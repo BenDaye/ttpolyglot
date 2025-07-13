@@ -1,0 +1,862 @@
+{
+  "common": {
+    "home": "Home",
+    "and": "and",
+    "close": "Close",
+    "next": "Next",
+    "skip": "Skip",
+    "menu": "Menu",
+    "store": "Stores",
+    "commonly": "General",
+    "manage": "Manage",
+    "other": "Other",
+    "setting": "Settings",
+    "user": "Users",
+    "noData": "No data available",
+    "helpCenter": "Help Center",
+    "today": "Today",
+    "currentWeek": "This week",
+    "currentMonth": "This month",
+    "currentYear": "This year",
+    "all": "all",
+    "username": "Username",
+    "email": "Email",
+    "contactNumber": "Phone",
+    "type": "Type",
+    "role": "Role",
+    "createAt": "Created",
+    "updateAt": "Updated",
+    "edit": "Edit",
+    "delete": "Delete",
+    "disabled": "Disable",
+    "enable": "Enable",
+    "confirm": "Confirm",
+    "name": "Name",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "pleaseEnter": "Please enter",
+    "guest": "Guest",
+    "member": "Member",
+    "admin": "Admin",
+    "save": "Save",
+    "moreActions": "More actions",
+    "cancel": "Cancel",
+    "items": "Items",
+    "updateSuccessful": "Update successful",
+    "QRCode": "QR Code"
+  },
+  "components": {
+    "appSidebarComponent": {
+      "dashboard": "Dashboard"
+    },
+    "dashboardPage": {
+      "menuItems": "Number of menus",
+      "dishCount": "Number of dishes",
+      "userViews": "User views",
+      "numberOfUsers": "Number of users",
+      "comparedWithYesterday": "Compared to yesterday",
+      "comparedWithLastWeek": "Compared to last week",
+      "comparedWithPreviousMonth": "Compared to last month",
+      "comparedWithLastYear": "Compared to last year",
+      "numberOfMenuSweeps": "Menu scans",
+      "hotMenuBrowsing": "Top menu views"
+    },
+    "usersPage": {
+      "userList": "User list",
+      "manageYourUsersHere": "Manage your users here",
+      "searchForUsernameOrEmail": "Search for username/email",
+      "addUser": "Add user",
+      "userType": "User type",
+      "guestUsers": "Guest",
+      "nonGuestUsers": "Member",
+      "userRole": "User role",
+      "admin": "Admin",
+      "user": "User",
+      "clearFilter": "Clear filter",
+      "editUser": "Edit user",
+      "updateUserInfo": "Update user info",
+      "createNewUser": "Create new user",
+      "clickSaveToComplete": "Click save to complete",
+      "pleaseEnterValidEmail": "Please enter a valid email",
+      "pleaseSelectRole": "Please select a role",
+      "pleaseEnterUsername": "Please enter a username",
+      "passwordIsRequired": "Password is required",
+      "passwordLengthMustBeGreaterThan6": "Password length must be greater than 6",
+      "passwordDoesNotMatch": "Password does not match",
+      "deleteUserConfirmation": "Are you sure you want to delete user {username}?",
+      "deleteUserConfirmationDescription": "This action cannot be undone.",
+      "pleaseWait": "Please wait",
+      "deleteUserSuccess": "Delete user successfully",
+      "deleteUserFailed": "Delete user failed",
+      "updateUserSuccess": "Update user successfully",
+      "updateUserFailed": "Update user failed",
+      "addUserSuccess": "Add user successfully",
+      "addUserFailed": "Add user failed"
+    },
+    "storesPage": {
+      "storeList": "Store list",
+      "owner": "Owner",
+      "manageYourStoreHere": "Manage your stores here",
+      "searchStoreName": "Search for store name/username",
+      "storeName": "Store name",
+      "storeAddress": "Store address",
+      "storeDescription": "Store description",
+      "addStore": "Add store",
+      "editStore": "Edit store",
+      "updateStoreInfo": "Update store info",
+      "createNewStore": "Create new store",
+      "clickSaveToComplete": "Click save to complete",
+      "storeLogo": "Store logo",
+      "pleaseEnterStoreName": "Please enter store name",
+      "pleaseEnterStoreAddress": "Please enter store address",
+      "pleaseEnterStoreDescription": "Please enter store description",
+      "unnamedStore": "Unnamed store",
+      "deleteStoreConfirmation": "Are you sure you want to delete store {storeName}?",
+      "deleteStoreConfirmationDescription": "This action cannot be undone."
+    },
+    "menusPage": {
+      "menuList": "Menu list",
+      "manageYourMenuHere": "Manage your menus here",
+      "searchMenuName": "Search for menu name",
+      "status": "Status",
+      "draft": "Disabled",
+      "public": "Enabled",
+      "updateMenuSuccess": "Update menu successfully",
+      "updateMenuFailed": "Update menu failed",
+      "deleteMenuSuccess": "Delete menu successfully",
+      "deleteMenuFailed": "Delete menu failed",
+      "pleaseWait": "Please wait",
+      "unnamedMenu": "Unnamed menu",
+      "deleteMenuConfirm": "Are you sure you want to delete menu {name}?",
+      "deleteMenuDescription": "This action cannot be undone.",
+      "menuImage": "Menu image",
+      "menuName": "Menu name",
+      "menuDescription": "Menu description",
+      "addMenu": "Add menu",
+      "editMenu": "Edit menu",
+      "updateMenuInfo": "Update menu info",
+      "createNewMenu": "Create new menu",
+      "clickSaveToComplete": "Click save to complete",
+      "pleaseEnterMenuName": "Please enter menu name",
+      "pleaseEnterMenuDescription": "Please enter menu description",
+      "pleaseEnterMenuImage": "Please enter menu image",
+      "pleaseSelectStatus": "Please select status"
+    },
+    "itemsPage": {
+      "searchItemName": "Search for item name/category",
+      "menuItems": "Menu items",
+      "manageMenuItems": "Manage menu items here",
+      "pleaseWait": "Please wait",
+      "editItemSuccess": "Edit successfully",
+      "editItemFailed": "Edit failed",
+      "deleteItemSuccess": "Delete successfully",
+      "deleteItemFailed": "Delete failed",
+      "deleteItemConfirm": "Are you sure you want to delete dish {name}?",
+      "deleteItemDescription": "This action cannot be undone.",
+      "itemImage": "Dish image",
+      "itemCategory": "Category",
+      "itemName": "Dish name",
+      "itemPrice": "Price",
+      "itemDescription": "Description",
+      "itemCurrency": "Currency",
+      "pleaseEnterItemCategory": "Please enter dish category",
+      "pleaseEnterItemName": "Please enter dish name",
+      "pleaseEnterItemPrice": "Please enter dish price",
+      "pleaseUploadItemImage": "Please upload dish image",
+      "pleaseEnterItemDescription": "Please enter dish description",
+      "pleaseSelectItemCurrency": "Please select dish currency",
+      "updateItemInfo": "Update dish info",
+      "createNewItem": "Create new dish",
+      "editItem": "Edit dish",
+      "addItem": "Add dish",
+      "clickSaveToComplete": "Click save to complete",
+      "pleaseEnterItemCurrency": "Please enter dish currency"
+    },
+    "settingProfilePage": {
+      "managementAndSetup": "Manage your account settings and set email preferences",
+      "personalProfile": "Profile",
+      "accountSecurity": "Account security",
+      "paragraph1": "This is how others see you on the site",
+      "paragraph2": "This is your public display name. It can be your real name or a pseudonym. You can only change it once every 30 days.",
+      "paragraph3": "Makes it easier for you to receive information from us.",
+      "paragraph4": "Enter your contact number",
+      "paragraph5": "Update profile",
+      "paragraph6": "Update your account settings. Set your preferred language and time zone.",
+      "paragraph7": "This name will appear in your profile and emails.",
+      "paragraph8": "Used to log in to your account and receive system notifications.",
+      "paragraph9": "6-12 digits plus letters.",
+      "paragraph10": "You need to log in again after confirmation.",
+      "updateAccount": "Update account",
+      "enterName": "Please enter your name",
+      "enterNumber": "Please enter your contact number",
+      "enterPwd": "Please enter your password",
+      "enterCheck": "Please enter your confirmation password"
+    },
+    "helpComponent": {
+      "title": "We have compiled the most important information to help you make the most of this experience. Can't find what you need? Please contact us.",
+      "commonProblems": "FAQ",
+      "storeAndAccountSettings": "Store and Account Settings",
+      "contactUs": "Contact Us",
+      "emailAddress": "Email",
+      "paragraph": "If you want to send us an email, please send an email to xxxxxx@xx.com. We will respond to your inquiry as soon as possible."
+    },
+    "faqPage": {
+      "item1Title": "How do I upload a menu image and let AI generate a menu?",
+      "item1Content": "To upload a menu image and have AI generate a menu, please follow these steps:\n1. Navigate to the sidebar, click the \"+\" sign on the right side of the \"Menu\" category to create a new menu\n2. Enter the new menu, upload the image, and start parsing\n3. AI will automatically recognize the text and generate a draft\n4. Be sure to proofread: You can check and modify the recognized content, change the menu name, etc. in the editing interface, click \"Save\"",
+
+      "item2Title": "Limitations for uploading menu images (supported formats? Size limits?)",
+      "item2Content": "Support JPG, PNG, WebP formats, up to 10MB",
+
+      "item3Title": "What to do if the recognition is wrong?",
+      "item3Content": "We recommend:\n1. Click the wrong text directly in the editing interface to modify the content\n2. If the recognition fails in a large area → re-upload a clearer photo\nNote: Handwriting, artistic fonts, and low-contrast images may affect the recognition effect",
+
+      "item4Title": "How to improve AI recognition rate?",
+      "item4Content": "We recommend ensuring that the menu image:\n1. Sufficient and even lighting\n2. Flat and wrinkle-free\n3. The text is clear and facing, avoiding reflection blur",
+
+      "item5Title": "How to view and download the menu QR code?",
+      "item5Content": "To view and download menu QR codes, please follow these steps:\n1. Navigate to the sidebar and click to select the corresponding menu\n2. Click \"QR Code\" in the upper right corner of the page\n3. Preview or download the QR code",
+
+      "item6Title": "What should I do if the customer cannot or does not want to scan the QR code?",
+      "item6Content": "We recommend:\n1. Prepare several paper menus as backup\n2. You can place QR code instruction cards on the table to help guests scan the code\n3. The waiter can proactively ask if they need help\n4. Consider placing tablets in the store for guests to order directly",
+
+      "item7Title": "How do I arrange my menu categories?",
+      "item7Content": "It is recommended to organize it in the following way:\n1. Put popular dishes first\n2. Arrange in the order of eating (such as appetizers, main courses, desserts)\n3. Special dishes can be classified separately\n4. Drinks and alcoholic beverages are classified separately\n5. You can use the drag and drop function to adjust the order of categories",
+
+      "item8Title": "How do I change my currency?",
+      "item8Content": "To set the currency of the menu, please follow the steps below:\n1. Navigate to the sidebar and click to select the corresponding menu\n2. In front of the dish price, there is a \"currency abbreviation\" mark. Click the down arrow to enter the drop-down menu of available currencies",
+
+      "item9Title": "How to edit the generated menu?",
+      "item9Content": "To edit the generated menu, please follow the steps below:\n1. Navigate to the sidebar and click to select the corresponding menu\n2. Delete or modify the dish name, price, picture, etc. directly in the editing interface\n3. Click \"Save\" to successfully modify",
+
+      "item10Title": "How to delete the menu?",
+      "item10Content": "To delete the menu, please follow the steps below:\n1. Navigate to the sidebar and click to select the corresponding menu\n2. Click the \"Edit\" icon next to the menu name in the upper left corner\n3. Click the \"Delete\" icon in the pop-up box",
+
+      "item11Title": "How to share the electronic menu with others?",
+      "item11Content": "If you want to share and view the menu, please follow the steps below:\n1. Download the QR code corresponding to the generated menu\n2. Provide the electronic QR code or print the QR code for others to scan and view\n3. Use your mobile phone to scan the QR code to view the electronic menu",
+
+      "item12Title": "How to view the access data of the menu?",
+      "item12Content": "1. Navigate to the sidebar and enter the [Dashboard] panel\n2. View core indicators"
+    },
+    "helpSettingPage": {
+      "item1Title": "What is the difference between a guest account and a formal account?",
+      "item1Content": "The guest account is limited to 3 stores and a total of 50 menus. The formal account is unlimited",
+
+      "item2Title": "Will my menu be lost after the guest account is upgraded to a formal account?",
+      "item2Content": "No, after upgrading to a formal account, TTPOS-MENU will keep the stores and menus created when the guest account was created for you",
+
+      "item3Title": "Modify password, email, name",
+      "item3Content": "To modify password, email, name, please follow the steps below:\n1. Navigate to the sidebar and click \"Settings\"\n2. Click \"Account Security\"\n3. Click \"Update Account\" after modifying the information",
+
+      "item4Title": "How to add a store?",
+      "item4Content": "To add a store, please follow the steps below:\n1. Navigate to the sidebar and click the store name at the top\n2. Click \"Add store\" in the pop-up box\n3. Fill in the corresponding information and click \"OK\"",
+
+      "item5Title": "How to manage my store?",
+      "item5Content": "To view the data of different stores, please follow the steps below:\n1. Navigate to the sidebar and click the store name at the top\n2. In the pop-up box, you can choose to switch between different stores under the current user\n3. After selecting the corresponding store, you can manage the menu of the store, etc."
+    },
+    "loginPage": {
+      "backToHome": "Back to Home",
+      "title": "Welcome to TTPOS Menu",
+      "subtitle": "Generate digital menus with one click",
+      "loginTitle": "Login to Account",
+      "loginDescription": "After logging in, your data will be saved permanently and more features will be unlocked",
+      "termsPrefix": "By continuing, you agree to our ",
+      "termsLink": "User Agreement",
+      "privacyLink": "Privacy Policy"
+    },
+    "loginComponent": {
+      "loginSuccess": "Login successful",
+      "guestSuccess": "Guest account created, you can now use all features",
+      "emailLabel": "Email Address",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Please enter your password",
+      "loginButton": "Login",
+      "or": "or",
+      "continueAsGuest": "Continue as Guest"
+    },
+    "upgradeComponent": {
+      "errorNotLoggedIn": "Please log in before upgrading",
+      "upgradeSuccess": "Upgrade successful",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "Please enter your email address",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Please enter your password",
+      "usernameLabel": "Username",
+      "optional": "(optional)",
+      "usernamePlaceholder": "Please enter your username",
+      "cancel": "Cancel",
+      "upgradeButton": "Upgrade Account"
+    },
+    "contactForm": {
+      "submitSuccess": "Submitted successfully",
+      "namePlaceholder": "Please enter your name/company name",
+      "emailPlaceholder": "Please enter your email address",
+      "phonePlaceholder": "Please enter your contact number",
+      "contentPlaceholder": "Please enter your message",
+      "submitButton": "Submit"
+    },
+    "bar": {
+      "textContent": "🚀 Discover more smart ordering tools! Click <b>ttpos.com</b> to explore the complete ordering system solution 💡",
+      "textButton": "Check it out ✨"
+    },
+    "cookie": {
+      "accept": "Accept",
+      "reject": "Reject",
+      "message": "We use cookies to optimize your browsing experience and implement website functionality through third-party SDKs. If you want to continue browsing this website, please agree to the use of cookies and {privacyLink}.",
+      "privacyLinkText": "Privacy Policy"
+    },
+    "footer": {
+      "copyright": "© {year} TTPOS Menu. Making menu digitization easier and restaurant management more efficient."
+    },
+    "menuDeleteDialog": {
+      "title": "Confirm Menu Deletion",
+      "description": "This action cannot be undone. Please proceed with caution.",
+      "cancel": "Cancel",
+      "confirm": "Confirm Deletion"
+    },
+    "storeDeleteDialog": {
+      "title": "Confirm Store Deletion",
+      "description": "This action cannot be undone. Please proceed with caution.",
+      "cancel": "Cancel",
+      "confirm": "Confirm Deletion"
+    },
+    "qrCodePopover": {
+      "scanToPreview": "Scan to preview menu",
+      "copyLink": "Copy Link",
+      "copyFailed": "Copy failed",
+      "copied": "Copied"
+    },
+    "menuLangButtons": {
+      "autoDetect": "Auto-detect language ({label})"
+    },
+    "menuLangDialog": {
+      "addError": "Failed to add language:",
+      "removeError": "Failed to remove language:",
+      "title": "Manage Languages",
+      "description": "Click a language option to add a new version or remove an existing one. Note: The default language cannot be removed.",
+      "searchPlaceholder": "Search languages...",
+      "default": "Default",
+      "addTitle": "Add Language",
+      "removeTitle": "Remove Language",
+      "addConfirm": "Are you sure you want to add the language \"{label} ({country})\"?",
+      "removeConfirm": "Are you sure you want to remove the language \"{label} ({country})\"? All content in this language will be deleted.",
+      "cancel": "Cancel",
+      "add": "Add",
+      "remove": "Remove"
+    },
+    "menuUploader": {
+      "title": "Upload Menu Image",
+      "description": "Drag and drop an image here, or click to select a file",
+      "supportedFormats": "Supports JPG, PNG, WebP formats, up to 10MB",
+      "previewAlt": "Menu Preview",
+      "imageSizeError": "Image size cannot exceed 10MB"
+    },
+    "menuPreview": {
+      "editStoreTooltip": "Click to edit store information",
+      "noImage": "No Image",
+      "unnamed": "Unnamed",
+      "noMore": "No more items"
+    },
+    "menuPopover": {
+      "validation": {
+        "nameRequired": "Menu name cannot be empty"
+      },
+      "title": "Edit Menu Information",
+      "description": "Please fill in the basic information of the menu",
+      "logo": "Menu Logo",
+      "logoAlt": "Menu logo",
+      "name": "Menu Name",
+      "menuDescription": "Menu Description",
+      "status": "Menu Status",
+      "statusPublic": "Enabled",
+      "statusDraft": "Draft",
+      "statusDisabled": "Disabled",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "itemPopover": {
+      "validation": {
+        "nameRequired": "Dish name cannot be empty",
+        "priceRequired": "Please enter the price",
+        "priceMin": "Price must be greater than 0",
+        "currencyRequired": "Please select a currency",
+        "categoryRequired": "Please select a category"
+      },
+      "continue":"Continue to identify",
+      "editTitle": "Edit Dish",
+      "addTitle": "Add Dish",
+      "editDescription": "Please fill in the information of the dish to edit",
+      "addDescription": "Please fill in the information of the dish to add",
+      "name": "Dish Name",
+      "description": "Dish Description",
+      "price": "Dish Price",
+      "currency": "Currency",
+      "category": "Category",
+      "add": "Add",
+      "currencyPlaceholder": "Currency",
+      "searchCurrency": "Search currency...",
+      "categoryPlaceholder": "Category",
+      "searchCategory": "Search category...",
+      "noCategoryFound": "No category found",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "menuEditor": {
+      "title": "Recognized Dishes",
+      "defaultCategory": "Default Category",
+      "addDescription": "Add description...",
+      "add": "Add",
+      "currency": "Currency",
+      "searchCurrency": "Search currency...",
+      "startingAiRecognition": "Starting AI recognition"
+    },
+    "dataTablePagination": {
+      "rowsPerPage": "Rows per page",
+      "pageIndicator": "Page {pageIndex} of {pageCount}",
+      "goToFirstPage": "Go to first page",
+      "goToPreviousPage": "Go to previous page",
+      "goToNextPage": "Go to next page",
+      "goToLastPage": "Go to last page"
+    },
+    "homePage": {
+      "errors": {
+        "invalidFileType": "Only JPG, PNG, WebP formats are supported",
+        "fileTooLarge": "File cannot exceed 10MB"
+      },
+      "hero": {
+        "title": "Convert paper menus\nto digital menus in one click",
+        "subtitle": "Use advanced AI technology to recognize menu content and automatically generate beautiful digital menus.",
+        "experience": "No registration required, try it now!",
+        "startNow": "Get Started",
+        "viewDemo": "View Demo",
+        "demoVideo": "Demo Video",
+        "uploadTitle": "Click or drag an image here to upload",
+        "uploadDescription": "Supports JPG, PNG, WebP formats, up to 10MB."
+      },
+      "howItWorks": {
+        "title": "How does it work?",
+        "subtitle": "Increase your orders by over 40% with these steps:",
+        "step1Title": "01. Select Menu Image",
+        "step1Description": "Provide a clear image of your restaurant's menu",
+        "step2Title": "02. AI Recognition",
+        "step2Description": "AI automatically recognizes menu content and extracts dish names, prices, and descriptions",
+        "step3Title": "03. Generate Digital Menu",
+        "step3Description": "Automatically generate a digital menu based on the extracted information"
+      },
+      "whyUs": {
+        "title": "Why Choose TTPOS Menu?",
+        "subtitle": "We use cutting-edge technology to provide the smartest and most convenient digital menu solutions for the food service industry",
+        "feature1Title": "AI Smart Recognition",
+        "feature1Description": "Advanced image recognition technology based on GPT-4 accurately identifies dish names, prices, and descriptions, with up to 95% accuracy",
+        "feature2Title": "Zero Barrier Usage",
+        "feature2Description": "No registration required, use instantly. The system automatically creates a guest account, and you can upgrade to a full account with one click, with seamless data migration",
+        "feature3Title": "Perfect Compatibility",
+        "feature3Description": "Responsive design perfectly adapts to mobile, tablet, and desktop devices. The generated digital menu supports QR code sharing, and customers can view it by scanning"
+      },
+      "getStarted": {
+        "title": "Ready to digitize your menu?",
+        "subtitle": "Upload your menu image now and experience the power of AI",
+        "button": "Start Now"
+      },
+      "contactUs": {
+        "title": "Contact Us",
+        "description": "Have questions? We're happy to help! Contact us for menu conversion, ordering systems, or custom needs. We respond within 24 hours on business days."
+      }
+    },
+    "uploadPage": {
+      "upgradeDialog": {
+        "description": "You are currently using a guest account, which will be automatically deleted after 7 days. Upgrade to a full account to permanently save data and unlock more features.",
+        "cancel": "Skip",
+        "upgrade": "Upgrade Account"
+      },
+      "toasts": {
+        "selectImageFirst": "Please select an image first",
+        "recognizingInProgress": "Recognizing image, please wait...",
+        "getMenuIdFailed": "Failed to get menu ID",
+        "recognitionFailed": "Recognition failed",
+        "recognitionSuccess": "Recognition completed",
+        "savingInProgress": "Saving menu, cannot {action}",
+        "itemAddedSuccess": "Dish added successfully",
+        "itemAddedFailed": "Failed to add dish: {error}",
+        "saveItemsFailed": "Failed to save dishes: {error}",
+        "languageAddedSuccess": "Language added successfully",
+        "languageAddedFailed": "Failed to add language: {error}",
+        "languageRemovedSuccess": "Language removed successfully",
+        "languageRemovedFailed": "Failed to remove language: {error}",
+        "savingInProgressUpdateStore": "Saving menu, cannot update store information",
+        "savingInProgressDeleteItem": "Saving menu, cannot delete dish",
+        "imageSizeTooLarge": "Image size cannot exceed {maxSize}",
+        "saveMenuSuccess": "Save menu successfully",
+        "savingInProgressAddItem": "Saving menu, cannot add dish",
+        "pleaseRecognizeItems": "The quantity of dishes is empty, please identify the dishes"
+      },
+      "errors": {
+        "saveMenuFailed": "Failed to save menu:",
+        "getProcessingTimeFailed": "Failed to get recognition time:",
+        "getMenuFailed": "Failed to get menu:",
+        "deleteItemFailed": "Failed to delete the dish: {error}"
+      },
+      "title": "AI Menu Recognition",
+      "subtitle": "Upload a menu image, and AI will automatically recognize dish names and prices",
+      "steps": {
+        "step1": "Select Image",
+        "step2": "AI Recognition",
+        "step3": "Edit & Save"
+      },
+      "recognitionResults": {
+        "title": "Recognition Complete",
+        "processing": "AI is recognizing menu content...",
+        "items": "Recognized Dishes",
+        "confidence": "Overall Confidence",
+        "processingTime": "Recognition Time",
+        "processingConsuming": "Recognition Consuming",
+        "highConfidence": "High Confidence",
+        "sure":"Sure"
+      },
+      "usageTips": {
+        "title": "Usage Tips",
+        "tip1": "<b>Zero-barrier experience:</b> No registration, just upload your menu to use",
+        "tip2": "Please ensure the menu image is clear and text is readable",
+        "tip3": "Supports multiple image formats: JPG, PNG, WebP",
+        "tip4": "AI recognition results can be manually edited and corrected",
+        "tip5": "Guest mode has full features, data is saved for 7 days",
+        "upgradeTip": "<b>Upgrade reminder:</b> Register an account to save data permanently and unlock more features"
+      },
+      "terms": {
+        "title": "User Agreement and Privacy Policy",
+        "description": "Please read and agree to the following terms",
+        "agree": "I have read and agree",
+        "termsLink": "User Agreement",
+        "privacyLink": "Privacy Policy",
+        "cancel": "Cancel",
+        "confirm": "Agree and Continue"
+      },
+      "actions": {
+        "reUpload": "Re-upload",
+        "editStore": "Edit Store Information",
+        "saveMenu": "Save Menu",
+        "startRecognition": "Start AI Recognition",
+        "cancel": "Cancel"
+      },
+      "validation": {
+        "storeAndMenuName": "Please fill in the store name and menu name first",
+        "storeName": "Please fill in the store name",
+        "menuName": "Please fill in the menu name"
+      },
+      "resetDialog": {
+        "title": "Confirm Menu Reset",
+        "descriptionPublic": "This menu has been published. Resetting will delete all dishes in the menu. This action cannot be undone.",
+        "descriptionDraft": "Resetting will delete all dishes in the menu. This action cannot be undone.",
+        "confirm": "Confirm Reset"
+      }
+    },
+    "uploadSuccessPage": {
+      "title": "Saved Successfully!",
+      "subtitle": "Menu saved successfully. Scan the QR code to access your exclusive menu page.",
+      "manageMenu": "Manage Menu",
+      "downloadQrCode": "Download QR Code",
+      "continueAdding": "Continue Adding"
+    },
+    "userPage": {
+      "toasts": {
+        "storeCreated": "Store created successfully",
+        "storeUpdated": "Store information saved successfully",
+        "atLeastOneStore": "At least one store must be kept",
+        "storeDeleted": "Store deleted successfully",
+        "menuUpdated": "Menu information saved successfully"
+      },
+      "unnamedStore": "Unnamed Store",
+      "addressLabel": "Address:",
+      "phoneLabel": "Phone:",
+      "noMenu": "No menu for \"{storeName}\"",
+      "unnamedMenu": "Unnamed Menu",
+      "noDescription": "No description",
+      "status": {
+        "public": "Enabled",
+        "draft": "Draft",
+        "disabled": "Disabled",
+        "unknown": "Unknown Status"
+      },
+      "lastModified": "Last Modified: {date}",
+      "manage": "Manage",
+      "delete": "Delete",
+      "addNewMenu": "Add New Menu"
+    },
+    "menuPage": {
+      "getMenuFailed": "Failed to get menu: {error}",
+      "loadingTitle": "Loading menu...",
+      "loadingDescription": "Please wait while we prepare your menu content",
+      "notFoundTitle": "Menu Not Found",
+      "notFoundDescription": "Sorry, this menu does not exist or has been deleted"
+    },
+    "header": {
+      "guestMode": "Guest Mode",
+      "upgradeToFullAccount": "Upgrade to Full Account",
+      "myMenus": "My Menus",
+      "clearData": "Clear Data",
+      "logout": "Logout",
+      "upgradeAccount": "Upgrade Account",
+      "upgradeToProVersion": "Upgrade to Pro Version",
+      "upgrade": "Upgrade",
+      "loginOrRegister": "Login | Register"
+    },
+    "authContext": {
+      "loginTitle": "Login",
+      "loginDescription": "After logging in, your data will be saved permanently and more features will be unlocked",
+      "upgradeTitle": "Upgrade to Full Account",
+      "upgradeDescription": "After upgrading, your data will be saved permanently and more features will be unlocked",
+      "hookError": "useAuth must be used within AuthProvider"
+    },
+    "storePopover": {
+      "validation": {
+        "storeNameRequired": "Store name cannot be empty",
+        "menuNameRequired": "Menu name cannot be empty"
+      },
+      "addTitle": "Add Store",
+      "editTitle": "Edit Store Information",
+      "addDescription": "Please fill in the new store information",
+      "editDescription": "Please fill in the basic information of the store",
+      "subTitle": "Add a new store to your account.",
+      "statusDescription": "Add to <current></current> menu and automatically translate to <more></more> versions",
+      "logo": "Logo",
+      "logoAlt": "Store logo",
+      "menuName": "Menu Name",
+      "storeName": "Store Name",
+      "address": "Store Address",
+      "phone": "Contact Number",
+      "cancel": "Cancel",
+      "create": "Create",
+      "save": "Save",
+      "creating": "Creating...",
+      "storeCreatedSuccessfully": "Store created successfully",
+      "incompleteInformation": "Please complete all the information"
+    },
+    "loadingComponent": {
+      "title": "Initializing system...",
+      "subtitle": "Providing you with a zero-barrier menu recognition experience soon"
+    },
+    "menuTemplate01": {
+      "switchLanguage": "Switch Language",
+      "noImage": "No Image",
+      "unnamed": "Unnamed",
+      "reachedBottom": "No more items"
+    },
+    "privacyPage": {
+      "title": "Privacy Policy",
+      "introduction": "This Privacy Policy describes how we collect, use, store, and protect your personal information. We understand the importance of personal information to you and will do our utmost to protect the security and reliability of your personal information.",
+      "section1": {
+        "title": "1. Information Collection",
+        "content": "1.1 Information you provide: When you register an account, use our services, or contact us, we may collect personal information you provide, such as name, contact details, account information, etc.\n1.2 Information generated during your use of services: Including your operation records, browsing records, transaction records, etc.\n1.3 Device information: We may collect information about the device you use, such as device model, operating system version, device settings, IP address, etc.\n1.4 Log information: When you use our services, the system may automatically collect information about your use of the service, such as access dates and times, software crash situations, etc."
+      },
+      "section2": {
+        "title": "2. Information Use",
+        "content": "2.1 To provide, maintain, and improve our services.\n2.2 To send you notifications, activity information, etc.\n2.3 To design new products or services.\n2.4 To conduct data analysis.\n2.5 To fulfill obligations according to legal requirements."
+      },
+      "section3": {
+        "title": "3. Information Protection",
+        "content": "3.1 We use various security technologies and procedures to prevent loss, improper use, unauthorized viewing, or disclosure of information.\n3.2 We take reasonable and feasible measures to ensure that irrelevant personal information is not collected.\n3.3 We use various security protection measures within a reasonable security level to ensure the security of information.\n3.4 The internet is not an absolutely secure environment, and we strongly recommend that you do not send any sensitive personal information via public networks."
+      },
+      "section4": {
+        "title": "4. Information Sharing",
+        "content": "4.1 We will not sell your personal information to any third party.\n4.2 We may share your personal information in the following circumstances:\na) After obtaining your explicit consent;\nb) To process your requests and fulfill the purposes of our services;\nc) In accordance with legal regulations, legal procedures, or mandatory requirements of government authorities;\nd) In cases involving mergers, acquisitions, asset transfers, or similar transactions, if personal information transfer is involved, we will require the new company or organization holding your personal information to continue to be bound by this Privacy Policy."
+      },
+      "section5": {
+        "title": "5. Cookies and Similar Technologies",
+        "content": "5.1 We may use cookies and similar technologies to collect and use your information.\n5.2 You can refuse or manage cookies through browser settings. However, please note that if cookies are disabled, you may not be able to enjoy the best service experience, and some services may not function properly."
+      },
+      "section6": {
+        "title": "6. Protection of Minors",
+        "content": "6.1 We attach great importance to the protection of personal information of minors. If you are a minor under the age of 18, you should obtain prior written consent from your parents or legal guardians before using our services.\n6.2 For personal information of minors collected with the consent of parents or legal guardians, we will only use or disclose this information in situations where the law permits, parents or guardians explicitly consent, or it is necessary to protect minors."
+      },
+      "section7": {
+        "title": "7. Your Rights",
+        "content": "7.1 You have the right to access, correct, and delete your personal information.\n7.2 You have the right to withdraw consent previously given for processing personal information.\n7.3 You have the right to obtain a copy of your personal information.\n7.4 In specific circumstances, you have the right to restrict or object to our processing of your personal information."
+      },
+      "section8": {
+        "title": "8. Updates to Privacy Policy",
+        "content": "8.1 We may revise the terms of this Privacy Policy from time to time.\n8.2 For significant changes, we will provide prominent notice.\n8.3 If you continue to use our services, it means you agree to be bound by the revised Privacy Policy."
+      },
+      "section9": {
+        "title": "9. Contact Us",
+        "content": "If you have any questions, comments, or suggestions regarding this Privacy Policy, or if you believe our personal information processing practices may have harmed your legitimate rights, please contact us through the following channels:",
+        "email": "Email: privacy@example.com",
+        "phone": "Contact phone: 400-XXX-XXXX"
+      },
+      "lastUpdated": "Last updated: "
+    },
+    "termsPage": {
+      "title": "Terms of Service",
+      "introduction": "Welcome to our service! Please read the following terms carefully before using our service. By using this service, you agree to be bound by this agreement.",
+      "section1": {
+        "title": "1. Acceptance and Modification of Agreement",
+        "content": "1.1 This agreement is established between you and our platform regarding the use of our services.\n1.2 We reserve the right to modify these terms when necessary. You can review the latest version of the terms on the relevant pages.\n1.3 If you continue to use our services after the terms have been modified, it is deemed that you have accepted the modified agreement."
+      },
+      "section2": {
+        "title": "2. Account Registration and Security",
+        "content": "2.1 Upon successful registration, you will receive an account and corresponding password, which you are responsible for safeguarding.\n2.2 You are responsible for all activities and events under your account.\n2.3 If you discover any unauthorized use of your account, please notify us immediately."
+      },
+      "section3": {
+        "title": "3. User Conduct Standards",
+        "content": "3.1 When using our services, you must comply with relevant laws and regulations.\n3.2 You must not use our services for any illegal or inappropriate activities, including but not limited to:\na) Publishing or disseminating information that violates laws and regulations;\nb) Infringing upon others' intellectual property rights, trade secrets, or other legal rights;\nc) Interfering with the normal operation of this service;\nd) Collecting other users' information without authorization;\ne) Other behaviors that violate laws, regulations, public morals, or harm others' legitimate rights and interests."
+      },
+      "section4": {
+        "title": "4. Content Standards",
+        "content": "4.1 The content you upload should comply with laws, regulations, public order and good morals, and the provisions of this agreement.\n4.2 We have the right to delete content that violates the above regulations and reserve the right to pursue relevant responsibilities.\n4.3 For the content you upload, you should ensure that you have the corresponding legal rights."
+      },
+      "section5": {
+        "title": "5. Intellectual Property",
+        "content": "5.1 All content on this platform, including but not limited to text, images, audio, video, software, programs, page designs, etc., are protected by intellectual property laws and regulations.\n5.2 Without our or the relevant rights holder's written permission, you may not copy, modify, compile, publish, or distribute the above content in any way."
+      },
+      "section6": {
+        "title": "6. Disclaimer",
+        "content": "6.1 We strive to ensure the security and stability of our services, but cannot completely rule out service interruptions or other issues caused by network, device failures, system maintenance, etc.\n6.2 We are not responsible for service interruptions or other defects caused by force majeure or reasons beyond our control.\n6.3 You understand and agree that we do not make any express or implied warranties regarding the legality, authenticity, or validity of communications, transactions, or other behaviors between users through the platform."
+      },
+      "section7": {
+        "title": "7. Agreement Termination",
+        "content": "7.1 If you violate the provisions of this agreement, we have the right to take measures such as warning, restricting, or terminating the provision of services as appropriate.\n7.2 You have the right to cancel your account, after which the service agreement between you and us will terminate.\n7.3 After the agreement is terminated, we have the right to continue to retain your relevant information as required by laws and regulations."
+      },
+      "section8": {
+        "title": "8. Applicable Law and Dispute Resolution",
+        "content": "8.1 This agreement is governed by the laws of the People's Republic of China.\n8.2 Any disputes arising from or related to this agreement shall be resolved through friendly negotiation; if negotiation fails, either party has the right to submit the dispute to the people's court with jurisdiction."
+      },
+      "lastUpdated": "Last updated: "
+    }
+  },
+  "constants": {
+    "language": {
+      "regions": {
+        "Asia": "Asia",
+        "Europe": "Europe",
+        "Americas": "Americas",
+        "Africa": "Africa",
+        "Oceania": "Oceania"
+      },
+      "countries": {
+        "SaudiArabia": "Saudi Arabia",
+        "Indonesia": "Indonesia",
+        "Malaysia": "Malaysia",
+        "Philippines": "Philippines",
+        "India": "India",
+        "Bangladesh": "Bangladesh",
+        "Pakistan": "Pakistan",
+        "Iran": "Iran",
+        "Japan": "Japan",
+        "SouthKorea": "South Korea",
+        "Thailand": "Thailand",
+        "Vietnam": "Vietnam",
+        "Israel": "Israel",
+        "China": "China",
+        "Denmark": "Denmark",
+        "Germany": "Germany",
+        "Greece": "Greece",
+        "UnitedKingdom": "United Kingdom",
+        "Spain": "Spain",
+        "Finland": "Finland",
+        "France": "France",
+        "Italy": "Italy",
+        "Netherlands": "Netherlands",
+        "Norway": "Norway",
+        "Poland": "Poland",
+        "Portugal": "Portugal",
+        "Russia": "Russia",
+        "Sweden": "Sweden",
+        "Turkey": "Turkey",
+        "Canada": "Canada",
+        "UnitedStates": "United States",
+        "Argentina": "Argentina",
+        "Chile": "Chile",
+        "Colombia": "Colombia",
+        "Mexico": "Mexico",
+        "Peru": "Peru",
+        "Brazil": "Brazil",
+        "SouthAfrica": "South Africa",
+        "Ethiopia": "Ethiopia",
+        "Egypt": "Egypt",
+        "Morocco": "Morocco",
+        "Senegal": "Senegal",
+        "Kenya": "Kenya",
+        "Australia": "Australia",
+        "NewZealand": "New Zealand"
+      }
+    },
+    "waitTips": {
+      "0": "Recognizing image, please wait...",
+      "1": "AI is analyzing menu content...",
+      "2": "Almost done, optimizing recognition results...",
+      "3": "Please wait, ensuring recognition accuracy...",
+      "4": "Processing, please be patient...",
+      "5": "AI is working hard, almost finished...",
+      "6": "Extracting key information from the menu...",
+      "7": "AI is learning the menu layout...",
+      "8": "Recognizing dish names and prices...",
+      "9": "Recognition results will be available soon...",
+      "10": "Final check of recognition results...",
+      "11": "AI is organizing your menu data..."
+    }
+  },
+  "api": {
+    "error": {
+      "AUTH_1001": "Token missing",
+      "AUTH_1002": "Invalid token",
+      "AUTH_1003": "Token expired",
+      "AUTH_1004": "Insufficient permissions",
+      "AUTH_1005": "Login failed",
+      "AUTH_1006": "Update failed",
+      "AUTH_1007": "Insufficient permissions",
+      "AUTH_1008": "User does not exist",
+      "AUTH_1009": "Incorrect password",
+      "AUTH_1010": "Failed to get user",
+      "AUTH_1011": "Username cannot be modified within 30 days",
+      "GUEST_1101": "Token expired",
+      "GUEST_1102": "Account expired",
+      "GUEST_1103": "Limit exceeded",
+      "GUEST_1104": "Upgrade failed",
+      "GUEST_1105": "Email already exists",
+      "GUEST_1106": "Creation failed",
+      "GUEST_1107": "Not a guest",
+      "VAL_2001": "Required field validation",
+      "VAL_2002": "Invalid format validation",
+      "VAL_2003": "File too large",
+      "VAL_2004": "Unsupported format validation",
+      "VAL_2005": "Invalid image URL validation",
+      "VAL_2006": "Password must be 6-32 characters",
+      "VAL_2007": "Password confirmation does not match",
+      "BIZ_3001": "Store does not exist",
+      "BIZ_3002": "Menu does not exist",
+      "BIZ_3003": "Duplicate name",
+      "BIZ_3004": "Store limit exceeded",
+      "BIZ_3005": "Menu limit exceeded",
+      "BIZ_3006": "You are not the store owner",
+      "BIZ_3007": "Menu creation failed",
+      "BIZ_3008": "Menu deletion failed",
+      "BIZ_3009": "Menu update failed",
+      "BIZ_3010": "Store creation failed",
+      "BIZ_3011": "Store update failed",
+      "BIZ_3012": "Store deletion failed",
+      "BIZ_3013": "Dish creation failed",
+      "BIZ_3014": "Dish deletion failed",
+      "BIZ_3015": "Dish update failed",
+      "BIZ_3016": "Statistics summary failed",
+      "BIZ_3017": "User does not exist",
+      "BIZ_3018": "Dish does not exist",
+      "BIZ_3019": "Dish localization creation failed",
+      "BIZ_3020": "Dish localization deletion failed",
+      "BIZ_3021": "Avatar upload failed",
+      "BIZ_3022": "User update failed",
+      "BIZ_3023": "Image format error: Only image/jpeg,image/jpg,image/png,image/webp allowed",
+      "BIZ_3024": "Image size error: Maximum size is 10MB",
+      "BIZ_3025": "Image upload failed",
+      "BIZ_3026": "AI recognition failed",
+      "BIZ_3027": "Store limit exceeded: Up to 3 stores can be created",
+      "BIZ_3028": "Menu limit exceeded: Up to 50 menus can be created",
+      "BIZ_3029": "Menu not enabled",
+      "BIZ_3030": "Failed to get menu",
+      "BIZ_3031": "User deletion failed",
+      "BIZ_3032": "Cannot update your own account",
+      "BIZ_3033": "Cannot delete your own account",
+      "BIZ_3034": "AI pre-request failed",
+      "BIZ_3035": "Stream key does not exist",
+      "BIZ_3036": "Failed to get stream data",
+      "SYS_5001": "Internal system error"
+    }
+  }
+}

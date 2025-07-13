@@ -1,0 +1,6 @@
+name: ttpolyglot
+
+packages:
+  - packages/core
+  - packages/parsers
+  - apps/ttpolyglot

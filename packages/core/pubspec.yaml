@@ -1,0 +1,35 @@
+name: ttpolyglot_core
+description: TTPolyglot 核心包，提供翻译管理平台的核心数据模型、业务逻辑和接口定义
+version: 1.0.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.6.1
+
+dependencies:
+  # 用于数据模型的相等性比较
+  equatable: ^2.0.5
+
+  # 用于 JSON 序列化
+  json_annotation: ^4.8.1
+
+  # 用于路径处理
+  path: ^1.8.0
+
+  # 用于 UUID 生成
+  uuid: ^4.0.0
+
+  # 用于日期时间处理 - 使用兼容版本
+  intl: ^0.19.0
+
+dev_dependencies:
+  # 代码质量检查
+  lints: ^5.0.0
+
+  # 单元测试
+  test: ^1.24.0
+
+  # JSON 序列化代码生成
+  build_runner: ^2.4.7
+  json_serializable: ^6.7.1

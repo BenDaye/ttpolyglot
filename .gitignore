@@ -1,0 +1,37 @@
+# Flutter/Dart/Pub related
+.dart_tool/
+.idea/
+
+# Node modules
+node_modules
+
+# melos
+melos_*.iml
+
+# Pubspec overrides
+pubspec_overrides.yaml
+
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Environment variables
+.env*
+!.env.example
+
+**/.DS_Store
+
+# Environment variables
+.env*
+.env*.local
+!.env.example
+!.env.development
+!.env.production
+!.env.test
+
+# DevTools options
+devtools_options.yaml
+
+# Releases
+releases/
+.github/

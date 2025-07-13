@@ -1,0 +1,68 @@
+{
+  // ===== 编辑器基础配置 =====
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+  "[xml]": {
+    "editor.formatOnSave": false,
+    "editor.formatOnPaste": false,
+    "editor.formatOnType": false
+  },
+
+  // ===== Dart/Flutter 配置 =====
+  "dart.previewFlutterUiGuides": true,
+  "dart.lineLength": 120,
+  "dart.promptToGetPackages": false,
+  "dart.runPubGetOnPubspecChanges": "never",
+
+  // ===== Todo Tree 插件配置 =====
+  "todo-tree.general.statusBar": "total",
+  "todo-tree.general.automaticGitRefreshInterval": 5,
+  "todo-tree.general.periodicRefreshInterval": 1,
+  "todo-tree.general.showActivityBarBadge": true,
+  "todo-tree.general.tags": ["BUG", "NOTE", "FIXME", "TODO", "HACK"],
+  "todo-tree.highlights.useColourScheme": true,
+  "todo-tree.tree.expanded": true,
+  "todo-tree.tree.groupedByTag": true,
+  "todo-tree.tree.showCountsInTree": true,
+  "todo-tree.tree.tagsOnly": false,
+  "todo-tree.tree.disableCompactFolders": true,
+  "todo-tree.tree.scanMode": "workspace only",
+  "todo-tree.tree.buttons.export": true,
+  "todo-tree.filtering.excludeGlobs": [
+    "**/android/*/**",
+    "**/linux/*/**",
+    "**/ios/*/**",
+    "**/windows/*/**",
+    "**/README.md",
+    "**/LICENSE"
+  ],
+
+  // ===== Code Spell Checker 配置 =====
+  "cSpell.words": ["ttpolyglot"],
+  "cSpell.ignorePaths": [
+    "package-lock.json",
+    "node_modules",
+    "vscode-extension",
+    ".git/{info,lfs,logs,refs,objects}/**",
+    ".git/{index,*refs,*HEAD}",
+    ".vscode",
+    ".vscode-insiders",
+    "packages/i18n/lib/langs/*.dart"
+  ],
+
+  // ===== 文件搜索配置 =====
+  "files.exclude": {
+    // "**/*.freezed.dart": true,
+    // "**/*.g.dart": true
+  },
+  "search.exclude": {
+    "**/.next": true,
+    "**/*.freezed.dart": true,
+    "**/*.g.dart": true,
+    "**/dist": true,
+    "**/node_modules": false,
+    "**/node_modules/**": true,
+    "**/vendor": true
+  }
+}

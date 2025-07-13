@@ -1,0 +1,76 @@
+{
+  // 使用 IntelliSense 了解相关属性。 
+  // 悬停以查看现有属性的描述。
+  // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "ttpolyglot",
+      "cwd": "apps/ttpolyglot",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "ttpolyglot (profile mode)",
+      "cwd": "apps/ttpolyglot",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "ttpolyglot (release mode)",
+      "cwd": "apps/ttpolyglot",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release"
+    },
+    {
+      "name": "cli",
+      "cwd": "packages/cli",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "client",
+      "cwd": "packages/client",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "core",
+      "cwd": "packages/core",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "parsers",
+      "cwd": "packages/parsers",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "protocol",
+      "cwd": "packages/protocol",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "server",
+      "cwd": "packages/server",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "translators",
+      "cwd": "packages/translators",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "ui",
+      "cwd": "packages/ui",
+      "request": "launch",
+      "type": "dart"
+    }
+  ]
+}

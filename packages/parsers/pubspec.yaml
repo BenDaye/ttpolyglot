@@ -1,0 +1,40 @@
+name: ttpolyglot_parsers
+description: TTPolyglot 文件解析器包，支持多种翻译文件格式的解析和生成
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.6.1
+
+dependencies:
+  # 核心包依赖
+  ttpolyglot_core: ^1.0.0
+
+  # JSON 处理
+  json_annotation: ^4.8.1
+
+  # YAML 处理
+  yaml: ^3.1.2
+
+  # CSV 处理
+  csv: ^6.0.0
+
+  # 路径处理
+  path: ^1.8.0
+
+  # 文件系统操作
+  file: ^7.0.0
+
+  # UUID 生成
+  uuid: ^4.0.0
+
+dev_dependencies:
+  # 代码质量检查
+  lints: ^5.0.0
+
+  # 单元测试
+  test: ^1.24.0
+
+  # JSON 序列化代码生成
+  build_runner: ^2.4.7
+  json_serializable: ^6.7.1

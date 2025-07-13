@@ -1,0 +1,862 @@
+{
+  "common": {
+    "home": "首页",
+    "and": "和",
+    "close": "关闭",
+    "next": "下一步",
+    "skip": "跳过",
+    "menu": "菜单",
+    "store": "店铺",
+    "commonly": "通用",
+    "manage": "管理",
+    "other": "其他",
+    "setting": "设置",
+    "user": "用户",
+    "noData": "暂无数据",
+    "helpCenter": "帮助中心",
+    "today": "本日",
+    "currentWeek": "本周",
+    "currentMonth": "本月",
+    "currentYear": "本年",
+    "all": "全部",
+    "username": "用户名",
+    "email": "邮箱",
+    "contactNumber": "联系电话",
+    "type": "类型",
+    "role": "角色",
+    "createAt": "创建时间",
+    "updateAt": "更新时间",
+    "edit": "编辑",
+    "delete": "删除",
+    "disabled": "禁用",
+    "enable": "启用",
+    "confirm": "确定",
+    "name": "姓名",
+    "password": "密码",
+    "confirmPassword": "确认密码",
+    "pleaseEnter": "请输入",
+    "guest": "游客",
+    "member": "会员",
+    "admin": "管理员",
+    "save": "保存",
+    "moreActions": "更多操作",
+    "cancel": "取消",
+    "items": "菜品",
+    "updateSuccessful": "更新成功",
+    "QRCode": "二维码"
+  },
+  "components": {
+    "appSidebarComponent": {
+      "dashboard": "仪表盘"
+    },
+    "dashboardPage": {
+      "menuItems": "菜单数量",
+      "dishCount": "菜品数量",
+      "userViews": "用户浏览次数",
+      "numberOfUsers": "用户数量",
+      "comparedWithYesterday": "较昨日",
+      "comparedWithLastWeek": "较上周",
+      "comparedWithPreviousMonth": "较上月",
+      "comparedWithLastYear": "较去年",
+      "numberOfMenuSweeps": "菜单扫码次数",
+      "hotMenuBrowsing": "热门菜单浏览"
+    },
+    "usersPage": {
+      "userList": "用户列表",
+      "manageYourUsersHere": "在此管理您的用户",
+      "searchForUsernameOrEmail": "搜索用户名/邮箱",
+      "addUser": "添加用户",
+      "userType": "用户类型",
+      "guestUsers": "游客",
+      "nonGuestUsers": "会员",
+      "userRole": "用户角色",
+      "admin": "管理员",
+      "user": "用户",
+      "clearFilter": "清除筛选",
+      "editUser": "编辑用户",
+      "updateUserInfo": "更新用户信息",
+      "createNewUser": "创建新用户",
+      "clickSaveToComplete": "点击保存完成",
+      "pleaseEnterValidEmail": "请输入有效的电子邮件",
+      "pleaseSelectRole": "请选择角色",
+      "pleaseEnterUsername": "请输入使用者名稱",
+      "passwordIsRequired": "密码是必填项",
+      "passwordLengthMustBeGreaterThan6": "密码长度不能小于6位",
+      "passwordDoesNotMatch": "密码不一致",
+      "deleteUserConfirmation": "确定要删除用户{username}吗？",
+      "deleteUserConfirmationDescription": "此操作无法撤销。",
+      "pleaseWait": "请等待",
+      "deleteUserSuccess": "删除用户成功",
+      "deleteUserFailed": "删除用户失败",
+      "updateUserSuccess": "更新用户成功",
+      "updateUserFailed": "更新用户失败",
+      "addUserSuccess": "添加用户成功",
+      "addUserFailed": "添加用户失败"
+    },
+    "storesPage": {
+      "storeList": "店铺列表",
+      "owner": "所属用户",
+      "manageYourStoreHere": "在此管理您的店铺",
+      "searchStoreName": "搜索店铺名称/用户名",
+      "storeName": "店铺名称",
+      "storeAddress": "店铺地址",
+      "storeDescription": "店铺描述",
+      "addStore": "添加店铺",
+      "editStore": "编辑店铺",
+      "updateStoreInfo": "更新店铺信息",
+      "createNewStore": "创建新店铺",
+      "clickSaveToComplete": "点击保存完成",
+      "storeLogo": "店铺LOGO",
+      "pleaseEnterStoreName": "请输入店铺名称",
+      "pleaseEnterStoreAddress": "请输入店铺地址",
+      "pleaseEnterStoreDescription": "请输入店铺描述",
+      "unnamedStore": "未命名店铺",
+      "deleteStoreConfirmation": "确定要删除店铺{storeName}吗？",
+      "deleteStoreConfirmationDescription": "此操作无法撤销。"
+    },
+    "menusPage": {
+      "menuList": "菜单列表",
+      "manageYourMenuHere": "在此管理您的菜单",
+      "searchMenuName": "搜索菜单名称",
+      "status": "状态",
+      "draft": "禁用",
+      "public": "启用",
+      "updateMenuSuccess": "更新菜单成功",
+      "updateMenuFailed": "更新菜单失败",
+      "deleteMenuSuccess": "删除菜单成功",
+      "deleteMenuFailed": "删除菜单失败",
+      "pleaseWait": "请等待",
+      "unnamedMenu": "未命名菜单",
+      "deleteMenuConfirm": "确定要删除菜单{name}吗？",
+      "deleteMenuDescription": "此操作无法撤销。",
+      "menuImage": "菜单图片",
+      "menuName": "菜单名称",
+      "menuDescription": "菜单描述",
+      "addMenu": "新增菜单",
+      "editMenu": "编辑菜单",
+      "updateMenuInfo": "更新菜单信息",
+      "createNewMenu": "创建新菜单",
+      "clickSaveToComplete": "点击保存完成",
+      "pleaseEnterMenuName": "请输入菜单名称",
+      "pleaseEnterMenuDescription": "请输入菜单描述",
+      "pleaseEnterMenuImage": "请输入菜单图片",
+      "pleaseSelectStatus": "请选择状态"
+    },
+    "itemsPage": {
+      "searchItemName": "搜索菜品名称/分类",
+      "menuItems": "菜单菜品",
+      "manageMenuItems": "在此管理菜单菜品",
+      "pleaseWait": "请等待",
+      "editItemSuccess": "编辑成功",
+      "editItemFailed": "编辑失败",
+      "deleteItemSuccess": "删除成功",
+      "deleteItemFailed": "删除失败",
+      "deleteItemConfirm": "确定要删除菜品{name}吗？",
+      "deleteItemDescription": "此操作无法撤销。",
+      "itemImage": "菜品图片",
+      "itemCategory": "分类",
+      "itemName": "菜品名称",
+      "itemPrice": "价格",
+      "itemDescription": "描述",
+      "itemCurrency": "货币",
+      "pleaseEnterItemCategory": "请输入菜品分类",
+      "pleaseEnterItemName": "请输入菜品名称",
+      "pleaseEnterItemPrice": "请输入菜品价格",
+      "pleaseUploadItemImage": "请上传菜品图片",
+      "pleaseEnterItemDescription": "请输入菜品描述",
+      "pleaseSelectItemCurrency": "请选择菜品货币",
+      "updateItemInfo": "更新菜品信息",
+      "createNewItem": "创建新菜品",
+      "editItem": "编辑菜品",
+      "addItem": "添加菜品",
+      "clickSaveToComplete": "点击保存完成",
+      "pleaseEnterItemCurrency": "请输入菜品货币"
+    },
+    "settingProfilePage": {
+      "managementAndSetup": "管理您的帐户设置并设置电子邮件偏好设置",
+      "personalProfile": "个人资料",
+      "accountSecurity": "账户安全",
+      "paragraph1": "这就是其他人在网站上看到您的信息",
+      "paragraph2": "这是您的公开显示名称。可以是您的真实姓名，也可以是假名。您每30天只能更改一次。",
+      "paragraph3": "方便您接受我们的信息。",
+      "paragraph4": "请输入联系电话",
+      "paragraph5": "更新个人资料",
+      "paragraph6": "更新您的帐户设置。设置您的首选语言和时区。",
+      "paragraph7": "此名称将显示在您的个人资料和电子邮件中。",
+      "paragraph8": "用于登录账户及接收系统通知。",
+      "paragraph9": "6-12位数字加字母组合。",
+      "paragraph10": "确认后需重新登录。",
+      "updateAccount": "更新账户",
+      "enterName": "请输入姓名",
+      "enterNumber": "请输入联系电话",
+      "enterPwd": "请输入密码",
+      "enterCheck": "请输入确认密码"
+    },
+    "helpComponent": {
+      "title": "我们整理了最重要的信息，帮助您充分利用这一体验。找不到您需要的内容？请联系我们。",
+      "commonProblems": "常见问题",
+      "storeAndAccountSettings": "店铺与账户设置",
+      "contactUs": "联系我们",
+      "emailAddress": "电子邮箱",
+      "paragraph": "如果您想给我们发送电子邮件，请发送邮件至xxxxxx@xx.com。我们将尽快回复您的咨询。"
+    },
+    "faqPage": {
+      "item1Title": "如何上传菜单图片并让AI生成菜单？",
+      "item1Content": "上传菜单图片并让AI生成菜单，请执行以下步骤：\n1. 导航至侧边栏，点击\"菜单\"分类右侧的\"+\"号创建新菜单\n2. 进入新菜单，上传图片，开始解析\n3. AI将自动识别文字并生成草稿\n4. 务必校对：可在编辑界面检查、修改识别内容，更改菜单名称等，点击\"保存\"",
+
+      "item2Title": "上传菜单图片的限制（支持格式？大小限制？）",
+      "item2Content": "支持JPG、PNG、WebP格式，最大10MB",
+
+      "item3Title": "识别错误了怎么办？",
+      "item3Content": "我们建议：\n1. 在编辑界面直接点击错误文本修改内容\n2. 若大面积识别失败→重新上传更清晰的照片\n注意：手写体、艺术字、低对比度图片可能影响识别效果",
+
+      "item4Title": "如何提高AI识别率？",
+      "item4Content": "我们建议确保菜单图片：\n1. 光线充足均匀\n2. 平整无褶皱\n3. 文字清晰正对，避免反光模糊",
+
+      "item5Title": "如何查看、下载菜单二维码？",
+      "item5Content": "查看、下载菜单二维码，请执行以下步骤：\n1. 导航至侧边栏，点击选择对应菜单\n2. 点击页面右上角\"二维码\"\n3. 预览或下载二维码",
+
+      "item6Title": "如果客户不能或不想扫描二维码，我该怎么办？",
+      "item6Content": "我们建议：\n1. 准备几份纸质菜单作为备用\n2. 可以在桌面放置二维码说明卡，帮助客人扫码\n3. 服务员可以主动询问是否需要帮助\n4. 考虑在店内放置平板电脑供客人直接点餐",
+
+      "item7Title": "如何安排我的菜单类别？",
+      "item7Content": "建议按照以下方式组织：\n1. 热门菜品放在最前面\n2. 按照用餐顺序排列（如前菜、主菜、甜点）\n3. 特色菜品可以单独分类\n4. 饮品、酒水单独分类\n5. 可以使用拖拽功能调整类别顺序",
+
+      "item8Title": "如何修改我的货币？",
+      "item8Content": "要设置菜单的货币，请执行以下步骤：\n1. 导航至侧边栏，点击选择对应菜单\n2. 菜品价格前方标识\"货币缩写\"，点击向下箭头，进入可用货币的下拉菜单",
+
+      "item9Title": "如何编辑生成的菜单？",
+      "item9Content": "编辑生成的菜单，请执行以下步骤：\n1. 导航至侧边栏，点击选择对应菜单\n2. 在编辑界面直接删除或修改菜品名称、价格、图片等内容\n3. 点击\"保存\"，即可修改成功",
+
+      "item10Title": "如何删除菜单？",
+      "item10Content": "删除菜单，请执行以下步骤：\n1. 导航至侧边栏，点击选择对应菜单\n2. 点击左上角菜单名称旁的\"编辑\"图标\n3. 在弹出的弹框中点击\"删除\"图标",
+
+      "item11Title": "如何分享给他人查看电子菜单？",
+      "item11Content": "若希望分享查看菜单，请执行以下步骤：\n1. 下载对应已生成菜单的二维码\n2. 提供电子二维码或打印二维码供他人扫码查看\n3. 使用手机扫描二维码，即可查看电子菜单",
+
+      "item12Title": "如何查看菜单的访问数据？",
+      "item12Content": "1. 导航至侧边栏，进入【仪表盘】面板\n2. 查看核心指标"
+    },
+    "helpSettingPage": {
+      "item1Title": "游客账号与正式账号有什么区别？",
+      "item1Content": "游客账号限制3个店铺，总菜单共50个。正式账号无限制",
+
+      "item2Title": "游客账号升级为正式账号后，我的菜单会丢失吗？",
+      "item2Content": "不会，升级正式账号后，TTPOS-MENU会为您保留游客账号时创建的店铺与菜单",
+
+      "item3Title": "修改密码、邮箱、姓名",
+      "item3Content": "修改密码、邮箱、姓名，请执行以下步骤：\n1. 导航至侧边栏，点击\"设置\"\n2. 点击\"账户安全\"\n3. 修改信息后点击\"更新账户\"",
+
+      "item4Title": "如何添加店铺？",
+      "item4Content": "添加店铺，请执行以下步骤：\n1. 导航至侧边栏，点击最上方的店铺名称\n2. 弹框中点击\"添加店铺\"\n3. 填写相应信息后点击\"确定\"",
+
+      "item5Title": "如何管理我的店铺？",
+      "item5Content": "查看不同店铺的数据，请执行以下步骤：\n1. 导航至侧边栏，点击最上方的店铺名称\n2. 弹框中可选择切换当前用户下的不同店铺\n3. 选择对应店铺后可管理该店铺的菜单等"
+    },
+    "loginPage": {
+      "backToHome": "返回首页",
+      "title": "欢迎使用 TTPOS Menu",
+      "subtitle": "一键生成电子菜单",
+      "loginTitle": "登录账号",
+      "loginDescription": "登录后您的数据将永久保存，并解锁更多功能",
+      "termsPrefix": "点击继续即表示您同意我们的 ",
+      "termsLink": "《用户协议》",
+      "privacyLink": "《隐私政策》"
+    },
+    "loginComponent": {
+      "loginSuccess": "登录成功",
+      "guestSuccess": "已创建游客账号，您可以开始使用所有功能",
+      "emailLabel": "邮箱地址",
+      "passwordLabel": "密码",
+      "passwordPlaceholder": "请输入密码",
+      "loginButton": "登录",
+      "or": "或者",
+      "continueAsGuest": "使用游客身份继续"
+    },
+    "upgradeComponent": {
+      "errorNotLoggedIn": "请先登录后再进行升级",
+      "upgradeSuccess": "升级成功",
+      "emailLabel": "邮箱地址",
+      "emailPlaceholder": "请输入邮箱地址",
+      "passwordLabel": "密码",
+      "passwordPlaceholder": "请输入密码",
+      "usernameLabel": "用户名",
+      "optional": "（可选）",
+      "usernamePlaceholder": "请输入用户名",
+      "cancel": "取消",
+      "upgradeButton": "升级账号"
+    },
+    "contactForm": {
+      "submitSuccess": "提交成功",
+      "namePlaceholder": "请输入您的姓名/公司名称",
+      "emailPlaceholder": "请输入您的邮箱地址",
+      "phonePlaceholder": "请输入您的联系电话",
+      "contentPlaceholder": "请输入您的留言内容",
+      "submitButton": "提交"
+    },
+    "bar": {
+      "textContent": "🚀 发现更多智能点餐神器！点击 <b>ttpos.com</b> 探索完整的点餐系统解决方案 💡",
+      "textButton": "去看看吧 ✨"
+    },
+    "cookie": {
+      "accept": "接受",
+      "reject": "拒绝",
+      "message": "我们将使用Cookie优化您的浏览体验，并通过第三方SDK实现网站功能，如果您想继续浏览本网站，请您同意使用Cookie和{privacyLink}。",
+      "privacyLinkText": "隐私条款"
+    },
+    "footer": {
+      "copyright": "© {year} TTPOS Menu. 让菜单数字化更简单，让餐饮管理更高效。"
+    },
+    "menuDeleteDialog": {
+      "title": "确认删除菜单",
+      "description": "删除后无法恢复，请谨慎操作",
+      "cancel": "取消",
+      "confirm": "确认删除"
+    },
+    "storeDeleteDialog": {
+      "title": "确认删除店铺",
+      "description": "删除后无法恢复，请谨慎操作",
+      "cancel": "取消",
+      "confirm": "确认删除"
+    },
+    "qrCodePopover": {
+      "scanToPreview": "扫码预览菜单",
+      "copyLink": "复制链接",
+      "copyFailed": "复制失败",
+      "copied": "复制成功"
+    },
+    "menuLangButtons": {
+      "autoDetect": "自动检测语言 ({label})"
+    },
+    "menuLangDialog": {
+      "addError": "添加语言失败:",
+      "removeError": "删除语言失败:",
+      "title": "管理语言",
+      "description": "点击语言选项可以添加新的语言版本，或删除已添加的语言版本。注意：默认语言不可删除。",
+      "searchPlaceholder": "搜索语言...",
+      "default": "默认",
+      "addTitle": "添加语言",
+      "removeTitle": "删除语言",
+      "addConfirm": "确定要添加「{label} ({country})」语言版本吗？",
+      "removeConfirm": "确定要删除「{label} ({country})」语言版本吗？删除后该语言的所有内容将被清除。",
+      "cancel": "取消",
+      "add": "添加",
+      "remove": "删除"
+    },
+    "menuUploader": {
+      "title": "上传菜单图片",
+      "description": "拖拽图片到此处，或点击选择文件",
+      "supportedFormats": "支持 JPG、PNG、WebP 格式，最大 10MB",
+      "previewAlt": "菜单预览",
+      "imageSizeError": "图片大小不能大于10MB"
+    },
+    "menuPreview": {
+      "editStoreTooltip": "点击修改店铺信息",
+      "noImage": "无图",
+      "unnamed": "未命名",
+      "noMore": "已经到底了"
+    },
+    "menuPopover": {
+      "validation": {
+        "nameRequired": "菜单名称不能为空"
+      },
+      "title": "编辑菜单信息",
+      "description": "请填写菜单的基本信息",
+      "logo": "菜单LOGO",
+      "logoAlt": "菜单logo",
+      "name": "菜单名称",
+      "menuDescription": "菜单描述",
+      "status": "菜单状态",
+      "statusPublic": "启用",
+      "statusDraft": "草稿",
+      "statusDisabled": "禁用",
+      "cancel": "取消",
+      "save": "保存"
+    },
+    "itemPopover": {
+      "validation": {
+        "nameRequired": "菜品名称不能为空",
+        "priceRequired": "请输入价格",
+        "priceMin": "价格必须大于0",
+        "currencyRequired": "请选择货币",
+        "categoryRequired": "请选择类别"
+      },
+      "continue":"继续识别",
+      "editTitle": "修改菜品",
+      "addTitle": "添加菜品",
+      "editDescription": "请填写修改的菜品信息",
+      "statusDescription": "添加到<current></current>菜单，同时自动翻译为<more></more>版本",
+      "addDescription": "请填写添加的菜品信息",
+      "name": "菜品名称",
+      "description": "菜品描述",
+      "price": "菜品价格",
+      "currency": "菜品货币",
+      "category": "菜品类别",
+      "add": "添加",
+      "currencyPlaceholder": "货币",
+      "searchCurrency": "搜索货币...",
+      "categoryPlaceholder": "类别",
+      "searchCategory": "搜索类别...",
+      "noCategoryFound": "未找到类别",
+      "cancel": "取消",
+      "save": "保存"
+    },
+    "menuEditor": {
+      "title": "识别的菜品",
+      "defaultCategory": "默认分类",
+      "addDescription": "添加描述...",
+      "add": "添加",
+      "currency": "货币",
+      "searchCurrency": "搜索货币...",
+      "startingAiRecognition": "开始AI识别"
+    },
+    "dataTablePagination": {
+      "rowsPerPage": "每页行数",
+      "pageIndicator": "第 {pageIndex} 页，共 {pageCount} 页",
+      "goToFirstPage": "跳转到第一页",
+      "goToPreviousPage": "跳转到上一页",
+      "goToNextPage": "跳转到下一页",
+      "goToLastPage": "跳转到最后一页"
+    },
+    "homePage": {
+      "errors": {
+        "invalidFileType": "仅支持JPG、PNG、WebP格式",
+        "fileTooLarge": "文件不能大于10MB"
+      },
+      "hero": {
+        "title": "将实体菜单\n一键生成电子菜单",
+        "subtitle": "使用最先进的 AI 技术，一键识别菜单内容，自动生成精美的电子菜单。",
+        "experience": "无需注册，立即体验！",
+        "startNow": "立即开始",
+        "viewDemo": "查看演示",
+        "demoVideo": "演示视频",
+        "uploadTitle": "点击或拖动到此处上传图片",
+        "uploadDescription": "支持JPG、PNG、WebP格式，最大10MB。"
+      },
+      "howItWorks": {
+        "title": "它是如何工作的？",
+        "subtitle": "将您的订单增加 40% 以上，就是这样：",
+        "step1Title": "01. 选择菜单图片",
+        "step1Description": "提供您餐厅的菜单正面清晰图片",
+        "step2Title": "02. AI 识别",
+        "step2Description": "AI 自动识别菜单内容，获取菜品名称、价格和描述信息",
+        "step3Title": "03. 生成电子菜单",
+        "step3Description": "根据获取信息自动生成电子菜单"
+      },
+      "whyUs": {
+        "title": "为什么选择 TTPOS Menu？",
+        "subtitle": "我们使用最先进的技术，为餐饮行业提供最智能、最便捷的菜单数字化解决方案",
+        "feature1Title": "AI 智能识别",
+        "feature1Description": "基于 GPT-4 的先进视觉识别技术，准确识别菜品名称、价格和描述信息， 识别准确率高达 95%",
+        "feature2Title": "零门槛使用",
+        "feature2Description": "无需注册登录，访问即可使用。系统自动创建游客账号， 体验满意后可一键升级为正式账号，数据无缝迁移",
+        "feature3Title": "完美适配",
+        "feature3Description": "响应式设计，完美适配手机、平板、电脑等各种设备。 生成的电子菜单支持二维码分享，顾客扫码即可查看"
+      },
+      "getStarted": {
+        "title": "准备好数字化你的菜单了吗？",
+        "subtitle": "立即上传你的菜单图片，体验 AI 的强大能力",
+        "button": "开始体验"
+      },
+      "contactUs": {
+        "title": "联系我们",
+        "description": "有任何疑问？我们乐意协助！欢迎咨询菜单转换、点餐系统或定制需求，工作日平均 24 小时内回复。"
+      }
+    },
+    "uploadPage": {
+      "upgradeDialog": {
+        "description": "当前是游客账号，数据仅会保存7天，7天后将被自动删除。升级为正式账号可永久保存数据，并解锁更多功能。",
+        "cancel": "跳过",
+        "upgrade": "升级账号"
+      },
+      "toasts": {
+        "selectImageFirst": "请先选择图片",
+        "recognizingInProgress": "正在识别图片，请稍候...",
+        "getMenuIdFailed": "获取菜单ID失败",
+        "recognitionFailed": "识别失败",
+        "recognitionSuccess": "识别成功",
+        "savingInProgress": "正在保存菜单，无法{action}",
+        "itemAddedSuccess": "菜品添加成功",
+        "itemAddedFailed": "菜品添加失败：{error}",
+        "saveItemsFailed": "保存菜品失败:{error}",
+        "languageAddedSuccess": "语言添加成功",
+        "languageAddedFailed": "语言添加失败：{error}",
+        "languageRemovedSuccess": "语言删除成功",
+        "languageRemovedFailed": "语言删除失败：{error}",
+        "savingInProgressUpdateStore": "正在保存菜单，无法更新店铺信息",
+        "savingInProgressDeleteItem": "正在保存菜单，无法删除菜品",
+        "imageSizeTooLarge": "图片大小不能超过{maxSize}",
+        "saveMenuSuccess": "保存菜单成功",
+        "savingInProgressAddItem": "正在保存菜单，无法添加菜品",
+        "pleaseRecognizeItems": "菜品数量为空，请识别菜品"
+      },
+      "errors": {
+        "saveMenuFailed": "保存菜单失败:",
+        "getProcessingTimeFailed": "获取识别时间失败:",
+        "getMenuFailed": "获取菜单失败:",
+        "deleteItemFailed": "删除菜品失败: {error}"
+      },
+      "title": "AI菜单识别",
+      "subtitle": "上传菜单图片，AI自动识别菜品名称和价格",
+      "steps": {
+        "step1": "选择图片",
+        "step2": "AI识别",
+        "step3": "编辑保存"
+      },
+      "recognitionResults": {
+        "title": "识别完成",
+        "processing": "AI正在识别菜单内容...",
+        "items": "识别菜品",
+        "confidence": "总体置信度",
+        "processingTime": "识别时间",
+        "processingConsuming": "识别耗时",
+        "highConfidence": "高置信度",
+        "sure":"确定"
+      },
+      "usageTips": {
+        "title": "使用提示",
+        "tip1": "<b>零门槛体验：</b>无需注册，直接上传菜单即可使用",
+        "tip2": "请确保菜单图片清晰，文字可读",
+        "tip3": "支持多种图片格式：JPG、PNG、WebP",
+        "tip4": "AI识别结果可以手动编辑和修正",
+        "tip5": "游客模式享受完整功能，数据保存7天",
+        "upgradeTip": "<b>升级提醒：</b>注册账号可永久保存数据，解锁更多功能"
+      },
+      "terms": {
+        "title": "用户协议 和 隐私政策",
+        "description": "请阅读并同意以下条款",
+        "agree": "已阅读并同意",
+        "termsLink": "《用户协议》",
+        "privacyLink": "《隐私政策》",
+        "cancel": "取消",
+        "confirm": "同意并继续"
+      },
+      "actions": {
+        "reUpload": "重新上传",
+        "editStore": "编辑店铺信息",
+        "saveMenu": "保存菜单",
+        "startRecognition": "开始AI识别",
+        "cancel": "取消"
+      },
+      "validation": {
+        "storeAndMenuName": "请先填写店铺名称和菜单名称",
+        "storeName": "请先填写店铺名称",
+        "menuName": "请先填写菜单名称"
+      },
+      "resetDialog": {
+        "title": "确认重置菜单",
+        "descriptionPublic": "当前菜单已发布，重置后将删除菜单内所有菜品，此操作不可恢复。",
+        "descriptionDraft": "重置后将删除菜单内所有菜品，此操作不可恢复。",
+        "confirm": "确认重置"
+      }
+    },
+    "uploadSuccessPage": {
+      "title": "保存成功！",
+      "subtitle": "菜单已成功保存，扫码即可访问您的专属菜单页。",
+      "manageMenu": "管理菜单",
+      "downloadQrCode": "下载二维码",
+      "continueAdding": "继续添加"
+    },
+    "userPage": {
+      "toasts": {
+        "storeCreated": "店铺创建成功",
+        "storeUpdated": "店铺信息保存成功",
+        "atLeastOneStore": "店铺列表至少保留一个",
+        "storeDeleted": "店铺删除成功",
+        "menuUpdated": "菜单信息保存成功"
+      },
+      "unnamedStore": "未命名店铺",
+      "addressLabel": "地址：",
+      "phoneLabel": "电话：",
+      "noMenu": "「{storeName}」暂无菜单",
+      "unnamedMenu": "未命名菜单",
+      "noDescription": "暂无描述",
+      "status": {
+        "public": "启用",
+        "draft": "草稿",
+        "disabled": "禁用",
+        "unknown": "未知状态"
+      },
+      "lastModified": "最后修改: {date}",
+      "manage": "管理",
+      "delete": "删除",
+      "addNewMenu": "添加新菜单"
+    },
+    "menuPage": {
+      "getMenuFailed": "获取菜单失败：{error}",
+      "loadingTitle": "正在加载菜单...",
+      "loadingDescription": "请稍候，我们正在为您准备菜单内容",
+      "notFoundTitle": "未找到菜单",
+      "notFoundDescription": "抱歉，该菜单不存在或已被删除"
+    },
+    "header": {
+      "guestMode": "游客模式",
+      "upgradeToFullAccount": "升级为正式账号",
+      "myMenus": "我的菜单",
+      "clearData": "清除数据",
+      "logout": "退出登录",
+      "upgradeAccount": "升级账号",
+      "upgradeToProVersion": "升级到专业版",
+      "upgrade": "升级",
+      "loginOrRegister": "登录 | 注册"
+    },
+    "authContext": {
+      "loginTitle": "登录",
+      "loginDescription": "登录后您的数据将永久保存，并解锁更多功能",
+      "upgradeTitle": "升级为正式账号",
+      "upgradeDescription": "升级后您的数据将永久保存，并解锁更多功能",
+      "hookError": "useAuth 必须在 AuthProvider 内使用"
+    },
+    "storePopover": {
+      "validation": {
+        "storeNameRequired": "店铺名称不能为空",
+        "menuNameRequired": "菜单名称不能为空"
+      },
+      "addTitle": "添加店铺",
+      "editTitle": "编辑店铺信息",
+      "addDescription": "请填写新店铺信息",
+      "editDescription": "请填写店铺的基本信息",
+      "subTitle": "添加一个新的店铺到您的账户中",
+      "logo": "LOGO",
+      "logoAlt": "店铺logo",
+      "menuName": "菜单名称",
+      "storeName": "店铺名称",
+      "address": "店铺地址",
+      "phone": "联系电话",
+      "cancel": "取消",
+      "create": "创建",
+      "save": "保存",
+      "creating": "创建中...",
+      "storeCreatedSuccessfully": "创建店铺成功",
+      "incompleteInformation": "请填写完整信息"
+    },
+    "loadingComponent": {
+      "title": "正在初始化系统...",
+      "subtitle": "即将为您提供零门槛菜单识别体验"
+    },
+    "menuTemplate01": {
+      "switchLanguage": "切换语言",
+      "noImage": "无图",
+      "unnamed": "未命名",
+      "reachedBottom": "已经到底了"
+    },
+    "privacyPage": {
+      "title": "隐私政策",
+      "introduction": "本隐私政策描述了我们如何收集、使用、存储和保护您的个人信息。我们理解个人信息对您的重要性，将尽最大努力保护您个人信息的安全可靠。",
+      "section1": {
+        "title": "1. 信息收集",
+        "content": "1.1 您提供的信息：当您注册账户、使用我们的服务或联系我们时，我们可能会收集您提供的个人信息，如姓名、联系方式、账户信息等。\n1.2 您使用服务过程中产生的信息：包括您的操作记录、浏览记录、交易记录等。\n1.3 设备信息：我们可能收集您使用的设备相关信息，如设备型号、操作系统版本、设备设置、IP地址等。\n1.4 日志信息：当您使用我们的服务时，系统可能会自动收集您对服务的使用情况信息，如访问日期和时间、软件崩溃情况等。"
+      },
+      "section2": {
+        "title": "2. 信息使用",
+        "content": "2.1 为您提供、维护和改进我们的服务。\n2.2 向您发送通知、活动信息等。\n2.3 设计新产品或服务。\n2.4 进行数据分析。\n2.5 根据法律要求履行义务。"
+      },
+      "section3": {
+        "title": "3. 信息保护",
+        "content": "3.1 我们使用各种安全技术和程序来防止信息的丢失、不当使用、未经授权的查看或披露。\n3.2 我们采取合理可行的措施，确保不收集无关的个人信息。\n3.3 我们在合理的安全水平内，使用各种安全保护措施来保证信息的安全性。\n3.4 互联网并非绝对安全的环境，强烈建议您不要通过公共网络发送任何敏感的个人信息。"
+      },
+      "section4": {
+        "title": "4. 信息共享",
+        "content": "4.1 我们不会向任何第三方出售您的个人信息。\n4.2 我们可能在以下情况下共享您的个人信息：\na) 获得您的明确同意后；\nb) 为处理您的请求并实现我们服务的目的；\nc) 根据法律法规、法律程序或政府主管部门的强制性要求；\nd) 在涉及合并、收购、资产转让或类似交易时，如涉及个人信息转让，我们会要求持有您个人信息的新公司或组织继续受本隐私政策的约束。"
+      },
+      "section5": {
+        "title": "5. Cookie 和类似技术",
+        "content": "5.1 我们可能使用 Cookie 和类似技术来收集和使用您的信息。\n5.2 您可以通过浏览器设置拒绝或管理 Cookie。但请注意，如果禁用 Cookie，您可能无法享受最佳的服务体验，某些服务可能无法正常使用。"
+      },
+      "section6": {
+        "title": "6. 未成年人保护",
+        "content": "6.1 我们高度重视对未成年人个人信息的保护。若您是18周岁以下的未成年人，在使用我们的服务前，应事先取得您的父母或法定监护人的书面同意。\n6.2 对于经父母或法定监护人同意而收集的未成年人个人信息，我们只会在受到法律允许、父母或监护人明确同意或者保护未成年人所必要的情况下使用或公开披露此信息。"
+      },
+      "section7": {
+        "title": "7. 您的权利",
+        "content": "7.1 您有权访问、更正和删除您的个人信息。\n7.2 您有权撤回之前给予的处理个人信息的同意。\n7.3 您有权获得您个人信息的副本。\n7.4 在特定情况下，您有权限制或反对我们处理您的个人信息。"
+      },
+      "section8": {
+        "title": "8. 隐私政策更新",
+        "content": "8.1 我们可能会不时修订本隐私政策的条款。\n8.2 对于重大变更，我们会提供显著的通知。\n8.3 如果您继续使用我们的服务，即表示您同意受修订后的隐私政策约束。"
+      },
+      "section9": {
+        "title": "9. 联系我们",
+        "content": "如果您对本隐私政策有任何疑问、意见或建议，或者您认为我们的个人信息处理行为可能损害了您的合法权益，请通过以下方式联系我们：",
+        "email": "邮箱：privacy@example.com",
+        "phone": "联系电话：400-XXX-XXXX"
+      },
+      "lastUpdated": "最后更新时间："
+    },
+    "termsPage": {
+      "title": "服务条款",
+      "introduction": "欢迎使用我们的服务！请在使用本服务前仔细阅读以下条款。使用本服务即表示您同意受本协议约束。",
+      "section1": {
+        "title": "1. 协议的接受和修改",
+        "content": "1.1 本协议是您与我们平台就使用我们服务所订立的协议。\n1.2 我们保留在必要时修改本条款的权利。您可以在相关页面查看条款的最新版本。\n1.3 如果您在条款修改后继续使用我们的服务，即视为您已接受修改后的协议。"
+      },
+      "section2": {
+        "title": "2. 账户注册与安全",
+        "content": "2.1 成功注册后，您将获得一个账户和相应的密码，您有责任保管好。\n2.2 您对在您账户下的所有活动和事件负责。\n2.3 如果您发现有任何未经授权使用您账户的情况，请立即通知我们。"
+      },
+      "section3": {
+        "title": "3. 用户行为规范",
+        "content": "3.1 在使用我们的服务时，您必须遵守相关法律法规。\n3.2 您不得将我们的服务用于任何非法或不当的活动，包括但不限于：\na) 发布或传播违反法律法规的信息；\nb) 侵犯他人知识产权、商业秘密或其他合法权利；\nc) 干扰本服务的正常运行；\nd) 未经授权收集其他用户信息；\ne) 其他违反法律法规、公序良俗或损害他人合法权益的行为。"
+      },
+      "section4": {
+        "title": "4. 内容规范",
+        "content": "4.1 您上传的内容应当符合法律法规、公序良俗以及本协议的规定。\n4.2 我们有权删除违反上述规定的内容，并保留追究相关责任的权利。\n4.3 对于您上传的内容，您应当保证拥有相应的合法权利。"
+      },
+      "section5": {
+        "title": "5. 知识产权",
+        "content": "5.1 本平台上的所有内容，包括但不限于文字、图片、音频、视频、软件、程序、版面设计等，均受知识产权法律法规保护。\n5.2 未经我们或相关权利人书面许可，您不得以任何方式复制、修改、编译、发布或分发上述内容。"
+      },
+      "section6": {
+        "title": "6. 免责声明",
+        "content": "6.1 我们努力确保服务的安全性和稳定性，但无法完全排除因网络、设备故障、系统维护等原因导致的服务中断或其他问题。\n6.2 对于因不可抗力或超出我们控制范围的原因导致的服务中断或其他缺陷，我们不承担责任。\n6.3 您理解并同意，我们对于用户通过平台进行的交流、交易或其他行为的合法性、真实性或有效性不作任何明示或暗示的保证。"
+      },
+      "section7": {
+        "title": "7. 协议终止",
+        "content": "7.1 如果您违反本协议的规定，我们有权视情况采取警告、限制、终止提供服务等措施。\n7.2 您有权注销账户，注销后您与我们之间的服务协议终止。\n7.3 协议终止后，我们有权根据法律法规要求继续保留您的相关信息。"
+      },
+      "section8": {
+        "title": "8. 适用法律与争议解决",
+        "content": "8.1 本协议适用中华人民共和国法律。\n8.2 因本协议产生或与本协议有关的任何争议，应通过友好协商解决；协商不成的，任何一方均有权将争议提交有管辖权的人民法院。"
+      },
+      "lastUpdated": "最后更新时间："
+    }
+  },
+  "constants": {
+    "language": {
+      "regions": {
+        "Asia": "亚洲",
+        "Europe": "欧洲",
+        "Americas": "美洲",
+        "Africa": "非洲",
+        "Oceania": "大洋洲"
+      },
+      "countries": {
+        "SaudiArabia": "沙特阿拉伯",
+        "Indonesia": "印度尼西亚",
+        "Malaysia": "马来西亚",
+        "Philippines": "菲律宾",
+        "India": "印度",
+        "Bangladesh": "孟加拉国",
+        "Pakistan": "巴基斯坦",
+        "Iran": "伊朗",
+        "Japan": "日本",
+        "SouthKorea": "韩国",
+        "Thailand": "泰国",
+        "Vietnam": "越南",
+        "Israel": "以色列",
+        "China": "中国",
+        "Denmark": "丹麦",
+        "Germany": "德国",
+        "Greece": "希腊",
+        "UnitedKingdom": "英国",
+        "Spain": "西班牙",
+        "Finland": "芬兰",
+        "France": "法国",
+        "Italy": "意大利",
+        "Netherlands": "荷兰",
+        "Norway": "挪威",
+        "Poland": "波兰",
+        "Portugal": "葡萄牙",
+        "Russia": "俄罗斯",
+        "Sweden": "瑞典",
+        "Turkey": "土耳其",
+        "Canada": "加拿大",
+        "UnitedStates": "美国",
+        "Argentina": "阿根廷",
+        "Chile": "智利",
+        "Colombia": "哥伦比亚",
+        "Mexico": "墨西哥",
+        "Peru": "秘鲁",
+        "Brazil": "巴西",
+        "SouthAfrica": "南非",
+        "Ethiopia": "埃塞俄比亚",
+        "Egypt": "埃及",
+        "Morocco": "摩洛哥",
+        "Senegal": "塞内加尔",
+        "Kenya": "肯尼亚",
+        "Australia": "澳大利亚",
+        "NewZealand": "新西兰"
+      }
+    },
+    "waitTips": {
+      "0": "正在识别图片，请稍候...",
+      "1": "AI正在仔细分析菜单内容...",
+      "2": "马上就好，正在优化识别结果...",
+      "3": "别着急，我们正在确保识别准确度...",
+      "4": "正在处理中，请耐心等待...",
+      "5": "AI正在努力工作中，即将完成...",
+      "6": "正在提取菜单中的关键信息...",
+      "7": "AI正在学习菜单的排版结构...",
+      "8": "正在识别菜品名称和价格...",
+      "9": "马上就能看到识别结果了...",
+      "10": "正在对识别结果进行最后的校对...",
+      "11": "AI正在为您整理菜单数据..."
+    }
+  },
+  "api": {
+    "error": {
+      "AUTH_1001": "令牌缺失",
+      "AUTH_1002": "令牌无效",
+      "AUTH_1003": "令牌过期",
+      "AUTH_1004": "权限不足",
+      "AUTH_1005": "登录失败",
+      "AUTH_1006": "更新失败",
+      "AUTH_1007": "权限不足",
+      "AUTH_1008": "用户不存在",
+      "AUTH_1009": "密码错误",
+      "AUTH_1010": "获取用户失败",
+      "AUTH_1011": "30天内不允许修改用户名",
+      "GUEST_1101": "令牌过期",
+      "GUEST_1102": "账号过期",
+      "GUEST_1103": "限制超出",
+      "GUEST_1104": "升级失败",
+      "GUEST_1105": "邮箱已存在",
+      "GUEST_1106": "创建失败",
+      "GUEST_1107": "不是游客",
+      "VAL_2001": "验证必填字段",
+      "VAL_2002": "验证无效的格式",
+      "VAL_2003": "验证文件太大",
+      "VAL_2004": "验证不支持的格式",
+      "VAL_2005": "验证无效的图片URL",
+      "VAL_2006": "密码长度必须为6-32位",
+      "VAL_2007": "密码确认不一致",
+      "BIZ_3001": "店铺不存在",
+      "BIZ_3002": "菜单不存在",
+      "BIZ_3003": "重复名称",
+      "BIZ_3004": "店铺限制超出",
+      "BIZ_3005": "菜单限制超出",
+      "BIZ_3006": "您不是店铺所有者",
+      "BIZ_3007": "菜单创建失败",
+      "BIZ_3008": "菜单删除失败",
+      "BIZ_3009": "菜单更新失败",
+      "BIZ_3010": "店铺创建失败",
+      "BIZ_3011": "店铺更新失败",
+      "BIZ_3012": "店铺删除失败",
+      "BIZ_3013": "菜品创建失败",
+      "BIZ_3014": "菜品删除失败",
+      "BIZ_3015": "菜品更新失败",
+      "BIZ_3016": "统计汇总失败",
+      "BIZ_3017": "用户不存在",
+      "BIZ_3018": "菜品不存在",
+      "BIZ_3019": "菜品本地化创建失败",
+      "BIZ_3020": "菜品本地化删除失败",
+      "BIZ_3021": "上传头像失败",
+      "BIZ_3022": "更新用户失败",
+      "BIZ_3023": "上传图片格式错误: 只允许image/jpeg,image/jpg,image/png,image/webp格式",
+      "BIZ_3024": "上传图片大小错误: 最大大小为10MB",
+      "BIZ_3025": "上传图片失败",
+      "BIZ_3026": "AI识别失败",
+      "BIZ_3027": "店铺限制超出: 最多只能创建3个店铺",
+      "BIZ_3028": "菜单限制超出: 最多只能创建50个菜单",
+      "BIZ_3029": "菜单未开启",
+      "BIZ_3030": "获取菜单失败",
+      "BIZ_3031": "用户删除失败",
+      "BIZ_3032": "不能更新自己的账号",
+      "BIZ_3033": "不能删除自己的账号",
+      "BIZ_3034": "AI预请求失败",
+      "BIZ_3035": "流式键不存在",
+      "BIZ_3036": "获取流式数据失败",
+      "SYS_5001": "系统内部错误"
+    }
+  }
+}

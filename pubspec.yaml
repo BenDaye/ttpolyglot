@@ -1,0 +1,10 @@
+name: ttpolyglot
+
+environment:
+  sdk: ">=3.6.1 <4.0.0"
+
+dev_dependencies:
+  melos: ^6.3.2
+
+workspace:
+  - packages/core
