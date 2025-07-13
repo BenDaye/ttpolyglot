@@ -63,9 +63,7 @@ ttpolyglot/
 │   ├── protocol/       # Serverpod 协议
 │   └── ui/             # 共享 UI 组件
 ├── apps/
-│   ├── web/                       # Flutter Web 主应用
-│   ├── desktop/                   # Flutter Desktop（规划中）
-│   └── mobile/                    # Flutter Mobile（规划中）
+│   └── ttpolyglot/                       # Flutter 主应用
 ├── server/
 │   └── server/         # Serverpod 后端
 └── tools/
