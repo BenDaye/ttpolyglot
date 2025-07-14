@@ -10,9 +10,6 @@ abstract class Routes {
   static const projects = _Paths.home + _Paths.projects;
 
   static String project(String projectId) => '$projects/$projectId';
-  static String projectDashboard(String projectId) => '$projects/$projectId/dashboard';
-  static String projectTranslations(String projectId) => '$projects/$projectId/translations';
-  static String projectLanguages(String projectId) => '$projects/$projectId/languages';
 
   static const settings = _Paths.home + _Paths.settings;
 
@@ -30,10 +27,6 @@ abstract class _Paths {
   static const settings = '/settings';
 
   static const project = '/:projectId';
-
-  static const projectDashboard = '/dashboard';
-  static const projectTranslations = '/translations';
-  static const projectLanguages = '/languages';
 
   static const unknown = '/404';
 

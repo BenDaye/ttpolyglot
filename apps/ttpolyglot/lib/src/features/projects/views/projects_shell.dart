@@ -56,10 +56,9 @@ class _ProjectsShellState extends State<ProjectsShell> {
                   );
                 }
 
-                return Placeholder(
-                  child: Center(
-                    child: Text(controller.selectedProjectId),
-                  ),
+                return GetRouterOutlet(
+                  initialRoute: Routes.project(controller.selectedProjectId),
+                  anchorRoute: Routes.projects,
                 );
               },
             ),
