@@ -66,8 +66,9 @@ class ProjectsSidebar extends StatelessWidget {
     bool isCompact = false,
   }) {
     return GetBuilder<ProjectsController>(
-      builder: (controller) => Padding(
+      builder: (controller) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+        margin: const EdgeInsets.only(bottom: 4.0),
         child: Row(
           spacing: 8.0,
           children: [

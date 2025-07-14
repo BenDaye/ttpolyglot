@@ -206,7 +206,6 @@ class ResponsiveSidebar extends StatelessWidget {
         () => Container(
           padding: EdgeInsets.symmetric(
             horizontal: isCompact ? 4.0 : 8.0,
-            vertical: 8.0,
           ),
           child: Column(
             children: [
