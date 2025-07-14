@@ -1,0 +1,12 @@
+---
+description: packages for app to import
+alwaysApply: false
+---
+
+在 apps 侧使用的包：
+
+1. **getx** - Flutter 状态管理、路由管理和依赖注入框架
+2. **dio** - 强大的 HTTP 客户端，用于网络请求
+3. **window_manager** - 桌面应用窗口管理插件
+
+这些包应该在 apps/ttpolyglot 项目中使用。

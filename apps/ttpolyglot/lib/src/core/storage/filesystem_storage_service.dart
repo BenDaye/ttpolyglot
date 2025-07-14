@@ -1,4 +1,5 @@
  import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -49,8 +50,8 @@ class FileSystemStorageServiceImpl extends FileSystemStorageService {
     
     try {
       return await file.readAsString(encoding: utf8);
-    } catch (e) {
-      print('Error reading file for key $key: $e');
+    } catch (e, stackTrace) {
+      log('Error reading file for key $key: $e', error: e, stackTrace: stackTrace);
       return null;
     }
   }
@@ -166,8 +167,8 @@ class FileSystemStorageServiceImpl extends FileSystemStorageService {
   }
 
   @override
-  Future<void> ensureDirectoryExists(String dirPath) async {
-    final directory = Directory(dirPath);
+  Future<void> ensureDirectoryExists(String path) async {
+    final directory = Directory(path);
     if (!await directory.exists()) {
       await directory.create(recursive: true);
     }

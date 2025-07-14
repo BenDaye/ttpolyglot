@@ -1,18 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:get/get.dart';
 
+import '../../core/layout/layout_controller.dart';
 import '../../core/platform/platform_adapter.dart';
+import '../../core/routing/app_router.dart';
 import '../../core/storage/storage_provider.dart';
 
-class HomePage extends ConsumerStatefulWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  ConsumerState<HomePage> createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends ConsumerState<HomePage> {
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    // 更新布局控制器
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final controller = Get.find<LayoutController>();
+      controller.updateLayoutForRoute(AppRouter.home);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const HomePageContent();
+  }
+}
+
+/// 导出的首页内容组件，用于嵌套路由
+class HomePageContent extends StatefulWidget {
+  const HomePageContent({super.key});
+
+  @override
+  State<HomePageContent> createState() => _HomePageContentState();
+}
+
+class _HomePageContentState extends State<HomePageContent> {
   final _platformAdapter = PlatformAdapter();
   late final StorageProvider _storageProvider;
 
@@ -25,16 +51,6 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('TTPolyglot'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => context.go('/settings'),
-          ),
-        ],
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -181,7 +197,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () => context.go('/projects'),
+                    onPressed: () => Get.toNamed(AppRouter.projects),
                     icon: const Icon(Icons.folder),
                     label: const Text('项目管理'),
                   ),
@@ -189,7 +205,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () => context.go('/settings'),
+                    onPressed: () => Get.toNamed(AppRouter.settings),
                     icon: const Icon(Icons.settings),
                     label: const Text('设置'),
                   ),
@@ -232,34 +248,35 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget _buildFeatureChip(String label, bool supported) {
     return Chip(
       label: Text(label),
-      backgroundColor:
-          supported ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surfaceVariant,
+      backgroundColor: supported
+          ? Theme.of(context).colorScheme.primaryContainer
+          : Theme.of(context).colorScheme.surfaceContainerHighest,
       labelStyle: TextStyle(
-        color: supported
-            ? Theme.of(context).colorScheme.onPrimaryContainer
-            : Theme.of(context).colorScheme.onSurfaceVariant,
+        color: supported ? Theme.of(context).colorScheme.onPrimaryContainer : Theme.of(context).colorScheme.onSurface,
       ),
       avatar: Icon(
         supported ? Icons.check_circle : Icons.cancel,
         size: 16,
-        color: supported
-            ? Theme.of(context).colorScheme.onPrimaryContainer
-            : Theme.of(context).colorScheme.onSurfaceVariant,
+        color: supported ? Theme.of(context).colorScheme.onPrimaryContainer : Theme.of(context).colorScheme.onSurface,
       ),
     );
   }
 
   IconData _getPlatformIcon() {
-    if (_platformAdapter.isDesktop) {
-      if (_platformAdapter.isMacOS) return Icons.laptop_mac;
-      if (_platformAdapter.isWindows) return Icons.laptop_windows;
-      if (_platformAdapter.isLinux) return Icons.laptop;
+    switch (_platformAdapter.currentPlatform) {
+      case PlatformType.desktop:
+        if (_platformAdapter.isMacOS) return Icons.desktop_mac;
+        if (_platformAdapter.isWindows) return Icons.desktop_windows;
+        if (_platformAdapter.isLinux) return Icons.computer;
+        return Icons.desktop_windows;
+      case PlatformType.mobile:
+        if (_platformAdapter.isIOS) return Icons.phone_iphone;
+        if (_platformAdapter.isAndroid) return Icons.android;
+        return Icons.phone_android;
+      case PlatformType.web:
+        return Icons.web;
+      case PlatformType.unknown:
+        return Icons.device_unknown;
     }
-    if (_platformAdapter.isWeb) return Icons.web;
-    if (_platformAdapter.isMobile) {
-      if (_platformAdapter.isIOS) return Icons.phone_iphone;
-      if (_platformAdapter.isAndroid) return Icons.phone_android;
-    }
-    return Icons.device_unknown;
   }
 }

@@ -146,7 +146,7 @@ Future<void> demonstrateStorageQuota() async {
   }
 
   final size = await storage.getSize();
-  print('- 当前存储大小: ${size} 字节');
+  print('- 当前存储大小: $size 字节');
 
   // 模拟存储配额
   const storageQuota = StorageQuota(

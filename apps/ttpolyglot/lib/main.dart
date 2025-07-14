@@ -1,7 +1,7 @@
+import 'dart:developer';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart' hide Size;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -17,11 +17,7 @@ void main() async {
   // 初始化存储服务
   await _initializeStorage();
 
-  runApp(
-    ProviderScope(
-      child: TTPolyglotApp(),
-    ),
-  );
+  runApp(const TTPolyglotApp());
 }
 
 /// 平台特定初始化
@@ -42,8 +38,8 @@ Future<void> _initializeDesktop() async {
 
   // 设置窗口选项
   final windowOptions = WindowOptions(
-    size: const ui.Size(1200, 800),
-    minimumSize: const ui.Size(800, 600),
+    size: const ui.Size(1680, 1050),
+    minimumSize: const ui.Size(1280, 720),
     center: true,
     backgroundColor: Colors.transparent,
     skipTaskbar: false,
@@ -60,18 +56,18 @@ Future<void> _initializeDesktop() async {
 /// Web端初始化
 Future<void> _initializeWeb() async {
   // Web端特定初始化
-  print('🌐 Web platform initialized');
+  log('🌐 Web platform initialized');
 }
 
 /// 移动端初始化
 Future<void> _initializeMobile() async {
   // 移动端特定初始化
-  print('📱 Mobile platform initialized');
+  log('📱 Mobile platform initialized');
 }
 
 /// 初始化存储服务
 Future<void> _initializeStorage() async {
   final storageProvider = StorageProvider();
   await storageProvider.initialize();
-  print('💾 Storage service initialized for ${storageProvider.currentPlatform}');
+  log('💾 Storage service initialized for ${storageProvider.currentPlatform}');
 }

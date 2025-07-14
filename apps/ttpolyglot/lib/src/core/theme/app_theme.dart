@@ -1,15 +1,21 @@
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// 应用主题提供者
-final appThemeProvider = Provider<AppTheme>((ref) {
-  return AppTheme();
-});
+/// 应用主题控制器
+class AppThemeController extends GetxController {
+  // 主题模式响应式变量
+  final _themeMode = ThemeMode.system.obs;
 
-/// 应用主题管理
-class AppTheme {
+  ThemeMode get themeMode => _themeMode.value;
+
+  /// 切换主题模式
+  void setThemeMode(ThemeMode mode) {
+    _themeMode.value = mode;
+    Get.changeThemeMode(mode);
+  }
+
   /// 浅色主题
   ThemeData get lightTheme {
     return FlexThemeData.light(
@@ -46,9 +52,6 @@ class AppTheme {
       fontFamily: GoogleFonts.notoSans().fontFamily,
     );
   }
-
-  /// 主题模式
-  ThemeMode get themeMode => ThemeMode.system;
 
   /// 主色调
   Color get primaryColor => Colors.blue;

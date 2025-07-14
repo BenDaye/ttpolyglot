@@ -16,22 +16,22 @@ class UnsupportedFormatException extends ParserException {
 
 /// 文件解析异常
 class FileParseException extends ParserException {
-  const FileParseException(String message, {Object? cause}) : super(message, cause: cause);
+  const FileParseException(super.message, {super.cause});
 }
 
 /// 文件写入异常
 class FileWriteException extends ParserException {
-  const FileWriteException(String message, {Object? cause}) : super(message, cause: cause);
+  const FileWriteException(super.message, {super.cause});
 }
 
 /// 文件读取异常
 class FileReadException extends ParserException {
-  const FileReadException(String message, {Object? cause}) : super(message, cause: cause);
+  const FileReadException(super.message, {super.cause});
 }
 
 /// 数据验证异常
 class ValidationException extends ParserException {
-  const ValidationException(String message, {this.errors = const []}) : super(message);
+  const ValidationException(super.message, {this.errors = const []});
 
   final List<String> errors;
 
@@ -46,5 +46,5 @@ class ValidationException extends ParserException {
 
 /// 编码异常
 class EncodingException extends ParserException {
-  const EncodingException(String message, {Object? cause}) : super(message, cause: cause);
+  const EncodingException(super.message, {super.cause});
 }

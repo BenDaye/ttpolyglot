@@ -1,35 +1,37 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 
+import 'core/layout/layout_controller.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
 
-class TTPolyglotApp extends ConsumerWidget {
+class TTPolyglotApp extends StatelessWidget {
   const TTPolyglotApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final router = ref.watch(appRouterProvider);
-    final theme = ref.watch(appThemeProvider);
+  Widget build(BuildContext context) {
+    // 初始化控制器
+    final themeController = Get.put(AppThemeController());
+    LayoutUtils.initLayoutController();
 
-    return MaterialApp.router(
+    return GetMaterialApp(
       title: 'TTPolyglot',
-      theme: theme.lightTheme,
-      darkTheme: theme.darkTheme,
-      themeMode: theme.themeMode,
-      routerConfig: router,
-      debugShowCheckedModeBanner: false,
-      locale: const Locale('zh', 'CN'),
+      theme: themeController.lightTheme,
+      darkTheme: themeController.darkTheme,
+      themeMode: themeController.themeMode,
+      initialRoute: AppRouter.initialRoute,
+      getPages: AppRouter.routes,
+      unknownRoute: AppRouter.unknownRoute,
+      debugShowCheckedModeBanner: kDebugMode,
+      locale: Get.deviceLocale,
+      fallbackLocale: const Locale('zh', 'CN'),
       supportedLocales: const [
         Locale('en', 'US'),
         Locale('zh', 'CN'),
       ],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
     );
   }
 }

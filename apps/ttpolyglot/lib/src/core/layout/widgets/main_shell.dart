@@ -1,0 +1,69 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import '../../routing/app_router.dart';
+import '../layout_controller.dart';
+import '../utils/layout_breakpoints.dart';
+import 'responsive_sidebar.dart';
+
+/// 主布局 Shell - 包含侧边栏和子路由出口
+class MainShell extends StatelessWidget {
+  const MainShell({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // 确保布局控制器已初始化
+    if (!Get.isRegistered<LayoutController>()) {
+      Get.put(LayoutController(), permanent: true);
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final shouldShowPersistentSidebar = ResponsiveUtils.shouldShowPersistentSidebar(context);
+
+        if (shouldShowPersistentSidebar) {
+          return _buildDesktopLayout(context);
+        } else {
+          return _buildMobileLayout(context);
+        }
+      },
+    );
+  }
+
+  /// 构建桌面端布局（常驻侧边栏）
+  Widget _buildDesktopLayout(BuildContext context) {
+    return Scaffold(
+      body: Row(
+        children: [
+          // 常驻侧边栏
+          const ResponsiveSidebar(),
+
+          // 主内容区域 - 使用 GetRouterOutlet 作为子路由出口
+          Expanded(
+            child: GetRouterOutlet(
+              initialRoute: AppRouter.home,
+              delegate: Get.rootDelegate,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 构建移动端布局（抽屉式侧边栏）
+  Widget _buildMobileLayout(BuildContext context) {
+    return Scaffold(
+      drawer: const ResponsiveSidebar(),
+      appBar: AppBar(
+        title: Obx(() {
+          final controller = Get.find<LayoutController>();
+          return Text(controller.pageTitle);
+        }),
+      ),
+      body: GetRouterOutlet(
+        initialRoute: AppRouter.home,
+        delegate: Get.rootDelegate,
+      ),
+    );
+  }
+}
