@@ -61,6 +61,8 @@ class _SettingsViewContent extends StatelessWidget {
             const SizedBox(height: 24),
             _buildLanguageSection(controller),
             const SizedBox(height: 24),
+            _buildTextFieldTestSection(),
+            const SizedBox(height: 24),
             _buildGeneralSection(controller),
           ],
         ),
@@ -160,6 +162,54 @@ class _SettingsViewContent extends StatelessWidget {
                     }).toList(),
                   ),
                 )),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextFieldTestSection() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.text_fields),
+                SizedBox(width: 12),
+                Text(
+                  'TextField 样式测试',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const TextField(
+              decoration: InputDecoration(
+                hintText: '这是一个测试TextField...',
+                prefixIcon: Icon(Icons.search),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const TextField(
+              decoration: InputDecoration(
+                hintText: '另一个测试TextField...',
+                prefixIcon: Icon(Icons.edit),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const TextField(
+              decoration: InputDecoration(
+                hintText: '带后缀图标的TextField...',
+                prefixIcon: Icon(Icons.person),
+                suffixIcon: Icon(Icons.visibility),
+              ),
+            ),
           ],
         ),
       ),

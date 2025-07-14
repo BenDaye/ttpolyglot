@@ -36,7 +36,7 @@ class AppThemeController extends GetxController {
         outlinedButtonRadius: 12.0,
         textButtonRadius: 12.0,
         // 输入框样式
-        inputDecoratorRadius: 12.0,
+        inputDecoratorRadius: 8.0,
         inputDecoratorBorderType: FlexInputBorderType.outline,
         // 导航栏样式
         navigationBarSelectedLabelSchemeColor: SchemeColor.primary,
@@ -80,6 +80,38 @@ class AppThemeController extends GetxController {
           ),
       // 自定义阴影
       shadowColor: Colors.black.withValues(alpha: 0.1),
+      // TextField 全局样式
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: const Color(0xFFF5F5F5),
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: BorderSide(
+            color: const Color(0xFFE5E5E5).withValues(alpha: 0.2),
+            width: 1,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: BorderSide(
+            color: const Color(0xFFE5E5E5).withValues(alpha: 0.2),
+            width: 1,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: const BorderSide(
+            color: Color(0xFFFF6B35),
+            width: 2,
+          ),
+        ),
+        hintStyle: TextStyle(
+          fontSize: 14.0,
+          color: const Color(0xFF191919).withValues(alpha: 0.5),
+        ),
+      ),
     );
   }
 
@@ -102,7 +134,7 @@ class AppThemeController extends GetxController {
         outlinedButtonRadius: 12.0,
         textButtonRadius: 12.0,
         // 输入框样式
-        inputDecoratorRadius: 12.0,
+        inputDecoratorRadius: 8.0,
         inputDecoratorBorderType: FlexInputBorderType.outline,
         // 导航栏样式
         navigationBarSelectedLabelSchemeColor: SchemeColor.primary,
@@ -146,6 +178,38 @@ class AppThemeController extends GetxController {
           ),
       // 自定义阴影
       shadowColor: Colors.black.withValues(alpha: 0.3),
+      // TextField 全局样式
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: const Color(0xFF2C2C2E),
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: BorderSide(
+            color: const Color(0xFF38383A).withValues(alpha: 0.2),
+            width: 1,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: BorderSide(
+            color: const Color(0xFF38383A).withValues(alpha: 0.2),
+            width: 1,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: const BorderSide(
+            color: Color(0xFFFF6B35),
+            width: 2,
+          ),
+        ),
+        hintStyle: TextStyle(
+          fontSize: 14.0,
+          color: Colors.white.withValues(alpha: 0.5),
+        ),
+      ),
     );
   }
 

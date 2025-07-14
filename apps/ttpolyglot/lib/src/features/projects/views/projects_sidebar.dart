@@ -4,8 +4,6 @@ import 'package:ttpolyglot/src/core/layout/utils/layout_breakpoints.dart';
 import 'package:ttpolyglot/src/features/projects/projects.dart';
 import 'package:ttpolyglot_core/core.dart';
 
-import '../controllers/projects_controller.dart';
-
 /// 项目侧边栏
 class ProjectsSidebar extends StatelessWidget {
   const ProjectsSidebar({super.key, this.delegate});
@@ -84,37 +82,10 @@ class ProjectsSidebar extends StatelessWidget {
                   ),
                   decoration: InputDecoration(
                     hintText: '搜索项目...',
-                    hintStyle: TextStyle(
-                      fontSize: 14.0,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-                    ),
                     prefixIcon: Icon(
                       Icons.search,
                       color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide: BorderSide(
-                        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-                        width: 1,
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide: BorderSide(
-                        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-                        width: 1,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide: BorderSide(
-                        color: Theme.of(context).colorScheme.primary,
-                        width: 2,
-                      ),
-                    ),
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 2.0),
                   ),
                 ),
               ),
@@ -123,7 +94,12 @@ class ProjectsSidebar extends StatelessWidget {
               color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4.0),
               child: InkWell(
-                onTap: () {},
+                onTap: () {
+                  Get.dialog(
+                    const CreateProjectDialog(),
+                    barrierDismissible: false,
+                  );
+                },
                 borderRadius: BorderRadius.circular(4.0),
                 child: Container(
                   padding: const EdgeInsets.all(8.0),

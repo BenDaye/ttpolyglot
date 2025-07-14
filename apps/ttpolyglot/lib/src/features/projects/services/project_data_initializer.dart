@@ -81,8 +81,8 @@ class ProjectDataInitializer {
   /// 创建预设的语言列表
   static List<Language> getPresetLanguages() {
     return [
-      Language(code: 'zh-CN', name: '中文（简体）', nativeName: '中文'),
-      Language(code: 'zh-TW', name: '中文（繁体）', nativeName: '中文'),
+      Language(code: 'zh-CN', name: '中文（简体）', nativeName: '简体中文'),
+      Language(code: 'zh-TW', name: '中文（繁体）', nativeName: '繁体中文'),
       Language(code: 'en-US', name: 'English (US)', nativeName: 'English'),
       Language(code: 'en-GB', name: 'English (UK)', nativeName: 'English'),
       Language(code: 'ja-JP', name: 'Japanese', nativeName: '日本語'),
@@ -116,7 +116,7 @@ class ProjectDataInitializer {
   /// 获取常用语言（用于快速选择）
   static List<Language> getCommonLanguages() {
     return [
-      Language(code: 'zh-CN', name: '中文（简体）', nativeName: '中文'),
+      Language(code: 'zh-CN', name: '中文（简体）', nativeName: '简体中文'),
       Language(code: 'en-US', name: 'English', nativeName: 'English'),
       Language(code: 'ja-JP', name: 'Japanese', nativeName: '日本語'),
       Language(code: 'ko-KR', name: 'Korean', nativeName: '한국어'),
