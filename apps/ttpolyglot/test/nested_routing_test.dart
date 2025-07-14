@@ -56,22 +56,22 @@ void main() {
       await tester.pumpAndSettle();
 
       // 验证初始路由
-      expect(Get.currentRoute, AppRouter.home);
+      expect(Get.currentRoute, MainRoute.home.fullPath);
 
       // 使用 Get.toNamed 导航到项目页面
-      Get.toNamed(AppRouter.projects);
+      Get.toNamed(MainRoute.projects.fullPath);
       await tester.pumpAndSettle();
 
       // 验证路由已切换
-      expect(Get.currentRoute, AppRouter.projects);
+      expect(Get.currentRoute, MainRoute.projects.fullPath);
       expect(find.text('暂无项目'), findsOneWidget);
 
       // 导航到设置页面
-      Get.toNamed(AppRouter.settings);
+      Get.toNamed(MainRoute.settings.fullPath);
       await tester.pumpAndSettle();
 
       // 验证路由已切换
-      expect(Get.currentRoute, AppRouter.settings);
+      expect(Get.currentRoute, MainRoute.settings.fullPath);
       expect(find.text('主题设置'), findsOneWidget);
     });
   });

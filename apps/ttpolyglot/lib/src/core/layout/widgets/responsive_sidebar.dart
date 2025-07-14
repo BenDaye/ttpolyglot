@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/core/routing/app_router.dart';
 
 import '../layout_controller.dart';
 import '../utils/layout_breakpoints.dart';
@@ -10,23 +11,16 @@ class ResponsiveSidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<LayoutController>(
-      builder: (controller) {
-        if (ResponsiveUtils.shouldShowPersistentSidebar(context)) {
-          // 桌面端和平板端：常驻侧边栏
-          return _buildPersistentSidebar(context);
-        } else {
-          // 移动端：抽屉式侧边栏
-          return _buildDrawerSidebar(context);
-        }
-      },
-    );
+    return ResponsiveUtils.shouldShowPersistentSidebar(context)
+        ? _buildPersistentSidebar(context)
+        : _buildDrawerSidebar(context);
   }
 
   /// 构建常驻侧边栏
   Widget _buildPersistentSidebar(BuildContext context) {
-    final isCompact = ResponsiveUtils.shouldShowCompactSidebar(context);
-    final width = ResponsiveUtils.getSidebarWidth(context);
+    // final isCompact = ResponsiveUtils.shouldShowCompactSidebar(context);
+    final isCompact = true;
+    final width = LayoutBreakpoints.compactSidebarWidth;
 
     return Container(
       width: width,
@@ -39,6 +33,7 @@ class ResponsiveSidebar extends StatelessWidget {
           ),
         ),
       ),
+      padding: const EdgeInsets.only(bottom: 8.0),
       child: Column(
         children: [
           // 应用头部
@@ -48,9 +43,6 @@ class ResponsiveSidebar extends StatelessWidget {
           Expanded(
             child: _buildNavigationMenu(context, isCompact),
           ),
-
-          // 底部信息
-          if (!isCompact) _buildBottomInfo(context),
         ],
       ),
     );
@@ -122,37 +114,44 @@ class ResponsiveSidebar extends StatelessWidget {
   Widget _buildNavigationMenu(BuildContext context, bool isCompact) {
     return GetBuilder<LayoutController>(
       builder: (controller) => Obx(
-        () => ListView(
-          padding: EdgeInsets.symmetric(
-            horizontal: isCompact ? 4 : 8,
-            vertical: 8,
-          ),
+        () => Column(
           children: [
-            _buildNavigationItem(
-              context: context,
-              icon: Icons.home_outlined,
-              activeIcon: Icons.home,
-              label: '首页',
-              route: '/home',
-              isCompact: isCompact,
-              isActive: controller.currentIndex == 0,
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isCompact ? 4.0 : 8.0,
+                  vertical: 8.0,
+                ),
+                children: [
+                  _buildNavigationItem(
+                    context: context,
+                    icon: Icons.home_outlined,
+                    activeIcon: Icons.home,
+                    label: '首页',
+                    route: MainRoute.home.fullPath,
+                    isCompact: isCompact,
+                    isActive: controller.currentIndex == 0,
+                  ),
+                  _buildNavigationItem(
+                    context: context,
+                    icon: Icons.folder_outlined,
+                    activeIcon: Icons.folder,
+                    label: '项目',
+                    route: MainRoute.projects.fullPath,
+                    isCompact: isCompact,
+                    badge: controller.projectsBadge.value,
+                    isActive: controller.currentIndex == 1,
+                  ),
+                ],
+              ),
             ),
-            _buildNavigationItem(
-              context: context,
-              icon: Icons.folder_outlined,
-              activeIcon: Icons.folder,
-              label: '项目',
-              route: '/projects',
-              isCompact: isCompact,
-              badge: controller.projectsBadge.value,
-              isActive: controller.currentIndex == 1,
-            ),
+            const SizedBox(height: 8.0),
             _buildNavigationItem(
               context: context,
               icon: Icons.settings_outlined,
               activeIcon: Icons.settings,
               label: '设置',
-              route: '/settings',
+              route: MainRoute.settings.fullPath,
               isCompact: isCompact,
               isActive: controller.currentIndex == 2,
             ),
@@ -174,27 +173,40 @@ class ResponsiveSidebar extends StatelessWidget {
     bool isActive = false,
   }) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 2),
+      margin: const EdgeInsets.symmetric(vertical: 2.0),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.0),
           onTap: () {
             // 使用 GetX 路由导航到子路由
-            Get.rootDelegate.offAndToNamed('/main$route');
+            Get.rootDelegate.offAndToNamed(route);
             if (ResponsiveUtils.isMobile(context)) {
               Navigator.of(context).pop();
             }
           },
           child: Container(
-            padding: EdgeInsets.all(isCompact ? 12 : 16),
+            padding: EdgeInsets.all(isCompact ? 12.0 : 16.0),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.0),
               color: isActive ? Theme.of(context).colorScheme.primaryContainer : null,
             ),
             child: isCompact
-                ? _buildCompactNavigationItem(context, icon, activeIcon, isActive, badge)
-                : _buildFullNavigationItem(context, icon, activeIcon, label, isActive, badge),
+                ? _buildCompactNavigationItem(
+                    context,
+                    icon,
+                    activeIcon,
+                    isActive,
+                    badge,
+                  )
+                : _buildFullNavigationItem(
+                    context,
+                    icon,
+                    activeIcon,
+                    label,
+                    isActive,
+                    badge,
+                  ),
           ),
         ),
       ),
@@ -210,6 +222,7 @@ class ResponsiveSidebar extends StatelessWidget {
     int? badge,
   ) {
     return Stack(
+      alignment: Alignment.center,
       children: [
         Icon(
           isActive ? activeIcon : icon,

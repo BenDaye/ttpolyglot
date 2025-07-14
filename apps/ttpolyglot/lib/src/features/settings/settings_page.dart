@@ -19,8 +19,10 @@ class _SettingsPageState extends State<SettingsPage> {
     super.initState();
     // 更新布局控制器
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final controller = Get.find<LayoutController>();
-      controller.updateLayoutForRoute(AppRouter.settings);
+      if (Get.isRegistered<LayoutController>()) {
+        final controller = Get.find<LayoutController>();
+        controller.updateLayoutForRoute(MainRoute.settings.fullPath);
+      }
     });
   }
 

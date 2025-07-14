@@ -1,8 +1,8 @@
 // 布局系统导出文件
-export 'base_page.dart';
+
+export 'layout_bindings.dart';
 export 'layout_config.dart';
 export 'layout_controller.dart';
-export 'layout_factory.dart';
 export 'utils/layout_breakpoints.dart';
 export 'widgets/app_bottom_nav.dart';
 export 'widgets/app_drawer.dart';

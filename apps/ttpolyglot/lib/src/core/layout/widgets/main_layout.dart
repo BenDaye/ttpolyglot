@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../layout_config.dart';
-import '../utils/layout_breakpoints.dart';
-import 'app_bottom_nav.dart';
-import 'responsive_sidebar.dart';
+import 'package:ttpolyglot/src/core/layout/layout.dart';
 
 /// 主应用布局
 class MainLayout extends StatelessWidget {
@@ -21,12 +18,7 @@ class MainLayout extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final shouldShowPersistentSidebar = ResponsiveUtils.shouldShowPersistentSidebar(context);
-
-        if (shouldShowPersistentSidebar) {
-          return _buildDesktopLayout(context);
-        } else {
-          return _buildMobileLayout(context);
-        }
+        return shouldShowPersistentSidebar ? _buildDesktopLayout(context) : _buildMobileLayout(context);
       },
     );
   }
@@ -137,12 +129,7 @@ class MainLayoutWithTabs extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final shouldShowPersistentSidebar = ResponsiveUtils.shouldShowPersistentSidebar(context);
-
-        if (shouldShowPersistentSidebar) {
-          return _buildDesktopLayout(context);
-        } else {
-          return _buildMobileLayout(context);
-        }
+        return shouldShowPersistentSidebar ? _buildDesktopLayout(context) : _buildMobileLayout(context);
       },
     );
   }

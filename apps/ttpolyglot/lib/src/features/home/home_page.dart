@@ -19,8 +19,10 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     // 更新布局控制器
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final controller = Get.find<LayoutController>();
-      controller.updateLayoutForRoute(AppRouter.home);
+      if (Get.isRegistered<LayoutController>()) {
+        final controller = Get.find<LayoutController>();
+        controller.updateLayoutForRoute(MainRoute.home.fullPath);
+      }
     });
   }
 
@@ -60,9 +62,6 @@ class _HomePageContentState extends State<HomePageContent> {
             const SizedBox(height: 16),
             _buildPlatformInfoCard(),
             const SizedBox(height: 16),
-            _buildFeaturesCard(),
-            const SizedBox(height: 16),
-            _buildActionsCard(),
           ],
         ),
       ),
@@ -133,91 +132,6 @@ class _HomePageContentState extends State<HomePageContent> {
     );
   }
 
-  Widget _buildFeaturesCard() {
-    final features = _platformAdapter.features;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.featured_play_list),
-                const SizedBox(width: 12),
-                Text(
-                  '平台功能',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _buildFeatureChip('文件系统', features.supportsFileSystem),
-                _buildFeatureChip('系统托盘', features.supportsSystemTray),
-                _buildFeatureChip('全局热键', features.supportsHotkeys),
-                _buildFeatureChip('文件监控', features.supportsFileWatcher),
-                _buildFeatureChip('窗口管理', features.supportsWindowManagement),
-                _buildFeatureChip('多窗口', features.supportsMultiWindow),
-                _buildFeatureChip('菜单栏', features.supportsMenuBar),
-                _buildFeatureChip('通知', features.supportsNotifications),
-                _buildFeatureChip('剪贴板', features.supportsClipboard),
-                _buildFeatureChip('开机自启', features.supportsAutoStart),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionsCard() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.dashboard),
-                const SizedBox(width: 12),
-                Text(
-                  '快速操作',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => Get.toNamed(AppRouter.projects),
-                    icon: const Icon(Icons.folder),
-                    label: const Text('项目管理'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => Get.toNamed(AppRouter.settings),
-                    icon: const Icon(Icons.settings),
-                    label: const Text('设置'),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildInfoRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -241,23 +155,6 @@ class _HomePageContentState extends State<HomePageContent> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildFeatureChip(String label, bool supported) {
-    return Chip(
-      label: Text(label),
-      backgroundColor: supported
-          ? Theme.of(context).colorScheme.primaryContainer
-          : Theme.of(context).colorScheme.surfaceContainerHighest,
-      labelStyle: TextStyle(
-        color: supported ? Theme.of(context).colorScheme.onPrimaryContainer : Theme.of(context).colorScheme.onSurface,
-      ),
-      avatar: Icon(
-        supported ? Icons.check_circle : Icons.cancel,
-        size: 16,
-        color: supported ? Theme.of(context).colorScheme.onPrimaryContainer : Theme.of(context).colorScheme.onSurface,
       ),
     );
   }

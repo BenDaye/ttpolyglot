@@ -27,11 +27,13 @@ class ProjectsController extends GetxController {
   final _projects = <ProjectModel>[].obs;
   final _isLoading = false.obs;
   final _searchQuery = ''.obs;
+  final _selectedProjectId = ''.obs;
 
   // Getters
   List<ProjectModel> get projects => _projects;
   bool get isLoading => _isLoading.value;
   String get searchQuery => _searchQuery.value;
+  String get selectedProjectId => _selectedProjectId.value;
 
   // 过滤后的项目列表
   List<ProjectModel> get filteredProjects {
@@ -143,5 +145,13 @@ class ProjectsController extends GetxController {
   /// 刷新项目列表
   Future<void> refreshProjects() async {
     await loadProjects();
+  }
+
+  /// 设置选中的项目ID
+  void setSelectedProjectId(String id) {
+    final project = _projects.firstWhereOrNull((project) => project.id == id);
+    if (project != null) {
+      _selectedProjectId.value = id;
+    }
   }
 }

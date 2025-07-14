@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../layout_config.dart';
+import 'package:ttpolyglot/src/core/layout/layout.dart';
 
 /// 认证布局（登录、注册等页面）
 class AuthLayout extends StatelessWidget {

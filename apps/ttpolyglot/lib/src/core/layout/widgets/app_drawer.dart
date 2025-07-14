@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../routing/app_router.dart';
+import 'package:ttpolyglot/src/core/routing/app_router.dart';
 
 /// 应用侧边栏
 class AppDrawer extends StatelessWidget {
@@ -24,19 +23,19 @@ class AppDrawer extends StatelessWidget {
                   context,
                   icon: Icons.home,
                   title: '首页',
-                  route: AppRouter.home,
+                  route: MainRoute.home.fullPath,
                 ),
                 _buildDrawerItem(
                   context,
                   icon: Icons.folder,
                   title: '项目管理',
-                  route: AppRouter.projects,
+                  route: MainRoute.projects.fullPath,
                 ),
                 _buildDrawerItem(
                   context,
                   icon: Icons.settings,
                   title: '设置',
-                  route: AppRouter.settings,
+                  route: MainRoute.settings.fullPath,
                 ),
                 const Divider(),
                 _buildDrawerItem(

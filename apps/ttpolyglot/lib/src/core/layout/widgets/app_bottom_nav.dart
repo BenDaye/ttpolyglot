@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../routing/app_router.dart';
+import 'package:ttpolyglot/src/core/routing/app_router.dart';
 
 /// 底部导航栏配置
 class BottomNavItem {
@@ -23,21 +22,21 @@ class AppBottomNav extends StatelessWidget {
   const AppBottomNav({super.key});
 
   /// 导航项配置
-  static const List<BottomNavItem> _navItems = [
+  static final List<BottomNavItem> _navItems = [
     BottomNavItem(
-      route: AppRouter.home,
+      route: MainRoute.home.fullPath,
       icon: Icons.home_outlined,
       activeIcon: Icons.home,
       label: '首页',
     ),
     BottomNavItem(
-      route: AppRouter.projects,
+      route: MainRoute.projects.fullPath,
       icon: Icons.folder_outlined,
       activeIcon: Icons.folder,
       label: '项目',
     ),
     BottomNavItem(
-      route: AppRouter.settings,
+      route: MainRoute.settings.fullPath,
       icon: Icons.settings_outlined,
       activeIcon: Icons.settings,
       label: '设置',

@@ -32,10 +32,10 @@ void main() {
 
     testWidgets('路由配置应该正确设置', (WidgetTester tester) async {
       // 验证路由常量
-      expect(AppRouter.home, equals('/main/home'));
-      expect(AppRouter.projects, equals('/main/projects'));
-      expect(AppRouter.settings, equals('/main/settings'));
-      expect(AppRouter.main, equals('/main'));
+      expect(MainRoute.home.fullPath, equals('/main/home'));
+      expect(MainRoute.projects.fullPath, equals('/main/projects'));
+      expect(MainRoute.settings.fullPath, equals('/main/settings'));
+      expect(RootRoute.main.path, equals('/main'));
     });
   });
 }

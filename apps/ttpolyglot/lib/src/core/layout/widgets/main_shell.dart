@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../routing/app_router.dart';
-import '../layout_controller.dart';
-import '../utils/layout_breakpoints.dart';
-import 'responsive_sidebar.dart';
+import 'package:ttpolyglot/src/core/layout/layout_controller.dart';
+import 'package:ttpolyglot/src/core/layout/utils/layout_breakpoints.dart';
+import 'package:ttpolyglot/src/core/layout/widgets/responsive_sidebar.dart';
+import 'package:ttpolyglot/src/core/routing/app_router.dart';
 
 /// 主布局 Shell - 包含侧边栏和子路由出口
 class MainShell extends StatelessWidget {
@@ -12,11 +11,6 @@ class MainShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 确保布局控制器已初始化
-    if (!Get.isRegistered<LayoutController>()) {
-      Get.put(LayoutController(), permanent: true);
-    }
-
     return LayoutBuilder(
       builder: (context, constraints) {
         final shouldShowPersistentSidebar = ResponsiveUtils.shouldShowPersistentSidebar(context);
@@ -41,7 +35,7 @@ class MainShell extends StatelessWidget {
           // 主内容区域 - 使用 GetRouterOutlet 作为子路由出口
           Expanded(
             child: GetRouterOutlet(
-              initialRoute: AppRouter.home,
+              initialRoute: MainRoute.home.fullPath,
               delegate: Get.rootDelegate,
             ),
           ),
@@ -55,13 +49,14 @@ class MainShell extends StatelessWidget {
     return Scaffold(
       drawer: const ResponsiveSidebar(),
       appBar: AppBar(
-        title: Obx(() {
-          final controller = Get.find<LayoutController>();
-          return Text(controller.pageTitle);
-        }),
+        title: GetBuilder<LayoutController>(
+          builder: (controller) => Obx(
+            () => Text(controller.pageTitle),
+          ),
+        ),
       ),
       body: GetRouterOutlet(
-        initialRoute: AppRouter.home,
+        initialRoute: MainRoute.home.fullPath,
         delegate: Get.rootDelegate,
       ),
     );

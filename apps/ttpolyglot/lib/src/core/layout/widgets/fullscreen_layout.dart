@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../layout_config.dart';
+import 'package:ttpolyglot/src/core/layout/layout.dart';
 
 /// 全屏布局（欢迎页、引导页等）
 class FullscreenLayout extends StatelessWidget {
