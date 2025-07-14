@@ -7,8 +7,10 @@ import 'web_storage_service.dart';
 /// 存储提供者
 class StorageProvider {
   static StorageProvider? _instance;
-  late final StorageService _storageService;
+  StorageService? _storageService;
   late final PlatformAdapter _platformAdapter;
+  bool _isInitialized = false;
+  bool _isInitializing = false;
 
   StorageProvider._internal() {
     _platformAdapter = PlatformAdapter();
@@ -20,13 +22,36 @@ class StorageProvider {
 
   /// 初始化存储服务
   Future<void> initialize() async {
-    _storageService = _createStorageService();
+    if (_isInitialized) {
+      return; // 已经初始化过了，直接返回
+    }
 
-    // 如果是具体的存储服务，进行初始化
-    if (_storageService is FileSystemStorageServiceImpl) {
-      await (_storageService).initialize();
-    } else if (_storageService is WebStorageServiceImpl) {
-      await (_storageService).initialize();
+    if (_isInitializing) {
+      // 正在初始化，等待完成
+      while (_isInitializing) {
+        await Future.delayed(const Duration(milliseconds: 50));
+      }
+      return;
+    }
+
+    _isInitializing = true;
+
+    try {
+      _storageService = _createStorageService();
+
+      // 如果是具体的存储服务，进行初始化
+      if (_storageService is FileSystemStorageServiceImpl) {
+        await (_storageService as FileSystemStorageServiceImpl).initialize();
+      } else if (_storageService is WebStorageServiceImpl) {
+        await (_storageService as WebStorageServiceImpl).initialize();
+      }
+
+      _isInitialized = true;
+    } catch (e) {
+      _isInitialized = false;
+      rethrow;
+    } finally {
+      _isInitializing = false;
     }
   }
 
@@ -46,7 +71,7 @@ class StorageProvider {
   }
 
   /// 获取存储服务
-  StorageService get storageService => _storageService;
+  StorageService get storageService => _storageService!;
 
   /// 获取当前平台
   PlatformType get currentPlatform => _platformAdapter.currentPlatform;

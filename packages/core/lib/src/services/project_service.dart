@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import '../models/language.dart';
 import '../models/project.dart';
 import '../models/user.dart';
@@ -76,6 +78,21 @@ abstract class ProjectService {
 
   /// 导入项目配置
   Future<Project> importProjectConfig(Map<String, dynamic> config);
+
+  /// 获取支持的语言列表
+  Future<List<Language>> getSupportedLanguages();
+
+  /// 搜索支持的语言
+  Future<List<Language>> searchSupportedLanguages(String query);
+
+  /// 获取按语言分组的支持语言列表
+  Future<Map<String, List<Language>>> getSupportedLanguagesByGroup();
+
+  /// 验证语言是否支持
+  Future<bool> validateLanguageSupport(String languageCode);
+
+  /// 验证多个语言是否都支持
+  Future<Map<String, bool>> validateMultipleLanguagesSupport(List<String> languageCodes);
 }
 
 /// 创建项目请求
@@ -95,6 +112,72 @@ class CreateProjectRequest {
   final List<Language> targetLanguages;
   final String ownerId;
   final bool isActive;
+
+  /// 验证请求数据
+  List<String> validate() {
+    try {
+      final errors = <String>[];
+
+      // 验证项目名称
+      if (name.trim().isEmpty) {
+        errors.add('项目名称不能为空');
+      }
+
+      // 验证项目描述
+      if (description.trim().isEmpty) {
+        errors.add('项目描述不能为空');
+      }
+
+      // 验证默认语言
+      if (!Language.isValidLanguageCode(defaultLanguage.code)) {
+        errors.add('默认语言代码格式错误: ${defaultLanguage.code}');
+      }
+
+      if (!Language.isLanguageSupported(defaultLanguage.code)) {
+        errors.add('不支持的默认语言: ${defaultLanguage.code}');
+      }
+
+      // 验证目标语言
+      if (targetLanguages.isEmpty) {
+        errors.add('至少需要选择一个目标语言');
+      }
+
+      for (final language in targetLanguages) {
+        if (!Language.isValidLanguageCode(language.code)) {
+          errors.add('目标语言代码格式错误: ${language.code}');
+        }
+
+        if (!Language.isLanguageSupported(language.code)) {
+          errors.add('不支持的目标语言: ${language.code}');
+        }
+      }
+
+      // 验证默认语言不能在目标语言中
+      if (targetLanguages.any((lang) => lang.code == defaultLanguage.code)) {
+        errors.add('默认语言不能同时作为目标语言');
+      }
+
+      // 验证目标语言不能重复
+      final targetLanguageCodes = targetLanguages.map((lang) => lang.code).toList();
+      final uniqueCodes = targetLanguageCodes.toSet();
+      if (targetLanguageCodes.length != uniqueCodes.length) {
+        errors.add('目标语言不能重复');
+      }
+
+      // 验证所有者ID
+      if (ownerId.trim().isEmpty) {
+        errors.add('项目所有者ID不能为空');
+      }
+
+      return errors;
+    } catch (error, stackTrace) {
+      developer.log('CreateProjectRequest.validate', error: error, stackTrace: stackTrace);
+      return ['验证项目请求时发生错误'];
+    }
+  }
+
+  /// 检查请求是否有效
+  bool get isValid => validate().isEmpty;
 }
 
 /// 更新项目请求
@@ -112,6 +195,71 @@ class UpdateProjectRequest {
   final Language? defaultLanguage;
   final List<Language>? targetLanguages;
   final bool? isActive;
+
+  /// 验证请求数据
+  List<String> validate() {
+    try {
+      final errors = <String>[];
+
+      // 验证项目名称
+      if (name != null && name!.trim().isEmpty) {
+        errors.add('项目名称不能为空');
+      }
+
+      // 验证项目描述
+      if (description != null && description!.trim().isEmpty) {
+        errors.add('项目描述不能为空');
+      }
+
+      // 验证默认语言
+      if (defaultLanguage != null) {
+        if (!Language.isValidLanguageCode(defaultLanguage!.code)) {
+          errors.add('默认语言代码格式错误: ${defaultLanguage!.code}');
+        }
+
+        if (!Language.isLanguageSupported(defaultLanguage!.code)) {
+          errors.add('不支持的默认语言: ${defaultLanguage!.code}');
+        }
+      }
+
+      // 验证目标语言
+      if (targetLanguages != null) {
+        if (targetLanguages!.isEmpty) {
+          errors.add('至少需要选择一个目标语言');
+        }
+
+        for (final language in targetLanguages!) {
+          if (!Language.isValidLanguageCode(language.code)) {
+            errors.add('目标语言代码格式错误: ${language.code}');
+          }
+
+          if (!Language.isLanguageSupported(language.code)) {
+            errors.add('不支持的目标语言: ${language.code}');
+          }
+        }
+
+        // 验证默认语言不能在目标语言中（如果同时提供了默认语言）
+        if (defaultLanguage != null && targetLanguages!.any((lang) => lang.code == defaultLanguage!.code)) {
+          errors.add('默认语言不能同时作为目标语言');
+        }
+
+        // 验证目标语言不能重复
+        final targetLanguageCodes = targetLanguages!.map((lang) => lang.code).toList();
+        final uniqueCodes = targetLanguageCodes.toSet();
+        if (targetLanguageCodes.length != uniqueCodes.length) {
+          errors.add('目标语言不能重复');
+        }
+      }
+
+      return errors;
+    } catch (error, stackTrace) {
+      developer.log('UpdateProjectRequest.validate', error: error, stackTrace: stackTrace);
+      return ['验证项目更新请求时发生错误'];
+    }
+  }
+
+  /// 检查请求是否有效
+  bool get isValid => validate().isEmpty;
 }
 
 /// 项目统计信息
@@ -136,6 +284,7 @@ class ProjectStats {
   final int memberCount;
   final DateTime lastUpdated;
 
+  /// 转换为 JSON
   Map<String, dynamic> toJson() {
     return {
       'totalEntries': totalEntries,
@@ -149,6 +298,7 @@ class ProjectStats {
     };
   }
 
+  /// 从 JSON 创建
   factory ProjectStats.fromJson(Map<String, dynamic> json) {
     return ProjectStats(
       totalEntries: json['totalEntries'] as int,
@@ -166,102 +316,29 @@ class ProjectStats {
 /// 项目权限
 class ProjectPermission {
   const ProjectPermission({
-    required this.userId,
-    required this.projectId,
-    required this.role,
     required this.canRead,
     required this.canWrite,
+    required this.canManage,
     required this.canDelete,
-    required this.canManageMembers,
   });
 
-  final String userId;
-  final String projectId;
-  final ProjectRole role;
   final bool canRead;
   final bool canWrite;
+  final bool canManage;
   final bool canDelete;
-  final bool canManageMembers;
-
-  Map<String, dynamic> toJson() {
-    return {
-      'userId': userId,
-      'projectId': projectId,
-      'role': role.name,
-      'canRead': canRead,
-      'canWrite': canWrite,
-      'canDelete': canDelete,
-      'canManageMembers': canManageMembers,
-    };
-  }
-
-  factory ProjectPermission.fromJson(Map<String, dynamic> json) {
-    return ProjectPermission(
-      userId: json['userId'] as String,
-      projectId: json['projectId'] as String,
-      role: ProjectRole.values.byName(json['role'] as String),
-      canRead: json['canRead'] as bool,
-      canWrite: json['canWrite'] as bool,
-      canDelete: json['canDelete'] as bool,
-      canManageMembers: json['canManageMembers'] as bool,
-    );
-  }
 }
 
-/// 项目成员
-class ProjectMember {
-  const ProjectMember({
-    required this.user,
-    required this.role,
-    required this.joinedAt,
-    this.lastActiveAt,
-  });
-
-  final User user;
-  final ProjectRole role;
-  final DateTime joinedAt;
-  final DateTime? lastActiveAt;
-
-  Map<String, dynamic> toJson() {
-    return {
-      'user': user.toJson(),
-      'role': role.name,
-      'joinedAt': joinedAt.toIso8601String(),
-      'lastActiveAt': lastActiveAt?.toIso8601String(),
-    };
-  }
-
-  factory ProjectMember.fromJson(Map<String, dynamic> json) {
-    return ProjectMember(
-      user: User.fromJson(json['user'] as Map<String, dynamic>),
-      role: ProjectRole.values.byName(json['role'] as String),
-      joinedAt: DateTime.parse(json['joinedAt'] as String),
-      lastActiveAt: json['lastActiveAt'] != null ? DateTime.parse(json['lastActiveAt'] as String) : null,
-    );
-  }
-}
-
-/// 项目角色枚举
+/// 项目角色
 enum ProjectRole {
-  /// 项目所有者
   owner,
-
-  /// 项目管理员
   admin,
-
-  /// 翻译员
   translator,
-
-  /// 审核员
   reviewer,
-
-  /// 只读成员
   viewer,
 }
 
 /// 项目角色扩展
 extension ProjectRoleExtension on ProjectRole {
-  /// 获取角色的中文显示名称
   String get displayName {
     switch (this) {
       case ProjectRole.owner:
@@ -273,41 +350,37 @@ extension ProjectRoleExtension on ProjectRole {
       case ProjectRole.reviewer:
         return '审核员';
       case ProjectRole.viewer:
-        return '只读成员';
+        return '查看者';
     }
   }
 
-  /// 获取角色权限级别
-  int get level {
-    switch (this) {
-      case ProjectRole.owner:
-        return 100;
-      case ProjectRole.admin:
-        return 80;
-      case ProjectRole.translator:
-        return 60;
-      case ProjectRole.reviewer:
-        return 40;
-      case ProjectRole.viewer:
-        return 20;
-    }
-  }
-
-  /// 是否可以读取
   bool get canRead => true;
 
-  /// 是否可以写入
-  bool get canWrite => level >= ProjectRole.translator.level;
+  bool get canWrite {
+    return this == ProjectRole.owner ||
+        this == ProjectRole.admin ||
+        this == ProjectRole.translator ||
+        this == ProjectRole.reviewer;
+  }
 
-  /// 是否可以删除
-  bool get canDelete => level >= ProjectRole.admin.level;
+  bool get canManage {
+    return this == ProjectRole.owner || this == ProjectRole.admin;
+  }
 
-  /// 是否可以管理成员
-  bool get canManageMembers => level >= ProjectRole.admin.level;
+  bool get canDelete {
+    return this == ProjectRole.owner;
+  }
+}
 
-  /// 是否可以管理项目设置
-  bool get canManageProject => level >= ProjectRole.admin.level;
+/// 项目成员
+class ProjectMember {
+  const ProjectMember({
+    required this.user,
+    required this.role,
+    required this.joinedAt,
+  });
 
-  /// 是否可以删除项目
-  bool get canDeleteProject => this == ProjectRole.owner;
+  final User user;
+  final ProjectRole role;
+  final DateTime joinedAt;
 }

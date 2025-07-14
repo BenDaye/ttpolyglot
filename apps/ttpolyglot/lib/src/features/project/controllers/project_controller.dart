@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:get/get.dart';
 
 class ProjectController extends GetxController {
@@ -12,11 +14,6 @@ class ProjectController extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    print('ProjectController onReady: $projectId');
-  }
-
-  @override
-  void onClose() {
-    super.onClose();
+    log('ProjectController onReady: $projectId');
   }
 }

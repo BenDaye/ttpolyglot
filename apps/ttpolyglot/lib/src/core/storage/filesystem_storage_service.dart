@@ -1,4 +1,4 @@
- import 'dart:convert';
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
@@ -11,7 +11,7 @@ class FileSystemStorageServiceImpl extends FileSystemStorageService {
   late final Directory _rootDirectory;
   late final Directory _configDirectory;
   late final Directory _projectsDirectory;
-  
+
   bool _initialized = false;
 
   /// 初始化存储服务
@@ -35,7 +35,7 @@ class FileSystemStorageServiceImpl extends FileSystemStorageService {
   @override
   Future<void> write(String key, String data) async {
     await _ensureInitialized();
-    
+
     final file = await _getFileForKey(key);
     await file.parent.create(recursive: true);
     await file.writeAsString(data, encoding: utf8);
@@ -44,10 +44,10 @@ class FileSystemStorageServiceImpl extends FileSystemStorageService {
   @override
   Future<String?> read(String key) async {
     await _ensureInitialized();
-    
+
     final file = await _getFileForKey(key);
     if (!await file.exists()) return null;
-    
+
     try {
       return await file.readAsString(encoding: utf8);
     } catch (e, stackTrace) {
@@ -59,7 +59,7 @@ class FileSystemStorageServiceImpl extends FileSystemStorageService {
   @override
   Future<void> delete(String key) async {
     await _ensureInitialized();
-    
+
     final file = await _getFileForKey(key);
     if (await file.exists()) {
       await file.delete();
@@ -69,29 +69,29 @@ class FileSystemStorageServiceImpl extends FileSystemStorageService {
   @override
   Future<List<String>> listKeys(String prefix) async {
     await _ensureInitialized();
-    
+
     final keys = <String>[];
-    
+
     // 递归遍历目录
     await for (final entity in _rootDirectory.list(recursive: true)) {
       if (entity is File) {
         final relativePath = path.relative(entity.path, from: _rootDirectory.path);
         final key = relativePath.replaceAll(path.separator, '.');
         final keyWithoutExtension = key.replaceAll('.json', '');
-        
+
         if (keyWithoutExtension.startsWith(prefix)) {
           keys.add(keyWithoutExtension);
         }
       }
     }
-    
+
     return keys;
   }
 
   @override
   Future<bool> exists(String key) async {
     await _ensureInitialized();
-    
+
     final file = await _getFileForKey(key);
     return await file.exists();
   }
@@ -99,7 +99,7 @@ class FileSystemStorageServiceImpl extends FileSystemStorageService {
   @override
   Future<void> clear() async {
     await _ensureInitialized();
-    
+
     if (await _rootDirectory.exists()) {
       await _rootDirectory.delete(recursive: true);
       await initialize(); // 重新初始化
@@ -109,7 +109,7 @@ class FileSystemStorageServiceImpl extends FileSystemStorageService {
   @override
   Future<int> getSize() async {
     await _ensureInitialized();
-    
+
     int totalSize = 0;
     await for (final entity in _rootDirectory.list(recursive: true)) {
       if (entity is File) {
@@ -117,31 +117,31 @@ class FileSystemStorageServiceImpl extends FileSystemStorageService {
         totalSize += stat.size;
       }
     }
-    
+
     return totalSize;
   }
 
   @override
   Future<Map<String, String>> exportData() async {
     await _ensureInitialized();
-    
+
     final data = <String, String>{};
     final keys = await listKeys('');
-    
+
     for (final key in keys) {
       final value = await read(key);
       if (value != null) {
         data[key] = value;
       }
     }
-    
+
     return data;
   }
 
   @override
   Future<void> importData(Map<String, String> data) async {
     await _ensureInitialized();
-    
+
     for (final entry in data.entries) {
       await write(entry.key, entry.value);
     }
@@ -187,7 +187,7 @@ class FileSystemStorageServiceImpl extends FileSystemStorageService {
     final segments = key.split('.');
     final fileName = '${segments.last}.json';
     final dirSegments = segments.sublist(0, segments.length - 1);
-    
+
     String filePath;
     if (dirSegments.isEmpty) {
       filePath = path.join(_rootDirectory.path, fileName);
@@ -195,7 +195,7 @@ class FileSystemStorageServiceImpl extends FileSystemStorageService {
       final dirPath = path.join(_rootDirectory.path, dirSegments.join(path.separator));
       filePath = path.join(dirPath, fileName);
     }
-    
+
     return File(filePath);
   }
 }

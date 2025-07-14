@@ -6,20 +6,68 @@ void main() {
 
   // 创建语言实例
   final english = Language(
-    code: 'en',
-    name: 'English',
-    nativeName: 'English',
+    code: 'en-US',
+    name: 'English (United States)',
+    nativeName: 'English (United States)',
   );
 
   final chinese = Language(
     code: 'zh-CN',
-    name: 'Chinese',
-    nativeName: '中文',
+    name: 'Chinese (Simplified)',
+    nativeName: '中文（简体）',
   );
 
   print('\n1. 语言管理:');
   print('- $english');
   print('- $chinese');
+
+  // 展示支持的语言列表功能
+  print('\n2. 支持的语言列表:');
+  print('总共支持 ${Language.supportedLanguages.length} 种语言');
+
+  // 显示前 10 种支持的语言
+  print('前 10 种支持的语言:');
+  for (int i = 0; i < 10 && i < Language.supportedLanguages.length; i++) {
+    final lang = Language.supportedLanguages[i];
+    print('  ${i + 1}. ${lang.code} - ${lang.name} (${lang.nativeName})');
+  }
+
+  // 测试语言代码验证
+  print('\n3. 语言代码验证:');
+  final testCodes = ['en-US', 'zh-CN', 'en', 'zh', 'fr-FR', 'invalid'];
+  for (final code in testCodes) {
+    final isValid = Language.isValidLanguageCode(code);
+    final isSupported = Language.isLanguageSupported(code);
+    print('  $code: 格式${isValid ? '正确' : '错误'}, ${isSupported ? '支持' : '不支持'}');
+  }
+
+  // 测试语言搜索
+  print('\n4. 语言搜索:');
+  final searchResults = Language.searchSupportedLanguages('Chinese');
+  print('搜索 "Chinese" 的结果:');
+  for (final lang in searchResults) {
+    print('  - ${lang.code}: ${lang.name}');
+  }
+
+  // 测试按语言分组
+  print('\n5. 按语言分组:');
+  final groupedLanguages = Language.supportedLanguagesByGroup;
+  print('支持的语言组数量: ${groupedLanguages.length}');
+
+  // 显示中文和英文的变体
+  if (groupedLanguages.containsKey('zh')) {
+    print('中文变体:');
+    for (final lang in groupedLanguages['zh']!) {
+      print('  - ${lang.code}: ${lang.nativeName}');
+    }
+  }
+
+  if (groupedLanguages.containsKey('en')) {
+    print('英文变体:');
+    for (final lang in groupedLanguages['en']!) {
+      print('  - ${lang.code}: ${lang.name}');
+    }
+  }
 
   // 创建用户实例
   final user = User(
@@ -31,7 +79,7 @@ void main() {
     updatedAt: DateTime.now(),
   );
 
-  print('\n2. 用户管理:');
+  print('\n6. 用户管理:');
   print('User: $user');
   print('Can manage project: ${user.role.canManageProject}');
   print('Can translate: ${user.role.canTranslate}');
@@ -58,7 +106,7 @@ void main() {
     settings: projectSettings,
   );
 
-  print('\n3. 项目管理:');
+  print('\n7. 项目管理:');
   print('Project: ${project.name}');
   print('Languages: ${project.allLanguages.map((l) => l.code).join(', ')}');
   print('Settings: Auto-sync: ${project.settings?.autoSync}, Max key length: ${project.settings?.maxKeyLength}');
@@ -70,13 +118,13 @@ void main() {
     joinedAt: DateTime.now(),
   );
 
-  print('\n4. 项目成员管理:');
+  print('\n8. 项目成员管理:');
   print('Member: ${projectMember.user.name} (${projectMember.role.displayName})');
   print('Permissions: Read: ${projectMember.role.canRead}, Write: ${projectMember.role.canWrite}');
 
   // 创建工作空间配置
   final workspacePreferences = WorkspacePreferences(
-    defaultLanguage: 'en',
+    defaultLanguage: 'en-US',
     theme: 'auto',
     autoSync: true,
     maxRecentProjects: 5,
@@ -92,7 +140,7 @@ void main() {
     updatedAt: DateTime.now(),
   );
 
-  print('\n5. 工作空间管理:');
+  print('\n9. 工作空间管理:');
   print('Version: ${workspaceConfig.version}');
   print('Current project: ${workspaceConfig.currentProjectId}');
   print('Recent projects: ${workspaceConfig.recentProjects.length}');
@@ -106,7 +154,7 @@ void main() {
     lastAccessed: DateTime.now(),
   );
 
-  print('\n6. 项目引用:');
+  print('\n10. 项目引用:');
   print('Reference: ${projectReference.name} at ${projectReference.path}');
 
   // 创建翻译条目
@@ -123,14 +171,14 @@ void main() {
     updatedAt: DateTime.now(),
   );
 
-  print('\n7. 翻译条目管理:');
+  print('\n11. 翻译条目管理:');
   print('Entry: ${entry.key}');
   print('Status: ${entry.status.displayName}');
   print('Is editable: ${entry.status.isEditable}');
 
   // 使用工具类
   final (namespace, key) = TranslationUtils.parseKey('hello.world');
-  print('\n8. 工具类功能:');
+  print('\n12. 工具类功能:');
   print('Parsed key:');
   print('- Namespace: $namespace');
   print('- Key: $key');
@@ -139,22 +187,9 @@ void main() {
   print('- Placeholders: $placeholders');
 
   // 项目统计示例
-  final projectStats = ProjectStats(
-    totalEntries: 100,
-    completedEntries: 80,
-    pendingEntries: 15,
-    reviewingEntries: 5,
-    completionRate: 0.8,
-    languageCount: 2,
-    memberCount: 3,
-    lastUpdated: DateTime.now(),
-  );
-
-  print('\n9. 项目统计:');
-  print('Total entries: ${projectStats.totalEntries}');
-  print('Completion rate: ${(projectStats.completionRate * 100).toStringAsFixed(1)}%');
-  print('Languages: ${projectStats.languageCount}');
-  print('Members: ${projectStats.memberCount}');
-
-  print('\n✅ 多项目管理功能演示完成！');
+  print('\n13. 项目统计:');
+  final stats = TranslationUtils.generateStatistics([entry]);
+  print('Total entries: ${stats['total']}');
+  print('Completed: ${stats['completed']}');
+  print('Completion rate: ${(stats['completionRate'] * 100).toStringAsFixed(1)}%');
 }

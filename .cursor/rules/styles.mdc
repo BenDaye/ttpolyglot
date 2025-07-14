@@ -1,0 +1,6 @@
+---
+alwaysApply: true
+---
+
+1. 我希望用 dart:developer 的 log 来替代 print 输出日志
+2. try catch 的代码，要catch 的是 error 和 stackTrace，并输出 log('[函数名称]', error: error, stackTrace: stackTrace);

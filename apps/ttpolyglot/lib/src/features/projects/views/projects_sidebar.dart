@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/layout/utils/layout_breakpoints.dart';
 import 'package:ttpolyglot/src/features/projects/projects.dart';
+import 'package:ttpolyglot_core/core.dart';
 
+import '../controllers/projects_controller.dart';
+
+/// 项目侧边栏
 class ProjectsSidebar extends StatelessWidget {
   const ProjectsSidebar({super.key, this.delegate});
 
@@ -192,10 +196,10 @@ class ProjectsSidebar extends StatelessWidget {
   }
 
   Widget _buildProjectCard(
-    ProjectModel project, {
+    Project project, {
     required BuildContext context,
     GetDelegate? delegate,
-    required Function(ProjectModel) onTap,
+    required Function(Project) onTap,
     bool isSelected = false,
   }) {
     return Card(
@@ -232,7 +236,7 @@ class ProjectsSidebar extends StatelessWidget {
                 Icon(Icons.translate, size: 16, color: Colors.grey[600]),
                 const SizedBox(width: 4),
                 Text(
-                  '${project.translationCount} 条翻译',
+                  '0 条翻译', // 暂时硬编码，后续可以从统计信息获取
                   style: TextStyle(color: Colors.grey[600], fontSize: 12),
                 ),
               ],
@@ -242,7 +246,7 @@ class ProjectsSidebar extends StatelessWidget {
                 Icon(Icons.language, size: 16, color: Colors.grey[600]),
                 const SizedBox(width: 4),
                 Text(
-                  '${project.languages.length} 种语言',
+                  '${project.allLanguages.length} 种语言',
                   style: TextStyle(color: Colors.grey[600], fontSize: 12),
                 ),
               ],
