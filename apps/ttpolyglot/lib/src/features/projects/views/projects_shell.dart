@@ -49,7 +49,8 @@ class _ProjectsShellState extends State<ProjectsShell> {
             builder: (controller) => Obx(
               () {
                 if (controller.selectedProjectId.isEmpty) {
-                  return Placeholder(
+                  return Container(
+                    color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
                     child: Center(
                       child: Text('No project selected'),
                     ),

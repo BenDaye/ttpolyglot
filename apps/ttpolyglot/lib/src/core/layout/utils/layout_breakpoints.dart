@@ -15,7 +15,7 @@ class LayoutBreakpoints {
   static const double sidebarWidth = 280;
 
   /// 紧凑侧边栏宽度（仅图标）
-  static const double compactSidebarWidth = 72;
+  static const double compactSidebarWidth = 64;
 }
 
 /// 屏幕类型枚举

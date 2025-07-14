@@ -38,8 +38,8 @@ Future<void> _initializeDesktop() async {
 
   // 设置窗口选项
   final windowOptions = WindowOptions(
-    size: const ui.Size(1680, 1050),
-    minimumSize: const ui.Size(1280, 720),
+    size: const ui.Size(1680, 720),
+    minimumSize: const ui.Size(1280, 640),
     center: true,
     backgroundColor: Colors.transparent,
     skipTaskbar: false,

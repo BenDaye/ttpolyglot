@@ -65,15 +65,73 @@ class ProjectsSidebar extends StatelessWidget {
   }) {
     return GetBuilder<ProjectsController>(
       builder: (controller) => Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: TextField(
-          onChanged: controller.searchProjects,
-          decoration: const InputDecoration(
-            hintText: '搜索项目...',
-            prefixIcon: Icon(Icons.search),
-            border: OutlineInputBorder(),
-            isDense: true,
-          ),
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+        child: Row(
+          spacing: 8.0,
+          children: [
+            Expanded(
+              child: SizedBox(
+                height: 36.0,
+                child: TextField(
+                  onChanged: controller.searchProjects,
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: '搜索项目...',
+                    hintStyle: TextStyle(
+                      fontSize: 14.0,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                        width: 1,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                        width: 1,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2,
+                      ),
+                    ),
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 2.0),
+                  ),
+                ),
+              ),
+            ),
+            Material(
+              color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(4.0),
+              child: InkWell(
+                onTap: () {},
+                borderRadius: BorderRadius.circular(4.0),
+                child: Container(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(
+                    Icons.add,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -149,8 +207,14 @@ class ProjectsSidebar extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
         dense: true,
         selected: isSelected,
-        leading: const CircleAvatar(
-          child: Icon(Icons.folder),
+        leading: Container(
+          width: 40.0,
+          height: 40.0,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(4.0),
+          ),
+          child: Icon(Icons.folder, color: Theme.of(context).colorScheme.primary),
         ),
         title: Text(
           '${project.name} - ${project.description}',

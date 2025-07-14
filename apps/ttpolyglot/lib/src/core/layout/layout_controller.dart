@@ -21,6 +21,9 @@ class LayoutController extends GetxController {
   // 项目徽章数量
   final _projectsBadge = 0.obs;
 
+  // 未读通知状态
+  final _hasUnreadNotifications = false.obs;
+
   // Getters
   int get currentIndex => _currentIndex.value;
   bool get isDrawerOpen => _isDrawerOpen.value;
@@ -28,6 +31,7 @@ class LayoutController extends GetxController {
   String get pageTitle => _pageTitle.value;
   Map<String, String> get badges => _badges;
   Rx<int> get projectsBadge => _projectsBadge;
+  Rx<bool> get hasUnreadNotifications => _hasUnreadNotifications;
 
   // 底部导航项配置
   final List<BottomNavConfig> navItems = [
@@ -133,6 +137,16 @@ class LayoutController extends GetxController {
   /// 清除项目徽章
   void clearProjectsBadge() {
     _projectsBadge.value = 0;
+  }
+
+  /// 设置未读通知状态
+  void setUnreadNotifications(bool hasUnread) {
+    _hasUnreadNotifications.value = hasUnread;
+  }
+
+  /// 清除未读通知
+  void clearUnreadNotifications() {
+    _hasUnreadNotifications.value = false;
   }
 
   /// 获取路由对应的配置
