@@ -4,7 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 
 import 'core/layout/layout_controller.dart';
-import 'core/routing/app_router.dart';
+import 'core/routing/app_pages.dart';
 import 'core/theme/app_theme.dart';
 
 class TTPolyglotApp extends StatelessWidget {
@@ -21,9 +21,9 @@ class TTPolyglotApp extends StatelessWidget {
       theme: themeController.lightTheme,
       darkTheme: themeController.darkTheme,
       themeMode: themeController.themeMode,
-      initialRoute: AppRouter.initialRoute,
-      getPages: AppRouter.routes,
-      unknownRoute: AppRouter.unknownRoute,
+      initialRoute: AppPages.initial,
+      getPages: AppPages.pages,
+      unknownRoute: AppPages.unknownRoute,
       debugShowCheckedModeBanner: kDebugMode,
       locale: Get.deviceLocale,
       fallbackLocale: const Locale('zh', 'CN'),

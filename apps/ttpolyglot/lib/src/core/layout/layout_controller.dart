@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
-
-import 'package:ttpolyglot/src/core/routing/app_router.dart';
+import 'package:ttpolyglot/src/core/routing/app_pages.dart';
 
 /// 布局控制器
 class LayoutController extends GetxController {
@@ -33,19 +32,19 @@ class LayoutController extends GetxController {
   // 底部导航项配置
   final List<BottomNavConfig> navItems = [
     BottomNavConfig(
-      route: MainRoute.home.fullPath,
+      route: Routes.dashboard,
       index: 0,
       title: '首页',
       showFab: false,
     ),
     BottomNavConfig(
-      route: MainRoute.projects.fullPath,
+      route: Routes.projects,
       index: 1,
       title: '项目管理',
       showFab: true,
     ),
     BottomNavConfig(
-      route: MainRoute.settings.fullPath,
+      route: Routes.settings,
       index: 2,
       title: '设置',
       showFab: false,

@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../core/layout/layout_controller.dart';
-import '../../core/routing/app_router.dart';
-import '../../core/theme/app_theme.dart';
-import 'settings_controller.dart';
+import '../../../core/layout/layout_controller.dart';
+import '../../../core/routing/app_pages.dart';
+import '../../../core/theme/app_theme.dart';
+import '../controllers/settings_controller.dart';
 
-class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+class SettingsView extends StatefulWidget {
+  const SettingsView({super.key});
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
+  State<SettingsView> createState() => _SettingsViewState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class _SettingsViewState extends State<SettingsView> {
   @override
   void initState() {
     super.initState();
@@ -21,29 +21,29 @@ class _SettingsPageState extends State<SettingsPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.isRegistered<LayoutController>()) {
         final controller = Get.find<LayoutController>();
-        controller.updateLayoutForRoute(MainRoute.settings.fullPath);
+        controller.updateLayoutForRoute(Routes.settings);
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return const SettingsPageContent();
+    return const SettingsViewContent();
   }
 }
 
 /// 导出的设置页面内容组件，用于嵌套路由
-class SettingsPageContent extends StatelessWidget {
-  const SettingsPageContent({super.key});
+class SettingsViewContent extends StatelessWidget {
+  const SettingsViewContent({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const _SettingsPageContent();
+    return const _SettingsViewContent();
   }
 }
 
-class _SettingsPageContent extends StatelessWidget {
-  const _SettingsPageContent();
+class _SettingsViewContent extends StatelessWidget {
+  const _SettingsViewContent();
 
   @override
   Widget build(BuildContext context) {

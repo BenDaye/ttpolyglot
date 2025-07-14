@@ -1,23 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/core/routing/app_router.dart';
+import 'package:ttpolyglot/src/core/routing/app_pages.dart';
 
 import '../layout_controller.dart';
 import '../utils/layout_breakpoints.dart';
 
 /// 响应式侧边栏组件
 class ResponsiveSidebar extends StatelessWidget {
-  const ResponsiveSidebar({super.key});
+  const ResponsiveSidebar({super.key, this.delegate});
+
+  final GetDelegate? delegate;
 
   @override
   Widget build(BuildContext context) {
     return ResponsiveUtils.shouldShowPersistentSidebar(context)
-        ? _buildPersistentSidebar(context)
-        : _buildDrawerSidebar(context);
+        ? _buildPersistentSidebar(
+            context,
+            delegate: delegate,
+          )
+        : _buildDrawerSidebar(
+            context,
+            delegate: delegate,
+          );
   }
 
   /// 构建常驻侧边栏
-  Widget _buildPersistentSidebar(BuildContext context) {
+  Widget _buildPersistentSidebar(
+    BuildContext context, {
+    GetDelegate? delegate,
+  }) {
     // final isCompact = ResponsiveUtils.shouldShowCompactSidebar(context);
     final isCompact = true;
     final width = LayoutBreakpoints.compactSidebarWidth;
@@ -37,11 +48,18 @@ class ResponsiveSidebar extends StatelessWidget {
       child: Column(
         children: [
           // 应用头部
-          _buildAppHeader(context, isCompact),
+          _buildAppHeader(
+            context,
+            isCompact: isCompact,
+          ),
 
           // 导航菜单
           Expanded(
-            child: _buildNavigationMenu(context, isCompact),
+            child: _buildNavigationMenu(
+              context,
+              isCompact: isCompact,
+              delegate: delegate,
+            ),
           ),
         ],
       ),
@@ -49,16 +67,26 @@ class ResponsiveSidebar extends StatelessWidget {
   }
 
   /// 构建抽屉式侧边栏
-  Widget _buildDrawerSidebar(BuildContext context) {
+  Widget _buildDrawerSidebar(
+    BuildContext context, {
+    GetDelegate? delegate,
+  }) {
     return Drawer(
       child: Column(
         children: [
           // 应用头部
-          _buildAppHeader(context, false),
+          _buildAppHeader(
+            context,
+            isCompact: false,
+          ),
 
           // 导航菜单
           Expanded(
-            child: _buildNavigationMenu(context, false),
+            child: _buildNavigationMenu(
+              context,
+              isCompact: false,
+              delegate: delegate,
+            ),
           ),
 
           // 底部信息
@@ -69,7 +97,10 @@ class ResponsiveSidebar extends StatelessWidget {
   }
 
   /// 构建应用头部
-  Widget _buildAppHeader(BuildContext context, bool isCompact) {
+  Widget _buildAppHeader(
+    BuildContext context, {
+    bool isCompact = false,
+  }) {
     return Container(
       padding: EdgeInsets.all(isCompact ? 8 : 16),
       child: isCompact
@@ -111,7 +142,11 @@ class ResponsiveSidebar extends StatelessWidget {
   }
 
   /// 构建导航菜单
-  Widget _buildNavigationMenu(BuildContext context, bool isCompact) {
+  Widget _buildNavigationMenu(
+    BuildContext context, {
+    bool isCompact = false,
+    GetDelegate? delegate,
+  }) {
     return GetBuilder<LayoutController>(
       builder: (controller) => Obx(
         () => Column(
@@ -128,7 +163,7 @@ class ResponsiveSidebar extends StatelessWidget {
                     icon: Icons.home_outlined,
                     activeIcon: Icons.home,
                     label: '首页',
-                    route: MainRoute.home.fullPath,
+                    route: Routes.dashboard,
                     isCompact: isCompact,
                     isActive: controller.currentIndex == 0,
                   ),
@@ -137,7 +172,7 @@ class ResponsiveSidebar extends StatelessWidget {
                     icon: Icons.folder_outlined,
                     activeIcon: Icons.folder,
                     label: '项目',
-                    route: MainRoute.projects.fullPath,
+                    route: Routes.projects,
                     isCompact: isCompact,
                     badge: controller.projectsBadge.value,
                     isActive: controller.currentIndex == 1,
@@ -151,7 +186,7 @@ class ResponsiveSidebar extends StatelessWidget {
               icon: Icons.settings_outlined,
               activeIcon: Icons.settings,
               label: '设置',
-              route: MainRoute.settings.fullPath,
+              route: Routes.settings,
               isCompact: isCompact,
               isActive: controller.currentIndex == 2,
             ),
@@ -168,10 +203,13 @@ class ResponsiveSidebar extends StatelessWidget {
     required IconData activeIcon,
     required String label,
     required String route,
-    required bool isCompact,
+    bool isCompact = false,
     int? badge,
     bool isActive = false,
+    GetDelegate? delegate,
   }) {
+    delegate ??= Get.rootDelegate;
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 2.0),
       child: Material(
@@ -180,7 +218,8 @@ class ResponsiveSidebar extends StatelessWidget {
           borderRadius: BorderRadius.circular(12.0),
           onTap: () {
             // 使用 GetX 路由导航到子路由
-            Get.rootDelegate.offAndToNamed(route);
+            delegate?.offAndToNamed(route);
+
             if (ResponsiveUtils.isMobile(context)) {
               Navigator.of(context).pop();
             }

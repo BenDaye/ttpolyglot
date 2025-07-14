@@ -1,22 +1,21 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/layout/utils/layout_breakpoints.dart';
-import 'package:ttpolyglot/src/core/routing/app_router.dart';
 import 'package:ttpolyglot/src/features/projects/projects.dart';
 
-class ProjectSidebar extends StatelessWidget {
-  const ProjectSidebar({super.key});
+class ProjectsSidebar extends StatelessWidget {
+  const ProjectsSidebar({super.key, this.delegate});
+
+  final GetDelegate? delegate;
 
   @override
   Widget build(BuildContext context) {
     return ResponsiveUtils.shouldShowPersistentSidebar(context)
-        ? _buildPersistentSidebar(context)
-        : _buildDrawerSidebar(context);
+        ? _buildPersistentSidebar(context, delegate: delegate)
+        : _buildDrawerSidebar(context, delegate: delegate);
   }
 
-  Widget _buildPersistentSidebar(BuildContext context) {
+  Widget _buildPersistentSidebar(BuildContext context, {GetDelegate? delegate}) {
     final isCompact = ResponsiveUtils.shouldShowCompactSidebar(context);
     final width = ResponsiveUtils.getSidebarWidth(context);
 
@@ -35,22 +34,35 @@ class ProjectSidebar extends StatelessWidget {
       child: Column(
         children: [
           // 应用头部
-          _buildAppHeader(context, isCompact),
+          _buildAppHeader(
+            context,
+            isCompact: isCompact,
+          ),
 
           // 导航菜单
           Expanded(
-            child: _buildNavigationMenu(context, isCompact),
+            child: _buildNavigationMenu(
+              context,
+              isCompact: isCompact,
+              delegate: delegate,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDrawerSidebar(BuildContext context) {
+  Widget _buildDrawerSidebar(
+    BuildContext context, {
+    GetDelegate? delegate,
+  }) {
     return const Placeholder();
   }
 
-  Widget _buildAppHeader(BuildContext context, bool isCompact) {
+  Widget _buildAppHeader(
+    BuildContext context, {
+    bool isCompact = false,
+  }) {
     return GetBuilder<ProjectsController>(
       builder: (controller) => Padding(
         padding: const EdgeInsets.all(8.0),
@@ -67,7 +79,11 @@ class ProjectSidebar extends StatelessWidget {
     );
   }
 
-  Widget _buildNavigationMenu(BuildContext context, bool isCompact) {
+  Widget _buildNavigationMenu(
+    BuildContext context, {
+    bool isCompact = false,
+    GetDelegate? delegate,
+  }) {
     return GetBuilder<ProjectsController>(
       builder: (controller) => Obx(() {
         if (controller.isLoading) {
@@ -99,7 +115,17 @@ class ProjectSidebar extends StatelessWidget {
             itemCount: projects.length,
             itemBuilder: (context, index) {
               final project = projects[index];
-              return _buildProjectCard(project, controller);
+              return Obx(
+                () => _buildProjectCard(
+                  project,
+                  context: context,
+                  delegate: delegate,
+                  onTap: (project) {
+                    controller.setSelectedProjectId(project.id);
+                  },
+                  isSelected: controller.selectedProjectId == project.id,
+                ),
+              );
             },
           ),
         );
@@ -107,14 +133,22 @@ class ProjectSidebar extends StatelessWidget {
     );
   }
 
-  Widget _buildProjectCard(ProjectModel project, ProjectsController controller) {
+  Widget _buildProjectCard(
+    ProjectModel project, {
+    required BuildContext context,
+    GetDelegate? delegate,
+    required Function(ProjectModel) onTap,
+    bool isSelected = false,
+  }) {
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
       shape: ContinuousRectangleBorder(),
+      color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1) : null,
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
         dense: true,
+        selected: isSelected,
         leading: const CircleAvatar(
           child: Icon(Icons.folder),
         ),
@@ -151,11 +185,7 @@ class ProjectSidebar extends StatelessWidget {
             ),
           ],
         ),
-        onTap: () {
-          final name = ProjectsRoute.dashboard.fullPath.replaceFirst(':projectId', project.id);
-          log(name);
-          Get.rootDelegate.offAndToNamed(name);
-        },
+        onTap: () => onTap(project),
       ),
     );
   }

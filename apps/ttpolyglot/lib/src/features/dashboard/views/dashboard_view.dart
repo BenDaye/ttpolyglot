@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/core/routing/app_pages.dart';
 
-import '../../core/layout/layout_controller.dart';
-import '../../core/platform/platform_adapter.dart';
-import '../../core/routing/app_router.dart';
-import '../../core/storage/storage_provider.dart';
+import '../../../core/layout/layout_controller.dart';
+import '../../../core/platform/platform_adapter.dart';
+import '../../../core/storage/storage_provider.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class DashboardView extends StatefulWidget {
+  const DashboardView({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<DashboardView> createState() => _DashboardViewState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _DashboardViewState extends State<DashboardView> {
   @override
   void initState() {
     super.initState();
@@ -21,26 +21,26 @@ class _HomePageState extends State<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.isRegistered<LayoutController>()) {
         final controller = Get.find<LayoutController>();
-        controller.updateLayoutForRoute(MainRoute.home.fullPath);
+        controller.updateLayoutForRoute(Routes.dashboard);
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return const HomePageContent();
+    return const DashboardViewContent();
   }
 }
 
 /// 导出的首页内容组件，用于嵌套路由
-class HomePageContent extends StatefulWidget {
-  const HomePageContent({super.key});
+class DashboardViewContent extends StatefulWidget {
+  const DashboardViewContent({super.key});
 
   @override
-  State<HomePageContent> createState() => _HomePageContentState();
+  State<DashboardViewContent> createState() => _DashboardViewContentState();
 }
 
-class _HomePageContentState extends State<HomePageContent> {
+class _DashboardViewContentState extends State<DashboardViewContent> {
   final _platformAdapter = PlatformAdapter();
   late final StorageProvider _storageProvider;
 

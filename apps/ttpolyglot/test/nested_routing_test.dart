@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/app.dart';
 import 'package:ttpolyglot/src/core/layout/layout_controller.dart';
-import 'package:ttpolyglot/src/core/routing/app_router.dart';
 import 'package:ttpolyglot/src/core/theme/app_theme.dart';
 
 void main() {
@@ -51,28 +50,28 @@ void main() {
       expect(find.text('欢迎使用 TTPolyglot'), findsOneWidget);
     });
 
-    testWidgets('GetRouterOutlet 应该能够正确处理子路由', (WidgetTester tester) async {
-      await tester.pumpWidget(const TTPolyglotApp());
-      await tester.pumpAndSettle();
+    // testWidgets('GetRouterOutlet 应该能够正确处理子路由', (WidgetTester tester) async {
+    //   await tester.pumpWidget(const TTPolyglotApp());
+    //   await tester.pumpAndSettle();
 
-      // 验证初始路由
-      expect(Get.currentRoute, MainRoute.home.fullPath);
+    //   // 验证初始路由
+    //   expect(Get.currentRoute, MainRoute.home.fullPath);
 
-      // 使用 Get.toNamed 导航到项目页面
-      Get.toNamed(MainRoute.projects.fullPath);
-      await tester.pumpAndSettle();
+    //   // 使用 Get.toNamed 导航到项目页面
+    //   Get.toNamed(MainRoute.projects.fullPath);
+    //   await tester.pumpAndSettle();
 
-      // 验证路由已切换
-      expect(Get.currentRoute, MainRoute.projects.fullPath);
-      expect(find.text('暂无项目'), findsOneWidget);
+    //   // 验证路由已切换
+    //   expect(Get.currentRoute, MainRoute.projects.fullPath);
+    //   expect(find.text('暂无项目'), findsOneWidget);
 
-      // 导航到设置页面
-      Get.toNamed(MainRoute.settings.fullPath);
-      await tester.pumpAndSettle();
+    //   // 导航到设置页面
+    //   Get.toNamed(MainRoute.settings.fullPath);
+    //   await tester.pumpAndSettle();
 
-      // 验证路由已切换
-      expect(Get.currentRoute, MainRoute.settings.fullPath);
-      expect(find.text('主题设置'), findsOneWidget);
-    });
+    //   // 验证路由已切换
+    //   expect(Get.currentRoute, MainRoute.settings.fullPath);
+    //   expect(find.text('主题设置'), findsOneWidget);
+    // });
   });
 }

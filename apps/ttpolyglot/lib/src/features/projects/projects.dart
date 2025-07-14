@@ -1,3 +1,3 @@
-export 'projects_controller.dart';
-export 'projects_bindings.dart';
-export 'widgets/widgets.dart';
+export 'controllers/projects_controller.dart';
+export 'bindings/projects_binding.dart';
+export 'views/widgets.dart';

@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/layout/layout.dart';
-import 'package:ttpolyglot/src/core/routing/app_router.dart';
+import 'package:ttpolyglot/src/core/routing/app_pages.dart';
 import 'package:ttpolyglot/src/features/projects/projects.dart';
 
-class ProjectShell extends StatefulWidget {
-  const ProjectShell({super.key});
+class ProjectsShell extends StatefulWidget {
+  const ProjectsShell({super.key});
 
   @override
-  State<ProjectShell> createState() => _ProjectShellState();
+  State<ProjectsShell> createState() => _ProjectsShellState();
 }
 
-class _ProjectShellState extends State<ProjectShell> {
+class _ProjectsShellState extends State<ProjectsShell> {
   @override
   void initState() {
     super.initState();
@@ -19,7 +19,7 @@ class _ProjectShellState extends State<ProjectShell> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.isRegistered<LayoutController>()) {
         final controller = Get.find<LayoutController>();
-        controller.updateLayoutForRoute(MainRoute.projects.fullPath);
+        controller.updateLayoutForRoute(Routes.projects);
       }
     });
   }
@@ -43,11 +43,26 @@ class _ProjectShellState extends State<ProjectShell> {
   Widget _buildDesktopLayout(BuildContext context) {
     return Row(
       children: [
-        const ProjectSidebar(),
+        const ProjectsSidebar(),
         Expanded(
-          child: GetRouterOutlet(
-            initialRoute: ProjectsRoute.empty.fullPath,
-            delegate: Get.rootDelegate,
+          child: GetBuilder<ProjectsController>(
+            builder: (controller) => Obx(
+              () {
+                if (controller.selectedProjectId.isEmpty) {
+                  return Placeholder(
+                    child: Center(
+                      child: Text('No project selected'),
+                    ),
+                  );
+                }
+
+                return Placeholder(
+                  child: Center(
+                    child: Text(controller.selectedProjectId),
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ],
