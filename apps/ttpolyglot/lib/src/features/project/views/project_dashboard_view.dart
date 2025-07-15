@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/core/widgets/stat_card.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
+import 'package:ttpolyglot_core/core.dart';
 
 /// 项目概览页面
 class ProjectDashboardView extends StatelessWidget {
@@ -22,6 +24,137 @@ class ProjectDashboardView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // 项目统计卡片
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.analytics, size: 24.0),
+                              const SizedBox(width: 8.0),
+                              Text(
+                                '项目统计',
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16.0),
+                          FutureBuilder<ProjectStats>(
+                            future: controller.getProjectStats(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return const Center(child: CircularProgressIndicator());
+                              }
+
+                              final stats = snapshot.data ??
+                                  ProjectStats(
+                                    totalEntries: 0,
+                                    completedEntries: 0,
+                                    pendingEntries: 0,
+                                    reviewingEntries: 0,
+                                    completionRate: 0.0,
+                                    languageCount: project.allLanguages.length,
+                                    memberCount: 1,
+                                    lastUpdated: DateTime.now(),
+                                  );
+
+                              return Column(
+                                children: [
+                                  // 翻译统计
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: StatCard(
+                                          title: '总词条',
+                                          value: stats.totalEntries.toString(),
+                                          icon: Icons.text_fields,
+                                          color: Colors.blue,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16.0),
+                                      Expanded(
+                                        child: StatCard(
+                                          title: '已翻译',
+                                          value: stats.completedEntries.toString(),
+                                          icon: Icons.check_circle,
+                                          color: Colors.green,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16.0),
+                                      Expanded(
+                                        child: StatCard(
+                                          title: '待翻译',
+                                          value: stats.pendingEntries.toString(),
+                                          icon: Icons.pending,
+                                          color: Colors.orange,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16.0),
+                                      Expanded(
+                                        child: StatCard(
+                                          title: '审核中',
+                                          value: stats.reviewingEntries.toString(),
+                                          icon: Icons.rate_review,
+                                          color: Colors.purple,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16.0),
+                                  // 语言和成员统计
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: StatCard(
+                                          title: '总语言数',
+                                          value: stats.languageCount.toString(),
+                                          icon: Icons.language,
+                                          color: Colors.blue,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16.0),
+                                      Expanded(
+                                        child: StatCard(
+                                          title: '目标语言',
+                                          value: project.targetLanguages.length.toString(),
+                                          icon: Icons.translate,
+                                          color: Colors.green,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16.0),
+                                      Expanded(
+                                        child: StatCard(
+                                          title: '团队成员',
+                                          value: stats.memberCount.toString(),
+                                          icon: Icons.people,
+                                          color: Colors.orange,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16.0),
+                                      Expanded(
+                                        child: StatCard(
+                                          title: '完成率',
+                                          value: '${(stats.completionRate * 100).toStringAsFixed(1)}%',
+                                          icon: Icons.trending_up,
+                                          color: Colors.teal,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16.0),
+
                   // 项目基本信息卡片
                   Card(
                     child: Padding(

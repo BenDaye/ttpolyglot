@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/core/widgets/stat_card.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 
 /// 项目翻译管理页面
@@ -23,55 +22,6 @@ class ProjectTranslationsView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 翻译统计卡片
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '翻译统计',
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          const SizedBox(height: 16.0),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: StatCard(
-                                  title: '总词条',
-                                  value: '1,234',
-                                  icon: Icons.text_fields,
-                                  color: Colors.blue,
-                                ),
-                              ),
-                              const SizedBox(width: 16.0),
-                              Expanded(
-                                child: StatCard(
-                                  title: '已翻译',
-                                  value: '856',
-                                  icon: Icons.check_circle,
-                                  color: Colors.green,
-                                ),
-                              ),
-                              const SizedBox(width: 16.0),
-                              Expanded(
-                                child: StatCard(
-                                  title: '待翻译',
-                                  value: '378',
-                                  icon: Icons.pending,
-                                  color: Colors.orange,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16.0),
-
                   // 翻译进度卡片
                   Card(
                     child: Padding(

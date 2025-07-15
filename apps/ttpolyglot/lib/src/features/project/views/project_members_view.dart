@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/core/widgets/stat_card.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 
 /// 项目成员管理页面
@@ -37,58 +36,6 @@ class ProjectMembersView extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 24.0),
-
-                  // 成员统计卡片
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '成员统计',
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          const SizedBox(height: 16.0),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: StatCard(
-                                  title: '总成员',
-                                  value: '8',
-                                  icon: Icons.people,
-                                  color: Colors.blue,
-                                  borderRadius: 8.0,
-                                ),
-                              ),
-                              const SizedBox(width: 16.0),
-                              Expanded(
-                                child: StatCard(
-                                  title: '管理员',
-                                  value: '2',
-                                  icon: Icons.admin_panel_settings,
-                                  color: Colors.orange,
-                                  borderRadius: 8.0,
-                                ),
-                              ),
-                              const SizedBox(width: 16.0),
-                              Expanded(
-                                child: StatCard(
-                                  title: '翻译者',
-                                  value: '6',
-                                  icon: Icons.translate,
-                                  color: Colors.green,
-                                  borderRadius: 8.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16.0),
 
                   // 成员列表卡片
                   Card(
