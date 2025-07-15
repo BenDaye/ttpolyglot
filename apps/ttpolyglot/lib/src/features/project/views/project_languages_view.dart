@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/core/widgets/stat_card.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 import 'package:ttpolyglot_core/core.dart';
 
@@ -38,22 +39,20 @@ class ProjectLanguagesView extends StatelessWidget {
                           Row(
                             children: [
                               Expanded(
-                                child: _buildStatCard(
-                                  context,
-                                  '总语言数',
-                                  '${project.targetLanguages.length + 1}',
-                                  Icons.language,
-                                  Colors.blue,
+                                child: StatCard(
+                                  title: '总语言数',
+                                  value: '${project.targetLanguages.length + 1}',
+                                  icon: Icons.language,
+                                  color: Colors.blue,
                                 ),
                               ),
                               const SizedBox(width: 16.0),
                               Expanded(
-                                child: _buildStatCard(
-                                  context,
-                                  '目标语言',
-                                  '${project.targetLanguages.length}',
-                                  Icons.translate,
-                                  Colors.green,
+                                child: StatCard(
+                                  title: '目标语言',
+                                  value: '${project.targetLanguages.length}',
+                                  icon: Icons.translate,
+                                  color: Colors.green,
                                 ),
                               ),
                             ],
@@ -214,43 +213,6 @@ class ProjectLanguagesView extends StatelessWidget {
               tooltip: '编辑',
             ),
           ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatCard(
-    BuildContext context,
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(4.0),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, size: 32.0, color: color),
-          const SizedBox(height: 8.0),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
-          ),
-          const SizedBox(height: 4.0),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: color,
-                ),
-          ),
         ],
       ),
     );

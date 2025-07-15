@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/core/widgets/format_card.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 
 /// 项目导入页面
@@ -46,11 +47,35 @@ class ProjectImportView extends StatelessWidget {
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
                           const SizedBox(height: 16.0),
-                          _buildFormatCard(context, 'JSON', 'application/json', Icons.code),
-                          _buildFormatCard(context, 'CSV', 'text/csv', Icons.table_chart),
-                          _buildFormatCard(context, 'Excel', 'application/vnd.ms-excel', Icons.table_view),
-                          _buildFormatCard(context, 'ARB', 'application/arb', Icons.flutter_dash),
-                          _buildFormatCard(context, 'PO', 'application/x-po', Icons.language),
+                          Column(
+                            children: [
+                              FormatCard(
+                                name: 'JSON',
+                                description: 'application/json',
+                                icon: Icons.code,
+                              ),
+                              FormatCard(
+                                name: 'CSV',
+                                description: 'text/csv',
+                                icon: Icons.table_chart,
+                              ),
+                              FormatCard(
+                                name: 'Excel',
+                                description: 'application/vnd.ms-excel',
+                                icon: Icons.table_view,
+                              ),
+                              FormatCard(
+                                name: 'ARB',
+                                description: 'application/arb',
+                                icon: Icons.flutter_dash,
+                              ),
+                              FormatCard(
+                                name: 'PO',
+                                description: 'application/x-po',
+                                icon: Icons.language,
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -211,45 +236,6 @@ class ProjectImportView extends StatelessWidget {
     );
   }
 
-  Widget _buildFormatCard(
-    BuildContext context,
-    String name,
-    String mimeType,
-    IconData icon,
-  ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8.0),
-      padding: const EdgeInsets.all(12.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 24.0),
-          const SizedBox(width: 12.0),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                Text(
-                  mimeType,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                      ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildOptionItem(
     BuildContext context,
     String title,
@@ -270,10 +256,10 @@ class ProjectImportView extends StatelessWidget {
 
   Widget _buildHistoryItem(
     BuildContext context,
-    String filename,
+    String fileName,
     String result,
     String time,
-    bool success,
+    bool isSuccess,
   ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),
@@ -285,8 +271,8 @@ class ProjectImportView extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            success ? Icons.check_circle : Icons.error,
-            color: success ? Colors.green : Colors.red,
+            isSuccess ? Icons.check_circle : Icons.error,
+            color: isSuccess ? Colors.green : Colors.red,
             size: 24.0,
           ),
           const SizedBox(width: 12.0),
@@ -295,13 +281,13 @@ class ProjectImportView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  filename,
+                  fileName,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 Text(
                   result,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: success ? Colors.green : Colors.red,
+                        color: isSuccess ? Colors.green : Colors.red,
                       ),
                 ),
                 Text(

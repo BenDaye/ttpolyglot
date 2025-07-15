@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/core/widgets/clickable_stat_card.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 
 /// 项目导出页面
@@ -52,35 +53,32 @@ class ProjectExportView extends StatelessWidget {
                           Row(
                             children: [
                               Expanded(
-                                child: _buildQuickExportCard(
-                                  context,
-                                  'JSON',
-                                  '适合前端应用',
-                                  Icons.code,
-                                  Colors.blue,
-                                  () {},
+                                child: ClickableStatCard(
+                                  title: 'JSON',
+                                  subtitle: '适合开发使用',
+                                  icon: Icons.code,
+                                  color: Colors.blue,
+                                  onTap: () {},
                                 ),
                               ),
                               const SizedBox(width: 16.0),
                               Expanded(
-                                child: _buildQuickExportCard(
-                                  context,
-                                  'CSV',
-                                  '适合表格编辑',
-                                  Icons.table_chart,
-                                  Colors.green,
-                                  () {},
+                                child: ClickableStatCard(
+                                  title: 'CSV',
+                                  subtitle: '适合批量编辑',
+                                  icon: Icons.table_chart,
+                                  color: Colors.green,
+                                  onTap: () {},
                                 ),
                               ),
                               const SizedBox(width: 16.0),
                               Expanded(
-                                child: _buildQuickExportCard(
-                                  context,
-                                  'Excel',
-                                  '适合数据分析',
-                                  Icons.table_view,
-                                  Colors.orange,
-                                  () {},
+                                child: ClickableStatCard(
+                                  title: 'Excel',
+                                  subtitle: '适合数据分析',
+                                  icon: Icons.table_view,
+                                  color: Colors.orange,
+                                  onTap: () {},
                                 ),
                               ),
                             ],
@@ -226,51 +224,6 @@ class ProjectExportView extends StatelessWidget {
           },
         );
       },
-    );
-  }
-
-  Widget _buildQuickExportCard(
-    BuildContext context,
-    String format,
-    String description,
-    IconData icon,
-    Color color,
-    VoidCallback onTap,
-  ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12.0),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12.0),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              Icon(icon, size: 32.0, color: color),
-              const SizedBox(height: 8.0),
-              Text(
-                format,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: color,
-                    ),
-              ),
-              const SizedBox(height: 4.0),
-              Text(
-                description,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: color,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 

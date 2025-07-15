@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/core/widgets/stat_card.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 
 /// 项目翻译管理页面
@@ -22,21 +23,6 @@ class ProjectTranslationsView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 页面标题
-                  Row(
-                    children: [
-                      const Icon(Icons.translate, size: 28.0),
-                      const SizedBox(width: 12.0),
-                      Text(
-                        '翻译管理',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24.0),
-
                   // 翻译统计卡片
                   Card(
                     child: Padding(
@@ -52,32 +38,29 @@ class ProjectTranslationsView extends StatelessWidget {
                           Row(
                             children: [
                               Expanded(
-                                child: _buildStatCard(
-                                  context,
-                                  '总词条',
-                                  '1,234',
-                                  Icons.text_fields,
-                                  Colors.blue,
+                                child: StatCard(
+                                  title: '总词条',
+                                  value: '1,234',
+                                  icon: Icons.text_fields,
+                                  color: Colors.blue,
                                 ),
                               ),
                               const SizedBox(width: 16.0),
                               Expanded(
-                                child: _buildStatCard(
-                                  context,
-                                  '已翻译',
-                                  '856',
-                                  Icons.check_circle,
-                                  Colors.green,
+                                child: StatCard(
+                                  title: '已翻译',
+                                  value: '856',
+                                  icon: Icons.check_circle,
+                                  color: Colors.green,
                                 ),
                               ),
                               const SizedBox(width: 16.0),
                               Expanded(
-                                child: _buildStatCard(
-                                  context,
-                                  '待翻译',
-                                  '378',
-                                  Icons.pending,
-                                  Colors.orange,
+                                child: StatCard(
+                                  title: '待翻译',
+                                  value: '378',
+                                  icon: Icons.pending,
+                                  color: Colors.orange,
                                 ),
                               ),
                             ],
@@ -156,43 +139,6 @@ class ProjectTranslationsView extends StatelessWidget {
           },
         );
       },
-    );
-  }
-
-  Widget _buildStatCard(
-    BuildContext context,
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12.0),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, size: 32.0, color: color),
-          const SizedBox(height: 8.0),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
-          ),
-          const SizedBox(height: 4.0),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: color,
-                ),
-          ),
-        ],
-      ),
     );
   }
 

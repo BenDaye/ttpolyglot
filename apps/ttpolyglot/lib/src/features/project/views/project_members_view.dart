@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/core/widgets/stat_card.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 
 /// 项目成员管理页面
@@ -52,32 +53,32 @@ class ProjectMembersView extends StatelessWidget {
                           Row(
                             children: [
                               Expanded(
-                                child: _buildStatCard(
-                                  context,
-                                  '总成员',
-                                  '8',
-                                  Icons.people,
-                                  Colors.blue,
+                                child: StatCard(
+                                  title: '总成员',
+                                  value: '8',
+                                  icon: Icons.people,
+                                  color: Colors.blue,
+                                  borderRadius: 8.0,
                                 ),
                               ),
                               const SizedBox(width: 16.0),
                               Expanded(
-                                child: _buildStatCard(
-                                  context,
-                                  '管理员',
-                                  '2',
-                                  Icons.admin_panel_settings,
-                                  Colors.orange,
+                                child: StatCard(
+                                  title: '管理员',
+                                  value: '2',
+                                  icon: Icons.admin_panel_settings,
+                                  color: Colors.orange,
+                                  borderRadius: 8.0,
                                 ),
                               ),
                               const SizedBox(width: 16.0),
                               Expanded(
-                                child: _buildStatCard(
-                                  context,
-                                  '翻译者',
-                                  '6',
-                                  Icons.translate,
-                                  Colors.green,
+                                child: StatCard(
+                                  title: '翻译者',
+                                  value: '6',
+                                  icon: Icons.translate,
+                                  color: Colors.green,
+                                  borderRadius: 8.0,
                                 ),
                               ),
                             ],
@@ -206,43 +207,6 @@ class ProjectMembersView extends StatelessWidget {
           },
         );
       },
-    );
-  }
-
-  Widget _buildStatCard(
-    BuildContext context,
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12.0),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, size: 32.0, color: color),
-          const SizedBox(height: 8.0),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
-          ),
-          const SizedBox(height: 4.0),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: color,
-                ),
-          ),
-        ],
-      ),
     );
   }
 
