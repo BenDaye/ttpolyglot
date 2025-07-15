@@ -1,6 +1,9 @@
+import 'dart:developer' as developer;
+
 import '../enums/translation_status.dart';
 import '../models/language.dart';
 import '../models/translation_entry.dart';
+import '../services/translation_service.dart';
 
 /// 翻译工具类
 class TranslationUtils {
@@ -18,6 +21,168 @@ class TranslationUtils {
       return ('', parts[0]);
     }
     return (parts.sublist(0, parts.length - 1).join('.'), parts.last);
+  }
+
+  /// 根据创建翻译键请求生成翻译条目列表
+  static List<TranslationEntry> generateTranslationEntries(
+    CreateTranslationKeyRequest request,
+  ) {
+    try {
+      final entries = <TranslationEntry>[];
+      final now = DateTime.now();
+
+      // 为每个目标语言生成翻译条目
+      for (final targetLanguage in request.targetLanguages) {
+        final entry = TranslationEntry(
+          id: _generateEntryId(request.projectId, request.key, targetLanguage.code),
+          key: request.key,
+          projectId: request.projectId,
+          sourceLanguage: request.sourceLanguage,
+          targetLanguage: targetLanguage,
+          sourceText: request.sourceText,
+          targetText: '', // 初始为空，等待翻译
+          status: request.initialStatus,
+          createdAt: now,
+          updatedAt: now,
+          context: request.context,
+          comment: request.comment,
+          maxLength: request.maxLength,
+          isPlural: request.isPlural,
+          pluralForms: request.pluralForms,
+        );
+        entries.add(entry);
+      }
+
+      // 如果需要为默认语言也生成条目
+      if (request.generateForDefaultLanguage) {
+        final defaultEntry = TranslationEntry(
+          id: _generateEntryId(request.projectId, request.key, request.sourceLanguage.code),
+          key: request.key,
+          projectId: request.projectId,
+          sourceLanguage: request.sourceLanguage,
+          targetLanguage: request.sourceLanguage,
+          sourceText: request.sourceText,
+          targetText: request.sourceText, // 默认语言的翻译就是源文本
+          status: TranslationStatus.completed, // 默认语言条目直接标记为完成
+          createdAt: now,
+          updatedAt: now,
+          context: request.context,
+          comment: request.comment,
+          maxLength: request.maxLength,
+          isPlural: request.isPlural,
+          pluralForms: request.pluralForms,
+        );
+        entries.add(defaultEntry);
+      }
+
+      developer.log(
+        'generateTranslationEntries',
+        name: 'TranslationUtils',
+        error: null,
+        stackTrace: null,
+      );
+
+      return entries;
+    } catch (error, stackTrace) {
+      developer.log(
+        'generateTranslationEntries',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  /// 生成翻译条目 ID
+  static String _generateEntryId(String projectId, String key, String languageCode) {
+    return '${projectId}_${key}_$languageCode';
+  }
+
+  /// 验证翻译键是否符合规范
+  static bool isValidTranslationKey(String key, {String? pattern}) {
+    if (key.trim().isEmpty) return false;
+
+    final defaultPattern = r'^[a-zA-Z][a-zA-Z0-9._-]*$';
+    final regex = RegExp(pattern ?? defaultPattern);
+
+    return regex.hasMatch(key);
+  }
+
+  /// 批量验证翻译条目
+  static Map<String, List<String>> batchValidateTranslationEntries(
+    List<TranslationEntry> entries,
+  ) {
+    final validationResults = <String, List<String>>{};
+
+    for (final entry in entries) {
+      final errors = <String>[];
+
+      // 验证键名
+      if (!isValidTranslationKey(entry.key)) {
+        errors.add('翻译键名格式不正确: ${entry.key}');
+      }
+
+      // 验证语言代码
+      if (!Language.isValidLanguageCode(entry.sourceLanguage.code)) {
+        errors.add('源语言代码格式错误: ${entry.sourceLanguage.code}');
+      }
+
+      if (!Language.isValidLanguageCode(entry.targetLanguage.code)) {
+        errors.add('目标语言代码格式错误: ${entry.targetLanguage.code}');
+      }
+
+      // 验证源文本
+      if (entry.sourceText.trim().isEmpty) {
+        errors.add('源文本不能为空');
+      }
+
+      // 验证翻译文本（如果状态为已完成）
+      if (entry.status == TranslationStatus.completed && entry.targetText.trim().isEmpty) {
+        errors.add('已完成的翻译条目不能有空的目标文本');
+      }
+
+      // 验证长度限制
+      if (entry.maxLength != null && entry.targetText.length > entry.maxLength!) {
+        errors.add('目标文本长度超过限制 (${entry.maxLength} 字符)');
+      }
+
+      if (errors.isNotEmpty) {
+        validationResults[entry.id] = errors;
+      }
+    }
+
+    return validationResults;
+  }
+
+  /// 根据项目语言生成翻译键请求
+  static CreateTranslationKeyRequest createTranslationKeyRequestFromProject({
+    required String projectId,
+    required String key,
+    required Language defaultLanguage,
+    required List<Language> targetLanguages,
+    required String sourceText,
+    String? context,
+    String? comment,
+    int? maxLength,
+    bool isPlural = false,
+    Map<String, String>? pluralForms,
+    TranslationStatus initialStatus = TranslationStatus.pending,
+    bool generateForDefaultLanguage = true,
+  }) {
+    return CreateTranslationKeyRequest(
+      projectId: projectId,
+      key: key,
+      sourceLanguage: defaultLanguage,
+      sourceText: sourceText,
+      targetLanguages: targetLanguages,
+      context: context,
+      comment: comment,
+      maxLength: maxLength,
+      isPlural: isPlural,
+      pluralForms: pluralForms,
+      initialStatus: initialStatus,
+      generateForDefaultLanguage: generateForDefaultLanguage,
+    );
   }
 
   /// 计算翻译完成度

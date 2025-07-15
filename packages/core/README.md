@@ -5,6 +5,7 @@ TTPolyglot 核心包，提供翻译管理平台的核心数据模型、业务逻
 ## 功能特性
 
 ### 数据模型
+
 - **Language**: 语言模型，支持多种语言格式
 - **Project**: 翻译项目模型
 - **TranslationEntry**: 翻译条目模型
@@ -12,14 +13,17 @@ TTPolyglot 核心包，提供翻译管理平台的核心数据模型、业务逻
 - **WorkspaceConfig**: 工作空间配置模型
 
 ### 业务逻辑
+
 - **项目管理**: 创建、更新、删除翻译项目
 - **翻译管理**: 管理翻译条目和状态
+- **翻译键管理**: 批量创建和管理翻译键
 - **用户管理**: 用户角色和权限控制
 - **工作空间管理**: 工作空间配置和偏好设置
 
 ### 语言支持
 
 #### 支持的语言列表
+
 Core 包内置了 47 种语言的支持，包括：
 
 - **英语变体**: en-US, en-GB, en-AU, en-CA
@@ -34,6 +38,7 @@ Core 包内置了 47 种语言的支持，包括：
 - 以及更多其他语言...
 
 #### 语言代码格式要求
+
 - **必须使用 `language_code-country_code` 格式**（如：`en-US`、`zh-CN`）
 - **不允许使用纯语言代码**（如：`en`、`zh`）
 - 语言代码必须是小写，国家代码必须是大写
@@ -88,25 +93,133 @@ if (request.isValid) {
 ```
 
 #### 验证规则
+
 - 项目名称和描述不能为空
 - 默认语言必须是支持的语言格式
 - 目标语言列表不能为空
 - 目标语言必须是支持的语言格式
 - 默认语言不能同时作为目标语言
 - 目标语言不能重复
-- 项目所有者ID不能为空
+- 项目所有者 ID 不能为空
+
+### 翻译键创建和管理
+
+Core 包提供了强大的翻译键创建和管理功能：
+
+#### 创建翻译键请求
+
+```dart
+// 创建翻译键请求
+final request = CreateTranslationKeyRequest(
+  projectId: 'project-1',
+  key: 'common.greeting',
+  sourceLanguage: Language.getLanguageByCode('en-US')!,
+  sourceText: 'Hello, welcome to our application!',
+  targetLanguages: [
+    Language.getLanguageByCode('zh-CN')!,
+    Language.getLanguageByCode('ja-JP')!,
+  ],
+  context: '应用程序的欢迎消息',
+  comment: '这是用户首次打开应用时看到的问候语',
+  maxLength: 100,
+  generateForDefaultLanguage: true,
+);
+
+// 验证请求
+if (request.isValid) {
+  // 生成翻译条目
+  final entries = TranslationUtils.generateTranslationEntries(request);
+} else {
+  // 处理验证错误
+  final errors = request.validate();
+}
+```
+
+#### 批量创建翻译条目
+
+```dart
+// 使用 TranslationService 批量创建翻译条目
+final translationService = MyTranslationService();
+final entries = await translationService.batchCreateTranslationEntries(generatedEntries);
+
+// 或者使用 createTranslationKey 方法直接创建
+final entries = await translationService.createTranslationKey(request);
+```
+
+#### 翻译键验证
+
+```dart
+// 验证翻译键格式
+bool isValid = TranslationUtils.isValidTranslationKey('common.greeting'); // true
+bool isInvalid = TranslationUtils.isValidTranslationKey('123invalid'); // false
+
+// 批量验证翻译条目
+final validationResults = TranslationUtils.batchValidateTranslationEntries(entries);
+if (validationResults.isNotEmpty) {
+  // 处理验证错误
+  for (final entryId in validationResults.keys) {
+    final errors = validationResults[entryId]!;
+    print('条目 $entryId 验证错误: ${errors.join(', ')}');
+  }
+}
+```
+
+#### 从项目信息创建翻译键请求
+
+```dart
+// 从项目信息快速创建翻译键请求
+final request = TranslationUtils.createTranslationKeyRequestFromProject(
+  projectId: 'project-1',
+  key: 'error.network',
+  defaultLanguage: project.defaultLanguage,
+  targetLanguages: project.targetLanguages,
+  sourceText: 'Network connection failed. Please try again.',
+  context: '网络连接失败时显示的错误消息',
+  maxLength: 80,
+);
+```
+
+#### 高级功能
+
+```dart
+// 复数形式的翻译
+final pluralRequest = CreateTranslationKeyRequest(
+  projectId: 'project-1',
+  key: 'item.count',
+  sourceLanguage: english,
+  sourceText: '{count} items',
+  targetLanguages: [chinese, japanese],
+  isPlural: true,
+  pluralForms: {
+    'one': '{count} item',
+    'other': '{count} items',
+  },
+);
+
+// 提取占位符
+final placeholders = TranslationUtils.extractPlaceholders('Welcome back, {username}!');
+print('占位符: ${placeholders.join(', ')}'); // 输出: {username}
+
+// 验证翻译文本
+final errors = TranslationUtils.validateTranslation(
+  'Hello, {name}!',
+  'Bonjour, {name}!',
+  maxLength: 50,
+  requiredPlaceholders: ['{name}'],
+);
+```
 
 ### 服务接口
 
 - **ProjectService**: 项目管理服务接口
-- **TranslationService**: 翻译服务接口
+- **TranslationService**: 翻译服务接口（新增批量创建和翻译键创建功能）
 - **StorageService**: 存储服务接口
 - **WorkspaceService**: 工作空间服务接口
 - **SyncService**: 同步服务接口
 
 ### 工具类
 
-- **TranslationUtils**: 翻译工具类，提供键值解析、完成度计算等功能
+- **TranslationUtils**: 翻译工具类，提供键值解析、完成度计算、批量创建等功能
 
 ## 使用示例
 
@@ -166,13 +279,13 @@ import 'package:ttpolyglot_core/core.dart';
 void main() {
   // 查看支持的语言
   print('支持的语言数量: ${Language.supportedLanguages.length}');
-  
+
   // 搜索中文语言
   final chineseLanguages = Language.searchSupportedLanguages('Chinese');
   for (final lang in chineseLanguages) {
     print('${lang.code}: ${lang.name}');
   }
-  
+
   // 创建项目请求
   final request = CreateProjectRequest(
     name: '多语言应用',
@@ -181,12 +294,56 @@ void main() {
     targetLanguages: [Language.getLanguageByCode('zh-CN')!],
     ownerId: 'user-123',
   );
-  
+
   // 验证请求
   if (request.isValid) {
     print('项目请求有效，可以创建项目');
   } else {
     print('项目请求无效:');
+    for (final error in request.validate()) {
+      print('- $error');
+    }
+  }
+}
+```
+
+### 翻译键创建示例
+
+```dart
+import 'package:ttpolyglot_core/core.dart';
+
+void main() {
+  // 创建语言实例
+  final english = Language.getLanguageByCode('en-US')!;
+  final chinese = Language.getLanguageByCode('zh-CN')!;
+  final japanese = Language.getLanguageByCode('ja-JP')!;
+
+  // 创建翻译键请求
+  final request = CreateTranslationKeyRequest(
+    projectId: 'project-1',
+    key: 'common.greeting',
+    sourceLanguage: english,
+    sourceText: 'Hello, welcome to our application!',
+    targetLanguages: [chinese, japanese],
+    context: '应用程序的欢迎消息',
+    comment: '这是用户首次打开应用时看到的问候语',
+    maxLength: 100,
+    generateForDefaultLanguage: true,
+  );
+
+  // 验证请求
+  if (request.isValid) {
+    // 生成翻译条目
+    final entries = TranslationUtils.generateTranslationEntries(request);
+    print('生成了 ${entries.length} 个翻译条目');
+
+    // 验证生成的条目
+    final validationResults = TranslationUtils.batchValidateTranslationEntries(entries);
+    if (validationResults.isEmpty) {
+      print('所有翻译条目验证通过');
+    }
+  } else {
+    print('请求验证失败:');
     for (final error in request.validate()) {
       print('- $error');
     }
@@ -202,25 +359,46 @@ dart run example/core_example.dart
 
 # 运行项目创建示例
 dart run example/project_creation_example.dart
+
+# 运行翻译键创建示例
+dart run example/translation_key_example.dart
+
+# 运行存储示例
+dart run example/storage_example.dart
 ```
 
-## 运行测试
+## 新功能总结
 
-```bash
-dart test
-```
+### 翻译键创建功能
 
-## 依赖项
+1. **CreateTranslationKeyRequest**: 创建翻译键的请求模型
 
-- `equatable`: 用于数据模型的相等性比较
-- `json_annotation`: 用于 JSON 序列化
-- `path`: 用于路径处理
-- `uuid`: 用于 UUID 生成
-- `intl`: 用于国际化支持
+   - 支持项目 ID、键名、源语言、源文本、目标语言等参数
+   - 支持上下文、备注、长度限制、复数形式等高级功能
+   - 内置完整的验证机制
 
-## 开发依赖
+2. **TranslationService 扩展**:
 
-- `test`: 单元测试框架
-- `lints`: 代码质量检查
-- `build_runner`: 代码生成工具
-- `json_serializable`: JSON 序列化代码生成
+   - `batchCreateTranslationEntries`: 批量创建翻译条目
+   - `createTranslationKey`: 为指定的 key 创建多个语言版本的翻译条目
+
+3. **TranslationUtils 扩展**:
+
+   - `generateTranslationEntries`: 根据请求生成翻译条目列表
+   - `isValidTranslationKey`: 验证翻译键格式
+   - `batchValidateTranslationEntries`: 批量验证翻译条目
+   - `createTranslationKeyRequestFromProject`: 从项目信息创建翻译键请求
+
+4. **自动语言版本生成**:
+
+   - 支持为项目的所有目标语言自动生成翻译条目
+   - 支持为默认语言生成已完成状态的翻译条目
+   - 支持复数形式、占位符、长度限制等高级功能
+
+5. **完整的验证机制**:
+   - 翻译键格式验证
+   - 语言代码验证
+   - 翻译条目完整性验证
+   - 批量验证支持
+
+这些功能大大简化了翻译键的创建和管理流程，支持一次性为多个语言创建翻译条目，提高了开发效率。
