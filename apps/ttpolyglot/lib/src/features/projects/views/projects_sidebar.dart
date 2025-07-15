@@ -77,7 +77,7 @@ class ProjectsSidebar extends StatelessWidget {
               child: SizedBox(
                 height: 36.0,
                 child: TextField(
-                  onChanged: controller.searchProjects,
+                  onChanged: ProjectsController.searchProjectsWithService,
                   style: TextStyle(
                     fontSize: 14.0,
                     color: Theme.of(context).colorScheme.onSurface,
@@ -147,7 +147,7 @@ class ProjectsSidebar extends StatelessWidget {
         }
 
         return RefreshIndicator(
-          onRefresh: controller.refreshProjects,
+          onRefresh: ProjectsController.refreshProjects,
           child: ListView.builder(
             itemCount: projects.length,
             itemBuilder: (context, index) {
@@ -158,7 +158,7 @@ class ProjectsSidebar extends StatelessWidget {
                   context: context,
                   delegate: delegate,
                   onTap: (project) {
-                    controller.setSelectedProjectId(project.id);
+                    ProjectsController.setSelectedProjectId(project.id);
                   },
                   isSelected: controller.selectedProjectId == project.id,
                 ),

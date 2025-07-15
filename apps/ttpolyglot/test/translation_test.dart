@@ -1,8 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ttpolyglot/src/features/translation/services/translation_service_impl.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 void main() {
   group('翻译功能测试', () {
+    late TranslationServiceImpl translationService;
+
+    setUp(() async {
+      // 这里应该设置测试环境
+      // translationService = await TranslationServiceImpl.create();
+    });
+
     test('创建翻译键请求验证', () {
       // 准备测试数据
       final english = Language.getLanguageByCode('en-US')!;
@@ -63,6 +71,62 @@ void main() {
       final japaneseEntry = entries.firstWhere((entry) => entry.targetLanguage.code == 'ja-JP');
       expect(japaneseEntry.status, TranslationStatus.pending);
       expect(japaneseEntry.targetText, '');
+    });
+
+    test('项目语言变化同步测试', () {
+      // 准备测试数据
+      final english = Language.getLanguageByCode('en-US')!;
+      final chinese = Language.getLanguageByCode('zh-CN')!;
+      final japanese = Language.getLanguageByCode('ja-JP')!;
+      final korean = Language.getLanguageByCode('ko-KR')!;
+
+      // 模拟现有的翻译条目
+      final existingEntries = [
+        TranslationEntry(
+          id: 'entry-1',
+          projectId: 'test-project',
+          key: 'common.greeting',
+          sourceLanguage: english,
+          targetLanguage: chinese,
+          sourceText: 'Hello',
+          targetText: '你好',
+          status: TranslationStatus.completed,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+        TranslationEntry(
+          id: 'entry-2',
+          projectId: 'test-project',
+          key: 'common.greeting',
+          sourceLanguage: english,
+          targetLanguage: japanese,
+          sourceText: 'Hello',
+          targetText: 'こんにちは',
+          status: TranslationStatus.completed,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      ];
+
+      // 新的目标语言列表（移除日语，添加韩语）
+      final newTargetLanguages = [chinese, korean];
+
+      // 验证语言变化检测逻辑
+      final oldTargetCodes = [chinese, japanese].map((lang) => lang.code).toSet();
+      final newTargetCodes = newTargetLanguages.map((lang) => lang.code).toSet();
+
+      expect(oldTargetCodes.containsAll(newTargetCodes), false); // 应该检测到变化
+      expect(newTargetCodes.containsAll(oldTargetCodes), false); // 应该检测到变化
+
+      // 验证需要添加的语言
+      final languagesToAdd = newTargetLanguages.where((lang) => !oldTargetCodes.contains(lang.code)).toList();
+      expect(languagesToAdd.length, 1);
+      expect(languagesToAdd.first.code, 'ko-KR');
+
+      // 验证需要删除的语言
+      final languagesToRemove = [chinese, japanese].where((lang) => !newTargetCodes.contains(lang.code)).toList();
+      expect(languagesToRemove.length, 1);
+      expect(languagesToRemove.first.code, 'ja-JP');
     });
 
     test('翻译键验证', () {
@@ -134,6 +198,53 @@ void main() {
       // 按语言分组
       final groupedByLanguage = TranslationUtils.groupByLanguage(entries);
       expect(groupedByLanguage[chinese]?.length, 3);
+    });
+
+    test('验证翻译键格式', () {
+      expect(TranslationUtils.isValidTranslationKey('common.greeting'), true);
+      expect(TranslationUtils.isValidTranslationKey('app.buttons.submit'), true);
+      expect(TranslationUtils.isValidTranslationKey('errors.network.timeout'), true);
+      expect(TranslationUtils.isValidTranslationKey('valid-key'), true); // 破折号是允许的
+      expect(TranslationUtils.isValidTranslationKey(''), false);
+      expect(TranslationUtils.isValidTranslationKey('invalid key'), false); // 空格不允许
+      expect(TranslationUtils.isValidTranslationKey('123invalid'), false); // 不能以数字开头
+    });
+
+    test('验证翻译条目批量验证', () {
+      final english = Language.getLanguageByCode('en-US')!;
+      final chinese = Language.getLanguageByCode('zh-CN')!;
+
+      final validEntry = TranslationEntry(
+        id: 'entry-1',
+        projectId: 'test-project',
+        key: 'common.greeting',
+        sourceLanguage: english,
+        targetLanguage: chinese,
+        sourceText: 'Hello',
+        targetText: '你好',
+        status: TranslationStatus.completed,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      final invalidEntry = TranslationEntry(
+        id: 'entry-2',
+        projectId: 'test-project',
+        key: 'invalid key', // 无效的键名
+        sourceLanguage: english,
+        targetLanguage: chinese,
+        sourceText: '', // 空的源文本
+        targetText: '你好',
+        status: TranslationStatus.completed,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      final validationResults = TranslationUtils.batchValidateTranslationEntries([validEntry, invalidEntry]);
+
+      expect(validationResults.containsKey('entry-1'), false); // 有效条目不应该有错误
+      expect(validationResults.containsKey('entry-2'), true); // 无效条目应该有错误
+      expect(validationResults['entry-2']!.length, 2); // 应该有2个错误（键名和源文本）
     });
   });
 }

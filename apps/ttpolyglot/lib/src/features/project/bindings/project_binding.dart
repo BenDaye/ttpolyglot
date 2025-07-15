@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
+import 'package:ttpolyglot/src/features/translation/translation.dart';
 
 class ProjectBinding extends Bindings {
   @override
@@ -8,6 +9,7 @@ class ProjectBinding extends Bindings {
     if (projectId != null) {
       Get.put(ProjectController(), tag: projectId);
       Get.put(ProjectNavigationController(), tag: projectId);
+      Get.put(TranslationController(projectId: projectId), tag: projectId);
     }
   }
 }

@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
+import 'package:ttpolyglot/src/features/translation/translation.dart';
 
 enum ProjectSubPage {
   dashboard,

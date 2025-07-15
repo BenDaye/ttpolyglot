@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
+import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 /// 项目翻译管理页面
@@ -11,12 +12,6 @@ class ProjectTranslationsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 初始化翻译控制器
-    final translationController = Get.put(
-      TranslationController(projectId: projectId),
-      tag: 'translation_$projectId',
-    );
-
     return GetBuilder<ProjectController>(
       tag: projectId,
       builder: (projectController) {
@@ -27,20 +22,35 @@ class ProjectTranslationsView extends StatelessWidget {
           }
 
           return Scaffold(
-            body: Column(
-              children: [
-                // 工具栏
-                _buildToolbar(context, translationController, project),
+            body: GetBuilder<TranslationController>(
+                tag: projectId,
+                builder: (translationController) {
+                  return Column(
+                    children: [
+                      // 工具栏
+                      _buildToolbar(
+                        context,
+                        controller: translationController,
+                        project: project,
+                      ),
 
-                // 筛选栏
-                _buildFilterBar(context, translationController, project),
+                      // 筛选栏
+                      _buildFilterBar(
+                        context,
+                        controller: translationController,
+                        project: project,
+                      ),
 
-                // 翻译条目列表
-                Expanded(
-                  child: _buildTranslationList(context, translationController),
-                ),
-              ],
-            ),
+                      // 翻译条目列表
+                      Expanded(
+                        child: _buildTranslationList(
+                          context,
+                          controller: translationController,
+                        ),
+                      ),
+                    ],
+                  );
+                }),
           );
         });
       },
@@ -48,7 +58,11 @@ class ProjectTranslationsView extends StatelessWidget {
   }
 
   /// 构建工具栏
-  Widget _buildToolbar(BuildContext context, TranslationController controller, Project project) {
+  Widget _buildToolbar(
+    BuildContext context, {
+    required TranslationController controller,
+    required Project project,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       decoration: BoxDecoration(
@@ -119,7 +133,11 @@ class ProjectTranslationsView extends StatelessWidget {
   }
 
   /// 构建筛选栏
-  Widget _buildFilterBar(BuildContext context, TranslationController controller, Project project) {
+  Widget _buildFilterBar(
+    BuildContext context, {
+    required TranslationController controller,
+    required Project project,
+  }) {
     return Container(
       height: 72.0,
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -238,7 +256,7 @@ class ProjectTranslationsView extends StatelessWidget {
 
           // 添加翻译键按钮
           IconButton(
-            onPressed: () => _showAddTranslationDialog(context, controller, project),
+            onPressed: () => _showAddTranslationDialog(context, controller: controller, project: project),
             icon: const Icon(Icons.add),
             tooltip: '添加翻译键',
           ),
@@ -248,7 +266,10 @@ class ProjectTranslationsView extends StatelessWidget {
   }
 
   /// 构建翻译条目列表
-  Widget _buildTranslationList(BuildContext context, TranslationController controller) {
+  Widget _buildTranslationList(
+    BuildContext context, {
+    required TranslationController controller,
+  }) {
     return Obx(
       () {
         if (controller.isLoading) {
@@ -634,7 +655,11 @@ class ProjectTranslationsView extends StatelessWidget {
   }
 
   /// 显示添加翻译对话框
-  void _showAddTranslationDialog(BuildContext context, TranslationController controller, Project project) {
+  void _showAddTranslationDialog(
+    BuildContext context, {
+    required TranslationController controller,
+    required Project project,
+  }) {
     final keyController = TextEditingController();
     final sourceTextController = TextEditingController();
     final contextController = TextEditingController();

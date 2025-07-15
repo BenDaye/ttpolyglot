@@ -166,7 +166,7 @@ class ProjectServiceImpl implements ProjectService {
   }
 
   @override
-  Future<Project> toggleProjectStatus(String projectId, bool isActive) async {
+  Future<Project> toggleProjectStatus(String projectId, {required bool isActive}) async {
     final project = await getProject(projectId);
     if (project == null) {
       throw Exception('项目不存在: $projectId');

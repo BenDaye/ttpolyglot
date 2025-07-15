@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/features/projects/controllers/projects_controller.dart';
+import 'package:ttpolyglot/src/features/projects/projects.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 /// 项目弹窗控制器
@@ -43,8 +43,7 @@ class ProjectDialogController extends GetxController {
 
   /// 初始化语言列表
   void _initializeLanguages() {
-    final controller = Get.find<ProjectsController>();
-    final presetLanguages = controller.getPresetLanguages();
+    final presetLanguages = ProjectsController.getPresetLanguages();
     _availableLanguages.assignAll(presetLanguages);
     // 设置默认语言为中文
     _selectedDefaultLanguage.value = presetLanguages.firstWhere(
@@ -211,14 +210,13 @@ class ProjectDialogController extends GetxController {
     _nameError.value = null;
 
     try {
-      final controller = Get.find<ProjectsController>();
       final name = nameController.text.trim();
       final description = descriptionController.text.trim();
 
       if (_isEditMode.value) {
         // 编辑模式：检查名称是否与其他项目冲突
         if (name != _editingProject.value!.name) {
-          final isNameAvailable = await controller.isProjectNameAvailable(name);
+          final isNameAvailable = await ProjectsController.isProjectNameAvailable(name);
           if (!isNameAvailable) {
             _nameError.value = '项目名称已存在';
             _isLoading.value = false;
@@ -226,8 +224,8 @@ class ProjectDialogController extends GetxController {
           }
         }
 
-        await controller.updateProject(
-          _editingProject.value!,
+        await ProjectsController.updateProject(
+          _editingProject.value!.id,
           name: name,
           description: description,
           defaultLanguage: _selectedDefaultLanguage.value!,
@@ -238,14 +236,14 @@ class ProjectDialogController extends GetxController {
         Get.snackbar('成功', '项目更新成功');
       } else {
         // 创建模式：检查项目名称是否可用
-        final isNameAvailable = await controller.isProjectNameAvailable(name);
+        final isNameAvailable = await ProjectsController.isProjectNameAvailable(name);
         if (!isNameAvailable) {
           _nameError.value = '项目名称已存在';
           _isLoading.value = false;
           return;
         }
 
-        await controller.createProject(
+        await ProjectsController.createProject(
           name: name,
           description: description,
           defaultLanguage: _selectedDefaultLanguage.value!,

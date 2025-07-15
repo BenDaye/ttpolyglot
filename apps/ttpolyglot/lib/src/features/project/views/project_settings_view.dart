@@ -167,7 +167,7 @@ class ProjectSettingsView extends StatelessWidget {
                         children: [
                           Text(
                             '危险操作',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                   color: Colors.red,
                                 ),
                           ),
@@ -177,7 +177,7 @@ class ProjectSettingsView extends StatelessWidget {
                             '删除项目',
                             '永久删除项目及其所有数据',
                             Icons.delete_forever,
-                            () {},
+                            controller.deleteProject,
                           ),
                           _buildDangerItem(
                             context,
@@ -249,13 +249,14 @@ class ProjectSettingsView extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),
       child: ListTile(
+        dense: true,
         leading: Icon(icon, color: Colors.red),
         title: Text(
           title,
           style: const TextStyle(color: Colors.red),
         ),
         subtitle: Text(subtitle),
-        trailing: const Icon(Icons.arrow_forward_ios, color: Colors.red),
+        trailing: const Icon(Icons.arrow_forward_ios, color: Colors.red, size: 16),
         onTap: onTap,
       ),
     );

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/layout/utils/layout_breakpoints.dart';
-import 'package:ttpolyglot/src/features/project/controllers/project_controller.dart';
-import 'package:ttpolyglot/src/features/project/controllers/project_navigation_controller.dart';
-import 'package:ttpolyglot/src/features/project/widgets/project_floating_navigation.dart';
+import 'package:ttpolyglot/src/features/project/project.dart';
 
 /// 项目外壳视图 - 包含悬浮导航和子页面
 class ProjectShell extends StatefulWidget {
@@ -32,35 +30,6 @@ class _ProjectShellState extends State<ProjectShell> {
                   if (controller.isLoading) {
                     return const Center(
                       child: CircularProgressIndicator(),
-                    );
-                  }
-
-                  if (controller.error.isNotEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.error_outline,
-                            size: 64.0,
-                            color: Colors.red,
-                          ),
-                          const SizedBox(height: 16.0),
-                          Text(
-                            controller.error,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.red,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 16.0),
-                          ElevatedButton(
-                            onPressed: controller.refreshProject,
-                            child: const Text('重试'),
-                          ),
-                        ],
-                      ),
                     );
                   }
 

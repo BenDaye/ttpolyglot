@@ -30,7 +30,7 @@ abstract class ProjectService {
   Future<void> deleteProject(String projectId);
 
   /// 激活/停用项目
-  Future<Project> toggleProjectStatus(String projectId, bool isActive);
+  Future<Project> toggleProjectStatus(String projectId, {required bool isActive});
 
   /// 检查项目是否存在
   Future<bool> projectExists(String projectId);
