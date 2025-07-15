@@ -22,21 +22,6 @@ class ProjectSettingsView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 页面标题
-                  Row(
-                    children: [
-                      const Icon(Icons.settings, size: 28.0),
-                      const SizedBox(width: 12.0),
-                      Text(
-                        '项目设置',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24.0),
-
                   // 基本设置卡片
                   Card(
                     child: Padding(
@@ -46,7 +31,7 @@ class ProjectSettingsView extends StatelessWidget {
                         children: [
                           Text(
                             '基本设置',
-                            style: Theme.of(context).textTheme.titleLarge,
+                            style: Theme.of(context).textTheme.titleMedium,
                           ),
                           const SizedBox(height: 16.0),
                           _buildSettingItem(
@@ -54,14 +39,14 @@ class ProjectSettingsView extends StatelessWidget {
                             '项目名称',
                             project.name,
                             Icons.title,
-                            () {},
+                            () => ProjectDialogController.showEditNameDialog(project),
                           ),
                           _buildSettingItem(
                             context,
                             '项目描述',
                             project.description,
                             Icons.description,
-                            () {},
+                            () => ProjectDialogController.showEditDescriptionDialog(project),
                           ),
                           _buildSettingItem(
                             context,
@@ -86,7 +71,7 @@ class ProjectSettingsView extends StatelessWidget {
                         children: [
                           Text(
                             '权限设置',
-                            style: Theme.of(context).textTheme.titleLarge,
+                            style: Theme.of(context).textTheme.titleMedium,
                           ),
                           const SizedBox(height: 16.0),
                           _buildSwitchItem(
@@ -126,7 +111,7 @@ class ProjectSettingsView extends StatelessWidget {
                         children: [
                           Text(
                             '通知设置',
-                            style: Theme.of(context).textTheme.titleLarge,
+                            style: Theme.of(context).textTheme.titleMedium,
                           ),
                           const SizedBox(height: 16.0),
                           _buildSwitchItem(
@@ -212,10 +197,11 @@ class ProjectSettingsView extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),
       child: ListTile(
+        dense: true,
         leading: Icon(icon),
         title: Text(title),
         subtitle: Text(value),
-        trailing: const Icon(Icons.arrow_forward_ios),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
         onTap: onTap,
       ),
     );
@@ -231,6 +217,7 @@ class ProjectSettingsView extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),
       child: SwitchListTile(
+        dense: true,
         title: Text(title),
         subtitle: Text(subtitle),
         value: value,

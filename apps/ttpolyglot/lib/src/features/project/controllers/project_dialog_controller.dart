@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/features/project/project.dart';
 import 'package:ttpolyglot/src/features/projects/projects.dart';
 import 'package:ttpolyglot_core/core.dart';
 
@@ -79,6 +80,8 @@ class ProjectDialogController extends GetxController {
     if (Get.isRegistered<ProjectDialogController>(tag: tag)) {
       Get.delete<ProjectDialogController>(tag: tag);
     }
+
+    _refreshProject(project.id);
   }
 
   /// 显示编辑项目目标语言弹窗
@@ -96,6 +99,8 @@ class ProjectDialogController extends GetxController {
     if (Get.isRegistered<ProjectDialogController>(tag: tag)) {
       Get.delete<ProjectDialogController>(tag: tag);
     }
+
+    _refreshProject(project.id);
   }
 
   /// 显示编辑项目默认语言弹窗
@@ -112,6 +117,54 @@ class ProjectDialogController extends GetxController {
     );
     if (Get.isRegistered<ProjectDialogController>(tag: tag)) {
       Get.delete<ProjectDialogController>(tag: tag);
+    }
+
+    _refreshProject(project.id);
+  }
+
+  /// 显示编辑项目名称弹窗
+  static Future<void> showEditNameDialog(Project project) async {
+    final tag = 'project_dialog_controller_${DateTime.now().millisecondsSinceEpoch}_project_${project.id}';
+    final controller = Get.put(ProjectDialogController(), tag: tag);
+    controller._resetForEdit(project);
+    await Get.dialog(
+      ProjectDialog(
+        tag: tag,
+        dialogModule: const [ProjectDialogModule.name],
+      ),
+      barrierDismissible: false,
+    );
+    if (Get.isRegistered<ProjectDialogController>(tag: tag)) {
+      Get.delete<ProjectDialogController>(tag: tag);
+    }
+
+    _refreshProject(project.id);
+  }
+
+  /// 显示编辑项目描述弹窗
+  static Future<void> showEditDescriptionDialog(Project project) async {
+    final tag = 'project_dialog_controller_${DateTime.now().millisecondsSinceEpoch}_project_${project.id}';
+    final controller = Get.put(ProjectDialogController(), tag: tag);
+    controller._resetForEdit(project);
+    await Get.dialog(
+      ProjectDialog(
+        tag: tag,
+        dialogModule: const [ProjectDialogModule.description],
+      ),
+      barrierDismissible: false,
+    );
+    if (Get.isRegistered<ProjectDialogController>(tag: tag)) {
+      Get.delete<ProjectDialogController>(tag: tag);
+    }
+
+    _refreshProject(project.id);
+  }
+
+  /// 刷新项目数据
+  static void _refreshProject(String projectId) {
+    if (Get.isRegistered<ProjectController>(tag: projectId)) {
+      final controller = Get.find<ProjectController>(tag: projectId);
+      controller.loadProject();
     }
   }
 
