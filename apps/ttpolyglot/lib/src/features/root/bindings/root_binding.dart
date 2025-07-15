@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
-
-import 'package:ttpolyglot/src/features/root/controllers/root_controller.dart';
+import 'package:ttpolyglot/src/features/root/root.dart';
 
 class RootBinding extends Bindings {
   @override

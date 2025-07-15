@@ -5,6 +5,15 @@ import 'package:google_fonts/google_fonts.dart';
 
 /// 应用主题控制器 - 橙色主题设计
 class AppThemeController extends GetxController {
+  static AppThemeController get to {
+    return Get.isRegistered<AppThemeController>()
+        ? Get.find<AppThemeController>()
+        : Get.put(
+            AppThemeController(),
+            permanent: true,
+          );
+  }
+
   // 主题模式响应式变量
   final _themeMode = ThemeMode.system.obs;
 
@@ -17,7 +26,7 @@ class AppThemeController extends GetxController {
   }
 
   /// 橙色主题的浅色主题
-  ThemeData get lightTheme {
+  static ThemeData get lightTheme {
     return FlexThemeData.light(
       scheme: FlexScheme.orangeM3,
       surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
@@ -122,7 +131,7 @@ class AppThemeController extends GetxController {
   }
 
   /// 橙色主题的深色主题
-  ThemeData get darkTheme {
+  static ThemeData get darkTheme {
     return FlexThemeData.dark(
       scheme: FlexScheme.orangeM3,
       surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
@@ -226,25 +235,25 @@ class AppThemeController extends GetxController {
   }
 
   /// 橙色主色调
-  Color get primaryColor => const Color(0xFFFF6B35);
+  static Color get primaryColor => const Color(0xFFFF6B35);
 
   /// 橙色次要色调
-  Color get secondaryColor => const Color(0xFFFF8A65);
+  static Color get secondaryColor => const Color(0xFFFF8A65);
 
   /// 成功色 - 绿色
-  Color get successColor => const Color(0xFF38A169);
+  static Color get successColor => const Color(0xFF38A169);
 
   /// 警告色 - 橙色
-  Color get warningColor => const Color(0xFFFF6B35);
+  static Color get warningColor => const Color(0xFFFF6B35);
 
   /// 错误色 - 红色
-  Color get errorColor => const Color(0xFFE53E3E);
+  static Color get errorColor => const Color(0xFFE53E3E);
 
   /// 信息色 - 蓝色
-  Color get infoColor => const Color(0xFF3182CE);
+  static Color get infoColor => const Color(0xFF3182CE);
 
   /// 获取当前主题的卡片装饰
-  BoxDecoration get cardDecoration {
+  static BoxDecoration get cardDecoration {
     final isDark = Get.isDarkMode;
     return BoxDecoration(
       color: isDark ? const Color(0xFF1C1C1E) : const Color(0xFFFAFAFA),
@@ -260,7 +269,7 @@ class AppThemeController extends GetxController {
   }
 
   /// 获取当前主题的按钮装饰
-  BoxDecoration get buttonDecoration {
+  static BoxDecoration get buttonDecoration {
     return BoxDecoration(
       color: primaryColor,
       borderRadius: BorderRadius.circular(12),
@@ -275,7 +284,7 @@ class AppThemeController extends GetxController {
   }
 
   /// 获取当前主题的输入框装饰
-  BoxDecoration get inputDecoration {
+  static BoxDecoration get inputDecoration {
     final isDark = Get.isDarkMode;
     return BoxDecoration(
       color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF5F5F5),
@@ -288,7 +297,7 @@ class AppThemeController extends GetxController {
   }
 
   /// 获取橙色主题的文本样式
-  TextStyle get orangeTitleStyle {
+  static TextStyle get orangeTitleStyle {
     return TextStyle(
       fontSize: 18,
       fontWeight: FontWeight.w600,
@@ -296,7 +305,7 @@ class AppThemeController extends GetxController {
     );
   }
 
-  TextStyle get orangeBodyStyle {
+  static TextStyle get orangeBodyStyle {
     return TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.normal,
@@ -304,7 +313,7 @@ class AppThemeController extends GetxController {
     );
   }
 
-  TextStyle get orangeCaptionStyle {
+  static TextStyle get orangeCaptionStyle {
     return TextStyle(
       fontSize: 14,
       fontWeight: FontWeight.normal,
@@ -313,7 +322,7 @@ class AppThemeController extends GetxController {
   }
 
   /// 获取橙色主题的渐变色
-  LinearGradient get primaryGradient {
+  static LinearGradient get primaryGradient {
     return LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
@@ -325,7 +334,7 @@ class AppThemeController extends GetxController {
   }
 
   /// 获取橙色主题的分割线
-  Widget get divider {
+  static Widget get divider {
     return Container(
       height: 1,
       color: Get.isDarkMode ? const Color(0xFF38383A) : const Color(0xFFE5E5E5),

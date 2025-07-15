@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/features/root/root.dart';
 
 import 'core/layout/layout_controller.dart';
 import 'core/routing/app_pages.dart';
@@ -13,14 +14,15 @@ class TTPolyglotApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // 初始化控制器
-    final themeController = Get.put(AppThemeController());
+
     LayoutUtils.initLayoutController();
 
     return GetMaterialApp(
       title: 'TTPolyglot',
-      theme: themeController.lightTheme,
-      darkTheme: themeController.darkTheme,
-      themeMode: themeController.themeMode,
+      initialBinding: RootBinding(),
+      theme: AppThemeController.lightTheme,
+      darkTheme: AppThemeController.darkTheme,
+      themeMode: AppThemeController.to.themeMode,
       initialRoute: AppPages.initial,
       getPages: AppPages.pages,
       unknownRoute: AppPages.unknownRoute,

@@ -47,21 +47,17 @@ class _SettingsViewContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // 获取控制器
-    final controller = Get.put(SettingsController());
-    final themeController = Get.find<AppThemeController>();
+    final controller = Get.find<SettingsController>();
 
     return Scaffold(
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          spacing: 16.0,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildThemeSection(themeController),
-            const SizedBox(height: 24),
+            _buildThemeSection(AppThemeController.to),
             _buildLanguageSection(controller),
-            const SizedBox(height: 24),
-            _buildTextFieldTestSection(),
-            const SizedBox(height: 24),
             _buildGeneralSection(controller),
           ],
         ),
@@ -69,53 +65,64 @@ class _SettingsViewContent extends StatelessWidget {
     );
   }
 
-  Widget _buildThemeSection(AppThemeController themeController) {
+  Widget _buildThemeSection(
+    AppThemeController themeController,
+  ) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
                 Icon(Icons.palette),
                 SizedBox(width: 12),
-                Text(
-                  '主题设置',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                Text('主题设置'),
               ],
             ),
             const SizedBox(height: 16),
-            Obx(() => ListTile(
-                  title: const Text('主题模式'),
-                  subtitle: Text(_getThemeModeText(themeController.themeMode)),
-                  trailing: DropdownButton<ThemeMode>(
-                    value: themeController.themeMode,
-                    onChanged: (ThemeMode? mode) {
-                      if (mode != null) {
-                        themeController.setThemeMode(mode);
-                      }
-                    },
-                    items: const [
-                      DropdownMenuItem(
-                        value: ThemeMode.system,
-                        child: Text('跟随系统'),
+            ListTile(
+              dense: true,
+              title: const Text('主题'),
+              subtitle: const Text('选择应用主题'),
+              trailing: Obx(
+                () => SegmentedButton<ThemeMode>(
+                  selected: {themeController.themeMode},
+                  onSelectionChanged: (Set<ThemeMode> mode) {
+                    themeController.setThemeMode(mode.first);
+                  },
+                  segments: [
+                    ButtonSegment(
+                      icon: const Icon(Icons.brightness_auto),
+                      value: ThemeMode.system,
+                      label: Text(_getThemeModeText(ThemeMode.system)),
+                    ),
+                    ButtonSegment(
+                      icon: const Icon(Icons.brightness_5),
+                      value: ThemeMode.light,
+                      label: Text(_getThemeModeText(ThemeMode.light)),
+                    ),
+                    ButtonSegment(
+                      icon: const Icon(Icons.brightness_2),
+                      value: ThemeMode.dark,
+                      label: Text(_getThemeModeText(ThemeMode.dark)),
+                    ),
+                  ],
+                  style: ButtonStyle(
+                    padding: WidgetStateProperty.all(
+                      EdgeInsets.symmetric(horizontal: 16.0),
+                    ),
+                    shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4.0),
+                        side: BorderSide.none,
                       ),
-                      DropdownMenuItem(
-                        value: ThemeMode.light,
-                        child: Text('浅色'),
-                      ),
-                      DropdownMenuItem(
-                        value: ThemeMode.dark,
-                        child: Text('深色'),
-                      ),
-                    ],
+                    ),
                   ),
-                )),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -133,80 +140,29 @@ class _SettingsViewContent extends StatelessWidget {
               children: [
                 Icon(Icons.language),
                 SizedBox(width: 12),
-                Text(
-                  '语言设置',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                Text('语言设置'),
               ],
             ),
             const SizedBox(height: 16),
-            Obx(() => ListTile(
-                  title: const Text('应用语言'),
-                  subtitle: Text(_getLanguageName(controller.language)),
-                  trailing: DropdownButton<String>(
-                    value: controller.language,
-                    onChanged: (String? language) {
-                      if (language != null) {
-                        controller.setLanguage(language);
-                      }
-                    },
-                    items: controller.languages.map<DropdownMenuItem<String>>((lang) {
-                      return DropdownMenuItem<String>(
-                        value: lang['code'],
-                        child: Text(lang['name']!),
-                      );
-                    }).toList(),
-                  ),
-                )),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextFieldTestSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Row(
-              children: [
-                Icon(Icons.text_fields),
-                SizedBox(width: 12),
-                Text(
-                  'TextField 样式测试',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+            Obx(
+              () => ListTile(
+                dense: true,
+                title: const Text('应用语言'),
+                subtitle: Text(_getLanguageName(controller.language)),
+                trailing: DropdownButton<String>(
+                  value: controller.language,
+                  onChanged: (String? language) {
+                    if (language != null) {
+                      controller.setLanguage(language);
+                    }
+                  },
+                  items: controller.languages.map<DropdownMenuItem<String>>((lang) {
+                    return DropdownMenuItem<String>(
+                      value: lang['code'],
+                      child: Text(lang['name']!),
+                    );
+                  }).toList(),
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const TextField(
-              decoration: InputDecoration(
-                hintText: '这是一个测试TextField...',
-                prefixIcon: Icon(Icons.search),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const TextField(
-              decoration: InputDecoration(
-                hintText: '另一个测试TextField...',
-                prefixIcon: Icon(Icons.edit),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const TextField(
-              decoration: InputDecoration(
-                hintText: '带后缀图标的TextField...',
-                prefixIcon: Icon(Icons.person),
-                suffixIcon: Icon(Icons.visibility),
               ),
             ),
           ],
@@ -226,32 +182,32 @@ class _SettingsViewContent extends StatelessWidget {
               children: [
                 Icon(Icons.settings),
                 SizedBox(width: 12),
-                Text(
-                  '通用设置',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                Text('通用设置'),
               ],
             ),
             const SizedBox(height: 16),
-            Obx(() => SwitchListTile(
-                  title: const Text('自动保存'),
-                  subtitle: const Text('编辑时自动保存更改'),
-                  value: controller.autoSave,
-                  onChanged: (bool value) {
-                    controller.toggleAutoSave();
-                  },
-                )),
-            Obx(() => SwitchListTile(
-                  title: const Text('通知'),
-                  subtitle: const Text('接收应用通知'),
-                  value: controller.notifications,
-                  onChanged: (bool value) {
-                    controller.toggleNotifications();
-                  },
-                )),
+            Obx(
+              () => SwitchListTile(
+                dense: true,
+                title: const Text('自动保存'),
+                subtitle: const Text('编辑时自动保存更改'),
+                value: controller.autoSave,
+                onChanged: (bool value) {
+                  controller.toggleAutoSave();
+                },
+              ),
+            ),
+            Obx(
+              () => SwitchListTile(
+                dense: true,
+                title: const Text('通知'),
+                subtitle: const Text('接收应用通知'),
+                value: controller.notifications,
+                onChanged: (bool value) {
+                  controller.toggleNotifications();
+                },
+              ),
+            ),
           ],
         ),
       ),
@@ -261,7 +217,7 @@ class _SettingsViewContent extends StatelessWidget {
   String _getThemeModeText(ThemeMode mode) {
     switch (mode) {
       case ThemeMode.system:
-        return '跟随系统';
+        return '系统';
       case ThemeMode.light:
         return '浅色';
       case ThemeMode.dark:
