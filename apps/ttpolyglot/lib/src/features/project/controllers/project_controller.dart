@@ -172,6 +172,38 @@ class ProjectController extends GetxController {
   Future<void> editProject() async {
     if (_project.value == null) return;
     await ProjectDialogController.showEditDialog(_project.value!);
-    await loadProject();
+    await refreshProject();
+  }
+
+  Future<void> removeTargetLanguage(Language language) async {
+    if (_project.value == null) return;
+
+    final result = await Get.dialog(
+      AlertDialog(
+        title: const Text('删除目标语言'),
+        content: const Text('确定要删除这个目标语言吗？'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Get.back(result: true),
+            child: const Text('确定'),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+
+    if (result == true) {
+      await _projectService.updateProject(
+        projectId,
+        UpdateProjectRequest(
+          targetLanguages: _project.value!.targetLanguages.where((lang) => lang.code != language.code).toList(),
+        ),
+      );
+      await refreshProject();
+    }
   }
 }

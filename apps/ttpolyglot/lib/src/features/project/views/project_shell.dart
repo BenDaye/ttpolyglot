@@ -18,6 +18,8 @@ class _ProjectShellState extends State<ProjectShell> {
 
   @override
   Widget build(BuildContext context) {
+    final isCompact = ResponsiveUtils.shouldShowDrawer(context);
+
     return GetBuilder<ProjectController>(
       tag: projectId,
       builder: (controller) {
@@ -25,60 +27,62 @@ class _ProjectShellState extends State<ProjectShell> {
           body: Stack(
             children: [
               // 主内容区域
-              Obx(() {
-                if (controller.isLoading) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
+              Obx(
+                () {
+                  if (controller.isLoading) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
 
-                if (controller.error.isNotEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.error_outline,
-                          size: 64.0,
-                          color: Colors.red,
-                        ),
-                        const SizedBox(height: 16.0),
-                        Text(
-                          controller.error,
-                          style: const TextStyle(
-                            fontSize: 16,
+                  if (controller.error.isNotEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.error_outline,
+                            size: 64.0,
                             color: Colors.red,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16.0),
-                        ElevatedButton(
-                          onPressed: controller.refreshProject,
-                          child: const Text('重试'),
-                        ),
-                      ],
-                    ),
-                  );
-                }
+                          const SizedBox(height: 16.0),
+                          Text(
+                            controller.error,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.red,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16.0),
+                          ElevatedButton(
+                            onPressed: controller.refreshProject,
+                            child: const Text('重试'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
 
-                final project = controller.project;
-                if (project == null) {
-                  return const Center(
-                    child: Text('项目不存在'),
-                  );
-                }
+                  final project = controller.project;
+                  if (project == null) {
+                    return const Center(
+                      child: Text('项目不存在'),
+                    );
+                  }
 
-                // 根据当前子页面显示不同内容
-                return GetBuilder<ProjectNavigationController>(
-                  tag: projectId,
-                  builder: (navController) {
-                    return Obx(() => navController.subPage);
-                  },
-                );
-              }),
+                  // 根据当前子页面显示不同内容
+                  return GetBuilder<ProjectNavigationController>(
+                    tag: projectId,
+                    builder: (navController) {
+                      return Obx(() => navController.subPage);
+                    },
+                  );
+                },
+              ),
 
               // 悬浮导航
-              if (ResponsiveUtils.shouldShowPersistentSidebar(context))
+              if (!isCompact)
                 ProjectFloatingNavigation(projectId: projectId)
               else
                 ProjectFloatingNavigationHorizontal(projectId: projectId),

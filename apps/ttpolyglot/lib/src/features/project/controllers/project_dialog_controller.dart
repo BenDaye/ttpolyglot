@@ -55,7 +55,7 @@ class ProjectDialogController extends GetxController {
 
   /// 显示创建项目弹窗
   static Future<void> showCreateDialog() async {
-    final tag = 'project_dialog_controller_${DateTime.now().millisecondsSinceEpoch}';
+    final tag = 'project_dialog_controller_${DateTime.now().millisecondsSinceEpoch}_project_create';
     final controller = Get.put(ProjectDialogController(), tag: tag);
     controller._resetForCreate();
     await Get.dialog(
@@ -75,6 +75,40 @@ class ProjectDialogController extends GetxController {
     controller._resetForEdit(project);
     await Get.dialog(
       ProjectDialog(tag: tag),
+      barrierDismissible: false,
+    );
+    if (Get.isRegistered<ProjectDialogController>(tag: tag)) {
+      Get.delete<ProjectDialogController>(tag: tag);
+    }
+  }
+
+  /// 显示编辑项目目标语言弹窗
+  static Future<void> showEditTargetLanguagesDialog(Project project) async {
+    final tag = 'project_dialog_controller_${DateTime.now().millisecondsSinceEpoch}_project_${project.id}';
+    final controller = Get.put(ProjectDialogController(), tag: tag);
+    controller._resetForEdit(project);
+    await Get.dialog(
+      ProjectDialog(
+        tag: tag,
+        dialogModule: const [ProjectDialogModule.targetLanguages],
+      ),
+      barrierDismissible: false,
+    );
+    if (Get.isRegistered<ProjectDialogController>(tag: tag)) {
+      Get.delete<ProjectDialogController>(tag: tag);
+    }
+  }
+
+  /// 显示编辑项目默认语言弹窗
+  static Future<void> showEditDefaultLanguagesDialog(Project project) async {
+    final tag = 'project_dialog_controller_${DateTime.now().millisecondsSinceEpoch}_project_${project.id}';
+    final controller = Get.put(ProjectDialogController(), tag: tag);
+    controller._resetForEdit(project);
+    await Get.dialog(
+      ProjectDialog(
+        tag: tag,
+        dialogModule: const [ProjectDialogModule.defaultLanguage],
+      ),
       barrierDismissible: false,
     );
     if (Get.isRegistered<ProjectDialogController>(tag: tag)) {
@@ -134,6 +168,9 @@ class ProjectDialogController extends GetxController {
   /// 设置默认语言
   void setDefaultLanguage(Language? language) {
     _selectedDefaultLanguage.value = language;
+    if (language != null) {
+      _selectedTargetLanguages.remove(language);
+    }
   }
 
   /// 切换目标语言
@@ -194,7 +231,7 @@ class ProjectDialogController extends GetxController {
           name: name,
           description: description,
           defaultLanguage: _selectedDefaultLanguage.value!,
-          targetLanguages: _selectedTargetLanguages.toList(),
+          targetLanguages: _selectedTargetLanguages.toList()..sort((a, b) => a.sortIndex.compareTo(b.sortIndex)),
         );
 
         Get.back(closeOverlays: true);
@@ -212,7 +249,7 @@ class ProjectDialogController extends GetxController {
           name: name,
           description: description,
           defaultLanguage: _selectedDefaultLanguage.value!,
-          targetLanguages: _selectedTargetLanguages.toList(),
+          targetLanguages: _selectedTargetLanguages.toList()..sort((a, b) => a.sortIndex.compareTo(b.sortIndex)),
         );
 
         Get.back(closeOverlays: true);
@@ -232,10 +269,28 @@ class ProjectDialogController extends GetxController {
   }
 }
 
+enum ProjectDialogModule {
+  name,
+  description,
+  defaultLanguage,
+  targetLanguages,
+}
+
 /// 项目弹窗组件
 class ProjectDialog extends StatelessWidget {
-  const ProjectDialog({super.key, required this.tag});
+  const ProjectDialog({
+    super.key,
+    required this.tag,
+    this.dialogModule = const [
+      ProjectDialogModule.name,
+      ProjectDialogModule.description,
+      ProjectDialogModule.defaultLanguage,
+      ProjectDialogModule.targetLanguages,
+    ],
+  });
+
   final String tag;
+  final List<ProjectDialogModule> dialogModule;
 
   @override
   Widget build(BuildContext context) {
@@ -243,10 +298,10 @@ class ProjectDialog extends StatelessWidget {
       tag: tag,
       builder: (controller) {
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
           child: Container(
-            width: 600.0,
-            height: 700.0,
+            width: 640.0,
+            height: 720.0,
             padding: const EdgeInsets.all(24.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -279,15 +334,17 @@ class ProjectDialog extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // 项目名称
-                            Text(
-                              '项目名称',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                            ),
-                            const SizedBox(height: 8.0),
-                            Obx(() => TextFormField(
+                            if (dialogModule.contains(ProjectDialogModule.name)) ...[
+                              // 项目名称
+                              Text(
+                                '项目名称',
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
+                              const SizedBox(height: 8.0),
+                              Obx(
+                                () => TextFormField(
                                   controller: controller.nameController,
                                   decoration: InputDecoration(
                                     hintText: '请输入项目名称',
@@ -300,101 +357,106 @@ class ProjectDialog extends StatelessWidget {
                                     }
                                     return null;
                                   },
-                                )),
-                            const SizedBox(height: 16.0),
-
-                            // 项目描述
-                            Text(
-                              '项目描述',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                            ),
-                            const SizedBox(height: 8.0),
-                            TextFormField(
-                              controller: controller.descriptionController,
-                              maxLines: 3,
-                              decoration: const InputDecoration(
-                                hintText: '请输入项目描述',
-                                contentPadding: EdgeInsets.all(12.0),
+                                ),
                               ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return '项目描述不能为空';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 16.0),
-
-                            // 默认语言
-                            Text(
-                              '默认语言',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                            ),
-                            const SizedBox(height: 8.0),
-                            Obx(() => Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 0.0),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.surfaceContainer,
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  child: DropdownButton<Language>(
-                                    value: controller.selectedDefaultLanguage != null &&
-                                            controller.availableLanguages
-                                                .any((lang) => lang.code == controller.selectedDefaultLanguage!.code)
-                                        ? controller.availableLanguages
-                                            .firstWhere((lang) => lang.code == controller.selectedDefaultLanguage!.code)
-                                        : null,
-                                    isExpanded: true,
-                                    menuMaxHeight: 240.0,
-                                    underline: const SizedBox(),
-                                    hint: const Text('选择默认语言'),
-                                    items: controller.availableLanguages.map((language) {
-                                      return DropdownMenuItem<Language>(
-                                        value: language,
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              width: 24.0,
-                                              height: 16.0,
-                                              margin: const EdgeInsets.only(right: 8.0),
-                                              decoration: BoxDecoration(
-                                                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                                                borderRadius: BorderRadius.circular(2.0),
-                                              ),
-                                              child: Center(
-                                                child: Text(
-                                                  language.code.split('-')[0].toUpperCase(),
-                                                  style: const TextStyle(fontSize: 10.0),
+                              const SizedBox(height: 16.0),
+                            ],
+                            if (dialogModule.contains(ProjectDialogModule.description)) ...[
+                              // 项目描述
+                              Text(
+                                '项目描述',
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
+                              const SizedBox(height: 8.0),
+                              TextFormField(
+                                controller: controller.descriptionController,
+                                maxLines: 3,
+                                decoration: const InputDecoration(
+                                  hintText: '请输入项目描述',
+                                  contentPadding: EdgeInsets.all(12.0),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return '项目描述不能为空';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16.0),
+                            ],
+                            if (dialogModule.contains(ProjectDialogModule.defaultLanguage)) ...[
+                              // 默认语言
+                              Text(
+                                '默认语言',
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
+                              const SizedBox(height: 8.0),
+                              Obx(() => Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 0.0),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).colorScheme.surfaceContainer,
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                    child: DropdownButton<Language>(
+                                      value: controller.selectedDefaultLanguage != null &&
+                                              controller.availableLanguages
+                                                  .any((lang) => lang.code == controller.selectedDefaultLanguage!.code)
+                                          ? controller.availableLanguages.firstWhere(
+                                              (lang) => lang.code == controller.selectedDefaultLanguage!.code)
+                                          : null,
+                                      isExpanded: true,
+                                      menuMaxHeight: 240.0,
+                                      underline: const SizedBox(),
+                                      hint: const Text('选择默认语言'),
+                                      items: controller.availableLanguages.map((language) {
+                                        return DropdownMenuItem<Language>(
+                                          value: language,
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                width: 24.0,
+                                                height: 16.0,
+                                                margin: const EdgeInsets.only(right: 8.0),
+                                                decoration: BoxDecoration(
+                                                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                                                  borderRadius: BorderRadius.circular(2.0),
+                                                ),
+                                                child: Center(
+                                                  child: Text(
+                                                    language.code.split('-')[0].toUpperCase(),
+                                                    style: const TextStyle(fontSize: 10.0),
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                            Expanded(
-                                              child: Text('${language.name} (${language.nativeName})'),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    }).toList(),
-                                    onChanged: controller.setDefaultLanguage,
-                                  ),
-                                )),
-                            const SizedBox(height: 16.0),
+                                              Expanded(
+                                                child: Text('${language.name} (${language.nativeName})'),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: controller.setDefaultLanguage,
+                                    ),
+                                  )),
+                              const SizedBox(height: 16.0),
+                            ],
+                            if (dialogModule.contains(ProjectDialogModule.targetLanguages)) ...[
+                              // 目标语言
+                              Text(
+                                '目标语言',
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
+                              const SizedBox(height: 8.0),
 
-                            // 目标语言
-                            Text(
-                              '目标语言',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                            ),
-                            const SizedBox(height: 8.0),
-
-                            // 目标语言选择 dropdown
-                            Obx(() => Container(
+                              // 目标语言选择 dropdown
+                              Obx(
+                                () => Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 0.0),
                                   decoration: BoxDecoration(
                                     color: Theme.of(context).colorScheme.surfaceContainer,
@@ -406,128 +468,137 @@ class ProjectDialog extends StatelessWidget {
                                     menuMaxHeight: 240.0,
                                     underline: const SizedBox(),
                                     hint: const Text('选择目标语言'),
-                                    items: controller.availableLanguages.map((language) {
-                                      final isDefaultLanguage = controller.selectedDefaultLanguage == language;
-                                      final isAlreadySelected = controller.selectedTargetLanguages.contains(language);
-                                      final isDisabled = isDefaultLanguage || isAlreadySelected;
+                                    items: controller.availableLanguages.map(
+                                      (language) {
+                                        final isDefaultLanguage = controller.selectedDefaultLanguage == language;
+                                        final isAlreadySelected = controller.selectedTargetLanguages.contains(language);
+                                        final isDisabled = isDefaultLanguage || isAlreadySelected;
 
-                                      return DropdownMenuItem<Language>(
-                                        value: language,
-                                        enabled: !isDisabled,
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              width: 24.0,
-                                              height: 16.0,
-                                              margin: const EdgeInsets.only(right: 8.0),
-                                              decoration: BoxDecoration(
-                                                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                                                borderRadius: BorderRadius.circular(2.0),
+                                        return DropdownMenuItem<Language>(
+                                          value: language,
+                                          enabled: !isDisabled,
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                width: 24.0,
+                                                height: 16.0,
+                                                margin: const EdgeInsets.only(right: 8.0),
+                                                decoration: BoxDecoration(
+                                                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                                                  borderRadius: BorderRadius.circular(2.0),
+                                                ),
+                                                child: Center(
+                                                  child: Text(
+                                                    language.code.split('-')[0].toUpperCase(),
+                                                    style: TextStyle(
+                                                      fontSize: 10.0,
+                                                      color: isDisabled ? Theme.of(context).disabledColor : null,
+                                                    ),
+                                                  ),
+                                                ),
                                               ),
-                                              child: Center(
+                                              Expanded(
                                                 child: Text(
-                                                  language.code.split('-')[0].toUpperCase(),
+                                                  '${language.name} (${language.nativeName})',
                                                   style: TextStyle(
-                                                    fontSize: 10.0,
                                                     color: isDisabled ? Theme.of(context).disabledColor : null,
                                                   ),
                                                 ),
                                               ),
-                                            ),
-                                            Expanded(
-                                              child: Text(
-                                                '${language.name} (${language.nativeName})',
-                                                style: TextStyle(
-                                                  color: isDisabled ? Theme.of(context).disabledColor : null,
-                                                ),
-                                              ),
-                                            ),
-                                            if (isDefaultLanguage)
-                                              const Padding(
-                                                padding: EdgeInsets.only(left: 8.0),
-                                                child: Text(
-                                                  '默认',
-                                                  style: TextStyle(
-                                                    fontSize: 12.0,
-                                                    fontWeight: FontWeight.w500,
+                                              if (isDefaultLanguage)
+                                                const Padding(
+                                                  padding: EdgeInsets.only(left: 8.0),
+                                                  child: Text(
+                                                    '默认',
+                                                    style: TextStyle(
+                                                      fontSize: 12.0,
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                            if (isAlreadySelected)
-                                              const Padding(
-                                                padding: EdgeInsets.only(left: 8.0),
-                                                child: Icon(
-                                                  Icons.check,
-                                                  size: 16.0,
-                                                  color: Colors.green,
+                                              if (isAlreadySelected)
+                                                const Padding(
+                                                  padding: EdgeInsets.only(left: 8.0),
+                                                  child: Icon(
+                                                    Icons.check,
+                                                    size: 16.0,
+                                                    color: Colors.green,
+                                                  ),
                                                 ),
-                                              ),
-                                          ],
-                                        ),
-                                      );
-                                    }).toList(),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    ).toList(),
                                     onChanged: (language) {
                                       if (language != null) {
                                         controller.toggleTargetLanguage(language);
                                       }
                                     },
                                   ),
-                                )),
-                            const SizedBox(height: 16.0),
+                                ),
+                              ),
+                              const SizedBox(height: 16.0),
 
-                            // 已选择的目标语言
-                            Obx(() => controller.selectedTargetLanguages.isNotEmpty
-                                ? Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '已选择的目标语言',
-                                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                      ),
-                                      const SizedBox(height: 8.0),
-                                      Wrap(
-                                        spacing: 8.0,
-                                        runSpacing: 8.0,
-                                        children: controller.selectedTargetLanguages.map((language) {
-                                          return Chip(
-                                            backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-                                            avatar: Container(
-                                              width: 24.0,
-                                              height: 16.0,
-                                              margin: const EdgeInsets.only(right: 4.0),
-                                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                                              decoration: BoxDecoration(
-                                                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                                                borderRadius: BorderRadius.circular(2.0),
-                                              ),
-                                              child: Center(
-                                                child: Text(
-                                                  language.code.split('-')[0].toUpperCase(),
-                                                  style: TextStyle(
-                                                    fontSize: 10.0,
-                                                    color: Theme.of(context).colorScheme.primary,
-                                                  ),
+                              // 已选择的目标语言
+                              Obx(
+                                () => controller.selectedTargetLanguages.isNotEmpty
+                                    ? Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            '已选择的目标语言',
+                                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                                  fontWeight: FontWeight.w600,
                                                 ),
-                                              ),
-                                            ),
-                                            avatarBoxConstraints: const BoxConstraints(
-                                              maxWidth: 48.0,
-                                              maxHeight: 16.0,
-                                            ),
-                                            label: Text('${language.name} (${language.nativeName})'),
-                                            deleteIcon: const Icon(Icons.close, size: 16.0),
-                                            onDeleted: () => controller.removeTargetLanguage(language),
-                                          );
-                                        }).toList(),
-                                      ),
-                                      const SizedBox(height: 8.0),
-                                    ],
-                                  )
-                                : const SizedBox()),
+                                          ),
+                                          const SizedBox(height: 8.0),
+                                          Wrap(
+                                            spacing: 8.0,
+                                            runSpacing: 8.0,
+                                            children: controller.selectedTargetLanguages.map(
+                                              (language) {
+                                                return Chip(
+                                                  backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+                                                  avatar: Container(
+                                                    width: 24.0,
+                                                    height: 16.0,
+                                                    margin: const EdgeInsets.only(right: 4.0),
+                                                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                                    decoration: BoxDecoration(
+                                                      color:
+                                                          Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                                                      borderRadius: BorderRadius.circular(2.0),
+                                                    ),
+                                                    child: Center(
+                                                      child: Text(
+                                                        language.code.split('-')[0].toUpperCase(),
+                                                        style: TextStyle(
+                                                          fontSize: 10.0,
+                                                          color: Theme.of(context).colorScheme.primary,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  avatarBoxConstraints: const BoxConstraints(
+                                                    maxWidth: 48.0,
+                                                    maxHeight: 16.0,
+                                                  ),
+                                                  label: Text('${language.name} (${language.nativeName})'),
+                                                  deleteIcon: const Icon(Icons.close, size: 16.0),
+                                                  onDeleted: () => controller.removeTargetLanguage(language),
+                                                );
+                                              },
+                                            ).toList(),
+                                          ),
+                                          const SizedBox(height: 8.0),
+                                        ],
+                                      )
+                                    : const SizedBox(),
+                              ),
 
-                            const SizedBox(height: 16.0),
+                              const SizedBox(height: 16.0),
+                            ],
                           ],
                         ),
                       ),
@@ -541,21 +612,25 @@ class ProjectDialog extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Obx(() => TextButton(
-                          onPressed: controller.isLoading ? null : controller.closeDialog,
-                          child: const Text('取消'),
-                        )),
+                    Obx(
+                      () => TextButton(
+                        onPressed: controller.isLoading ? null : controller.closeDialog,
+                        child: const Text('取消'),
+                      ),
+                    ),
                     const SizedBox(width: 16.0),
-                    Obx(() => ElevatedButton(
-                          onPressed: controller.isLoading ? null : controller.submitForm,
-                          child: controller.isLoading
-                              ? const SizedBox(
-                                  width: 16.0,
-                                  height: 16.0,
-                                  child: CircularProgressIndicator(strokeWidth: 2.0),
-                                )
-                              : Text(controller.isEditMode ? '更新项目' : '创建项目'),
-                        )),
+                    Obx(
+                      () => ElevatedButton(
+                        onPressed: controller.isLoading ? null : controller.submitForm,
+                        child: controller.isLoading
+                            ? const SizedBox(
+                                width: 16.0,
+                                height: 16.0,
+                                child: CircularProgressIndicator(strokeWidth: 2.0),
+                              )
+                            : Text(controller.isEditMode ? '更新项目' : '创建项目'),
+                      ),
+                    ),
                   ],
                 ),
               ],

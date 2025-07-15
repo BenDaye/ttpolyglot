@@ -14,7 +14,6 @@ class ProjectExportView extends StatelessWidget {
       builder: (controller) {
         return Obx(
           () {
-            if (controller.isLoading) return const Center(child: CircularProgressIndicator());
             final project = controller.project;
             if (project == null) return const Center(child: Text('项目不存在'));
 

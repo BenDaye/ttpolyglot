@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
+import 'package:ttpolyglot_core/core.dart';
 
 /// 项目语言设置页面
 class ProjectLanguagesView extends StatelessWidget {
@@ -14,7 +15,6 @@ class ProjectLanguagesView extends StatelessWidget {
       builder: (controller) {
         return Obx(
           () {
-            if (controller.isLoading) return const Center(child: CircularProgressIndicator());
             final project = controller.project;
             if (project == null) return const Center(child: Text('项目不存在'));
 
@@ -23,81 +23,6 @@ class ProjectLanguagesView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 页面标题
-                  Row(
-                    children: [
-                      const Icon(Icons.language, size: 28.0),
-                      const SizedBox(width: 12.0),
-                      Text(
-                        '语言设置',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24.0),
-
-                  // 默认语言卡片
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '默认语言',
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          const SizedBox(height: 16.0),
-                          _buildLanguageCard(
-                            context,
-                            project.defaultLanguage,
-                            isDefault: true,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16.0),
-
-                  // 目标语言卡片
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                '目标语言',
-                                style: Theme.of(context).textTheme.titleLarge,
-                              ),
-                              ElevatedButton.icon(
-                                onPressed: () {
-                                  // TODO: 添加语言功能
-                                },
-                                icon: const Icon(Icons.add),
-                                label: const Text('添加语言'),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16.0),
-                          ...project.targetLanguages.map((lang) => _buildLanguageCard(
-                                context,
-                                lang,
-                                isDefault: false,
-                              )),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16.0),
-
                   // 语言统计卡片
                   Card(
                     child: Padding(
@@ -137,6 +62,72 @@ class ProjectLanguagesView extends StatelessWidget {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 16.0),
+                  // 默认语言卡片
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '默认语言',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(height: 16.0),
+                          _buildLanguageCard(
+                            context,
+                            project.defaultLanguage,
+                            isDefault: true,
+                            onEdit: (language) async {
+                              await ProjectDialogController.showEditDefaultLanguagesDialog(project);
+                              controller.refreshProject();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16.0),
+
+                  // 目标语言卡片
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '目标语言',
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                              ElevatedButton.icon(
+                                onPressed: () async {
+                                  await ProjectDialogController.showEditTargetLanguagesDialog(project);
+                                  controller.refreshProject();
+                                },
+                                icon: const Icon(Icons.add),
+                                label: const Text('添加语言'),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16.0),
+                          ...project.targetLanguages.map((lang) => _buildLanguageCard(
+                                context,
+                                lang,
+                                isDefault: false,
+                                onDelete: (language) {
+                                  controller.removeTargetLanguage(language);
+                                },
+                              )),
+                        ],
+                      ),
+                    ),
+                  ),
 
                   // 为悬浮导航留出空间
                   const SizedBox(height: 100.0),
@@ -149,7 +140,13 @@ class ProjectLanguagesView extends StatelessWidget {
     );
   }
 
-  Widget _buildLanguageCard(BuildContext context, dynamic language, {required bool isDefault}) {
+  Widget _buildLanguageCard(
+    BuildContext context,
+    Language language, {
+    required bool isDefault,
+    Function(Language)? onEdit,
+    Function(Language)? onDelete,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),
       padding: const EdgeInsets.all(16.0),
@@ -157,7 +154,7 @@ class ProjectLanguagesView extends StatelessWidget {
         color: isDefault
             ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
             : Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(4.0),
         border: isDefault ? Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)) : null,
       ),
       child: Row(
@@ -188,33 +185,9 @@ class ProjectLanguagesView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      language.nativeName,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                    if (isDefault) ...[
-                      const SizedBox(width: 8.0),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary,
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        child: Text(
-                          '默认',
-                          style: TextStyle(
-                            fontSize: 10.0,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
+                Text(
+                  language.nativeName,
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 4.0),
                 Text(
@@ -230,18 +203,15 @@ class ProjectLanguagesView extends StatelessWidget {
           // 操作按钮
           if (!isDefault) ...[
             IconButton(
-              onPressed: () {
-                // TODO: 编辑语言设置
-              },
-              icon: const Icon(Icons.edit),
-              tooltip: '编辑',
-            ),
-            IconButton(
-              onPressed: () {
-                // TODO: 删除语言
-              },
+              onPressed: () => onDelete?.call(language),
               icon: const Icon(Icons.delete),
               tooltip: '删除',
+            ),
+          ] else ...[
+            IconButton(
+              onPressed: () => onEdit?.call(language),
+              icon: const Icon(Icons.edit),
+              tooltip: '编辑',
             ),
           ],
         ],
@@ -260,7 +230,7 @@ class ProjectLanguagesView extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(4.0),
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(

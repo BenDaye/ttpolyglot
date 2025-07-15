@@ -322,11 +322,6 @@ class ProjectsController extends GetxController {
     return ProjectDataInitializer.getPresetLanguages();
   }
 
-  /// 获取常用语言列表
-  List<Language> getCommonLanguages() {
-    return ProjectDataInitializer.getCommonLanguages();
-  }
-
   /// 根据语言代码获取语言对象
   Language? getLanguageByCode(String code) {
     return ProjectDataInitializer.getLanguageByCode(code);

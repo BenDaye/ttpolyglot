@@ -112,6 +112,12 @@ class AppThemeController extends GetxController {
           color: const Color(0xFF191919).withValues(alpha: 0.5),
         ),
       ),
+      cardTheme: CardTheme(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4.0),
+        ),
+        elevation: 2.0,
+      ),
     );
   }
 
@@ -209,6 +215,12 @@ class AppThemeController extends GetxController {
           fontSize: 14.0,
           color: Colors.white.withValues(alpha: 0.5),
         ),
+      ),
+      cardTheme: CardTheme(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4.0),
+        ),
+        elevation: 2.0,
       ),
     );
   }
