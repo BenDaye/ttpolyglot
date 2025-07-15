@@ -14,9 +14,9 @@ class ProjectDashboardView extends StatelessWidget {
       builder: (controller) {
         return Obx(
           () {
+            if (controller.isLoading) return const Center(child: CircularProgressIndicator());
             final project = controller.project;
-
-            if (project == null) return const Placeholder();
+            if (project == null) return const Center(child: Text('项目不存在'));
 
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),

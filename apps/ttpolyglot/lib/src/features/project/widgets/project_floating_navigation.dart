@@ -21,18 +21,6 @@ class ProjectFloatingNavigation extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(4.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.15),
-                    blurRadius: 12.0,
-                    offset: const Offset(0, 4.0),
-                  ),
-                  BoxShadow(
-                    color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.1),
-                    blurRadius: 24.0,
-                    offset: const Offset(0, 8.0),
-                  ),
-                ],
               ),
               padding: const EdgeInsets.symmetric(vertical: 4.0),
               child: Column(
@@ -68,7 +56,7 @@ class ProjectFloatingNavigation extends StatelessWidget {
         message: item.tooltip,
         preferBelow: false,
         child: InkWell(
-          onTap: onTap,
+          onTap: item.isEnabled ? onTap : null,
           borderRadius: BorderRadius.circular(4.0),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),

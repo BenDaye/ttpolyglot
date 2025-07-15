@@ -61,9 +61,10 @@ class ProjectController extends GetxController {
         _project.value = project;
         // 更新项目最后访问时间
         await _projectService.updateProjectLastAccessed(projectId, 'default-user');
-      } else {
-        _error.value = '项目不存在: $projectId';
+        return;
       }
+
+      _error.value = '项目不存在: $projectId';
     } catch (error, stackTrace) {
       _error.value = '加载项目失败: $error';
       log('加载项目失败', error: error, stackTrace: stackTrace);

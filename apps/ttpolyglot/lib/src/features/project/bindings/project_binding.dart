@@ -6,8 +6,8 @@ class ProjectBinding extends Bindings {
   void dependencies() {
     final projectId = Get.parameters['projectId'];
     if (projectId != null) {
-      Get.put(ProjectNavigationController(), tag: projectId);
       Get.put(ProjectController(), tag: projectId);
+      Get.put(ProjectNavigationController(), tag: projectId);
     }
   }
 }
