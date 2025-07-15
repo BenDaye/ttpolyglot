@@ -318,8 +318,8 @@ class ProjectTranslationsView extends StatelessWidget {
               final cardWidth = _calculateCardWidth(constraints.maxWidth);
 
               return Wrap(
-                spacing: 16.0,
-                runSpacing: 16.0,
+                spacing: 8.0,
+                runSpacing: 8.0,
                 children: groupedEntries.entries.map(
                   (entry) {
                     final key = entry.key;
@@ -348,7 +348,7 @@ class ProjectTranslationsView extends StatelessWidget {
   double _calculateCardWidth(double availableWidth) {
     const minCardWidth = 400.0;
     const maxCardWidth = 600.0;
-    const spacing = 16.0;
+    const spacing = 8.0;
 
     // 计算可以放置的列数
     int columns = 1;
