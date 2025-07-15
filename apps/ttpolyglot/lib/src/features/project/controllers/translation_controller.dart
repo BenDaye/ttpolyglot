@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/features/project/controllers/project_controller.dart';
 import 'package:ttpolyglot/src/features/project/services/translation_service_impl.dart';
 import 'package:ttpolyglot_core/core.dart';
 
@@ -9,6 +11,7 @@ import 'package:ttpolyglot_core/core.dart';
 class TranslationController extends GetxController {
   final String projectId;
   late final TranslationServiceImpl _translationService;
+  ProjectController? _projectController;
 
   // 响应式变量
   final _translationEntries = <TranslationEntry>[].obs;
@@ -18,6 +21,9 @@ class TranslationController extends GetxController {
   final _searchQuery = ''.obs;
   final _selectedLanguage = Rxn<Language>();
   final _selectedStatus = Rxn<TranslationStatus>();
+
+  // 用于监听项目语言变化
+  Project? _lastProject;
 
   // Getters
   List<TranslationEntry> get translationEntries => _translationEntries;
@@ -34,6 +40,7 @@ class TranslationController extends GetxController {
   void onInit() {
     super.onInit();
     _initializeService();
+    _setupProjectListener();
   }
 
   /// 初始化翻译服务
@@ -45,6 +52,86 @@ class TranslationController extends GetxController {
       _error.value = '初始化翻译服务失败: $error';
       log('初始化翻译服务失败', error: error, stackTrace: stackTrace);
     }
+  }
+
+  /// 设置项目监听器
+  void _setupProjectListener() {
+    // 延迟获取项目控制器，确保它已经初始化
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (Get.isRegistered<ProjectController>(tag: projectId)) {
+        _projectController = Get.find<ProjectController>(tag: projectId);
+
+        // 使用 ever 监听项目变化
+        ever(_projectController!.projectObs, (Project? project) {
+          if (project != null) {
+            _handleProjectChange(project);
+          }
+        });
+      }
+    });
+  }
+
+  /// 处理项目变化
+  void _handleProjectChange(Project newProject) async {
+    if (_lastProject == null) {
+      _lastProject = newProject;
+      return;
+    }
+
+    // 检查语言配置是否发生变化
+    final hasLanguageChanged = _hasLanguageConfigChanged(_lastProject!, newProject);
+
+    if (hasLanguageChanged) {
+      log('检测到项目语言配置变化，开始同步翻译条目...');
+
+      try {
+        await _translationService.syncProjectLanguages(
+          projectId,
+          newProject.defaultLanguage,
+          newProject.targetLanguages,
+        );
+
+        // 同步完成后重新加载翻译条目
+        await loadTranslationEntries();
+
+        Get.snackbar('成功', '项目语言同步完成');
+      } catch (error, stackTrace) {
+        log('同步项目语言失败', error: error, stackTrace: stackTrace);
+        Get.snackbar('错误', '项目语言同步失败: $error');
+      }
+    }
+
+    _lastProject = newProject;
+  }
+
+  /// 检查语言配置是否发生变化
+  bool _hasLanguageConfigChanged(Project oldProject, Project newProject) {
+    // 检查默认语言是否变化
+    if (oldProject.defaultLanguage.code != newProject.defaultLanguage.code) {
+      return true;
+    }
+
+    // 检查目标语言数量是否变化
+    if (oldProject.targetLanguages.length != newProject.targetLanguages.length) {
+      return true;
+    }
+
+    // 检查目标语言内容是否变化
+    final oldCodes = oldProject.targetLanguages.map((lang) => lang.code).toSet();
+    final newCodes = newProject.targetLanguages.map((lang) => lang.code).toSet();
+
+    if (!oldCodes.containsAll(newCodes) || !newCodes.containsAll(oldCodes)) {
+      return true;
+    }
+
+    // 检查语言排序是否变化
+    for (int i = 0; i < oldProject.targetLanguages.length; i++) {
+      if (oldProject.targetLanguages[i].sortIndex != newProject.targetLanguages[i].sortIndex) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /// 加载翻译条目
@@ -279,6 +366,18 @@ class TranslationController extends GetxController {
         languages.add(entry.targetLanguage);
       }
     }
+
+    // 按 sortIndex 排序
+    languages.sort((a, b) {
+      final aIndex = a.sortIndex;
+      final bIndex = b.sortIndex;
+      if (aIndex != bIndex) {
+        return aIndex.compareTo(bIndex);
+      }
+      // 如果 sortIndex 相同，则按语言代码排序
+      return a.code.compareTo(b.code);
+    });
+
     return languages;
   }
 
@@ -290,35 +389,43 @@ class TranslationController extends GetxController {
   /// 按翻译键分组条目
   Map<String, List<TranslationEntry>> getGroupedEntries() {
     final grouped = <String, List<TranslationEntry>>{};
-    
+
     for (final entry in _filteredEntries) {
       grouped.putIfAbsent(entry.key, () => []).add(entry);
     }
-    
+
     // 按键名排序
     final sortedKeys = grouped.keys.toList()..sort();
     final sortedGrouped = <String, List<TranslationEntry>>{};
-    
+
     for (final key in sortedKeys) {
-      // 按语言代码排序每个组内的条目
+      // 按语言的 sortIndex 排序每个组内的条目
       final entries = grouped[key]!;
-      entries.sort((a, b) => a.targetLanguage.code.compareTo(b.targetLanguage.code));
+      entries.sort((a, b) {
+        final aIndex = a.targetLanguage.sortIndex;
+        final bIndex = b.targetLanguage.sortIndex;
+        if (aIndex != bIndex) {
+          return aIndex.compareTo(bIndex);
+        }
+        // 如果 sortIndex 相同，则按语言代码排序
+        return a.targetLanguage.code.compareTo(b.targetLanguage.code);
+      });
       sortedGrouped[key] = entries;
     }
-    
+
     return sortedGrouped;
   }
 
   /// 获取翻译条目统计信息
   Map<String, int> getStatistics() {
     final stats = <String, int>{};
-    
+
     stats['total'] = _translationEntries.length;
     stats['completed'] = _translationEntries.where((e) => e.status == TranslationStatus.completed).length;
     stats['pending'] = _translationEntries.where((e) => e.status == TranslationStatus.pending).length;
     stats['reviewing'] = _translationEntries.where((e) => e.status == TranslationStatus.reviewing).length;
     stats['translating'] = _translationEntries.where((e) => e.status == TranslationStatus.translating).length;
-    
+
     return stats;
   }
 }

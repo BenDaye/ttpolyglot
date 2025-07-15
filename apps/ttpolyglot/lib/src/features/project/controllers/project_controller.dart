@@ -18,6 +18,7 @@ class ProjectController extends GetxController {
 
   // Getters
   Project? get project => _project.value;
+  Rxn<Project> get projectObs => _project;
   bool get isLoading => _isLoading.value;
   String get error => _error.value;
 

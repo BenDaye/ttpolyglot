@@ -226,6 +226,110 @@ class TranslationServiceImpl implements TranslationService {
     }
   }
 
+  /// 同步项目语言变化
+  /// 当项目的目标语言发生变化时，同步更新翻译条目
+  Future<void> syncProjectLanguages(
+    String projectId,
+    Language sourceLanguage,
+    List<Language> newTargetLanguages,
+  ) async {
+    try {
+      final allEntries = await getTranslationEntries(projectId);
+
+      // 按翻译键分组现有条目
+      final groupedEntries = <String, List<TranslationEntry>>{};
+      for (final entry in allEntries) {
+        if (!groupedEntries.containsKey(entry.key)) {
+          groupedEntries[entry.key] = [];
+        }
+        groupedEntries[entry.key]!.add(entry);
+      }
+
+      final updatedEntries = <TranslationEntry>[];
+
+      // 对每个翻译键处理语言同步
+      for (final keyGroup in groupedEntries.entries) {
+        final key = keyGroup.key;
+        final existingEntries = keyGroup.value;
+
+        // 获取源条目（用于创建新语言条目）
+        final sourceEntry = existingEntries.firstWhere(
+          (entry) => entry.sourceLanguage.code == sourceLanguage.code,
+          orElse: () => existingEntries.first,
+        );
+
+        // 获取当前已有的目标语言
+        final existingTargetLanguages = existingEntries.map((entry) => entry.targetLanguage).toSet();
+
+        // 确定需要添加的语言
+        final languagesToAdd = newTargetLanguages
+            .where((lang) => !existingTargetLanguages.any((existing) => existing.code == lang.code))
+            .toList();
+
+        // 确定需要删除的语言
+        final languagesToRemove = existingTargetLanguages
+            .where((lang) => !newTargetLanguages.any((newLang) => newLang.code == lang.code))
+            .toList();
+
+        // 保留仍然存在的条目
+        final entriesToKeep = existingEntries
+            .where((entry) => newTargetLanguages.any((lang) => lang.code == entry.targetLanguage.code))
+            .toList();
+
+        // 为新语言创建条目
+        for (final language in languagesToAdd) {
+          final newEntry = TranslationEntry(
+            id: _generateId(),
+            projectId: projectId,
+            key: key,
+            sourceLanguage: sourceLanguage,
+            sourceText: sourceEntry.sourceText,
+            targetLanguage: language,
+            targetText: '',
+            status: TranslationStatus.pending,
+            context: sourceEntry.context,
+            comment: sourceEntry.comment,
+            maxLength: sourceEntry.maxLength,
+            isPlural: sourceEntry.isPlural,
+            pluralForms: sourceEntry.pluralForms,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          );
+          updatedEntries.add(newEntry);
+        }
+
+        // 添加保留的条目
+        updatedEntries.addAll(entriesToKeep);
+
+        log('同步翻译键 "$key": 添加 ${languagesToAdd.length} 个语言, 删除 ${languagesToRemove.length} 个语言');
+      }
+
+      // 按目标语言的 sortIndex 排序
+      updatedEntries.sort((a, b) {
+        final aIndex = a.targetLanguage.sortIndex;
+        final bIndex = b.targetLanguage.sortIndex;
+        if (aIndex != bIndex) {
+          return aIndex.compareTo(bIndex);
+        }
+        return a.key.compareTo(b.key);
+      });
+
+      // 保存更新后的翻译条目
+      await _saveTranslationEntries(projectId, updatedEntries);
+
+      log('项目语言同步完成: 共 ${updatedEntries.length} 个翻译条目');
+    } catch (error, stackTrace) {
+      log('同步项目语言失败', error: error, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 生成唯一ID
+  String _generateId() {
+    return DateTime.now().millisecondsSinceEpoch.toString() +
+        (DateTime.now().microsecond % 1000).toString().padLeft(3, '0');
+  }
+
   /// 保存翻译条目到存储
   Future<void> _saveTranslationEntries(String projectId, List<TranslationEntry> entries) async {
     final entriesJson = jsonEncode(entries.map((e) => e.toJson()).toList());

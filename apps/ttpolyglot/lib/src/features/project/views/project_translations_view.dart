@@ -50,7 +50,7 @@ class ProjectTranslationsView extends StatelessWidget {
   /// 构建工具栏
   Widget _buildToolbar(BuildContext context, TranslationController controller, Project project) {
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         border: Border(
@@ -121,7 +121,8 @@ class ProjectTranslationsView extends StatelessWidget {
   /// 构建筛选栏
   Widget _buildFilterBar(BuildContext context, TranslationController controller, Project project) {
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      height: 72.0,
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         border: Border(
