@@ -1,6 +1,9 @@
 import 'dart:developer';
 
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/features/project/controllers/project_dialog_controller.dart';
+import 'package:ttpolyglot/src/features/projects/projects.dart';
 import 'package:ttpolyglot/src/features/projects/services/project_service_impl.dart';
 import 'package:ttpolyglot_core/core.dart';
 
@@ -131,5 +134,43 @@ class ProjectController extends GetxController {
       log('检查项目存在性失败', error: error, stackTrace: stackTrace);
       return false;
     }
+  }
+
+  Future<void> deleteProject() async {
+    final result = await Get.dialog(
+      AlertDialog(
+        title: const Text('删除项目'),
+        content: const Text('确定要删除这个项目吗？'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Get.back(result: true),
+            child: const Text('确定'),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+
+    if (result == true) {
+      await _projectService.deleteProject(projectId);
+
+      if (Get.isRegistered<ProjectsController>()) {
+        final controller = Get.find<ProjectsController>();
+        controller.setSelectedProjectId(null);
+        controller.loadProjects();
+      }
+
+      Get.back(closeOverlays: true);
+    }
+  }
+
+  Future<void> editProject() async {
+    if (_project.value == null) return;
+    await ProjectDialogController.showEditDialog(_project.value!);
+    await loadProject();
   }
 }

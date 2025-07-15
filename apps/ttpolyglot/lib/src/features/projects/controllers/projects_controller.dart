@@ -199,7 +199,12 @@ class ProjectsController extends GetxController {
   }
 
   /// 设置选中的项目ID
-  void setSelectedProjectId(String id) {
+  void setSelectedProjectId(String? id) {
+    if (id == null || id.isEmpty) {
+      _selectedProjectId.value = '';
+      return;
+    }
+
     final project = _projects.firstWhereOrNull((project) => project.id == id);
     if (project != null) {
       _selectedProjectId.value = id;
