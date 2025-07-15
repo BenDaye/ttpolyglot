@@ -1,11 +1,12 @@
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/features/project/controllers/project_controller.dart';
+import 'package:ttpolyglot/src/features/project/project.dart';
 
 class ProjectBinding extends Bindings {
   @override
   void dependencies() {
     final projectId = Get.parameters['projectId'];
     if (projectId != null) {
+      Get.put(ProjectNavigationController(), tag: projectId);
       Get.put(ProjectController(), tag: projectId);
     }
   }

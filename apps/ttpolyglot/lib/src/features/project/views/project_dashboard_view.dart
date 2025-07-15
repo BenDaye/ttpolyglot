@@ -1,109 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/features/project/controllers/project_controller.dart';
+import 'package:ttpolyglot/src/features/project/project.dart';
 
-class ProjectView extends StatelessWidget {
-  const ProjectView({super.key});
+/// 项目概览页面
+class ProjectDashboardView extends StatelessWidget {
+  const ProjectDashboardView({super.key, required this.projectId});
+  final String projectId;
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ProjectController>(
-      tag: Get.parameters['projectId'],
+      tag: projectId,
       builder: (controller) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Obx(
-              () => ListTile(
-                title: Text(
-                  controller.project?.name ?? 'ProjectView: ${controller.projectId}',
-                ),
-                subtitle: Text(
-                  controller.project?.description ?? '',
-                ),
-              ),
-            ),
-            toolbarHeight: 64.0,
-            actions: [
-              Obx(
-                () => controller.project != null
-                    ? Row(
-                        spacing: 8.0,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit),
-                            onPressed: () => controller.editProject(),
-                            tooltip: '编辑项目',
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.refresh),
-                            onPressed: controller.refreshProject,
-                            tooltip: '刷新项目',
-                          ),
-                          PopupMenuButton(
-                            offset: const Offset(0, 48.0),
-                            menuPadding: EdgeInsets.zero,
-                            itemBuilder: (context) => [
-                              PopupMenuItem(
-                                padding: EdgeInsets.zero,
-                                child: ListTile(
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
-                                  onTap: () => controller.deleteProject(),
-                                  title: Text('删除项目'),
-                                  leading: const Icon(Icons.delete),
-                                ),
-                              ),
-                            ],
-                            icon: const Icon(Icons.more_vert),
-                          ),
-                        ],
-                      )
-                    : const SizedBox.shrink(),
-              ),
-              const SizedBox(width: 16.0),
-            ],
-          ),
-          body: Obx(() {
-            if (controller.isLoading) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-
-            if (controller.error.isNotEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 64.0,
-                      color: Colors.red,
-                    ),
-                    const SizedBox(height: 16.0),
-                    Text(
-                      controller.error,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.red,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16.0),
-                    ElevatedButton(
-                      onPressed: controller.refreshProject,
-                      child: const Text('重试'),
-                    ),
-                  ],
-                ),
-              );
-            }
-
+        return Obx(
+          () {
             final project = controller.project;
-            if (project == null) {
-              return const Center(
-                child: Text('项目不存在'),
-              );
-            }
+
+            if (project == null) return const Placeholder();
 
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
@@ -171,7 +84,7 @@ class ProjectView extends StatelessWidget {
                           Wrap(
                             spacing: 8,
                             runSpacing: 8,
-                            children: project.targetLanguages.map((lang) => _buildLanguageChip(lang)).toList(),
+                            children: project.targetLanguages.map<Widget>((lang) => _buildLanguageChip(lang)).toList(),
                           ),
                         ],
                       ),
@@ -205,10 +118,13 @@ class ProjectView extends StatelessWidget {
                       ),
                     ),
                   ),
+
+                  // 为悬浮导航留出空间
+                  const SizedBox(height: 100.0),
                 ],
               ),
             );
-          }),
+          },
         );
       },
     );

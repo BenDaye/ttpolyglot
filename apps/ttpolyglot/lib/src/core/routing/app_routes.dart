@@ -11,6 +11,15 @@ abstract class Routes {
 
   static String project(String projectId) => '$projects/$projectId';
 
+  // 项目子页面路由
+  static String projectDashboard(String projectId) => '${project(projectId)}/dashboard';
+  static String projectTranslations(String projectId) => '${project(projectId)}/translations';
+  static String projectLanguages(String projectId) => '${project(projectId)}/languages';
+  static String projectMembers(String projectId) => '${project(projectId)}/members';
+  static String projectSettings(String projectId) => '${project(projectId)}/settings';
+  static String projectImport(String projectId) => '${project(projectId)}/import';
+  static String projectExport(String projectId) => '${project(projectId)}/export';
+
   static const settings = _Paths.home + _Paths.settings;
 
   static const unknown = _Paths.unknown;
