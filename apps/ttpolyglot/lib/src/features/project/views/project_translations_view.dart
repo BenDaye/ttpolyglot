@@ -714,7 +714,7 @@ class ProjectTranslationsView extends StatelessWidget {
                 key: key,
                 sourceText: sourceText,
                 sourceLanguage: project.defaultLanguage,
-                targetLanguages: project.targetLanguages,
+                targetLanguages: project.targetLanguages..sort((a, b) => a.sortIndex.compareTo(b.sortIndex)),
                 context: contextController.text.trim().isEmpty ? null : contextController.text.trim(),
                 comment: commentController.text.trim().isEmpty ? null : commentController.text.trim(),
               );
