@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/core/layout/layout_controller.dart';
+import 'package:ttpolyglot/src/core/platform/platform_adapter.dart';
 import 'package:ttpolyglot/src/core/routing/app_pages.dart';
-
-import '../../../core/layout/layout_controller.dart';
-import '../../../core/platform/platform_adapter.dart';
-import '../../../core/storage/storage_provider.dart';
+import 'package:ttpolyglot/src/core/storage/storage_provider.dart';
 
 class DashboardView extends StatefulWidget {
   const DashboardView({super.key});
@@ -54,7 +53,7 @@ class _DashboardViewContentState extends State<DashboardViewContent> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -71,7 +70,7 @@ class _DashboardViewContentState extends State<DashboardViewContent> {
   Widget _buildWelcomeCard() {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -108,7 +107,7 @@ class _DashboardViewContentState extends State<DashboardViewContent> {
   Widget _buildPlatformInfoCard() {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -134,7 +133,7 @@ class _DashboardViewContentState extends State<DashboardViewContent> {
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

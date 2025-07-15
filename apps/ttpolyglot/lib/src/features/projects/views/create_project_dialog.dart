@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot_core/core.dart';
 
-import '../controllers/projects_controller.dart';
+import 'package:ttpolyglot/src/features/projects/controllers/projects_controller.dart';
 
 /// 创建项目弹窗
 class CreateProjectDialog extends StatefulWidget {
@@ -146,7 +146,7 @@ class _CreateProjectDialogState extends State<CreateProjectDialog> {
       child: Container(
         width: 600,
         height: 700,
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -191,7 +191,7 @@ class _CreateProjectDialogState extends State<CreateProjectDialog> {
                           decoration: InputDecoration(
                             hintText: '请输入项目名称',
                             errorText: _nameError,
-                            contentPadding: const EdgeInsets.all(12),
+                            contentPadding: const EdgeInsets.all(12.0),
                           ),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
@@ -215,7 +215,7 @@ class _CreateProjectDialogState extends State<CreateProjectDialog> {
                           maxLines: 3,
                           decoration: InputDecoration(
                             hintText: '请输入项目描述',
-                            contentPadding: const EdgeInsets.all(12),
+                            contentPadding: const EdgeInsets.all(12.0),
                           ),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
@@ -233,12 +233,12 @@ class _CreateProjectDialogState extends State<CreateProjectDialog> {
                                 fontWeight: FontWeight.w600,
                               ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 8.0),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 0.0),
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.surfaceContainer,
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(8.0),
                           ),
                           child: DropdownButton<Language>(
                             value: _selectedDefaultLanguage != null &&

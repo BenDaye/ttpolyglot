@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../controllers/sign_up_controller.dart';
+import 'package:ttpolyglot/src/features/sign_up/controllers/sign_up_controller.dart';
 
 class SignUpView extends GetView<SignUpController> {
   const SignUpView({super.key});

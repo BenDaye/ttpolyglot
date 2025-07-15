@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../../core/layout/layout_controller.dart';
-import '../../../core/routing/app_pages.dart';
-import '../../../core/theme/app_theme.dart';
-import '../controllers/settings_controller.dart';
+import 'package:ttpolyglot/src/core/layout/layout_controller.dart';
+import 'package:ttpolyglot/src/core/routing/app_pages.dart';
+import 'package:ttpolyglot/src/core/theme/app_theme.dart';
+import 'package:ttpolyglot/src/features/settings/controllers/settings_controller.dart';
 
 class SettingsView extends StatefulWidget {
   const SettingsView({super.key});
@@ -53,7 +52,7 @@ class _SettingsViewContent extends StatelessWidget {
 
     return Scaffold(
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -73,7 +72,7 @@ class _SettingsViewContent extends StatelessWidget {
   Widget _buildThemeSection(AppThemeController themeController) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -126,7 +125,7 @@ class _SettingsViewContent extends StatelessWidget {
   Widget _buildLanguageSection(SettingsController controller) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -171,7 +170,7 @@ class _SettingsViewContent extends StatelessWidget {
   Widget _buildTextFieldTestSection() {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -219,7 +218,7 @@ class _SettingsViewContent extends StatelessWidget {
   Widget _buildGeneralSection(SettingsController controller) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

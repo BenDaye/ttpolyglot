@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
 
@@ -12,8 +13,9 @@ class WebStorageImpl {
     try {
       html.window.localStorage['test'] = 'test';
       html.window.localStorage.remove('test');
-    } catch (e) {
-      throw Exception('LocalStorage is not available: $e');
+    } catch (error, stackTrace) {
+      log('initialize', error: error, stackTrace: stackTrace);
+      throw Exception('LocalStorage is not available: $error');
     }
   }
 

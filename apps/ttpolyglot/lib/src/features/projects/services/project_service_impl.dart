@@ -3,7 +3,7 @@ import 'dart:developer';
 
 import 'package:ttpolyglot_core/core.dart';
 
-import '../../../core/storage/storage_provider.dart';
+import 'package:ttpolyglot/src/core/storage/storage_provider.dart';
 
 /// 项目服务实现
 class ProjectServiceImpl implements ProjectService {

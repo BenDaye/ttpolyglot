@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
-
-import '../controllers/project_controller.dart';
+import 'package:ttpolyglot/src/features/project/controllers/project_controller.dart';
 
 class ProjectBinding extends Bindings {
   @override

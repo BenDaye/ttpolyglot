@@ -1,9 +1,8 @@
 import 'dart:developer';
 
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/features/projects/services/project_service_impl.dart';
 import 'package:ttpolyglot_core/core.dart';
-
-import '../../projects/services/project_service_impl.dart';
 
 class ProjectController extends GetxController {
   late final String projectId;

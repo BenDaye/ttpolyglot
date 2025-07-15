@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../controllers/project_controller.dart';
+import 'package:ttpolyglot/src/features/project/controllers/project_controller.dart';
 
 class ProjectView extends StatelessWidget {
   const ProjectView({super.key});
@@ -13,9 +12,16 @@ class ProjectView extends StatelessWidget {
       builder: (controller) {
         return Scaffold(
           appBar: AppBar(
-            title: Obx(() => Text(
+            title: Obx(
+              () => ListTile(
+                title: Text(
                   controller.project?.name ?? 'ProjectView: ${controller.projectId}',
-                )),
+                ),
+                subtitle: Text(
+                  controller.project?.description ?? '',
+                ),
+              ),
+            ),
             toolbarHeight: 64,
             actions: [
               if (controller.project != null)
@@ -70,14 +76,14 @@ class ProjectView extends StatelessWidget {
             }
 
             return SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 项目基本信息卡片
                   Card(
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -110,7 +116,7 @@ class ProjectView extends StatelessWidget {
                   // 语言配置卡片
                   Card(
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -147,7 +153,7 @@ class ProjectView extends StatelessWidget {
                   // 项目所有者信息卡片
                   Card(
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -180,7 +186,7 @@ class ProjectView extends StatelessWidget {
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -209,7 +215,7 @@ class ProjectView extends StatelessWidget {
 
   Widget _buildLanguageInfo(String label, dynamic language) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

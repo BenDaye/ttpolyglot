@@ -108,7 +108,8 @@ class ProjectDataInitializer {
   static Language? getLanguageByCode(String code) {
     try {
       return getPresetLanguages().firstWhere((lang) => lang.code == code);
-    } catch (e) {
+    } catch (error, stackTrace) {
+      log('getLanguageByCode', error: error, stackTrace: stackTrace);
       return null;
     }
   }

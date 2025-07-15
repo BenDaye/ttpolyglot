@@ -3,4 +3,7 @@ alwaysApply: true
 ---
 
 1. 我希望用 dart:developer 的 log 来替代 print 输出日志
-2. try catch 的代码，要catch 的是 error 和 stackTrace，并输出 log('[函数名称]', error: error, stackTrace: stackTrace);
+2. try catch 的代码，要 catch 的是 error 和 stackTrace，并输出 log('[函数名称]', error: error, stackTrace: stackTrace);
+3. Flutter 的 padding/margin/width/height/size 以及其它的参数，都尽可能使用 double，即便是整数也要写类似 10.0 这个风格
+4. features 目录下的每个 feature 文件夹都写一个默认导出的文件, 方便其他目录引入
+5. 使用 package 风格引入，不要使用相对路径

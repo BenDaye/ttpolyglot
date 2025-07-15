@@ -1,10 +1,9 @@
 import 'dart:developer';
 
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/features/projects/services/project_data_initializer.dart';
+import 'package:ttpolyglot/src/features/projects/services/project_service_impl.dart';
 import 'package:ttpolyglot_core/core.dart';
-
-import '../services/project_data_initializer.dart';
-import '../services/project_service_impl.dart';
 
 /// 项目管理控制器
 class ProjectsController extends GetxController {
@@ -67,9 +66,10 @@ class ProjectsController extends GetxController {
     try {
       final projects = await _projectService.getAllProjects();
       _projects.assignAll(projects);
-    } catch (e) {
-      _error.value = '加载项目失败: $e';
+    } catch (error, stackTrace) {
+      _error.value = '加载项目失败: $error';
       Get.snackbar('错误', _error.value);
+      log('loadProjects', error: error, stackTrace: stackTrace);
     } finally {
       _isLoading.value = false;
     }
@@ -111,9 +111,10 @@ class ProjectsController extends GetxController {
       _projects.add(newProject);
 
       Get.snackbar('成功', '项目创建成功');
-    } catch (e) {
-      _error.value = '创建项目失败: $e';
+    } catch (error, stackTrace) {
+      _error.value = '创建项目失败: $error';
       Get.snackbar('错误', _error.value);
+      log('createProject', error: error, stackTrace: stackTrace);
     } finally {
       _isLoading.value = false;
     }
@@ -146,9 +147,10 @@ class ProjectsController extends GetxController {
       }
 
       Get.snackbar('成功', '项目更新成功');
-    } catch (e) {
-      _error.value = '更新项目失败: $e';
+    } catch (error, stackTrace) {
+      _error.value = '更新项目失败: $error';
       Get.snackbar('错误', _error.value);
+      log('updateProject', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -164,9 +166,10 @@ class ProjectsController extends GetxController {
       }
 
       Get.snackbar('成功', '项目删除成功');
-    } catch (e) {
-      _error.value = '删除项目失败: $e';
+    } catch (error, stackTrace) {
+      _error.value = '删除项目失败: $error';
       Get.snackbar('错误', _error.value);
+      log('deleteProject', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -183,9 +186,10 @@ class ProjectsController extends GetxController {
 
       final status = isActive ? '激活' : '停用';
       Get.snackbar('成功', '项目$status成功');
-    } catch (e) {
-      _error.value = '切换项目状态失败: $e';
+    } catch (error, stackTrace) {
+      _error.value = '切换项目状态失败: $error';
       Get.snackbar('错误', _error.value);
+      log('toggleProjectStatus', error: error, stackTrace: stackTrace);
     }
   }
 
