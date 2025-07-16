@@ -1,26 +1,20 @@
 import 'dart:developer';
 
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/core/services/translation_service_impl.dart';
 import 'package:ttpolyglot/src/features/projects/services/project_data_initializer.dart';
-import 'package:ttpolyglot/src/features/projects/services/project_service_impl.dart';
+import 'package:ttpolyglot/src/core/services/project_service_impl.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 /// 项目管理控制器
 class ProjectsController extends GetxController {
   static ProjectsController get to {
-    return Get.isRegistered<ProjectsController>()
-        ? Get.find<ProjectsController>()
-        : Get.put(
-            ProjectsController(),
-          );
+    return Get.isRegistered<ProjectsController>() ? Get.find<ProjectsController>() : Get.put(ProjectsController());
   }
 
-  // 项目服务
-  late final ProjectServiceImpl _projectService;
-
-  // 翻译服务
-  late final TranslationServiceImpl _translationService;
+  final ProjectServiceImpl _projectService = Get.find<ProjectServiceImpl>();
+  final TranslationServiceImpl _translationService = Get.find<TranslationServiceImpl>();
 
   // 响应式项目列表
   final _projects = <Project>[].obs;
@@ -54,17 +48,14 @@ class ProjectsController extends GetxController {
   /// 初始化项目服务
   Future<void> _initializeService() async {
     try {
-      _projectService = await ProjectServiceImpl.create();
-      _translationService = await TranslationServiceImpl.create();
-
       // 初始化示例数据
       final initializer = ProjectDataInitializer(_projectService);
       await initializer.initializeSampleProjects();
 
       await loadProjects();
-    } catch (e, stackTrace) {
-      Get.snackbar('错误', '初始化项目服务失败: $e');
-      log('初始化项目服务失败', error: e, stackTrace: stackTrace);
+    } catch (error, stackTrace) {
+      Get.snackbar('错误', '初始化项目服务失败: $error');
+      log('初始化项目服务失败', error: error, stackTrace: stackTrace);
     }
   }
 

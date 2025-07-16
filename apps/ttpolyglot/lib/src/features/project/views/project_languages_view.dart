@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 import 'package:ttpolyglot_core/core.dart';
 
@@ -130,7 +131,7 @@ class ProjectLanguagesView extends StatelessWidget {
             child: Center(
               child: Text(
                 language.code.split('-')[0].toUpperCase(),
-                style: TextStyle(
+                style: GoogleFonts.notoSansMono(
                   fontSize: 12.0,
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).colorScheme.primary,

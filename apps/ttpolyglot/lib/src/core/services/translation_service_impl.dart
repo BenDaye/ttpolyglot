@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/storage/storage_provider.dart';
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_parsers/parsers.dart';
 
 /// 翻译服务实现
-class TranslationServiceImpl implements TranslationService {
+class TranslationServiceImpl extends GetxService implements TranslationService {
   final StorageService _storageService;
 
   TranslationServiceImpl(this._storageService);
@@ -23,13 +25,33 @@ class TranslationServiceImpl implements TranslationService {
   }
 
   @override
-  Future<List<TranslationEntry>> getTranslationEntries(String projectId) async {
+  Future<List<TranslationEntry>> getTranslationEntries(
+    String projectId, {
+    bool includeSourceLanguage = false,
+  }) async {
     try {
       final entriesJson = await _storageService.read('projects.$projectId.translations');
       if (entriesJson == null) return [];
 
       final entriesData = jsonDecode(entriesJson) as List<dynamic>;
-      return entriesData.map((data) => TranslationEntry.fromJson(data as Map<String, dynamic>)).toList();
+      List<TranslationEntry> result =
+          entriesData.map((data) => TranslationEntry.fromJson(data as Map<String, dynamic>)).toList();
+
+      if (!includeSourceLanguage) return result;
+
+      if (result.isEmpty) return [];
+
+      final copyLanguageCode = result.first.targetLanguage.code;
+      final copyEntries = result.where((item) => item.targetLanguage.code == copyLanguageCode).toList().map(
+            (item) => item.copyWith(
+              id: item.id.replaceAll(item.targetLanguage.code, item.sourceLanguage.code),
+              targetLanguage: item.sourceLanguage,
+              targetText: item.sourceText,
+              status: TranslationStatus.completed,
+            ),
+          );
+
+      return [...copyEntries, ...result];
     } catch (error, stackTrace) {
       log('获取翻译条目失败', error: error, stackTrace: stackTrace);
       return [];
@@ -39,10 +61,11 @@ class TranslationServiceImpl implements TranslationService {
   @override
   Future<List<TranslationEntry>> getTranslationEntriesByLanguage(
     String projectId,
-    Language targetLanguage,
-  ) async {
+    Language targetLanguage, {
+    bool includeSourceLanguage = false,
+  }) async {
     try {
-      final allEntries = await getTranslationEntries(projectId);
+      final allEntries = await getTranslationEntries(projectId, includeSourceLanguage: includeSourceLanguage);
       return allEntries.where((entry) => entry.targetLanguage.code == targetLanguage.code).toList();
     } catch (error, stackTrace) {
       log('根据语言获取翻译条目失败', error: error, stackTrace: stackTrace);
@@ -338,12 +361,45 @@ class TranslationServiceImpl implements TranslationService {
 
   // 以下方法暂时不实现，返回默认值或抛出异常
   @override
-  Future<String> exportTranslations(String projectId, Language language, String format) async {
-    throw UnimplementedError('exportTranslations not implemented');
+  Future<String> exportTranslations(
+    String projectId,
+    Language language, {
+    String format = FileFormats.json,
+    TranslationKeyStyle keyStyle = TranslationKeyStyle.nested,
+    List<TranslationEntry> entries = const [],
+  }) async {
+    if (entries.isEmpty) {
+      entries = await getTranslationEntriesByLanguage(
+        projectId,
+        language,
+        includeSourceLanguage: true,
+      );
+    }
+
+    entries.sort((a, b) => a.key.compareTo(b.key));
+
+    final jsonParser = ParserFactory.getParser(FileFormats.json);
+
+    final jsonString = await jsonParser.writeString(
+      entries,
+      language,
+      options: {
+        'nestedKeyStyle': keyStyle == TranslationKeyStyle.nested,
+      },
+    );
+
+    log(jsonString, name: language.code);
+
+    return jsonString;
   }
 
   @override
-  Future<List<TranslationEntry>> importTranslations(String projectId, String filePath, String format) async {
+  Future<List<TranslationEntry>> importTranslations(
+    String projectId,
+    String filePath, {
+    String format = FileFormats.json,
+    TranslationKeyStyle keyStyle = TranslationKeyStyle.nested,
+  }) async {
     throw UnimplementedError('importTranslations not implemented');
   }
 

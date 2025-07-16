@@ -6,6 +6,7 @@ library;
 export 'src/enums/sync_status.dart';
 // 常量和枚举
 export 'src/enums/translation_status.dart';
+export 'src/enums/translation_key.dart';
 export 'src/enums/user_role.dart';
 export 'src/models/language.dart';
 // 数据模型

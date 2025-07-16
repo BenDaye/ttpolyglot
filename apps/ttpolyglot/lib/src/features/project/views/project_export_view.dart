@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/widgets/clickable_stat_card.dart';
+import 'package:ttpolyglot/src/features/export/export.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 
 /// 项目导出页面
@@ -23,21 +24,6 @@ class ProjectExportView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 页面标题
-                  Row(
-                    children: [
-                      const Icon(Icons.file_upload, size: 28.0),
-                      const SizedBox(width: 12.0),
-                      Text(
-                        '导出翻译',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24.0),
-
                   // 快速导出卡片
                   Card(
                     child: Padding(
@@ -58,7 +44,9 @@ class ProjectExportView extends StatelessWidget {
                                   subtitle: '适合开发使用',
                                   icon: Icons.code,
                                   color: Colors.blue,
-                                  onTap: () {},
+                                  onTap: () {
+                                    ExportController.exportTranslationsShortcutJson(projectId);
+                                  },
                                 ),
                               ),
                               const SizedBox(width: 16.0),

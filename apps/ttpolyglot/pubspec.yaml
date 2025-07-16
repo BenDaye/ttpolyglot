@@ -8,6 +8,7 @@ environment:
   flutter: 3.27.3
 
 dependencies:
+  archive: 4.0.7
   collection: ^1.18.0
   cupertino_icons: ^1.0.8
   dio: ^5.7.0

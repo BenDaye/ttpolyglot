@@ -14,7 +14,6 @@ class TTPolyglotApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // 初始化控制器
-
     LayoutUtils.initLayoutController();
 
     return GetMaterialApp(

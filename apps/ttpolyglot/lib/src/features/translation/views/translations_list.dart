@@ -27,8 +27,7 @@ class TranslationsList extends StatelessWidget {
           case TranslationsListType.byKey:
             return _buildByKey(context, controller: controller);
           case TranslationsListType.byLanguage:
-            // return _buildByLanguage(context, controller: controller);
-            return const SizedBox.shrink();
+            return _buildByLanguage(context, controller: controller);
         }
       },
     );
@@ -100,6 +99,62 @@ class TranslationsList extends StatelessWidget {
                     );
                   },
                 ).toList(),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildByLanguage(
+    BuildContext context, {
+    required TranslationController controller,
+  }) {
+    return Obx(
+      () {
+        if (controller.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final groupedEntries = controller.groupedEntriesByLanguage;
+        if (groupedEntries.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.translate_outlined,
+                  size: 64.0,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(height: 16.0),
+                Text(
+                  '暂无翻译条目',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+                const SizedBox(height: 8.0),
+                Text(
+                  '点击筛选栏右侧的按钮开始添加翻译条目',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
+            ),
+          );
+        }
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return TranslationsCardByLanguageExpansionPanelList(
+                groupedEntries: groupedEntries,
+                onDeleteAllEntries: ({required String key, required List<TranslationEntry> entries}) async {
+                  _deleteTranslationKey(context, controller: controller, key: key, entries: entries);
+                },
+                onEditEntry: ({required TranslationEntry entry}) {
+                  _showEditTranslationDialog(context, controller: controller, entry: entry);
+                },
               );
             },
           ),

@@ -50,8 +50,8 @@ class FileSystemStorageServiceImpl extends FileSystemStorageService {
 
     try {
       return await file.readAsString(encoding: utf8);
-    } catch (e, stackTrace) {
-      log('Error reading file for key $key: $e', error: e, stackTrace: stackTrace);
+    } catch (error, stackTrace) {
+      log('Error reading file for key $key: $error', error: error, stackTrace: stackTrace);
       return null;
     }
   }

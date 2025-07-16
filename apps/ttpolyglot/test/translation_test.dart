@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ttpolyglot/src/features/translation/services/translation_service_impl.dart';
+import 'package:ttpolyglot/src/core/services/translation_service_impl.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 void main() {
