@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/widgets/format_card.dart';
@@ -99,7 +97,7 @@ class ProjectImportView extends StatelessWidget {
                       DragDropUpload(
                         languages: controller.project?.targetLanguages ?? [],
                         height: 200.0,
-                        allowedExtensions: ['json', 'csv', 'xlsx', 'xls', 'arb', 'po'],
+                        allowedExtensions: controller.allowedExtensions,
                         maxFileSize: 10 * 1024 * 1024, // 10MB
                         multiple: true,
                         title: '拖拽文件到此处或点击选择',
@@ -107,17 +105,7 @@ class ProjectImportView extends StatelessWidget {
                         icon: Icons.cloud_upload,
                         borderRadius: 12.0,
                         showFileInfo: true,
-                        onFileSelected: (files, languageMap) {
-                          log('onFileSelected: $files, languageMap: $languageMap');
-                          // 显示导入成功提示
-                          Get.snackbar(
-                            '导入成功',
-                            '文件已成功导入',
-                            snackPosition: SnackPosition.TOP,
-                            backgroundColor: Colors.green,
-                            colorText: Colors.white,
-                          );
-                        },
+                        onFileSelected: controller.importFiles,
                       ),
                     ],
                   ),

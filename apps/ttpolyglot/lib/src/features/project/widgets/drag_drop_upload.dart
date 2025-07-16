@@ -271,6 +271,13 @@ class _DragDropUploadState extends State<DragDropUpload> {
                 const SizedBox(width: 12.0),
                 ElevatedButton(
                   onPressed: () {
+                    // 判断是否所有文件都有效
+                    for (final file in _selectedFiles) {
+                      if (!_validateFile(file)) {
+                        _showErrorSnackBar('文件 ${file.name} 超出限制');
+                        return;
+                      }
+                    }
                     // 确认导入
                     widget.onFileSelected(_selectedFiles, _fileLanguageMap);
                   },
@@ -337,7 +344,7 @@ class _DragDropUploadState extends State<DragDropUpload> {
                         ),
                         const SizedBox(width: 4.0),
                         Text(
-                          '1', // Placeholder for warning count
+                          '超出限制',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: Theme.of(context).colorScheme.error,
                                 fontWeight: FontWeight.w500,
@@ -363,7 +370,7 @@ class _DragDropUploadState extends State<DragDropUpload> {
                 ),
                 child: Center(
                   child: Text(
-                    '0', // Placeholder, replace with actual translation count
+                    '0',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: Theme.of(context).colorScheme.primary,
@@ -385,7 +392,7 @@ class _DragDropUploadState extends State<DragDropUpload> {
                 ),
                 const SizedBox(width: 4.0),
                 Text(
-                  '0 / 0', // Placeholder: resolved / conflicts
+                  '0 / 0',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w500,
                       ),
@@ -611,7 +618,12 @@ class _DragDropUploadState extends State<DragDropUpload> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(message),
+          content: Text(
+            message,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onError,
+                ),
+          ),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );

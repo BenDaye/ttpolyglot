@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
@@ -19,6 +20,9 @@ class ProjectController extends GetxController {
   Project? get project => _project.value;
   Rxn<Project> get projectObs => _project;
   bool get isLoading => _isLoading.value;
+
+  // 允许的文件扩展名
+  List<String> get allowedExtensions => ['json', 'csv', 'xlsx', 'xls', 'arb', 'po'];
 
   @override
   void onInit() {
@@ -171,5 +175,72 @@ class ProjectController extends GetxController {
       final newTargetLanguages = _project.value!.targetLanguages.where((lang) => lang.code != language.code).toList();
       await ProjectsController.updateProject(projectId, targetLanguages: newTargetLanguages);
     }
+  }
+
+  Future<void> importFiles(List<PlatformFile> files, Map<String, Language> languageMap) async {
+    for (final file in files) {
+      final language = languageMap[file.name];
+      if (language == null) {
+        Get.snackbar('错误', '文件 ${file.name} 没有匹配到语言');
+        continue;
+      }
+
+      // 获取文件扩展名
+      final extension = file.name.split('.').last;
+      // 根据不同的文件类型，调用不同的导入方法
+      if (!allowedExtensions.contains(extension)) {
+        Get.snackbar('错误', '文件 ${file.name} 不支持的文件类型');
+        continue;
+      }
+
+      // 根据不同的文件类型，调用不同的导入方法
+      switch (extension) {
+        case 'json':
+          await importJsonFile(file, language);
+          break;
+        case 'csv':
+          await importCsvFile(file, language);
+          break;
+        case 'xlsx':
+          await importXlsxFile(file, language);
+          break;
+        case 'xls':
+          await importXlsFile(file, language);
+          break;
+        case 'arb':
+          await importArbFile(file, language);
+          break;
+        case 'po':
+          await importPoFile(file, language);
+          break;
+        default:
+          Get.snackbar('错误', '文件 ${file.name} 不支持的文件类型');
+          continue;
+      }
+    }
+  }
+
+  Future<void> importJsonFile(PlatformFile file, Language language) async {
+    log('importJsonFile: $file, language: $language');
+  }
+
+  Future<void> importCsvFile(PlatformFile file, Language language) async {
+    log('importCsvFile: $file, language: $language');
+  }
+
+  Future<void> importXlsxFile(PlatformFile file, Language language) async {
+    log('importXlsxFile: $file, language: $language');
+  }
+
+  Future<void> importXlsFile(PlatformFile file, Language language) async {
+    log('importXlsFile: $file, language: $language');
+  }
+
+  Future<void> importArbFile(PlatformFile file, Language language) async {
+    log('importArbFile: $file, language: $language');
+  }
+
+  Future<void> importPoFile(PlatformFile file, Language language) async {
+    log('importPoFile: $file, language: $language');
   }
 }
