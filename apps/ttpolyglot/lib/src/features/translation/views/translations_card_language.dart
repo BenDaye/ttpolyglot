@@ -217,6 +217,7 @@ class TranslationsCardByLanguageBody extends StatelessWidget {
               borderRadius: BorderRadius.circular(8.0),
             ),
             child: ListTile(
+              onTap: isSourceLanguage ? null : () => onEditEntry?.call(entry: entry),
               leading: // 状态标签
                   Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
