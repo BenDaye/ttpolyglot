@@ -2,12 +2,14 @@ import 'dart:developer';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:ttpolyglot_core/core.dart';
 
 /// 拖拽上传组件
 class DragDropUpload extends StatefulWidget {
   const DragDropUpload({
     super.key,
     required this.onFileSelected,
+    required this.languages,
     this.allowedExtensions = const [],
     this.maxFileSize = 10 * 1024 * 1024, // 10MB
     this.multiple = false,
@@ -20,7 +22,10 @@ class DragDropUpload extends StatefulWidget {
   });
 
   /// 文件选择回调
-  final Function(List<PlatformFile>) onFileSelected;
+  final Function(List<PlatformFile>, Map<String, Language>) onFileSelected;
+
+  /// 可选的语言列表
+  final List<Language> languages;
 
   /// 允许的文件扩展名（不包含点号）
   final List<String> allowedExtensions;
@@ -55,7 +60,10 @@ class DragDropUpload extends StatefulWidget {
 
 class _DragDropUploadState extends State<DragDropUpload> {
   bool _isDragOver = false;
-  List<PlatformFile> _selectedFiles = [];
+  final List<PlatformFile> _selectedFiles = [];
+  
+  // 文件语言映射：文件名 -> 选择的语言
+  final Map<String, Language> _fileLanguageMap = {};
 
   @override
   Widget build(BuildContext context) {
@@ -261,10 +269,10 @@ class _DragDropUploadState extends State<DragDropUpload> {
                 ),
                 const SizedBox(width: 12.0),
                 ElevatedButton(
-                  onPressed: () {
-                    // 确认导入
-                    widget.onFileSelected(_selectedFiles);
-                  },
+                                      onPressed: () {
+                      // 确认导入
+                      widget.onFileSelected(_selectedFiles, _fileLanguageMap);
+                    },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -396,8 +404,8 @@ class _DragDropUploadState extends State<DragDropUpload> {
               iconSize: 18.0,
               padding: const EdgeInsets.all(4.0),
               constraints: const BoxConstraints(
-                minWidth: 32.0,
-                minHeight: 32.0,
+                minWidth: 48.0,
+                minHeight: 48.0,
               ),
             ),
           ),
@@ -407,56 +415,53 @@ class _DragDropUploadState extends State<DragDropUpload> {
   }
 
   Widget _buildLanguageSelector(PlatformFile file) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(4.0),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Language flag/icon
-          Icon(
-            Icons.language,
-            size: 16.0,
-            color: Theme.of(context).colorScheme.primary,
+    final selectedLanguage = _fileLanguageMap[file.name];
+    final availableLanguages = widget.languages;
+    
+    // 如果没有选择语言，尝试自动匹配
+    if (selectedLanguage == null && availableLanguages.isNotEmpty) {
+      final matchedLanguage = _matchLanguageFromFileName(file.name);
+      if (matchedLanguage != null) {
+        _fileLanguageMap[file.name] = matchedLanguage;
+      }
+    }
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(4.0),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+            ),
           ),
-          const SizedBox(width: 4.0),
-          // Language name
-          Text(
-            '中文', // 默认语言
+          child: DropdownButton<Language>(
+            value: _fileLanguageMap[file.name],
+            isExpanded: true,
+            underline: const SizedBox(),
+            icon: const Icon(Icons.keyboard_arrow_down, size: 16.0),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w500,
                 ),
-          ),
-          const SizedBox(width: 4.0),
-          // Clear button
-          IconButton(
-            onPressed: () {
-              // Clear language selection
+            hint: const Text('选择语言'),
+            items: availableLanguages.map(
+                      (language) => DropdownMenuItem<Language>(
+                        value: language,
+                        child: Text(
+                          '${language.nativeName} (${language.code})',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
+                    ).toList(),
+            onChanged: (language) {
+              if (language != null) {
+                setState(() {
+                  _fileLanguageMap[file.name] = language;
+                });
+              }
             },
-            icon: const Icon(Icons.close, size: 12.0),
-            iconSize: 12.0,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(
-              minWidth: 16.0,
-              minHeight: 16.0,
-            ),
           ),
-          const SizedBox(width: 2.0),
-          // Dropdown arrow
-          Icon(
-            Icons.keyboard_arrow_down,
-            size: 16.0,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-          ),
-        ],
-      ),
-    );
+        );
   }
 
   /// 选择文件
@@ -484,6 +489,11 @@ class _DragDropUploadState extends State<DragDropUpload> {
             } else {
               // 文件不存在，添加
               _selectedFiles.add(newFile);
+              // 自动匹配语言
+              final matchedLanguage = _matchLanguageFromFileName(newFile.name);
+              if (matchedLanguage != null) {
+                _fileLanguageMap[newFile.name] = matchedLanguage;
+              }
               log('添加新文件: ${newFile.name}');
             }
           }
@@ -491,7 +501,7 @@ class _DragDropUploadState extends State<DragDropUpload> {
 
         // 如果不是多文件模式，立即回调
         if (!widget.multiple) {
-          widget.onFileSelected(_selectedFiles);
+          widget.onFileSelected(_selectedFiles, _fileLanguageMap);
         }
       }
     } catch (error, stackTrace) {
@@ -525,6 +535,11 @@ class _DragDropUploadState extends State<DragDropUpload> {
               } else {
                 // 文件不存在，添加
                 _selectedFiles.add(newFile);
+                // 自动匹配语言
+                final matchedLanguage = _matchLanguageFromFileName(newFile.name);
+                if (matchedLanguage != null) {
+                  _fileLanguageMap[newFile.name] = matchedLanguage;
+                }
                 log('添加新文件: ${newFile.name}');
               }
             }
@@ -532,7 +547,7 @@ class _DragDropUploadState extends State<DragDropUpload> {
           
           // 如果不是多文件模式，立即回调
           if (!widget.multiple) {
-            widget.onFileSelected(_selectedFiles);
+            widget.onFileSelected(_selectedFiles, _fileLanguageMap);
           }
         }
       }
@@ -564,6 +579,26 @@ class _DragDropUploadState extends State<DragDropUpload> {
   String _getFileExtension(String fileName) {
     final parts = fileName.split('.');
     return parts.length > 1 ? parts.last : '';
+  }
+
+  /// 根据文件名匹配语言
+  Language? _matchLanguageFromFileName(String fileName) {
+    if (widget.languages.isEmpty) return null;
+    
+    final fileNameLower = fileName.toLowerCase();
+    
+    // 尝试匹配语言代码
+    for (final language in widget.languages) {
+      final code = language.code.toLowerCase();
+      if (fileNameLower.contains('_$code.') || fileNameLower.contains('-$code.') || fileNameLower.endsWith('_$code')) {
+        log('根据文件名匹配到语言: ${language.nativeName} (${language.code})');
+        return language;
+      }
+    }
+    
+    // 如果没有匹配到，返回第一个语言
+    log('未匹配到语言，使用默认语言: ${widget.languages.first.nativeName} (${widget.languages.first.code})');
+    return widget.languages.first;
   }
 
   /// 显示错误提示

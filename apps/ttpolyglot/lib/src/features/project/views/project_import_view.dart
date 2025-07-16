@@ -97,6 +97,7 @@ class ProjectImportView extends StatelessWidget {
                       ),
                       const SizedBox(height: 16.0),
                       DragDropUpload(
+                        languages: controller.project?.targetLanguages ?? [],
                         height: 200.0,
                         allowedExtensions: ['json', 'csv', 'xlsx', 'xls', 'arb', 'po'],
                         maxFileSize: 10 * 1024 * 1024, // 10MB
@@ -106,8 +107,16 @@ class ProjectImportView extends StatelessWidget {
                         icon: Icons.cloud_upload,
                         borderRadius: 12.0,
                         showFileInfo: true,
-                        onFileSelected: (files) {
-                          log('onFileSelected: $files');
+                        onFileSelected: (files, languageMap) {
+                          log('onFileSelected: $files, languageMap: $languageMap');
+                          // 显示导入成功提示
+                          Get.snackbar(
+                            '导入成功',
+                            '文件已成功导入',
+                            snackPosition: SnackPosition.TOP,
+                            backgroundColor: Colors.green,
+                            colorText: Colors.white,
+                          );
                         },
                       ),
                     ],
