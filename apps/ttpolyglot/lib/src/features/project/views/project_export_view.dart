@@ -23,21 +23,6 @@ class ProjectExportView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 页面标题
-                  Row(
-                    children: [
-                      const Icon(Icons.file_upload, size: 28.0),
-                      const SizedBox(width: 12.0),
-                      Text(
-                        '导出翻译',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24.0),
-
                   // 快速导出卡片
                   Card(
                     child: Padding(
