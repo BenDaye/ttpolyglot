@@ -59,32 +59,33 @@ class _DragDropUploadState extends State<DragDropUpload> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: widget.height,
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: _isDragOver
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.outline,
-          width: _isDragOver ? 3.0 : 2.0,
-          style: BorderStyle.solid,
+    return Column(
+      children: [
+        // 上传区域
+        Container(
+          width: double.infinity,
+          height: widget.height,
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: _isDragOver ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outline,
+              width: _isDragOver ? 3.0 : 2.0,
+              style: BorderStyle.solid,
+            ),
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+            color: _isDragOver
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
+                : Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
+          ),
+          child: _buildUploadArea(),
         ),
-        borderRadius: BorderRadius.circular(widget.borderRadius),
-        color: _isDragOver
-            ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
-            : Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
-      ),
-      child: _buildContent(),
+
+        // 文件列表（如果有文件且需要显示）
+        if (_selectedFiles.isNotEmpty && widget.showFileInfo) ...[
+          const SizedBox(height: 16.0),
+          _buildFileList(),
+        ],
+      ],
     );
-  }
-
-  Widget _buildContent() {
-    if (_selectedFiles.isNotEmpty && widget.showFileInfo) {
-      return _buildFileList();
-    }
-
-    return _buildUploadArea();
   }
 
   Widget _buildUploadArea() {
@@ -152,122 +153,306 @@ class _DragDropUploadState extends State<DragDropUpload> {
   }
 
   Widget _buildFileList() {
-    return Column(
-      children: [
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16.0),
-            itemCount: _selectedFiles.length,
-            itemBuilder: (context, index) {
-              final file = _selectedFiles[index];
-              return _buildFileItem(file, index);
-            },
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(8.0),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
         ),
-        Container(
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            border: Border(
-              top: BorderSide(
-                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-              ),
-            ),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  '已选择 ${_selectedFiles.length} 个文件',
-                  style: Theme.of(context).textTheme.bodyMedium,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 表格标题
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
                 ),
               ),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    _selectedFiles.clear();
-                  });
-                },
-                child: const Text('清空'),
-              ),
-              const SizedBox(width: 8.0),
-              ElevatedButton(
-                onPressed: () {
-                  widget.onFileSelected(_selectedFiles);
-                },
-                child: const Text('确认上传'),
-              ),
-            ],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    '语言',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                        ),
+                  ),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    '文件名',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                        ),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Center(
+                    child: Text(
+                      '翻译数量',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                          ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    '已解决/冲突',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                        ),
+                  ),
+                ),
+                const SizedBox(width: 48.0), // 为删除按钮留出空间
+              ],
+            ),
           ),
-        ),
-      ],
+
+          // 文件列表
+          if (_selectedFiles.isNotEmpty) ...[
+            ...(_selectedFiles.asMap().entries.map((entry) {
+              final index = entry.key;
+              final file = entry.value;
+              return _buildFileTableRow(file, index);
+            })),
+          ],
+
+          // 底部操作按钮
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+                ),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                OutlinedButton(
+                  onPressed: () {
+                    // 取消导入 - 清空文件列表
+                    setState(() {
+                      _selectedFiles.clear();
+                    });
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                  ),
+                  child: const Text('取消导入'),
+                ),
+                const SizedBox(width: 12.0),
+                ElevatedButton(
+                  onPressed: () {
+                    // 确认导入
+                    widget.onFileSelected(_selectedFiles);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                  child: const Text('导入'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildFileItem(PlatformFile file, int index) {
+  Widget _buildFileTableRow(PlatformFile file, int index) {
     final isValid = _validateFile(file);
-    final fileSize = _formatFileSize(file.size);
-    final extension = _getFileExtension(file.name);
-
     return Container(
-      margin: const EdgeInsets.only(bottom: 8.0),
-      padding: const EdgeInsets.all(12.0),
+      padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: isValid
-            ? Theme.of(context).colorScheme.surfaceContainer
-            : Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8.0),
-        border: Border.all(
-          color: isValid
-              ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)
-              : Theme.of(context).colorScheme.error.withValues(alpha: 0.3),
+        border: Border(
+          bottom: BorderSide(
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+          ),
         ),
       ),
       child: Row(
         children: [
-          Icon(
-            isValid ? Icons.insert_drive_file : Icons.error,
-            color: isValid
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.error,
-            size: 24.0,
-          ),
-          const SizedBox(width: 12.0),
+          // 语言
           Expanded(
+            flex: 2,
+            child: _buildLanguageSelector(file),
+          ),
+          // 文件名
+          Expanded(
+            flex: 3,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   file.name,
-                  style: Theme.of(context).textTheme.titleSmall,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  '$fileSize • $extension',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
                       ),
                 ),
                 if (!isValid) ...[
                   const SizedBox(height: 4.0),
-                  Text(
-                    _getValidationError(file),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(4.0),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.warning_amber,
+                          size: 12.0,
                           color: Theme.of(context).colorScheme.error,
                         ),
+                        const SizedBox(width: 4.0),
+                        Text(
+                          '1', // Placeholder for warning count
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.error,
+                                fontWeight: FontWeight.w500,
+                              ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ],
             ),
           ),
+          // 翻译数量
+          Expanded(
+            flex: 2,
+            child: Center(
+              child: Container(
+                width: 32.0,
+                height: 32.0,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    '0', // Placeholder, replace with actual translation count
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // 已解决/冲突
+          Expanded(
+            flex: 2,
+            child: Row(
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  size: 16.0,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 4.0),
+                Text(
+                  '0 / 0', // Placeholder: resolved / conflicts
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          // 删除按钮
+          SizedBox(
+            width: 48.0,
+            child: IconButton(
+              onPressed: () {
+                setState(() {
+                  _selectedFiles.removeAt(index);
+                });
+              },
+              icon: const Icon(Icons.delete_outline, size: 18.0),
+              iconSize: 18.0,
+              padding: const EdgeInsets.all(4.0),
+              constraints: const BoxConstraints(
+                minWidth: 32.0,
+                minHeight: 32.0,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLanguageSelector(PlatformFile file) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(4.0),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Language flag/icon
+          Icon(
+            Icons.language,
+            size: 16.0,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(width: 4.0),
+          // Language name
+          Text(
+            '中文', // 默认语言
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+          ),
+          const SizedBox(width: 4.0),
+          // Clear button
           IconButton(
             onPressed: () {
-              setState(() {
-                _selectedFiles.removeAt(index);
-              });
+              // Clear language selection
             },
-            icon: const Icon(Icons.close),
-            iconSize: 20.0,
+            icon: const Icon(Icons.close, size: 12.0),
+            iconSize: 12.0,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(
+              minWidth: 16.0,
+              minHeight: 16.0,
+            ),
+          ),
+          const SizedBox(width: 2.0),
+          // Dropdown arrow
+          Icon(
+            Icons.keyboard_arrow_down,
+            size: 16.0,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           ),
         ],
       ),
@@ -286,9 +471,25 @@ class _DragDropUploadState extends State<DragDropUpload> {
 
       if (result != null && result.files.isNotEmpty) {
         setState(() {
-          _selectedFiles = result.files;
+          // 检查并处理重复文件
+          for (final newFile in result.files) {
+            final existingIndex = _selectedFiles.indexWhere(
+              (existingFile) => existingFile.name == newFile.name,
+            );
+            
+            if (existingIndex != -1) {
+              // 文件已存在，覆盖
+              _selectedFiles[existingIndex] = newFile;
+              log('文件已存在，已覆盖: ${newFile.name}');
+            } else {
+              // 文件不存在，添加
+              _selectedFiles.add(newFile);
+              log('添加新文件: ${newFile.name}');
+            }
+          }
         });
 
+        // 如果不是多文件模式，立即回调
         if (!widget.multiple) {
           widget.onFileSelected(_selectedFiles);
         }
@@ -311,8 +512,25 @@ class _DragDropUploadState extends State<DragDropUpload> {
         }
         if (files.isNotEmpty) {
           setState(() {
-            _selectedFiles = files;
+            // 检查并处理重复文件
+            for (final newFile in files) {
+              final existingIndex = _selectedFiles.indexWhere(
+                (existingFile) => existingFile.name == newFile.name,
+              );
+              
+              if (existingIndex != -1) {
+                // 文件已存在，覆盖
+                _selectedFiles[existingIndex] = newFile;
+                log('文件已存在，已覆盖: ${newFile.name}');
+              } else {
+                // 文件不存在，添加
+                _selectedFiles.add(newFile);
+                log('添加新文件: ${newFile.name}');
+              }
+            }
           });
+          
+          // 如果不是多文件模式，立即回调
           if (!widget.multiple) {
             widget.onFileSelected(_selectedFiles);
           }
@@ -342,39 +560,10 @@ class _DragDropUploadState extends State<DragDropUpload> {
     return true;
   }
 
-  /// 获取验证错误信息
-  String _getValidationError(PlatformFile file) {
-    if (file.size > widget.maxFileSize) {
-      return '文件过大，最大支持 ${_formatFileSize(widget.maxFileSize)}';
-    }
-
-    if (widget.allowedExtensions.isNotEmpty) {
-      final extension = _getFileExtension(file.name);
-      if (!widget.allowedExtensions.contains(extension.toLowerCase())) {
-        return '不支持的文件格式，支持: ${widget.allowedExtensions.map((ext) => '.$ext').join(', ')}';
-      }
-    }
-
-    return '文件验证失败';
-  }
-
   /// 获取文件扩展名
   String _getFileExtension(String fileName) {
     final parts = fileName.split('.');
     return parts.length > 1 ? parts.last : '';
-  }
-
-  /// 格式化文件大小
-  String _formatFileSize(int bytes) {
-    if (bytes < 1024) {
-      return '${bytes}B';
-    } else if (bytes < 1024 * 1024) {
-      return '${(bytes / 1024).toStringAsFixed(1)}KB';
-    } else if (bytes < 1024 * 1024 * 1024) {
-      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)}MB';
-    } else {
-      return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)}GB';
-    }
   }
 
   /// 显示错误提示
