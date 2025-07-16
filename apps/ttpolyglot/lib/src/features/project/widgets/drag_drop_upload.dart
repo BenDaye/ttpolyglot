@@ -137,15 +137,6 @@ class _DragDropUploadState extends State<DragDropUpload> {
                         color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
                 ),
-                // if (widget.allowedExtensions.isNotEmpty) ...[
-                //   const SizedBox(height: 8.0),
-                //   Text(
-                //     '支持格式: ${widget.allowedExtensions.map((ext) => '.$ext').join(', ')}',
-                //     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                //           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                //         ),
-                //   ),
-                // ],
                 const SizedBox(height: 16.0),
                 ElevatedButton.icon(
                   onPressed: _pickFiles,
