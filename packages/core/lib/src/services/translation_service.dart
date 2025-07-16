@@ -1,3 +1,4 @@
+import '../enums/translation_key.dart';
 import '../enums/translation_status.dart';
 import '../models/language.dart';
 import '../models/translation_entry.dart';
@@ -5,24 +6,46 @@ import '../models/translation_entry.dart';
 /// 翻译服务接口
 abstract class TranslationService {
   /// 获取项目的所有翻译条目
-  Future<List<TranslationEntry>> getTranslationEntries(String projectId);
+  ///
+  /// [projectId] 项目 ID
+  ///
+  /// [includeSourceLanguage] 是否包含源语言的翻译条目
+  Future<List<TranslationEntry>> getTranslationEntries(
+    String projectId, {
+    bool includeSourceLanguage = false,
+  });
 
   /// 根据语言获取翻译条目
+  ///
+  /// [projectId] 项目 ID
+  ///
+  /// [targetLanguage] 目标语言
+  ///
+  /// [includeSourceLanguage] 是否包含源语言的翻译条目
   Future<List<TranslationEntry>> getTranslationEntriesByLanguage(
     String projectId,
-    Language targetLanguage,
-  );
+    Language targetLanguage, {
+    bool includeSourceLanguage = false,
+  });
 
   /// 根据状态获取翻译条目
+  ///
+  /// [projectId] 项目 ID
+  ///
+  /// [status] 状态
   Future<List<TranslationEntry>> getTranslationEntriesByStatus(
     String projectId,
     TranslationStatus status,
   );
 
   /// 创建翻译条目
+  ///
+  /// [entry] 翻译条目
   Future<TranslationEntry> createTranslationEntry(TranslationEntry entry);
 
   /// 批量创建翻译条目
+  ///
+  /// [entries] 翻译条目列表
   Future<List<TranslationEntry>> batchCreateTranslationEntries(
     List<TranslationEntry> entries,
   );
@@ -58,16 +81,19 @@ abstract class TranslationService {
   /// 导出翻译文件
   Future<String> exportTranslations(
     String projectId,
-    Language language,
+    Language language, {
     String format,
-  );
+    TranslationKeyStyle keyStyle = TranslationKeyStyle.nested,
+    List<TranslationEntry> entries = const [],
+  });
 
   /// 导入翻译文件
   Future<List<TranslationEntry>> importTranslations(
     String projectId,
-    String filePath,
+    String filePath, {
     String format,
-  );
+    TranslationKeyStyle keyStyle = TranslationKeyStyle.nested,
+  });
 
   /// 自动翻译
   Future<TranslationEntry> autoTranslate(

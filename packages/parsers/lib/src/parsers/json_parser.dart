@@ -96,10 +96,15 @@ class JsonParser implements TranslationParser {
     final jsonObject = <String, dynamic>{};
     final indent = options?['indent'] as String? ?? '  ';
     final sortKeys = options?['sortKeys'] as bool? ?? true;
+    final nestedKeyStyle = options?['nestedKeyStyle'] as bool? ?? true;
 
     for (final entry in entries) {
       if (entry.targetLanguage.code == language.code) {
-        _setNestedValue(jsonObject, entry.key, entry.targetText);
+        if (nestedKeyStyle) {
+          _setNestedValue(jsonObject, entry.key, entry.targetText);
+        } else {
+          jsonObject[entry.key] = entry.targetText;
+        }
       }
     }
 
