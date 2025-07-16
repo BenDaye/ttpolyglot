@@ -15,6 +15,7 @@ class ExpansionPanelListItem {
   });
 }
 
+// TODO: 还是做成 Getx 来控制数据， 不然每次改变都会触发重新渲染整个组件，不友好
 class TranslationsCardByLanguageExpansionPanelList extends StatefulWidget {
   const TranslationsCardByLanguageExpansionPanelList({
     super.key,
