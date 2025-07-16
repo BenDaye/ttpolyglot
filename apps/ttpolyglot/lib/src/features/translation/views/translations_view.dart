@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_core/core.dart';
@@ -23,34 +22,37 @@ class ProjectTranslationsView extends StatelessWidget {
 
           return Scaffold(
             body: GetBuilder<TranslationController>(
-                tag: projectId,
-                builder: (translationController) {
-                  return Column(
-                    children: [
-                      // 工具栏
-                      _buildToolbar(
-                        context,
-                        controller: translationController,
-                        project: project,
-                      ),
+              tag: projectId,
+              builder: (translationController) {
+                return Column(
+                  children: [
+                    // 工具栏
+                    _buildToolbar(
+                      context,
+                      controller: translationController,
+                      project: project,
+                    ),
 
-                      // 筛选栏
-                      _buildFilterBar(
-                        context,
-                        controller: translationController,
-                        project: project,
-                      ),
+                    // 筛选栏
+                    _buildFilterBar(
+                      context,
+                      controller: translationController,
+                      project: project,
+                    ),
 
-                      // 翻译条目列表
-                      Expanded(
-                        child: _buildTranslationList(
-                          context,
-                          controller: translationController,
+                    // 翻译条目列表
+                    Expanded(
+                      child: Obx(
+                        () => TranslationsList(
+                          type: translationController.listType,
+                          projectId: projectId,
                         ),
                       ),
-                    ],
-                  );
-                }),
+                    ),
+                  ],
+                );
+              },
+            ),
           );
         });
       },
@@ -85,7 +87,7 @@ class ProjectTranslationsView extends StatelessWidget {
 
           // 统计信息
           Obx(() {
-            final stats = controller.getStatistics();
+            final stats = controller.statistics;
             return Row(
               children: [
                 _buildStatChip(context, '总计', stats['total'] ?? 0, Colors.blue),
@@ -171,7 +173,7 @@ class ProjectTranslationsView extends StatelessWidget {
           Expanded(
             child: Obx(
               () {
-                final languages = controller.getAvailableLanguages();
+                final languages = controller.availableLanguages;
                 return DropdownButtonFormField<Language>(
                   menuMaxHeight: 240.0,
                   decoration: const InputDecoration(
@@ -210,7 +212,7 @@ class ProjectTranslationsView extends StatelessWidget {
           // 状态筛选
           Expanded(
             child: Obx(() {
-              final statuses = controller.getAvailableStatuses();
+              final statuses = controller.availableStatuses;
               return DropdownButtonFormField<TranslationStatus>(
                 menuMaxHeight: 240.0,
                 decoration: const InputDecoration(
@@ -254,6 +256,23 @@ class ProjectTranslationsView extends StatelessWidget {
 
           const SizedBox(width: 8.0),
 
+          // 切换列表类型按钮
+          Obx(
+            () {
+              return IconButton(
+                onPressed: () => controller.switchListType(
+                  controller.listType == TranslationsListType.byKey
+                      ? TranslationsListType.byLanguage
+                      : TranslationsListType.byKey,
+                ),
+                icon: Icon(
+                  controller.listType == TranslationsListType.byKey ? Icons.view_column : Icons.view_list,
+                ),
+                tooltip: '切换列表类型',
+              );
+            },
+          ),
+
           // 添加翻译键按钮
           IconButton(
             onPressed: () => _showAddTranslationDialog(context, controller: controller, project: project),
@@ -263,395 +282,6 @@ class ProjectTranslationsView extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  /// 构建翻译条目列表
-  Widget _buildTranslationList(
-    BuildContext context, {
-    required TranslationController controller,
-  }) {
-    return Obx(
-      () {
-        if (controller.isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (controller.error.isNotEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 64.0,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                const SizedBox(height: 16.0),
-                Text(
-                  '加载失败',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 8.0),
-                Text(
-                  controller.error,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16.0),
-                ElevatedButton(
-                  onPressed: () => controller.refreshTranslationEntries(),
-                  child: const Text('重试'),
-                ),
-              ],
-            ),
-          );
-        }
-
-        final groupedEntries = controller.getGroupedEntries();
-        if (groupedEntries.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.translate_outlined,
-                  size: 64.0,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(height: 16.0),
-                Text(
-                  '暂无翻译条目',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 8.0),
-                Text(
-                  '点击筛选栏右侧的按钮开始添加翻译条目',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ],
-            ),
-          );
-        }
-
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final cardWidth = _calculateCardWidth(constraints.maxWidth);
-
-              return Wrap(
-                spacing: 8.0,
-                runSpacing: 8.0,
-                children: groupedEntries.entries.map(
-                  (entry) {
-                    final key = entry.key;
-                    final entries = entry.value;
-
-                    return SizedBox(
-                      width: cardWidth,
-                      child: _buildTranslationKeyCard(
-                        context,
-                        controller,
-                        key,
-                        entries,
-                      ),
-                    );
-                  },
-                ).toList(),
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  /// 计算卡片宽度
-  double _calculateCardWidth(double availableWidth) {
-    const minCardWidth = 400.0;
-    const maxCardWidth = 600.0;
-    const spacing = 8.0;
-
-    // 计算可以放置的列数
-    int columns = 1;
-    while (true) {
-      final totalSpacing = (columns - 1) * spacing;
-      final cardWidth = (availableWidth - totalSpacing) / columns;
-
-      if (cardWidth >= minCardWidth && cardWidth <= maxCardWidth) {
-        return cardWidth;
-      } else if (cardWidth < minCardWidth) {
-        break;
-      }
-
-      columns++;
-      if (columns > 4) break; // 最多4列
-    }
-
-    // 如果无法满足最小宽度，使用最小宽度
-    return minCardWidth.clamp(minCardWidth, availableWidth);
-  }
-
-  /// 构建翻译键卡片
-  Widget _buildTranslationKeyCard(
-      BuildContext context, TranslationController controller, String key, List<TranslationEntry> entries) {
-    final firstEntry = entries.first;
-
-    return Card(
-      elevation: 2.0,
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 头部信息
-            Row(
-              children: [
-                // 翻译键
-                Expanded(
-                  child: Text(
-                    key,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                ),
-
-                // 操作按钮
-                PopupMenuButton<String>(
-                  onSelected: (value) => _handleKeyAction(context, controller, key, entries, value),
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'delete_all',
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete_sweep),
-                          SizedBox(width: 8.0),
-                          Text('删除整个键'),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 8.0),
-
-            // 源文本
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(10.0),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainer,
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '源文本 (${firstEntry.sourceLanguage.code})',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                  ),
-                  const SizedBox(height: 4.0),
-                  Text(
-                    firstEntry.sourceText,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
-            ),
-
-            // 上下文信息（如果有）
-            if (firstEntry.context != null && firstEntry.context!.isNotEmpty) ...[
-              const SizedBox(height: 8.0),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(10.0),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(6.0),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '上下文',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                    ),
-                    const SizedBox(height: 4.0),
-                    Text(
-                      firstEntry.context!,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-
-            const SizedBox(height: 12.0),
-
-            // 各语言翻译
-            Text(
-              '翻译',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-            const SizedBox(height: 8.0),
-
-            Column(
-              spacing: 8.0,
-              children: [
-                ...entries.map(
-                  (entry) => _buildLanguageTranslationItem(context, controller, entry),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// 构建语言翻译项
-  Widget _buildLanguageTranslationItem(BuildContext context, TranslationController controller, TranslationEntry entry) {
-    return InkWell(
-      onTap: () => _showEditTranslationDialog(context, controller, entry),
-      borderRadius: BorderRadius.circular(4.0),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.5),
-          border: Border.all(
-            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-          ),
-          borderRadius: BorderRadius.circular(4.0),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // 语言标签
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              child: Text(
-                entry.targetLanguage.code,
-                style: GoogleFonts.notoSansMono(
-                  color: Theme.of(context).colorScheme.onSecondaryContainer,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-
-            const SizedBox(width: 8.0),
-
-            // 翻译内容
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    entry.targetText.isEmpty ? '待翻译' : entry.targetText,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: entry.targetText.isEmpty
-                              ? Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5)
-                              : null,
-                          fontStyle: entry.targetText.isEmpty ? FontStyle.italic : null,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                    maxLines: 1,
-                  ),
-
-                  const SizedBox(height: 4.0),
-
-                  // 状态标签
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(entry.status).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(4.0),
-                    ),
-                    child: Text(
-                      entry.status.displayName,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: _getStatusColor(entry.status),
-                            fontSize: 10.0,
-                          ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// 获取状态颜色
-  Color _getStatusColor(TranslationStatus status) {
-    switch (status) {
-      case TranslationStatus.pending:
-        return Colors.orange;
-      case TranslationStatus.translating:
-        return Colors.blue;
-      case TranslationStatus.completed:
-        return Colors.green;
-      case TranslationStatus.reviewing:
-        return Colors.purple;
-      case TranslationStatus.rejected:
-        return Colors.red;
-      case TranslationStatus.needsRevision:
-        return Colors.amber;
-      case TranslationStatus.outdated:
-        return Colors.grey;
-    }
-  }
-
-  /// 处理翻译键操作
-  void _handleKeyAction(BuildContext context, TranslationController controller, String key,
-      List<TranslationEntry> entries, String action) {
-    switch (action) {
-      case 'delete_all':
-        _deleteTranslationKey(context, controller, key, entries);
-        break;
-    }
-  }
-
-  /// 删除整个翻译键
-  void _deleteTranslationKey(
-      BuildContext context, TranslationController controller, String key, List<TranslationEntry> entries) async {
-    final result = await Get.dialog<bool>(
-      AlertDialog(
-        title: const Text('删除翻译键'),
-        content: Text('确定要删除翻译键 "$key" 及其所有语言版本吗？此操作不可撤销。'),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(result: false),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () => Get.back(result: true),
-            child: const Text('确定'),
-          ),
-        ],
-      ),
-      barrierDismissible: false,
-    );
-
-    if (result == true) {
-      final entryIds = entries.map((entry) => entry.id).toList();
-      await controller.batchDeleteTranslationEntries(entryIds);
-    }
   }
 
   /// 显示添加翻译对话框
@@ -748,131 +378,6 @@ class ProjectTranslationsView extends StatelessWidget {
               Get.back();
             },
             child: const Text('创建'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 显示编辑翻译对话框
-  void _showEditTranslationDialog(BuildContext context, TranslationController controller, TranslationEntry entry) {
-    final targetTextController = TextEditingController(text: entry.targetText);
-    final contextController = TextEditingController(text: entry.context ?? '');
-    final commentController = TextEditingController(text: entry.comment ?? '');
-    var selectedStatus = entry.status;
-
-    Get.dialog(
-      AlertDialog(
-        title: Text('编辑翻译：${entry.key}'),
-        content: Container(
-          width: 480.0,
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // 显示源文本
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12.0),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '源文本 (${entry.sourceLanguage.code})',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      const SizedBox(height: 4.0),
-                      Text(
-                        entry.sourceText,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16.0),
-                TextField(
-                  controller: targetTextController,
-                  decoration: InputDecoration(
-                    labelText: '目标文本 (${entry.targetLanguage.code})',
-                    contentPadding: const EdgeInsets.all(12.0),
-                    border: const OutlineInputBorder(),
-                  ),
-                  maxLines: 3,
-                ),
-                const SizedBox(height: 16.0),
-
-                TextField(
-                  controller: contextController,
-                  decoration: const InputDecoration(
-                    labelText: '上下文',
-                    contentPadding: EdgeInsets.all(12.0),
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 5,
-                ),
-                const SizedBox(height: 16.0),
-                TextField(
-                  controller: commentController,
-                  decoration: const InputDecoration(
-                    labelText: '备注',
-                    contentPadding: EdgeInsets.all(12.0),
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 2,
-                ),
-                const SizedBox(height: 16.0),
-                StatefulBuilder(
-                  builder: (context, setState) {
-                    return DropdownButtonFormField<TranslationStatus>(
-                      value: selectedStatus,
-                      decoration: const InputDecoration(
-                        labelText: '状态',
-                        contentPadding: EdgeInsets.all(16.0),
-                        border: OutlineInputBorder(),
-                      ),
-                      items: TranslationStatus.values.map((status) {
-                        return DropdownMenuItem(
-                          value: status,
-                          child: Text(status.displayName),
-                        );
-                      }).toList(),
-                      onChanged: (status) {
-                        if (status != null) {
-                          setState(() {
-                            selectedStatus = status;
-                          });
-                        }
-                      },
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('取消'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final updatedEntry = entry.copyWith(
-                targetText: targetTextController.text.trim(),
-                status: selectedStatus,
-                context: contextController.text.trim().isEmpty ? null : contextController.text.trim(),
-                comment: commentController.text.trim().isEmpty ? null : commentController.text.trim(),
-              );
-
-              controller.updateTranslationEntry(updatedEntry);
-              Get.back();
-            },
-            child: const Text('保存'),
           ),
         ],
       ),

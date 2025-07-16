@@ -3,33 +3,33 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/features/translation/services/translation_service_impl.dart';
+import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 /// 翻译控制器
 class TranslationController extends GetxController {
   final String projectId;
+  TranslationController({required this.projectId});
+
   late final TranslationServiceImpl _translationService;
 
   // 响应式变量
   final _translationEntries = <TranslationEntry>[].obs;
   final _filteredEntries = <TranslationEntry>[].obs;
   final _isLoading = false.obs;
-  final _error = ''.obs;
   final _searchQuery = ''.obs;
   final _selectedLanguage = Rxn<Language>();
   final _selectedStatus = Rxn<TranslationStatus>();
+  final _listType = TranslationsListType.byKey.obs;
 
   // Getters
   List<TranslationEntry> get translationEntries => _translationEntries;
   List<TranslationEntry> get filteredEntries => _filteredEntries;
   bool get isLoading => _isLoading.value;
-  String get error => _error.value;
   String get searchQuery => _searchQuery.value;
   Language? get selectedLanguage => _selectedLanguage.value;
   TranslationStatus? get selectedStatus => _selectedStatus.value;
-
-  TranslationController({required this.projectId});
+  TranslationsListType get listType => _listType.value;
 
   @override
   void onInit() {
@@ -43,7 +43,6 @@ class TranslationController extends GetxController {
       _translationService = await TranslationServiceImpl.create();
       await loadTranslationEntries();
     } catch (error, stackTrace) {
-      _error.value = '初始化翻译服务失败: $error';
       log('初始化翻译服务失败', error: error, stackTrace: stackTrace);
     }
   }
@@ -57,21 +56,18 @@ class TranslationController extends GetxController {
       log('翻译条目刷新完成');
     } catch (error, stackTrace) {
       log('刷新翻译条目失败', error: error, stackTrace: stackTrace);
-      _error.value = '刷新翻译条目失败: $error';
     }
   }
 
   /// 加载翻译条目
   Future<void> loadTranslationEntries() async {
     _isLoading.value = true;
-    _error.value = '';
 
     try {
       final entries = await _translationService.getTranslationEntries(projectId);
       _translationEntries.assignAll(entries);
       _applyFilters();
     } catch (error, stackTrace) {
-      _error.value = '加载翻译条目失败: $error';
       log('加载翻译条目失败', error: error, stackTrace: stackTrace);
     } finally {
       _isLoading.value = false;
@@ -120,8 +116,7 @@ class TranslationController extends GetxController {
 
       Get.snackbar('成功', '翻译键创建成功');
     } catch (error, stackTrace) {
-      _error.value = '创建翻译键失败: $error';
-      Get.snackbar('错误', _error.value);
+      Get.snackbar('错误', '创建翻译键失败: $error');
       log('创建翻译键失败', error: error, stackTrace: stackTrace);
     }
   }
@@ -140,8 +135,7 @@ class TranslationController extends GetxController {
 
       Get.snackbar('成功', '翻译条目更新成功');
     } catch (error, stackTrace) {
-      _error.value = '更新翻译条目失败: $error';
-      Get.snackbar('错误', _error.value);
+      Get.snackbar('错误', '更新翻译条目失败: $error');
       log('更新翻译条目失败', error: error, stackTrace: stackTrace);
     }
   }
@@ -177,8 +171,7 @@ class TranslationController extends GetxController {
         Get.snackbar('成功', '翻译条目删除成功');
       }
     } catch (error, stackTrace) {
-      _error.value = '删除翻译条目失败: $error';
-      Get.snackbar('错误', _error.value);
+      Get.snackbar('错误', '删除翻译条目失败: $error');
       log('删除翻译条目失败', error: error, stackTrace: stackTrace);
     }
   }
@@ -216,8 +209,7 @@ class TranslationController extends GetxController {
         Get.snackbar('成功', '批量删除翻译条目成功');
       }
     } catch (error, stackTrace) {
-      _error.value = '批量删除翻译条目失败: $error';
-      Get.snackbar('错误', _error.value);
+      Get.snackbar('错误', '批量删除翻译条目失败: $error');
       log('批量删除翻译条目失败', error: error, stackTrace: stackTrace);
     }
   }
@@ -275,6 +267,12 @@ class TranslationController extends GetxController {
     _filteredEntries.assignAll(filtered);
   }
 
+  /// 切换列表类型
+  void switchListType(TranslationsListType type) {
+    _listType.value = type;
+    _applyFilters();
+  }
+
   /// 获取翻译进度统计
   Future<Map<String, int>> getTranslationProgress() async {
     try {
@@ -286,7 +284,7 @@ class TranslationController extends GetxController {
   }
 
   /// 获取可用的语言列表
-  List<Language> getAvailableLanguages() {
+  List<Language> get availableLanguages {
     final languages = <Language>[];
     for (final entry in _translationEntries) {
       if (!languages.any((lang) => lang.code == entry.targetLanguage.code)) {
@@ -309,12 +307,12 @@ class TranslationController extends GetxController {
   }
 
   /// 获取可用的状态列表
-  List<TranslationStatus> getAvailableStatuses() {
+  List<TranslationStatus> get availableStatuses {
     return TranslationStatus.values;
   }
 
   /// 按翻译键分组条目
-  Map<String, List<TranslationEntry>> getGroupedEntries() {
+  Map<String, List<TranslationEntry>> get groupedEntries {
     final grouped = <String, List<TranslationEntry>>{};
 
     for (final entry in _filteredEntries) {
@@ -343,8 +341,40 @@ class TranslationController extends GetxController {
     return sortedGrouped;
   }
 
+  /// 按语言分组条目
+  Map<Language, List<TranslationEntry>> get groupedEntriesByLanguage {
+    final grouped = <Language, List<TranslationEntry>>{};
+
+    for (final entry in _filteredEntries) {
+      grouped.putIfAbsent(entry.targetLanguage, () => []).add(entry);
+    }
+
+    // 按语言的 sortIndex 排序
+    final sortedLanguages = grouped.keys.toList()
+      ..sort((a, b) {
+        final aIndex = a.sortIndex;
+        final bIndex = b.sortIndex;
+        if (aIndex != bIndex) {
+          return aIndex.compareTo(bIndex);
+        }
+        // 如果 sortIndex 相同，则按语言代码排序
+        return a.code.compareTo(b.code);
+      });
+
+    final sortedGrouped = <Language, List<TranslationEntry>>{};
+
+    for (final language in sortedLanguages) {
+      // 按翻译键名排序每个语言组内的条目
+      final entries = grouped[language]!;
+      entries.sort((a, b) => a.key.compareTo(b.key));
+      sortedGrouped[language] = entries;
+    }
+
+    return sortedGrouped;
+  }
+
   /// 获取翻译条目统计信息
-  Map<String, int> getStatistics() {
+  Map<String, int> get statistics {
     final stats = <String, int>{};
 
     stats['total'] = _translationEntries.length;
@@ -354,5 +384,25 @@ class TranslationController extends GetxController {
     stats['translating'] = _translationEntries.where((e) => e.status == TranslationStatus.translating).length;
 
     return stats;
+  }
+
+  /// 获取状态颜色
+  static Color getStatusColor(TranslationStatus status) {
+    switch (status) {
+      case TranslationStatus.pending:
+        return Colors.orange;
+      case TranslationStatus.translating:
+        return Colors.blue;
+      case TranslationStatus.completed:
+        return Colors.green;
+      case TranslationStatus.reviewing:
+        return Colors.purple;
+      case TranslationStatus.rejected:
+        return Colors.red;
+      case TranslationStatus.needsRevision:
+        return Colors.amber;
+      case TranslationStatus.outdated:
+        return Colors.grey;
+    }
   }
 }
