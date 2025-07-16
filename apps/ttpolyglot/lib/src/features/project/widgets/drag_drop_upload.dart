@@ -183,6 +183,7 @@ class _DragDropUploadState extends State<DragDropUpload> {
               ),
             ),
             child: Row(
+              spacing: 10.0,
               children: [
                 Expanded(
                   flex: 2,
@@ -299,6 +300,7 @@ class _DragDropUploadState extends State<DragDropUpload> {
         ),
       ),
       child: Row(
+        spacing: 10.0,
         children: [
           // 语言
           Expanded(
