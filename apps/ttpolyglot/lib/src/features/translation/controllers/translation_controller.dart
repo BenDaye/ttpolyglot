@@ -341,25 +341,43 @@ class TranslationController extends GetxController {
     return sortedGrouped;
   }
 
-  /// 按语言分组条目
+  /// 按语言分组条目（包含来源语言）
   Map<Language, List<TranslationEntry>> get groupedEntriesByLanguage {
     final grouped = <Language, List<TranslationEntry>>{};
 
     for (final entry in _filteredEntries) {
+      // 只按目标语言分组，避免重复
       grouped.putIfAbsent(entry.targetLanguage, () => []).add(entry);
+    }
+
+    if (grouped.isNotEmpty) {
+      final sourceLanguage = grouped.entries.first.value.first.sourceLanguage;
+      final List<TranslationEntry> copy = grouped.entries.first.value
+          .map(
+            (item) => item.copyWith(
+              id: item.id.replaceAll(item.targetLanguage.code, item.sourceLanguage.code),
+              targetLanguage: item.sourceLanguage,
+              targetText: item.sourceText,
+              status: TranslationStatus.completed,
+            ),
+          )
+          .toList();
+      grouped.putIfAbsent(sourceLanguage, () => []).addAll(copy);
     }
 
     // 按语言的 sortIndex 排序
     final sortedLanguages = grouped.keys.toList()
-      ..sort((a, b) {
-        final aIndex = a.sortIndex;
-        final bIndex = b.sortIndex;
-        if (aIndex != bIndex) {
-          return aIndex.compareTo(bIndex);
-        }
-        // 如果 sortIndex 相同，则按语言代码排序
-        return a.code.compareTo(b.code);
-      });
+      ..sort(
+        (a, b) {
+          final aIndex = a.sortIndex;
+          final bIndex = b.sortIndex;
+          if (aIndex != bIndex) {
+            return aIndex.compareTo(bIndex);
+          }
+          // 如果 sortIndex 相同，则按语言代码排序
+          return a.code.compareTo(b.code);
+        },
+      );
 
     final sortedGrouped = <Language, List<TranslationEntry>>{};
 
