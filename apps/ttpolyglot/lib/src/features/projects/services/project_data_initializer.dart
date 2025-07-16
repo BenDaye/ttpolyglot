@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:ttpolyglot_core/core.dart';
 
-import 'project_service_impl.dart';
+import '../../../core/services/project_service_impl.dart';
 
 /// 项目数据初始化器
 class ProjectDataInitializer {

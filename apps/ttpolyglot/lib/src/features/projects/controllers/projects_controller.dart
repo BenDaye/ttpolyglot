@@ -1,32 +1,20 @@
-import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
 
-import 'package:archive/archive.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/core/platform/platform_adapter.dart';
+import 'package:ttpolyglot/src/core/services/translation_service_impl.dart';
 import 'package:ttpolyglot/src/features/projects/services/project_data_initializer.dart';
-import 'package:ttpolyglot/src/features/projects/services/project_service_impl.dart';
+import 'package:ttpolyglot/src/core/services/project_service_impl.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_core/core.dart';
-import 'package:ttpolyglot_parsers/parsers.dart';
 
 /// 项目管理控制器
 class ProjectsController extends GetxController {
   static ProjectsController get to {
-    return Get.isRegistered<ProjectsController>()
-        ? Get.find<ProjectsController>()
-        : Get.put(
-            ProjectsController(),
-          );
+    return Get.isRegistered<ProjectsController>() ? Get.find<ProjectsController>() : Get.put(ProjectsController());
   }
 
-  // 项目服务
-  late final ProjectServiceImpl _projectService;
-
-  // 翻译服务
-  late final TranslationServiceImpl _translationService;
+  final ProjectServiceImpl _projectService = Get.find<ProjectServiceImpl>();
+  final TranslationServiceImpl _translationService = Get.find<TranslationServiceImpl>();
 
   // 响应式项目列表
   final _projects = <Project>[].obs;
@@ -60,17 +48,14 @@ class ProjectsController extends GetxController {
   /// 初始化项目服务
   Future<void> _initializeService() async {
     try {
-      _projectService = await ProjectServiceImpl.create();
-      _translationService = await TranslationServiceImpl.create();
-
       // 初始化示例数据
       final initializer = ProjectDataInitializer(_projectService);
       await initializer.initializeSampleProjects();
 
       await loadProjects();
-    } catch (e, stackTrace) {
-      Get.snackbar('错误', '初始化项目服务失败: $e');
-      log('初始化项目服务失败', error: e, stackTrace: stackTrace);
+    } catch (error, stackTrace) {
+      Get.snackbar('错误', '初始化项目服务失败: $error');
+      log('初始化项目服务失败', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -434,109 +419,5 @@ class ProjectsController extends GetxController {
   /// 根据语言代码获取语言对象
   static Language? getLanguageByCode(String code) {
     return ProjectDataInitializer.getLanguageByCode(code);
-  }
-
-  static Future<void> exportTranslationsShortcutJson(
-    String projectId,
-  ) async {
-    final controller = to;
-    final translationService = controller._translationService;
-
-    try {
-      // 获取项目信息
-      final project = await controller._projectService.getProject(projectId);
-      if (project == null) {
-        Get.snackbar('错误', '项目不存在');
-        return;
-      }
-
-      // TODO: 先实现桌面端
-      if (!PlatformAdapter().isDesktop) return;
-
-      // 生成默认文件名
-      final defaultFileName = '${project.name}_translations.zip';
-
-      // 让用户选择保存位置
-      final savePath = await FilePicker.platform.saveFile(
-        dialogTitle: '选择保存位置',
-        fileName: defaultFileName,
-        allowedExtensions: ['zip'],
-        type: FileType.custom,
-      );
-
-      if (savePath == null) {
-        log('用户取消了文件保存');
-        return;
-      }
-
-      // // 根据文件扩展名确定格式
-      // final fileExtension = savePath.split('.').last.toLowerCase();
-      // String format;
-      // TranslationKeyStyle keyStyle;
-
-      // switch (fileExtension) {
-      //   case 'json':
-      //     format = FileFormats.json;
-      //     keyStyle = TranslationKeyStyle.nested;
-      //     break;
-      //   case 'yaml':
-      //   case 'yml':
-      //     format = FileFormats.yaml;
-      //     keyStyle = TranslationKeyStyle.nested;
-      //     break;
-      //   case 'csv':
-      //     format = FileFormats.csv;
-      //     keyStyle = TranslationKeyStyle.flat;
-      //     break;
-      //   case 'arb':
-      //     format = FileFormats.arb;
-      //     keyStyle = TranslationKeyStyle.flat;
-      //     break;
-      //   case 'properties':
-      //     format = FileFormats.properties;
-      //     keyStyle = TranslationKeyStyle.flat;
-      //     break;
-      //   case 'po':
-      //     format = FileFormats.po;
-      //     keyStyle = TranslationKeyStyle.flat;
-      //     break;
-      //   default:
-      //     format = FileFormats.json;
-      //     keyStyle = TranslationKeyStyle.nested;
-      // }
-
-      final allEntries = await translationService.getTranslationEntries(projectId, includeSourceLanguage: true);
-      final allLanguages = [project.defaultLanguage, ...project.targetLanguages];
-      final Archive archive = Archive();
-
-      Future<void> export(Language language) async {
-        final filterEntries = allEntries.where((entry) => entry.targetLanguage.code == language.code).toList();
-        final content = await translationService.exportTranslations(
-          projectId,
-          language,
-          format: FileFormats.json,
-          keyStyle: TranslationKeyStyle.nested,
-          entries: filterEntries,
-        );
-
-        final fileName = '${language.code}.json';
-        final contentBytes = utf8.encode(content);
-        final file = ArchiveFile(fileName, contentBytes.length, contentBytes);
-        archive.addFile(file);
-        log('导出翻译文件: $fileName', name: 'exportTranslations');
-      }
-
-      await Future.wait(allLanguages.map(export));
-
-      final zipData = ZipEncoder().encode(archive);
-      final zipFile = File(savePath);
-      await zipFile.writeAsBytes(zipData);
-
-      log('翻译文件已保存到: $savePath', name: 'exportTranslations');
-      Get.snackbar('成功', '翻译文件导出成功');
-    } catch (error, stackTrace) {
-      log('exportTranslations', error: error, stackTrace: stackTrace);
-      Get.snackbar('错误', '导出翻译文件失败: $error');
-    }
   }
 }

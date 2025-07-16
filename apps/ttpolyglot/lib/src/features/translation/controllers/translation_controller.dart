@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/core/services/translation_service_impl.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_core/core.dart';
 
@@ -11,7 +12,7 @@ class TranslationController extends GetxController {
   final String projectId;
   TranslationController({required this.projectId});
 
-  late final TranslationServiceImpl _translationService;
+  final TranslationServiceImpl _translationService = Get.find<TranslationServiceImpl>();
 
   // 响应式变量
   final _translationEntries = <TranslationEntry>[].obs;
@@ -40,7 +41,6 @@ class TranslationController extends GetxController {
   /// 初始化翻译服务
   Future<void> _initializeService() async {
     try {
-      _translationService = await TranslationServiceImpl.create();
       await loadTranslationEntries();
     } catch (error, stackTrace) {
       log('初始化翻译服务失败', error: error, stackTrace: stackTrace);

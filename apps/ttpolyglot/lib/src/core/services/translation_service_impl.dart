@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/storage/storage_provider.dart';
 import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_parsers/parsers.dart';
 
 /// 翻译服务实现
-class TranslationServiceImpl implements TranslationService {
+class TranslationServiceImpl extends GetxService implements TranslationService {
   final StorageService _storageService;
 
   TranslationServiceImpl(this._storageService);

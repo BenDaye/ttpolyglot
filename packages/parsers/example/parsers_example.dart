@@ -64,8 +64,8 @@ Future<void> testUserJsonFiles() async {
 
       print('🌍 Language: ${result.language.name} (${result.language.code})');
       print('');
-    } catch (e, stackTrace) {
-      print('❌ Error parsing en-US.json: $e');
+    } catch (error, stackTrace) {
+      print('❌ Error parsing en-US.json: $error');
       print('Stack trace: $stackTrace');
       print('');
     }
@@ -105,8 +105,8 @@ Future<void> testUserJsonFiles() async {
 
       print('🌍 Language: ${result.language.name} (${result.language.code})');
       print('');
-    } catch (e, stackTrace) {
-      print('❌ Error parsing zh-CN.json: $e');
+    } catch (error, stackTrace) {
+      print('❌ Error parsing zh-CN.json: $error');
       print('Stack trace: $stackTrace');
       print('');
     }

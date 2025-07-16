@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/widgets/clickable_stat_card.dart';
+import 'package:ttpolyglot/src/features/export/export.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
-import 'package:ttpolyglot/src/features/projects/projects.dart';
 
 /// 项目导出页面
 class ProjectExportView extends StatelessWidget {
@@ -45,7 +45,7 @@ class ProjectExportView extends StatelessWidget {
                                   icon: Icons.code,
                                   color: Colors.blue,
                                   onTap: () {
-                                    ProjectsController.exportTranslationsShortcutJson(projectId);
+                                    ExportController.exportTranslationsShortcutJson(projectId);
                                   },
                                 ),
                               ),
