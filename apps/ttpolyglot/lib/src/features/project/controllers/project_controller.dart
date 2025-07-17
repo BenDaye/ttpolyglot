@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/core/services/translation_service_impl.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 import 'package:ttpolyglot/src/features/projects/projects.dart';
 import 'package:ttpolyglot_core/core.dart';
@@ -11,6 +12,7 @@ class ProjectController extends GetxController {
   late final String projectId;
 
   final TextEditingController _deleteProjectNameTextController = TextEditingController();
+  final TranslationServiceImpl _translationService = Get.find<TranslationServiceImpl>();
 
   // 响应式项目对象
   final _project = Rxn<Project>();
@@ -179,6 +181,41 @@ class ProjectController extends GetxController {
     if (result == true) {
       final newTargetLanguages = _project.value!.targetLanguages.where((lang) => lang.code != language.code).toList();
       await ProjectsController.updateProject(projectId, targetLanguages: newTargetLanguages);
+    }
+  }
+
+  Future<void> importFiles(Map<String, Language> languageMap, Map<String, Map<String, String>> translationMap) async {
+    try {
+      final entries = <TranslationEntry>[];
+      for (final translation in translationMap.entries) {
+        final item = translation.value;
+        item.forEach((key, value) async {
+          final request = CreateTranslationKeyRequest(
+            projectId: projectId,
+            key: key,
+            sourceText: value,
+            sourceLanguage: _project.value!.defaultLanguage,
+            targetLanguages: _project.value!.targetLanguages..sort((a, b) => a.sortIndex.compareTo(b.sortIndex)),
+          );
+          // 如果请求有效，则创建翻译条目
+          if (request.isValid) {
+            final entry = await _translationService.createTranslationKey(request);
+            entries.addAll(entry);
+          }
+        });
+      }
+      // 如果导入的条目为空，则提示错误
+      if (entries.isEmpty) {
+        Get.snackbar('错误', '创建翻译条目失败');
+        return;
+      }
+      await _translationService.batchUpdateTranslationEntries(entries);
+      //
+      setFiles([]);
+      // 提示成功
+      Get.snackbar('成功', '导入文件成功');
+    } catch (error, stackTrace) {
+      log('导入文件失败', error: error, stackTrace: stackTrace);
     }
   }
 }

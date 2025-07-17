@@ -139,7 +139,7 @@ class ProjectImportView extends StatelessWidget {
                               controller.setFiles([]);
                             },
                             onImport: (languageMap, translationMap) {
-                              // controller.importFiles(languageMap, translationMap);
+                              controller.importFiles(languageMap, translationMap);
                             },
                           ),
                         );

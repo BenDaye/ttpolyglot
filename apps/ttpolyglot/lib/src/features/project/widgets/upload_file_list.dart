@@ -13,7 +13,7 @@ class UploadFileList extends StatefulWidget {
   final List<Language> languages;
   final List<String> allowedExtensions;
   final VoidCallback? onClear; // 清空文件列表
-  final Function(Map<String, Language>, Map<String, Map<String, dynamic>>)? onImport; // 导入文件
+  final Function(Map<String, Language>, Map<String, Map<String, String>>)? onImport; // 导入文件
   final Function(int index)? onDelete; // 删除文件
 
   const UploadFileList({
@@ -32,7 +32,7 @@ class UploadFileList extends StatefulWidget {
 
 class _UploadFileListState extends State<UploadFileList> {
   final Map<String, Language> _fileLanguageMap = {};
-  final Map<String, Map<String, dynamic>> _fileTranslationMap = {};
+  final Map<String, Map<String, String>> _fileTranslationMap = {};
 
   @override
   void initState() {
@@ -363,7 +363,16 @@ class _UploadFileListState extends State<UploadFileList> {
         case 'json':
           final jsonContent = utf8.decode(file.bytes ?? []);
           final json = jsonDecode(jsonContent);
-          _fileTranslationMap[file.name] = json;
+          if (json is Map<String, dynamic>) {
+            _fileTranslationMap[file.name] = json.map(
+              (key, value) => MapEntry(
+                key,
+                value is String ? value : value.toString(),
+              ),
+            );
+          } else {
+            Get.snackbar('错误', '文件 ${file.name} 不是有效的 JSON 格式');
+          }
           break;
         case 'csv':
           final csvContent = utf8.decode(file.bytes ?? []);
