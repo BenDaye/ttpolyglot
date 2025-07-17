@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 /// 应用主题控制器 - 橙色主题设计
 class AppThemeController extends GetxController {
-  static AppThemeController get to {
+  static AppThemeController get instance {
     return Get.isRegistered<AppThemeController>()
         ? Get.find<AppThemeController>()
         : Get.put(

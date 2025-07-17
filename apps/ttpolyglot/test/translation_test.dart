@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ttpolyglot/src/core/services/translation_service_impl.dart';
+// import 'package:ttpolyglot/src/core/services/service.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 void main() {
   group('翻译功能测试', () {
-    late TranslationServiceImpl translationService;
+    // late TranslationServiceImpl translationService;
 
     setUp(() async {
       // 这里应该设置测试环境
@@ -75,38 +75,38 @@ void main() {
 
     test('项目语言变化同步测试', () {
       // 准备测试数据
-      final english = Language.getLanguageByCode('en-US')!;
+      // final english = Language.getLanguageByCode('en-US')!;
       final chinese = Language.getLanguageByCode('zh-CN')!;
       final japanese = Language.getLanguageByCode('ja-JP')!;
       final korean = Language.getLanguageByCode('ko-KR')!;
 
       // 模拟现有的翻译条目
-      final existingEntries = [
-        TranslationEntry(
-          id: 'entry-1',
-          projectId: 'test-project',
-          key: 'common.greeting',
-          sourceLanguage: english,
-          targetLanguage: chinese,
-          sourceText: 'Hello',
-          targetText: '你好',
-          status: TranslationStatus.completed,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        ),
-        TranslationEntry(
-          id: 'entry-2',
-          projectId: 'test-project',
-          key: 'common.greeting',
-          sourceLanguage: english,
-          targetLanguage: japanese,
-          sourceText: 'Hello',
-          targetText: 'こんにちは',
-          status: TranslationStatus.completed,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        ),
-      ];
+      // final existingEntries = [
+      //   TranslationEntry(
+      //     id: 'entry-1',
+      //     projectId: 'test-project',
+      //     key: 'common.greeting',
+      //     sourceLanguage: english,
+      //     targetLanguage: chinese,
+      //     sourceText: 'Hello',
+      //     targetText: '你好',
+      //     status: TranslationStatus.completed,
+      //     createdAt: DateTime.now(),
+      //     updatedAt: DateTime.now(),
+      //   ),
+      //   TranslationEntry(
+      //     id: 'entry-2',
+      //     projectId: 'test-project',
+      //     key: 'common.greeting',
+      //     sourceLanguage: english,
+      //     targetLanguage: japanese,
+      //     sourceText: 'Hello',
+      //     targetText: 'こんにちは',
+      //     status: TranslationStatus.completed,
+      //     createdAt: DateTime.now(),
+      //     updatedAt: DateTime.now(),
+      //   ),
+      // ];
 
       // 新的目标语言列表（移除日语，添加韩语）
       final newTargetLanguages = [chinese, korean];

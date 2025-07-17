@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/layout/utils/layout_breakpoints.dart';
-import 'package:ttpolyglot/src/features/project/project.dart';
-import 'package:ttpolyglot/src/features/projects/projects.dart';
+import 'package:ttpolyglot/src/features/features.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 /// 项目侧边栏

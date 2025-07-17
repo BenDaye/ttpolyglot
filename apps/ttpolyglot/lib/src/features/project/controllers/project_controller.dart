@@ -40,7 +40,7 @@ class ProjectController extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    log('ProjectController onReady: $projectId');
+    log('ProjectController onReady: $projectId', name: 'ProjectController');
     loadProject();
   }
 
@@ -71,7 +71,7 @@ class ProjectController extends GetxController {
       Get.snackbar('错误', '项目不存在: $projectId');
     } catch (error, stackTrace) {
       Get.snackbar('错误', '加载项目失败: $error');
-      log('加载项目失败', error: error, stackTrace: stackTrace);
+      log('加载项目失败', error: error, stackTrace: stackTrace, name: 'ProjectController');
     } finally {
       _isLoading.value = false;
     }
@@ -87,7 +87,7 @@ class ProjectController extends GetxController {
     try {
       return await ProjectsController.getProjectStats(projectId);
     } catch (error, stackTrace) {
-      log('获取项目统计失败', error: error, stackTrace: stackTrace);
+      log('获取项目统计失败', error: error, stackTrace: stackTrace, name: 'ProjectController');
       return ProjectStats(
         totalEntries: 0,
         completedEntries: 0,

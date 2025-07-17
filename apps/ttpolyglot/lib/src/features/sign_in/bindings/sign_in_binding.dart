@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/features/sign_in/controllers/sign_in_controller.dart';
+import 'package:ttpolyglot/src/features/sign_in/sign_in.dart';
 
 class SignInBinding extends Bindings {
   @override

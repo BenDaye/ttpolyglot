@@ -1,15 +1,13 @@
 import 'dart:developer';
 
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/core/services/translation_service_impl.dart';
-import 'package:ttpolyglot/src/features/projects/services/project_data_initializer.dart';
-import 'package:ttpolyglot/src/core/services/project_service_impl.dart';
-import 'package:ttpolyglot/src/features/translation/translation.dart';
+import 'package:ttpolyglot/src/core/services/service.dart';
+import 'package:ttpolyglot/src/features/features.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 /// 项目管理控制器
 class ProjectsController extends GetxController {
-  static ProjectsController get to {
+  static ProjectsController get instance {
     return Get.isRegistered<ProjectsController>() ? Get.find<ProjectsController>() : Get.put(ProjectsController());
   }
 
@@ -55,13 +53,13 @@ class ProjectsController extends GetxController {
       await loadProjects();
     } catch (error, stackTrace) {
       Get.snackbar('错误', '初始化项目服务失败: $error');
-      log('初始化项目服务失败', error: error, stackTrace: stackTrace);
+      log('初始化项目服务失败', error: error, stackTrace: stackTrace, name: 'ProjectsController');
     }
   }
 
   /// 加载项目列表
   static Future<void> loadProjects() async {
-    final controller = to;
+    final controller = instance;
 
     try {
       controller._isLoading.value = true;
@@ -69,7 +67,7 @@ class ProjectsController extends GetxController {
       controller._projects.assignAll(projects);
     } catch (error, stackTrace) {
       Get.snackbar('错误', '加载项目失败: $error');
-      log('loadProjects', error: error, stackTrace: stackTrace);
+      log('loadProjects', error: error, stackTrace: stackTrace, name: 'ProjectsController');
     } finally {
       controller._isLoading.value = false;
     }
@@ -87,7 +85,7 @@ class ProjectsController extends GetxController {
     required Language defaultLanguage,
     required List<Language> targetLanguages,
   }) async {
-    final controller = to;
+    final controller = instance;
     try {
       controller._isLoading.value = true;
       // 检查项目名称是否可用
@@ -113,7 +111,7 @@ class ProjectsController extends GetxController {
       Get.snackbar('成功', '项目创建成功');
     } catch (error, stackTrace) {
       Get.snackbar('错误', '创建项目失败: $error');
-      log('createProject', error: error, stackTrace: stackTrace);
+      log('createProject', error: error, stackTrace: stackTrace, name: 'ProjectsController');
     } finally {
       controller._isLoading.value = false;
     }
@@ -129,7 +127,7 @@ class ProjectsController extends GetxController {
     bool? isActive,
   }) async {
     try {
-      final controller = to;
+      final controller = instance;
 
       final project = await controller._projectService.getProject(projectId);
       if (project == null) {
@@ -172,13 +170,13 @@ class ProjectsController extends GetxController {
       Get.snackbar('成功', '项目更新成功');
     } catch (error, stackTrace) {
       Get.snackbar('错误', '更新项目失败: $error');
-      log('updateProject', error: error, stackTrace: stackTrace);
+      log('updateProject', error: error, stackTrace: stackTrace, name: 'ProjectsController');
     }
   }
 
   /// 删除项目
   static Future<void> deleteProject(String projectId) async {
-    final controller = to;
+    final controller = instance;
 
     try {
       await controller._projectService.deleteProject(projectId);
@@ -192,13 +190,13 @@ class ProjectsController extends GetxController {
       Get.snackbar('成功', '项目删除成功');
     } catch (error, stackTrace) {
       Get.snackbar('错误', '删除项目失败: $error');
-      log('deleteProject', error: error, stackTrace: stackTrace);
+      log('deleteProject', error: error, stackTrace: stackTrace, name: 'ProjectsController');
     }
   }
 
   /// 切换项目状态
   static Future<void> toggleProjectStatus(String projectId, {required bool isActive}) async {
-    final controller = to;
+    final controller = instance;
 
     try {
       final updatedProject = await controller._projectService.toggleProjectStatus(projectId, isActive: isActive);
@@ -213,7 +211,7 @@ class ProjectsController extends GetxController {
       Get.snackbar('成功', '项目$status成功');
     } catch (error, stackTrace) {
       Get.snackbar('错误', '切换项目状态失败: $error');
-      log('toggleProjectStatus', error: error, stackTrace: stackTrace);
+      log('toggleProjectStatus', error: error, stackTrace: stackTrace, name: 'ProjectsController');
     }
   }
 
@@ -252,7 +250,7 @@ class ProjectsController extends GetxController {
     try {
       log('开始同步项目语言配置到翻译条目');
 
-      final controller = to;
+      final controller = instance;
       final translationService = controller._translationService;
 
       await translationService.syncProjectLanguages(
@@ -269,7 +267,7 @@ class ProjectsController extends GetxController {
         await translationController.onProjectLanguageChanged();
       }
     } catch (error, stackTrace) {
-      log('同步翻译条目语言配置失败', error: error, stackTrace: stackTrace);
+      log('同步翻译条目语言配置失败', error: error, stackTrace: stackTrace, name: 'ProjectsController');
       // 不抛出异常，避免影响项目更新
     }
   }
@@ -281,7 +279,7 @@ class ProjectsController extends GetxController {
 
   /// 设置选中的项目ID
   static void setSelectedProjectId(String? id) {
-    final controller = to;
+    final controller = instance;
 
     if (id == null || id.isEmpty) {
       controller._selectedProjectId.value = '';
@@ -302,12 +300,12 @@ class ProjectsController extends GetxController {
 
   /// 获取项目统计信息
   static Future<ProjectStats> getProjectStats(String projectId) async {
-    final controller = to;
+    final controller = instance;
 
     try {
       return await controller._projectService.getProjectStats(projectId);
     } catch (error, stackTrace) {
-      log('获取项目统计失败', error: error, stackTrace: stackTrace);
+      log('获取项目统计失败', error: error, stackTrace: stackTrace, name: 'ProjectsController');
       return ProjectStats(
         totalEntries: 0,
         completedEntries: 0,
@@ -323,7 +321,7 @@ class ProjectsController extends GetxController {
 
   /// 搜索项目（使用服务）
   static Future<void> searchProjectsWithService(String query) async {
-    final controller = to;
+    final controller = instance;
 
     if (query.isEmpty) {
       await loadProjects();
@@ -336,7 +334,7 @@ class ProjectsController extends GetxController {
       controller._projects.assignAll(projects);
     } catch (error, stackTrace) {
       Get.snackbar('错误', '搜索项目失败: $error');
-      log('搜索项目失败', error: error, stackTrace: stackTrace);
+      log('搜索项目失败', error: error, stackTrace: stackTrace, name: 'ProjectsController');
     } finally {
       controller._isLoading.value = false;
     }
@@ -344,31 +342,31 @@ class ProjectsController extends GetxController {
 
   /// 获取最近访问的项目
   static Future<List<Project>> getRecentProjects({int limit = 10}) async {
-    final controller = to;
+    final controller = instance;
 
     try {
       return await controller._projectService.getRecentProjects('default-user', limit: limit);
     } catch (error, stackTrace) {
-      log('获取最近项目失败', error: error, stackTrace: stackTrace);
+      log('获取最近项目失败', error: error, stackTrace: stackTrace, name: 'ProjectsController');
       return [];
     }
   }
 
   /// 检查项目名称是否可用
   static Future<bool> isProjectNameAvailable(String name, {String? excludeProjectId}) async {
-    final controller = to;
+    final controller = instance;
 
     try {
       return await controller._projectService.isProjectNameAvailable(name, excludeProjectId: excludeProjectId);
     } catch (error, stackTrace) {
-      log('检查项目名称失败', error: error, stackTrace: stackTrace);
+      log('检查项目名称失败', error: error, stackTrace: stackTrace, name: 'ProjectsController');
       return false;
     }
   }
 
   /// 更新项目最后访问时间
   static Future<void> updateProjectLastAccessed(String projectId) async {
-    final controller = to;
+    final controller = instance;
 
     try {
       await controller._projectService.updateProjectLastAccessed(projectId, 'default-user');
@@ -383,30 +381,30 @@ class ProjectsController extends GetxController {
         );
       }
     } catch (error, stackTrace) {
-      log('更新项目访问时间失败', error: error, stackTrace: stackTrace);
+      log('更新项目访问时间失败', error: error, stackTrace: stackTrace, name: 'ProjectsController');
     }
   }
 
   /// 获取项目详情
   static Future<Project?> getProject(String projectId) async {
-    final controller = to;
+    final controller = instance;
 
     try {
       return await controller._projectService.getProject(projectId);
     } catch (error, stackTrace) {
-      log('获取项目详情失败', error: error, stackTrace: stackTrace);
+      log('获取项目详情失败', error: error, stackTrace: stackTrace, name: 'ProjectsController');
       return null;
     }
   }
 
   /// 检查项目是否存在
   static Future<bool> projectExists(String projectId) async {
-    final controller = to;
+    final controller = instance;
 
     try {
       return await controller._projectService.projectExists(projectId);
     } catch (error, stackTrace) {
-      log('检查项目存在性失败', error: error, stackTrace: stackTrace);
+      log('检查项目存在性失败', error: error, stackTrace: stackTrace, name: 'ProjectsController');
       return false;
     }
   }

@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/layout/layout_controller.dart';
 import 'package:ttpolyglot/src/core/routing/app_pages.dart';
 import 'package:ttpolyglot/src/core/theme/app_theme.dart';
-import 'package:ttpolyglot/src/features/settings/controllers/settings_controller.dart';
+import 'package:ttpolyglot/src/features/settings/settings.dart';
 
 class SettingsView extends StatefulWidget {
   const SettingsView({super.key});
@@ -56,7 +56,7 @@ class _SettingsViewContent extends StatelessWidget {
           spacing: 16.0,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildThemeSection(AppThemeController.to),
+            _buildThemeSection(AppThemeController.instance),
             _buildLanguageSection(controller),
             _buildGeneralSection(controller),
           ],
