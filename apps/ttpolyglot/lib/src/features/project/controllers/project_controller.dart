@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'dart:developer';
 
+import 'package:csv/csv.dart';
+import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -221,26 +224,56 @@ class ProjectController extends GetxController {
   }
 
   Future<void> importJsonFile(PlatformFile file, Language language) async {
-    log('importJsonFile: $file, language: $language');
+    // log('importJsonFile: $file, language: $language');
+    // 获取json文件内容
+    final jsonContent = utf8.decode(file.bytes!);
+    // 解析json
+    final json = jsonDecode(jsonContent);
+    log('json: $json');
+    // 将json内容导入到项目中
   }
 
   Future<void> importCsvFile(PlatformFile file, Language language) async {
-    log('importCsvFile: $file, language: $language');
+    // log('importCsvFile: $file, language: $language');
+    // 获取csv文件内容
+    final csvContent = utf8.decode(file.bytes!);
+    // 解析csv
+    final csvRows = const CsvToListConverter().convert(csvContent);
+    log('csv: $csvRows');
+    // 将csv内容导入到项目中
   }
 
   Future<void> importXlsxFile(PlatformFile file, Language language) async {
-    log('importXlsxFile: $file, language: $language');
+    // log('importXlsxFile: $file, language: $language');
+    // 解析xlsx
+    final excel = Excel.decodeBytes(file.bytes!);
+    log('xlsx: $excel');
+    // 将xlsx内容导入到项目中
   }
 
   Future<void> importXlsFile(PlatformFile file, Language language) async {
-    log('importXlsFile: $file, language: $language');
+    // log('importXlsFile: $file, language: $language');
+    // 解析xls
+    final excel = Excel.decodeBytes(file.bytes!);
+    log('xls: $excel');
+    // 将xls内容导入到项目中
   }
 
   Future<void> importArbFile(PlatformFile file, Language language) async {
-    log('importArbFile: $file, language: $language');
+    // log('importArbFile: $file, language: $language');
+    // 获取arb文件内容
+    final arbContent = utf8.decode(file.bytes!);
+    log('arb: $arbContent');
+    // 将arb内容导入到项目中
   }
 
   Future<void> importPoFile(PlatformFile file, Language language) async {
-    log('importPoFile: $file, language: $language');
+    // log('importPoFile: $file, language: $language');
+    // 获取po文件内容
+    final poContent = utf8.decode(file.bytes!);
+    log('po: $poContent');
+    // 将po内容导入到项目中
   }
+
+  // 
 }

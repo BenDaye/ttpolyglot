@@ -57,7 +57,7 @@ class ExportServiceImplDesktop {
 
       final zipData = ZipEncoder().encode(archive);
       final zipFile = File(savePath);
-      await zipFile.writeAsBytes(zipData);
+      await zipFile.writeAsBytes(zipData ?? []);
 
       return true;
     } catch (error, stackTrace) {
