@@ -34,9 +34,15 @@ class ExportTaskResult {
 
 class ExportServiceImplDesktop {
   /// 使用 isolate 导出翻译文件
-  static Future<bool> exportTranslationsShortcutJson({
+  static Future<bool> exportTranslationsJson({
     required Project project,
     required List<TranslationEntry> entries,
+    ExportOptions options = const ExportOptions(
+      languages: [],
+      keyStyle: TranslationKeyStyle.nested,
+      separateFirstLevelKeyIntoFiles: false,
+      useLanguageCodeAsFolderName: false,
+    ),
   }) async {
     try {
       // 生成默认文件名

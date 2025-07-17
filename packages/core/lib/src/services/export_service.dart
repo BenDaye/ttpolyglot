@@ -2,38 +2,74 @@ import 'package:ttpolyglot_core/core.dart';
 
 abstract class ExportService {
   /// 快捷导出所有语言到 json 文件
-  Future<bool> exportTranslationsShortcutJson({
+  Future<bool> exportTranslationsJson({
     required Project project,
     required List<TranslationEntry> entries,
+    ExportOptions options = const ExportOptions(
+      languages: [],
+      keyStyle: TranslationKeyStyle.nested,
+      separateFirstLevelKeyIntoFiles: false,
+      useLanguageCodeAsFolderName: false,
+    ),
   });
 
   /// 快捷导出所有语言到 yaml 文件
-  Future<bool> exportTranslationsShortcutYaml({
+  Future<bool> exportTranslationsYaml({
     required Project project,
     required List<TranslationEntry> entries,
+    ExportOptions options = const ExportOptions(
+      languages: [],
+      keyStyle: TranslationKeyStyle.nested,
+      separateFirstLevelKeyIntoFiles: false,
+      useLanguageCodeAsFolderName: false,
+    ),
   });
 
   /// 快捷导出所有语言到 csv 文件
-  Future<bool> exportTranslationsShortcutCsv({
+  Future<bool> exportTranslationsCsv({
     required Project project,
     required List<TranslationEntry> entries,
+    ExportOptions options = const ExportOptions(
+      languages: [],
+      keyStyle: TranslationKeyStyle.flat,
+      separateFirstLevelKeyIntoFiles: false,
+      useLanguageCodeAsFolderName: false,
+    ),
   });
 
   /// 快捷导出所有语言到 arb 文件
-  Future<bool> exportTranslationsShortcutArb({
+  Future<bool> exportTranslationsArb({
     required Project project,
     required List<TranslationEntry> entries,
+    ExportOptions options = const ExportOptions(
+      languages: [],
+      keyStyle: TranslationKeyStyle.nested,
+      separateFirstLevelKeyIntoFiles: false,
+      useLanguageCodeAsFolderName: false,
+    ),
   });
 
   /// 快捷导出所有语言到 properties 文件
-  Future<bool> exportTranslationsShortcutProperties({
+  Future<bool> exportTranslationsProperties({
     required Project project,
     required List<TranslationEntry> entries,
+    ExportOptions options = const ExportOptions(
+      languages: [],
+      keyStyle: TranslationKeyStyle.flat,
+      separateFirstLevelKeyIntoFiles: false,
+      useLanguageCodeAsFolderName: false,
+    ),
   });
 
   /// 快捷导出所有语言到 po 文件
-  Future<bool> exportTranslationsShortcutPo({
+  Future<bool> exportTranslationsPo({
     required Project project,
     required List<TranslationEntry> entries,
+    ExportOptions options = const ExportOptions(
+      languages: [],
+      keyStyle: TranslationKeyStyle.flat,
+      separateFirstLevelKeyIntoFiles: false,
+      useLanguageCodeAsFolderName: false,
+    ),
   });
 }

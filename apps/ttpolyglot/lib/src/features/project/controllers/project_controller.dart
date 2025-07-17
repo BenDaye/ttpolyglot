@@ -6,7 +6,14 @@ import 'package:ttpolyglot/src/features/features.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 class ProjectController extends GetxController {
-  late final String projectId;
+  final String projectId;
+  ProjectController({required this.projectId});
+
+  static ProjectController getInstance(String projectId) {
+    return Get.isRegistered<ProjectController>(tag: projectId)
+        ? Get.find<ProjectController>(tag: projectId)
+        : Get.put(ProjectController(projectId: projectId), tag: projectId);
+  }
 
   final TextEditingController _deleteProjectNameTextController = TextEditingController();
 
@@ -18,12 +25,6 @@ class ProjectController extends GetxController {
   Project? get project => _project.value;
   Rxn<Project> get projectObs => _project;
   bool get isLoading => _isLoading.value;
-
-  @override
-  void onInit() {
-    super.onInit();
-    projectId = Get.parameters['projectId'] ?? '';
-  }
 
   @override
   void onReady() {

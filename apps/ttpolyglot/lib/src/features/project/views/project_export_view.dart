@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/widgets/clickable_stat_card.dart';
 import 'package:ttpolyglot/src/features/features.dart';
+import 'package:ttpolyglot_parsers/parsers.dart';
 
 /// 项目导出页面
 class ProjectExportView extends StatelessWidget {
@@ -44,7 +45,7 @@ class ProjectExportView extends StatelessWidget {
                                   icon: Icons.code,
                                   color: Colors.blue,
                                   onTap: () {
-                                    ProjectExportController.exportTranslationsShortcutJson(projectId);
+                                    ProjectExportController.getInstance(projectId).exportTranslationsJson();
                                   },
                                 ),
                               ),
@@ -78,90 +79,95 @@ class ProjectExportView extends StatelessWidget {
                   const SizedBox(height: 16.0),
 
                   // 自定义导出卡片
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '自定义导出',
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          const SizedBox(height: 16.0),
+                  GetBuilder<ProjectExportController>(
+                      init: ProjectExportController.getInstance(projectId),
+                      tag: projectId,
+                      builder: (controller) {
+                        return Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '自定义导出',
+                                  style: Theme.of(context).textTheme.titleLarge,
+                                ),
+                                const SizedBox(height: 16.0),
 
-                          // 语言选择
-                          Text(
-                            '选择语言',
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: 8.0),
-                          Wrap(
-                            spacing: 8.0,
-                            runSpacing: 8.0,
-                            children: [
-                              _buildLanguageChip(context, project.defaultLanguage, true),
-                              ...project.targetLanguages.map((lang) => _buildLanguageChip(context, lang, false)),
-                            ],
-                          ),
+                                // 格式选择
+                                Text(
+                                  '选择格式',
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                ),
+                                const SizedBox(height: 8.0),
+                                _buildFormatSelector(context, controller: controller),
 
-                          const SizedBox(height: 16.0),
+                                const SizedBox(height: 16.0),
 
-                          // 导出选项
-                          Text(
-                            '导出选项',
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: 8.0),
-                          _buildExportOption(
-                            context,
-                            '仅导出已翻译内容',
-                            '跳过未翻译的词条',
-                            true,
-                            (value) {},
-                          ),
-                          _buildExportOption(
-                            context,
-                            '包含翻译状态',
-                            '在导出文件中包含翻译状态信息',
-                            false,
-                            (value) {},
-                          ),
-                          _buildExportOption(
-                            context,
-                            '包含时间戳',
-                            '在导出文件中包含创建和更新时间',
-                            false,
-                            (value) {},
-                          ),
+                                // 语言选择
+                                Text(
+                                  '选择语言',
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                ),
+                                const SizedBox(height: 8.0),
+                                Wrap(
+                                  spacing: 8.0,
+                                  runSpacing: 8.0,
+                                  children: [
+                                    _buildLanguageChip(context, project.defaultLanguage, true),
+                                    ...project.targetLanguages.map((lang) => _buildLanguageChip(context, lang, false)),
+                                  ],
+                                ),
 
-                          const SizedBox(height: 16.0),
+                                const SizedBox(height: 16.0),
 
-                          // 格式选择
-                          Text(
-                            '选择格式',
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: 8.0),
-                          _buildFormatSelector(context),
+                                // 导出选项
+                                Text(
+                                  '导出选项',
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                ),
+                                const SizedBox(height: 8.0),
+                                _buildExportOption(
+                                  context,
+                                  '仅导出已翻译内容',
+                                  '跳过未翻译的词条',
+                                  true,
+                                  (value) {},
+                                ),
+                                _buildExportOption(
+                                  context,
+                                  '包含翻译状态',
+                                  '在导出文件中包含翻译状态信息',
+                                  false,
+                                  (value) {},
+                                ),
+                                _buildExportOption(
+                                  context,
+                                  '包含时间戳',
+                                  '在导出文件中包含创建和更新时间',
+                                  false,
+                                  (value) {},
+                                ),
 
-                          const SizedBox(height: 16.0),
+                                const SizedBox(height: 16.0),
 
-                          // 导出按钮
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: () {
-                                // TODO: 自定义导出功能
-                              },
-                              icon: const Icon(Icons.download),
-                              label: const Text('开始导出'),
+                                // 导出按钮
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      // TODO: 自定义导出功能
+                                    },
+                                    icon: const Icon(Icons.download),
+                                    label: const Text('开始导出'),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
+                        );
+                      }),
 
                   const SizedBox(height: 16.0),
 
@@ -247,37 +253,27 @@ class ProjectExportView extends StatelessWidget {
     );
   }
 
-  Widget _buildFormatSelector(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: RadioListTile<String>(
-            title: const Text('JSON'),
-            value: 'json',
-            groupValue: 'json',
-            onChanged: (value) {},
-            dense: true,
+  Widget _buildFormatSelector(
+    BuildContext context, {
+    required ProjectExportController controller,
+  }) {
+    return Obx(
+      () => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ...FileFormats.allFormats.map(
+            (format) => RadioListTile<String>(
+              title: Text(FileFormats.getDisplayName(format)),
+              value: format,
+              groupValue: controller.exportFormat,
+              onChanged: (value) {
+                controller.exportFormat = format;
+              },
+              dense: true,
+            ),
           ),
-        ),
-        Expanded(
-          child: RadioListTile<String>(
-            title: const Text('CSV'),
-            value: 'csv',
-            groupValue: 'json',
-            onChanged: (value) {},
-            dense: true,
-          ),
-        ),
-        Expanded(
-          child: RadioListTile<String>(
-            title: const Text('Excel'),
-            value: 'excel',
-            groupValue: 'json',
-            onChanged: (value) {},
-            dense: true,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
