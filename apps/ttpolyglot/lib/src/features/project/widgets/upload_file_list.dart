@@ -370,6 +370,7 @@ class _UploadFileListState extends State<UploadFileList> {
                 value is String ? value : value.toString(),
               ),
             );
+            setState(() {});
           } else {
             Get.snackbar('错误', '文件 ${file.name} 不是有效的 JSON 格式');
           }
