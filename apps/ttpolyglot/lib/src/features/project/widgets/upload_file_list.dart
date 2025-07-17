@@ -1,12 +1,17 @@
+import 'dart:convert';
 import 'dart:developer';
 
+import 'package:csv/csv.dart';
+import 'package:excel/excel.dart' as excel;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 class UploadFileList extends StatefulWidget {
   final List<PlatformFile> files;
   final List<Language> languages;
+  final List<String> allowedExtensions;
   final VoidCallback? onClear; // 清空文件列表
   final Function(Map<String, Language>)? onImport; // 导入文件
   final Function(int index)? onDelete; // 删除文件
@@ -15,6 +20,7 @@ class UploadFileList extends StatefulWidget {
     super.key,
     this.files = const [],
     this.languages = const [],
+    this.allowedExtensions = const [],
     this.onClear,
     this.onImport,
     this.onDelete,
@@ -26,6 +32,28 @@ class UploadFileList extends StatefulWidget {
 
 class _UploadFileListState extends State<UploadFileList> {
   final Map<String, Language> _fileLanguageMap = {};
+  final Map<String, Map<String, dynamic>> _fileTranslationMap = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _importFiles(widget.files);
+  }
+
+  @override
+  void didUpdateWidget(UploadFileList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.files != widget.files) {
+      _importFiles(widget.files);
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _fileTranslationMap.clear();
+    _fileLanguageMap.clear();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -198,7 +226,7 @@ class _UploadFileListState extends State<UploadFileList> {
                 ),
                 child: Center(
                   child: Text(
-                    '0',
+                    _fileTranslationMap[file.name]?.length.toString() ?? '0',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: Theme.of(context).colorScheme.primary,
@@ -319,5 +347,54 @@ class _UploadFileListState extends State<UploadFileList> {
     // 如果没有匹配到，返回第一个语言
     log('未匹配到语言，使用默认语言: ${widget.languages.first.nativeName} (${widget.languages.first.code})');
     return widget.languages.first;
+  }
+
+  Future<void> _importFiles(List<PlatformFile> files) async {
+    _fileTranslationMap.clear();
+    for (final file in files) {
+      // 获取文件扩展名
+      final extension = file.name.split('.').last;
+      if (!widget.allowedExtensions.contains(extension)) {
+        Get.snackbar('错误', '文件 ${file.name} 不支持的文件类型');
+        continue;
+      }
+      // 根据不同的文件类型，调用不同的导入方法
+      switch (extension) {
+        case 'json':
+          final jsonContent = utf8.decode(file.bytes ?? []);
+          final json = jsonDecode(jsonContent);
+          _fileTranslationMap[file.name] = json;
+          break;
+        case 'csv':
+          final csvContent = utf8.decode(file.bytes ?? []);
+          final csvRows = const CsvToListConverter().convert(csvContent);
+          // _fileTranslationMap[file.name] = csvRows;
+          log('csv: $csvRows');
+          break;
+        case 'xlsx':
+          final excelData = excel.Excel.decodeBytes(file.bytes ?? []);
+          // _fileTranslationMap[file.name] = excelData;
+          log('xlsx: $excelData');
+          break;
+        case 'xls':
+          final excelData = excel.Excel.decodeBytes(file.bytes ?? []);
+          // _fileTranslationMap[file.name] = excelData;
+          log('xls: $excelData');
+          break;
+        case 'arb':
+          final arbContent = utf8.decode(file.bytes ?? []);
+          // _fileTranslationMap[file.name] = arbContent;
+          log('arb: $arbContent');
+          break;
+        case 'po':
+          final poContent = utf8.decode(file.bytes ?? []);
+          // _fileTranslationMap[file.name] = poContent;
+          log('po: $poContent');
+          break;
+        default:
+          Get.snackbar('错误', '文件 ${file.name} 不支持的文件类型');
+          continue;
+      }
+    }
   }
 }

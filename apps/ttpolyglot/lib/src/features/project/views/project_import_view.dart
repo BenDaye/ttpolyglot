@@ -129,6 +129,7 @@ class ProjectImportView extends StatelessWidget {
                           child: UploadFileList(
                             files: controller.files,
                             languages: controller.project?.targetLanguages ?? [],
+                            allowedExtensions: controller.allowedExtensions,
                             onDelete: (index) {
                               controller.setFiles(
                                 List.from(controller.files)..removeAt(index),
