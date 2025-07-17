@@ -1,5 +1,4 @@
-import 'package:ttpolyglot/src/features/export/export.dart';
-import 'package:ttpolyglot/src/features/projects/projects.dart';
+import 'package:ttpolyglot/src/features/features.dart';
 
 /// 翻译导出功能示例
 class ExportTranslationsExample {
@@ -26,7 +25,7 @@ class ExportTranslationsExample {
       print('\n2. 开始导出翻译文件...');
       print('注意: 这将打开文件选择器，请选择保存位置');
 
-      await ExportController.exportTranslationsShortcutJson(project.id);
+      await ProjectExportController.exportTranslationsShortcutJson(project.id);
 
       print('\n3. 导出完成！');
       print('文件已保存到用户选择的位置');
@@ -71,7 +70,7 @@ class ExportTranslationsExample {
 
     try {
       // 尝试导出不存在的项目
-      await ExportController.exportTranslationsShortcutJson('non-existent-project');
+      await ProjectExportController.exportTranslationsShortcutJson('non-existent-project');
     } catch (error) {
       print('预期的错误: $error');
     }

@@ -3,9 +3,11 @@ import 'dart:developer';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/services/service.dart';
 
-class ExportController extends GetxController {
-  static ExportController get instance {
-    return Get.isRegistered<ExportController>() ? Get.find<ExportController>() : Get.put(ExportController());
+class ProjectExportController extends GetxController {
+  static ProjectExportController get instance {
+    return Get.isRegistered<ProjectExportController>()
+        ? Get.find<ProjectExportController>()
+        : Get.put(ProjectExportController());
   }
 
   final ProjectServiceImpl _projectService = Get.find<ProjectServiceImpl>();
@@ -41,7 +43,7 @@ class ExportController extends GetxController {
 
       Get.snackbar('成功', '翻译文件导出成功');
     } catch (error, stackTrace) {
-      log('exportTranslationsShortcutJson', error: error, stackTrace: stackTrace, name: 'ExportController');
+      log('exportTranslationsShortcutJson', error: error, stackTrace: stackTrace, name: 'ProjectExportController');
       Get.snackbar('错误', '导出翻译文件失败: $error');
     }
   }
