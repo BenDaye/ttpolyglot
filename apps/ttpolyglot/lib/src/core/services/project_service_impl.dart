@@ -19,7 +19,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
       await storageProvider.initialize();
       return ProjectServiceImpl(storageProvider.storageService);
     } catch (error, stackTrace) {
-      log('创建项目服务失败', error: error, stackTrace: stackTrace);
+      log('创建项目服务失败', error: error, stackTrace: stackTrace, name: 'ProjectServiceImpl');
       rethrow;
     }
   }
@@ -53,7 +53,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
       final projectData = jsonDecode(projectJson) as Map<String, dynamic>;
       return Project.fromJson(projectData);
     } catch (error, stackTrace) {
-      log('获取项目失败', error: error, stackTrace: stackTrace);
+      log('获取项目失败', error: error, stackTrace: stackTrace, name: 'ProjectServiceImpl');
       return null;
     }
   }
@@ -76,7 +76,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
 
       return projects;
     } catch (error, stackTrace) {
-      log('获取用户项目失败', error: error, stackTrace: stackTrace);
+      log('获取用户项目失败', error: error, stackTrace: stackTrace, name: 'ProjectServiceImpl');
       return [];
     }
   }
@@ -127,7 +127,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
 
       return projects;
     } catch (error, stackTrace) {
-      log('获取所有项目失败', error: error, stackTrace: stackTrace);
+      log('获取所有项目失败', error: error, stackTrace: stackTrace, name: 'ProjectServiceImpl');
       return [];
     }
   }
@@ -203,7 +203,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
         return ProjectStats.fromJson(statsData);
       }
     } catch (error, stackTrace) {
-      log('获取项目统计失败', error: error, stackTrace: stackTrace);
+      log('获取项目统计失败', error: error, stackTrace: stackTrace, name: 'ProjectServiceImpl');
     }
 
     // 返回默认统计
@@ -344,7 +344,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
     try {
       return Language.supportedLanguages;
     } catch (error, stackTrace) {
-      log('获取支持的语言列表失败', error: error, stackTrace: stackTrace);
+      log('获取支持的语言列表失败', error: error, stackTrace: stackTrace, name: 'ProjectServiceImpl');
       return [];
     }
   }
@@ -354,7 +354,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
     try {
       return Language.searchSupportedLanguages(query);
     } catch (error, stackTrace) {
-      log('搜索支持的语言失败', error: error, stackTrace: stackTrace);
+      log('搜索支持的语言失败', error: error, stackTrace: stackTrace, name: 'ProjectServiceImpl');
       return [];
     }
   }
@@ -364,7 +364,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
     try {
       return Language.supportedLanguagesByGroup;
     } catch (error, stackTrace) {
-      log('获取分组语言列表失败', error: error, stackTrace: stackTrace);
+      log('获取分组语言列表失败', error: error, stackTrace: stackTrace, name: 'ProjectServiceImpl');
       return {};
     }
   }
@@ -374,7 +374,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
     try {
       return Language.isLanguageSupported(languageCode);
     } catch (error, stackTrace) {
-      log('验证语言支持失败', error: error, stackTrace: stackTrace);
+      log('验证语言支持失败', error: error, stackTrace: stackTrace, name: 'ProjectServiceImpl');
       return false;
     }
   }
@@ -388,7 +388,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
       }
       return results;
     } catch (error, stackTrace) {
-      log('验证多个语言支持失败', error: error, stackTrace: stackTrace);
+      log('验证多个语言支持失败', error: error, stackTrace: stackTrace, name: 'ProjectServiceImpl');
       return {};
     }
   }
