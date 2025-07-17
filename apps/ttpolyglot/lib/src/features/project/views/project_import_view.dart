@@ -138,8 +138,8 @@ class ProjectImportView extends StatelessWidget {
                             onClear: () {
                               controller.setFiles([]);
                             },
-                            onImport: (map) {
-                              // controller.importFiles(map);
+                            onImport: (languageMap, translationMap) {
+                              // controller.importFiles(languageMap, translationMap);
                             },
                           ),
                         );

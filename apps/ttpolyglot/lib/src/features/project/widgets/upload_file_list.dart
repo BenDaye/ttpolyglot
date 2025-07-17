@@ -13,7 +13,7 @@ class UploadFileList extends StatefulWidget {
   final List<Language> languages;
   final List<String> allowedExtensions;
   final VoidCallback? onClear; // 清空文件列表
-  final Function(Map<String, Language>)? onImport; // 导入文件
+  final Function(Map<String, Language>, Map<String, Map<String, dynamic>>)? onImport; // 导入文件
   final Function(int index)? onDelete; // 删除文件
 
   const UploadFileList({
@@ -164,7 +164,7 @@ class _UploadFileListState extends State<UploadFileList> {
                 const SizedBox(width: 12.0),
                 ElevatedButton(
                   onPressed: () {
-                    widget.onImport?.call(_fileLanguageMap);
+                    widget.onImport?.call(_fileLanguageMap, _fileTranslationMap);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.primary,
