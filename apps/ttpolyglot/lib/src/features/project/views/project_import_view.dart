@@ -103,7 +103,22 @@ class ProjectImportView extends StatelessWidget {
                         subtitle: '支持 JSON、CSV、Excel、ARB、PO 格式',
                         allowedExtensions: controller.allowedExtensions,
                         maxFileSize: 10 * 1024 * 1024, // 10MB
-                        onFileSelected: controller.setFiles,
+                        onFileSelected: (files) {
+                          final newFiles = controller.files;
+                          for (final newFile in files) {
+                            final existingIndex = controller.files.indexWhere(
+                              (existingFile) => existingFile.name == newFile.name,
+                            );
+                            // 文件已存在，覆盖
+                            if (existingIndex != -1) {
+                              newFiles[existingIndex] = newFile;
+                            } else {
+                              newFiles.add(newFile);
+                            }
+                          }
+                          //
+                          controller.setFiles(newFiles);
+                        },
                       ),
                       Obx(() {
                         if (controller.files.isEmpty) {
