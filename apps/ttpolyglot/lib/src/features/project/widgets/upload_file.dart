@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:ttpolyglot/src/features/project/widgets/upload_drop.dart';
 
 class UploadFile extends StatefulWidget {
   final double height;
@@ -28,6 +29,8 @@ class UploadFile extends StatefulWidget {
 }
 
 class _UploadFileState extends State<UploadFile> {
+  bool _isDragging = false;
+
   /// 过滤文件方法
   void _filterFiles(List<PlatformFile> files) {
     // 定义符合条件的文件列表
@@ -94,49 +97,61 @@ class _UploadFileState extends State<UploadFile> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _pickFiles,
-      child: Container(
-        width: double.infinity,
-        height: widget.height,
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: Theme.of(context).colorScheme.primary,
-            width: 2.0,
-            style: BorderStyle.solid,
+    return UploadDrop(
+      onDrop: _filterFiles,
+      onDragging: (isDragging) => setState(() => _isDragging = isDragging),
+      child: GestureDetector(
+        onTap: _pickFiles,
+        child: Container(
+          width: double.infinity,
+          height: widget.height,
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: _isDragging
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+              width: 2.0,
+              style: BorderStyle.solid,
+            ),
+            borderRadius: BorderRadius.circular(12.0),
+            color: _isDragging
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
+                : Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
           ),
-          borderRadius: BorderRadius.circular(12.0),
-          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.cloud_upload,
-              size: 48.0,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(height: 16.0),
-            Text(
-              widget.title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-            ),
-            const SizedBox(height: 8.0),
-            Text(
-              widget.subtitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
-            ),
-            const SizedBox(height: 16.0),
-            ElevatedButton.icon(
-              onPressed: _pickFiles,
-              icon: const Icon(Icons.folder_open),
-              label: const Text('选择文件'),
-            ),
-          ],
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.cloud_upload,
+                size: 48.0,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(height: 16.0),
+              Text(
+                widget.title,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+              ),
+              const SizedBox(height: 8.0),
+              Text(
+                widget.subtitle,
+                style: _isDragging
+                    ? Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                        )
+                    : Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                    ),
+              ),
+              const SizedBox(height: 16.0),
+              ElevatedButton.icon(
+                onPressed: _pickFiles,
+                icon: const Icon(Icons.folder_open),
+                label: const Text('选择文件'),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/widgets/format_card.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
-import 'package:ttpolyglot/src/features/project/widgets/drag_drop_upload.dart';
+import 'package:ttpolyglot/src/features/project/widgets/upload_file.dart';
 
 /// 项目导入页面
 class ProjectImportView extends StatelessWidget {
@@ -94,18 +94,13 @@ class ProjectImportView extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 16.0),
-                      DragDropUpload(
-                        languages: controller.project?.targetLanguages ?? [],
+                      UploadFile(
                         height: 200.0,
-                        allowedExtensions: controller.allowedExtensions,
-                        maxFileSize: 10 * 1024 * 1024, // 10MB
                         multiple: true,
                         title: '拖拽文件到此处或点击选择',
                         subtitle: '支持 JSON、CSV、Excel、ARB、PO 格式',
-                        icon: Icons.cloud_upload,
-                        borderRadius: 12.0,
-                        showFileInfo: true,
-                        onFileSelected: controller.importFiles,
+                        allowedExtensions: controller.allowedExtensions,
+                        maxFileSize: 10 * 1024 * 1024, // 10MB
                       ),
                     ],
                   ),
