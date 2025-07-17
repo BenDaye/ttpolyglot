@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/widgets/format_card.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 import 'package:ttpolyglot/src/features/project/widgets/upload_file.dart';
+import 'package:ttpolyglot/src/features/project/widgets/upload_file_list.dart';
 
 /// 项目导入页面
 class ProjectImportView extends StatelessWidget {
@@ -94,6 +95,7 @@ class ProjectImportView extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 16.0),
+                      // 上传文件
                       UploadFile(
                         height: 200.0,
                         multiple: true,
@@ -101,7 +103,31 @@ class ProjectImportView extends StatelessWidget {
                         subtitle: '支持 JSON、CSV、Excel、ARB、PO 格式',
                         allowedExtensions: controller.allowedExtensions,
                         maxFileSize: 10 * 1024 * 1024, // 10MB
+                        onFileSelected: controller.setFiles,
                       ),
+                      Obx(() {
+                        if (controller.files.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 16.0),
+                          child: UploadFileList(
+                            files: controller.files,
+                            languages: controller.project?.targetLanguages ?? [],
+                            onDelete: (index) {
+                              controller.setFiles(
+                                List.from(controller.files)..removeAt(index),
+                              );
+                            },
+                            onClear: () {
+                              controller.setFiles([]);
+                            },
+                            onImport: (map) {
+                              // controller.importFiles(map);
+                            },
+                          ),
+                        );
+                      }),
                     ],
                   ),
                 ),
