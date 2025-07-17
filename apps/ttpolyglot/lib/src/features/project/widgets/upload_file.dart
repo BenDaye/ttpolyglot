@@ -28,7 +28,32 @@ class UploadFile extends StatefulWidget {
 }
 
 class _UploadFileState extends State<UploadFile> {
-  
+  /// 过滤文件方法
+  void _filterFiles(List<PlatformFile> files) {
+    // 定义符合条件的文件列表
+    final validFiles = <PlatformFile>[];
+    // 循环遍历选中的文件
+    for (final file in files) {
+      // 检查文件大小
+      if (file.size > widget.maxFileSize) {
+        _showErrorSnackBar('文件 ${file.name} 大小超出限制');
+        continue;
+      }
+      // 检查文件扩展名
+      final extension = file.name.split('.').last;
+      if (!widget.allowedExtensions.contains(extension)) {
+        _showErrorSnackBar('文件 ${file.name} 不支持的文件类型');
+        continue;
+      }
+      validFiles.add(file);
+    }
+    if (validFiles.isEmpty) {
+      return;
+    }
+    // 执行回调
+    widget.onFileSelected?.call(validFiles);
+  }
+
   /// 选择文件
   Future<void> _pickFiles() async {
     try {
@@ -42,28 +67,8 @@ class _UploadFileState extends State<UploadFile> {
       if (result == null) {
         return;
       }
-      // 定义符合条件的文件列表
-      final validFiles = <PlatformFile>[];
-      // 循环遍历选中的文件
-      for (final file in result.files) {
-        // 检查文件大小
-        if (file.size > widget.maxFileSize) {
-          _showErrorSnackBar('文件 ${file.name} 大小超出限制');
-          continue;
-        }
-        // 检查文件扩展名
-        final extension = file.name.split('.').last;
-        if (!widget.allowedExtensions.contains(extension)) {
-          _showErrorSnackBar('文件 ${file.name} 不支持的文件类型');
-          continue;
-        }
-        validFiles.add(file);
-      }
-      if (validFiles.isEmpty) {
-        return;
-      }
-      // 执行回调
-      widget.onFileSelected?.call(validFiles);
+      //
+      _filterFiles(result.files);
     } catch (error, stackTrace) {
       log('_pickFiles', error: error, stackTrace: stackTrace);
       _showErrorSnackBar('选择文件失败: $error');
