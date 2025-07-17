@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/features/project/project.dart';
+import 'package:ttpolyglot/src/features/features.dart';
 
 /// 项目设置页面
 class ProjectSettingsView extends StatelessWidget {

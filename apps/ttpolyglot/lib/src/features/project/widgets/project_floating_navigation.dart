@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/features/project/project.dart';
+import 'package:ttpolyglot/src/features/features.dart';
 
 /// 项目悬浮导航组件
 class ProjectFloatingNavigation extends StatelessWidget {
@@ -26,14 +26,18 @@ class ProjectFloatingNavigation extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 spacing: 2.0,
-                children: controller.navItems.map((item) {
-                  return Obx(() => _buildNavButton(
-                        context,
-                        item,
-                        controller.isCurrentPage(item.id),
-                        () => controller.navigateToSubPage(item.id),
-                      ));
-                }).toList(),
+                children: controller.navItems
+                    .map(
+                      (item) => Obx(
+                        () => _buildNavButton(
+                          context,
+                          item,
+                          controller.isCurrentPage(item.id),
+                          () => controller.navigateToSubPage(item.id),
+                        ),
+                      ),
+                    )
+                    .toList(),
               ),
             ),
           ),
@@ -102,14 +106,18 @@ class ProjectFloatingNavigationCompact extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 6.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: controller.navItems.map((item) {
-                  return Obx(() => _buildCompactNavButton(
-                        context,
-                        item,
-                        controller.isCurrentPage(item.id),
-                        () => controller.navigateToSubPage(item.id),
-                      ));
-                }).toList(),
+                children: controller.navItems
+                    .map(
+                      (item) => Obx(
+                        () => _buildCompactNavButton(
+                          context,
+                          item,
+                          controller.isCurrentPage(item.id),
+                          () => controller.navigateToSubPage(item.id),
+                        ),
+                      ),
+                    )
+                    .toList(),
               ),
             ),
           ),
@@ -186,14 +194,18 @@ class ProjectFloatingNavigationHorizontal extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: controller.navItems.map((item) {
-                return Obx(() => _buildHorizontalNavButton(
-                      context,
-                      item,
-                      controller.isCurrentPage(item.id),
-                      () => controller.navigateToSubPage(item.id),
-                    ));
-              }).toList(),
+              children: controller.navItems
+                  .map(
+                    (item) => Obx(
+                      () => _buildHorizontalNavButton(
+                        context,
+                        item,
+                        controller.isCurrentPage(item.id),
+                        () => controller.navigateToSubPage(item.id),
+                      ),
+                    ),
+                  )
+                  .toList(),
             ),
           ),
         );

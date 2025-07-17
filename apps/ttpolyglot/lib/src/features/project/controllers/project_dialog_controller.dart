@@ -2,8 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/features/project/project.dart';
-import 'package:ttpolyglot/src/features/projects/projects.dart';
+import 'package:ttpolyglot/src/features/features.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 /// 项目弹窗控制器
@@ -307,7 +306,7 @@ class ProjectDialogController extends GetxController {
         Get.snackbar('成功', '项目创建成功');
       }
     } catch (error, stackTrace) {
-      log(_isEditMode.value ? '更新项目失败' : '创建项目失败', error: error, stackTrace: stackTrace);
+      log(_isEditMode.value ? '更新项目失败' : '创建项目失败', error: error, stackTrace: stackTrace, name: 'ProjectDialogController');
       Get.snackbar('错误', '${_isEditMode.value ? '更新' : '创建'}项目失败: $error');
     } finally {
       _isLoading.value = false;
@@ -692,19 +691,3 @@ class ProjectDialog extends StatelessWidget {
     );
   }
 }
-
-/*
-使用示例：
-
-// 1. 创建新项目
-await ProjectDialogController.showCreateDialog();
-
-// 2. 编辑现有项目
-final project = await projectsController.getProject(projectId);
-if (project != null) {
-  await ProjectDialogController.showEditDialog(project);
-}
-
-// 3. 在任何地方都可以调用，不需要手动管理控制器生命周期
-// 控制器会自动创建和销毁
-*/

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/layout/utils/layout_breakpoints.dart';
-import 'package:ttpolyglot/src/features/project/project.dart';
+import 'package:ttpolyglot/src/features/features.dart';
 
 /// 项目外壳视图 - 包含悬浮导航和子页面
 class ProjectShell extends StatefulWidget {

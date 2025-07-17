@@ -4,7 +4,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/services/service.dart';
-import 'package:ttpolyglot/src/features/translation/translation.dart';
+import 'package:ttpolyglot/src/features/features.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 /// 翻译控制器
@@ -43,7 +43,7 @@ class TranslationController extends GetxController {
     try {
       await loadTranslationEntries();
     } catch (error, stackTrace) {
-      log('初始化翻译服务失败', error: error, stackTrace: stackTrace);
+      log('初始化翻译服务失败', error: error, stackTrace: stackTrace, name: 'TranslationController');
     }
   }
 
@@ -55,7 +55,7 @@ class TranslationController extends GetxController {
       await loadTranslationEntries();
       log('翻译条目刷新完成');
     } catch (error, stackTrace) {
-      log('刷新翻译条目失败', error: error, stackTrace: stackTrace);
+      log('刷新翻译条目失败', error: error, stackTrace: stackTrace, name: 'TranslationController');
     }
   }
 
@@ -68,7 +68,7 @@ class TranslationController extends GetxController {
       _translationEntries.assignAll(entries);
       _applyFilters();
     } catch (error, stackTrace) {
-      log('加载翻译条目失败', error: error, stackTrace: stackTrace);
+      log('加载翻译条目失败', error: error, stackTrace: stackTrace, name: 'TranslationController');
     } finally {
       _isLoading.value = false;
     }
@@ -117,7 +117,7 @@ class TranslationController extends GetxController {
       Get.snackbar('成功', '翻译键创建成功');
     } catch (error, stackTrace) {
       Get.snackbar('错误', '创建翻译键失败: $error');
-      log('创建翻译键失败', error: error, stackTrace: stackTrace);
+      log('创建翻译键失败', error: error, stackTrace: stackTrace, name: 'TranslationController');
     }
   }
 
@@ -136,7 +136,7 @@ class TranslationController extends GetxController {
       Get.snackbar('成功', '翻译条目更新成功');
     } catch (error, stackTrace) {
       Get.snackbar('错误', '更新翻译条目失败: $error');
-      log('更新翻译条目失败', error: error, stackTrace: stackTrace);
+      log('更新翻译条目失败', error: error, stackTrace: stackTrace, name: 'TranslationController');
     }
   }
 
@@ -172,7 +172,7 @@ class TranslationController extends GetxController {
       }
     } catch (error, stackTrace) {
       Get.snackbar('错误', '删除翻译条目失败: $error');
-      log('删除翻译条目失败', error: error, stackTrace: stackTrace);
+      log('删除翻译条目失败', error: error, stackTrace: stackTrace, name: 'TranslationController');
     }
   }
 
@@ -210,7 +210,7 @@ class TranslationController extends GetxController {
       }
     } catch (error, stackTrace) {
       Get.snackbar('错误', '批量删除翻译条目失败: $error');
-      log('批量删除翻译条目失败', error: error, stackTrace: stackTrace);
+      log('批量删除翻译条目失败', error: error, stackTrace: stackTrace, name: 'TranslationController');
     }
   }
 
@@ -278,7 +278,7 @@ class TranslationController extends GetxController {
     try {
       return await _translationService.getTranslationProgress(projectId);
     } catch (error, stackTrace) {
-      log('获取翻译进度失败', error: error, stackTrace: stackTrace);
+      log('获取翻译进度失败', error: error, stackTrace: stackTrace, name: 'TranslationController');
       return {};
     }
   }

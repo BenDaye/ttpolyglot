@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/features/project/project.dart';
-import 'package:ttpolyglot/src/features/translation/translation.dart';
+import 'package:ttpolyglot/src/features/features.dart';
 
 class ProjectBinding extends Bindings {
   @override

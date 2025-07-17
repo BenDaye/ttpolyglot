@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/widgets/format_card.dart';
-import 'package:ttpolyglot/src/features/project/project.dart';
+import 'package:ttpolyglot/src/features/features.dart';
 
 /// 项目导入页面
 class ProjectImportView extends StatelessWidget {

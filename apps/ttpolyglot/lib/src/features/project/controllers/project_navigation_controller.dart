@@ -3,8 +3,8 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/features/project/project.dart';
-import 'package:ttpolyglot/src/features/translation/translation.dart';
+import 'package:ttpolyglot/src/features/features.dart';
+
 
 enum ProjectSubPage {
   dashboard,
@@ -121,7 +121,7 @@ class ProjectNavigationController extends GetxController {
     try {
       _currentSubPage.value = subPageId;
     } catch (error, stackTrace) {
-      log('导航到项目子页面失败', error: error, stackTrace: stackTrace);
+      log('导航到项目子页面失败', error: error, stackTrace: stackTrace, name: 'ProjectNavigationController');
     }
   }
 

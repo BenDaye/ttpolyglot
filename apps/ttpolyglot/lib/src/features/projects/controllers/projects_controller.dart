@@ -2,8 +2,7 @@ import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/services/service.dart';
-import 'package:ttpolyglot/src/core/utils/project_data_initializer.dart';
-import 'package:ttpolyglot/src/features/translation/translation.dart';
+import 'package:ttpolyglot/src/features/features.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 /// 项目管理控制器
@@ -54,7 +53,7 @@ class ProjectsController extends GetxController {
       await loadProjects();
     } catch (error, stackTrace) {
       Get.snackbar('错误', '初始化项目服务失败: $error');
-      log('初始化项目服务失败', error: error, stackTrace: stackTrace);
+      log('初始化项目服务失败', error: error, stackTrace: stackTrace, name: 'ProjectsController');
     }
   }
 
@@ -68,7 +67,7 @@ class ProjectsController extends GetxController {
       controller._projects.assignAll(projects);
     } catch (error, stackTrace) {
       Get.snackbar('错误', '加载项目失败: $error');
-      log('loadProjects', error: error, stackTrace: stackTrace);
+      log('loadProjects', error: error, stackTrace: stackTrace, name: 'ProjectsController');
     } finally {
       controller._isLoading.value = false;
     }
@@ -112,7 +111,7 @@ class ProjectsController extends GetxController {
       Get.snackbar('成功', '项目创建成功');
     } catch (error, stackTrace) {
       Get.snackbar('错误', '创建项目失败: $error');
-      log('createProject', error: error, stackTrace: stackTrace);
+      log('createProject', error: error, stackTrace: stackTrace, name: 'ProjectsController');
     } finally {
       controller._isLoading.value = false;
     }
@@ -171,7 +170,7 @@ class ProjectsController extends GetxController {
       Get.snackbar('成功', '项目更新成功');
     } catch (error, stackTrace) {
       Get.snackbar('错误', '更新项目失败: $error');
-      log('updateProject', error: error, stackTrace: stackTrace);
+      log('updateProject', error: error, stackTrace: stackTrace, name: 'ProjectsController');
     }
   }
 
@@ -191,7 +190,7 @@ class ProjectsController extends GetxController {
       Get.snackbar('成功', '项目删除成功');
     } catch (error, stackTrace) {
       Get.snackbar('错误', '删除项目失败: $error');
-      log('deleteProject', error: error, stackTrace: stackTrace);
+      log('deleteProject', error: error, stackTrace: stackTrace, name: 'ProjectsController');
     }
   }
 
@@ -212,7 +211,7 @@ class ProjectsController extends GetxController {
       Get.snackbar('成功', '项目$status成功');
     } catch (error, stackTrace) {
       Get.snackbar('错误', '切换项目状态失败: $error');
-      log('toggleProjectStatus', error: error, stackTrace: stackTrace);
+      log('toggleProjectStatus', error: error, stackTrace: stackTrace, name: 'ProjectsController');
     }
   }
 
@@ -268,7 +267,7 @@ class ProjectsController extends GetxController {
         await translationController.onProjectLanguageChanged();
       }
     } catch (error, stackTrace) {
-      log('同步翻译条目语言配置失败', error: error, stackTrace: stackTrace);
+      log('同步翻译条目语言配置失败', error: error, stackTrace: stackTrace, name: 'ProjectsController');
       // 不抛出异常，避免影响项目更新
     }
   }
@@ -306,7 +305,7 @@ class ProjectsController extends GetxController {
     try {
       return await controller._projectService.getProjectStats(projectId);
     } catch (error, stackTrace) {
-      log('获取项目统计失败', error: error, stackTrace: stackTrace);
+      log('获取项目统计失败', error: error, stackTrace: stackTrace, name: 'ProjectsController');
       return ProjectStats(
         totalEntries: 0,
         completedEntries: 0,
@@ -335,7 +334,7 @@ class ProjectsController extends GetxController {
       controller._projects.assignAll(projects);
     } catch (error, stackTrace) {
       Get.snackbar('错误', '搜索项目失败: $error');
-      log('搜索项目失败', error: error, stackTrace: stackTrace);
+      log('搜索项目失败', error: error, stackTrace: stackTrace, name: 'ProjectsController');
     } finally {
       controller._isLoading.value = false;
     }
@@ -348,7 +347,7 @@ class ProjectsController extends GetxController {
     try {
       return await controller._projectService.getRecentProjects('default-user', limit: limit);
     } catch (error, stackTrace) {
-      log('获取最近项目失败', error: error, stackTrace: stackTrace);
+      log('获取最近项目失败', error: error, stackTrace: stackTrace, name: 'ProjectsController');
       return [];
     }
   }
@@ -360,7 +359,7 @@ class ProjectsController extends GetxController {
     try {
       return await controller._projectService.isProjectNameAvailable(name, excludeProjectId: excludeProjectId);
     } catch (error, stackTrace) {
-      log('检查项目名称失败', error: error, stackTrace: stackTrace);
+      log('检查项目名称失败', error: error, stackTrace: stackTrace, name: 'ProjectsController');
       return false;
     }
   }
@@ -382,7 +381,7 @@ class ProjectsController extends GetxController {
         );
       }
     } catch (error, stackTrace) {
-      log('更新项目访问时间失败', error: error, stackTrace: stackTrace);
+      log('更新项目访问时间失败', error: error, stackTrace: stackTrace, name: 'ProjectsController');
     }
   }
 
@@ -393,7 +392,7 @@ class ProjectsController extends GetxController {
     try {
       return await controller._projectService.getProject(projectId);
     } catch (error, stackTrace) {
-      log('获取项目详情失败', error: error, stackTrace: stackTrace);
+      log('获取项目详情失败', error: error, stackTrace: stackTrace, name: 'ProjectsController');
       return null;
     }
   }
@@ -405,7 +404,7 @@ class ProjectsController extends GetxController {
     try {
       return await controller._projectService.projectExists(projectId);
     } catch (error, stackTrace) {
-      log('检查项目存在性失败', error: error, stackTrace: stackTrace);
+      log('检查项目存在性失败', error: error, stackTrace: stackTrace, name: 'ProjectsController');
       return false;
     }
   }
