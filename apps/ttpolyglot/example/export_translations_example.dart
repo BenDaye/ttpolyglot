@@ -11,7 +11,7 @@ class ExportTranslationsExample {
       // 1. 获取项目列表
       print('\n1. 获取项目列表...');
       await ProjectsController.loadProjects();
-      final projects = ProjectsController.to.projects;
+      final projects = ProjectsController.instance.projects;
 
       if (projects.isEmpty) {
         print('没有找到项目，请先创建一些项目');

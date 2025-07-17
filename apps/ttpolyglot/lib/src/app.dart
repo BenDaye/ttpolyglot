@@ -21,7 +21,7 @@ class TTPolyglotApp extends StatelessWidget {
       initialBinding: RootBinding(),
       theme: AppThemeController.lightTheme,
       darkTheme: AppThemeController.darkTheme,
-      themeMode: AppThemeController.to.themeMode,
+      themeMode: AppThemeController.instance.themeMode,
       initialRoute: AppPages.initial,
       getPages: AppPages.pages,
       unknownRoute: AppPages.unknownRoute,

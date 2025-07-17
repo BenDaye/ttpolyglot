@@ -4,8 +4,6 @@ import 'dart:io';
 
 import 'package:archive/archive_io.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:get/get.dart';
-import 'package:ttpolyglot/src/core/services/translation_service_impl.dart';
 import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_parsers/parsers.dart';
 
@@ -15,8 +13,6 @@ class ExportServiceImplDesktop {
     required List<TranslationEntry> entries,
   }) async {
     try {
-      final translationService = Get.find<TranslationServiceImpl>();
-
       // 生成默认文件名
       final defaultFileName = '${project.name}_translations.zip';
 
@@ -38,17 +34,23 @@ class ExportServiceImplDesktop {
 
       Future<void> export(Language language) async {
         final filterEntries = entries.where((entry) => entry.targetLanguage.code == language.code).toList();
-        final content = await translationService.exportTranslations(
-          project.id,
+
+        filterEntries.sort((a, b) => a.key.compareTo(b.key));
+
+        final jsonParser = ParserFactory.getParser(FileFormats.json);
+
+        final jsonString = await jsonParser.writeString(
+          filterEntries,
           language,
-          format: FileFormats.json,
-          keyStyle: TranslationKeyStyle.nested,
-          entries: filterEntries,
+          options: {
+            'nestedKeyStyle': true,
+          },
         );
 
         final fileName = '${language.code}.json';
-        final contentBytes = utf8.encode(content);
+        final contentBytes = utf8.encode(jsonString);
         final file = ArchiveFile(fileName, contentBytes.length, contentBytes);
+
         archive.addFile(file);
         log('导出翻译文件: $fileName', name: 'ExportServiceImplDesktop');
       }

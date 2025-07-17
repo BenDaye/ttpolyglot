@@ -3,8 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/core/services/project_service_impl.dart';
-import 'package:ttpolyglot/src/core/services/translation_service_impl.dart';
+import 'package:ttpolyglot/src/core/services/service.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -20,8 +19,8 @@ void main() async {
   // 初始化存储服务
   await _initializeStorage();
 
-  // 初始化项目服务
-  await _initializeProjectService();
+  // 初始化服务
+  await _initializeService();
 
   runApp(const TTPolyglotApp());
 }
@@ -78,9 +77,10 @@ Future<void> _initializeStorage() async {
   log('💾 Storage service initialized for ${storageProvider.currentPlatform}');
 }
 
-/// 初始化项目服务
-Future<void> _initializeProjectService() async {
+/// 初始化服务
+Future<void> _initializeService() async {
   await Get.putAsync(() => ProjectServiceImpl.create());
   await Get.putAsync(() => TranslationServiceImpl.create());
-  log('💾 Project service initialized');
+  await Get.putAsync(() => ExportServiceImpl.create());
+  log('⚙️ Services initialized');
 }

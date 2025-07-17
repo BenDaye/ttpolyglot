@@ -1,17 +1,23 @@
+import 'dart:developer';
+
+import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/platform/platform_adapter.dart';
-import 'package:ttpolyglot/src/features/export/export.dart';
+import 'package:ttpolyglot/src/core/services/service.dart';
 import 'package:ttpolyglot_core/core.dart';
 
-class ExportServiceImpl implements ExportService {
-  static ExportServiceImpl? _instance;
-  late final PlatformAdapter _platformAdapter;
+class ExportServiceImpl extends GetxService implements ExportService {
+  final PlatformAdapter _platformAdapter;
 
-  ExportServiceImpl._internal() {
-    _platformAdapter = PlatformAdapter();
-  }
+  ExportServiceImpl(this._platformAdapter);
 
-  factory ExportServiceImpl() {
-    return _instance ??= ExportServiceImpl._internal();
+  static Future<ExportServiceImpl> create() async {
+    try {
+      final platformAdapter = PlatformAdapter();
+      return ExportServiceImpl(platformAdapter);
+    } catch (error, stackTrace) {
+      log('创建导出服务失败', error: error, stackTrace: stackTrace, name: 'ExportServiceImpl');
+      rethrow;
+    }
   }
 
   @override

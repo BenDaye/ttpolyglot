@@ -1,15 +1,14 @@
 import 'dart:developer';
 
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/core/services/translation_service_impl.dart';
-import 'package:ttpolyglot/src/features/projects/services/project_data_initializer.dart';
-import 'package:ttpolyglot/src/core/services/project_service_impl.dart';
+import 'package:ttpolyglot/src/core/services/service.dart';
+import 'package:ttpolyglot/src/core/utils/project_data_initializer.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 /// 项目管理控制器
 class ProjectsController extends GetxController {
-  static ProjectsController get to {
+  static ProjectsController get instance {
     return Get.isRegistered<ProjectsController>() ? Get.find<ProjectsController>() : Get.put(ProjectsController());
   }
 
@@ -61,7 +60,7 @@ class ProjectsController extends GetxController {
 
   /// 加载项目列表
   static Future<void> loadProjects() async {
-    final controller = to;
+    final controller = instance;
 
     try {
       controller._isLoading.value = true;
@@ -87,7 +86,7 @@ class ProjectsController extends GetxController {
     required Language defaultLanguage,
     required List<Language> targetLanguages,
   }) async {
-    final controller = to;
+    final controller = instance;
     try {
       controller._isLoading.value = true;
       // 检查项目名称是否可用
@@ -129,7 +128,7 @@ class ProjectsController extends GetxController {
     bool? isActive,
   }) async {
     try {
-      final controller = to;
+      final controller = instance;
 
       final project = await controller._projectService.getProject(projectId);
       if (project == null) {
@@ -178,7 +177,7 @@ class ProjectsController extends GetxController {
 
   /// 删除项目
   static Future<void> deleteProject(String projectId) async {
-    final controller = to;
+    final controller = instance;
 
     try {
       await controller._projectService.deleteProject(projectId);
@@ -198,7 +197,7 @@ class ProjectsController extends GetxController {
 
   /// 切换项目状态
   static Future<void> toggleProjectStatus(String projectId, {required bool isActive}) async {
-    final controller = to;
+    final controller = instance;
 
     try {
       final updatedProject = await controller._projectService.toggleProjectStatus(projectId, isActive: isActive);
@@ -252,7 +251,7 @@ class ProjectsController extends GetxController {
     try {
       log('开始同步项目语言配置到翻译条目');
 
-      final controller = to;
+      final controller = instance;
       final translationService = controller._translationService;
 
       await translationService.syncProjectLanguages(
@@ -281,7 +280,7 @@ class ProjectsController extends GetxController {
 
   /// 设置选中的项目ID
   static void setSelectedProjectId(String? id) {
-    final controller = to;
+    final controller = instance;
 
     if (id == null || id.isEmpty) {
       controller._selectedProjectId.value = '';
@@ -302,7 +301,7 @@ class ProjectsController extends GetxController {
 
   /// 获取项目统计信息
   static Future<ProjectStats> getProjectStats(String projectId) async {
-    final controller = to;
+    final controller = instance;
 
     try {
       return await controller._projectService.getProjectStats(projectId);
@@ -323,7 +322,7 @@ class ProjectsController extends GetxController {
 
   /// 搜索项目（使用服务）
   static Future<void> searchProjectsWithService(String query) async {
-    final controller = to;
+    final controller = instance;
 
     if (query.isEmpty) {
       await loadProjects();
@@ -344,7 +343,7 @@ class ProjectsController extends GetxController {
 
   /// 获取最近访问的项目
   static Future<List<Project>> getRecentProjects({int limit = 10}) async {
-    final controller = to;
+    final controller = instance;
 
     try {
       return await controller._projectService.getRecentProjects('default-user', limit: limit);
@@ -356,7 +355,7 @@ class ProjectsController extends GetxController {
 
   /// 检查项目名称是否可用
   static Future<bool> isProjectNameAvailable(String name, {String? excludeProjectId}) async {
-    final controller = to;
+    final controller = instance;
 
     try {
       return await controller._projectService.isProjectNameAvailable(name, excludeProjectId: excludeProjectId);
@@ -368,7 +367,7 @@ class ProjectsController extends GetxController {
 
   /// 更新项目最后访问时间
   static Future<void> updateProjectLastAccessed(String projectId) async {
-    final controller = to;
+    final controller = instance;
 
     try {
       await controller._projectService.updateProjectLastAccessed(projectId, 'default-user');
@@ -389,7 +388,7 @@ class ProjectsController extends GetxController {
 
   /// 获取项目详情
   static Future<Project?> getProject(String projectId) async {
-    final controller = to;
+    final controller = instance;
 
     try {
       return await controller._projectService.getProject(projectId);
@@ -401,7 +400,7 @@ class ProjectsController extends GetxController {
 
   /// 检查项目是否存在
   static Future<bool> projectExists(String projectId) async {
-    final controller = to;
+    final controller = instance;
 
     try {
       return await controller._projectService.projectExists(projectId);

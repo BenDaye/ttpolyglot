@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/features/project/controllers/project_navigation_controller.dart';
+import 'package:ttpolyglot/src/features/project/project.dart';
 
 /// 项目悬浮导航组件
 class ProjectFloatingNavigation extends StatelessWidget {
