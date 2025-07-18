@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:ttpolyglot/src/core/widgets/clickable_stat_card.dart';
 import 'package:ttpolyglot/src/features/features.dart';
+import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_parsers/parsers.dart';
 
 /// 项目导出页面
@@ -101,7 +103,30 @@ class ProjectExportView extends StatelessWidget {
                                   style: Theme.of(context).textTheme.titleMedium,
                                 ),
                                 const SizedBox(height: 8.0),
-                                _buildFormatSelector(context, controller: controller),
+                                Obx(
+                                  () => Wrap(
+                                    spacing: 8.0,
+                                    runSpacing: 8.0,
+                                    children: FileFormats.allFormats
+                                        .map(
+                                          (format) => FilterChip(
+                                            showCheckmark: false,
+                                            selected: controller.exportFormat == format,
+                                            label: Text(
+                                              '${FileFormats.getDisplayName(format)} (${FileFormats.getFileExtension(format)})',
+                                            ),
+                                            onSelected: (selected) {
+                                              if (selected) {
+                                                controller.exportFormat = format;
+                                              }
+                                            },
+                                            selectedColor:
+                                                Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.5),
+                                          ),
+                                        )
+                                        .toList(),
+                                  ),
+                                ),
 
                                 const SizedBox(height: 16.0),
 
@@ -111,13 +136,22 @@ class ProjectExportView extends StatelessWidget {
                                   style: Theme.of(context).textTheme.titleMedium,
                                 ),
                                 const SizedBox(height: 8.0),
-                                Wrap(
-                                  spacing: 8.0,
-                                  runSpacing: 8.0,
-                                  children: [
-                                    _buildLanguageChip(context, project.defaultLanguage, true),
-                                    ...project.targetLanguages.map((lang) => _buildLanguageChip(context, lang, false)),
-                                  ],
+                                Obx(
+                                  () => Wrap(
+                                    spacing: 8.0,
+                                    runSpacing: 8.0,
+                                    children: controller.supportedLanguages
+                                        .map(
+                                          (lang) => _buildLanguageChip(
+                                            context,
+                                            language: lang,
+                                            isDefault: controller.isDefaultLanguage(lang),
+                                            isSelected: controller.isActiveLanguage(lang),
+                                            onTap: controller.toggleLanguage,
+                                          ),
+                                        )
+                                        .toList(),
+                                  ),
                                 ),
 
                                 const SizedBox(height: 16.0),
@@ -128,27 +162,51 @@ class ProjectExportView extends StatelessWidget {
                                   style: Theme.of(context).textTheme.titleMedium,
                                 ),
                                 const SizedBox(height: 8.0),
-                                _buildExportOption(
-                                  context,
-                                  '仅导出已翻译内容',
-                                  '跳过未翻译的词条',
-                                  true,
-                                  (value) {},
-                                ),
-                                _buildExportOption(
-                                  context,
-                                  '包含翻译状态',
-                                  '在导出文件中包含翻译状态信息',
-                                  false,
-                                  (value) {},
-                                ),
-                                _buildExportOption(
-                                  context,
-                                  '包含时间戳',
-                                  '在导出文件中包含创建和更新时间',
-                                  false,
-                                  (value) {},
-                                ),
+                                ...[
+                                  Obx(
+                                    () => _buildExportOption(
+                                      context,
+                                      title: '嵌套键值风格',
+                                      subtitle:
+                                          '当开启时, 导出文件将使用嵌套键值风格 ({ "auth": { "login": "登录" } }), 否则使用扁平风格. 例如: { "auth.login": "登录" }',
+                                      value: controller.exportKeyStyle == TranslationKeyStyle.nested,
+                                      onChanged: (value) {
+                                        if (value) {
+                                          controller.exportKeyStyle = TranslationKeyStyle.nested;
+                                        } else {
+                                          controller.exportKeyStyle = TranslationKeyStyle.flat;
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8.0),
+                                  Obx(
+                                    () => _buildExportOption(
+                                      context,
+                                      title: '创建语言文件夹',
+                                      subtitle:
+                                          '当开启时, 使用语言名称作为文件夹名 (en-US/translations.json), 否则导出文件将使用语言代码作为文件名 (en-US.json).',
+                                      value: controller.useLanguageCodeAsFolderName,
+                                      onChanged: (value) {
+                                        controller.useLanguageCodeAsFolderName = value;
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8.0),
+                                  Obx(
+                                    () => _buildExportOption(
+                                      context,
+                                      title: '创建 namespace 文件夹',
+                                      subtitle:
+                                          '当开启时, 使用语言名称作为文件夹名 (en-US/auth.json), 否则导出文件将使用语言代码作为文件名 (en-US.json).',
+                                      value: controller.separateFirstLevelKeyIntoFiles,
+                                      onChanged: (value) {
+                                        controller.separateFirstLevelKeyIntoFiles = value;
+                                      },
+                                      isDisabled: !controller.useLanguageCodeAsFolderName,
+                                    ),
+                                  ),
+                                ],
 
                                 const SizedBox(height: 16.0),
 
@@ -156,9 +214,7 @@ class ProjectExportView extends StatelessWidget {
                                 SizedBox(
                                   width: double.infinity,
                                   child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      // TODO: 自定义导出功能
-                                    },
+                                    onPressed: controller.submitForm,
                                     icon: const Icon(Icons.download),
                                     label: const Text('开始导出'),
                                   ),
@@ -168,46 +224,6 @@ class ProjectExportView extends StatelessWidget {
                           ),
                         );
                       }),
-
-                  const SizedBox(height: 16.0),
-
-                  // 导出历史卡片
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '导出历史',
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          const SizedBox(height: 16.0),
-                          _buildExportHistoryItem(
-                            context,
-                            'translations_all.json',
-                            '包含所有语言的完整导出',
-                            '1 小时前',
-                            true,
-                          ),
-                          _buildExportHistoryItem(
-                            context,
-                            'translations_en.csv',
-                            '仅英文翻译',
-                            '3 小时前',
-                            true,
-                          ),
-                          _buildExportHistoryItem(
-                            context,
-                            'translations_zh.xlsx',
-                            '中文翻译（Excel格式）',
-                            '1 天前',
-                            true,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
 
                   // 为悬浮导航留出空间
                   const SizedBox(height: 100.0),
@@ -221,116 +237,61 @@ class ProjectExportView extends StatelessWidget {
   }
 
   Widget _buildLanguageChip(
-    BuildContext context,
-    dynamic language,
-    bool isDefault,
-  ) {
+    BuildContext context, {
+    required Language language,
+    required bool isDefault,
+    required void Function(Language) onTap,
+    required bool isSelected,
+  }) {
     return FilterChip(
-      selected: true,
-      label: Text('${language.nativeName} (${language.code})'),
+      showCheckmark: false,
+      selected: isSelected,
+      label: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        spacing: 8.0,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.secondaryContainer,
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: Center(
+              child: Text(
+                language.code,
+                style: GoogleFonts.notoSansMono(
+                  fontSize: 12.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          Text(language.nativeName),
+        ],
+      ),
       onSelected: (selected) {
-        // TODO: 切换语言选择
+        onTap(language);
       },
+      selectedColor: Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.5),
     );
   }
 
   Widget _buildExportOption(
-    BuildContext context,
-    String title,
-    String subtitle,
-    bool value,
-    ValueChanged<bool> onChanged,
-  ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8.0),
-      child: SwitchListTile(
-        title: Text(title),
-        subtitle: Text(subtitle),
-        value: value,
-        onChanged: onChanged,
-        dense: true,
-      ),
-    );
-  }
-
-  Widget _buildFormatSelector(
     BuildContext context, {
-    required ProjectExportController controller,
+    required String title,
+    required String subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+    bool isDisabled = false,
   }) {
-    return Obx(
-      () => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ...FileFormats.allFormats.map(
-            (format) => RadioListTile<String>(
-              title: Text(FileFormats.getDisplayName(format)),
-              value: format,
-              groupValue: controller.exportFormat,
-              onChanged: (value) {
-                controller.exportFormat = format;
-              },
-              dense: true,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildExportHistoryItem(
-    BuildContext context,
-    String filename,
-    String description,
-    String time,
-    bool success,
-  ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12.0),
-      padding: const EdgeInsets.all(12.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            success ? Icons.check_circle : Icons.error,
-            color: success ? Colors.green : Colors.red,
-            size: 24.0,
-          ),
-          const SizedBox(width: 12.0),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  filename,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                Text(
-                  description,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                      ),
-                ),
-                Text(
-                  time,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                      ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            onPressed: () {
-              // TODO: 下载文件
-            },
-            icon: const Icon(Icons.download),
-            tooltip: '下载',
-          ),
-        ],
-      ),
+    return SwitchListTile(
+      title: Text(title),
+      subtitle: Text(subtitle),
+      isThreeLine: true,
+      value: value,
+      onChanged: isDisabled ? null : onChanged,
+      dense: true,
     );
   }
 }

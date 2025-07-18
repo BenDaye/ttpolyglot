@@ -36,6 +36,7 @@ class ExportServiceImpl extends GetxService implements ExportService {
         return await ExportServiceImplDesktop.exportTranslationsJson(
           project: project,
           entries: entries,
+          options: options,
         );
       case PlatformType.web:
       case PlatformType.mobile:

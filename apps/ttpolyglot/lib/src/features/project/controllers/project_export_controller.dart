@@ -19,6 +19,22 @@ class ProjectExportController extends GetxController {
   final TranslationServiceImpl _translationService = Get.find<TranslationServiceImpl>();
   final ExportServiceImpl _exportService = Get.find<ExportServiceImpl>();
 
+  @override
+  void onInit() {
+    super.onInit();
+
+    _initialized();
+  }
+
+  Future<void> _initialized() async {
+    final (project, entries) = await _getProjectAndEntries(projectId);
+
+    _supportedLanguages.value = project.allLanguages;
+    _exportLanguages.value = project.allLanguages;
+
+    _defaultLanguage.value = project.defaultLanguage;
+  }
+
   Future<(Project, List<TranslationEntry>)> _getProjectAndEntries(String projectId) async {
     // 获取项目信息
     final project = await _projectService.getProject(
@@ -88,11 +104,49 @@ class ProjectExportController extends GetxController {
     _exportFormat.value = value;
   }
 
+  /// 支持语言
+  final RxList<Language> _supportedLanguages = <Language>[].obs;
+  List<Language> get supportedLanguages => _supportedLanguages;
+  set supportedLanguages(List<Language> value) {
+    _supportedLanguages.value = value;
+  }
+
   /// 导出语言
   final RxList<Language> _exportLanguages = <Language>[].obs;
   List<Language> get exportLanguages => _exportLanguages;
-  set exportLanguages(List<Language> value) {
-    _exportLanguages.value = value;
+
+  /// 切换语言
+  /// 如果 [_exportLanguages] 包含 [language],
+  /// 则从 [_exportLanguages] 中移除 [language]
+  /// 否则将 [language] 添加到 [_exportLanguages] 中
+  void toggleLanguage(Language language) {
+    if (!isSupportedLanguage(language)) {
+      if (isActiveLanguage(language)) {
+        exportLanguages.remove(language);
+      }
+      return;
+    }
+
+    if (isActiveLanguage(language)) {
+      exportLanguages.remove(language);
+    } else {
+      exportLanguages.add(language);
+    }
+  }
+
+  bool isSupportedLanguage(Language language) {
+    return supportedLanguages.contains(language);
+  }
+
+  bool isActiveLanguage(Language language) {
+    return exportLanguages.contains(language);
+  }
+
+  final Rx<Language> _defaultLanguage = Language.zhCN.obs;
+  Language get defaultLanguage => _defaultLanguage.value;
+
+  bool isDefaultLanguage(Language language) {
+    return language == defaultLanguage;
   }
 
   /// 导出键值风格
