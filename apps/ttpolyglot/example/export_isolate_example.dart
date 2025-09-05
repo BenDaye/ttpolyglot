@@ -15,7 +15,7 @@ class ExportIsolateExample {
         id: 'example-project',
         name: '示例项目',
         description: '这是一个示例项目',
-        defaultLanguage: Language.enUS,
+        primaryLanguage: Language.enUS,
         targetLanguages: [
           Language.zhCN,
           Language.jaJP,
@@ -115,7 +115,7 @@ class ExportIsolateExample {
         id: 'example-project',
         name: '示例项目',
         description: '这是一个示例项目',
-        defaultLanguage: Language.enUS,
+        primaryLanguage: Language.enUS,
         targetLanguages: [
           Language.zhCN,
         ],

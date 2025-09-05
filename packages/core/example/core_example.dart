@@ -98,7 +98,7 @@ void main() {
     id: 'project-1',
     name: 'Web App',
     description: '主要的 Web 应用项目',
-    defaultLanguage: english,
+    primaryLanguage: english,
     targetLanguages: [chinese],
     owner: user,
     createdAt: DateTime.now(),
