@@ -26,6 +26,11 @@ class ProjectController extends GetxController {
   Rxn<Project> get projectObs => _project;
   bool get isLoading => _isLoading.value;
 
+  String get title => _project.value?.name ?? '-';
+  String get description => _project.value?.description ?? '-';
+  int get languageCount => _project.value?.allLanguages.length ?? 0;
+  int get translationCount => 0;
+
   @override
   void onReady() {
     super.onReady();
