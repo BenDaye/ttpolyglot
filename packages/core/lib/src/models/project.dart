@@ -197,11 +197,23 @@ class Project extends Equatable {
 
   /// 从 JSON 创建
   factory Project.fromJson(Map<String, dynamic> json) {
+    // 处理主语言字段的向后兼容性
+    Language primaryLanguage;
+    if (json['primaryLanguage'] != null) {
+      primaryLanguage = Language.fromJson(json['primaryLanguage'] as Map<String, dynamic>);
+    } else if (json['defaultLanguage'] != null) {
+      // 向后兼容：如果存在旧的 defaultLanguage 字段，使用它
+      primaryLanguage = Language.fromJson(json['defaultLanguage'] as Map<String, dynamic>);
+    } else {
+      // 如果都没有，抛出更明确的错误
+      throw FormatException('Project JSON missing required field: primaryLanguage or defaultLanguage');
+    }
+
     return Project(
       id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String,
-      primaryLanguage: Language.fromJson(json['primaryLanguage'] as Map<String, dynamic>),
+      primaryLanguage: primaryLanguage,
       targetLanguages: (json['targetLanguages'] as List<dynamic>)
           .map((lang) => Language.fromJson(lang as Map<String, dynamic>))
           .toList(),

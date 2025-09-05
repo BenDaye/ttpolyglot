@@ -738,5 +738,41 @@ void main() {
       expect(project.allLanguages.length, equals(1));
       expect(project.allLanguages.first.code, equals('en-US'));
     });
+
+    test('should deserialize from legacy defaultLanguage format', () {
+      final legacyJson = {
+        'id': 'project-1',
+        'name': 'Test Project',
+        'description': 'Test project description',
+        'defaultLanguage': english.toJson(), // 使用旧的字段名
+        'targetLanguages': [chinese.toJson()],
+        'owner': user.toJson(),
+        'createdAt': DateTime.now().toIso8601String(),
+        'updatedAt': DateTime.now().toIso8601String(),
+        'isActive': true,
+      };
+
+      final project = Project.fromJson(legacyJson);
+
+      expect(project.primaryLanguage.code, equals('en-US'));
+      expect(project.name, equals('Test Project'));
+      expect(project.targetLanguages.length, equals(1));
+      expect(project.targetLanguages.first.code, equals('zh-CN'));
+    });
+
+    test('should throw error when both primaryLanguage and defaultLanguage are missing', () {
+      final invalidJson = {
+        'id': 'project-1',
+        'name': 'Test Project',
+        'description': 'Test project description',
+        'targetLanguages': [chinese.toJson()],
+        'owner': user.toJson(),
+        'createdAt': DateTime.now().toIso8601String(),
+        'updatedAt': DateTime.now().toIso8601String(),
+        'isActive': true,
+      };
+
+      expect(() => Project.fromJson(invalidJson), throwsA(isA<FormatException>()));
+    });
   });
 }
