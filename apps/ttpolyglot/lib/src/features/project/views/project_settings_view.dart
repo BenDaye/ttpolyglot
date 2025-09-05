@@ -55,6 +55,31 @@ class ProjectSettingsView extends StatelessWidget {
                             Icons.toggle_on,
                             () {},
                           ),
+                          _buildSettingItem(
+                            context,
+                            '主语言',
+                            '${project.primaryLanguage.nativeName} (${project.primaryLanguage.code})',
+                            Icons.language,
+                            () {
+                              // 显示主语言固定性的说明
+                              Get.dialog(
+                                AlertDialog(
+                                  title: const Text('主语言设置'),
+                                  content: const Text(
+                                    '项目的主语言在创建时已设定，且不可修改。\n\n'
+                                    '这是为了确保翻译数据的一致性和系统的稳定性。\n\n'
+                                    '如需使用不同的主语言，请创建新项目。',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Get.back(),
+                                      child: const Text('了解'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
                         ],
                       ),
                     ),

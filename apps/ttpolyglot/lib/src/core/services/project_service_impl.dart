@@ -2,9 +2,8 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:get/get.dart';
-import 'package:ttpolyglot_core/core.dart';
-
 import 'package:ttpolyglot/src/core/storage/storage_provider.dart';
+import 'package:ttpolyglot_core/core.dart';
 
 /// 项目服务实现
 class ProjectServiceImpl extends GetxService implements ProjectService {
@@ -30,7 +29,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
       id: 'project-${DateTime.now().millisecondsSinceEpoch}',
       name: request.name,
       description: request.description,
-      defaultLanguage: request.defaultLanguage,
+      primaryLanguage: request.primaryLanguage, // 修改：使用primaryLanguage
       targetLanguages: request.targetLanguages,
       owner: await _getCurrentUser(),
       createdAt: DateTime.now(),
@@ -40,6 +39,9 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
 
     await _saveProject(project);
     await _updateProjectList(project.id, add: true);
+
+    // 创建项目后验证数据一致性
+    await _validateProjectSourceLanguageConsistency(project);
 
     return project;
   }
@@ -142,13 +144,17 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
     final updatedProject = existingProject.copyWith(
       name: request.name,
       description: request.description,
-      defaultLanguage: request.defaultLanguage,
+      // 注意：primaryLanguage（主语言）不可修改，已从copyWith中移除
       targetLanguages: request.targetLanguages,
       isActive: request.isActive,
       updatedAt: DateTime.now(),
     );
 
     await _saveProject(updatedProject);
+
+    // 更新项目后验证数据一致性
+    await _validateProjectSourceLanguageConsistency(updatedProject);
+
     return updatedProject;
   }
 
@@ -390,6 +396,29 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
     } catch (error, stackTrace) {
       log('验证多个语言支持失败', error: error, stackTrace: stackTrace, name: 'ProjectServiceImpl');
       return {};
+    }
+  }
+
+  /// 验证项目源语言数据一致性
+  Future<void> _validateProjectSourceLanguageConsistency(Project project) async {
+    try {
+      // 这里应该获取项目的翻译条目进行验证
+      // 暂时只记录日志，具体实现需要根据实际的数据结构调整
+      log(
+        '验证项目源语言一致性',
+        error: '项目ID: ${project.id}, 主语言: ${project.primaryLanguage.code}',
+        name: 'ProjectServiceImpl',
+      );
+
+      // TODO: 实现具体的翻译条目验证逻辑
+      // 可以使用 SourceLanguageValidator 来验证翻译条目
+    } catch (error, stackTrace) {
+      log(
+        '验证项目源语言一致性失败',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'ProjectServiceImpl',
+      );
     }
   }
 }

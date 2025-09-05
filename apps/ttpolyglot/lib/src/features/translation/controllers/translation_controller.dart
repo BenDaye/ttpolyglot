@@ -8,6 +8,9 @@ import 'package:ttpolyglot/src/features/features.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 /// 翻译控制器
+///
+/// 负责管理翻译条目的创建、更新和查询。
+/// 所有翻译操作都使用项目的主语言作为源语言，确保数据一致性。
 class TranslationController extends GetxController {
   final String projectId;
   TranslationController({required this.projectId});
@@ -80,10 +83,12 @@ class TranslationController extends GetxController {
   }
 
   /// 创建翻译键
+  ///
+  /// 使用项目的主语言作为源语言创建翻译条目。
+  /// 这种设计确保了所有翻译都基于相同的源语言，提高了数据一致性。
   Future<void> createTranslationKey({
     required String key,
     required String sourceText,
-    required Language sourceLanguage,
     required List<Language> targetLanguages,
     String? context,
     String? comment,
@@ -92,10 +97,17 @@ class TranslationController extends GetxController {
     Map<String, String>? pluralForms,
   }) async {
     try {
+      // 获取项目信息以确保使用正确的主语言
+      final project = await ProjectsController.getProject(projectId);
+      if (project == null) {
+        throw Exception('项目不存在: $projectId');
+      }
+
+      // 使用项目的主语言作为源语言
       final request = CreateTranslationKeyRequest(
         projectId: projectId,
         key: key,
-        sourceLanguage: sourceLanguage,
+        sourceLanguage: project.primaryLanguage, // 使用项目主语言
         sourceText: sourceText,
         targetLanguages: targetLanguages,
         context: context,
@@ -109,6 +121,11 @@ class TranslationController extends GetxController {
       if (!request.isValid) {
         final errors = request.validate();
         throw Exception('创建翻译键验证失败: ${errors.join(', ')}');
+      }
+
+      // 验证目标语言不包含主语言
+      if (targetLanguages.any((lang) => lang.code == project.primaryLanguage.code)) {
+        throw Exception('目标语言不能包含项目的主语言');
       }
 
       await _translationService.createTranslationKey(request);

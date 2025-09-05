@@ -57,6 +57,10 @@ class ProjectController extends GetxController {
       final project = await ProjectsController.getProject(projectId);
       if (project != null) {
         _project.value = project;
+
+        // 验证项目源语言数据一致性
+        await _validateProjectSourceLanguageConsistency(project);
+
         // 更新项目最后访问时间
         await ProjectsController.updateProjectLastAccessed(projectId);
         return;
@@ -175,6 +179,31 @@ class ProjectController extends GetxController {
     if (result == true) {
       final newTargetLanguages = _project.value!.targetLanguages.where((lang) => lang.code != language.code).toList();
       await ProjectsController.updateProject(projectId, targetLanguages: newTargetLanguages);
+      await refreshProject(); // 刷新项目数据
+    }
+  }
+
+  /// 验证项目源语言数据一致性
+  Future<void> _validateProjectSourceLanguageConsistency(Project project) async {
+    try {
+      // 这里可以集成SourceLanguageValidator进行更详细的验证
+      // 暂时只记录日志，提醒主语言不可修改
+      log(
+        '项目源语言验证',
+        error: '项目ID: ${project.id}, 主语言: ${project.primaryLanguage.code} (不可修改)',
+        name: 'ProjectController',
+      );
+
+      // TODO: 如果需要，可以在这里集成完整的翻译条目验证
+      // 使用 SourceLanguageValidator.validateProjectSourceLanguage()
+    } catch (error, stackTrace) {
+      log(
+        '验证项目源语言一致性失败',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'ProjectController',
+      );
+      // 不阻止项目加载，只是记录错误
     }
   }
 }

@@ -142,7 +142,7 @@ void main() {
       final request = CreateProjectRequest(
         name: 'Test Project',
         description: 'Test project description',
-        defaultLanguage: english,
+        primaryLanguage: english,
         targetLanguages: [chinese, japanese],
         ownerId: 'user-1',
       );
@@ -155,7 +155,7 @@ void main() {
       final request = CreateProjectRequest(
         name: '',
         description: 'Test project description',
-        defaultLanguage: english,
+        primaryLanguage: english,
         targetLanguages: [chinese],
         ownerId: 'user-1',
       );
@@ -168,7 +168,7 @@ void main() {
       final request = CreateProjectRequest(
         name: 'Test Project',
         description: '',
-        defaultLanguage: english,
+        primaryLanguage: english,
         targetLanguages: [chinese],
         ownerId: 'user-1',
       );
@@ -177,7 +177,7 @@ void main() {
       expect(request.validate(), contains('项目描述不能为空'));
     });
 
-    test('should reject invalid default language code', () {
+    test('should reject invalid primary language code', () {
       final invalidLanguage = Language(
         code: 'en',
         name: 'English',
@@ -187,16 +187,16 @@ void main() {
       final request = CreateProjectRequest(
         name: 'Test Project',
         description: 'Test project description',
-        defaultLanguage: invalidLanguage,
+        primaryLanguage: invalidLanguage,
         targetLanguages: [chinese],
         ownerId: 'user-1',
       );
 
       expect(request.isValid, isFalse);
-      expect(request.validate(), contains('默认语言代码格式错误: en'));
+      expect(request.validate(), contains('主语言代码格式错误: en'));
     });
 
-    test('should reject unsupported default language', () {
+    test('should reject unsupported primary language', () {
       final unsupportedLanguage = Language(
         code: 'xx-XX',
         name: 'Unknown Language',
@@ -206,20 +206,20 @@ void main() {
       final request = CreateProjectRequest(
         name: 'Test Project',
         description: 'Test project description',
-        defaultLanguage: unsupportedLanguage,
+        primaryLanguage: unsupportedLanguage,
         targetLanguages: [chinese],
         ownerId: 'user-1',
       );
 
       expect(request.isValid, isFalse);
-      expect(request.validate(), contains('不支持的默认语言: xx-XX'));
+      expect(request.validate(), contains('不支持的主语言: xx-XX'));
     });
 
     test('should reject empty target languages', () {
       final request = CreateProjectRequest(
         name: 'Test Project',
         description: 'Test project description',
-        defaultLanguage: english,
+        primaryLanguage: english,
         targetLanguages: [],
         ownerId: 'user-1',
       );
@@ -238,7 +238,7 @@ void main() {
       final request = CreateProjectRequest(
         name: 'Test Project',
         description: 'Test project description',
-        defaultLanguage: english,
+        primaryLanguage: english,
         targetLanguages: [invalidLanguage],
         ownerId: 'user-1',
       );
@@ -257,7 +257,7 @@ void main() {
       final request = CreateProjectRequest(
         name: 'Test Project',
         description: 'Test project description',
-        defaultLanguage: english,
+        primaryLanguage: english,
         targetLanguages: [unsupportedLanguage],
         ownerId: 'user-1',
       );
@@ -266,24 +266,24 @@ void main() {
       expect(request.validate(), contains('不支持的目标语言: yy-YY'));
     });
 
-    test('should reject default language as target language', () {
+    test('should reject primary language as target language', () {
       final request = CreateProjectRequest(
         name: 'Test Project',
         description: 'Test project description',
-        defaultLanguage: english,
+        primaryLanguage: english,
         targetLanguages: [english, chinese],
         ownerId: 'user-1',
       );
 
       expect(request.isValid, isFalse);
-      expect(request.validate(), contains('默认语言不能同时作为目标语言'));
+      expect(request.validate(), contains('主语言不能同时作为目标语言'));
     });
 
     test('should reject duplicate target languages', () {
       final request = CreateProjectRequest(
         name: 'Test Project',
         description: 'Test project description',
-        defaultLanguage: english,
+        primaryLanguage: english,
         targetLanguages: [chinese, chinese],
         ownerId: 'user-1',
       );
@@ -296,7 +296,7 @@ void main() {
       final request = CreateProjectRequest(
         name: 'Test Project',
         description: 'Test project description',
-        defaultLanguage: english,
+        primaryLanguage: english,
         targetLanguages: [chinese],
         ownerId: '',
       );
@@ -528,7 +528,7 @@ void main() {
       final request = TranslationUtils.createTranslationKeyRequestFromProject(
         projectId: 'project-1',
         key: 'common.greeting',
-        defaultLanguage: english,
+        primaryLanguage: english,
         targetLanguages: [chinese, japanese],
         sourceText: 'Hello, World!',
         context: 'Greeting message',
@@ -587,11 +587,15 @@ void main() {
   });
 
   group('Project', () {
-    test('should create project with supported languages', () {
-      final english = Language.getLanguageByCode('en-US')!;
-      final chinese = Language.getLanguageByCode('zh-CN')!;
+    late Language english;
+    late Language chinese;
+    late User user;
 
-      final user = User(
+    setUp(() {
+      english = Language.getLanguageByCode('en-US')!;
+      chinese = Language.getLanguageByCode('zh-CN')!;
+
+      user = User(
         id: 'user-1',
         email: 'test@example.com',
         name: 'Test User',
@@ -599,22 +603,140 @@ void main() {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
+    });
 
+    test('should create project with supported languages', () {
       final project = Project(
         id: 'project-1',
         name: 'Test Project',
         description: 'Test project description',
-        defaultLanguage: english,
+        primaryLanguage: english,
         targetLanguages: [chinese],
         owner: user,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
 
-      expect(project.defaultLanguage.code, equals('en-US'));
+      expect(project.primaryLanguage.code, equals('en-US'));
       expect(project.targetLanguages.length, equals(1));
       expect(project.targetLanguages.first.code, equals('zh-CN'));
       expect(project.allLanguages.length, equals(2));
+    });
+
+    test('should maintain primary language when copying', () {
+      final project = Project(
+        id: 'project-1',
+        name: 'Test Project',
+        description: 'Test project description',
+        primaryLanguage: english,
+        targetLanguages: [chinese],
+        owner: user,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      final copiedProject = project.copyWith(
+        name: 'Updated Project',
+        description: 'Updated description',
+        targetLanguages: [],
+      );
+
+      expect(copiedProject.primaryLanguage.code, equals('en-US'));
+      expect(copiedProject.name, equals('Updated Project'));
+      expect(copiedProject.description, equals('Updated description'));
+      expect(copiedProject.targetLanguages.length, equals(0));
+    });
+
+    test('should serialize and deserialize with primary language', () {
+      final originalProject = Project(
+        id: 'project-1',
+        name: 'Test Project',
+        description: 'Test project description',
+        primaryLanguage: english,
+        targetLanguages: [chinese],
+        owner: user,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      final json = originalProject.toJson();
+      final deserializedProject = Project.fromJson(json);
+
+      expect(deserializedProject.primaryLanguage.code, equals('en-US'));
+      expect(deserializedProject.name, equals('Test Project'));
+      expect(deserializedProject.targetLanguages.length, equals(1));
+      expect(deserializedProject.targetLanguages.first.code, equals('zh-CN'));
+    });
+
+    test('should handle equality with primary language', () {
+      final project1 = Project(
+        id: 'project-1',
+        name: 'Test Project',
+        description: 'Test project description',
+        primaryLanguage: english,
+        targetLanguages: [chinese],
+        owner: user,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      final project2 = Project(
+        id: 'project-1',
+        name: 'Test Project',
+        description: 'Test project description',
+        primaryLanguage: english,
+        targetLanguages: [chinese],
+        owner: user,
+        createdAt: project1.createdAt,
+        updatedAt: project1.updatedAt,
+      );
+
+      final project3 = Project(
+        id: 'project-1',
+        name: 'Test Project',
+        description: 'Test project description',
+        primaryLanguage: chinese, // Different primary language
+        targetLanguages: [english],
+        owner: user,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      expect(project1, equals(project2));
+      expect(project1, isNot(equals(project3)));
+    });
+
+    test('should include primary language in all languages', () {
+      final project = Project(
+        id: 'project-1',
+        name: 'Test Project',
+        description: 'Test project description',
+        primaryLanguage: english,
+        targetLanguages: [chinese],
+        owner: user,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      expect(project.allLanguages.length, equals(2));
+      expect(project.allLanguages.map((lang) => lang.code), contains('en-US'));
+      expect(project.allLanguages.map((lang) => lang.code), contains('zh-CN'));
+    });
+
+    test('should handle empty target languages', () {
+      final project = Project(
+        id: 'project-1',
+        name: 'Test Project',
+        description: 'Test project description',
+        primaryLanguage: english,
+        targetLanguages: [],
+        owner: user,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      expect(project.allLanguages.length, equals(1));
+      expect(project.allLanguages.first.code, equals('en-US'));
     });
   });
 }

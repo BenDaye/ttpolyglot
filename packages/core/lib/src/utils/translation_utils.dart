@@ -158,7 +158,7 @@ class TranslationUtils {
   static CreateTranslationKeyRequest createTranslationKeyRequestFromProject({
     required String projectId,
     required String key,
-    required Language defaultLanguage,
+    required Language primaryLanguage,
     required List<Language> targetLanguages,
     required String sourceText,
     String? context,
@@ -172,7 +172,7 @@ class TranslationUtils {
     return CreateTranslationKeyRequest(
       projectId: projectId,
       key: key,
-      sourceLanguage: defaultLanguage,
+      sourceLanguage: primaryLanguage,
       sourceText: sourceText,
       targetLanguages: targetLanguages,
       context: context,

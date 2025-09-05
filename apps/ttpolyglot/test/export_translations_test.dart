@@ -61,7 +61,7 @@ void main() {
         id: 'test-project',
         name: '测试项目',
         description: '这是一个测试项目',
-        defaultLanguage: Language.getLanguageByCode('zh-CN')!,
+        primaryLanguage: Language.getLanguageByCode('zh-CN')!,
         targetLanguages: [
           Language.getLanguageByCode('en-US')!,
           Language.getLanguageByCode('ja-JP')!,

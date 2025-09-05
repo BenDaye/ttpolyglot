@@ -24,25 +24,68 @@ class ProjectLanguagesView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 默认语言卡片
+                  // 主语言卡片
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Row(
+                            children: [
+                              Text(
+                                '主语言',
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                              const SizedBox(width: 8.0),
+                              Icon(
+                                Icons.lock,
+                                size: 16.0,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              const SizedBox(width: 4.0),
+                              Text(
+                                '不可修改',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8.0),
                           Text(
-                            '默认语言',
-                            style: Theme.of(context).textTheme.titleLarge,
+                            '项目创建时设定的主语言，用于翻译的源语言',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                                ),
                           ),
                           const SizedBox(height: 16.0),
                           _buildLanguageCard(
                             context,
-                            project.defaultLanguage,
-                            isDefault: true,
-                            onEdit: (language) async {
-                              await ProjectDialogController.showEditDefaultLanguagesDialog(project);
-                              controller.refreshProject();
+                            project.primaryLanguage,
+                            isPrimary: true,
+                            onInfo: (language) {
+                              // 显示主语言信息
+                              Get.dialog(
+                                AlertDialog(
+                                  title: const Text('主语言说明'),
+                                  content: const Text(
+                                    '主语言是项目的源语言，所有翻译都基于此语言进行。\n\n'
+                                    '主语言在项目创建时设定，且不可修改，以确保：\n'
+                                    '• 翻译数据的一致性\n'
+                                    '• 系统的稳定性和可靠性\n'
+                                    '• 团队协作的规范性\n\n'
+                                    '如需使用不同的主语言，请创建新项目。',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Get.back(),
+                                      child: const Text('了解'),
+                                    ),
+                                  ],
+                                ),
+                              );
                             },
                           ),
                         ],
@@ -80,7 +123,7 @@ class ProjectLanguagesView extends StatelessWidget {
                           ...project.targetLanguages.map((lang) => _buildLanguageCard(
                                 context,
                                 lang,
-                                isDefault: false,
+                                isPrimary: false,
                                 onDelete: (language) {
                                   controller.removeTargetLanguage(language);
                                 },
@@ -104,19 +147,19 @@ class ProjectLanguagesView extends StatelessWidget {
   Widget _buildLanguageCard(
     BuildContext context,
     Language language, {
-    required bool isDefault,
-    Function(Language)? onEdit,
+    required bool isPrimary,
+    Function(Language)? onInfo,
     Function(Language)? onDelete,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: isDefault
+        color: isPrimary
             ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
             : Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(4.0),
-        border: isDefault ? Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)) : null,
+        border: isPrimary ? Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)) : null,
       ),
       child: Row(
         children: [
@@ -162,7 +205,7 @@ class ProjectLanguagesView extends StatelessWidget {
           ),
 
           // 操作按钮
-          if (!isDefault) ...[
+          if (!isPrimary) ...[
             IconButton(
               onPressed: () => onDelete?.call(language),
               icon: const Icon(Icons.delete),
@@ -170,9 +213,9 @@ class ProjectLanguagesView extends StatelessWidget {
             ),
           ] else ...[
             IconButton(
-              onPressed: () => onEdit?.call(language),
-              icon: const Icon(Icons.edit),
-              tooltip: '编辑',
+              onPressed: () => onInfo?.call(language),
+              icon: const Icon(Icons.info),
+              tooltip: '信息',
             ),
           ],
         ],

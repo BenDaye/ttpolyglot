@@ -90,7 +90,7 @@ class ExportServiceImplDesktop {
   /// 在 isolate 中执行导出任务
   static Future<ExportTaskResult> _executeExportTask(ExportTaskParams params) async {
     try {
-      final allLanguages = [params.project.defaultLanguage, ...params.project.targetLanguages];
+      final allLanguages = [params.project.primaryLanguage, ...params.project.targetLanguages];
       final Archive archive = Archive();
 
       // 处理每个语言的翻译

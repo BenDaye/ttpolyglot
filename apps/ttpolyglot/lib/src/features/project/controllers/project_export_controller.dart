@@ -32,7 +32,7 @@ class ProjectExportController extends GetxController {
     _supportedLanguages.value = project.allLanguages;
     _exportLanguages.value = project.allLanguages;
 
-    _defaultLanguage.value = project.defaultLanguage;
+    _defaultLanguage.value = project.primaryLanguage;
   }
 
   Future<(Project, List<TranslationEntry>)> _getProjectAndEntries(String projectId) async {
