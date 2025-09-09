@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "spec-workflow-ttpolygolt": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@pimzino/spec-workflow-mcp@latest",
+        "./",
+        "--AutoStartDashboard",
+        "--port",
+        "60020"
+      ]
+    }
+  }
+}
