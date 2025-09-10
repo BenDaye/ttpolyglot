@@ -360,6 +360,147 @@ class ProjectImportView extends StatelessWidget {
 
               const SizedBox(height: 16.0),
 
+              // 语言特定配置卡片
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            '语言特定配置',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(width: 12.0),
+                          TextButton.icon(
+                            onPressed: () {
+                              controller.resetLanguageConfigs();
+                            },
+                            icon: const Icon(Icons.refresh, size: 16.0),
+                            label: const Text('重置'),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                              textStyle: Theme.of(context).textTheme.labelSmall,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12.0),
+                      Text(
+                        '为不同语言设置独立的导入配置',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                      ),
+                      const SizedBox(height: 16.0),
+                      Obx(() {
+                        // 获取项目的所有语言（默认语言 + 目标语言）
+                        final combinedLanguages = <Language>[
+                          if (controller.project?.defaultLanguage != null) controller.project!.defaultLanguage,
+                          ...(controller.project?.targetLanguages ?? []),
+                        ];
+
+                        final languages = {
+                          for (final lang in combinedLanguages) lang.code: lang,
+                        }.values.toList();
+
+                        if (languages.isEmpty) {
+                          return Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16.0),
+                            child: Text(
+                              '项目暂无配置语言',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
+                              textAlign: TextAlign.center,
+                            ),
+                          );
+                        }
+
+                        return Column(
+                          children: languages.map((language) {
+                            final config = controller.getLanguageConfig(language.code);
+                            return Card(
+                              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                              margin: const EdgeInsets.only(bottom: 12.0),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.language,
+                                          size: 20.0,
+                                          color: Theme.of(context).colorScheme.primary,
+                                        ),
+                                        const SizedBox(width: 8.0),
+                                        Text(
+                                          '${language.nativeName} (${language.code})',
+                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12.0),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: _buildLanguageOptionItem(
+                                            context,
+                                            '覆盖现有翻译',
+                                            config.overrideExisting,
+                                            (value) {
+                                              final newConfig = config.copyWith(overrideExisting: value);
+                                              controller.setLanguageConfig(language.code, newConfig);
+                                            },
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12.0),
+                                        Expanded(
+                                          child: _buildLanguageOptionItem(
+                                            context,
+                                            '自动审核',
+                                            config.autoReview,
+                                            (value) {
+                                              final newConfig = config.copyWith(autoReview: value);
+                                              controller.setLanguageConfig(language.code, newConfig);
+                                            },
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12.0),
+                                        Expanded(
+                                          child: _buildLanguageOptionItem(
+                                            context,
+                                            '忽略空值',
+                                            config.ignoreEmpty,
+                                            (value) {
+                                              final newConfig = config.copyWith(ignoreEmpty: value);
+                                              controller.setLanguageConfig(language.code, newConfig);
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16.0),
+
               // 导入历史卡片
               Card(
                 child: Padding(
@@ -429,6 +570,34 @@ class ProjectImportView extends StatelessWidget {
         subtitle: Text(subtitle),
         value: value,
         onChanged: onChanged,
+      ),
+    );
+  }
+
+  Widget _buildLanguageOptionItem(
+    BuildContext context,
+    String title,
+    bool value,
+    ValueChanged<bool> onChanged,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 4.0),
+      child: Column(
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 4.0),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+        ],
       ),
     );
   }

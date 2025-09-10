@@ -10,6 +10,32 @@ import 'package:ttpolyglot/src/features/projects/projects.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_core/core.dart';
 
+/// 语言特定的导入配置
+class ImportLanguageConfig {
+  final bool overrideExisting;
+  final bool autoReview;
+  final bool ignoreEmpty;
+
+  const ImportLanguageConfig({
+    required this.overrideExisting,
+    required this.autoReview,
+    required this.ignoreEmpty,
+  });
+
+  /// 创建副本并更新部分配置
+  ImportLanguageConfig copyWith({
+    bool? overrideExisting,
+    bool? autoReview,
+    bool? ignoreEmpty,
+  }) {
+    return ImportLanguageConfig(
+      overrideExisting: overrideExisting ?? this.overrideExisting,
+      autoReview: autoReview ?? this.autoReview,
+      ignoreEmpty: ignoreEmpty ?? this.ignoreEmpty,
+    );
+  }
+}
+
 class ProjectController extends GetxController {
   late final String projectId;
 
@@ -35,14 +61,39 @@ class ProjectController extends GetxController {
   final _autoReview = true.obs; // 自动审核
   final _ignoreEmpty = true.obs; // 忽略空值
 
+  // 按语言的导入设置
+  final RxMap<String, ImportLanguageConfig> _languageConfigs = <String, ImportLanguageConfig>{}.obs;
+
   // 导入设置 Getters & Setters
   bool get overrideExisting => _overrideExisting.value;
   bool get autoReview => _autoReview.value;
   bool get ignoreEmpty => _ignoreEmpty.value;
 
+  Map<String, ImportLanguageConfig> get languageConfigs => _languageConfigs;
+
   void setOverrideExisting(bool value) => _overrideExisting.value = value;
   void setAutoReview(bool value) => _autoReview.value = value;
   void setIgnoreEmpty(bool value) => _ignoreEmpty.value = value;
+
+  /// 设置语言特定的导入配置
+  void setLanguageConfig(String languageCode, ImportLanguageConfig config) {
+    _languageConfigs[languageCode] = config;
+  }
+
+  /// 获取语言特定的导入配置，如果没有则返回全局配置
+  ImportLanguageConfig getLanguageConfig(String languageCode) {
+    return _languageConfigs[languageCode] ??
+        ImportLanguageConfig(
+          overrideExisting: overrideExisting,
+          autoReview: autoReview,
+          ignoreEmpty: ignoreEmpty,
+        );
+  }
+
+  /// 重置所有语言配置为全局设置
+  void resetLanguageConfigs() {
+    _languageConfigs.clear();
+  }
 
   // 导入记录
   final RxList<ImportRecord> _importRecords = <ImportRecord>[].obs;
@@ -254,9 +305,12 @@ class ProjectController extends GetxController {
             continue;
           }
 
+          // 获取语言特定的配置
+          final languageConfig = getLanguageConfig(selectedLanguage.code);
+
           // 根据"忽略空值"设置处理空值
-          if (ignoreEmpty && value.trim().isEmpty) {
-            log('跳过空值: $key', name: 'ProjectController');
+          if (languageConfig.ignoreEmpty && value.trim().isEmpty) {
+            log('跳过空值: $key (语言: ${selectedLanguage.code})', name: 'ProjectController');
             totalSkipped++;
             continue;
           }
@@ -265,7 +319,7 @@ class ProjectController extends GetxController {
           TranslationStatus entryStatus;
           if (value.trim().isEmpty) {
             entryStatus = TranslationStatus.pending;
-          } else if (autoReview) {
+          } else if (languageConfig.autoReview) {
             entryStatus = TranslationStatus.completed; // 自动审核表示直接标记为完成
           } else {
             entryStatus = TranslationStatus.reviewing; // 需要人工审核
@@ -312,9 +366,10 @@ class ProjectController extends GetxController {
           allImportedEntries.addAll(createdEntries);
         }
 
-        // 处理冲突条目
+        // 处理冲突条目（使用语言特定的配置）
         if (conflictResult.conflicts.isNotEmpty) {
-          if (overrideExisting) {
+          final languageConfig = getLanguageConfig(selectedLanguage.code);
+          if (languageConfig.overrideExisting) {
             // 覆盖现有翻译：使用导入的条目覆盖现有条目
             final conflictResolutions = conflictResult.conflicts
                 .map((conflict) => conflict_service.ConflictResolution(
@@ -332,12 +387,13 @@ class ProjectController extends GetxController {
             if (resolvedEntries.isNotEmpty) {
               final updatedEntries = await _translationService.batchUpdateTranslationEntries(resolvedEntries);
               allImportedEntries.addAll(updatedEntries);
-              log('覆盖了 ${updatedEntries.length} 个现有翻译条目', name: 'ProjectController');
+              log('覆盖了 ${updatedEntries.length} 个现有翻译条目 (语言: ${selectedLanguage.code})', name: 'ProjectController');
             }
           } else {
             // 不覆盖现有翻译：跳过冲突条目
             allConflicts.addAll(conflictResult.conflicts);
-            log('发现 ${conflictResult.conflicts.length} 个冲突，跳过（未启用覆盖）', name: 'ProjectController');
+            log('发现 ${conflictResult.conflicts.length} 个冲突，跳过（语言: ${selectedLanguage.code} 未启用覆盖）',
+                name: 'ProjectController');
           }
         }
       }
