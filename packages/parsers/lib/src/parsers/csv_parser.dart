@@ -48,6 +48,7 @@ class CsvParser implements TranslationParser {
 
       final converter = CsvToListConverter(
         fieldDelimiter: delimiter,
+        eol: '\n',
         shouldParseNumbers: false,
       );
 

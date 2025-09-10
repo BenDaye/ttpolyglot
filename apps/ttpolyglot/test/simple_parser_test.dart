@@ -8,11 +8,7 @@ void main() {
   group('简单解析器测试', () {
     test('测试CSV格式解析', () async {
       // 创建测试用的CSV内容
-      const csvContent = '''key,value
-hello,你好
-welcome,欢迎
-goodbye,再见
-thank_you,谢谢''';
+      final csvContent = ['key,value', 'hello,你好', 'welcome,欢迎', 'goodbye,再见', 'thank_you,谢谢'].join('\n');
 
       // 获取CSV解析器
       final parser = ParserFactory.getParser('csv');
@@ -58,18 +54,20 @@ thank_you,谢谢''';
 
     test('测试PO格式解析', () async {
       // 创建测试用的PO内容
-      const poContent = '''# Translation file for zh_CN
-msgid "hello"
-msgstr "你好"
-
-msgid "welcome"
-msgstr "欢迎"
-
-msgid "goodbye"
-msgstr "再见"
-
-msgid "thank_you"
-msgstr "谢谢"''';
+      final poContent = [
+        '# Translation file for zh_CN',
+        'msgid "hello"',
+        'msgstr "你好"',
+        '',
+        'msgid "welcome"',
+        'msgstr "欢迎"',
+        '',
+        'msgid "goodbye"',
+        'msgstr "再见"',
+        '',
+        'msgid "thank_you"',
+        'msgstr "谢谢"'
+      ].join('\n');
 
       // 获取PO解析器
       final parser = ParserFactory.getParser('po');

@@ -54,8 +54,14 @@ class PoParser implements TranslationParser {
           i++;
           continue;
         }
-        if (line.startsWith('msgid ""') || line.startsWith('msgstr ""')) {
+        // 如果遇到非空的msgid，说明头部结束，开始解析条目
+        if (line.startsWith('msgid ') && !line.startsWith('msgid ""')) {
           break;
+        }
+        // 如果遇到空的msgid/msgstr，说明这是头部的一部分
+        if (line.startsWith('msgid ""') || line.startsWith('msgstr ""')) {
+          i++;
+          continue;
         }
         i++;
       }
@@ -318,7 +324,7 @@ class PoParser implements TranslationParser {
 
   /// 查找下一个 PO 指令
   int _findNextPoDirective(List<String> lines, int startIndex) {
-    int i = startIndex;
+    int i = startIndex + 1; // 从下一行开始查找
 
     while (i < lines.length) {
       final line = lines[i].trim();
