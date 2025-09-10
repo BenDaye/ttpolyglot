@@ -74,9 +74,6 @@ class ProjectController extends GetxController {
     super.onReady();
     log('ProjectController onReady: $projectId', name: 'ProjectController');
     loadProject();
-
-    // 初始化示例导入记录（用于测试）
-    _initializeExampleRecords();
   }
 
   @override
@@ -527,57 +524,5 @@ class ProjectController extends GetxController {
     }
 
     log('已创建导入记录，当前记录数: ${_importRecords.length}', name: 'ProjectController');
-  }
-
-  /// 初始化示例导入记录（用于测试）
-  void _initializeExampleRecords() {
-    // 只在没有记录时添加示例记录
-    if (_importRecords.isEmpty) {
-      final now = DateTime.now();
-
-      // 成功记录
-      addImportRecord(ImportRecord(
-        id: '1',
-        fileName: 'translations_zh.json',
-        status: ImportRecordStatus.success,
-        message: '成功导入 234 条翻译（已自动审核）',
-        importedCount: 234,
-        conflictCount: 0,
-        skippedCount: 0,
-        timestamp: now.subtract(const Duration(hours: 2)),
-        language: 'zh-CN',
-        duration: 1850,
-      ));
-
-      // 部分成功记录
-      addImportRecord(ImportRecord(
-        id: '2',
-        fileName: 'translations_en.csv',
-        status: ImportRecordStatus.partial,
-        message: '成功导入 189 条翻译，跳过 15 个冲突',
-        importedCount: 189,
-        conflictCount: 15,
-        skippedCount: 0,
-        timestamp: now.subtract(const Duration(days: 1)),
-        language: 'en-US',
-        duration: 3200,
-      ));
-
-      // 失败记录
-      addImportRecord(ImportRecord(
-        id: '3',
-        fileName: 'translations_ja.xlsx',
-        status: ImportRecordStatus.failure,
-        message: '导入失败：格式错误',
-        importedCount: 0,
-        conflictCount: 0,
-        skippedCount: 0,
-        timestamp: now.subtract(const Duration(days: 2)),
-        language: 'ja-JP',
-        duration: 450,
-      ));
-
-      log('已添加示例导入记录', name: 'ProjectController');
-    }
   }
 }
