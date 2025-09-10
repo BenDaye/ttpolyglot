@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ttpolyglot_core/core.dart';
@@ -175,51 +174,6 @@ msgstr "谢谢"''';
       } catch (error, stackTrace) {
         log('❌ PO格式demo文件解析失败', error: error, stackTrace: stackTrace);
         fail('PO解析失败: $error');
-      }
-    });
-
-    testWidgets('测试复杂JSON demo文件解析', (WidgetTester tester) async {
-      // 读取实际的demo文件
-      final demoFile = File('/Users/mac888/Desktop/www/ttpolyglot/demo_zh_CN.json');
-
-      if (!await demoFile.exists()) {
-        log('⚠️ demo文件不存在，跳过测试');
-        return;
-      }
-
-      final content = await demoFile.readAsString();
-
-      // 获取JSON解析器
-      final parser = ParserFactory.getParser('json');
-
-      // 创建中文语言对象
-      final language = Language(
-        code: 'zh-CN',
-        name: 'Chinese (Simplified)',
-        nativeName: '中文（简体）',
-      );
-
-      try {
-        // 解析JSON内容
-        final result = await parser.parseString(content, language);
-
-        // 验证解析结果
-        expect(result.entries.isNotEmpty, true);
-        expect(result.language.code, 'zh-CN');
-
-        log('✅ 复杂JSON格式demo文件解析成功！解析了 ${result.entries.length} 个翻译条目');
-
-        // 打印前几个解析结果
-        final firstFewEntries = result.entries.take(5);
-        for (final entry in firstFewEntries) {
-          log('  ${entry.key}: ${entry.targetText}');
-        }
-        if (result.entries.length > 5) {
-          log('  ... 还有 ${result.entries.length - 5} 个条目');
-        }
-      } catch (error, stackTrace) {
-        log('❌ 复杂JSON格式demo文件解析失败', error: error, stackTrace: stackTrace);
-        fail('复杂JSON解析失败: $error');
       }
     });
 
