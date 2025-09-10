@@ -199,17 +199,47 @@ class CsvParser implements TranslationParser {
     final parts = fileName.split('.');
     if (parts.length > 1) {
       final langCode = parts.last;
+      // 标准化语言代码格式为 xx-XX
+      final standardizedCode = _standardizeLanguageCode(langCode);
       return Language(
-        code: langCode,
-        name: langCode.toUpperCase(),
-        nativeName: langCode,
+        code: standardizedCode,
+        name: standardizedCode.toUpperCase(),
+        nativeName: standardizedCode,
       );
     }
 
     return const Language(
-      code: 'en',
+      code: 'en-US',
       name: 'English',
       nativeName: 'English',
     );
+  }
+
+  /// 标准化语言代码格式为 xx-XX
+  String _standardizeLanguageCode(String langCode) {
+    // 如果已经是正确格式，直接返回
+    if (langCode.contains('-') && langCode.length >= 5) {
+      return langCode;
+    }
+
+    // 如果只有语言代码（如 zh），添加默认地区
+    final langCodeMap = {
+      'zh': 'zh-CN',
+      'en': 'en-US',
+      'ja': 'ja-JP',
+      'ko': 'ko-KR',
+      'fr': 'fr-FR',
+      'de': 'de-DE',
+      'es': 'es-ES',
+      'it': 'it-IT',
+      'pt': 'pt-PT',
+      'ru': 'ru-RU',
+      'ar': 'ar-SA',
+      'hi': 'hi-IN',
+      'th': 'th-TH',
+      'vi': 'vi-VN',
+    };
+
+    return langCodeMap[langCode.toLowerCase()] ?? 'en-US';
   }
 }

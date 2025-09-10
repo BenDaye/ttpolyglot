@@ -67,6 +67,12 @@ thank_you,谢谢''';
         // 解析CSV内容
         final result = await parser.parseString(csvContent, language);
 
+        // 调试输出
+        log('CSV解析结果: ${result.entries.length} 个条目');
+        if (result.warnings.isNotEmpty) {
+          log('CSV解析警告: ${result.warnings.join(', ')}');
+        }
+
         // 验证解析结果
         expect(result.entries.isNotEmpty, true);
         expect(result.entries.length, 4);
@@ -83,7 +89,7 @@ thank_you,谢谢''';
           log('  ${entry.key}: ${entry.targetText}');
         }
       } catch (error, stackTrace) {
-        log('❌ CSV格式demo文件解析失败', error: error, stackTrace: stackTrace);
+        log('❌ CSV格式demo文件解析失败', error: error, stackTrace: stackTrace, name: 'CSVTest');
         fail('CSV解析失败: $error');
       }
     });
@@ -156,6 +162,12 @@ msgstr "谢谢"''';
         // 解析PO内容
         final result = await parser.parseString(poContent, language);
 
+        // 调试输出
+        log('PO解析结果: ${result.entries.length} 个条目');
+        if (result.warnings.isNotEmpty) {
+          log('PO解析警告: ${result.warnings.join(', ')}');
+        }
+
         // 验证解析结果
         expect(result.entries.isNotEmpty, true);
         expect(result.entries.length, 4);
@@ -172,7 +184,7 @@ msgstr "谢谢"''';
           log('  ${entry.key}: ${entry.targetText}');
         }
       } catch (error, stackTrace) {
-        log('❌ PO格式demo文件解析失败', error: error, stackTrace: stackTrace);
+        log('❌ PO格式demo文件解析失败', error: error, stackTrace: stackTrace, name: 'POTest');
         fail('PO解析失败: $error');
       }
     });

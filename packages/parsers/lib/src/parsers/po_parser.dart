@@ -62,7 +62,7 @@ class PoParser implements TranslationParser {
 
       // 解析翻译条目
       while (i < lines.length) {
-        final entry = _parsePoEntry(lines, i);
+        final entry = _parsePoEntry(lines, i, language);
         if (entry != null) {
           final (translationEntry, nextIndex) = entry;
           entries.add(translationEntry);
@@ -206,23 +206,25 @@ class PoParser implements TranslationParser {
       final parts = fileName.split(RegExp(r'[_-]'));
       if (parts.length > 1) {
         final langCode = parts.last;
+        // 标准化语言代码格式为 xx-XX
+        final standardizedCode = _standardizeLanguageCode(langCode);
         return Language(
-          code: langCode,
-          name: langCode.toUpperCase(),
-          nativeName: langCode,
+          code: standardizedCode,
+          name: standardizedCode.toUpperCase(),
+          nativeName: standardizedCode,
         );
       }
     }
 
     return const Language(
-      code: 'en',
+      code: 'en-US',
       name: 'English',
       nativeName: 'English',
     );
   }
 
   /// 解析单个 PO 条目
-  (TranslationEntry, int)? _parsePoEntry(List<String> lines, int startIndex) {
+  (TranslationEntry, int)? _parsePoEntry(List<String> lines, int startIndex, Language language) {
     int i = startIndex;
     String? comment;
     String? context;
@@ -267,8 +269,8 @@ class PoParser implements TranslationParser {
         id: _uuid.v4(),
         key: msgid,
         projectId: 'unknown',
-        sourceLanguage: const Language(code: 'en', name: 'English', nativeName: 'English'),
-        targetLanguage: const Language(code: 'en', name: 'English', nativeName: 'English'),
+        sourceLanguage: language,
+        targetLanguage: language,
         sourceText: msgid,
         targetText: msgstr,
         status: msgstr.isEmpty ? TranslationStatus.pending : TranslationStatus.completed,
@@ -347,5 +349,33 @@ class PoParser implements TranslationParser {
         .replaceAll('\\n', '\n')
         .replaceAll('\\r', '\r')
         .replaceAll('\\t', '\t');
+  }
+
+  /// 标准化语言代码格式为 xx-XX
+  String _standardizeLanguageCode(String langCode) {
+    // 如果已经是正确格式，直接返回
+    if (langCode.contains('-') && langCode.length >= 5) {
+      return langCode;
+    }
+
+    // 如果只有语言代码（如 zh），添加默认地区
+    final langCodeMap = {
+      'zh': 'zh-CN',
+      'en': 'en-US',
+      'ja': 'ja-JP',
+      'ko': 'ko-KR',
+      'fr': 'fr-FR',
+      'de': 'de-DE',
+      'es': 'es-ES',
+      'it': 'it-IT',
+      'pt': 'pt-PT',
+      'ru': 'ru-RU',
+      'ar': 'ar-SA',
+      'hi': 'hi-IN',
+      'th': 'th-TH',
+      'vi': 'vi-VN',
+    };
+
+    return langCodeMap[langCode.toLowerCase()] ?? 'en-US';
   }
 }
