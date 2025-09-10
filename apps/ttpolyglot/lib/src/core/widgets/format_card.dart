@@ -8,12 +8,14 @@ class FormatCard extends StatelessWidget {
     required this.description,
     required this.icon,
     this.onTap,
+    this.trailing,
   });
 
   final String name;
   final String description;
   final IconData icon;
   final VoidCallback? onTap;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +50,10 @@ class FormatCard extends StatelessWidget {
                     ],
                   ),
                 ),
+                if (trailing != null) ...[
+                  const SizedBox(width: 8.0),
+                  trailing!,
+                ],
               ],
             ),
           ),

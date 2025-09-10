@@ -1,5 +1,9 @@
+import 'dart:developer';
+
+import 'package:excel/excel.dart' as excel;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/core/utils/file_save_util.dart';
 import 'package:ttpolyglot/src/core/widgets/format_card.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 import 'package:ttpolyglot/src/features/project/widgets/upload_file.dart';
@@ -54,26 +58,117 @@ class ProjectImportView extends StatelessWidget {
                             name: 'JSON',
                             description: 'application/json',
                             icon: Icons.code,
+                            trailing: TextButton.icon(
+                              onPressed: () async {
+                                try {
+                                  await FileSaveUtil.saveTextFile(
+                                    fileName: 'demo.json',
+                                    content: '{"hello": "你好"}',
+                                    mimeType: 'application/json',
+                                  );
+                                } catch (error, stackTrace) {
+                                  log('下载 JSON Demo 失败',
+                                      error: error, stackTrace: stackTrace, name: 'ProjectImportView');
+                                }
+                              },
+                              icon: const Icon(Icons.download, size: 16.0),
+                              label: const Text('下载 Demo'),
+                            ),
                           ),
                           FormatCard(
                             name: 'CSV',
                             description: 'text/csv',
                             icon: Icons.table_chart,
+                            trailing: TextButton.icon(
+                              onPressed: () async {
+                                try {
+                                  // CSV 解析器默认包含表头 key,value
+                                  const csv = 'key,value\nhello,你好';
+                                  await FileSaveUtil.saveTextFile(
+                                    fileName: 'demo.csv',
+                                    content: csv,
+                                    mimeType: 'text/csv',
+                                  );
+                                } catch (error, stackTrace) {
+                                  log('下载 CSV Demo 失败',
+                                      error: error, stackTrace: stackTrace, name: 'ProjectImportView');
+                                }
+                              },
+                              icon: const Icon(Icons.download, size: 16.0),
+                              label: const Text('下载 Demo'),
+                            ),
                           ),
                           FormatCard(
                             name: 'Excel',
                             description: 'application/vnd.ms-excel',
                             icon: Icons.table_view,
+                            trailing: TextButton.icon(
+                              onPressed: () async {
+                                try {
+                                  // 生成真正的 XLSX，第一行表头，第二行数据
+                                  final book = excel.Excel.createExcel();
+                                  final sheet = book[book.getDefaultSheet() ?? 'Sheet1'];
+                                  sheet.appendRow(['key', 'value']);
+                                  sheet.appendRow(['hello', '你好']);
+                                  final bytes = book.encode();
+                                  if (bytes != null) {
+                                    await FileSaveUtil.saveBytesFile(
+                                      fileName: 'demo.xlsx',
+                                      bytes: bytes,
+                                      mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                    );
+                                  }
+                                } catch (error, stackTrace) {
+                                  log('下载 Excel Demo 失败',
+                                      error: error, stackTrace: stackTrace, name: 'ProjectImportView');
+                                }
+                              },
+                              icon: const Icon(Icons.download, size: 16.0),
+                              label: const Text('下载 Demo'),
+                            ),
                           ),
                           FormatCard(
                             name: 'ARB',
                             description: 'application/arb',
                             icon: Icons.flutter_dash,
+                            trailing: TextButton.icon(
+                              onPressed: () async {
+                                try {
+                                  const arb = '{"@@locale":"zh","hello":"你好"}';
+                                  await FileSaveUtil.saveTextFile(
+                                    fileName: 'app_zh.arb',
+                                    content: arb,
+                                    mimeType: 'application/json',
+                                  );
+                                } catch (error, stackTrace) {
+                                  log('下载 ARB Demo 失败',
+                                      error: error, stackTrace: stackTrace, name: 'ProjectImportView');
+                                }
+                              },
+                              icon: const Icon(Icons.download, size: 16.0),
+                              label: const Text('下载 Demo'),
+                            ),
                           ),
                           FormatCard(
                             name: 'PO',
                             description: 'application/x-po',
                             icon: Icons.language,
+                            trailing: TextButton.icon(
+                              onPressed: () async {
+                                try {
+                                  const po = '# Translation file for zh_CN\nmsgid "hello"\nmsgstr "你好"\n';
+                                  await FileSaveUtil.saveTextFile(
+                                    fileName: 'zh_CN.po',
+                                    content: po,
+                                    mimeType: 'text/plain',
+                                  );
+                                } catch (error, stackTrace) {
+                                  log('下载 PO Demo 失败', error: error, stackTrace: stackTrace, name: 'ProjectImportView');
+                                }
+                              },
+                              icon: const Icon(Icons.download, size: 16.0),
+                              label: const Text('下载 Demo'),
+                            ),
                           ),
                         ],
                       ),
