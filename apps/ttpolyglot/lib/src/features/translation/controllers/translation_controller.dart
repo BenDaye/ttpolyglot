@@ -162,7 +162,14 @@ class TranslationController extends GetxController {
       );
 
       if (result == true) {
-        await _translationService.deleteTranslationEntry(entryId);
+        // 先从本地查找条目确认存在
+        final entryToDelete = _translationEntries.firstWhereOrNull((e) => e.id == entryId);
+        if (entryToDelete == null) {
+          throw Exception('翻译条目不存在');
+        }
+
+        // 使用更高效的删除方法
+        await _translationService.deleteTranslationEntryFromProject(projectId, entryId);
 
         // 从本地列表中移除
         _translationEntries.removeWhere((e) => e.id == entryId);
@@ -199,7 +206,7 @@ class TranslationController extends GetxController {
 
       if (result == true) {
         for (final entryId in entryIds) {
-          await _translationService.deleteTranslationEntry(entryId);
+          await _translationService.deleteTranslationEntryFromProject(projectId, entryId);
         }
 
         // 从本地列表中移除

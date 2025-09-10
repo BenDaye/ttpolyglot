@@ -61,6 +61,9 @@ abstract class TranslationService {
   /// 删除翻译条目
   Future<void> deleteTranslationEntry(String entryId);
 
+  /// 删除翻译条目（指定项目ID）
+  Future<void> deleteTranslationEntryFromProject(String projectId, String entryId);
+
   /// 批量更新翻译条目
   Future<List<TranslationEntry>> batchUpdateTranslationEntries(
     List<TranslationEntry> entries,

@@ -153,13 +153,47 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
   @override
   Future<void> deleteTranslationEntry(String entryId) async {
     try {
-      // 从条目ID中解析项目ID
-      final parts = entryId.split('_');
-      if (parts.length < 2) {
-        throw Exception('无效的翻译条目ID: $entryId');
+      // 先通过遍历所有项目来查找包含该条目的项目
+      String? targetProjectId;
+
+      // 这里需要一个更好的方法来获取项目ID，暂时通过遍历查找
+      // 在实际使用中，条目ID应该包含项目信息或者通过其他方式传递项目ID
+      final storageKeys = await _storageService.listKeys('projects.');
+      for (final key in storageKeys) {
+        if (key.startsWith('projects.') && key.endsWith('.translations')) {
+          final projectId = key.substring('projects.'.length, key.length - '.translations'.length);
+          final allEntries = await getTranslationEntries(projectId);
+
+          if (allEntries.any((e) => e.id == entryId)) {
+            targetProjectId = projectId;
+            break;
+          }
+        }
       }
 
-      final projectId = parts[0];
+      if (targetProjectId == null) {
+        throw Exception('翻译条目不存在: $entryId');
+      }
+
+      final allEntries = await getTranslationEntries(targetProjectId);
+      final filteredEntries = allEntries.where((e) => e.id != entryId).toList();
+
+      if (filteredEntries.length == allEntries.length) {
+        throw Exception('翻译条目不存在: $entryId');
+      }
+
+      await _saveTranslationEntries(targetProjectId, filteredEntries);
+      log('成功删除翻译条目: $entryId 从项目: $targetProjectId', name: 'TranslationServiceImpl');
+    } catch (error, stackTrace) {
+      log('删除翻译条目失败', error: error, stackTrace: stackTrace, name: 'TranslationServiceImpl');
+      rethrow;
+    }
+  }
+
+  /// 删除翻译条目（指定项目ID的版本，更高效）
+  @override
+  Future<void> deleteTranslationEntryFromProject(String projectId, String entryId) async {
+    try {
       final allEntries = await getTranslationEntries(projectId);
       final filteredEntries = allEntries.where((e) => e.id != entryId).toList();
 
@@ -168,6 +202,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       }
 
       await _saveTranslationEntries(projectId, filteredEntries);
+      log('成功删除翻译条目: $entryId 从项目: $projectId', name: 'TranslationServiceImpl');
     } catch (error, stackTrace) {
       log('删除翻译条目失败', error: error, stackTrace: stackTrace, name: 'TranslationServiceImpl');
       rethrow;
