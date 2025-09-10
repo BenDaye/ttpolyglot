@@ -58,6 +58,7 @@ class ProjectImportView extends StatelessWidget {
                             name: 'JSON',
                             description: 'application/json',
                             icon: Icons.code,
+                            color: Colors.orange,
                             trailing: TextButton.icon(
                               onPressed: () async {
                                 try {
@@ -71,6 +72,12 @@ class ProjectImportView extends StatelessWidget {
                                       error: error, stackTrace: stackTrace, name: 'ProjectImportView');
                                 }
                               },
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+                                side: BorderSide(color: Theme.of(context).colorScheme.outline),
+                                foregroundColor: Theme.of(context).colorScheme.onSurface,
+                                textStyle: Theme.of(context).textTheme.labelSmall,
+                              ),
                               icon: const Icon(Icons.download, size: 16.0),
                               label: const Text('下载 Demo'),
                             ),
@@ -79,6 +86,7 @@ class ProjectImportView extends StatelessWidget {
                             name: 'CSV',
                             description: 'text/csv',
                             icon: Icons.table_chart,
+                            color: Colors.lightBlue,
                             trailing: TextButton.icon(
                               onPressed: () async {
                                 try {
@@ -94,6 +102,12 @@ class ProjectImportView extends StatelessWidget {
                                       error: error, stackTrace: stackTrace, name: 'ProjectImportView');
                                 }
                               },
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+                                side: BorderSide(color: Theme.of(context).colorScheme.outline),
+                                foregroundColor: Theme.of(context).colorScheme.onSurface,
+                                textStyle: Theme.of(context).textTheme.labelSmall,
+                              ),
                               icon: const Icon(Icons.download, size: 16.0),
                               label: const Text('下载 Demo'),
                             ),
@@ -102,6 +116,7 @@ class ProjectImportView extends StatelessWidget {
                             name: 'Excel',
                             description: 'application/vnd.ms-excel',
                             icon: Icons.table_view,
+                            color: Colors.green,
                             trailing: TextButton.icon(
                               onPressed: () async {
                                 try {
@@ -123,6 +138,12 @@ class ProjectImportView extends StatelessWidget {
                                       error: error, stackTrace: stackTrace, name: 'ProjectImportView');
                                 }
                               },
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+                                side: BorderSide(color: Theme.of(context).colorScheme.outline),
+                                foregroundColor: Theme.of(context).colorScheme.onSurface,
+                                textStyle: Theme.of(context).textTheme.labelSmall,
+                              ),
                               icon: const Icon(Icons.download, size: 16.0),
                               label: const Text('下载 Demo'),
                             ),
@@ -131,6 +152,7 @@ class ProjectImportView extends StatelessWidget {
                             name: 'ARB',
                             description: 'application/arb',
                             icon: Icons.flutter_dash,
+                            color: Colors.purple,
                             trailing: TextButton.icon(
                               onPressed: () async {
                                 try {
@@ -145,6 +167,12 @@ class ProjectImportView extends StatelessWidget {
                                       error: error, stackTrace: stackTrace, name: 'ProjectImportView');
                                 }
                               },
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+                                side: BorderSide(color: Theme.of(context).colorScheme.outline),
+                                foregroundColor: Theme.of(context).colorScheme.onSurface,
+                                textStyle: Theme.of(context).textTheme.labelSmall,
+                              ),
                               icon: const Icon(Icons.download, size: 16.0),
                               label: const Text('下载 Demo'),
                             ),
@@ -153,6 +181,7 @@ class ProjectImportView extends StatelessWidget {
                             name: 'PO',
                             description: 'application/x-po',
                             icon: Icons.language,
+                            color: Colors.teal,
                             trailing: TextButton.icon(
                               onPressed: () async {
                                 try {
@@ -166,6 +195,12 @@ class ProjectImportView extends StatelessWidget {
                                   log('下载 PO Demo 失败', error: error, stackTrace: stackTrace, name: 'ProjectImportView');
                                 }
                               },
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+                                side: BorderSide(color: Theme.of(context).colorScheme.outline),
+                                foregroundColor: Theme.of(context).colorScheme.onSurface,
+                                textStyle: Theme.of(context).textTheme.labelSmall,
+                              ),
                               icon: const Icon(Icons.download, size: 16.0),
                               label: const Text('下载 Demo'),
                             ),

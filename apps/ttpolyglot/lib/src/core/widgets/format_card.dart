@@ -9,6 +9,7 @@ class FormatCard extends StatelessWidget {
     required this.icon,
     this.onTap,
     this.trailing,
+    this.color,
   });
 
   final String name;
@@ -16,6 +17,7 @@ class FormatCard extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onTap;
   final Widget? trailing;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +33,19 @@ class FormatCard extends StatelessWidget {
             padding: const EdgeInsets.all(12.0),
             child: Row(
               children: [
-                Icon(icon, size: 24.0),
+                Container(
+                  width: 36.0,
+                  height: 36.0,
+                  decoration: BoxDecoration(
+                    color: (color ?? Theme.of(context).colorScheme.primary).withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 20.0,
+                    color: color ?? Theme.of(context).colorScheme.primary,
+                  ),
+                ),
                 const SizedBox(width: 12.0),
                 Expanded(
                   child: Column(
@@ -41,11 +55,22 @@ class FormatCard extends StatelessWidget {
                         name,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
-                      Text(
-                        description,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                            ),
+                      const SizedBox(height: 6.0),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(4.0),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15),
+                          ),
+                        ),
+                        child: Text(
+                          description,
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                              ),
+                        ),
                       ),
                     ],
                   ),
