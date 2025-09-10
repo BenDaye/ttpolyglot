@@ -54,7 +54,7 @@ class ProjectImportView extends StatelessWidget {
                       const SizedBox(height: 16.0),
                       LayoutBuilder(
                         builder: (context, constraints) {
-                          final cardWidth = (constraints.maxWidth - 8.0) / 2; // 减去中间间距
+                          final cardWidth = (constraints.maxWidth - 16.0) / 3; // 减去两个间距 (8.0 * 2)
                           return Wrap(
                             spacing: 8.0,
                             runSpacing: 8.0,
