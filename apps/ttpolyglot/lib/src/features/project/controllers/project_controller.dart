@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/core/services/conflict_detection_service.dart';
 import 'package:ttpolyglot/src/core/services/translation_service_impl.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 import 'package:ttpolyglot/src/features/projects/projects.dart';
@@ -186,36 +187,120 @@ class ProjectController extends GetxController {
 
   Future<void> importFiles(Map<String, Language> languageMap, Map<String, Map<String, String>> translationMap) async {
     try {
-      final entries = <TranslationEntry>[];
-      for (final translation in translationMap.entries) {
-        final item = translation.value;
-        item.forEach((key, value) async {
-          final request = CreateTranslationKeyRequest(
-            projectId: projectId,
-            key: key,
-            sourceText: value,
-            sourceLanguage: _project.value!.defaultLanguage,
-            targetLanguages: _project.value!.targetLanguages..sort((a, b) => a.sortIndex.compareTo(b.sortIndex)),
-          );
-          // 如果请求有效，则创建翻译条目
-          if (request.isValid) {
-            final entry = await _translationService.createTranslationKey(request);
-            entries.addAll(entry);
+      log('开始批量导入翻译文件', name: 'ProjectController');
+
+      final allImportedEntries = <TranslationEntry>[];
+      final allConflicts = <TranslationConflict>[];
+      int totalSkipped = 0;
+
+      // 获取现有翻译条目用于冲突检测
+      final existingEntries = await _translationService.getTranslationEntries(projectId);
+
+      // 处理每个文件的翻译
+      for (final fileEntry in translationMap.entries) {
+        final fileName = fileEntry.key;
+        final translations = fileEntry.value;
+        final selectedLanguage = languageMap[fileName];
+
+        if (selectedLanguage == null) {
+          log('跳过文件 $fileName：未选择语言', name: 'ProjectController');
+          totalSkipped += translations.length;
+          continue;
+        }
+
+        log('处理文件 $fileName，语言: ${selectedLanguage.code}，条目数: ${translations.length}', name: 'ProjectController');
+
+        // 将翻译键值对转换为 TranslationEntry
+        final importedEntries = <TranslationEntry>[];
+        for (final translation in translations.entries) {
+          final key = translation.key;
+          final value = translation.value;
+
+          if (key.trim().isEmpty) {
+            log('跳过空键', name: 'ProjectController');
+            totalSkipped++;
+            continue;
           }
-        });
+
+          // 创建翻译条目
+          final entry = TranslationEntry(
+            id: DateTime.now().millisecondsSinceEpoch.toString() +
+                (DateTime.now().microsecond % 1000).toString().padLeft(3, '0'),
+            projectId: projectId,
+            key: key.trim(),
+            sourceLanguage: selectedLanguage.code == _project.value!.defaultLanguage.code
+                ? selectedLanguage
+                : _project.value!.defaultLanguage,
+            targetLanguage: selectedLanguage,
+            sourceText:
+                selectedLanguage.code == _project.value!.defaultLanguage.code ? value : key, // 如果不是默认语言，使用键作为源文本
+            targetText: value,
+            status: value.trim().isEmpty ? TranslationStatus.pending : TranslationStatus.completed,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          );
+
+          importedEntries.add(entry);
+        }
+
+        if (importedEntries.isEmpty) {
+          log('文件 $fileName 没有有效的翻译条目', name: 'ProjectController');
+          continue;
+        }
+
+        // 使用冲突检测服务检测冲突
+        final conflictResult = await ConflictDetectionService.detectConflicts(
+          existingEntries,
+          importedEntries,
+        );
+
+        log('文件 $fileName 冲突检测结果: ${conflictResult.conflictCount} 个冲突，${conflictResult.newEntryCount} 个新条目',
+            name: 'ProjectController');
+
+        // 添加新条目（无冲突的）
+        if (conflictResult.newEntries.isNotEmpty) {
+          final createdEntries = await _translationService.batchCreateTranslationEntries(conflictResult.newEntries);
+          allImportedEntries.addAll(createdEntries);
+        }
+
+        // 记录冲突（暂时跳过，后续可实现冲突解决UI）
+        if (conflictResult.conflicts.isNotEmpty) {
+          allConflicts.addAll(conflictResult.conflicts);
+          log('发现 ${conflictResult.conflicts.length} 个冲突，暂时跳过', name: 'ProjectController');
+        }
       }
-      // 如果导入的条目为空，则提示错误
-      if (entries.isEmpty) {
-        Get.snackbar('错误', '创建翻译条目失败');
-        return;
-      }
-      await _translationService.batchUpdateTranslationEntries(entries);
-      //
+
+      // 清空文件列表
       setFiles([]);
-      // 提示成功
-      Get.snackbar('成功', '导入文件成功');
+
+      // 显示导入结果
+      if (allImportedEntries.isEmpty && allConflicts.isEmpty) {
+        Get.snackbar('提示', '没有导入任何翻译内容');
+      } else {
+        final message = StringBuffer();
+        if (allImportedEntries.isNotEmpty) {
+          message.write('成功导入 ${allImportedEntries.length} 个翻译条目');
+        }
+        if (allConflicts.isNotEmpty) {
+          if (message.isNotEmpty) message.write('，');
+          message.write('发现 ${allConflicts.length} 个冲突（已跳过）');
+        }
+        if (totalSkipped > 0) {
+          if (message.isNotEmpty) message.write('，');
+          message.write('跳过 $totalSkipped 个无效条目');
+        }
+
+        Get.snackbar(
+          allConflicts.isNotEmpty ? '部分成功' : '成功',
+          message.toString(),
+          duration: const Duration(seconds: 5),
+        );
+      }
+
+      log('导入完成：成功 ${allImportedEntries.length}，冲突 ${allConflicts.length}，跳过 $totalSkipped', name: 'ProjectController');
     } catch (error, stackTrace) {
-      log('导入文件失败', error: error, stackTrace: stackTrace);
+      log('导入文件失败', error: error, stackTrace: stackTrace, name: 'ProjectController');
+      Get.snackbar('错误', '导入文件失败: $error');
     }
   }
 }

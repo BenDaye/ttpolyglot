@@ -400,7 +400,76 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
     String format = FileFormats.json,
     TranslationKeyStyle keyStyle = TranslationKeyStyle.nested,
   }) async {
-    throw UnimplementedError('importTranslations not implemented');
+    try {
+      log('开始导入翻译文件: $filePath, 格式: $format', name: 'TranslationServiceImpl');
+
+      // 获取解析器
+      final parser = ParserFactory.getParser(format);
+
+      // 解析文件
+      final parseResult = await parser.parseFile(filePath);
+
+      if (parseResult.entries.isEmpty) {
+        log('文件解析结果为空: $filePath', name: 'TranslationServiceImpl');
+        return [];
+      }
+
+      log('解析到 ${parseResult.entries.length} 个翻译条目', name: 'TranslationServiceImpl');
+
+      // 获取现有翻译条目进行冲突检测
+      final existingEntries = await getTranslationEntries(projectId);
+      final existingKeys = existingEntries.map((e) => e.key).toSet();
+
+      final importedEntries = <TranslationEntry>[];
+      final conflictEntries = <TranslationEntry>[];
+      final newEntries = <TranslationEntry>[];
+
+      // 分类处理解析出的条目
+      for (final parsedEntry in parseResult.entries) {
+        // 更新条目的 projectId
+        final entry = parsedEntry.copyWith(
+          projectId: projectId,
+          id: _generateId(),
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
+        if (existingKeys.contains(entry.key)) {
+          // 发现冲突的条目
+          conflictEntries.add(entry);
+          log('发现冲突翻译键: ${entry.key}', name: 'TranslationServiceImpl');
+        } else {
+          // 新的条目
+          newEntries.add(entry);
+        }
+      }
+
+      // 批量创建新条目
+      if (newEntries.isNotEmpty) {
+        final createdEntries = await batchCreateTranslationEntries(newEntries);
+        importedEntries.addAll(createdEntries);
+        log('成功创建 ${createdEntries.length} 个新翻译条目', name: 'TranslationServiceImpl');
+      }
+
+      // 处理冲突条目（暂时跳过，后续实现冲突解决机制）
+      if (conflictEntries.isNotEmpty) {
+        log('跳过 ${conflictEntries.length} 个冲突翻译条目（功能待实现）', name: 'TranslationServiceImpl');
+        // TODO: 实现冲突解决机制
+      }
+
+      // 输出警告信息
+      if (parseResult.warnings.isNotEmpty) {
+        for (final warning in parseResult.warnings) {
+          log('解析警告: $warning', name: 'TranslationServiceImpl');
+        }
+      }
+
+      log('导入完成，共导入 ${importedEntries.length} 个翻译条目', name: 'TranslationServiceImpl');
+      return importedEntries;
+    } catch (error, stackTrace) {
+      log('导入翻译文件失败', error: error, stackTrace: stackTrace, name: 'TranslationServiceImpl');
+      rethrow;
+    }
   }
 
   @override
