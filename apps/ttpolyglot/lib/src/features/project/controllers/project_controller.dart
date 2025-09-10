@@ -44,6 +44,22 @@ class ProjectController extends GetxController {
   void setAutoReview(bool value) => _autoReview.value = value;
   void setIgnoreEmpty(bool value) => _ignoreEmpty.value = value;
 
+  // 导入记录
+  final RxList<ImportRecord> _importRecords = <ImportRecord>[].obs;
+  List<ImportRecord> get importRecords => _importRecords.toList();
+
+  /// 添加导入记录
+  void addImportRecord(ImportRecord record) {
+    _importRecords.insert(0, record); // 最新记录插在最前面
+
+    // 最多保留5条记录
+    if (_importRecords.length > 5) {
+      _importRecords.removeRange(5, _importRecords.length);
+    }
+
+    // TODO: 可以在这里添加持久化存储逻辑
+  }
+
   // 允许的文件扩展名
   List<String> get allowedExtensions => ['json', 'csv', 'xlsx', 'xls', 'arb', 'po'];
 
@@ -58,6 +74,9 @@ class ProjectController extends GetxController {
     super.onReady();
     log('ProjectController onReady: $projectId', name: 'ProjectController');
     loadProject();
+
+    // 初始化示例导入记录（用于测试）
+    _initializeExampleRecords();
   }
 
   @override
@@ -201,6 +220,7 @@ class ProjectController extends GetxController {
   }
 
   Future<void> importFiles(Map<String, Language> languageMap, Map<String, Map<String, String>> translationMap) async {
+    final startTime = DateTime.now();
     try {
       log('开始批量导入翻译文件，设置：覆盖现有翻译=$overrideExisting，自动审核=$autoReview，忽略空值=$ignoreEmpty', name: 'ProjectController');
 
@@ -377,10 +397,187 @@ class ProjectController extends GetxController {
         );
       }
 
+      // 创建导入记录
+      _createImportRecords(
+        languageMap,
+        translationMap,
+        allImportedEntries.length,
+        allConflicts.length,
+        totalSkipped,
+        startTime,
+        success: true,
+      );
+
       log('导入完成：成功 ${allImportedEntries.length}，冲突 ${allConflicts.length}，跳过 $totalSkipped', name: 'ProjectController');
     } catch (error, stackTrace) {
       log('导入文件失败', error: error, stackTrace: stackTrace, name: 'ProjectController');
+
+      // 创建失败记录
+      _createImportRecords(
+        languageMap,
+        translationMap,
+        0,
+        0,
+        0,
+        startTime,
+        success: false,
+        errorMessage: error.toString(),
+      );
+
       Get.snackbar('错误', '导入文件失败: $error');
+    }
+  }
+
+  /// 创建导入记录
+  void _createImportRecords(
+    Map<String, Language> languageMap,
+    Map<String, Map<String, String>> translationMap,
+    int totalImportedCount,
+    int totalConflictCount,
+    int totalSkippedCount,
+    DateTime startTime, {
+    required bool success,
+    String? errorMessage,
+  }) {
+    final endTime = DateTime.now();
+    final duration = endTime.difference(startTime).inMilliseconds;
+
+    // 如果有多个文件，为每个文件创建记录
+    if (translationMap.isNotEmpty) {
+      for (final fileEntry in translationMap.entries) {
+        final fileName = fileEntry.key;
+        final translations = fileEntry.value;
+        final selectedLanguage = languageMap[fileName];
+
+        // 计算当前文件的统计数据（简化处理）
+        final fileTranslationCount = translations.length;
+        final fileImportedCount = success
+            ? (totalImportedCount *
+                    fileTranslationCount /
+                    translationMap.values.fold<int>(0, (sum, map) => sum + map.length))
+                .round()
+            : 0;
+        final fileConflictCount = success
+            ? (totalConflictCount *
+                    fileTranslationCount /
+                    translationMap.values.fold<int>(0, (sum, map) => sum + map.length))
+                .round()
+            : 0;
+        final fileSkippedCount = success
+            ? (totalSkippedCount *
+                    fileTranslationCount /
+                    translationMap.values.fold<int>(0, (sum, map) => sum + map.length))
+                .round()
+            : 0;
+
+        ImportRecordStatus status;
+        String message;
+
+        if (!success) {
+          status = ImportRecordStatus.failure;
+          message = errorMessage ?? '导入失败';
+        } else if (fileConflictCount > 0 || fileSkippedCount > 0) {
+          status = ImportRecordStatus.partial;
+          message = '成功导入 $fileImportedCount 条翻译';
+          if (fileConflictCount > 0) {
+            message += '，${overrideExisting ? "覆盖" : "跳过"} $fileConflictCount 个冲突';
+          }
+          if (fileSkippedCount > 0) {
+            message += '，跳过 $fileSkippedCount 个条目';
+          }
+        } else {
+          status = ImportRecordStatus.success;
+          message = '成功导入 $fileImportedCount 条翻译';
+          if (autoReview) {
+            message += '（已自动审核）';
+          }
+        }
+
+        final record = ImportRecord(
+          id: DateTime.now().millisecondsSinceEpoch.toString() +
+              (DateTime.now().microsecond % 1000).toString().padLeft(3, '0'),
+          fileName: fileName,
+          status: status,
+          message: message,
+          importedCount: fileImportedCount,
+          conflictCount: fileConflictCount,
+          skippedCount: fileSkippedCount,
+          timestamp: startTime,
+          language: selectedLanguage?.code,
+          duration: duration,
+        );
+
+        addImportRecord(record);
+      }
+    } else {
+      // 如果没有文件，创建一个通用的失败记录
+      final record = ImportRecord(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        fileName: '未知文件',
+        status: ImportRecordStatus.failure,
+        message: errorMessage ?? '导入失败：没有有效文件',
+        importedCount: 0,
+        conflictCount: 0,
+        skippedCount: 0,
+        timestamp: startTime,
+        duration: duration,
+      );
+
+      addImportRecord(record);
+    }
+
+    log('已创建导入记录，当前记录数: ${_importRecords.length}', name: 'ProjectController');
+  }
+
+  /// 初始化示例导入记录（用于测试）
+  void _initializeExampleRecords() {
+    // 只在没有记录时添加示例记录
+    if (_importRecords.isEmpty) {
+      final now = DateTime.now();
+
+      // 成功记录
+      addImportRecord(ImportRecord(
+        id: '1',
+        fileName: 'translations_zh.json',
+        status: ImportRecordStatus.success,
+        message: '成功导入 234 条翻译（已自动审核）',
+        importedCount: 234,
+        conflictCount: 0,
+        skippedCount: 0,
+        timestamp: now.subtract(const Duration(hours: 2)),
+        language: 'zh-CN',
+        duration: 1850,
+      ));
+
+      // 部分成功记录
+      addImportRecord(ImportRecord(
+        id: '2',
+        fileName: 'translations_en.csv',
+        status: ImportRecordStatus.partial,
+        message: '成功导入 189 条翻译，跳过 15 个冲突',
+        importedCount: 189,
+        conflictCount: 15,
+        skippedCount: 0,
+        timestamp: now.subtract(const Duration(days: 1)),
+        language: 'en-US',
+        duration: 3200,
+      ));
+
+      // 失败记录
+      addImportRecord(ImportRecord(
+        id: '3',
+        fileName: 'translations_ja.xlsx',
+        status: ImportRecordStatus.failure,
+        message: '导入失败：格式错误',
+        importedCount: 0,
+        conflictCount: 0,
+        skippedCount: 0,
+        timestamp: now.subtract(const Duration(days: 2)),
+        language: 'ja-JP',
+        duration: 450,
+      ));
+
+      log('已添加示例导入记录', name: 'ProjectController');
     }
   }
 }
