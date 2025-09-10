@@ -4,6 +4,7 @@ import 'package:ttpolyglot/src/core/widgets/format_card.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 import 'package:ttpolyglot/src/features/project/widgets/upload_file.dart';
 import 'package:ttpolyglot/src/features/project/widgets/upload_file_list.dart';
+import 'package:ttpolyglot_core/core.dart';
 
 /// 项目导入页面
 class ProjectImportView extends StatelessWidget {
@@ -126,20 +127,34 @@ class ProjectImportView extends StatelessWidget {
                         }
                         return Padding(
                           padding: const EdgeInsets.only(top: 16.0),
-                          child: UploadFileList(
-                            files: controller.files,
-                            languages: controller.project?.targetLanguages ?? [],
-                            allowedExtensions: controller.allowedExtensions,
-                            onDelete: (index) {
-                              controller.setFiles(
-                                List.from(controller.files)..removeAt(index),
+                          child: Builder(
+                            builder: (context) {
+                              // 组合默认语言 + 目标语言，并按 code 去重
+                              final combinedLanguages = <Language>[
+                                if (controller.project?.defaultLanguage != null) controller.project!.defaultLanguage,
+                                ...(controller.project?.targetLanguages ?? []),
+                              ];
+
+                              final languages = {
+                                for (final lang in combinedLanguages) lang.code: lang,
+                              }.values.toList();
+
+                              return UploadFileList(
+                                files: controller.files,
+                                languages: languages,
+                                allowedExtensions: controller.allowedExtensions,
+                                onDelete: (index) {
+                                  controller.setFiles(
+                                    List.from(controller.files)..removeAt(index),
+                                  );
+                                },
+                                onClear: () {
+                                  controller.setFiles([]);
+                                },
+                                onImport: (languageMap, translationMap) {
+                                  controller.importFiles(languageMap, translationMap);
+                                },
                               );
-                            },
-                            onClear: () {
-                              controller.setFiles([]);
-                            },
-                            onImport: (languageMap, translationMap) {
-                              controller.importFiles(languageMap, translationMap);
                             },
                           ),
                         );
