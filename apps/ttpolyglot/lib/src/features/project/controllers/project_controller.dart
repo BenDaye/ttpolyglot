@@ -7,6 +7,7 @@ import 'package:ttpolyglot/src/core/services/conflict_detection_service.dart';
 import 'package:ttpolyglot/src/core/services/translation_service_impl.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 import 'package:ttpolyglot/src/features/projects/projects.dart';
+import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 class ProjectController extends GetxController {
@@ -272,6 +273,20 @@ class ProjectController extends GetxController {
 
       // 清空文件列表
       setFiles([]);
+
+      // 刷新翻译列表（如果翻译控制器已注册）
+      if (allImportedEntries.isNotEmpty) {
+        try {
+          if (Get.isRegistered<TranslationController>(tag: projectId)) {
+            final translationController = Get.find<TranslationController>(tag: projectId);
+            await translationController.refreshTranslationEntries();
+            log('已通知翻译控制器刷新数据', name: 'ProjectController');
+          }
+        } catch (error, stackTrace) {
+          log('通知翻译控制器刷新失败', error: error, stackTrace: stackTrace, name: 'ProjectController');
+          // 不影响主要流程，继续执行
+        }
+      }
 
       // 显示导入结果
       if (allImportedEntries.isEmpty && allConflicts.isEmpty) {
