@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/core/services/conflict_detection_service.dart';
+import 'package:ttpolyglot/src/core/services/conflict_detection_service.dart' as conflict_service;
 import 'package:ttpolyglot/src/core/services/translation_service_impl.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 import 'package:ttpolyglot/src/features/projects/projects.dart';
@@ -29,6 +29,20 @@ class ProjectController extends GetxController {
   final RxList<PlatformFile> _files = <PlatformFile>[].obs;
   List<PlatformFile> get files => _files.toList();
   void setFiles(List<PlatformFile> files) => _files.assignAll(files);
+
+  // 导入设置
+  final _overrideExisting = false.obs; // 覆盖现有翻译
+  final _autoReview = true.obs; // 自动审核
+  final _ignoreEmpty = true.obs; // 忽略空值
+
+  // 导入设置 Getters & Setters
+  bool get overrideExisting => _overrideExisting.value;
+  bool get autoReview => _autoReview.value;
+  bool get ignoreEmpty => _ignoreEmpty.value;
+
+  void setOverrideExisting(bool value) => _overrideExisting.value = value;
+  void setAutoReview(bool value) => _autoReview.value = value;
+  void setIgnoreEmpty(bool value) => _ignoreEmpty.value = value;
 
   // 允许的文件扩展名
   List<String> get allowedExtensions => ['json', 'csv', 'xlsx', 'xls', 'arb', 'po'];
@@ -188,10 +202,10 @@ class ProjectController extends GetxController {
 
   Future<void> importFiles(Map<String, Language> languageMap, Map<String, Map<String, String>> translationMap) async {
     try {
-      log('开始批量导入翻译文件', name: 'ProjectController');
+      log('开始批量导入翻译文件，设置：覆盖现有翻译=$overrideExisting，自动审核=$autoReview，忽略空值=$ignoreEmpty', name: 'ProjectController');
 
       final allImportedEntries = <TranslationEntry>[];
-      final allConflicts = <TranslationConflict>[];
+      final allConflicts = <conflict_service.TranslationConflict>[];
       int totalSkipped = 0;
 
       // 获取现有翻译条目用于冲突检测
@@ -223,6 +237,23 @@ class ProjectController extends GetxController {
             continue;
           }
 
+          // 根据"忽略空值"设置处理空值
+          if (ignoreEmpty && value.trim().isEmpty) {
+            log('跳过空值: $key', name: 'ProjectController');
+            totalSkipped++;
+            continue;
+          }
+
+          // 根据"自动审核"设置确定状态
+          TranslationStatus entryStatus;
+          if (value.trim().isEmpty) {
+            entryStatus = TranslationStatus.pending;
+          } else if (autoReview) {
+            entryStatus = TranslationStatus.completed; // 自动审核表示直接标记为完成
+          } else {
+            entryStatus = TranslationStatus.reviewing; // 需要人工审核
+          }
+
           // 创建翻译条目
           final entry = TranslationEntry(
             id: DateTime.now().millisecondsSinceEpoch.toString() +
@@ -236,7 +267,7 @@ class ProjectController extends GetxController {
             sourceText:
                 selectedLanguage.code == _project.value!.defaultLanguage.code ? value : key, // 如果不是默认语言，使用键作为源文本
             targetText: value,
-            status: value.trim().isEmpty ? TranslationStatus.pending : TranslationStatus.completed,
+            status: entryStatus,
             createdAt: DateTime.now(),
             updatedAt: DateTime.now(),
           );
@@ -250,7 +281,7 @@ class ProjectController extends GetxController {
         }
 
         // 使用冲突检测服务检测冲突
-        final conflictResult = await ConflictDetectionService.detectConflicts(
+        final conflictResult = await conflict_service.ConflictDetectionService.detectConflicts(
           existingEntries,
           importedEntries,
         );
@@ -264,10 +295,33 @@ class ProjectController extends GetxController {
           allImportedEntries.addAll(createdEntries);
         }
 
-        // 记录冲突（暂时跳过，后续可实现冲突解决UI）
+        // 处理冲突条目
         if (conflictResult.conflicts.isNotEmpty) {
-          allConflicts.addAll(conflictResult.conflicts);
-          log('发现 ${conflictResult.conflicts.length} 个冲突，暂时跳过', name: 'ProjectController');
+          if (overrideExisting) {
+            // 覆盖现有翻译：使用导入的条目覆盖现有条目
+            final conflictResolutions = conflictResult.conflicts
+                .map((conflict) => conflict_service.ConflictResolution(
+                      key: conflict.key,
+                      strategy: conflict_service.ConflictResolutionStrategy.useImported,
+                      resolvedEntry: conflict.importedEntry,
+                    ))
+                .toList();
+
+            final resolvedEntries = conflict_service.ConflictDetectionService.resolveConflicts(
+              conflictResult.conflicts,
+              conflictResolutions,
+            );
+
+            if (resolvedEntries.isNotEmpty) {
+              final updatedEntries = await _translationService.batchUpdateTranslationEntries(resolvedEntries);
+              allImportedEntries.addAll(updatedEntries);
+              log('覆盖了 ${updatedEntries.length} 个现有翻译条目', name: 'ProjectController');
+            }
+          } else {
+            // 不覆盖现有翻译：跳过冲突条目
+            allConflicts.addAll(conflictResult.conflicts);
+            log('发现 ${conflictResult.conflicts.length} 个冲突，跳过（未启用覆盖）', name: 'ProjectController');
+          }
         }
       }
 
@@ -295,14 +349,25 @@ class ProjectController extends GetxController {
         final message = StringBuffer();
         if (allImportedEntries.isNotEmpty) {
           message.write('成功导入 ${allImportedEntries.length} 个翻译条目');
+          if (autoReview) {
+            message.write('（已自动审核）');
+          }
         }
         if (allConflicts.isNotEmpty) {
           if (message.isNotEmpty) message.write('，');
-          message.write('发现 ${allConflicts.length} 个冲突（已跳过）');
+          if (overrideExisting) {
+            message.write('覆盖了 ${allConflicts.length} 个现有翻译');
+          } else {
+            message.write('发现 ${allConflicts.length} 个冲突（已跳过）');
+          }
         }
         if (totalSkipped > 0) {
           if (message.isNotEmpty) message.write('，');
-          message.write('跳过 $totalSkipped 个无效条目');
+          if (ignoreEmpty) {
+            message.write('跳过 $totalSkipped 个空值或无效条目');
+          } else {
+            message.write('跳过 $totalSkipped 个无效条目');
+          }
         }
 
         Get.snackbar(
