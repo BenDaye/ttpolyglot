@@ -1,12 +1,120 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ttpolyglot/src/core/widgets/clickable_stat_card.dart';
 import 'package:ttpolyglot/src/features/features.dart';
+
+/// 导出历史记录数据模型
+class ExportHistoryItem {
+  final String filename;
+  final String description;
+  final DateTime timestamp;
+  final bool success;
+  final String format;
+  final int languageCount;
+
+  ExportHistoryItem({
+    required this.filename,
+    required this.description,
+    required this.timestamp,
+    required this.success,
+    required this.format,
+    required this.languageCount,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'filename': filename,
+      'description': description,
+      'timestamp': timestamp.toIso8601String(),
+      'success': success,
+      'format': format,
+      'languageCount': languageCount,
+    };
+  }
+
+  factory ExportHistoryItem.fromJson(Map<String, dynamic> json) {
+    return ExportHistoryItem(
+      filename: json['filename'],
+      description: json['description'],
+      timestamp: DateTime.parse(json['timestamp']),
+      success: json['success'],
+      format: json['format'],
+      languageCount: json['languageCount'],
+    );
+  }
+}
+
+/// 导出历史缓存服务
+class ExportHistoryCache {
+  static const String _cacheKey = 'export_history';
+  static const int _maxHistoryPerProject = 5;
+
+  static Future<void> saveExportHistory(String projectId, ExportHistoryItem item) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = '$_cacheKey:$projectId';
+
+    // 获取现有历史记录
+    final historyList = await getExportHistory(projectId);
+
+    // 添加新记录到开头
+    historyList.insert(0, item);
+
+    // 限制每个项目最多5条记录
+    if (historyList.length > _maxHistoryPerProject) {
+      historyList.removeRange(_maxHistoryPerProject, historyList.length);
+    }
+
+    // 保存到缓存
+    final jsonList = historyList.map((item) => item.toJson()).toList();
+    await prefs.setString(key, jsonEncode(jsonList));
+  }
+
+  static Future<List<ExportHistoryItem>> getExportHistory(String projectId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = '$_cacheKey:$projectId';
+
+    final jsonString = prefs.getString(key);
+    if (jsonString == null) return [];
+
+    try {
+      final jsonList = jsonDecode(jsonString) as List;
+      return jsonList.map((json) => ExportHistoryItem.fromJson(json)).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  static Future<void> clearExportHistory(String projectId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = '$_cacheKey:$projectId';
+    await prefs.remove(key);
+  }
+}
 
 /// 项目导出页面
 class ProjectExportView extends StatelessWidget {
   const ProjectExportView({super.key, required this.projectId});
   final String projectId;
+
+  String _formatTime(DateTime timestamp) {
+    final now = DateTime.now();
+    final difference = now.difference(timestamp);
+
+    if (difference.inMinutes < 1) {
+      return '刚刚';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes} 分钟前';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours} 小时前';
+    } else if (difference.inDays < 30) {
+      return '${difference.inDays} 天前';
+    } else {
+      return '${timestamp.month}-${timestamp.day} ${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,8 +167,29 @@ class ProjectExportView extends StatelessWidget {
                                       subtitle: '适合开发使用',
                                       icon: Icons.code,
                                       color: Colors.blue,
-                                      onTap: () {
-                                        ProjectExportController.exportTranslationsShortcutJson(projectId);
+                                      onTap: () async {
+                                        try {
+                                          ProjectExportController.exportTranslationsShortcutJson(projectId);
+                                          final historyItem = ExportHistoryItem(
+                                            filename: 'translations_${DateTime.now().millisecondsSinceEpoch}.json',
+                                            description: '快捷导出 - JSON格式',
+                                            timestamp: DateTime.now(),
+                                            success: true,
+                                            format: 'json',
+                                            languageCount: 1,
+                                          );
+                                          await ExportHistoryCache.saveExportHistory(projectId, historyItem);
+                                        } catch (e) {
+                                          final historyItem = ExportHistoryItem(
+                                            filename: 'JSON导出失败',
+                                            description: '快捷导出过程中发生错误',
+                                            timestamp: DateTime.now(),
+                                            success: false,
+                                            format: 'json',
+                                            languageCount: 1,
+                                          );
+                                          await ExportHistoryCache.saveExportHistory(projectId, historyItem);
+                                        }
                                       },
                                     ),
                                   ),
@@ -71,8 +200,29 @@ class ProjectExportView extends StatelessWidget {
                                       subtitle: '适合批量编辑',
                                       icon: Icons.table_chart,
                                       color: Colors.green,
-                                      onTap: () {
-                                        ProjectExportController.exportTranslationsShortcutCsv(projectId);
+                                      onTap: () async {
+                                        try {
+                                          ProjectExportController.exportTranslationsShortcutCsv(projectId);
+                                          final historyItem = ExportHistoryItem(
+                                            filename: 'translations_${DateTime.now().millisecondsSinceEpoch}.csv',
+                                            description: '快捷导出 - CSV格式',
+                                            timestamp: DateTime.now(),
+                                            success: true,
+                                            format: 'csv',
+                                            languageCount: 1,
+                                          );
+                                          await ExportHistoryCache.saveExportHistory(projectId, historyItem);
+                                        } catch (e) {
+                                          final historyItem = ExportHistoryItem(
+                                            filename: 'CSV导出失败',
+                                            description: '快捷导出过程中发生错误',
+                                            timestamp: DateTime.now(),
+                                            success: false,
+                                            format: 'csv',
+                                            languageCount: 1,
+                                          );
+                                          await ExportHistoryCache.saveExportHistory(projectId, historyItem);
+                                        }
                                       },
                                     ),
                                   ),
@@ -83,8 +233,29 @@ class ProjectExportView extends StatelessWidget {
                                       subtitle: '适合数据分析',
                                       icon: Icons.table_view,
                                       color: Colors.orange,
-                                      onTap: () {
-                                        ProjectExportController.exportTranslationsShortcutExcel(projectId);
+                                      onTap: () async {
+                                        try {
+                                          ProjectExportController.exportTranslationsShortcutExcel(projectId);
+                                          final historyItem = ExportHistoryItem(
+                                            filename: 'translations_${DateTime.now().millisecondsSinceEpoch}.xlsx',
+                                            description: '快捷导出 - Excel格式',
+                                            timestamp: DateTime.now(),
+                                            success: true,
+                                            format: 'excel',
+                                            languageCount: 1,
+                                          );
+                                          await ExportHistoryCache.saveExportHistory(projectId, historyItem);
+                                        } catch (e) {
+                                          final historyItem = ExportHistoryItem(
+                                            filename: 'Excel导出失败',
+                                            description: '快捷导出过程中发生错误',
+                                            timestamp: DateTime.now(),
+                                            success: false,
+                                            format: 'excel',
+                                            languageCount: 1,
+                                          );
+                                          await ExportHistoryCache.saveExportHistory(projectId, historyItem);
+                                        }
                                       },
                                     ),
                                   ),
@@ -95,8 +266,29 @@ class ProjectExportView extends StatelessWidget {
                                       subtitle: 'Flutter ARB格式',
                                       icon: Icons.flutter_dash,
                                       color: Colors.purple,
-                                      onTap: () {
-                                        ProjectExportController.exportTranslationsShortcutArb(projectId);
+                                      onTap: () async {
+                                        try {
+                                          ProjectExportController.exportTranslationsShortcutArb(projectId);
+                                          final historyItem = ExportHistoryItem(
+                                            filename: 'translations_${DateTime.now().millisecondsSinceEpoch}.arb',
+                                            description: '快捷导出 - ARB格式',
+                                            timestamp: DateTime.now(),
+                                            success: true,
+                                            format: 'arb',
+                                            languageCount: 1,
+                                          );
+                                          await ExportHistoryCache.saveExportHistory(projectId, historyItem);
+                                        } catch (e) {
+                                          final historyItem = ExportHistoryItem(
+                                            filename: 'ARB导出失败',
+                                            description: '快捷导出过程中发生错误',
+                                            timestamp: DateTime.now(),
+                                            success: false,
+                                            format: 'arb',
+                                            languageCount: 1,
+                                          );
+                                          await ExportHistoryCache.saveExportHistory(projectId, historyItem);
+                                        }
                                       },
                                     ),
                                   ),
@@ -107,8 +299,29 @@ class ProjectExportView extends StatelessWidget {
                                       subtitle: 'GNU PO格式',
                                       icon: Icons.language,
                                       color: Colors.teal,
-                                      onTap: () {
-                                        ProjectExportController.exportTranslationsShortcutPo(projectId);
+                                      onTap: () async {
+                                        try {
+                                          ProjectExportController.exportTranslationsShortcutPo(projectId);
+                                          final historyItem = ExportHistoryItem(
+                                            filename: 'translations_${DateTime.now().millisecondsSinceEpoch}.po',
+                                            description: '快捷导出 - PO格式',
+                                            timestamp: DateTime.now(),
+                                            success: true,
+                                            format: 'po',
+                                            languageCount: 1,
+                                          );
+                                          await ExportHistoryCache.saveExportHistory(projectId, historyItem);
+                                        } catch (e) {
+                                          final historyItem = ExportHistoryItem(
+                                            filename: 'PO导出失败',
+                                            description: '快捷导出过程中发生错误',
+                                            timestamp: DateTime.now(),
+                                            success: false,
+                                            format: 'po',
+                                            languageCount: 1,
+                                          );
+                                          await ExportHistoryCache.saveExportHistory(projectId, historyItem);
+                                        }
                                       },
                                     ),
                                   ),
@@ -411,15 +624,67 @@ class ProjectExportView extends StatelessWidget {
                                                   onPressed: exportController.isExporting ||
                                                           exportController.selectedLanguages.isEmpty
                                                       ? null
-                                                      : () {
-                                                          ProjectExportController.exportTranslationsCustom(
-                                                            projectId,
-                                                            selectedLanguages: exportController.selectedLanguages,
-                                                            exportOnlyTranslated: exportController.exportOnlyTranslated,
-                                                            includeStatus: exportController.includeStatus,
-                                                            includeTimestamps: exportController.includeTimestamps,
-                                                            format: exportController.selectedFormat,
-                                                          );
+                                                      : () async {
+                                                          try {
+                                                            ProjectExportController.exportTranslationsCustom(
+                                                              projectId,
+                                                              selectedLanguages: exportController.selectedLanguages,
+                                                              exportOnlyTranslated:
+                                                                  exportController.exportOnlyTranslated,
+                                                              includeStatus: exportController.includeStatus,
+                                                              includeTimestamps: exportController.includeTimestamps,
+                                                              format: exportController.selectedFormat,
+                                                            );
+
+                                                            // 生成导出描述
+                                                            final formatName =
+                                                                switch (exportController.selectedFormat.toLowerCase()) {
+                                                              'json' => 'JSON',
+                                                              'csv' => 'CSV',
+                                                              'excel' => 'Excel',
+                                                              'arb' => 'ARB',
+                                                              'po' => 'PO',
+                                                              _ => exportController.selectedFormat.toUpperCase(),
+                                                            };
+
+                                                            final languageText = exportController
+                                                                        .selectedLanguages.length ==
+                                                                    1
+                                                                ? '单语言'
+                                                                : '${exportController.selectedLanguages.length} 种语言';
+                                                            final translatedText =
+                                                                exportController.exportOnlyTranslated ? '（仅已翻译）' : '';
+
+                                                            final description =
+                                                                '$languageText$translatedText - $formatName 格式';
+
+                                                            // 保存导出历史
+                                                            final historyItem = ExportHistoryItem(
+                                                              filename:
+                                                                  'translations_${DateTime.now().millisecondsSinceEpoch}.${exportController.selectedFormat}',
+                                                              description: description,
+                                                              timestamp: DateTime.now(),
+                                                              success: true,
+                                                              format: exportController.selectedFormat,
+                                                              languageCount: exportController.selectedLanguages.length,
+                                                            );
+
+                                                            await ExportHistoryCache.saveExportHistory(
+                                                                projectId, historyItem);
+                                                          } catch (e) {
+                                                            // 导出失败时保存失败记录
+                                                            final historyItem = ExportHistoryItem(
+                                                              filename: '导出失败',
+                                                              description: '导出过程中发生错误',
+                                                              timestamp: DateTime.now(),
+                                                              success: false,
+                                                              format: exportController.selectedFormat,
+                                                              languageCount: exportController.selectedLanguages.length,
+                                                            );
+
+                                                            await ExportHistoryCache.saveExportHistory(
+                                                                projectId, historyItem);
+                                                          }
                                                         },
                                                   icon: AnimatedSwitcher(
                                                     duration: const Duration(milliseconds: 200),
@@ -584,31 +849,110 @@ class ProjectExportView extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            '导出历史',
-                            style: Theme.of(context).textTheme.titleLarge,
+                          Row(
+                            children: [
+                              Text(
+                                '导出历史',
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                              const Spacer(),
+                              FutureBuilder<List<ExportHistoryItem>>(
+                                future: ExportHistoryCache.getExportHistory(projectId),
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                                    return TextButton.icon(
+                                      onPressed: () async {
+                                        await ExportHistoryCache.clearExportHistory(projectId);
+                                        // 这里可以添加一个简单的通知或重新构建
+                                        // 由于使用FutureBuilder，它会自动重新获取数据
+                                      },
+                                      icon: const Icon(Icons.clear, size: 16.0),
+                                      label: const Text('清空'),
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: Theme.of(context).colorScheme.error,
+                                      ),
+                                    );
+                                  }
+                                  return const SizedBox.shrink();
+                                },
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 16.0),
-                          _buildExportHistoryItem(
-                            context,
-                            'translations_all.json',
-                            '包含所有语言的完整导出',
-                            '1 小时前',
-                            true,
-                          ),
-                          _buildExportHistoryItem(
-                            context,
-                            'translations_en.csv',
-                            '仅英文翻译',
-                            '3 小时前',
-                            true,
-                          ),
-                          _buildExportHistoryItem(
-                            context,
-                            'translations_zh.xlsx',
-                            '中文翻译（Excel格式）',
-                            '1 天前',
-                            true,
+                          FutureBuilder<List<ExportHistoryItem>>(
+                            future: ExportHistoryCache.getExportHistory(projectId),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(32.0),
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                              }
+
+                              if (snapshot.hasError) {
+                                return Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(32.0),
+                                    child: Column(
+                                      children: [
+                                        Icon(
+                                          Icons.error_outline,
+                                          size: 48.0,
+                                          color: Theme.of(context).colorScheme.error,
+                                        ),
+                                        const SizedBox(height: 16.0),
+                                        Text(
+                                          '加载历史记录失败',
+                                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                                color: Theme.of(context).colorScheme.error,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              final historyList = snapshot.data ?? [];
+
+                              if (historyList.isEmpty) {
+                                return Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(32.0),
+                                    child: Column(
+                                      children: [
+                                        Icon(
+                                          Icons.history,
+                                          size: 48.0,
+                                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                                        ),
+                                        const SizedBox(height: 16.0),
+                                        Text(
+                                          '暂无导出历史',
+                                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              return Column(
+                                children: historyList
+                                    .map((item) => _buildExportHistoryItem(
+                                          context,
+                                          item.filename,
+                                          item.description,
+                                          _formatTime(item.timestamp),
+                                          item.success,
+                                        ))
+                                    .toList(),
+                              );
+                            },
                           ),
                         ],
                       ),
