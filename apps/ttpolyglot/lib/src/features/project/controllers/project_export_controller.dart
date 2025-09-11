@@ -240,7 +240,7 @@ class ProjectExportController extends GetxController {
   }
 
   /// 执行自定义导出
-  static Future<void> exportTranslationsCustom(
+  static Future<String?> exportTranslationsCustom(
     String projectId, {
     required Set<String> selectedLanguages,
     required bool exportOnlyTranslated,
@@ -256,7 +256,7 @@ class ProjectExportController extends GetxController {
       final project = await controller._projectService.getProject(projectId);
       if (project == null) {
         Get.snackbar('错误', '项目不存在');
-        return;
+        return null;
       }
 
       // 获取翻译条目
@@ -277,11 +277,11 @@ class ProjectExportController extends GetxController {
 
       if (finalEntries.isEmpty) {
         Get.snackbar('提示', '没有符合条件的翻译内容');
-        return;
+        return null;
       }
 
       // 根据格式调用相应的导出方法
-      final success = await _exportByFormat(
+      final savePath = await _exportByFormat(
         project: project,
         entries: finalEntries,
         format: format,
@@ -289,19 +289,23 @@ class ProjectExportController extends GetxController {
         includeTimestamps: includeTimestamps,
       );
 
-      if (success) {
+      if (savePath != null) {
         Get.snackbar('成功', '自定义导出完成');
+        return savePath;
       }
+
+      return null;
     } catch (error, stackTrace) {
       log('自定义导出失败', error: error, stackTrace: stackTrace, name: 'ProjectExportController');
       Get.snackbar('错误', '自定义导出失败: $error');
+      return null;
     } finally {
       controller._isExporting.value = false;
     }
   }
 
   /// 根据格式调用相应的导出方法
-  static Future<bool> _exportByFormat({
+  static Future<String?> _exportByFormat({
     required Project project,
     required List<TranslationEntry> entries,
     required String format,
@@ -312,27 +316,27 @@ class ProjectExportController extends GetxController {
 
     switch (format) {
       case 'json':
-        return await controller._exportService.exportTranslationsShortcutJson(
+        return await controller._exportService.exportTranslationsShortcutJsonWithPath(
           project: project,
           entries: entries,
         );
       case 'csv':
-        return await controller._exportService.exportTranslationsShortcutCsv(
+        return await controller._exportService.exportTranslationsShortcutCsvWithPath(
           project: project,
           entries: entries,
         );
       case 'excel':
-        return await controller._exportService.exportTranslationsShortcutExcel(
+        return await controller._exportService.exportTranslationsShortcutExcelWithPath(
           project: project,
           entries: entries,
         );
       case 'arb':
-        return await controller._exportService.exportTranslationsShortcutArb(
+        return await controller._exportService.exportTranslationsShortcutArbWithPath(
           project: project,
           entries: entries,
         );
       case 'po':
-        return await controller._exportService.exportTranslationsShortcutPo(
+        return await controller._exportService.exportTranslationsShortcutPoWithPath(
           project: project,
           entries: entries,
         );

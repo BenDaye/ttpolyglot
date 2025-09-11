@@ -677,7 +677,8 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                                                       ? null
                                                       : () async {
                                                           try {
-                                                            ProjectExportController.exportTranslationsCustom(
+                                                            final savePath =
+                                                                await ProjectExportController.exportTranslationsCustom(
                                                               widget.projectId,
                                                               selectedLanguages: exportController.selectedLanguages,
                                                               exportOnlyTranslated:
@@ -709,15 +710,19 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                                                             final description =
                                                                 '$languageText$translatedText - $formatName 格式';
 
+                                                            final filename = savePath != null
+                                                                ? savePath.split('/').last
+                                                                : 'translations_${DateTime.now().millisecondsSinceEpoch}.${exportController.selectedFormat}';
+
                                                             // 保存导出历史
                                                             final historyItem = ExportHistoryItem(
-                                                              filename:
-                                                                  'translations_${DateTime.now().millisecondsSinceEpoch}.${exportController.selectedFormat}',
+                                                              filename: filename,
                                                               description: description,
                                                               timestamp: DateTime.now(),
-                                                              success: true,
+                                                              success: savePath != null,
                                                               format: exportController.selectedFormat,
                                                               languageCount: exportController.selectedLanguages.length,
+                                                              filePath: savePath,
                                                             );
 
                                                             await ExportHistoryCache.saveExportHistory(
