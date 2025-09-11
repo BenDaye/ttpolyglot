@@ -212,114 +212,248 @@ class ProjectExportView extends StatelessWidget {
 
                                 const SizedBox(height: 16.0),
 
-                                // 导出摘要
-                                Container(
-                                  padding: const EdgeInsets.all(12.0),
+                                // 导出操作区域 - 优化后的合并设计
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    border: Border.all(
-                                      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1),
+                                        Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.05),
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
                                     ),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '导出摘要',
-                                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                    borderRadius: BorderRadius.circular(16.0),
+                                    border: Border.all(
+                                      color: exportController.isExporting
+                                          ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.25)
+                                          : Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                                      width: exportController.isExporting ? 1.5 : 1.0,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.08),
+                                        blurRadius: 8.0,
+                                        offset: const Offset(0, 2),
                                       ),
-                                      const SizedBox(height: 8.0),
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.language,
-                                            size: 16.0,
-                                            color: Theme.of(context).colorScheme.primary,
-                                          ),
-                                          const SizedBox(width: 8.0),
-                                          Text(
-                                            '语言: ${exportController.selectedLanguages.length} 个',
-                                            style: Theme.of(context).textTheme.bodySmall,
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4.0),
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.description,
-                                            size: 16.0,
-                                            color: Theme.of(context).colorScheme.primary,
-                                          ),
-                                          const SizedBox(width: 8.0),
-                                          Text(
-                                            '格式: ${exportController.selectedFormat.toUpperCase()}',
-                                            style: Theme.of(context).textTheme.bodySmall,
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4.0),
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.filter_list,
-                                            size: 16.0,
-                                            color: Theme.of(context).colorScheme.primary,
-                                          ),
-                                          const SizedBox(width: 8.0),
-                                          Expanded(
-                                            child: Text(
-                                              '选项: ${[
-                                                if (exportController.exportOnlyTranslated) '仅已翻译',
-                                                if (exportController.includeStatus) '包含状态',
-                                                if (exportController.includeTimestamps) '包含时间戳',
-                                              ].join(', ').isNotEmpty ? [
-                                                  if (exportController.exportOnlyTranslated) '仅已翻译',
-                                                  if (exportController.includeStatus) '包含状态',
-                                                  if (exportController.includeTimestamps) '包含时间戳',
-                                                ].join(', ') : '无'}',
-                                              style: Theme.of(context).textTheme.bodySmall,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                      if (exportController.isExporting)
+                                        BoxShadow(
+                                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+                                          blurRadius: 16.0,
+                                          offset: const Offset(0, 4),
+                                        ),
                                     ],
                                   ),
-                                ),
+                                  child: Column(
+                                    children: [
+                                      // 导出配置摘要
+                                      Padding(
+                                        padding: const EdgeInsets.all(20.0),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            // 标题区域
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.settings_outlined,
+                                                  size: 20.0,
+                                                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
+                                                ),
+                                                const SizedBox(width: 12.0),
+                                                Text(
+                                                  '导出配置',
+                                                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                                        fontWeight: FontWeight.w600,
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .onSurface
+                                                            .withValues(alpha: 0.65),
+                                                      ),
+                                                ),
+                                                const SizedBox(width: 12.0),
+                                                Text(
+                                                  '(请选择导出参数并开始导出)',
+                                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .onSurfaceVariant
+                                                            .withValues(alpha: 0.65),
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 16.0),
 
-                                const SizedBox(height: 16.0),
+                                            // 配置信息 - 一行布局，三个配置项横向排列
+                                            Row(
+                                              children: [
+                                                // 第一列：语言配置
+                                                Expanded(
+                                                  child: _buildEnhancedSummaryItem(
+                                                    context,
+                                                    Icons.language,
+                                                    '导出语言',
+                                                    '${exportController.selectedLanguages.length} 个语言',
+                                                    subtitle: '已选择导出的语言数量',
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 16.0),
 
-                                // 导出按钮
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton.icon(
-                                    onPressed:
-                                        exportController.isExporting || exportController.selectedLanguages.isEmpty
-                                            ? null
-                                            : () {
-                                                ProjectExportController.exportTranslationsCustom(
-                                                  projectId,
-                                                  selectedLanguages: exportController.selectedLanguages,
-                                                  exportOnlyTranslated: exportController.exportOnlyTranslated,
-                                                  includeStatus: exportController.includeStatus,
-                                                  includeTimestamps: exportController.includeTimestamps,
-                                                  format: exportController.selectedFormat,
-                                                );
-                                              },
-                                    icon: exportController.isExporting
-                                        ? const SizedBox(
-                                            width: 16.0,
-                                            height: 16.0,
-                                            child: CircularProgressIndicator(strokeWidth: 2.0),
-                                          )
-                                        : const Icon(Icons.download),
-                                    label: Text(exportController.isExporting ? '导出中...' : '开始导出'),
-                                    style: ElevatedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(vertical: 12.0),
-                                    ),
+                                                // 第二列：格式配置
+                                                Expanded(
+                                                  child: _buildEnhancedSummaryItem(
+                                                    context,
+                                                    Icons.description,
+                                                    '导出格式',
+                                                    exportController.selectedFormat.toUpperCase(),
+                                                    subtitle: _getFormatDescription(exportController.selectedFormat),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 16.0),
+
+                                                // 第三列：选项配置
+                                                Expanded(
+                                                  child: _buildEnhancedSummaryItem(
+                                                    context,
+                                                    Icons.filter_list,
+                                                    '导出选项',
+                                                    _buildOptionsText(exportController),
+                                                    subtitle: '导出时的附加设置',
+                                                    isOptionsRow: true,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+
+                                      // 分割线 - 带渐变效果
+                                      Container(
+                                        height: 1.0,
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              Theme.of(context).colorScheme.primary.withValues(alpha: 0.0),
+                                              Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
+                                              Theme.of(context).colorScheme.primary.withValues(alpha: 0.0),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+
+                                      // 导出按钮区域 - 增强设计
+                                      Container(
+                                        padding: const EdgeInsets.all(20.0),
+                                        child: Column(
+                                          children: [
+                                            SizedBox(
+                                              width: double.infinity,
+                                              child: AnimatedContainer(
+                                                duration: const Duration(milliseconds: 200),
+                                                child: ElevatedButton.icon(
+                                                  onPressed: exportController.isExporting ||
+                                                          exportController.selectedLanguages.isEmpty
+                                                      ? null
+                                                      : () {
+                                                          ProjectExportController.exportTranslationsCustom(
+                                                            projectId,
+                                                            selectedLanguages: exportController.selectedLanguages,
+                                                            exportOnlyTranslated: exportController.exportOnlyTranslated,
+                                                            includeStatus: exportController.includeStatus,
+                                                            includeTimestamps: exportController.includeTimestamps,
+                                                            format: exportController.selectedFormat,
+                                                          );
+                                                        },
+                                                  icon: AnimatedSwitcher(
+                                                    duration: const Duration(milliseconds: 200),
+                                                    child: exportController.isExporting
+                                                        ? Container(
+                                                            key: const ValueKey('loading'),
+                                                            width: 20.0,
+                                                            height: 20.0,
+                                                            child: CircularProgressIndicator(
+                                                              strokeWidth: 2.5,
+                                                              valueColor: AlwaysStoppedAnimation<Color>(
+                                                                Theme.of(context).colorScheme.onPrimary,
+                                                              ),
+                                                            ),
+                                                          )
+                                                        : const Icon(
+                                                            Icons.download_rounded,
+                                                            key: ValueKey('download'),
+                                                          ),
+                                                  ),
+                                                  label: AnimatedSwitcher(
+                                                    duration: const Duration(milliseconds: 200),
+                                                    child: Text(
+                                                      key: ValueKey(exportController.isExporting),
+                                                      exportController.isExporting ? '正在导出翻译文件...' : '开始导出翻译文件',
+                                                      style: const TextStyle(
+                                                        fontWeight: FontWeight.w600,
+                                                        fontSize: 16.0,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  style: ElevatedButton.styleFrom(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+                                                    backgroundColor: exportController.selectedLanguages.isEmpty
+                                                        ? Theme.of(context)
+                                                            .colorScheme
+                                                            .onSurface
+                                                            .withValues(alpha: 0.12)
+                                                        : Theme.of(context).colorScheme.primary,
+                                                    foregroundColor: exportController.selectedLanguages.isEmpty
+                                                        ? Theme.of(context)
+                                                            .colorScheme
+                                                            .onSurface
+                                                            .withValues(alpha: 0.38)
+                                                        : Theme.of(context).colorScheme.onPrimary,
+                                                    elevation: exportController.isExporting ? 0 : 3.0,
+                                                    shadowColor:
+                                                        Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(12.0),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+
+                                            // 状态提示
+                                            if (exportController.selectedLanguages.isEmpty)
+                                              Padding(
+                                                padding: const EdgeInsets.only(top: 8.0),
+                                                child: Text(
+                                                  '请至少选择一种语言',
+                                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                        color: Theme.of(context).colorScheme.error,
+                                                        fontWeight: FontWeight.w500,
+                                                      ),
+                                                ),
+                                              )
+                                            else if (exportController.isExporting)
+                                              Padding(
+                                                padding: const EdgeInsets.only(top: 8.0),
+                                                child: Text(
+                                                  '正在准备导出文件，请稍候...',
+                                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .primary
+                                                            .withValues(alpha: 0.8),
+                                                        fontWeight: FontWeight.w500,
+                                                      ),
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
@@ -419,6 +553,123 @@ class ProjectExportView extends StatelessWidget {
         dense: true,
       ),
     );
+  }
+
+  /// 增强的摘要项组件
+  Widget _buildEnhancedSummaryItem(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value, {
+    String? subtitle,
+    bool isOptionsRow = false,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12.0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(10.0),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(6.0),
+            ),
+            child: Icon(
+              icon,
+              size: 16.0,
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
+            ),
+          ),
+          const SizedBox(width: 12.0),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontSize: 11.0,
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+                const SizedBox(height: 2.0),
+                Text(
+                  value,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                ),
+                if (subtitle != null && !isOptionsRow) ...[
+                  const SizedBox(height: 2.0),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                          fontSize: 10.0,
+                        ),
+                  ),
+                ],
+                if (isOptionsRow && subtitle != null) ...[
+                  const SizedBox(height: 4.0),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(4.0),
+                    ),
+                    child: Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
+                            fontSize: 10.0,
+                            fontWeight: FontWeight.w500,
+                          ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 获取格式描述
+  String _getFormatDescription(String format) {
+    switch (format) {
+      case 'json':
+        return '适合开发使用的标准格式';
+      case 'csv':
+        return '适合批量编辑的表格格式';
+      case 'excel':
+        return '适合数据分析的Excel格式';
+      case 'arb':
+        return 'Flutter国际化专用格式';
+      case 'po':
+        return 'GNU Gettext标准格式';
+      default:
+        return '通用格式';
+    }
+  }
+
+  /// 构建选项文本
+  String _buildOptionsText(ProjectExportController controller) {
+    final options = <String>[];
+    if (controller.exportOnlyTranslated) options.add('仅已翻译');
+    if (controller.includeStatus) options.add('包含状态');
+    if (controller.includeTimestamps) options.add('包含时间戳');
+
+    return options.isNotEmpty ? options.join(' · ') : '无特殊选项';
   }
 
   Widget _buildFormatSelector(BuildContext context, ProjectExportController exportController) {
