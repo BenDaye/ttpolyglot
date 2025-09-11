@@ -265,64 +265,6 @@ class ProjectExportView extends StatelessWidget {
 
                                 const SizedBox(height: 16.0),
 
-                                // 导出选项
-                                Container(
-                                  padding: const EdgeInsets.all(16.0),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.05),
-                                    borderRadius: BorderRadius.circular(16.0),
-                                    border: Border.all(
-                                      color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
-                                    ),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.settings,
-                                            size: 20.0,
-                                            color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.7),
-                                          ),
-                                          const SizedBox(width: 12.0),
-                                          Text(
-                                            '导出选项',
-                                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Theme.of(context).colorScheme.onSurface,
-                                                ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 16.0),
-                                      _buildExportOption(
-                                        context,
-                                        '仅导出已翻译内容',
-                                        '跳过未翻译的词条',
-                                        exportController.exportOnlyTranslated,
-                                        (value) => exportController.setExportOnlyTranslated(value),
-                                      ),
-                                      _buildExportOption(
-                                        context,
-                                        '包含翻译状态',
-                                        '在导出文件中包含翻译状态信息',
-                                        exportController.includeStatus,
-                                        (value) => exportController.setIncludeStatus(value),
-                                      ),
-                                      _buildExportOption(
-                                        context,
-                                        '包含时间戳',
-                                        '在导出文件中包含创建和更新时间',
-                                        exportController.includeTimestamps,
-                                        (value) => exportController.setIncludeTimestamps(value),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-
-                                const SizedBox(height: 16.0),
-
                                 // 导出操作区域 - 优化后的合并设计
                                 AnimatedContainer(
                                   duration: const Duration(milliseconds: 300),
@@ -430,7 +372,7 @@ class ProjectExportView extends StatelessWidget {
                                                   child: _buildEnhancedSummaryItem(
                                                     context,
                                                     Icons.filter_list,
-                                                    '导出选项',
+                                                    '导出设置',
                                                     _buildOptionsText(exportController),
                                                     subtitle: '导出时的附加设置',
                                                     isOptionsRow: true,
@@ -563,6 +505,64 @@ class ProjectExportView extends StatelessWidget {
                                               ),
                                           ],
                                         ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                const SizedBox(height: 16.0),
+
+                                // 导出设置
+                                Container(
+                                  padding: const EdgeInsets.all(16.0),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.05),
+                                    borderRadius: BorderRadius.circular(16.0),
+                                    border: Border.all(
+                                      color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
+                                    ),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.settings,
+                                            size: 20.0,
+                                            color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.7),
+                                          ),
+                                          const SizedBox(width: 12.0),
+                                          Text(
+                                            '导出设置',
+                                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Theme.of(context).colorScheme.onSurface,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 16.0),
+                                      _buildExportOption(
+                                        context,
+                                        '仅导出已翻译内容',
+                                        '跳过未翻译的词条',
+                                        exportController.exportOnlyTranslated,
+                                        (value) => exportController.setExportOnlyTranslated(value),
+                                      ),
+                                      _buildExportOption(
+                                        context,
+                                        '包含翻译状态',
+                                        '在导出文件中包含翻译状态信息',
+                                        exportController.includeStatus,
+                                        (value) => exportController.setIncludeStatus(value),
+                                      ),
+                                      _buildExportOption(
+                                        context,
+                                        '包含时间戳',
+                                        '在导出文件中包含创建和更新时间',
+                                        exportController.includeTimestamps,
+                                        (value) => exportController.setIncludeTimestamps(value),
                                       ),
                                     ],
                                   ),
