@@ -9,6 +9,7 @@ class ProjectBinding extends Bindings {
       Get.put(ProjectController(), tag: projectId);
       Get.put(ProjectNavigationController(), tag: projectId);
       Get.put(TranslationController(projectId: projectId), tag: projectId);
+      Get.put(ProjectExportController(), tag: projectId);
     }
   }
 }
