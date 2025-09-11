@@ -11,14 +11,36 @@ import 'package:ttpolyglot/src/features/project/widgets/upload_file_list.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 /// 项目导入页面
-class ProjectImportView extends StatelessWidget {
+class ProjectImportView extends StatefulWidget {
   const ProjectImportView({super.key, required this.projectId});
   final String projectId;
 
   @override
+  State<ProjectImportView> createState() => _ProjectImportViewState();
+}
+
+class _ProjectImportViewState extends State<ProjectImportView> {
+  String _formatImportTime(DateTime timestamp) {
+    final now = DateTime.now();
+    final difference = now.difference(timestamp);
+
+    if (difference.inMinutes < 1) {
+      return '刚刚';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes} 分钟前';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours} 小时前';
+    } else if (difference.inDays < 30) {
+      return '${difference.inDays} 天前';
+    } else {
+      return '${timestamp.month}-${timestamp.day} ${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}';
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GetBuilder<ProjectController>(
-      tag: projectId,
+      tag: widget.projectId,
       builder: (controller) {
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -319,8 +341,58 @@ class ProjectImportView extends StatelessWidget {
                                 onClear: () {
                                   controller.setFiles([]);
                                 },
-                                onImport: (languageMap, translationMap) {
-                                  controller.importFiles(languageMap, translationMap);
+                                onImport: (languageMap, translationMap) async {
+                                  try {
+                                    await controller.importFiles(languageMap, translationMap);
+
+                                    // 获取导入的文件名（假设从languageMap中获取第一个文件的名字）
+                                    final firstFile = controller.files.isNotEmpty ? controller.files.first : null;
+                                    final filename = firstFile?.name ?? '导入文件';
+
+                                    // 计算总记录数
+                                    final totalRecords =
+                                        translationMap.values.expand((translations) => translations.values).length;
+
+                                    // 确定文件格式
+                                    final format = firstFile?.name.split('.').last.toUpperCase() ?? 'UNKNOWN';
+
+                                    // 生成描述
+                                    final languageCount = languageMap.length;
+                                    final languageText = languageCount == 1 ? '单语言' : '$languageCount 种语言';
+                                    final description = '$languageText - $format格式 - $totalRecords 条记录';
+
+                                    // 保存导入历史
+                                    final historyItem = ImportHistoryItem(
+                                      filename: filename,
+                                      description: description,
+                                      timestamp: DateTime.now(),
+                                      success: true,
+                                      format: format,
+                                      recordCount: totalRecords,
+                                    );
+
+                                    await ImportHistoryCache.saveImportHistory(widget.projectId, historyItem);
+
+                                    // 强制刷新UI
+                                    setState(() {});
+                                  } catch (e) {
+                                    // 导入失败时保存失败记录
+                                    final firstFile = controller.files.isNotEmpty ? controller.files.first : null;
+                                    final filename = firstFile?.name ?? '导入失败';
+                                    final format = firstFile?.name.split('.').last.toUpperCase() ?? 'UNKNOWN';
+
+                                    final historyItem = ImportHistoryItem(
+                                      filename: filename,
+                                      description: '导入过程中发生错误 - $format格式',
+                                      timestamp: DateTime.now(),
+                                      success: false,
+                                      format: format,
+                                      recordCount: 0,
+                                    );
+
+                                    await ImportHistoryCache.saveImportHistory(widget.projectId, historyItem);
+                                    setState(() {});
+                                  }
                                 },
                               );
                             },
@@ -381,50 +453,136 @@ class ProjectImportView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        '导入历史',
-                        style: Theme.of(context).textTheme.titleLarge,
+                      Row(
+                        children: [
+                          Text(
+                            '导入历史',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const Spacer(),
+                          FutureBuilder<List<ImportHistoryItem>>(
+                            future: ImportHistoryCache.getImportHistory(widget.projectId),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                                return TextButton.icon(
+                                  onPressed: () async {
+                                    final result = await showDialog<bool>(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: const Text('确认清空'),
+                                          content: const Text('确定要清空所有的导入历史记录吗？此操作不可撤销。'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.of(context).pop(false),
+                                              child: const Text('取消'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () => Navigator.of(context).pop(true),
+                                              style: TextButton.styleFrom(
+                                                foregroundColor: Theme.of(context).colorScheme.error,
+                                              ),
+                                              child: const Text('清空'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+
+                                    if (result == true) {
+                                      await ImportHistoryCache.clearImportHistory(widget.projectId);
+                                      setState(() {}); // 触发UI更新
+                                    }
+                                  },
+                                  icon: const Icon(Icons.clear, size: 16.0),
+                                  label: const Text('清空'),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: Theme.of(context).colorScheme.error,
+                                  ),
+                                );
+                              }
+                              return const SizedBox.shrink();
+                            },
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 16.0),
-                      Obx(() {
-                        if (controller.importRecords.isEmpty) {
-                          return Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(32.0),
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    Icons.history,
-                                    size: 48.0,
-                                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
-                                  ),
-                                  const SizedBox(height: 16.0),
-                                  Text(
-                                    '暂无导入记录',
-                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-                                        ),
-                                  ),
-                                ],
+                      FutureBuilder<List<ImportHistoryItem>>(
+                        future: ImportHistoryCache.getImportHistory(widget.projectId),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(32.0),
+                                child: CircularProgressIndicator(),
                               ),
-                            ),
-                          );
-                        }
+                            );
+                          }
 
-                        return Column(
-                          mainAxisSize: MainAxisSize.max,
-                          children: controller.importRecords
-                              .map((record) => _buildHistoryItem(
-                                    context,
-                                    record.fileName,
-                                    record.message,
-                                    record.formattedTime,
-                                    record.status == ImportRecordStatus.success,
-                                    record: record,
-                                  ))
-                              .toList(),
-                        );
-                      }),
+                          if (snapshot.hasError) {
+                            return Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(32.0),
+                                child: Column(
+                                  children: [
+                                    Icon(
+                                      Icons.error_outline,
+                                      size: 48.0,
+                                      color: Theme.of(context).colorScheme.error,
+                                    ),
+                                    const SizedBox(height: 16.0),
+                                    Text(
+                                      '加载历史记录失败',
+                                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                            color: Theme.of(context).colorScheme.error,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+
+                          final historyList = snapshot.data ?? [];
+
+                          if (historyList.isEmpty) {
+                            return Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(32.0),
+                                child: Column(
+                                  children: [
+                                    Icon(
+                                      Icons.history,
+                                      size: 48.0,
+                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                                    ),
+                                    const SizedBox(height: 16.0),
+                                    Text(
+                                      '暂无导入记录',
+                                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+
+                          return Column(
+                            children: historyList
+                                .map((item) => _buildImportHistoryItem(
+                                      context,
+                                      item.filename,
+                                      item.description,
+                                      _formatImportTime(item.timestamp),
+                                      item.success,
+                                      item: item,
+                                    ))
+                                .toList(),
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -457,60 +615,63 @@ class ProjectImportView extends StatelessWidget {
     );
   }
 
-  Widget _buildHistoryItem(
+  Widget _buildImportHistoryItem(
     BuildContext context,
-    String fileName,
-    String result,
+    String filename,
+    String description,
     String time,
     bool isSuccess, {
-    ImportRecord? record,
+    ImportHistoryItem? item,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),
       padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(8.0),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(
+          color: isSuccess
+              ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.1)
+              : Theme.of(context).colorScheme.error.withValues(alpha: 0.2),
+        ),
       ),
       child: Row(
         children: [
-          _buildStatusIcon(context, record),
+          Container(
+            padding: const EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              color: isSuccess
+                  ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
+                  : Theme.of(context).colorScheme.error.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: Icon(
+              isSuccess ? Icons.check_circle : Icons.error,
+              size: 20.0,
+              color: isSuccess ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.error,
+            ),
+          ),
           const SizedBox(width: 12.0),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        fileName,
-                        style: Theme.of(context).textTheme.titleMedium,
-                        overflow: TextOverflow.ellipsis,
+                Text(
+                  filename,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
-                    ),
-                    if (record?.language != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(4.0),
-                        ),
-                        child: Text(
-                          record!.language!.toUpperCase(),
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onPrimaryContainer,
-                              ),
-                        ),
-                      ),
-                  ],
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4.0),
                 Text(
-                  result,
+                  description,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: _getStatusColor(context, record),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                       ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4.0),
                 Row(
@@ -518,124 +679,33 @@ class ProjectImportView extends StatelessWidget {
                     Text(
                       time,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                     ),
-                    if (record?.formattedDuration != null) ...[
+                    if (item != null && item.recordCount > 0) ...[
                       const SizedBox(width: 8.0),
-                      Icon(
-                        Icons.schedule,
-                        size: 12.0,
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-                      ),
-                      const SizedBox(width: 2.0),
-                      Text(
-                        record!.formattedDuration!,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                            ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(4.0),
+                        ),
+                        child: Text(
+                          '${item.recordCount} 条',
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                fontWeight: FontWeight.w500,
+                              ),
+                        ),
                       ),
                     ],
                   ],
                 ),
-                if (record != null && record.totalCount > 0) ...[
-                  const SizedBox(height: 6.0),
-                  _buildProgressIndicator(context, record),
-                ],
               ],
             ),
           ),
         ],
       ),
-    );
-  }
-
-  /// 构建状态图标
-  Widget _buildStatusIcon(BuildContext context, ImportRecord? record) {
-    if (record == null) {
-      return const Icon(Icons.help_outline, size: 24.0);
-    }
-
-    IconData iconData;
-    Color color;
-
-    switch (record.status) {
-      case ImportRecordStatus.success:
-        iconData = Icons.check_circle;
-        color = Colors.green;
-        break;
-      case ImportRecordStatus.failure:
-        iconData = Icons.error;
-        color = Colors.red;
-        break;
-      case ImportRecordStatus.partial:
-        iconData = Icons.warning;
-        color = Colors.orange;
-        break;
-    }
-
-    return Icon(iconData, color: color, size: 24.0);
-  }
-
-  /// 获取状态颜色
-  Color _getStatusColor(BuildContext context, ImportRecord? record) {
-    if (record == null) {
-      return Theme.of(context).colorScheme.onSurface;
-    }
-
-    switch (record.status) {
-      case ImportRecordStatus.success:
-        return Colors.green;
-      case ImportRecordStatus.failure:
-        return Colors.red;
-      case ImportRecordStatus.partial:
-        return Colors.orange;
-    }
-  }
-
-  /// 构建进度指示器
-  Widget _buildProgressIndicator(BuildContext context, ImportRecord record) {
-    final successRate = record.successRate;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              '成功率: ${(successRate * 100).toStringAsFixed(0)}%',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
-                  ),
-            ),
-            const Spacer(),
-            Text(
-              '${record.importedCount}/${record.totalCount}',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
-                  ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4.0),
-        Container(
-          height: 4.0,
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainer,
-            borderRadius: BorderRadius.circular(2.0),
-          ),
-          child: FractionallySizedBox(
-            widthFactor: successRate,
-            alignment: AlignmentDirectional.centerStart,
-            child: Container(
-              decoration: BoxDecoration(
-                color: _getStatusColor(context, record),
-                borderRadius: BorderRadius.circular(2.0),
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 /// 导入记录状态
 enum ImportRecordStatus {
   /// 成功
@@ -243,5 +245,93 @@ class ImportRecord {
         language.hashCode ^
         fileSize.hashCode ^
         duration.hashCode;
+  }
+}
+
+/// 导入历史记录数据模型
+class ImportHistoryItem {
+  final String filename;
+  final String description;
+  final DateTime timestamp;
+  final bool success;
+  final String format;
+  final int recordCount;
+
+  ImportHistoryItem({
+    required this.filename,
+    required this.description,
+    required this.timestamp,
+    required this.success,
+    required this.format,
+    required this.recordCount,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'filename': filename,
+      'description': description,
+      'timestamp': timestamp.toIso8601String(),
+      'success': success,
+      'format': format,
+      'recordCount': recordCount,
+    };
+  }
+
+  factory ImportHistoryItem.fromJson(Map<String, dynamic> json) {
+    return ImportHistoryItem(
+      filename: json['filename'],
+      description: json['description'],
+      timestamp: DateTime.parse(json['timestamp']),
+      success: json['success'],
+      format: json['format'],
+      recordCount: json['recordCount'],
+    );
+  }
+}
+
+/// 导入历史缓存服务
+class ImportHistoryCache {
+  static const String _cacheKey = 'import_history';
+  static const int _maxHistoryPerProject = 5;
+
+  static Future<void> saveImportHistory(String projectId, ImportHistoryItem item) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = '$_cacheKey:$projectId';
+
+    // 获取现有历史记录
+    final historyList = await getImportHistory(projectId);
+
+    // 添加新记录到开头
+    historyList.insert(0, item);
+
+    // 限制每个项目最多5条记录
+    if (historyList.length > _maxHistoryPerProject) {
+      historyList.removeRange(_maxHistoryPerProject, historyList.length);
+    }
+
+    // 保存到缓存
+    final jsonList = historyList.map((item) => item.toJson()).toList();
+    await prefs.setString(key, jsonEncode(jsonList));
+  }
+
+  static Future<List<ImportHistoryItem>> getImportHistory(String projectId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = '$_cacheKey:$projectId';
+
+    final jsonString = prefs.getString(key);
+    if (jsonString == null) return [];
+
+    try {
+      final jsonList = jsonDecode(jsonString) as List;
+      return jsonList.map((json) => ImportHistoryItem.fromJson(json)).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  static Future<void> clearImportHistory(String projectId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = '$_cacheKey:$projectId';
+    await prefs.remove(key);
   }
 }
