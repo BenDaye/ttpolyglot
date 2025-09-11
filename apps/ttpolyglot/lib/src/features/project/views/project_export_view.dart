@@ -1,103 +1,8 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ttpolyglot/src/core/utils/file_save_util.dart';
 import 'package:ttpolyglot/src/core/widgets/clickable_stat_card.dart';
 import 'package:ttpolyglot/src/features/features.dart';
-
-/// 导出历史记录数据模型
-class ExportHistoryItem {
-  final String filename;
-  final String description;
-  final DateTime timestamp;
-  final bool success;
-  final String format;
-  final int languageCount;
-  final String? filePath; // 导出文件保存路径，可为空（失败的导出）
-
-  ExportHistoryItem({
-    required this.filename,
-    required this.description,
-    required this.timestamp,
-    required this.success,
-    required this.format,
-    required this.languageCount,
-    this.filePath,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'filename': filename,
-      'description': description,
-      'timestamp': timestamp.toIso8601String(),
-      'success': success,
-      'format': format,
-      'languageCount': languageCount,
-      'filePath': filePath,
-    };
-  }
-
-  factory ExportHistoryItem.fromJson(Map<String, dynamic> json) {
-    return ExportHistoryItem(
-      filename: json['filename'],
-      description: json['description'],
-      timestamp: DateTime.parse(json['timestamp']),
-      success: json['success'],
-      format: json['format'],
-      languageCount: json['languageCount'],
-      filePath: json['filePath'],
-    );
-  }
-}
-
-/// 导出历史缓存服务
-class ExportHistoryCache {
-  static const String _cacheKey = 'export_history';
-  static const int _maxHistoryPerProject = 5;
-
-  static Future<void> saveExportHistory(String projectId, ExportHistoryItem item) async {
-    final prefs = await SharedPreferences.getInstance();
-    final key = '$_cacheKey:$projectId';
-
-    // 获取现有历史记录
-    final historyList = await getExportHistory(projectId);
-
-    // 添加新记录到开头
-    historyList.insert(0, item);
-
-    // 限制每个项目最多5条记录
-    if (historyList.length > _maxHistoryPerProject) {
-      historyList.removeRange(_maxHistoryPerProject, historyList.length);
-    }
-
-    // 保存到缓存
-    final jsonList = historyList.map((item) => item.toJson()).toList();
-    await prefs.setString(key, jsonEncode(jsonList));
-  }
-
-  static Future<List<ExportHistoryItem>> getExportHistory(String projectId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final key = '$_cacheKey:$projectId';
-
-    final jsonString = prefs.getString(key);
-    if (jsonString == null) return [];
-
-    try {
-      final jsonList = jsonDecode(jsonString) as List;
-      return jsonList.map((json) => ExportHistoryItem.fromJson(json)).toList();
-    } catch (e) {
-      return [];
-    }
-  }
-
-  static Future<void> clearExportHistory(String projectId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final key = '$_cacheKey:$projectId';
-    await prefs.remove(key);
-  }
-}
 
 /// 项目导出页面
 class ProjectExportView extends StatefulWidget {
@@ -567,98 +472,38 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                                     children: [
                                       // 导出配置摘要
                                       Padding(
-                                        padding: const EdgeInsets.all(20.0),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                        padding: const EdgeInsets.only(
+                                          top: 20.0,
+                                          left: 20.0,
+                                          right: 20.0,
+                                        ),
+                                        child: Row(
                                           children: [
-                                            // 标题区域
-                                            Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.settings_outlined,
-                                                  size: 20.0,
-                                                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
-                                                ),
-                                                const SizedBox(width: 12.0),
-                                                Text(
-                                                  '导出配置',
-                                                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                                        fontWeight: FontWeight.w600,
-                                                        color: Theme.of(context)
-                                                            .colorScheme
-                                                            .onSurface
-                                                            .withValues(alpha: 0.65),
-                                                      ),
-                                                ),
-                                                const SizedBox(width: 12.0),
-                                                Text(
-                                                  '(请选择导出参数并开始导出)',
-                                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                        color: Theme.of(context)
-                                                            .colorScheme
-                                                            .onSurfaceVariant
-                                                            .withValues(alpha: 0.65),
-                                                      ),
-                                                ),
-                                              ],
+                                            Icon(
+                                              Icons.settings_outlined,
+                                              size: 20.0,
+                                              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
                                             ),
-                                            const SizedBox(height: 16.0),
-
-                                            // 配置信息 - 一行布局，三个配置项横向排列
-                                            Row(
-                                              children: [
-                                                // 第一列：语言配置
-                                                Expanded(
-                                                  child: _buildEnhancedSummaryItem(
-                                                    context,
-                                                    Icons.language,
-                                                    '导出语言',
-                                                    '${exportController.selectedLanguages.length} 个语言',
-                                                    subtitle: '已选择导出的语言数量',
+                                            const SizedBox(width: 12.0),
+                                            Text(
+                                              '导出配置',
+                                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                                    fontWeight: FontWeight.w600,
+                                                    color:
+                                                        Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
                                                   ),
-                                                ),
-                                                const SizedBox(width: 16.0),
-
-                                                // 第二列：格式配置
-                                                Expanded(
-                                                  child: _buildEnhancedSummaryItem(
-                                                    context,
-                                                    Icons.description,
-                                                    '导出格式',
-                                                    exportController.selectedFormat.toUpperCase(),
-                                                    subtitle: _getFormatDescription(exportController.selectedFormat),
+                                            ),
+                                            const SizedBox(width: 12.0),
+                                            Text(
+                                              '(请选择导出参数并开始导出)',
+                                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurfaceVariant
+                                                        .withValues(alpha: 0.65),
                                                   ),
-                                                ),
-                                                const SizedBox(width: 16.0),
-
-                                                // 第三列：选项配置
-                                                Expanded(
-                                                  child: _buildEnhancedSummaryItem(
-                                                    context,
-                                                    Icons.filter_list,
-                                                    '导出选项',
-                                                    _buildOptionsText(exportController),
-                                                    subtitle: '导出时的附加设置',
-                                                    isOptionsRow: true,
-                                                  ),
-                                                ),
-                                              ],
                                             ),
                                           ],
-                                        ),
-                                      ),
-
-                                      // 分割线 - 带渐变效果
-                                      Container(
-                                        height: 1.0,
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            colors: [
-                                              Theme.of(context).colorScheme.primary.withValues(alpha: 0.0),
-                                              Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
-                                              Theme.of(context).colorScheme.primary.withValues(alpha: 0.0),
-                                            ],
-                                          ),
                                         ),
                                       ),
 
@@ -671,129 +516,105 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                                               width: double.infinity,
                                               child: AnimatedContainer(
                                                 duration: const Duration(milliseconds: 200),
-                                                child: ElevatedButton.icon(
-                                                  onPressed: exportController.isExporting ||
+                                                child: InkWell(
+                                                  onTap: exportController.isExporting ||
                                                           exportController.selectedLanguages.isEmpty
                                                       ? null
                                                       : () async {
-                                                          try {
-                                                            final savePath =
-                                                                await ProjectExportController.exportTranslationsCustom(
-                                                              widget.projectId,
-                                                              selectedLanguages: exportController.selectedLanguages,
-                                                              exportOnlyTranslated:
-                                                                  exportController.exportOnlyTranslated,
-                                                              includeStatus: exportController.includeStatus,
-                                                              includeTimestamps: exportController.includeTimestamps,
-                                                              format: exportController.selectedFormat,
-                                                            );
-
-                                                            // 生成导出描述
-                                                            final formatName =
-                                                                switch (exportController.selectedFormat.toLowerCase()) {
-                                                              'json' => 'JSON',
-                                                              'csv' => 'CSV',
-                                                              'excel' => 'Excel',
-                                                              'arb' => 'ARB',
-                                                              'po' => 'PO',
-                                                              _ => exportController.selectedFormat.toUpperCase(),
-                                                            };
-
-                                                            final languageText = exportController
-                                                                        .selectedLanguages.length ==
-                                                                    1
-                                                                ? '单语言'
-                                                                : '${exportController.selectedLanguages.length} 种语言';
-                                                            final translatedText =
-                                                                exportController.exportOnlyTranslated ? '（仅已翻译）' : '';
-
-                                                            final description =
-                                                                '$languageText$translatedText - $formatName 格式';
-
-                                                            final filename = savePath != null
-                                                                ? savePath.split('/').last
-                                                                : 'translations_${DateTime.now().millisecondsSinceEpoch}.${exportController.selectedFormat}';
-
-                                                            // 保存导出历史
-                                                            final historyItem = ExportHistoryItem(
-                                                              filename: filename,
-                                                              description: description,
-                                                              timestamp: DateTime.now(),
-                                                              success: savePath != null,
-                                                              format: exportController.selectedFormat,
-                                                              languageCount: exportController.selectedLanguages.length,
-                                                              filePath: savePath,
-                                                            );
-
-                                                            await ExportHistoryCache.saveExportHistory(
-                                                                widget.projectId, historyItem);
-                                                            setState(() {}); // 触发UI更新
-                                                          } catch (e) {
-                                                            // 导出失败时保存失败记录
-                                                            final historyItem = ExportHistoryItem(
-                                                              filename: '导出失败',
-                                                              description: '导出过程中发生错误',
-                                                              timestamp: DateTime.now(),
-                                                              success: false,
-                                                              format: exportController.selectedFormat,
-                                                              languageCount: exportController.selectedLanguages.length,
-                                                            );
-
-                                                            await ExportHistoryCache.saveExportHistory(
-                                                                widget.projectId, historyItem);
-                                                            setState(() {}); // 触发UI更新
-                                                          }
+                                                          await ProjectExportController.exportTranslationsWithHistory(
+                                                            widget.projectId,
+                                                            selectedLanguages: exportController.selectedLanguages,
+                                                            exportOnlyTranslated: exportController.exportOnlyTranslated,
+                                                            includeStatus: exportController.includeStatus,
+                                                            includeTimestamps: exportController.includeTimestamps,
+                                                            format: exportController.selectedFormat,
+                                                            onUIUpdate: () => setState(() {}),
+                                                          );
                                                         },
-                                                  icon: AnimatedSwitcher(
-                                                    duration: const Duration(milliseconds: 200),
-                                                    child: exportController.isExporting
-                                                        ? Container(
-                                                            key: const ValueKey('loading'),
-                                                            width: 20.0,
-                                                            height: 20.0,
-                                                            child: CircularProgressIndicator(
-                                                              strokeWidth: 2.5,
-                                                              valueColor: AlwaysStoppedAnimation<Color>(
-                                                                Theme.of(context).colorScheme.onPrimary,
-                                                              ),
-                                                            ),
-                                                          )
-                                                        : const Icon(
-                                                            Icons.download_rounded,
-                                                            key: ValueKey('download'),
-                                                          ),
-                                                  ),
-                                                  label: AnimatedSwitcher(
-                                                    duration: const Duration(milliseconds: 200),
-                                                    child: Text(
-                                                      key: ValueKey(exportController.isExporting),
-                                                      exportController.isExporting ? '正在导出翻译文件...' : '开始导出翻译文件',
-                                                      style: const TextStyle(
-                                                        fontWeight: FontWeight.w600,
-                                                        fontSize: 16.0,
+                                                  child: Container(
+                                                    height: 200.0,
+                                                    width: double.infinity,
+                                                    decoration: BoxDecoration(
+                                                      border: Border.all(
+                                                        color: exportController.selectedLanguages.isEmpty
+                                                            ? Theme.of(context)
+                                                                .colorScheme
+                                                                .outline
+                                                                .withValues(alpha: 0.3)
+                                                            : Theme.of(context)
+                                                                .colorScheme
+                                                                .primary
+                                                                .withValues(alpha: 0.5),
+                                                        width: 2.0,
+                                                        style: BorderStyle.solid,
                                                       ),
-                                                    ),
-                                                  ),
-                                                  style: ElevatedButton.styleFrom(
-                                                    padding:
-                                                        const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
-                                                    backgroundColor: exportController.selectedLanguages.isEmpty
-                                                        ? Theme.of(context)
-                                                            .colorScheme
-                                                            .onSurface
-                                                            .withValues(alpha: 0.12)
-                                                        : Theme.of(context).colorScheme.primary,
-                                                    foregroundColor: exportController.selectedLanguages.isEmpty
-                                                        ? Theme.of(context)
-                                                            .colorScheme
-                                                            .onSurface
-                                                            .withValues(alpha: 0.38)
-                                                        : Theme.of(context).colorScheme.onPrimary,
-                                                    elevation: exportController.isExporting ? 0 : 3.0,
-                                                    shadowColor:
-                                                        Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
-                                                    shape: RoundedRectangleBorder(
                                                       borderRadius: BorderRadius.circular(12.0),
+                                                      color: exportController.selectedLanguages.isEmpty
+                                                          ? Theme.of(context)
+                                                              .colorScheme
+                                                              .surfaceContainerHighest
+                                                              .withValues(alpha: 0.3)
+                                                          : Theme.of(context)
+                                                              .colorScheme
+                                                              .primary
+                                                              .withValues(alpha: 0.05),
+                                                    ),
+                                                    child: Column(
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      children: [
+                                                        Icon(
+                                                          Icons.cloud_download,
+                                                          size: 48.0,
+                                                          color: Theme.of(context).colorScheme.primary,
+                                                        ),
+                                                        const SizedBox(height: 16.0),
+                                                        Text(
+                                                          '点击开始导出翻译文件',
+                                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                                                color: Theme.of(context).colorScheme.primary,
+                                                              ),
+                                                        ),
+                                                        const SizedBox(height: 8.0),
+                                                        Text(
+                                                          '点击开始导出翻译文件',
+                                                          style: exportController.selectedLanguages.isEmpty
+                                                              ? Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                                                    color: Theme.of(context)
+                                                                        .colorScheme
+                                                                        .onSurface
+                                                                        .withValues(alpha: 0.7),
+                                                                  )
+                                                              : Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                                                    color: Theme.of(context)
+                                                                        .colorScheme
+                                                                        .onSurface
+                                                                        .withValues(alpha: 0.3),
+                                                                  ),
+                                                        ),
+                                                        const SizedBox(height: 16.0),
+                                                        ElevatedButton.icon(
+                                                          onPressed: exportController.isExporting ||
+                                                                  exportController.selectedLanguages.isEmpty
+                                                              ? null
+                                                              : () async {
+                                                                  await ProjectExportController
+                                                                      .exportTranslationsWithHistory(
+                                                                    widget.projectId,
+                                                                    selectedLanguages:
+                                                                        exportController.selectedLanguages,
+                                                                    exportOnlyTranslated:
+                                                                        exportController.exportOnlyTranslated,
+                                                                    includeStatus: exportController.includeStatus,
+                                                                    includeTimestamps:
+                                                                        exportController.includeTimestamps,
+                                                                    format: exportController.selectedFormat,
+                                                                    onUIUpdate: () => setState(() {}),
+                                                                  );
+                                                                },
+                                                          icon: const Icon(Icons.download_rounded),
+                                                          label: const Text('确认导出'),
+                                                        ),
+                                                      ],
                                                     ),
                                                   ),
                                                 ),

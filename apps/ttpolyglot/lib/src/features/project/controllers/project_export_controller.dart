@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ttpolyglot/src/core/services/service.dart';
 import 'package:ttpolyglot_core/core.dart';
 
@@ -343,5 +345,170 @@ class ProjectExportController extends GetxController {
       default:
         throw UnsupportedError('不支持的导出格式: $format');
     }
+  }
+
+  /// 执行导出并保存历史记录
+  static Future<String?> exportTranslationsWithHistory(
+    String projectId, {
+    required Set<String> selectedLanguages,
+    required bool exportOnlyTranslated,
+    required bool includeStatus,
+    required bool includeTimestamps,
+    required String format,
+    required Function() onUIUpdate,
+  }) async {
+    try {
+      final savePath = await exportTranslationsCustom(
+        projectId,
+        selectedLanguages: selectedLanguages,
+        exportOnlyTranslated: exportOnlyTranslated,
+        includeStatus: includeStatus,
+        includeTimestamps: includeTimestamps,
+        format: format,
+      );
+
+      // 生成导出描述
+      final formatName = switch (format.toLowerCase()) {
+        'json' => 'JSON',
+        'csv' => 'CSV',
+        'excel' => 'Excel',
+        'arb' => 'ARB',
+        'po' => 'PO',
+        _ => format.toUpperCase(),
+      };
+
+      final languageText = selectedLanguages.length == 1 ? '单语言' : '${selectedLanguages.length} 种语言';
+      final translatedText = exportOnlyTranslated ? '（仅已翻译）' : '';
+
+      final description = '$languageText$translatedText - $formatName 格式';
+
+      final filename =
+          savePath != null ? savePath.split('/').last : 'translations_${DateTime.now().millisecondsSinceEpoch}.$format';
+
+      // 保存导出历史
+      final historyItem = ExportHistoryItem(
+        filename: filename,
+        description: description,
+        timestamp: DateTime.now(),
+        success: savePath != null,
+        format: format,
+        languageCount: selectedLanguages.length,
+        filePath: savePath,
+      );
+
+      await ExportHistoryCache.saveExportHistory(projectId, historyItem);
+      onUIUpdate(); // 触发UI更新
+
+      return savePath;
+    } catch (error, stackTrace) {
+      log('exportTranslationsWithHistory', error: error, stackTrace: stackTrace, name: 'ProjectExportController');
+
+      // 导出失败时保存失败记录
+      final historyItem = ExportHistoryItem(
+        filename: '导出失败',
+        description: '导出过程中发生错误',
+        timestamp: DateTime.now(),
+        success: false,
+        format: format,
+        languageCount: selectedLanguages.length,
+      );
+
+      await ExportHistoryCache.saveExportHistory(projectId, historyItem);
+      onUIUpdate(); // 触发UI更新
+
+      return null;
+    }
+  }
+}
+
+/// 导出历史记录数据模型
+class ExportHistoryItem {
+  final String filename;
+  final String description;
+  final DateTime timestamp;
+  final bool success;
+  final String format;
+  final int languageCount;
+  final String? filePath;
+
+  ExportHistoryItem({
+    required this.filename,
+    required this.description,
+    required this.timestamp,
+    required this.success,
+    required this.format,
+    required this.languageCount,
+    this.filePath,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'filename': filename,
+      'description': description,
+      'timestamp': timestamp.toIso8601String(),
+      'success': success,
+      'format': format,
+      'languageCount': languageCount,
+      'filePath': filePath,
+    };
+  }
+
+  factory ExportHistoryItem.fromJson(Map<String, dynamic> json) {
+    return ExportHistoryItem(
+      filename: json['filename'],
+      description: json['description'],
+      timestamp: DateTime.parse(json['timestamp']),
+      success: json['success'] ?? false,
+      format: json['format'] ?? 'json',
+      languageCount: json['languageCount'] ?? 0,
+      filePath: json['filePath'],
+    );
+  }
+}
+
+/// 导出历史记录缓存管理
+class ExportHistoryCache {
+  static const String _cacheKey = 'export_history';
+  static const int _maxHistoryPerProject = 5;
+
+  static Future<void> saveExportHistory(String projectId, ExportHistoryItem item) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = '$_cacheKey:$projectId';
+
+    // 获取现有历史记录
+    final historyList = await getExportHistory(projectId);
+
+    // 添加新记录到开头
+    historyList.insert(0, item);
+
+    // 限制每个项目最多5条记录
+    if (historyList.length > _maxHistoryPerProject) {
+      historyList.removeRange(_maxHistoryPerProject, historyList.length);
+    }
+
+    // 保存到缓存
+    final jsonList = historyList.map((item) => item.toJson()).toList();
+    await prefs.setString(key, jsonEncode(jsonList));
+  }
+
+  static Future<List<ExportHistoryItem>> getExportHistory(String projectId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = '$_cacheKey:$projectId';
+
+    final jsonString = prefs.getString(key);
+    if (jsonString == null) return [];
+
+    try {
+      final jsonList = jsonDecode(jsonString) as List;
+      return jsonList.map((json) => ExportHistoryItem.fromJson(json)).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  static Future<void> clearExportHistory(String projectId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = '$_cacheKey:$projectId';
+    await prefs.remove(key);
   }
 }
