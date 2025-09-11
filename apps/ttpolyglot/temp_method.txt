@@ -1,0 +1,124 @@
+  /// 构建翻译提供商配置列表
+  List<Widget> _buildProviderConfigs(TranslationConfigController controller) {
+    final configs = <Widget>[];
+
+    for (final provider in TranslationProvider.values) {
+      final providerConfig = controller.config.getProviderConfig(provider);
+      if (providerConfig == null) continue;
+
+      configs.add(
+        Obx(
+          () {
+            final currentProviderConfig = controller.config.getProviderConfig(provider);
+            if (currentProviderConfig == null) return const SizedBox.shrink();
+
+            return ExpansionTile(
+              title: Row(
+                children: [
+                  Text(provider.name),
+                  const SizedBox(width: 8.0),
+                  Icon(
+                    currentProviderConfig.isEnabled ? Icons.check_circle : Icons.radio_button_unchecked,
+                    size: 16.0,
+                    color: currentProviderConfig.isEnabled ? Colors.green : Colors.grey,
+                  ),
+                ],
+              ),
+              subtitle: currentProviderConfig.isEnabled && currentProviderConfig.isValid
+                  ? const Text('已启用')
+                  : currentProviderConfig.isEnabled && !currentProviderConfig.isValid
+                      ? const Text('配置不完整', style: TextStyle(color: Colors.orange))
+                      : const Text('未启用'),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: Column(
+                    children: [
+                    // 启用开关
+                    SwitchListTile(
+                      dense: true,
+                      title: const Text('启用'),
+                      value: currentProviderConfig.isEnabled,
+                      onChanged: (bool value) {
+                        controller.toggleProvider(provider);
+                      },
+                    ),
+                    if (currentProviderConfig.isEnabled) ...[
+                      const SizedBox(height: 8.0),
+                      // App ID 输入框
+                      TextFormField(
+                        initialValue: currentProviderConfig.appId,
+                        decoration: InputDecoration(
+                          labelText: provider == TranslationProvider.custom ? 'API Key' : 'App ID',
+                          border: const OutlineInputBorder(),
+                          hintText: provider == TranslationProvider.custom ? '输入API密钥' : '输入应用ID',
+                        ),
+                        onChanged: (value) {
+                          controller.updateProviderConfig(provider, appId: value);
+                        },
+                      ),
+                      const SizedBox(height: 8.0),
+                      // App Key 输入框
+                      if (provider != TranslationProvider.custom) ...[
+                        TextFormField(
+                          initialValue: currentProviderConfig.appKey,
+                          decoration: const InputDecoration(
+                            labelText: 'App Key',
+                            border: OutlineInputBorder(),
+                            hintText: '输入应用密钥',
+                          ),
+                          onChanged: (value) {
+                            controller.updateProviderConfig(provider, appKey: value);
+                          },
+                        ),
+                        const SizedBox(height: 8.0),
+                      ],
+                      // API URL 输入框（仅自定义翻译）
+                      if (provider == TranslationProvider.custom) ...[
+                        TextFormField(
+                          initialValue: currentProviderConfig.apiUrl ?? '',
+                          decoration: const InputDecoration(
+                            labelText: 'API 地址',
+                            border: OutlineInputBorder(),
+                            hintText: '输入自定义翻译API地址',
+                          ),
+                          onChanged: (value) {
+                            controller.updateProviderConfig(provider, apiUrl: value);
+                          },
+                        ),
+                        const SizedBox(height: 8.0),
+                      ],
+                      // 验证状态
+                      if (!currentProviderConfig.isValid) ...[
+                        Container(
+                          padding: const EdgeInsets.all(8.0),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(4.0),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.warning, color: Colors.orange, size: 16.0),
+                              const SizedBox(width: 8.0),
+                              Expanded(
+                                child: Text(
+                                  currentProviderConfig.getValidationErrors().join('\n'),
+                                  style: const TextStyle(color: Colors.orange, fontSize: 12.0),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ],
+                ),
+              ],
+            );
+          },
+        ),
+      );
+    }
+
+    return configs;
+  }

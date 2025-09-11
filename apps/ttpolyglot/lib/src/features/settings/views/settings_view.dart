@@ -59,6 +59,7 @@ class _SettingsViewContent extends StatelessWidget {
             _buildThemeSection(AppThemeController.instance),
             _buildLanguageSection(controller),
             _buildGeneralSection(controller),
+            _buildTranslationSection(),
           ],
         ),
       ),
@@ -234,5 +235,430 @@ class _SettingsViewContent extends StatelessWidget {
       default:
         return '中文';
     }
+  }
+
+  /// 构建翻译设置部分
+  Widget _buildTranslationSection() {
+    final translationController = Get.find<TranslationConfigController>();
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.translate),
+                const SizedBox(width: 12.0),
+                const Expanded(
+                  child: Text('翻译接口配置'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () => _showAddProviderDialog(translationController),
+                  icon: const Icon(Icons.add),
+                  label: const Text('添加翻译接口'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16.0),
+            // 翻译接口配置
+            _buildProviderConfigs(translationController),
+            const SizedBox(height: 16.0),
+            // 高级设置
+            _buildAdvancedSettings(translationController),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 构建翻译接口配置列表
+  Widget _buildProviderConfigs(TranslationConfigController controller) {
+    return Obx(() {
+      final providers = controller.config.providers;
+
+      return Column(
+        children: [
+          // 翻译接口列表
+          ...providers.map((config) => _buildProviderItem(controller, config)),
+        ],
+      );
+    });
+  }
+
+  /// 构建单个翻译接口项
+  Widget _buildProviderItem(TranslationConfigController controller, TranslationProviderConfig config) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8.0),
+      child: ExpansionTile(
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                config.displayName,
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
+            Icon(
+              config.isEnabled ? Icons.check_circle : Icons.radio_button_unchecked,
+              size: 16.0,
+              color: config.isEnabled ? Colors.green : Colors.grey,
+            ),
+          ],
+        ),
+        subtitle: Text(
+          config.isEnabled && config.isValid
+              ? '已启用'
+              : config.isEnabled && !config.isValid
+                  ? '配置不完整'
+                  : '未启用',
+          style: TextStyle(
+            color: config.isEnabled && !config.isValid ? Colors.orange : null,
+          ),
+        ),
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                // 启用开关
+                SwitchListTile(
+                  dense: true,
+                  title: const Text('启用'),
+                  value: config.isEnabled,
+                  onChanged: (value) => controller.toggleProviderById(config.id),
+                ),
+                const Divider(),
+                // 配置表单
+                if (config.isEnabled) ...[
+                  // 名称输入框
+                  TextFormField(
+                    initialValue: config.name,
+                    decoration: const InputDecoration(
+                      labelText: '名称',
+                      border: OutlineInputBorder(),
+                      hintText: '输入翻译接口名称',
+                    ),
+                    onChanged: (value) {
+                      controller.updateProviderConfigById(config.id, name: value);
+                    },
+                  ),
+                  const SizedBox(height: 12.0),
+                  // App ID 输入框
+                  TextFormField(
+                    initialValue: config.appId,
+                    decoration: InputDecoration(
+                      labelText: config.provider == TranslationProvider.custom ? 'API Key' : 'App ID',
+                      border: const OutlineInputBorder(),
+                      hintText: config.provider == TranslationProvider.custom ? '输入API密钥' : '输入应用ID',
+                    ),
+                    onChanged: (value) {
+                      controller.updateProviderConfigById(config.id, appId: value);
+                    },
+                  ),
+                  const SizedBox(height: 12.0),
+                  // App Key 输入框（非自定义翻译）
+                  if (config.provider != TranslationProvider.custom) ...[
+                    TextFormField(
+                      initialValue: config.appKey,
+                      decoration: const InputDecoration(
+                        labelText: 'App Key',
+                        border: OutlineInputBorder(),
+                        hintText: '输入应用密钥',
+                      ),
+                      onChanged: (value) {
+                        controller.updateProviderConfigById(config.id, appKey: value);
+                      },
+                    ),
+                    const SizedBox(height: 12.0),
+                  ],
+                  // API URL 输入框（仅自定义翻译）
+                  if (config.provider == TranslationProvider.custom) ...[
+                    TextFormField(
+                      initialValue: config.apiUrl ?? '',
+                      decoration: const InputDecoration(
+                        labelText: 'API 地址',
+                        border: OutlineInputBorder(),
+                        hintText: '输入自定义翻译API地址',
+                      ),
+                      onChanged: (value) {
+                        controller.updateProviderConfigById(config.id, apiUrl: value);
+                      },
+                    ),
+                    const SizedBox(height: 12.0),
+                  ],
+                  // 验证状态
+                  if (!config.isValid) ...[
+                    Container(
+                      padding: const EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4.0),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.warning, color: Colors.orange, size: 16.0),
+                          const SizedBox(width: 8.0),
+                          Expanded(
+                            child: Text(
+                              config.getValidationErrors().join('\n'),
+                              style: const TextStyle(color: Colors.orange, fontSize: 12.0),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12.0),
+                  ],
+                ],
+                // 删除按钮
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton.icon(
+                      onPressed: () => _showDeleteProviderDialog(controller, config),
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      label: const Text('删除', style: TextStyle(color: Colors.red)),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 构建高级设置
+  Widget _buildAdvancedSettings(TranslationConfigController controller) {
+    return Obx(
+      () => ExpansionTile(
+        title: const Text('高级设置'),
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Column(
+              children: [
+                // 最大重试次数
+                ListTile(
+                  dense: true,
+                  title: const Text('最大重试次数'),
+                  subtitle: Text('${controller.config.maxRetries} 次'),
+                  trailing: SizedBox(
+                    width: 120.0,
+                    child: TextFormField(
+                      initialValue: controller.config.maxRetries.toString(),
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                      ),
+                      onChanged: (value) {
+                        final retries = int.tryParse(value);
+                        if (retries != null) {
+                          controller.setMaxRetries(retries);
+                        }
+                      },
+                    ),
+                  ),
+                ),
+                // 超时时间
+                ListTile(
+                  dense: true,
+                  title: const Text('超时时间'),
+                  subtitle: Text('${controller.config.timeoutSeconds} 秒'),
+                  trailing: SizedBox(
+                    width: 120.0,
+                    child: TextFormField(
+                      initialValue: controller.config.timeoutSeconds.toString(),
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                      ),
+                      onChanged: (value) {
+                        final timeout = int.tryParse(value);
+                        if (timeout != null) {
+                          controller.setTimeout(timeout);
+                        }
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8.0),
+                // 重置按钮
+                OutlinedButton(
+                  onPressed: () {
+                    showDialog(
+                      context: Get.context!,
+                      builder: (context) => AlertDialog(
+                        title: const Text('确认重置'),
+                        content: const Text('确定要重置所有翻译配置为默认值吗？'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('取消'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              controller.resetToDefault();
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('确认'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  child: const Text('重置为默认配置'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 显示添加翻译接口对话框
+  void _showAddProviderDialog(TranslationConfigController controller) {
+    TranslationProvider selectedProvider = TranslationProvider.baidu;
+    final nameController = TextEditingController();
+    final appIdController = TextEditingController();
+    final appKeyController = TextEditingController();
+    final apiUrlController = TextEditingController();
+
+    showDialog(
+      context: Get.context!,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('添加翻译接口'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 翻译提供商选择
+                DropdownButtonFormField<TranslationProvider>(
+                  value: selectedProvider,
+                  decoration: const InputDecoration(
+                    labelText: '翻译提供商',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: TranslationProvider.values.map((provider) {
+                    return DropdownMenuItem(
+                      value: provider,
+                      child: Text(provider.name),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedProvider = value!;
+                    });
+                  },
+                ),
+                const SizedBox(height: 12.0),
+                // 名称输入框
+                TextFormField(
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                    labelText: '名称',
+                    border: OutlineInputBorder(),
+                    hintText: '输入翻译接口名称',
+                  ),
+                ),
+                const SizedBox(height: 12.0),
+                // App ID 输入框
+                TextFormField(
+                  controller: appIdController,
+                  decoration: InputDecoration(
+                    labelText: selectedProvider == TranslationProvider.custom ? 'API Key' : 'App ID',
+                    border: const OutlineInputBorder(),
+                    hintText: selectedProvider == TranslationProvider.custom ? '输入API密钥' : '输入应用ID',
+                  ),
+                ),
+                const SizedBox(height: 12.0),
+                // App Key 输入框（非自定义翻译）
+                if (selectedProvider != TranslationProvider.custom) ...[
+                  TextFormField(
+                    controller: appKeyController,
+                    decoration: const InputDecoration(
+                      labelText: 'App Key',
+                      border: OutlineInputBorder(),
+                      hintText: '输入应用密钥',
+                    ),
+                  ),
+                  const SizedBox(height: 12.0),
+                ],
+                // API URL 输入框（仅自定义翻译）
+                if (selectedProvider == TranslationProvider.custom) ...[
+                  TextFormField(
+                    controller: apiUrlController,
+                    decoration: const InputDecoration(
+                      labelText: 'API 地址',
+                      border: OutlineInputBorder(),
+                      hintText: '输入自定义翻译API地址',
+                    ),
+                  ),
+                  const SizedBox(height: 12.0),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('取消'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (nameController.text.isNotEmpty) {
+                  controller.addTranslationProvider(
+                    provider: selectedProvider,
+                    name: nameController.text,
+                    appId: appIdController.text,
+                    appKey: selectedProvider != TranslationProvider.custom ? appKeyController.text : null,
+                    apiUrl: selectedProvider == TranslationProvider.custom ? apiUrlController.text : null,
+                  );
+                  Navigator.of(context).pop();
+                }
+              },
+              child: const Text('添加'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 显示删除翻译接口对话框
+  void _showDeleteProviderDialog(TranslationConfigController controller, TranslationProviderConfig config) {
+    showDialog(
+      context: Get.context!,
+      builder: (context) => AlertDialog(
+        title: const Text('确认删除'),
+        content: Text('确定要删除翻译接口 "${config.displayName}" 吗？此操作不可撤销。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('取消'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              controller.removeTranslationProvider(config.id);
+              Navigator.of(context).pop();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('删除'),
+          ),
+        ],
+      ),
+    );
   }
 }
