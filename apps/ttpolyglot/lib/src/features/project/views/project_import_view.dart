@@ -388,15 +388,25 @@ class ProjectImportView extends StatelessWidget {
                       const SizedBox(height: 16.0),
                       Obx(() {
                         if (controller.importRecords.isEmpty) {
-                          return Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(16.0),
-                            child: Text(
-                              '暂无导入记录',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(32.0),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.history,
+                                    size: 48.0,
+                                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                                   ),
-                              textAlign: TextAlign.center,
+                                  const SizedBox(height: 16.0),
+                                  Text(
+                                    '暂无导入记录',
+                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                        ),
+                                  ),
+                                ],
+                              ),
                             ),
                           );
                         }
