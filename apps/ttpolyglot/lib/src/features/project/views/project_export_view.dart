@@ -31,6 +31,44 @@ class _ProjectExportViewState extends State<ProjectExportView> {
     }
   }
 
+  String _getSelectedConfigSummary(ProjectExportController exportController) {
+    final List<String> configParts = [];
+
+    // 语言配置
+    if (exportController.selectedLanguages.isNotEmpty) {
+      configParts.add('${exportController.selectedLanguages.length} 种语言');
+    }
+
+    // 导出格式
+    final formatName = switch (exportController.selectedFormat.toLowerCase()) {
+      'json' => 'JSON',
+      'csv' => 'CSV',
+      'excel' => 'Excel',
+      'arb' => 'ARB',
+      'po' => 'PO',
+      _ => exportController.selectedFormat.toUpperCase(),
+    };
+    configParts.add('$formatName 格式');
+
+    // 导出选项
+    final options = <String>[];
+    if (exportController.exportOnlyTranslated) {
+      options.add('仅已翻译');
+    }
+    if (exportController.includeStatus) {
+      options.add('包含状态');
+    }
+    if (exportController.includeTimestamps) {
+      options.add('包含时间戳');
+    }
+
+    if (options.isNotEmpty) {
+      configParts.add(options.join(', '));
+    }
+
+    return configParts.isEmpty ? '未选择配置' : configParts.join(' • ');
+  }
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ProjectController>(
@@ -576,7 +614,7 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                                                         ),
                                                         const SizedBox(height: 8.0),
                                                         Text(
-                                                          '点击开始导出翻译文件',
+                                                          _getSelectedConfigSummary(exportController),
                                                           style: exportController.selectedLanguages.isEmpty
                                                               ? Theme.of(context).textTheme.bodyMedium?.copyWith(
                                                                     color: Theme.of(context)
@@ -1026,123 +1064,6 @@ class _ProjectExportViewState extends State<ProjectExportView> {
         ),
       ),
     );
-  }
-
-  /// 增强的摘要项组件
-  Widget _buildEnhancedSummaryItem(
-    BuildContext context,
-    IconData icon,
-    String label,
-    String value, {
-    String? subtitle,
-    bool isOptionsRow = false,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(12.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(10.0),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(6.0),
-            ),
-            child: Icon(
-              icon,
-              size: 20.0,
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
-            ),
-          ),
-          const SizedBox(width: 12.0),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontSize: 11.0,
-                        fontWeight: FontWeight.w500,
-                      ),
-                ),
-                const SizedBox(height: 2.0),
-                Text(
-                  value,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                ),
-                if (subtitle != null && !isOptionsRow) ...[
-                  const SizedBox(height: 2.0),
-                  Text(
-                    subtitle,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
-                          fontSize: 10.0,
-                        ),
-                  ),
-                ],
-                if (isOptionsRow && subtitle != null) ...[
-                  const SizedBox(height: 4.0),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(4.0),
-                    ),
-                    child: Text(
-                      subtitle,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
-                            fontSize: 10.0,
-                            fontWeight: FontWeight.w500,
-                          ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 获取格式描述
-  String _getFormatDescription(String format) {
-    switch (format) {
-      case 'json':
-        return '适合开发使用的标准格式';
-      case 'csv':
-        return '适合批量编辑的表格格式';
-      case 'excel':
-        return '适合数据分析的Excel格式';
-      case 'arb':
-        return 'Flutter国际化专用格式';
-      case 'po':
-        return 'GNU Gettext标准格式';
-      default:
-        return '通用格式';
-    }
-  }
-
-  /// 构建选项文本
-  String _buildOptionsText(ProjectExportController controller) {
-    final options = <String>[];
-    if (controller.exportOnlyTranslated) options.add('仅已翻译');
-    if (controller.includeStatus) options.add('包含状态');
-    if (controller.includeTimestamps) options.add('包含时间戳');
-
-    return options.isNotEmpty ? options.join(' · ') : '无特殊选项';
   }
 
   Widget _buildFormatSelector(BuildContext context, ProjectExportController exportController) {
