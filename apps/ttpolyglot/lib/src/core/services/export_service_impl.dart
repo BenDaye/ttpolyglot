@@ -59,6 +59,10 @@ class ExportServiceImpl extends GetxService implements ExportService {
   }) async {
     switch (_platformAdapter.currentPlatform) {
       case PlatformType.desktop:
+        return await ExportServiceImplDesktop.exportTranslationsShortcutCsv(
+          project: project,
+          entries: entries,
+        );
       case PlatformType.web:
       case PlatformType.mobile:
       case PlatformType.unknown:
@@ -73,6 +77,27 @@ class ExportServiceImpl extends GetxService implements ExportService {
   }) async {
     switch (_platformAdapter.currentPlatform) {
       case PlatformType.desktop:
+        return await ExportServiceImplDesktop.exportTranslationsShortcutArb(
+          project: project,
+          entries: entries,
+        );
+      case PlatformType.web:
+      case PlatformType.mobile:
+      case PlatformType.unknown:
+        throw UnimplementedError();
+    }
+  }
+
+  Future<bool> exportTranslationsShortcutExcel({
+    required Project project,
+    required List<TranslationEntry> entries,
+  }) async {
+    switch (_platformAdapter.currentPlatform) {
+      case PlatformType.desktop:
+        return await ExportServiceImplDesktop.exportTranslationsShortcutExcel(
+          project: project,
+          entries: entries,
+        );
       case PlatformType.web:
       case PlatformType.mobile:
       case PlatformType.unknown:
@@ -101,6 +126,10 @@ class ExportServiceImpl extends GetxService implements ExportService {
   }) async {
     switch (_platformAdapter.currentPlatform) {
       case PlatformType.desktop:
+        return await ExportServiceImplDesktop.exportTranslationsShortcutPo(
+          project: project,
+          entries: entries,
+        );
       case PlatformType.web:
       case PlatformType.mobile:
       case PlatformType.unknown:

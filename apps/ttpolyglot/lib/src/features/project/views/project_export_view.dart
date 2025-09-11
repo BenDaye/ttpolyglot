@@ -35,40 +35,86 @@ class ProjectExportView extends StatelessWidget {
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
                           const SizedBox(height: 16.0),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: ClickableStatCard(
-                                  title: 'JSON',
-                                  subtitle: '适合开发使用',
-                                  icon: Icons.code,
-                                  color: Colors.blue,
-                                  onTap: () {
-                                    ProjectExportController.exportTranslationsShortcutJson(projectId);
-                                  },
-                                ),
-                              ),
-                              const SizedBox(width: 16.0),
-                              Expanded(
-                                child: ClickableStatCard(
-                                  title: 'CSV',
-                                  subtitle: '适合批量编辑',
-                                  icon: Icons.table_chart,
-                                  color: Colors.green,
-                                  onTap: () {},
-                                ),
-                              ),
-                              const SizedBox(width: 16.0),
-                              Expanded(
-                                child: ClickableStatCard(
-                                  title: 'Excel',
-                                  subtitle: '适合数据分析',
-                                  icon: Icons.table_view,
-                                  color: Colors.orange,
-                                  onTap: () {},
-                                ),
-                              ),
-                            ],
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              // 响应式列数：小屏幕2列，中等屏幕3列，大屏幕5列
+                              final crossAxisCount = constraints.maxWidth < 600.0
+                                  ? 2
+                                  : constraints.maxWidth < 900.0
+                                      ? 3
+                                      : 5;
+
+                              // 动态计算卡片宽度：总宽度减去间距后除以列数
+                              final totalSpacing = (crossAxisCount - 1) * 16.0; // 间距总和
+                              final cardWidth = (constraints.maxWidth - totalSpacing) / crossAxisCount;
+
+                              return Wrap(
+                                spacing: 16.0,
+                                runSpacing: 16.0,
+                                children: [
+                                  SizedBox(
+                                    width: cardWidth,
+                                    child: ClickableStatCard(
+                                      title: 'JSON',
+                                      subtitle: '适合开发使用',
+                                      icon: Icons.code,
+                                      color: Colors.blue,
+                                      onTap: () {
+                                        ProjectExportController.exportTranslationsShortcutJson(projectId);
+                                      },
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: cardWidth,
+                                    child: ClickableStatCard(
+                                      title: 'CSV',
+                                      subtitle: '适合批量编辑',
+                                      icon: Icons.table_chart,
+                                      color: Colors.green,
+                                      onTap: () {
+                                        ProjectExportController.exportTranslationsShortcutCsv(projectId);
+                                      },
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: cardWidth,
+                                    child: ClickableStatCard(
+                                      title: 'Excel',
+                                      subtitle: '适合数据分析',
+                                      icon: Icons.table_view,
+                                      color: Colors.orange,
+                                      onTap: () {
+                                        ProjectExportController.exportTranslationsShortcutExcel(projectId);
+                                      },
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: cardWidth,
+                                    child: ClickableStatCard(
+                                      title: 'ARB',
+                                      subtitle: 'Flutter ARB格式',
+                                      icon: Icons.flutter_dash,
+                                      color: Colors.purple,
+                                      onTap: () {
+                                        ProjectExportController.exportTranslationsShortcutArb(projectId);
+                                      },
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: cardWidth,
+                                    child: ClickableStatCard(
+                                      title: 'PO',
+                                      subtitle: 'GNU PO格式',
+                                      icon: Icons.language,
+                                      color: Colors.teal,
+                                      onTap: () {
+                                        ProjectExportController.exportTranslationsShortcutPo(projectId);
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                         ],
                       ),
