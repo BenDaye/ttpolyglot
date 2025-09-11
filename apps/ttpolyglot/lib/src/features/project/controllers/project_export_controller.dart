@@ -309,8 +309,8 @@ class ProjectExportController extends GetxController {
     required Project project,
     required List<TranslationEntry> entries,
     required String format,
-    required bool includeStatus,
-    required bool includeTimestamps,
+    bool includeStatus = false,
+    bool includeTimestamps = false,
   }) async {
     final controller = instance(project.id);
 
