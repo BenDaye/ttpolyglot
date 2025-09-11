@@ -77,9 +77,15 @@ class _SettingsViewContent extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.palette),
-                SizedBox(width: 12),
-                Text('主题设置'),
+                const Icon(Icons.palette),
+                const SizedBox(width: 12),
+                const Text(
+                  '主题设置',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16.0,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -141,7 +147,13 @@ class _SettingsViewContent extends StatelessWidget {
               children: [
                 Icon(Icons.language),
                 SizedBox(width: 12),
-                Text('语言设置'),
+                Text(
+                  '语言设置',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16.0,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -183,7 +195,13 @@ class _SettingsViewContent extends StatelessWidget {
               children: [
                 Icon(Icons.settings),
                 SizedBox(width: 12),
-                Text('通用设置'),
+                Text(
+                  '通用设置',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16.0,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -252,7 +270,13 @@ class _SettingsViewContent extends StatelessWidget {
                 const Icon(Icons.translate),
                 const SizedBox(width: 12.0),
                 const Expanded(
-                  child: Text('翻译接口配置'),
+                  child: Text(
+                    '翻译接口配置',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 16.0,
+                    ),
+                  ),
                 ),
                 OutlinedButton.icon(
                   onPressed: () => _showAddProviderDialog(translationController),
