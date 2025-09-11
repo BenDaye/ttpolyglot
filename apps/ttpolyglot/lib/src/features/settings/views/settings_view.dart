@@ -459,7 +459,13 @@ class _SettingsViewContent extends StatelessWidget {
   Widget _buildAdvancedSettings(TranslationConfigController controller) {
     return Obx(
       () => ExpansionTile(
-        title: const Text('高级设置'),
+        title: const Text(
+          '高级设置',
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 16.0,
+          ),
+        ),
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
