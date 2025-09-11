@@ -28,6 +28,25 @@ class ExportServiceImpl extends GetxService implements ExportService {
     switch (_platformAdapter.currentPlatform) {
       case PlatformType.desktop:
         return await ExportServiceImplDesktop.exportTranslationsShortcutJson(
+              project: project,
+              entries: entries,
+            ) !=
+            null;
+      case PlatformType.web:
+      case PlatformType.mobile:
+      case PlatformType.unknown:
+        throw UnimplementedError();
+    }
+  }
+
+  /// 导出翻译文件并返回文件路径 (用于历史记录)
+  Future<String?> exportTranslationsShortcutJsonWithPath({
+    required Project project,
+    required List<TranslationEntry> entries,
+  }) async {
+    switch (_platformAdapter.currentPlatform) {
+      case PlatformType.desktop:
+        return await ExportServiceImplDesktop.exportTranslationsShortcutJson(
           project: project,
           entries: entries,
         );
@@ -60,6 +79,25 @@ class ExportServiceImpl extends GetxService implements ExportService {
     switch (_platformAdapter.currentPlatform) {
       case PlatformType.desktop:
         return await ExportServiceImplDesktop.exportTranslationsShortcutCsv(
+              project: project,
+              entries: entries,
+            ) !=
+            null;
+      case PlatformType.web:
+      case PlatformType.mobile:
+      case PlatformType.unknown:
+        throw UnimplementedError();
+    }
+  }
+
+  /// 导出CSV翻译文件并返回文件路径 (用于历史记录)
+  Future<String?> exportTranslationsShortcutCsvWithPath({
+    required Project project,
+    required List<TranslationEntry> entries,
+  }) async {
+    switch (_platformAdapter.currentPlatform) {
+      case PlatformType.desktop:
+        return await ExportServiceImplDesktop.exportTranslationsShortcutCsv(
           project: project,
           entries: entries,
         );
@@ -78,6 +116,25 @@ class ExportServiceImpl extends GetxService implements ExportService {
     switch (_platformAdapter.currentPlatform) {
       case PlatformType.desktop:
         return await ExportServiceImplDesktop.exportTranslationsShortcutArb(
+              project: project,
+              entries: entries,
+            ) !=
+            null;
+      case PlatformType.web:
+      case PlatformType.mobile:
+      case PlatformType.unknown:
+        throw UnimplementedError();
+    }
+  }
+
+  /// 导出ARB翻译文件并返回文件路径 (用于历史记录)
+  Future<String?> exportTranslationsShortcutArbWithPath({
+    required Project project,
+    required List<TranslationEntry> entries,
+  }) async {
+    switch (_platformAdapter.currentPlatform) {
+      case PlatformType.desktop:
+        return await ExportServiceImplDesktop.exportTranslationsShortcutArb(
           project: project,
           entries: entries,
         );
@@ -89,6 +146,25 @@ class ExportServiceImpl extends GetxService implements ExportService {
   }
 
   Future<bool> exportTranslationsShortcutExcel({
+    required Project project,
+    required List<TranslationEntry> entries,
+  }) async {
+    switch (_platformAdapter.currentPlatform) {
+      case PlatformType.desktop:
+        return await ExportServiceImplDesktop.exportTranslationsShortcutExcel(
+              project: project,
+              entries: entries,
+            ) !=
+            null;
+      case PlatformType.web:
+      case PlatformType.mobile:
+      case PlatformType.unknown:
+        throw UnimplementedError();
+    }
+  }
+
+  /// 导出Excel翻译文件并返回文件路径 (用于历史记录)
+  Future<String?> exportTranslationsShortcutExcelWithPath({
     required Project project,
     required List<TranslationEntry> entries,
   }) async {
@@ -121,6 +197,25 @@ class ExportServiceImpl extends GetxService implements ExportService {
 
   @override
   Future<bool> exportTranslationsShortcutPo({
+    required Project project,
+    required List<TranslationEntry> entries,
+  }) async {
+    switch (_platformAdapter.currentPlatform) {
+      case PlatformType.desktop:
+        return await ExportServiceImplDesktop.exportTranslationsShortcutPo(
+              project: project,
+              entries: entries,
+            ) !=
+            null;
+      case PlatformType.web:
+      case PlatformType.mobile:
+      case PlatformType.unknown:
+        throw UnimplementedError();
+    }
+  }
+
+  /// 导出PO翻译文件并返回文件路径 (用于历史记录)
+  Future<String?> exportTranslationsShortcutPoWithPath({
     required Project project,
     required List<TranslationEntry> entries,
   }) async {

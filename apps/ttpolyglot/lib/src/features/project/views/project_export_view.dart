@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ttpolyglot/src/core/utils/file_save_util.dart';
 import 'package:ttpolyglot/src/core/widgets/clickable_stat_card.dart';
 import 'package:ttpolyglot/src/features/features.dart';
 
@@ -14,6 +15,7 @@ class ExportHistoryItem {
   final bool success;
   final String format;
   final int languageCount;
+  final String? filePath; // 导出文件保存路径，可为空（失败的导出）
 
   ExportHistoryItem({
     required this.filename,
@@ -22,6 +24,7 @@ class ExportHistoryItem {
     required this.success,
     required this.format,
     required this.languageCount,
+    this.filePath,
   });
 
   Map<String, dynamic> toJson() {
@@ -32,6 +35,7 @@ class ExportHistoryItem {
       'success': success,
       'format': format,
       'languageCount': languageCount,
+      'filePath': filePath,
     };
   }
 
@@ -43,6 +47,7 @@ class ExportHistoryItem {
       success: json['success'],
       format: json['format'],
       languageCount: json['languageCount'],
+      filePath: json['filePath'],
     );
   }
 }
@@ -174,14 +179,20 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                                       color: Colors.blue,
                                       onTap: () async {
                                         try {
-                                          ProjectExportController.exportTranslationsShortcutJson(widget.projectId);
+                                          final savePath = await ProjectExportController.exportTranslationsShortcutJson(
+                                              widget.projectId);
+                                          final filename = savePath != null
+                                              ? savePath.split('/').last
+                                              : 'translations_${DateTime.now().millisecondsSinceEpoch}.json';
+
                                           final historyItem = ExportHistoryItem(
-                                            filename: 'translations_${DateTime.now().millisecondsSinceEpoch}.json',
+                                            filename: filename,
                                             description: '快捷导出 - JSON格式',
                                             timestamp: DateTime.now(),
-                                            success: true,
+                                            success: savePath != null,
                                             format: 'json',
                                             languageCount: 1,
+                                            filePath: savePath,
                                           );
                                           await ExportHistoryCache.saveExportHistory(widget.projectId, historyItem);
                                           setState(() {}); // 触发UI更新
@@ -209,14 +220,20 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                                       color: Colors.green,
                                       onTap: () async {
                                         try {
-                                          ProjectExportController.exportTranslationsShortcutCsv(widget.projectId);
+                                          final savePath = await ProjectExportController.exportTranslationsShortcutCsv(
+                                              widget.projectId);
+                                          final filename = savePath != null
+                                              ? savePath.split('/').last
+                                              : 'translations_${DateTime.now().millisecondsSinceEpoch}.csv';
+
                                           final historyItem = ExportHistoryItem(
-                                            filename: 'translations_${DateTime.now().millisecondsSinceEpoch}.csv',
+                                            filename: filename,
                                             description: '快捷导出 - CSV格式',
                                             timestamp: DateTime.now(),
-                                            success: true,
+                                            success: savePath != null,
                                             format: 'csv',
                                             languageCount: 1,
+                                            filePath: savePath,
                                           );
                                           await ExportHistoryCache.saveExportHistory(widget.projectId, historyItem);
                                           setState(() {}); // 触发UI更新
@@ -244,14 +261,21 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                                       color: Colors.orange,
                                       onTap: () async {
                                         try {
-                                          ProjectExportController.exportTranslationsShortcutExcel(widget.projectId);
+                                          final savePath =
+                                              await ProjectExportController.exportTranslationsShortcutExcel(
+                                                  widget.projectId);
+                                          final filename = savePath != null
+                                              ? savePath.split('/').last
+                                              : 'translations_${DateTime.now().millisecondsSinceEpoch}.xlsx';
+
                                           final historyItem = ExportHistoryItem(
-                                            filename: 'translations_${DateTime.now().millisecondsSinceEpoch}.xlsx',
+                                            filename: filename,
                                             description: '快捷导出 - Excel格式',
                                             timestamp: DateTime.now(),
-                                            success: true,
+                                            success: savePath != null,
                                             format: 'excel',
                                             languageCount: 1,
+                                            filePath: savePath,
                                           );
                                           await ExportHistoryCache.saveExportHistory(widget.projectId, historyItem);
                                           setState(() {}); // 触发UI更新
@@ -279,14 +303,20 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                                       color: Colors.purple,
                                       onTap: () async {
                                         try {
-                                          ProjectExportController.exportTranslationsShortcutArb(widget.projectId);
+                                          final savePath = await ProjectExportController.exportTranslationsShortcutArb(
+                                              widget.projectId);
+                                          final filename = savePath != null
+                                              ? savePath.split('/').last
+                                              : 'translations_${DateTime.now().millisecondsSinceEpoch}.arb';
+
                                           final historyItem = ExportHistoryItem(
-                                            filename: 'translations_${DateTime.now().millisecondsSinceEpoch}.arb',
+                                            filename: filename,
                                             description: '快捷导出 - ARB格式',
                                             timestamp: DateTime.now(),
-                                            success: true,
+                                            success: savePath != null,
                                             format: 'arb',
                                             languageCount: 1,
+                                            filePath: savePath,
                                           );
                                           await ExportHistoryCache.saveExportHistory(widget.projectId, historyItem);
                                           setState(() {}); // 触发UI更新
@@ -314,14 +344,20 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                                       color: Colors.teal,
                                       onTap: () async {
                                         try {
-                                          ProjectExportController.exportTranslationsShortcutPo(widget.projectId);
+                                          final savePath = await ProjectExportController.exportTranslationsShortcutPo(
+                                              widget.projectId);
+                                          final filename = savePath != null
+                                              ? savePath.split('/').last
+                                              : 'translations_${DateTime.now().millisecondsSinceEpoch}.po';
+
                                           final historyItem = ExportHistoryItem(
-                                            filename: 'translations_${DateTime.now().millisecondsSinceEpoch}.po',
+                                            filename: filename,
                                             description: '快捷导出 - PO格式',
                                             timestamp: DateTime.now(),
-                                            success: true,
+                                            success: savePath != null,
                                             format: 'po',
                                             languageCount: 1,
+                                            filePath: savePath,
                                           );
                                           await ExportHistoryCache.saveExportHistory(widget.projectId, historyItem);
                                           setState(() {}); // 触发UI更新
@@ -986,10 +1022,7 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                                 children: historyList
                                     .map((item) => _buildExportHistoryItem(
                                           context,
-                                          item.filename,
-                                          item.description,
-                                          _formatTime(item.timestamp),
-                                          item.success,
+                                          item,
                                         ))
                                     .toList(),
                               );
@@ -1443,10 +1476,7 @@ class _ProjectExportViewState extends State<ProjectExportView> {
 
   Widget _buildExportHistoryItem(
     BuildContext context,
-    String filename,
-    String description,
-    String time,
-    bool success,
+    ExportHistoryItem item,
   ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),
@@ -1458,8 +1488,8 @@ class _ProjectExportViewState extends State<ProjectExportView> {
       child: Row(
         children: [
           Icon(
-            success ? Icons.check_circle : Icons.error,
-            color: success ? Colors.green : Colors.red,
+            item.success ? Icons.check_circle : Icons.error,
+            color: item.success ? Colors.green : Colors.red,
             size: 24.0,
           ),
           const SizedBox(width: 12.0),
@@ -1468,17 +1498,17 @@ class _ProjectExportViewState extends State<ProjectExportView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  filename,
+                  item.filename,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 Text(
-                  description,
+                  item.description,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
                 ),
                 Text(
-                  time,
+                  _formatTime(item.timestamp),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
@@ -1487,11 +1517,26 @@ class _ProjectExportViewState extends State<ProjectExportView> {
             ),
           ),
           IconButton(
-            onPressed: () {
-              // TODO: 下载文件
-            },
+            onPressed: item.filePath != null && item.success
+                ? () async {
+                    try {
+                      final success = await FileSaveUtil.downloadFileFromPath(
+                        filePath: item.filePath!,
+                        customFileName: item.filename,
+                      );
+
+                      if (success) {
+                        Get.snackbar('成功', '文件下载成功');
+                      } else {
+                        Get.snackbar('错误', '文件下载失败，文件可能已被删除或移动');
+                      }
+                    } catch (e) {
+                      Get.snackbar('错误', '文件下载失败: $e');
+                    }
+                  }
+                : null,
             icon: const Icon(Icons.download),
-            tooltip: '下载',
+            tooltip: item.filePath != null && item.success ? '下载' : '文件不可用',
           ),
         ],
       ),

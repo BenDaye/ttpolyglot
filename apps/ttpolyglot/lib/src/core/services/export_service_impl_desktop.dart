@@ -34,7 +34,7 @@ class ExportTaskResult {
 
 class ExportServiceImplDesktop {
   /// 使用 isolate 导出翻译文件
-  static Future<bool> exportTranslationsShortcutJson({
+  static Future<String?> exportTranslationsShortcutJson({
     required Project project,
     required List<TranslationEntry> entries,
   }) async {
@@ -52,7 +52,7 @@ class ExportServiceImplDesktop {
 
       if (savePath == null) {
         log('用户取消了文件保存', name: 'ExportServiceImplDesktop');
-        return false;
+        return null;
       }
 
       // 创建导出任务参数
@@ -66,7 +66,7 @@ class ExportServiceImplDesktop {
 
       if (!result.success) {
         log('导出任务失败: ${result.error}', name: 'ExportServiceImplDesktop');
-        return false;
+        return null;
       }
 
       // 在主线程中写入文件
@@ -74,7 +74,7 @@ class ExportServiceImplDesktop {
       await zipFile.writeAsBytes(result.archiveData!);
 
       log('导出完成: $savePath', name: 'ExportServiceImplDesktop');
-      return true;
+      return savePath; // 返回保存路径
     } catch (error, stackTrace) {
       log('导出翻译文件失败', error: error, stackTrace: stackTrace, name: 'ExportServiceImplDesktop');
       throw Exception('导出翻译文件失败: $error');
@@ -131,7 +131,7 @@ class ExportServiceImplDesktop {
   }
 
   /// 使用 isolate 导出翻译文件 (CSV格式)
-  static Future<bool> exportTranslationsShortcutCsv({
+  static Future<String?> exportTranslationsShortcutCsv({
     required Project project,
     required List<TranslationEntry> entries,
   }) async {
@@ -149,7 +149,7 @@ class ExportServiceImplDesktop {
 
       if (savePath == null) {
         log('用户取消了文件保存', name: 'ExportServiceImplDesktop');
-        return false;
+        return null;
       }
 
       // 创建导出任务参数
@@ -163,7 +163,7 @@ class ExportServiceImplDesktop {
 
       if (!result.success) {
         log('导出任务失败: ${result.error}', name: 'ExportServiceImplDesktop');
-        return false;
+        return null;
       }
 
       // 在主线程中写入文件
@@ -171,7 +171,7 @@ class ExportServiceImplDesktop {
       await zipFile.writeAsBytes(result.archiveData!);
 
       log('导出完成: $savePath', name: 'ExportServiceImplDesktop');
-      return true;
+      return savePath; // 返回保存路径
     } catch (error, stackTrace) {
       log('导出CSV翻译文件失败', error: error, stackTrace: stackTrace, name: 'ExportServiceImplDesktop');
       throw Exception('导出CSV翻译文件失败: $error');
@@ -179,7 +179,7 @@ class ExportServiceImplDesktop {
   }
 
   /// 使用 isolate 导出翻译文件 (Excel格式)
-  static Future<bool> exportTranslationsShortcutExcel({
+  static Future<String?> exportTranslationsShortcutExcel({
     required Project project,
     required List<TranslationEntry> entries,
   }) async {
@@ -197,7 +197,7 @@ class ExportServiceImplDesktop {
 
       if (savePath == null) {
         log('用户取消了文件保存', name: 'ExportServiceImplDesktop');
-        return false;
+        return null;
       }
 
       // 创建导出任务参数
@@ -211,7 +211,7 @@ class ExportServiceImplDesktop {
 
       if (!result.success) {
         log('导出任务失败: ${result.error}', name: 'ExportServiceImplDesktop');
-        return false;
+        return null;
       }
 
       // 在主线程中写入文件
@@ -219,7 +219,7 @@ class ExportServiceImplDesktop {
       await zipFile.writeAsBytes(result.archiveData!);
 
       log('导出完成: $savePath', name: 'ExportServiceImplDesktop');
-      return true;
+      return savePath; // 返回保存路径
     } catch (error, stackTrace) {
       log('导出Excel翻译文件失败', error: error, stackTrace: stackTrace, name: 'ExportServiceImplDesktop');
       throw Exception('导出Excel翻译文件失败: $error');
@@ -227,7 +227,7 @@ class ExportServiceImplDesktop {
   }
 
   /// 使用 isolate 导出翻译文件 (ARB格式)
-  static Future<bool> exportTranslationsShortcutArb({
+  static Future<String?> exportTranslationsShortcutArb({
     required Project project,
     required List<TranslationEntry> entries,
   }) async {
@@ -245,7 +245,7 @@ class ExportServiceImplDesktop {
 
       if (savePath == null) {
         log('用户取消了文件保存', name: 'ExportServiceImplDesktop');
-        return false;
+        return null;
       }
 
       // 创建导出任务参数
@@ -259,7 +259,7 @@ class ExportServiceImplDesktop {
 
       if (!result.success) {
         log('导出任务失败: ${result.error}', name: 'ExportServiceImplDesktop');
-        return false;
+        return null;
       }
 
       // 在主线程中写入文件
@@ -267,7 +267,7 @@ class ExportServiceImplDesktop {
       await zipFile.writeAsBytes(result.archiveData!);
 
       log('导出完成: $savePath', name: 'ExportServiceImplDesktop');
-      return true;
+      return savePath; // 返回保存路径
     } catch (error, stackTrace) {
       log('导出ARB翻译文件失败', error: error, stackTrace: stackTrace, name: 'ExportServiceImplDesktop');
       throw Exception('导出ARB翻译文件失败: $error');
@@ -275,7 +275,7 @@ class ExportServiceImplDesktop {
   }
 
   /// 使用 isolate 导出翻译文件 (PO格式)
-  static Future<bool> exportTranslationsShortcutPo({
+  static Future<String?> exportTranslationsShortcutPo({
     required Project project,
     required List<TranslationEntry> entries,
   }) async {
@@ -293,7 +293,7 @@ class ExportServiceImplDesktop {
 
       if (savePath == null) {
         log('用户取消了文件保存', name: 'ExportServiceImplDesktop');
-        return false;
+        return null;
       }
 
       // 创建导出任务参数
@@ -307,7 +307,7 @@ class ExportServiceImplDesktop {
 
       if (!result.success) {
         log('导出任务失败: ${result.error}', name: 'ExportServiceImplDesktop');
-        return false;
+        return null;
       }
 
       // 在主线程中写入文件
@@ -315,7 +315,7 @@ class ExportServiceImplDesktop {
       await zipFile.writeAsBytes(result.archiveData!);
 
       log('导出完成: $savePath', name: 'ExportServiceImplDesktop');
-      return true;
+      return savePath; // 返回保存路径
     } catch (error, stackTrace) {
       log('导出PO翻译文件失败', error: error, stackTrace: stackTrace, name: 'ExportServiceImplDesktop');
       throw Exception('导出PO翻译文件失败: $error');

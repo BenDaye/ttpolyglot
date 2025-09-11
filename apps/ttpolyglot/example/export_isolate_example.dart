@@ -153,7 +153,7 @@ class ExportIsolateExample {
         entries: entries,
       );
 
-      if (success) {
+      if (success != null) {
         log('Isolate 导出成功！', name: 'ExportIsolateExample');
       } else {
         log('Isolate 导出失败', name: 'ExportIsolateExample');

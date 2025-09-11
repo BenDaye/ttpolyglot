@@ -15,7 +15,7 @@ class ProjectExportController extends GetxController {
   final TranslationServiceImpl _translationService = Get.find<TranslationServiceImpl>();
   final ExportServiceImpl _exportService = Get.find<ExportServiceImpl>();
 
-  static Future<void> exportTranslationsShortcutJson(
+  static Future<String?> exportTranslationsShortcutJson(
     String projectId,
   ) async {
     final controller = instance(projectId);
@@ -27,7 +27,7 @@ class ProjectExportController extends GetxController {
       );
       if (project == null) {
         Get.snackbar('错误', '项目不存在');
-        return;
+        return null;
       }
 
       final entries = await controller._translationService.getTranslationEntries(
@@ -35,21 +35,23 @@ class ProjectExportController extends GetxController {
         includeSourceLanguage: true,
       );
 
-      final success = await controller._exportService.exportTranslationsShortcutJson(
+      final savePath = await controller._exportService.exportTranslationsShortcutJsonWithPath(
         project: project,
         entries: entries,
       );
 
-      if (!success) return;
+      if (savePath == null) return null;
 
       Get.snackbar('成功', 'JSON翻译文件导出成功');
+      return savePath;
     } catch (error, stackTrace) {
       log('exportTranslationsShortcutJson', error: error, stackTrace: stackTrace, name: 'ProjectExportController');
       Get.snackbar('错误', '导出JSON翻译文件失败: $error');
+      return null;
     }
   }
 
-  static Future<void> exportTranslationsShortcutCsv(
+  static Future<String?> exportTranslationsShortcutCsv(
     String projectId,
   ) async {
     final controller = instance(projectId);
@@ -61,7 +63,7 @@ class ProjectExportController extends GetxController {
       );
       if (project == null) {
         Get.snackbar('错误', '项目不存在');
-        return;
+        return null;
       }
 
       final entries = await controller._translationService.getTranslationEntries(
@@ -69,21 +71,23 @@ class ProjectExportController extends GetxController {
         includeSourceLanguage: true,
       );
 
-      final success = await controller._exportService.exportTranslationsShortcutCsv(
+      final savePath = await controller._exportService.exportTranslationsShortcutCsvWithPath(
         project: project,
         entries: entries,
       );
 
-      if (!success) return;
+      if (savePath == null) return null;
 
       Get.snackbar('成功', 'CSV翻译文件导出成功');
+      return savePath;
     } catch (error, stackTrace) {
       log('exportTranslationsShortcutCsv', error: error, stackTrace: stackTrace, name: 'ProjectExportController');
       Get.snackbar('错误', '导出CSV翻译文件失败: $error');
+      return null;
     }
   }
 
-  static Future<void> exportTranslationsShortcutExcel(
+  static Future<String?> exportTranslationsShortcutExcel(
     String projectId,
   ) async {
     final controller = instance(projectId);
@@ -95,7 +99,7 @@ class ProjectExportController extends GetxController {
       );
       if (project == null) {
         Get.snackbar('错误', '项目不存在');
-        return;
+        return null;
       }
 
       final entries = await controller._translationService.getTranslationEntries(
@@ -103,21 +107,23 @@ class ProjectExportController extends GetxController {
         includeSourceLanguage: true,
       );
 
-      final success = await controller._exportService.exportTranslationsShortcutExcel(
+      final savePath = await controller._exportService.exportTranslationsShortcutExcelWithPath(
         project: project,
         entries: entries,
       );
 
-      if (!success) return;
+      if (savePath == null) return null;
 
       Get.snackbar('成功', 'Excel翻译文件导出成功');
+      return savePath;
     } catch (error, stackTrace) {
       log('exportTranslationsShortcutExcel', error: error, stackTrace: stackTrace, name: 'ProjectExportController');
       Get.snackbar('错误', '导出Excel翻译文件失败: $error');
+      return null;
     }
   }
 
-  static Future<void> exportTranslationsShortcutArb(
+  static Future<String?> exportTranslationsShortcutArb(
     String projectId,
   ) async {
     final controller = instance(projectId);
@@ -129,7 +135,7 @@ class ProjectExportController extends GetxController {
       );
       if (project == null) {
         Get.snackbar('错误', '项目不存在');
-        return;
+        return null;
       }
 
       final entries = await controller._translationService.getTranslationEntries(
@@ -137,21 +143,23 @@ class ProjectExportController extends GetxController {
         includeSourceLanguage: true,
       );
 
-      final success = await controller._exportService.exportTranslationsShortcutArb(
+      final savePath = await controller._exportService.exportTranslationsShortcutArbWithPath(
         project: project,
         entries: entries,
       );
 
-      if (!success) return;
+      if (savePath == null) return null;
 
       Get.snackbar('成功', 'ARB翻译文件导出成功');
+      return savePath;
     } catch (error, stackTrace) {
       log('exportTranslationsShortcutArb', error: error, stackTrace: stackTrace, name: 'ProjectExportController');
       Get.snackbar('错误', '导出ARB翻译文件失败: $error');
+      return null;
     }
   }
 
-  static Future<void> exportTranslationsShortcutPo(
+  static Future<String?> exportTranslationsShortcutPo(
     String projectId,
   ) async {
     final controller = instance(projectId);
@@ -163,7 +171,7 @@ class ProjectExportController extends GetxController {
       );
       if (project == null) {
         Get.snackbar('错误', '项目不存在');
-        return;
+        return null;
       }
 
       final entries = await controller._translationService.getTranslationEntries(
@@ -171,17 +179,19 @@ class ProjectExportController extends GetxController {
         includeSourceLanguage: true,
       );
 
-      final success = await controller._exportService.exportTranslationsShortcutPo(
+      final savePath = await controller._exportService.exportTranslationsShortcutPoWithPath(
         project: project,
         entries: entries,
       );
 
-      if (!success) return;
+      if (savePath == null) return null;
 
       Get.snackbar('成功', 'PO翻译文件导出成功');
+      return savePath;
     } catch (error, stackTrace) {
       log('exportTranslationsShortcutPo', error: error, stackTrace: stackTrace, name: 'ProjectExportController');
       Get.snackbar('错误', '导出PO翻译文件失败: $error');
+      return null;
     }
   }
 
