@@ -54,7 +54,21 @@ class ProjectImportView extends StatelessWidget {
                       const SizedBox(height: 16.0),
                       LayoutBuilder(
                         builder: (context, constraints) {
-                          final cardWidth = (constraints.maxWidth - 16.0) / 3; // 减去两个间距 (8.0 * 2)
+                          // 响应式列数：小屏幕1列，中等屏幕2列，大屏幕3列，超大屏4列，超超大屏5列
+                          final crossAxisCount = constraints.maxWidth < 600.0
+                              ? 1
+                              : constraints.maxWidth < 900.0
+                                  ? 2
+                                  : constraints.maxWidth < 1200.0
+                                      ? 3
+                                      : constraints.maxWidth < 1400.0
+                                          ? 4
+                                          : 5;
+
+                          // 动态计算卡片宽度：总宽度减去间距后除以列数
+                          final totalSpacing = (crossAxisCount - 1) * 8.0; // 间距总和
+                          var cardWidth = (constraints.maxWidth - totalSpacing) / crossAxisCount;
+
                           return Wrap(
                             spacing: 8.0,
                             runSpacing: 8.0,
