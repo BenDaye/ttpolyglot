@@ -197,46 +197,11 @@ class TranslationConfig {
     final providersData = map['providers'] as List<dynamic>? ?? [];
     final providers = providersData.map((p) => TranslationProviderConfig.fromMap(p as Map<String, dynamic>)).toList();
 
-    // 如果没有配置，创建默认配置
-    if (providers.isEmpty) {
-      providers.addAll([
-        TranslationProviderConfig(
-          id: _generateId(),
-          provider: TranslationProvider.baidu,
-          name: '百度翻译',
-          appId: '',
-          appKey: '',
-          isEnabled: false,
-        ),
-        TranslationProviderConfig(
-          id: _generateId(),
-          provider: TranslationProvider.youdao,
-          name: '有道翻译',
-          appId: '',
-          appKey: '',
-          isEnabled: false,
-        ),
-        TranslationProviderConfig(
-          id: _generateId(),
-          provider: TranslationProvider.google,
-          name: '谷歌翻译',
-          appId: '',
-          appKey: '',
-          isEnabled: false,
-        ),
-      ]);
-    }
-
     return TranslationConfig(
       providers: providers,
       maxRetries: map['maxRetries'] as int? ?? 3,
       timeoutSeconds: map['timeoutSeconds'] as int? ?? 30,
     );
-  }
-
-  /// 生成唯一ID
-  static String _generateId() {
-    return DateTime.now().millisecondsSinceEpoch.toString();
   }
 
   /// 获取启用的提供商

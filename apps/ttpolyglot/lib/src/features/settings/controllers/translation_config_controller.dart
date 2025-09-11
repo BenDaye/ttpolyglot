@@ -136,32 +136,7 @@ class TranslationConfigController extends GetxController {
   /// 重置为默认配置
   void resetToDefault() {
     _config.value = TranslationConfig(
-      providers: [
-        TranslationProviderConfig(
-          id: _generateId(),
-          provider: TranslationProvider.baidu,
-          name: '百度翻译',
-          appId: '',
-          appKey: '',
-          isEnabled: false,
-        ),
-        TranslationProviderConfig(
-          id: _generateId(),
-          provider: TranslationProvider.youdao,
-          name: '有道翻译',
-          appId: '',
-          appKey: '',
-          isEnabled: false,
-        ),
-        TranslationProviderConfig(
-          id: _generateId(),
-          provider: TranslationProvider.google,
-          name: '谷歌翻译',
-          appId: '',
-          appKey: '',
-          isEnabled: false,
-        ),
-      ],
+      providers: [],
     );
     _saveConfig();
   }
