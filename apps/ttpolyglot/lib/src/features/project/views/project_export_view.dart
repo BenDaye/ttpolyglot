@@ -127,7 +127,7 @@ class ProjectExportView extends StatelessWidget {
                   GetBuilder<ProjectExportController>(
                     tag: projectId,
                     builder: (exportController) {
-                      // 初始化自定义导出设置
+                      // 初始化自定义导出选项
                       exportController.initializeCustomExport(project);
 
                       return Obx(
@@ -372,7 +372,7 @@ class ProjectExportView extends StatelessWidget {
                                                   child: _buildEnhancedSummaryItem(
                                                     context,
                                                     Icons.filter_list,
-                                                    '导出设置',
+                                                    '导出选项',
                                                     _buildOptionsText(exportController),
                                                     subtitle: '导出时的附加设置',
                                                     isOptionsRow: true,
@@ -512,7 +512,7 @@ class ProjectExportView extends StatelessWidget {
 
                                 const SizedBox(height: 16.0),
 
-                                // 导出设置
+                                // 导出选项
                                 Container(
                                   padding: const EdgeInsets.all(16.0),
                                   decoration: BoxDecoration(
@@ -534,7 +534,7 @@ class ProjectExportView extends StatelessWidget {
                                           ),
                                           const SizedBox(width: 12.0),
                                           Text(
-                                            '导出设置',
+                                            '导出选项',
                                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                                   fontWeight: FontWeight.w600,
                                                   color: Theme.of(context).colorScheme.onSurface,
