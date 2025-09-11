@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/core/services/conflict_detection_service.dart' as conflict_service;
 import 'package:ttpolyglot/src/core/services/translation_service_impl.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 import 'package:ttpolyglot/src/features/projects/projects.dart';
@@ -222,10 +221,11 @@ class ProjectController extends GetxController {
       log('开始批量导入翻译文件，设置：覆盖现有翻译=$overrideExisting，自动审核=$autoReview，忽略空值=$ignoreEmpty', name: 'ProjectController');
 
       final allImportedEntries = <TranslationEntry>[];
-      final allConflicts = <conflict_service.TranslationConflict>[];
+      final allSkippedEntries = <String>[];
+      final allUpdatedEntries = <TranslationEntry>[];
       int totalSkipped = 0;
 
-      // 获取现有翻译条目用于冲突检测
+      // 获取现有翻译条目用于精确检查
       final existingEntries = await _translationService.getTranslationEntries(projectId);
 
       // 处理每个文件的翻译
@@ -242,8 +242,11 @@ class ProjectController extends GetxController {
 
         log('处理文件 $fileName，语言: ${selectedLanguage.code}，条目数: ${translations.length}', name: 'ProjectController');
 
-        // 将翻译键值对转换为 TranslationEntry
+        // 处理每个翻译条目
         final importedEntries = <TranslationEntry>[];
+        final updatedEntries = <TranslationEntry>[];
+        final skippedKeys = <String>[];
+
         for (final translation in translations.entries) {
           final key = translation.key;
           final value = translation.value;
@@ -261,84 +264,139 @@ class ProjectController extends GetxController {
             continue;
           }
 
-          // 根据"自动审核"设置确定状态
-          TranslationStatus entryStatus;
-          if (value.trim().isEmpty) {
-            entryStatus = TranslationStatus.pending;
-          } else if (autoReview) {
-            entryStatus = TranslationStatus.completed; // 自动审核表示直接标记为完成
-          } else {
-            entryStatus = TranslationStatus.reviewing; // 需要人工审核
+          // 1. 判断key值是否已经存在
+          TranslationEntry? existingEntryForKey;
+          try {
+            existingEntryForKey = existingEntries.firstWhere(
+              (entry) => entry.key == key.trim(),
+            );
+          } catch (e) {
+            existingEntryForKey = null;
           }
 
-          // 创建翻译条目
-          final entry = TranslationEntry(
-            id: DateTime.now().millisecondsSinceEpoch.toString() +
-                (DateTime.now().microsecond % 1000).toString().padLeft(3, '0'),
-            projectId: projectId,
-            key: key.trim(),
-            sourceLanguage: selectedLanguage.code == _project.value!.defaultLanguage.code
-                ? selectedLanguage
-                : _project.value!.defaultLanguage,
-            targetLanguage: selectedLanguage,
-            sourceText:
-                selectedLanguage.code == _project.value!.defaultLanguage.code ? value : key, // 如果不是默认语言，使用键作为源文本
-            targetText: value,
-            status: entryStatus,
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
-          );
+          if (existingEntryForKey == null) {
+            // key不存在，直接创建新条目
+            log('key "$key" 不存在，将创建新条目', name: 'ProjectController');
 
-          importedEntries.add(entry);
-        }
+            // 根据"自动审核"设置确定状态
+            TranslationStatus entryStatus;
+            if (value.trim().isEmpty) {
+              entryStatus = TranslationStatus.pending;
+            } else if (autoReview) {
+              entryStatus = TranslationStatus.completed;
+            } else {
+              entryStatus = TranslationStatus.reviewing;
+            }
 
-        if (importedEntries.isEmpty) {
-          log('文件 $fileName 没有有效的翻译条目', name: 'ProjectController');
-          continue;
-        }
-
-        // 使用冲突检测服务检测冲突
-        final conflictResult = await conflict_service.ConflictDetectionService.detectConflicts(
-          existingEntries,
-          importedEntries,
-        );
-
-        log('文件 $fileName 冲突检测结果: ${conflictResult.conflictCount} 个冲突，${conflictResult.newEntryCount} 个新条目',
-            name: 'ProjectController');
-
-        // 添加新条目（无冲突的）
-        if (conflictResult.newEntries.isNotEmpty) {
-          final createdEntries = await _translationService.batchCreateTranslationEntries(conflictResult.newEntries);
-          allImportedEntries.addAll(createdEntries);
-        }
-
-        // 处理冲突条目
-        if (conflictResult.conflicts.isNotEmpty) {
-          if (overrideExisting) {
-            // 覆盖现有翻译：使用导入的条目覆盖现有条目
-            final conflictResolutions = conflictResult.conflicts
-                .map((conflict) => conflict_service.ConflictResolution(
-                      key: conflict.key,
-                      strategy: conflict_service.ConflictResolutionStrategy.useImported,
-                      resolvedEntry: conflict.importedEntry,
-                    ))
-                .toList();
-
-            final resolvedEntries = conflict_service.ConflictDetectionService.resolveConflicts(
-              conflictResult.conflicts,
-              conflictResolutions,
+            final newEntry = TranslationEntry(
+              id: DateTime.now().millisecondsSinceEpoch.toString() +
+                  (DateTime.now().microsecond % 1000).toString().padLeft(3, '0'),
+              projectId: projectId,
+              key: key.trim(),
+              sourceLanguage: selectedLanguage.code == _project.value!.defaultLanguage.code
+                  ? selectedLanguage
+                  : _project.value!.defaultLanguage,
+              targetLanguage: selectedLanguage,
+              sourceText: selectedLanguage.code == _project.value!.defaultLanguage.code ? value : key,
+              targetText: value,
+              status: entryStatus,
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
             );
 
-            if (resolvedEntries.isNotEmpty) {
-              final updatedEntries = await _translationService.batchUpdateTranslationEntries(resolvedEntries);
-              allImportedEntries.addAll(updatedEntries);
-              log('覆盖了 ${updatedEntries.length} 个现有翻译条目', name: 'ProjectController');
-            }
+            importedEntries.add(newEntry);
           } else {
-            // 不覆盖现有翻译：跳过冲突条目
-            allConflicts.addAll(conflictResult.conflicts);
-            log('发现 ${conflictResult.conflicts.length} 个冲突，跳过（未启用覆盖）', name: 'ProjectController');
+            // 2. key存在，判断当前语言的值是否存在
+            TranslationEntry? existingTranslationForLanguage;
+            try {
+              existingTranslationForLanguage = existingEntries.firstWhere(
+                (entry) => entry.key == key.trim() && entry.targetLanguage.code == selectedLanguage.code,
+              );
+            } catch (e) {
+              existingTranslationForLanguage = null;
+            }
+
+            if (existingTranslationForLanguage == null) {
+              // 3. 当前语言的值不存在，直接写入
+              log('key "$key" 存在但语言 "${selectedLanguage.code}" 的值不存在，将创建新条目', name: 'ProjectController');
+
+              TranslationStatus entryStatus;
+              if (value.trim().isEmpty) {
+                entryStatus = TranslationStatus.pending;
+              } else if (autoReview) {
+                entryStatus = TranslationStatus.completed;
+              } else {
+                entryStatus = TranslationStatus.reviewing;
+              }
+
+              final newEntry = TranslationEntry(
+                id: DateTime.now().millisecondsSinceEpoch.toString() +
+                    (DateTime.now().microsecond % 1000).toString().padLeft(3, '0'),
+                projectId: projectId,
+                key: key.trim(),
+                sourceLanguage: selectedLanguage.code == _project.value!.defaultLanguage.code
+                    ? selectedLanguage
+                    : _project.value!.defaultLanguage,
+                targetLanguage: selectedLanguage,
+                sourceText: selectedLanguage.code == _project.value!.defaultLanguage.code ? value : key,
+                targetText: value,
+                status: entryStatus,
+                createdAt: DateTime.now(),
+                updatedAt: DateTime.now(),
+              );
+
+              importedEntries.add(newEntry);
+            } else {
+              // 4. 当前语言的值存在，根据配置判断是否需要覆盖
+              if (overrideExisting) {
+                // 覆盖现有翻译
+                log('key "$key" 的语言 "${selectedLanguage.code}" 值存在，根据配置将覆盖现有翻译', name: 'ProjectController');
+
+                TranslationStatus entryStatus;
+                if (value.trim().isEmpty) {
+                  entryStatus = TranslationStatus.pending;
+                } else if (autoReview) {
+                  entryStatus = TranslationStatus.completed;
+                } else {
+                  entryStatus = TranslationStatus.reviewing;
+                }
+
+                final updatedEntry = existingTranslationForLanguage.copyWith(
+                  sourceText: selectedLanguage.code == _project.value!.defaultLanguage.code ? value : key,
+                  targetText: value,
+                  status: entryStatus,
+                  updatedAt: DateTime.now(),
+                );
+
+                updatedEntries.add(updatedEntry);
+              } else {
+                // 不覆盖，跳过此条目
+                log('key "$key" 的语言 "${selectedLanguage.code}" 值存在，根据配置跳过覆盖', name: 'ProjectController');
+                skippedKeys.add(key.trim());
+                totalSkipped++;
+              }
+            }
           }
+        }
+
+        // 批量创建新条目
+        if (importedEntries.isNotEmpty) {
+          final createdEntries = await _translationService.batchCreateTranslationEntries(importedEntries);
+          allImportedEntries.addAll(createdEntries);
+          log('文件 $fileName 创建了 ${createdEntries.length} 个新翻译条目', name: 'ProjectController');
+        }
+
+        // 批量更新现有条目
+        if (updatedEntries.isNotEmpty) {
+          final updatedResult = await _translationService.batchUpdateTranslationEntries(updatedEntries);
+          allUpdatedEntries.addAll(updatedResult);
+          log('文件 $fileName 更新了 ${updatedResult.length} 个现有翻译条目', name: 'ProjectController');
+        }
+
+        // 记录跳过的条目
+        if (skippedKeys.isNotEmpty) {
+          allSkippedEntries.addAll(skippedKeys);
+          log('文件 $fileName 跳过了 ${skippedKeys.length} 个现有翻译条目', name: 'ProjectController');
         }
       }
 
@@ -360,35 +418,52 @@ class ProjectController extends GetxController {
       }
 
       // 显示导入结果
-      if (allImportedEntries.isEmpty && allConflicts.isEmpty) {
+      if (allImportedEntries.isEmpty && allUpdatedEntries.isEmpty && allSkippedEntries.isEmpty) {
         Get.snackbar('提示', '没有导入任何翻译内容');
       } else {
         final message = StringBuffer();
-        if (allImportedEntries.isNotEmpty) {
-          message.write('成功导入 ${allImportedEntries.length} 个翻译条目');
+
+        // 统计创建的新条目数量
+        final newEntriesCount = allImportedEntries.length;
+
+        // 统计更新的条目数量
+        final updatedEntriesCount = allUpdatedEntries.length;
+
+        // 统计跳过的条目数量
+        final skippedEntriesCount = allSkippedEntries.length;
+
+        if (newEntriesCount > 0) {
+          message.write('创建了 $newEntriesCount 个新翻译条目');
           if (autoReview) {
             message.write('（已自动审核）');
           }
         }
-        if (allConflicts.isNotEmpty) {
+
+        if (updatedEntriesCount > 0) {
           if (message.isNotEmpty) message.write('，');
-          if (overrideExisting) {
-            message.write('覆盖了 ${allConflicts.length} 个现有翻译');
-          } else {
-            message.write('发现 ${allConflicts.length} 个冲突（已跳过）');
-          }
-        }
-        if (totalSkipped > 0) {
-          if (message.isNotEmpty) message.write('，');
-          if (ignoreEmpty) {
-            message.write('跳过 $totalSkipped 个空值或无效条目');
-          } else {
-            message.write('跳过 $totalSkipped 个无效条目');
+          message.write('更新了 $updatedEntriesCount 个现有翻译');
+          if (autoReview) {
+            message.write('（已自动审核）');
           }
         }
 
+        if (skippedEntriesCount > 0) {
+          if (message.isNotEmpty) message.write('，');
+          if (overrideExisting) {
+            message.write('跳过 $skippedEntriesCount 个空值或无效条目');
+          } else {
+            message.write('跳过 $skippedEntriesCount 个现有翻译（未启用覆盖）');
+          }
+        }
+
+        if (totalSkipped > skippedEntriesCount) {
+          final additionalSkipped = totalSkipped - skippedEntriesCount;
+          if (message.isNotEmpty) message.write('，');
+          message.write('跳过 $additionalSkipped 个无效条目');
+        }
+
         Get.snackbar(
-          allConflicts.isNotEmpty ? '部分成功' : '成功',
+          skippedEntriesCount > 0 && !overrideExisting ? '部分成功' : '成功',
           message.toString(),
           duration: const Duration(seconds: 5),
         );
@@ -399,13 +474,15 @@ class ProjectController extends GetxController {
         languageMap,
         translationMap,
         allImportedEntries.length,
-        allConflicts.length,
+        allUpdatedEntries.length,
+        allSkippedEntries.length,
         totalSkipped,
         startTime,
         success: true,
       );
 
-      log('导入完成：成功 ${allImportedEntries.length}，冲突 ${allConflicts.length}，跳过 $totalSkipped', name: 'ProjectController');
+      log('导入完成：创建 ${allImportedEntries.length}，更新 ${allUpdatedEntries.length}，跳过 ${allSkippedEntries.length + (totalSkipped - allSkippedEntries.length)}',
+          name: 'ProjectController');
     } catch (error, stackTrace) {
       log('导入文件失败', error: error, stackTrace: stackTrace, name: 'ProjectController');
 
@@ -413,6 +490,7 @@ class ProjectController extends GetxController {
       _createImportRecords(
         languageMap,
         translationMap,
+        0,
         0,
         0,
         0,
@@ -429,8 +507,9 @@ class ProjectController extends GetxController {
   void _createImportRecords(
     Map<String, Language> languageMap,
     Map<String, Map<String, String>> translationMap,
-    int totalImportedCount,
-    int totalConflictCount,
+    int totalCreatedCount,
+    int totalUpdatedCount,
+    int totalSkippedExistingCount,
     int totalSkippedCount,
     DateTime startTime, {
     required bool success,
@@ -448,14 +527,20 @@ class ProjectController extends GetxController {
 
         // 计算当前文件的统计数据（简化处理）
         final fileTranslationCount = translations.length;
-        final fileImportedCount = success
-            ? (totalImportedCount *
+        final fileCreatedCount = success
+            ? (totalCreatedCount *
                     fileTranslationCount /
                     translationMap.values.fold<int>(0, (sum, map) => sum + map.length))
                 .round()
             : 0;
-        final fileConflictCount = success
-            ? (totalConflictCount *
+        final fileUpdatedCount = success
+            ? (totalUpdatedCount *
+                    fileTranslationCount /
+                    translationMap.values.fold<int>(0, (sum, map) => sum + map.length))
+                .round()
+            : 0;
+        final fileSkippedExistingCount = success
+            ? (totalSkippedExistingCount *
                     fileTranslationCount /
                     translationMap.values.fold<int>(0, (sum, map) => sum + map.length))
                 .round()
@@ -473,18 +558,28 @@ class ProjectController extends GetxController {
         if (!success) {
           status = ImportRecordStatus.failure;
           message = errorMessage ?? '导入失败';
-        } else if (fileConflictCount > 0 || fileSkippedCount > 0) {
+        } else if (fileSkippedExistingCount > 0 || fileSkippedCount > fileSkippedExistingCount) {
           status = ImportRecordStatus.partial;
-          message = '成功导入 $fileImportedCount 条翻译';
-          if (fileConflictCount > 0) {
-            message += '，${overrideExisting ? "覆盖" : "跳过"} $fileConflictCount 个冲突';
+          message = '成功处理翻译';
+          if (fileCreatedCount > 0) {
+            message += '，创建 $fileCreatedCount 条新翻译';
           }
-          if (fileSkippedCount > 0) {
-            message += '，跳过 $fileSkippedCount 个条目';
+          if (fileUpdatedCount > 0) {
+            message += '，更新 $fileUpdatedCount 条翻译';
+          }
+          if (fileSkippedExistingCount > 0) {
+            message += '，${overrideExisting ? "" : "跳过"} $fileSkippedExistingCount 个现有翻译';
+          }
+          if (fileSkippedCount > fileSkippedExistingCount) {
+            final additionalSkipped = fileSkippedCount - fileSkippedExistingCount;
+            message += '，跳过 $additionalSkipped 个无效条目';
           }
         } else {
           status = ImportRecordStatus.success;
-          message = '成功导入 $fileImportedCount 条翻译';
+          message = '成功处理 $fileCreatedCount 条翻译';
+          if (fileUpdatedCount > 0) {
+            message += '，更新 $fileUpdatedCount 条翻译';
+          }
           if (autoReview) {
             message += '（已自动审核）';
           }
@@ -496,8 +591,8 @@ class ProjectController extends GetxController {
           fileName: fileName,
           status: status,
           message: message,
-          importedCount: fileImportedCount,
-          conflictCount: fileConflictCount,
+          importedCount: fileCreatedCount,
+          conflictCount: fileUpdatedCount,
           skippedCount: fileSkippedCount,
           timestamp: startTime,
           language: selectedLanguage?.code,
