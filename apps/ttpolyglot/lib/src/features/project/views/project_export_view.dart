@@ -155,14 +155,37 @@ class ProjectExportView extends StatelessWidget {
                                 const SizedBox(height: 16.0),
 
                                 // 语言选择
-                                Text(
-                                  '选择语言 (${exportController.selectedLanguages.length}/${project.targetLanguages.length + 1})',
-                                  style: Theme.of(context).textTheme.titleMedium,
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
+                                    borderRadius: BorderRadius.circular(12.0),
+                                    border: Border.all(
+                                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.translate,
+                                        size: 20.0,
+                                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
+                                      ),
+                                      const SizedBox(width: 12.0),
+                                      Text(
+                                        '选择语言 (${exportController.selectedLanguages.length}/${project.targetLanguages.length + 1})',
+                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: Theme.of(context).colorScheme.onSurface,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                const SizedBox(height: 8.0),
+                                const SizedBox(height: 16.0),
                                 Wrap(
-                                  spacing: 8.0,
-                                  runSpacing: 8.0,
+                                  spacing: 12.0,
+                                  runSpacing: 12.0,
                                   children: [
                                     _buildLanguageChip(context, project.defaultLanguage, true, exportController),
                                     ...project.targetLanguages
@@ -172,12 +195,68 @@ class ProjectExportView extends StatelessWidget {
 
                                 const SizedBox(height: 16.0),
 
-                                // 导出选项
-                                Text(
-                                  '导出选项',
-                                  style: Theme.of(context).textTheme.titleMedium,
+                                // 格式选择
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.05),
+                                    borderRadius: BorderRadius.circular(12.0),
+                                    border: Border.all(
+                                      color: Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.1),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.folder,
+                                        size: 20.0,
+                                        color: Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.7),
+                                      ),
+                                      const SizedBox(width: 12.0),
+                                      Text(
+                                        '选择格式',
+                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: Theme.of(context).colorScheme.onSurface,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                const SizedBox(height: 8.0),
+                                const SizedBox(height: 16.0),
+                                _buildFormatSelector(context, exportController),
+
+                                const SizedBox(height: 16.0),
+
+                                // 导出选项
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.05),
+                                    borderRadius: BorderRadius.circular(12.0),
+                                    border: Border.all(
+                                      color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.settings,
+                                        size: 20.0,
+                                        color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.7),
+                                      ),
+                                      const SizedBox(width: 12.0),
+                                      Text(
+                                        '导出选项',
+                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: Theme.of(context).colorScheme.onSurface,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 16.0),
                                 _buildExportOption(
                                   context,
                                   '仅导出已翻译内容',
@@ -199,16 +278,6 @@ class ProjectExportView extends StatelessWidget {
                                   exportController.includeTimestamps,
                                   (value) => exportController.setIncludeTimestamps(value),
                                 ),
-
-                                const SizedBox(height: 16.0),
-
-                                // 格式选择
-                                Text(
-                                  '选择格式',
-                                  style: Theme.of(context).textTheme.titleMedium,
-                                ),
-                                const SizedBox(height: 8.0),
-                                _buildFormatSelector(context, exportController),
 
                                 const SizedBox(height: 16.0),
 
@@ -523,16 +592,80 @@ class ProjectExportView extends StatelessWidget {
   ) {
     final isSelected = exportController.selectedLanguages.contains(language.code);
 
-    return FilterChip(
-      selected: isSelected,
-      label: Text('${language.nativeName} (${language.code})'),
-      avatar: isDefault ? const Icon(Icons.star, size: 16.0) : null,
-      onSelected: (selected) {
-        exportController.toggleLanguage(language.code);
-      },
-      backgroundColor: isDefault ? Theme.of(context).colorScheme.primaryContainer : null,
-      selectedColor: Theme.of(context).colorScheme.primaryContainer,
-      checkmarkColor: Theme.of(context).colorScheme.primary,
+    return GestureDetector(
+      onTap: () => exportController.toggleLanguage(language.code),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        decoration: BoxDecoration(
+          gradient: isSelected
+              ? LinearGradient(
+                  colors: [
+                    Theme.of(context).colorScheme.primary.withValues(alpha: 0.6),
+                    Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : LinearGradient(
+                  colors: [
+                    Theme.of(context).colorScheme.surface,
+                    Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  ],
+                ),
+          borderRadius: BorderRadius.circular(16.0),
+          border: Border.all(
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)
+                : Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+            width: isSelected ? 2.0 : 1.0,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                    blurRadius: 6.0,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isDefault) ...[
+              Icon(
+                Icons.star,
+                size: 16.0,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.9)
+                    : Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
+              ),
+              const SizedBox(width: 8.0),
+            ],
+            Flexible(
+              child: Text(
+                '${language.nativeName} (${language.code})',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.9)
+                          : Theme.of(context).colorScheme.onSurface,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (isSelected) ...[
+              const SizedBox(width: 8.0),
+              Icon(
+                Icons.check_circle,
+                size: 16.0,
+                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 
@@ -544,13 +677,57 @@ class ProjectExportView extends StatelessWidget {
     ValueChanged<bool> onChanged,
   ) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8.0),
-      child: SwitchListTile(
-        title: Text(title),
-        subtitle: Text(subtitle),
-        value: value,
-        onChanged: onChanged,
-        dense: true,
+      margin: const EdgeInsets.only(bottom: 12.0),
+      child: Material(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(16.0),
+        child: InkWell(
+          onTap: () => onChanged(!value),
+          borderRadius: BorderRadius.circular(16.0),
+          child: Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16.0),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                      ),
+                      const SizedBox(height: 4.0),
+                      Text(
+                        subtitle,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16.0),
+                Switch(
+                  value: value,
+                  onChanged: onChanged,
+                  activeColor: Theme.of(context).colorScheme.primary,
+                  activeTrackColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                  inactiveThumbColor: Theme.of(context).colorScheme.outline,
+                  inactiveTrackColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -674,69 +851,154 @@ class ProjectExportView extends StatelessWidget {
 
   Widget _buildFormatSelector(BuildContext context, ProjectExportController exportController) {
     final formats = [
-      {'label': 'JSON', 'value': 'json', 'icon': Icons.code, 'description': '适合开发使用'},
-      {'label': 'CSV', 'value': 'csv', 'icon': Icons.table_chart, 'description': '适合批量编辑'},
-      {'label': 'Excel', 'value': 'excel', 'icon': Icons.table_view, 'description': '适合数据分析'},
-      {'label': 'ARB', 'value': 'arb', 'icon': Icons.flutter_dash, 'description': 'Flutter ARB格式'},
-      {'label': 'PO', 'value': 'po', 'icon': Icons.language, 'description': 'GNU PO格式'},
+      {'label': 'JSON', 'value': 'json', 'icon': Icons.code, 'description': '适合开发使用', 'color': const Color(0xFF4CAF50)},
+      {
+        'label': 'CSV',
+        'value': 'csv',
+        'icon': Icons.table_chart,
+        'description': '适合批量编辑',
+        'color': const Color(0xFF2196F3)
+      },
+      {
+        'label': 'Excel',
+        'value': 'excel',
+        'icon': Icons.table_view,
+        'description': '适合数据分析',
+        'color': const Color(0xFF4CAF50)
+      },
+      {
+        'label': 'ARB',
+        'value': 'arb',
+        'icon': Icons.flutter_dash,
+        'description': 'Flutter ARB格式',
+        'color': const Color(0xFF673AB7)
+      },
+      {
+        'label': 'PO',
+        'value': 'po',
+        'icon': Icons.language,
+        'description': 'GNU PO格式',
+        'color': const Color(0xFF009688)
+      },
     ];
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth < 600.0 ? 2 : 3;
+        // 根据屏幕宽度决定列数
+        final availableWidth = constraints.maxWidth;
+        int crossAxisCount;
 
-        return Wrap(
-          spacing: 8.0,
-          runSpacing: 8.0,
-          children: formats.map((format) {
+        if (availableWidth < 400) {
+          crossAxisCount = 1; // 很窄的屏幕，单列
+        } else if (availableWidth < 600) {
+          crossAxisCount = 2; // 中等宽度，双列
+        } else if (availableWidth < 800) {
+          crossAxisCount = 3; // 较宽，三列
+        } else {
+          crossAxisCount = 4; // 很宽，四列
+        }
+
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 8.0,
+            mainAxisSpacing: 8.0,
+            childAspectRatio: availableWidth < 400 ? 4.5 : 3.8, // 水平布局使用更扁的比例
+          ),
+          itemCount: formats.length,
+          itemBuilder: (context, index) {
+            final format = formats[index];
             final isSelected = exportController.selectedFormat == format['value'];
 
-            return SizedBox(
-              width: (constraints.maxWidth - (crossAxisCount - 1) * 8.0) / crossAxisCount,
-              child: RadioListTile<String>(
-                title: Row(
-                  children: [
-                    Icon(
-                      format['icon'] as IconData,
-                      size: 20.0,
+            return Material(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(12.0),
+              child: InkWell(
+                onTap: () => exportController.setSelectedFormat(format['value'] as String),
+                borderRadius: BorderRadius.circular(12.0),
+                child: Container(
+                  padding: const EdgeInsets.all(12.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12.0),
+                    border: Border.all(
                       color: isSelected
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                          ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)
+                          : Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+                      width: isSelected ? 2.0 : 1.0,
                     ),
-                    const SizedBox(width: 8.0),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            format['label'] as String,
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                  fontWeight: isSelected ? FontWeight.bold : null,
-                                ),
-                          ),
-                          Text(
-                            format['description'] as String,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                ),
-                          ),
-                        ],
+                    gradient: isSelected
+                        ? LinearGradient(
+                            colors: [
+                              Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                              Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
+                            ],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          )
+                        : null,
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
+                              : (format['color'] as Color).withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        child: Icon(
+                          format['icon'] as IconData,
+                          size: availableWidth < 400 ? 16.0 : 18.0, // 小屏幕使用小图标
+                          color: isSelected ? Theme.of(context).colorScheme.primary : (format['color'] as Color),
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 12.0),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              format['label'] as String,
+                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                                    color: isSelected
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(context).colorScheme.onSurface,
+                                    fontSize: availableWidth < 400 ? 12.0 : null, // 小屏幕使用小字体
+                                  ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2.0),
+                            Text(
+                              format['description'] as String,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                                    fontSize: availableWidth < 400 ? 10.0 : null, // 小屏幕使用小字体
+                                  ),
+                              maxLines: availableWidth < 400 ? 1 : 2, // 小屏幕只显示一行
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (isSelected) ...[
+                        const SizedBox(width: 8.0),
+                        Icon(
+                          Icons.check_circle,
+                          size: availableWidth < 400 ? 20.0 : 24.0, // 增大选中图标尺寸
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
-                value: format['value'] as String,
-                groupValue: exportController.selectedFormat,
-                onChanged: (value) {
-                  if (value != null) {
-                    exportController.setSelectedFormat(value);
-                  }
-                },
-                dense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
               ),
             );
-          }).toList(),
+          },
         );
       },
     );
