@@ -59,7 +59,7 @@ class _SettingsViewContent extends StatelessWidget {
             _buildThemeSection(AppThemeController.instance),
             _buildLanguageSection(controller),
             _buildGeneralSection(controller),
-            _buildTranslationSection(),
+            _buildTranslationSection(context),
           ],
         ),
       ),
@@ -256,7 +256,7 @@ class _SettingsViewContent extends StatelessWidget {
   }
 
   /// 构建翻译设置部分
-  Widget _buildTranslationSection() {
+  Widget _buildTranslationSection(BuildContext context) {
     final translationController = Get.find<TranslationConfigController>();
 
     return Card(
@@ -287,7 +287,7 @@ class _SettingsViewContent extends StatelessWidget {
             ),
             const SizedBox(height: 16.0),
             // 翻译接口配置
-            _buildProviderConfigs(translationController),
+            _buildProviderConfigs(context, translationController),
             const SizedBox(height: 16.0),
             // 高级设置
             _buildAdvancedSettings(translationController),
@@ -298,21 +298,22 @@ class _SettingsViewContent extends StatelessWidget {
   }
 
   /// 构建翻译接口配置列表
-  Widget _buildProviderConfigs(TranslationConfigController controller) {
+  Widget _buildProviderConfigs(BuildContext context, TranslationConfigController controller) {
     return Obx(() {
       final providers = controller.config.providers;
 
       return Column(
         children: [
           // 翻译接口列表
-          ...providers.map((config) => _buildProviderItem(controller, config)),
+          ...providers.map((config) => _buildProviderItem(context, controller, config)),
         ],
       );
     });
   }
 
   /// 构建单个翻译接口项
-  Widget _buildProviderItem(TranslationConfigController controller, TranslationProviderConfig config) {
+  Widget _buildProviderItem(
+      BuildContext context, TranslationConfigController controller, TranslationProviderConfig config) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8.0),
       child: ExpansionTile(
@@ -387,6 +388,22 @@ class _SettingsViewContent extends StatelessWidget {
                     config.id,
                     isDefault: value,
                   ),
+                  activeColor: Colors.white,
+                  activeTrackColor: Theme.of(context).primaryColor,
+                  inactiveThumbColor: Colors.grey.shade400,
+                  inactiveTrackColor: Colors.grey.shade300,
+                  thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return Colors.white;
+                    }
+                    return Colors.grey.shade400;
+                  }),
+                  trackColor: WidgetStateProperty.resolveWith<Color>((states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return Theme.of(context).primaryColor;
+                    }
+                    return Colors.grey.shade300;
+                  }),
                 ),
                 const Divider(),
                 // 配置表单
@@ -989,7 +1006,6 @@ class _SettingsViewContent extends StatelessWidget {
                               isDefault = value;
                             });
                           },
-                          activeColor: Theme.of(context).primaryColor,
                         ),
                       ],
                     ),
