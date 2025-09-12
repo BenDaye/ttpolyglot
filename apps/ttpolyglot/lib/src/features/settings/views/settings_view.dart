@@ -320,42 +320,109 @@ class _SettingsViewContent extends StatelessWidget {
         borderRadius: BorderRadius.circular(8.0),
       ),
       elevation: 2.0,
-      child: ExpansionTile(
-        title: Row(
-          children: [
-            Expanded(
-              child: Row(
-                children: [
-                  if (config.isDefault) ...[
-                    Container(
-                      padding: const EdgeInsets.all(4.0),
-                      decoration: BoxDecoration(
-                        color: Colors.amber.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(4.0),
-                      ),
-                      child: Icon(
-                        Icons.star,
-                        size: 16.0,
-                        color: Colors.amber,
-                      ),
-                    ),
-                    const SizedBox(width: 8.0),
-                  ],
-                  Expanded(
-                    child: Text(
-                      config.displayName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16.0,
-                      ),
-                    ),
-                  ),
-                ],
+      child: Column(
+        children: [
+          // 标题区域
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(8.0),
+                topRight: Radius.circular(8.0),
               ),
             ),
-          ],
-        ),
-        children: [
+            child: Row(
+              children: [
+                // 左侧：默认标识和名称
+                Expanded(
+                  child: Row(
+                    children: [
+                      if (config.isDefault) ...[
+                        Container(
+                          padding: const EdgeInsets.all(4.0),
+                          decoration: BoxDecoration(
+                            color: Colors.amber.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(4.0),
+                          ),
+                          child: Icon(
+                            Icons.star,
+                            size: 16.0,
+                            color: Colors.amber,
+                          ),
+                        ),
+                        const SizedBox(width: 8.0),
+                      ],
+                      Expanded(
+                        child: Text(
+                          config.displayName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16.0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // 右侧：操作按钮
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // 编辑按钮
+                    IconButton(
+                      onPressed: () => _showEditProviderDialog(controller, config),
+                      icon: Icon(
+                        Icons.edit,
+                        size: 20.0,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      tooltip: '编辑',
+                      padding: const EdgeInsets.all(8.0),
+                      constraints: const BoxConstraints(),
+                    ),
+                    const SizedBox(width: 4.0),
+                    // 设为默认按钮
+                    IconButton(
+                      onPressed: config.isDefault
+                          ? null
+                          : () => controller.updateProviderConfigById(
+                                config.id,
+                                isDefault: true,
+                              ),
+                      icon: Icon(
+                        Icons.star_border,
+                        size: 20.0,
+                        color: config.isDefault ? Colors.amber : Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      tooltip: config.isDefault ? '已是默认' : '设为默认',
+                      padding: const EdgeInsets.all(8.0),
+                      constraints: const BoxConstraints(),
+                    ),
+                    const SizedBox(width: 4.0),
+                    // 删除按钮
+                    IconButton(
+                      onPressed: () => _showDeleteProviderDialog(controller, config),
+                      icon: Icon(
+                        Icons.delete_outline,
+                        size: 20.0,
+                        color: Colors.red,
+                      ),
+                      tooltip: '删除',
+                      padding: const EdgeInsets.all(8.0),
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          // 分隔线
+          Container(
+            height: 1.0,
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+          ),
+          // 内容区域
           Container(
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
@@ -368,7 +435,7 @@ class _SettingsViewContent extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 默认翻译开关
+                // 启用/禁用开关
                 Container(
                   margin: const EdgeInsets.only(bottom: 16.0),
                   decoration: BoxDecoration(
@@ -380,211 +447,25 @@ class _SettingsViewContent extends StatelessWidget {
                   ),
                   child: SwitchListTile(
                     dense: true,
-                    title: Row(
-                      children: [
-                        Text(
-                          '设为默认翻译',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(width: 8.0),
-                        Container(
-                          padding: const EdgeInsets.all(2.0),
-                          decoration: BoxDecoration(
-                            color: Colors.amber.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(2.0),
-                          ),
-                          child: Icon(
-                            Icons.star,
-                            size: 14.0,
-                            color: Colors.amber,
-                          ),
-                        ),
-                      ],
+                    title: Text(
+                      '启用此翻译接口',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                     subtitle: Text(
-                      '使用此翻译接口作为默认选项',
+                      '启用后可以在翻译时选择此接口',
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontSize: 12.0,
                       ),
                     ),
-                    value: config.isDefault,
+                    value: config.isEnabled,
                     onChanged: (value) => controller.updateProviderConfigById(
                       config.id,
-                      isDefault: value,
+                      isEnabled: value,
                     ),
-                  ),
-                ),
-
-                // 分隔线
-                Container(
-                  height: 1.0,
-                  margin: const EdgeInsets.only(bottom: 16.0),
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-                ),
-
-                // 配置表单
-                Text(
-                  '配置信息',
-                  style: TextStyle(
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 16.0),
-
-                // 名称输入框
-                Container(
-                  margin: const EdgeInsets.only(bottom: 12.0),
-                  child: TextFormField(
-                    initialValue: config.name,
-                    decoration: InputDecoration(
-                      labelText: '接口名称',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      hintText: '输入翻译接口名称',
-                      filled: true,
-                      fillColor: Theme.of(context).colorScheme.surface,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
-                    ),
-                    onChanged: (value) {
-                      controller.updateProviderConfigById(config.id, name: value);
-                    },
-                  ),
-                ),
-
-                // App ID 输入框
-                Container(
-                  margin: const EdgeInsets.only(bottom: 12.0),
-                  child: TextFormField(
-                    initialValue: config.appId,
-                    decoration: InputDecoration(
-                      labelText: config.provider == TranslationProvider.custom ? 'API Key' : 'App ID',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      hintText: config.provider == TranslationProvider.custom ? '输入API密钥' : '输入应用ID',
-                      filled: true,
-                      fillColor: Theme.of(context).colorScheme.surface,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
-                    ),
-                    onChanged: (value) {
-                      controller.updateProviderConfigById(config.id, appId: value);
-                    },
-                  ),
-                ),
-
-                // App Key 输入框（非自定义翻译）
-                if (config.provider != TranslationProvider.custom) ...[
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 12.0),
-                    child: TextFormField(
-                      initialValue: config.appKey,
-                      decoration: InputDecoration(
-                        labelText: 'App Key',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        hintText: '输入应用密钥',
-                        filled: true,
-                        fillColor: Theme.of(context).colorScheme.surface,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
-                      ),
-                      onChanged: (value) {
-                        controller.updateProviderConfigById(config.id, appKey: value);
-                      },
-                    ),
-                  ),
-                ],
-
-                // API URL 输入框（仅自定义翻译）
-                if (config.provider == TranslationProvider.custom) ...[
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 12.0),
-                    child: TextFormField(
-                      initialValue: config.apiUrl ?? '',
-                      decoration: InputDecoration(
-                        labelText: 'API 地址',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        hintText: '输入自定义翻译API地址',
-                        filled: true,
-                        fillColor: Theme.of(context).colorScheme.surface,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
-                      ),
-                      onChanged: (value) {
-                        controller.updateProviderConfigById(config.id, apiUrl: value);
-                      },
-                    ),
-                  ),
-                ],
-
-                // 验证状态
-                if (!config.isValid) ...[
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 12.0),
-                    padding: const EdgeInsets.all(12.0),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8.0),
-                      border: Border.all(
-                        color: Colors.orange.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.warning, color: Colors.orange, size: 16.0),
-                        const SizedBox(width: 8.0),
-                        Expanded(
-                          child: Text(
-                            config.getValidationErrors().join('\n'),
-                            style: TextStyle(color: Colors.orange, fontSize: 12.0),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-
-                // 删除按钮
-                Container(
-                  margin: const EdgeInsets.only(top: 16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8.0),
-                          border: Border.all(
-                            color: Colors.red.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: TextButton.icon(
-                          onPressed: () => _showDeleteProviderDialog(controller, config),
-                          icon: Icon(
-                            Icons.delete_outline,
-                            color: Colors.red,
-                            size: 18.0,
-                          ),
-                          label: Text(
-                            '删除此接口',
-                            style: TextStyle(
-                              color: Colors.red,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                 ),
               ],
@@ -1148,6 +1029,476 @@ class _SettingsViewContent extends StatelessWidget {
               ),
               child: Text(
                 '添加',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14.0,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 显示编辑翻译接口对话框
+  void _showEditProviderDialog(TranslationConfigController controller, TranslationProviderConfig config) {
+    final nameController = TextEditingController(text: config.name);
+    final appIdController = TextEditingController(text: config.appId);
+    final appKeyController = TextEditingController(text: config.appKey);
+    final apiUrlController = TextEditingController(text: config.apiUrl ?? '');
+    bool isDefault = config.isDefault;
+
+    // 错误状态
+    String? nameError;
+    String? appIdError;
+    String? appKeyError;
+    String? apiUrlError;
+
+    // 验证函数
+    bool validateInputs() {
+      bool isValid = true;
+
+      // 重置错误状态
+      nameError = null;
+      appIdError = null;
+      appKeyError = null;
+      apiUrlError = null;
+
+      // 验证名称
+      if (nameController.text.trim().isEmpty) {
+        nameError = '请输入翻译接口名称';
+        isValid = false;
+      }
+
+      // 验证App ID
+      if (appIdController.text.trim().isEmpty) {
+        appIdError = config.provider == TranslationProvider.custom ? '请输入API密钥' : '请输入应用ID';
+        isValid = false;
+      }
+
+      // 验证App Key（非自定义翻译）
+      if (config.provider != TranslationProvider.custom && appKeyController.text.trim().isEmpty) {
+        appKeyError = '请输入应用密钥';
+        isValid = false;
+      }
+
+      // 验证API URL（仅自定义翻译）
+      if (config.provider == TranslationProvider.custom && apiUrlController.text.trim().isEmpty) {
+        apiUrlError = '请输入API地址';
+        isValid = false;
+      }
+
+      // 验证API URL格式（仅自定义翻译）
+      if (config.provider == TranslationProvider.custom &&
+          apiUrlController.text.trim().isNotEmpty &&
+          !apiUrlController.text.trim().startsWith('http')) {
+        apiUrlError = 'API地址必须以http或https开头';
+        isValid = false;
+      }
+
+      return isValid;
+    }
+
+    Get.dialog(
+      StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Row(
+            children: [
+              Text(
+                '编辑翻译接口',
+                style: TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+              const Spacer(),
+              IconButton(
+                onPressed: () => Get.back(),
+                icon: Icon(
+                  Icons.close,
+                  color: Colors.grey.shade600,
+                  size: 24.0,
+                ),
+                padding: const EdgeInsets.all(8.0),
+                constraints: const BoxConstraints(),
+                splashRadius: 28.0,
+              ),
+            ],
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          elevation: 8.0,
+          backgroundColor: Theme.of(context).dialogBackgroundColor,
+          content: Container(
+            width: 480.0,
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 翻译提供商选择（只读）
+                  Container(
+                    padding: const EdgeInsets.all(12.0),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(8.0),
+                      border: Border.all(
+                        color: Colors.grey.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.translate,
+                          color: Theme.of(context).primaryColor.withValues(alpha: 0.7),
+                          size: 20.0,
+                        ),
+                        const SizedBox(width: 12.0),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '翻译提供商',
+                                style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 12.0,
+                                ),
+                              ),
+                              const SizedBox(height: 4.0),
+                              Text(
+                                config.provider.name,
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onSurface,
+                                  fontSize: 16.0,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.lock,
+                          color: Colors.grey.shade400,
+                          size: 16.0,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+                  // 名称输入框
+                  TextField(
+                    controller: nameController,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.all(12.0),
+                      labelText: '名称',
+                      labelStyle: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.edit,
+                        color: Theme.of(context).primaryColor.withValues(alpha: 0.7),
+                        size: 20.0,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide(
+                          color: Colors.grey.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).primaryColor,
+                          width: 2.0,
+                        ),
+                      ),
+                      hintText: '输入翻译接口名称',
+                      hintStyle: TextStyle(
+                        color: Colors.grey.withValues(alpha: 0.6),
+                        fontSize: 14.0,
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 2.0,
+                        ),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 2.0,
+                        ),
+                      ),
+                      errorText: nameError,
+                    ),
+                  ),
+                  const SizedBox(height: 20.0),
+                  // App ID 输入框
+                  TextField(
+                    controller: appIdController,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.all(12.0),
+                      labelText: config.provider == TranslationProvider.custom ? 'API Key' : 'App ID',
+                      labelStyle: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.account_circle,
+                        color: Theme.of(context).primaryColor.withValues(alpha: 0.7),
+                        size: 20.0,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide(
+                          color: Colors.grey.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).primaryColor,
+                          width: 2.0,
+                        ),
+                      ),
+                      hintText: config.provider == TranslationProvider.custom ? '输入API密钥' : '输入应用ID',
+                      hintStyle: TextStyle(
+                        color: Colors.grey.withValues(alpha: 0.6),
+                        fontSize: 14.0,
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 2.0,
+                        ),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 2.0,
+                        ),
+                      ),
+                      errorText: appIdError,
+                    ),
+                  ),
+                  const SizedBox(height: 20.0),
+                  // App Key 输入框（非自定义翻译）
+                  if (config.provider != TranslationProvider.custom) ...[
+                    TextField(
+                      controller: appKeyController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.all(12.0),
+                        labelText: 'App Key',
+                        labelStyle: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.vpn_key,
+                          color: Theme.of(context).primaryColor.withValues(alpha: 0.7),
+                          size: 20.0,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(
+                            color: Colors.grey.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).primaryColor,
+                            width: 2.0,
+                          ),
+                        ),
+                        hintText: '输入应用密钥',
+                        hintStyle: TextStyle(
+                          color: Colors.grey.withValues(alpha: 0.6),
+                          fontSize: 14.0,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(
+                            color: Colors.red,
+                            width: 2.0,
+                          ),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(
+                            color: Colors.red,
+                            width: 2.0,
+                          ),
+                        ),
+                        errorText: appKeyError,
+                      ),
+                    ),
+                    const SizedBox(height: 16.0),
+                  ],
+                  // API URL 输入框（仅自定义翻译）
+                  if (config.provider == TranslationProvider.custom) ...[
+                    TextField(
+                      controller: apiUrlController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.all(12.0),
+                        labelText: 'API 地址',
+                        labelStyle: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.link,
+                          color: Theme.of(context).primaryColor.withValues(alpha: 0.7),
+                          size: 20.0,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(
+                            color: Colors.grey.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).primaryColor,
+                            width: 2.0,
+                          ),
+                        ),
+                        hintText: '输入自定义翻译API地址',
+                        hintStyle: TextStyle(
+                          color: Colors.grey.withValues(alpha: 0.6),
+                          fontSize: 14.0,
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(
+                            color: Colors.red,
+                            width: 2.0,
+                          ),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(
+                            color: Colors.red,
+                            width: 2.0,
+                          ),
+                        ),
+                        errorText: apiUrlError,
+                      ),
+                    ),
+                    const SizedBox(height: 16.0),
+                  ],
+                  // 默认翻译开关
+                  Container(
+                    padding: const EdgeInsets.all(12.0),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(8.0),
+                      border: Border.all(
+                        color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.star,
+                          color: Theme.of(context).primaryColor,
+                          size: 20.0,
+                        ),
+                        const SizedBox(width: 12.0),
+                        const Expanded(
+                          child: Text(
+                            '设为默认翻译接口',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        Switch(
+                          value: isDefault,
+                          onChanged: (value) {
+                            setState(() {
+                              isDefault = value;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8.0),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
+              child: Text(
+                '取消',
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8.0),
+            ElevatedButton(
+              onPressed: () {
+                if (validateInputs()) {
+                  controller.updateProviderConfigById(
+                    config.id,
+                    name: nameController.text.trim(),
+                    appId: appIdController.text.trim(),
+                    appKey: config.provider != TranslationProvider.custom ? appKeyController.text.trim() : null,
+                    apiUrl: config.provider == TranslationProvider.custom ? apiUrlController.text.trim() : null,
+                    isDefault: isDefault,
+                  );
+                  Get.back();
+                } else {
+                  // 触发UI更新以显示错误信息
+                  setState(() {});
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                elevation: 2.0,
+                shadowColor: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+              ),
+              child: Text(
+                '保存',
                 style: const TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 14.0,
