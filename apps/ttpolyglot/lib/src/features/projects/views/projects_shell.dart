@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:ttpolyglot/src/core/layout/layout.dart';
 import 'package:ttpolyglot/src/core/routing/app_pages.dart';
+import 'package:ttpolyglot/src/core/theme/app_theme.dart' as app_theme;
 import 'package:ttpolyglot/src/features/features.dart';
 
 class ProjectsShell extends StatefulWidget {
@@ -50,9 +52,9 @@ class _ProjectsShellState extends State<ProjectsShell> {
               () {
                 if (controller.selectedProjectId.isEmpty) {
                   return Container(
-                    color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
+                    color: Theme.of(context).colorScheme.surface,
                     child: Center(
-                      child: Text('No project selected'),
+                      child: _buildEmptyState(context),
                     ),
                   );
                 }
@@ -66,6 +68,35 @@ class _ProjectsShellState extends State<ProjectsShell> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 400.0),
+      padding: const EdgeInsets.all(32.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 图标
+          Icon(
+            Symbols.folder_open,
+            size: 64.0,
+            color: app_theme.AppThemeController.primaryColor.withValues(alpha: 0.9),
+          ),
+          const SizedBox(height: 24.0),
+          // 标题
+          Text(
+            '暂无选择的项目',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.grey : const Color(0xFF191919),
+                ),
+          ),
+        ],
+      ),
     );
   }
 }
