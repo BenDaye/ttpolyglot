@@ -620,11 +620,18 @@ class _SettingsViewContent extends StatelessWidget {
                   if (selectedProvider != TranslationProvider.custom) ...[
                     TextField(
                       controller: appKeyController,
-                      decoration: const InputDecoration(
-                        contentPadding: EdgeInsets.all(12.0),
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.all(12.0),
                         labelText: 'App Key',
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                         hintText: '输入应用密钥',
+                        hintStyle: TextStyle(
+                          color: Colors.grey.withValues(alpha: 0.7),
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16.0),
@@ -633,6 +640,7 @@ class _SettingsViewContent extends StatelessWidget {
                   if (selectedProvider == TranslationProvider.custom) ...[
                     TextField(
                       controller: apiUrlController,
+                      maxLines: 3,
                       decoration: const InputDecoration(
                         contentPadding: EdgeInsets.all(12.0),
                         labelText: 'API 地址',
