@@ -460,46 +460,31 @@ class _SettingsViewContent extends StatelessWidget {
                     ),
                     const SizedBox(width: 16.0),
                     // 设为默认开关
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                      decoration: BoxDecoration(
-                        color: config.isDefault
-                            ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.2)
-                            : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(20.0),
-                        border: Border.all(
-                          color: config.isDefault
-                              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)
-                              : Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-                          width: 1.0,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '设为默认',
+                          style: TextStyle(
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.w500,
+                            color: config.isDefault
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                          ),
                         ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '设为默认',
-                            style: TextStyle(
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.w500,
-                              color: config.isDefault
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          const SizedBox(width: 8.0),
-                          Switch(
-                            value: config.isDefault,
-                            onChanged: (bool value) {
-                              controller.updateProviderConfigById(
-                                config.id,
-                                isDefault: value,
-                              );
-                            },
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                        ],
-                      ),
+                        const SizedBox(width: 8.0),
+                        Switch(
+                          value: config.isDefault,
+                          onChanged: (bool value) {
+                            controller.updateProviderConfigById(
+                              config.id,
+                              isDefault: value,
+                            );
+                          },
+                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                      ],
                     ),
                   ],
                 ),
