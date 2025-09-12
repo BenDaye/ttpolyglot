@@ -278,10 +278,24 @@ class _SettingsViewContent extends StatelessWidget {
                     ),
                   ),
                 ),
-                OutlinedButton.icon(
+                ElevatedButton.icon(
                   onPressed: () => _showAddProviderDialog(translationController),
                   icon: const Icon(Icons.add),
-                  label: const Text('添加翻译接口'),
+                  label: const Text(
+                    '添加翻译接口',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14.0,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    elevation: 2.0,
+                    shadowColor: AppThemeController.primaryColor.withValues(alpha: 0.3),
+                  ),
                 ),
               ],
             ),
@@ -324,13 +338,27 @@ class _SettingsViewContent extends StatelessWidget {
         children: [
           // 标题区域
           Container(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).colorScheme.surface,
+                  Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(8.0),
                 topRight: Radius.circular(8.0),
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.08),
+                  blurRadius: 4.0,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Row(
               children: [
@@ -340,25 +368,49 @@ class _SettingsViewContent extends StatelessWidget {
                     children: [
                       if (config.isDefault) ...[
                         Container(
-                          padding: const EdgeInsets.all(4.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                           decoration: BoxDecoration(
-                            color: Colors.amber.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(4.0),
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.amber.withValues(alpha: 0.2),
+                                Colors.amber.withValues(alpha: 0.1),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(12.0),
+                            border: Border.all(
+                              color: Colors.amber.withValues(alpha: 0.3),
+                              width: 1.0,
+                            ),
                           ),
-                          child: Icon(
-                            Icons.star,
-                            size: 16.0,
-                            color: Colors.amber,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.star,
+                                size: 14.0,
+                                color: Colors.amber.shade700,
+                              ),
+                              const SizedBox(width: 4.0),
+                              Text(
+                                '默认',
+                                style: TextStyle(
+                                  fontSize: 12.0,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.amber.shade700,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 8.0),
+                        const SizedBox(width: 12.0),
                       ],
                       Expanded(
                         child: Text(
                           config.displayName,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w600,
-                            fontSize: 16.0,
+                            fontSize: 18.0,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -370,40 +422,84 @@ class _SettingsViewContent extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // 编辑按钮
-                    IconButton(
-                      onPressed: () => _showEditProviderDialog(controller, config),
-                      icon: Icon(
-                        Icons.edit,
-                        size: 20.0,
-                        color: Theme.of(context).colorScheme.primary,
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8.0),
                       ),
-                      tooltip: '编辑',
-                      padding: const EdgeInsets.all(8.0),
-                      constraints: const BoxConstraints(),
+                      child: IconButton(
+                        onPressed: () => _showEditProviderDialog(controller, config),
+                        icon: Icon(
+                          Icons.edit,
+                          size: 20.0,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        tooltip: '编辑',
+                        padding: const EdgeInsets.all(10.0),
+                        constraints: const BoxConstraints(),
+                      ),
                     ),
-                    const SizedBox(width: 4.0),
+                    const SizedBox(width: 8.0),
                     // 删除按钮
-                    IconButton(
-                      onPressed: () => _showDeleteProviderDialog(controller, config),
-                      icon: Icon(
-                        Icons.delete_outline,
-                        size: 20.0,
-                        color: Colors.red,
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.red.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8.0),
                       ),
-                      tooltip: '删除',
-                      padding: const EdgeInsets.all(8.0),
-                      constraints: const BoxConstraints(),
+                      child: IconButton(
+                        onPressed: () => _showDeleteProviderDialog(controller, config),
+                        icon: Icon(
+                          Icons.delete_outline,
+                          size: 20.0,
+                          color: Colors.red.shade600,
+                        ),
+                        tooltip: '删除',
+                        padding: const EdgeInsets.all(10.0),
+                        constraints: const BoxConstraints(),
+                      ),
                     ),
-                    const SizedBox(width: 4.0),
+                    const SizedBox(width: 16.0),
                     // 设为默认开关
-                    Switch(
-                      value: config.isDefault,
-                      onChanged: (bool value) {
-                        controller.updateProviderConfigById(
-                          config.id,
-                          isDefault: value,
-                        );
-                      },
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                      decoration: BoxDecoration(
+                        color: config.isDefault
+                            ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.2)
+                            : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(20.0),
+                        border: Border.all(
+                          color: config.isDefault
+                              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)
+                              : Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                          width: 1.0,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '设为默认',
+                            style: TextStyle(
+                              fontSize: 14.0,
+                              fontWeight: FontWeight.w500,
+                              color: config.isDefault
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(width: 8.0),
+                          Switch(
+                            value: config.isDefault,
+                            onChanged: (bool value) {
+                              controller.updateProviderConfigById(
+                                config.id,
+                                isDefault: value,
+                              );
+                            },
+                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
