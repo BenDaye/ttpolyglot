@@ -562,6 +562,57 @@ class _SettingsViewContent extends StatelessWidget {
     final appKeyController = TextEditingController();
     final apiUrlController = TextEditingController();
 
+    // 错误状态
+    String? nameError;
+    String? appIdError;
+    String? appKeyError;
+    String? apiUrlError;
+
+    // 验证函数
+    bool _validateInputs() {
+      bool isValid = true;
+
+      // 重置错误状态
+      nameError = null;
+      appIdError = null;
+      appKeyError = null;
+      apiUrlError = null;
+
+      // 验证名称
+      if (nameController.text.trim().isEmpty) {
+        nameError = '请输入翻译接口名称';
+        isValid = false;
+      }
+
+      // 验证App ID
+      if (appIdController.text.trim().isEmpty) {
+        appIdError = selectedProvider == TranslationProvider.custom ? '请输入API密钥' : '请输入应用ID';
+        isValid = false;
+      }
+
+      // 验证App Key（非自定义翻译）
+      if (selectedProvider != TranslationProvider.custom && appKeyController.text.trim().isEmpty) {
+        appKeyError = '请输入应用密钥';
+        isValid = false;
+      }
+
+      // 验证API URL（仅自定义翻译）
+      if (selectedProvider == TranslationProvider.custom && apiUrlController.text.trim().isEmpty) {
+        apiUrlError = '请输入API地址';
+        isValid = false;
+      }
+
+      // 验证API URL格式（仅自定义翻译）
+      if (selectedProvider == TranslationProvider.custom &&
+          apiUrlController.text.trim().isNotEmpty &&
+          !apiUrlController.text.trim().startsWith('http')) {
+        apiUrlError = 'API地址必须以http或https开头';
+        isValid = false;
+      }
+
+      return isValid;
+    }
+
     Get.dialog(
       StatefulBuilder(
         builder: (context, setState) => AlertDialog(
@@ -682,6 +733,21 @@ class _SettingsViewContent extends StatelessWidget {
                         color: Colors.grey.withValues(alpha: 0.6),
                         fontSize: 14.0,
                       ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 2.0,
+                        ),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 2.0,
+                        ),
+                      ),
+                      errorText: nameError,
                     ),
                   ),
                   const SizedBox(height: 20.0),
@@ -721,6 +787,21 @@ class _SettingsViewContent extends StatelessWidget {
                         color: Colors.grey.withValues(alpha: 0.6),
                         fontSize: 14.0,
                       ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 2.0,
+                        ),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 2.0,
+                        ),
+                      ),
+                      errorText: appIdError,
                     ),
                   ),
                   const SizedBox(height: 20.0),
@@ -763,6 +844,21 @@ class _SettingsViewContent extends StatelessWidget {
                           fontSize: 14.0,
                           fontStyle: FontStyle.italic,
                         ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(
+                            color: Colors.red,
+                            width: 2.0,
+                          ),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(
+                            color: Colors.red,
+                            width: 2.0,
+                          ),
+                        ),
+                        errorText: appKeyError,
                       ),
                     ),
                     const SizedBox(height: 16.0),
@@ -805,6 +901,21 @@ class _SettingsViewContent extends StatelessWidget {
                           color: Colors.grey.withValues(alpha: 0.6),
                           fontSize: 14.0,
                         ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(
+                            color: Colors.red,
+                            width: 2.0,
+                          ),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(
+                            color: Colors.red,
+                            width: 2.0,
+                          ),
+                        ),
+                        errorText: apiUrlError,
                       ),
                     ),
                     const SizedBox(height: 16.0),
@@ -834,15 +945,18 @@ class _SettingsViewContent extends StatelessWidget {
             const SizedBox(width: 8.0),
             ElevatedButton(
               onPressed: () {
-                if (nameController.text.isNotEmpty) {
+                if (_validateInputs()) {
                   controller.addTranslationProvider(
                     provider: selectedProvider,
-                    name: nameController.text,
-                    appId: appIdController.text,
-                    appKey: selectedProvider != TranslationProvider.custom ? appKeyController.text : null,
-                    apiUrl: selectedProvider == TranslationProvider.custom ? apiUrlController.text : null,
+                    name: nameController.text.trim(),
+                    appId: appIdController.text.trim(),
+                    appKey: selectedProvider != TranslationProvider.custom ? appKeyController.text.trim() : null,
+                    apiUrl: selectedProvider == TranslationProvider.custom ? apiUrlController.text.trim() : null,
                   );
                   Get.back();
+                } else {
+                  // 触发UI更新以显示错误信息
+                  setState(() {});
                 }
               },
               style: ElevatedButton.styleFrom(
