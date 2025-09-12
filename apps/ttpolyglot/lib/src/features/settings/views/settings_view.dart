@@ -565,7 +565,19 @@ class _SettingsViewContent extends StatelessWidget {
     Get.dialog(
       StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: const Text('添加翻译接口'),
+          title: Text(
+            '添加翻译接口',
+            style: TextStyle(
+              fontSize: 20.0,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          elevation: 8.0,
+          backgroundColor: Theme.of(context).dialogBackgroundColor,
           content: Container(
             width: 480.0,
             padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -576,10 +588,29 @@ class _SettingsViewContent extends StatelessWidget {
                   // 翻译提供商选择
                   DropdownButtonFormField<TranslationProvider>(
                     value: selectedProvider,
-                    decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.all(12.0),
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.all(12.0),
                       labelText: '翻译提供商',
-                      border: OutlineInputBorder(),
+                      labelStyle: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide(
+                          color: Colors.grey.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).primaryColor,
+                          width: 2.0,
+                        ),
+                      ),
                     ),
                     items: TranslationProvider.values.map((provider) {
                       return DropdownMenuItem(
@@ -597,25 +628,71 @@ class _SettingsViewContent extends StatelessWidget {
                   // 名称输入框
                   TextField(
                     controller: nameController,
-                    decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.all(12.0),
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.all(12.0),
                       labelText: '名称',
-                      border: OutlineInputBorder(),
+                      labelStyle: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide(
+                          color: Colors.grey.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).primaryColor,
+                          width: 2.0,
+                        ),
+                      ),
                       hintText: '输入翻译接口名称',
+                      hintStyle: TextStyle(
+                        color: Colors.grey.withValues(alpha: 0.6),
+                        fontSize: 14.0,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 16.0),
+                  const SizedBox(height: 20.0),
                   // App ID 输入框
                   TextField(
                     controller: appIdController,
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.all(12.0),
                       labelText: selectedProvider == TranslationProvider.custom ? 'API Key' : 'App ID',
-                      border: const OutlineInputBorder(),
+                      labelStyle: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide(
+                          color: Colors.grey.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).primaryColor,
+                          width: 2.0,
+                        ),
+                      ),
                       hintText: selectedProvider == TranslationProvider.custom ? '输入API密钥' : '输入应用ID',
+                      hintStyle: TextStyle(
+                        color: Colors.grey.withValues(alpha: 0.6),
+                        fontSize: 14.0,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 16.0),
+                  const SizedBox(height: 20.0),
                   // App Key 输入框（非自定义翻译）
                   if (selectedProvider != TranslationProvider.custom) ...[
                     TextField(
@@ -624,12 +701,30 @@ class _SettingsViewContent extends StatelessWidget {
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.all(12.0),
                         labelText: 'App Key',
-                        border: const OutlineInputBorder(),
+                        labelStyle: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(
+                            color: Colors.grey.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).primaryColor,
+                            width: 2.0,
+                          ),
+                        ),
                         hintText: '输入应用密钥',
                         hintStyle: TextStyle(
-                          color: Colors.grey.withValues(alpha: 0.7),
+                          color: Colors.grey.withValues(alpha: 0.6),
                           fontSize: 14.0,
-                          fontWeight: FontWeight.w400,
                           fontStyle: FontStyle.italic,
                         ),
                       ),
@@ -641,15 +736,39 @@ class _SettingsViewContent extends StatelessWidget {
                     TextField(
                       controller: apiUrlController,
                       maxLines: 3,
-                      decoration: const InputDecoration(
-                        contentPadding: EdgeInsets.all(12.0),
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.all(12.0),
                         labelText: 'API 地址',
-                        border: OutlineInputBorder(),
+                        labelStyle: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(
+                            color: Colors.grey.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).primaryColor,
+                            width: 2.0,
+                          ),
+                        ),
                         hintText: '输入自定义翻译API地址',
+                        hintStyle: TextStyle(
+                          color: Colors.grey.withValues(alpha: 0.6),
+                          fontSize: 14.0,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16.0),
                   ],
+                  const SizedBox(height: 8.0),
                 ],
               ),
             ),
@@ -657,8 +776,21 @@ class _SettingsViewContent extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Get.back(),
-              child: const Text('取消'),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
+              child: Text(
+                '取消',
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
+            const SizedBox(width: 8.0),
             ElevatedButton(
               onPressed: () {
                 if (nameController.text.isNotEmpty) {
@@ -672,7 +804,21 @@ class _SettingsViewContent extends StatelessWidget {
                   Get.back();
                 }
               },
-              child: const Text('添加'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                elevation: 2.0,
+                shadowColor: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+              ),
+              child: Text(
+                '添加',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14.0,
+                ),
+              ),
             ),
           ],
         ),
