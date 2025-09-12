@@ -565,13 +565,29 @@ class _SettingsViewContent extends StatelessWidget {
     Get.dialog(
       StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: Text(
-            '添加翻译接口',
-            style: TextStyle(
-              fontSize: 20.0,
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).primaryColor,
-            ),
+          title: Row(
+            children: [
+              Text(
+                '添加翻译接口',
+                style: TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+              const Spacer(),
+              IconButton(
+                onPressed: () => Get.back(),
+                icon: Icon(
+                  Icons.close,
+                  color: Colors.grey.shade600,
+                  size: 24.0,
+                ),
+                padding: const EdgeInsets.all(8.0),
+                constraints: const BoxConstraints(),
+                splashRadius: 28.0,
+              ),
+            ],
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.0),
@@ -594,6 +610,11 @@ class _SettingsViewContent extends StatelessWidget {
                       labelStyle: TextStyle(
                         color: Theme.of(context).primaryColor,
                         fontWeight: FontWeight.w500,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.translate,
+                        color: Theme.of(context).primaryColor.withValues(alpha: 0.7),
+                        size: 20.0,
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
@@ -635,6 +656,11 @@ class _SettingsViewContent extends StatelessWidget {
                         color: Theme.of(context).primaryColor,
                         fontWeight: FontWeight.w500,
                       ),
+                      prefixIcon: Icon(
+                        Icons.edit,
+                        color: Theme.of(context).primaryColor.withValues(alpha: 0.7),
+                        size: 20.0,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
@@ -668,6 +694,11 @@ class _SettingsViewContent extends StatelessWidget {
                       labelStyle: TextStyle(
                         color: Theme.of(context).primaryColor,
                         fontWeight: FontWeight.w500,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.account_circle,
+                        color: Theme.of(context).primaryColor.withValues(alpha: 0.7),
+                        size: 20.0,
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
@@ -704,6 +735,11 @@ class _SettingsViewContent extends StatelessWidget {
                         labelStyle: TextStyle(
                           color: Theme.of(context).primaryColor,
                           fontWeight: FontWeight.w500,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.vpn_key,
+                          color: Theme.of(context).primaryColor.withValues(alpha: 0.7),
+                          size: 20.0,
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
@@ -742,6 +778,11 @@ class _SettingsViewContent extends StatelessWidget {
                         labelStyle: TextStyle(
                           color: Theme.of(context).primaryColor,
                           fontWeight: FontWeight.w500,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.link,
+                          color: Theme.of(context).primaryColor.withValues(alpha: 0.7),
+                          size: 20.0,
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
