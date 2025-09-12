@@ -382,24 +382,6 @@ class _SettingsViewContent extends StatelessWidget {
                       constraints: const BoxConstraints(),
                     ),
                     const SizedBox(width: 4.0),
-                    // 设为默认按钮
-                    IconButton(
-                      onPressed: config.isDefault
-                          ? null
-                          : () => controller.updateProviderConfigById(
-                                config.id,
-                                isDefault: true,
-                              ),
-                      icon: Icon(
-                        Icons.star_border,
-                        size: 20.0,
-                        color: config.isDefault ? Colors.amber : Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                      tooltip: config.isDefault ? '已是默认' : '设为默认',
-                      padding: const EdgeInsets.all(8.0),
-                      constraints: const BoxConstraints(),
-                    ),
-                    const SizedBox(width: 4.0),
                     // 删除按钮
                     IconButton(
                       onPressed: () => _showDeleteProviderDialog(controller, config),
@@ -412,61 +394,18 @@ class _SettingsViewContent extends StatelessWidget {
                       padding: const EdgeInsets.all(8.0),
                       constraints: const BoxConstraints(),
                     ),
+                    const SizedBox(width: 4.0),
+                    // 设为默认开关
+                    Switch(
+                      value: config.isDefault,
+                      onChanged: (bool value) {
+                        controller.updateProviderConfigById(
+                          config.id,
+                          isDefault: value,
+                        );
+                      },
+                    ),
                   ],
-                ),
-              ],
-            ),
-          ),
-          // 分隔线
-          Container(
-            height: 1.0,
-            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-          ),
-          // 内容区域
-          Container(
-            padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(8.0),
-                bottomRight: Radius.circular(8.0),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 启用/禁用开关
-                Container(
-                  margin: const EdgeInsets.only(bottom: 16.0),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.circular(8.0),
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-                    ),
-                  ),
-                  child: SwitchListTile(
-                    dense: true,
-                    title: Text(
-                      '启用此翻译接口',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    subtitle: Text(
-                      '启用后可以在翻译时选择此接口',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontSize: 12.0,
-                      ),
-                    ),
-                    value: config.isEnabled,
-                    onChanged: (value) => controller.updateProviderConfigById(
-                      config.id,
-                      isEnabled: value,
-                    ),
-                  ),
                 ),
               ],
             ),
