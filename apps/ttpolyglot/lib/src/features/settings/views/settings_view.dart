@@ -562,85 +562,93 @@ class _SettingsViewContent extends StatelessWidget {
     final appKeyController = TextEditingController();
     final apiUrlController = TextEditingController();
 
-    showDialog(
-      context: Get.context!,
-      builder: (context) => StatefulBuilder(
+    Get.dialog(
+      StatefulBuilder(
         builder: (context, setState) => AlertDialog(
           title: const Text('添加翻译接口'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // 翻译提供商选择
-                DropdownButtonFormField<TranslationProvider>(
-                  value: selectedProvider,
-                  decoration: const InputDecoration(
-                    labelText: '翻译提供商',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: TranslationProvider.values.map((provider) {
-                    return DropdownMenuItem(
-                      value: provider,
-                      child: Text(provider.name),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedProvider = value!;
-                    });
-                  },
-                ),
-                const SizedBox(height: 12.0),
-                // 名称输入框
-                TextFormField(
-                  controller: nameController,
-                  decoration: const InputDecoration(
-                    labelText: '名称',
-                    border: OutlineInputBorder(),
-                    hintText: '输入翻译接口名称',
-                  ),
-                ),
-                const SizedBox(height: 12.0),
-                // App ID 输入框
-                TextFormField(
-                  controller: appIdController,
-                  decoration: InputDecoration(
-                    labelText: selectedProvider == TranslationProvider.custom ? 'API Key' : 'App ID',
-                    border: const OutlineInputBorder(),
-                    hintText: selectedProvider == TranslationProvider.custom ? '输入API密钥' : '输入应用ID',
-                  ),
-                ),
-                const SizedBox(height: 12.0),
-                // App Key 输入框（非自定义翻译）
-                if (selectedProvider != TranslationProvider.custom) ...[
-                  TextFormField(
-                    controller: appKeyController,
+          content: Container(
+            width: 480.0,
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 翻译提供商选择
+                  DropdownButtonFormField<TranslationProvider>(
+                    value: selectedProvider,
                     decoration: const InputDecoration(
-                      labelText: 'App Key',
+                      contentPadding: EdgeInsets.all(12.0),
+                      labelText: '翻译提供商',
                       border: OutlineInputBorder(),
-                      hintText: '输入应用密钥',
+                    ),
+                    items: TranslationProvider.values.map((provider) {
+                      return DropdownMenuItem(
+                        value: provider,
+                        child: Text(provider.name),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        selectedProvider = value!;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16.0),
+                  // 名称输入框
+                  TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.all(12.0),
+                      labelText: '名称',
+                      border: OutlineInputBorder(),
+                      hintText: '输入翻译接口名称',
                     ),
                   ),
-                  const SizedBox(height: 12.0),
-                ],
-                // API URL 输入框（仅自定义翻译）
-                if (selectedProvider == TranslationProvider.custom) ...[
-                  TextFormField(
-                    controller: apiUrlController,
-                    decoration: const InputDecoration(
-                      labelText: 'API 地址',
-                      border: OutlineInputBorder(),
-                      hintText: '输入自定义翻译API地址',
+                  const SizedBox(height: 16.0),
+                  // App ID 输入框
+                  TextField(
+                    controller: appIdController,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.all(12.0),
+                      labelText: selectedProvider == TranslationProvider.custom ? 'API Key' : 'App ID',
+                      border: const OutlineInputBorder(),
+                      hintText: selectedProvider == TranslationProvider.custom ? '输入API密钥' : '输入应用ID',
                     ),
                   ),
-                  const SizedBox(height: 12.0),
+                  const SizedBox(height: 16.0),
+                  // App Key 输入框（非自定义翻译）
+                  if (selectedProvider != TranslationProvider.custom) ...[
+                    TextField(
+                      controller: appKeyController,
+                      decoration: const InputDecoration(
+                        contentPadding: EdgeInsets.all(12.0),
+                        labelText: 'App Key',
+                        border: OutlineInputBorder(),
+                        hintText: '输入应用密钥',
+                      ),
+                    ),
+                    const SizedBox(height: 16.0),
+                  ],
+                  // API URL 输入框（仅自定义翻译）
+                  if (selectedProvider == TranslationProvider.custom) ...[
+                    TextField(
+                      controller: apiUrlController,
+                      decoration: const InputDecoration(
+                        contentPadding: EdgeInsets.all(12.0),
+                        labelText: 'API 地址',
+                        border: OutlineInputBorder(),
+                        hintText: '输入自定义翻译API地址',
+                      ),
+                    ),
+                    const SizedBox(height: 16.0),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => Get.back(),
               child: const Text('取消'),
             ),
             ElevatedButton(
@@ -653,7 +661,7 @@ class _SettingsViewContent extends StatelessWidget {
                     appKey: selectedProvider != TranslationProvider.custom ? appKeyController.text : null,
                     apiUrl: selectedProvider == TranslationProvider.custom ? apiUrlController.text : null,
                   );
-                  Navigator.of(context).pop();
+                  Get.back();
                 }
               },
               child: const Text('添加'),
