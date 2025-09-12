@@ -319,9 +319,23 @@ class _SettingsViewContent extends StatelessWidget {
         title: Row(
           children: [
             Expanded(
-              child: Text(
-                config.displayName,
-                style: const TextStyle(fontWeight: FontWeight.w500),
+              child: Row(
+                children: [
+                  if (config.isDefault) ...[
+                    Icon(
+                      Icons.star,
+                      size: 16.0,
+                      color: Colors.amber,
+                    ),
+                    const SizedBox(width: 4.0),
+                  ],
+                  Expanded(
+                    child: Text(
+                      config.displayName,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
               ),
             ),
             Icon(
@@ -352,6 +366,27 @@ class _SettingsViewContent extends StatelessWidget {
                   title: const Text('启用'),
                   value: config.isEnabled,
                   onChanged: (value) => controller.toggleProviderById(config.id),
+                ),
+                // 默认翻译开关
+                SwitchListTile(
+                  dense: true,
+                  title: Row(
+                    children: [
+                      const Text('默认翻译'),
+                      const SizedBox(width: 8.0),
+                      Icon(
+                        Icons.star,
+                        size: 16.0,
+                        color: Colors.amber,
+                      ),
+                    ],
+                  ),
+                  subtitle: const Text('设为此翻译接口为默认'),
+                  value: config.isDefault,
+                  onChanged: (value) => controller.updateProviderConfigById(
+                    config.id,
+                    isDefault: value,
+                  ),
                 ),
                 const Divider(),
                 // 配置表单
@@ -561,6 +596,7 @@ class _SettingsViewContent extends StatelessWidget {
     final appIdController = TextEditingController();
     final appKeyController = TextEditingController();
     final apiUrlController = TextEditingController();
+    bool isDefault = false;
 
     // 错误状态
     String? nameError;
@@ -569,7 +605,7 @@ class _SettingsViewContent extends StatelessWidget {
     String? apiUrlError;
 
     // 验证函数
-    bool _validateInputs() {
+    bool validateInputs() {
       bool isValid = true;
 
       // 重置错误状态
@@ -920,6 +956,44 @@ class _SettingsViewContent extends StatelessWidget {
                     ),
                     const SizedBox(height: 16.0),
                   ],
+                  // 默认翻译开关
+                  Container(
+                    padding: const EdgeInsets.all(12.0),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(8.0),
+                      border: Border.all(
+                        color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.star,
+                          color: Theme.of(context).primaryColor,
+                          size: 20.0,
+                        ),
+                        const SizedBox(width: 12.0),
+                        const Expanded(
+                          child: Text(
+                            '设为默认翻译接口',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        Switch(
+                          value: isDefault,
+                          onChanged: (value) {
+                            setState(() {
+                              isDefault = value;
+                            });
+                          },
+                          activeColor: Theme.of(context).primaryColor,
+                        ),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: 8.0),
                 ],
               ),
@@ -945,13 +1019,14 @@ class _SettingsViewContent extends StatelessWidget {
             const SizedBox(width: 8.0),
             ElevatedButton(
               onPressed: () {
-                if (_validateInputs()) {
+                if (validateInputs()) {
                   controller.addTranslationProvider(
                     provider: selectedProvider,
                     name: nameController.text.trim(),
                     appId: appIdController.text.trim(),
                     appKey: selectedProvider != TranslationProvider.custom ? appKeyController.text.trim() : null,
                     apiUrl: selectedProvider == TranslationProvider.custom ? apiUrlController.text.trim() : null,
+                    isDefault: isDefault,
                   );
                   Get.back();
                 } else {

@@ -49,6 +49,7 @@ class TranslationProviderConfig {
     required this.appKey,
     this.apiUrl,
     this.isEnabled = false,
+    this.isDefault = false,
     this.name,
   });
 
@@ -73,6 +74,9 @@ class TranslationProviderConfig {
   /// 是否启用
   final bool isEnabled;
 
+  /// 是否为默认翻译接口
+  final bool isDefault;
+
   /// 转换为Map
   Map<String, dynamic> toMap() {
     return {
@@ -83,6 +87,7 @@ class TranslationProviderConfig {
       'appKey': appKey,
       'apiUrl': apiUrl,
       'isEnabled': isEnabled,
+      'isDefault': isDefault,
     };
   }
 
@@ -96,6 +101,7 @@ class TranslationProviderConfig {
       appKey: map['appKey'] as String? ?? '',
       apiUrl: map['apiUrl'] as String?,
       isEnabled: map['isEnabled'] as bool? ?? false,
+      isDefault: map['isDefault'] as bool? ?? false,
     );
   }
 
@@ -113,6 +119,7 @@ class TranslationProviderConfig {
     String? appKey,
     String? apiUrl,
     bool? isEnabled,
+    bool? isDefault,
   }) {
     return TranslationProviderConfig(
       id: id ?? this.id,
@@ -122,6 +129,7 @@ class TranslationProviderConfig {
       appKey: appKey ?? this.appKey,
       apiUrl: apiUrl ?? this.apiUrl,
       isEnabled: isEnabled ?? this.isEnabled,
+      isDefault: isDefault ?? this.isDefault,
     );
   }
 
@@ -224,6 +232,16 @@ class TranslationConfig {
       return providers.firstWhere((p) => p.provider == provider);
     } catch (e) {
       return null;
+    }
+  }
+
+  /// 获取默认翻译接口
+  TranslationProviderConfig? get defaultProvider {
+    try {
+      return providers.firstWhere((p) => p.isDefault);
+    } catch (e) {
+      // 如果没有默认接口，返回第一个启用的接口
+      return enabledProviders.isNotEmpty ? enabledProviders.first : null;
     }
   }
 

@@ -153,7 +153,14 @@ class TranslationConfigController extends GetxController {
     String? appId,
     String? appKey,
     String? apiUrl,
+    bool isDefault = false,
   }) {
+    // 如果设置为默认，先取消其他默认设置
+    var updatedProviders = config.providers;
+    if (isDefault) {
+      updatedProviders = config.providers.map((p) => p.copyWith(isDefault: false)).toList();
+    }
+
     final newConfig = TranslationProviderConfig(
       id: _generateId(),
       provider: provider,
@@ -162,9 +169,10 @@ class TranslationConfigController extends GetxController {
       appKey: appKey ?? '',
       apiUrl: apiUrl,
       isEnabled: false,
+      isDefault: isDefault,
     );
 
-    final updatedProviders = [...config.providers, newConfig];
+    updatedProviders = [...updatedProviders, newConfig];
     _config.value = config.copyWith(providers: updatedProviders);
     _saveConfig();
   }
@@ -197,8 +205,15 @@ class TranslationConfigController extends GetxController {
     String? appKey,
     String? apiUrl,
     bool? isEnabled,
+    bool? isDefault,
   }) {
-    final updatedProviders = config.providers.map((p) {
+    var updatedProviders = config.providers;
+    if (isDefault == true) {
+      // 如果设置为默认，先取消其他默认设置
+      updatedProviders = config.providers.map((p) => p.copyWith(isDefault: false)).toList();
+    }
+
+    updatedProviders = updatedProviders.map((p) {
       if (p.id == id) {
         return p.copyWith(
           name: name,
@@ -206,6 +221,7 @@ class TranslationConfigController extends GetxController {
           appKey: appKey,
           apiUrl: apiUrl,
           isEnabled: isEnabled,
+          isDefault: isDefault,
         );
       }
       return p;
