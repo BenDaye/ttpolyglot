@@ -499,33 +499,51 @@ class _SettingsViewContent extends StatelessWidget {
   /// 构建高级设置
   Widget _buildAdvancedSettings(TranslationConfigController controller) {
     return Obx(
-      () => ExpansionTile(
-        title: const Text(
-          '高级设置',
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            fontSize: 16.0,
-          ),
+      () => Card(
+        margin: EdgeInsets.zero,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.0),
         ),
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Column(
+        child: Container(
+          decoration: AppThemeController.cardDecoration,
+          child: ExpansionTile(
+            title: Row(
               children: [
-                // 最大重试次数
-                ListTile(
-                  dense: true,
-                  title: const Text('最大重试次数'),
-                  subtitle: Text('${controller.config.maxRetries} 次'),
-                  trailing: SizedBox(
-                    width: 120.0,
-                    child: TextFormField(
-                      initialValue: controller.config.maxRetries.toString(),
-                      keyboardType: TextInputType.number,
-                      textAlign: TextAlign.center,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    color: AppThemeController.primaryColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: Icon(
+                    Icons.settings,
+                    color: AppThemeController.primaryColor,
+                    size: 20.0,
+                  ),
+                ),
+                const SizedBox(width: 12.0),
+                const Text(
+                  '高级设置',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16.0,
+                  ),
+                ),
+              ],
+            ),
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  children: [
+                    // 最大重试次数
+                    _buildSettingRow(
+                      icon: Icons.refresh,
+                      title: '最大重试次数',
+                      subtitle: '${controller.config.maxRetries} 次',
+                      controller: TextEditingController(
+                        text: controller.config.maxRetries.toString(),
                       ),
                       onChanged: (value) {
                         final retries = int.tryParse(value);
@@ -534,22 +552,14 @@ class _SettingsViewContent extends StatelessWidget {
                         }
                       },
                     ),
-                  ),
-                ),
-                // 超时时间
-                ListTile(
-                  dense: true,
-                  title: const Text('超时时间'),
-                  subtitle: Text('${controller.config.timeoutSeconds} 秒'),
-                  trailing: SizedBox(
-                    width: 120.0,
-                    child: TextFormField(
-                      initialValue: controller.config.timeoutSeconds.toString(),
-                      keyboardType: TextInputType.number,
-                      textAlign: TextAlign.center,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                    const SizedBox(height: 16.0),
+                    // 超时时间
+                    _buildSettingRow(
+                      icon: Icons.timer,
+                      title: '超时时间',
+                      subtitle: '${controller.config.timeoutSeconds} 秒',
+                      controller: TextEditingController(
+                        text: controller.config.timeoutSeconds.toString(),
                       ),
                       onChanged: (value) {
                         final timeout = int.tryParse(value);
@@ -558,36 +568,147 @@ class _SettingsViewContent extends StatelessWidget {
                         }
                       },
                     ),
+                    const SizedBox(height: 24.0),
+                    // 重置按钮
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          showDialog(
+                            context: Get.context!,
+                            builder: (context) => AlertDialog(
+                              title: const Text('确认重置'),
+                              content: const Text('确定要重置所有翻译配置为默认值吗？'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  child: const Text('取消'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    controller.resetToDefault();
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('确认'),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.restore),
+                        label: const Text('重置为默认配置'),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12.0),
+                          side: BorderSide(
+                            color: AppThemeController.primaryColor.withValues(alpha: 0.3),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 构建设置行
+  Widget _buildSettingRow({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required TextEditingController controller,
+    required Function(String) onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Get.isDarkMode ? const Color(0xFF2C2C2E) : const Color(0xFFF8F9FA),
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(
+          color: Get.isDarkMode ? const Color(0xFF38383A) : const Color(0xFFE9ECEF),
+          width: 1.0,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10.0),
+            decoration: BoxDecoration(
+              color: AppThemeController.primaryColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: Icon(
+              icon,
+              color: AppThemeController.primaryColor,
+              size: 20.0,
+            ),
+          ),
+          const SizedBox(width: 16.0),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 8.0),
-                // 重置按钮
-                OutlinedButton(
-                  onPressed: () {
-                    showDialog(
-                      context: Get.context!,
-                      builder: (context) => AlertDialog(
-                        title: const Text('确认重置'),
-                        content: const Text('确定要重置所有翻译配置为默认值吗？'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('取消'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              controller.resetToDefault();
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text('确认'),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                  child: const Text('重置为默认配置'),
+                const SizedBox(height: 4.0),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    color: Get.isDarkMode ? Colors.white70 : Colors.black54,
+                  ),
                 ),
               ],
+            ),
+          ),
+          const SizedBox(width: 16.0),
+          SizedBox(
+            width: 80.0,
+            child: TextFormField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Get.isDarkMode ? const Color(0xFF3A3A3C) : Colors.white,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(
+                    color: AppThemeController.primaryColor.withValues(alpha: 0.2),
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(
+                    color: Get.isDarkMode ? const Color(0xFF48484A) : const Color(0xFFE9ECEF),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(
+                    color: AppThemeController.primaryColor,
+                    width: 2.0,
+                  ),
+                ),
+              ),
+              style: const TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.w500,
+              ),
+              onChanged: onChanged,
             ),
           ),
         ],
