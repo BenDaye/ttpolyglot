@@ -1252,6 +1252,17 @@ class _SettingsViewContentState extends State<_SettingsViewContent> {
                   // 调用成功回调来展开列表
                   onSuccess?.call();
                   Get.back();
+                  // 显示成功提示
+                  Get.snackbar(
+                    '成功',
+                    '翻译接口 "${nameController.text.trim()}" 添加成功',
+                    snackPosition: SnackPosition.TOP,
+                    backgroundColor: Colors.green.withValues(alpha: 0.9),
+                    colorText: Colors.white,
+                    duration: const Duration(seconds: 2),
+                    margin: const EdgeInsets.all(16.0),
+                    borderRadius: 8.0,
+                  );
                 } else {
                   // 触发UI更新以显示错误信息
                   setState(() {});
