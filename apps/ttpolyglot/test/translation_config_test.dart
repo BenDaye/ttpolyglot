@@ -27,7 +27,6 @@ void main() {
         name: '百度翻译',
         appId: 'test_id',
         appKey: 'test_key',
-        isEnabled: true,
       );
       expect(config.isValid, true);
 
@@ -37,7 +36,6 @@ void main() {
         name: '百度翻译',
         appId: '',
         appKey: 'test_key',
-        isEnabled: true,
       );
       expect(invalidConfig.isValid, false);
     });
@@ -50,7 +48,6 @@ void main() {
         appId: 'test_key',
         appKey: '',
         apiUrl: 'https://api.example.com',
-        isEnabled: true,
       );
       expect(config.isValid, true);
 
@@ -61,7 +58,6 @@ void main() {
         appId: '',
         appKey: '',
         apiUrl: 'https://api.example.com',
-        isEnabled: true,
       );
       expect(invalidConfig.isValid, false);
     });
@@ -73,7 +69,6 @@ void main() {
         name: '百度翻译',
         appId: '',
         appKey: '',
-        isEnabled: true,
       );
       final errors = config.getValidationErrors();
       expect(errors.length, 2);
@@ -88,13 +83,11 @@ void main() {
         name: '百度翻译',
         appId: 'original_id',
         appKey: 'original_key',
-        isEnabled: false,
       );
 
-      final updated = original.copyWith(appId: 'updated_id', isEnabled: true);
+      final updated = original.copyWith(appId: 'updated_id');
       expect(updated.appId, 'updated_id');
       expect(updated.appKey, 'original_key');
-      expect(updated.isEnabled, true);
       expect(updated.provider, original.provider);
       expect(updated.id, original.id);
     });
@@ -106,7 +99,6 @@ void main() {
         name: '我的百度翻译',
         appId: 'test_id',
         appKey: 'test_key',
-        isEnabled: true,
       );
 
       final configWithoutName = TranslationProviderConfig(
@@ -114,7 +106,6 @@ void main() {
         provider: TranslationProvider.baidu,
         appId: 'test_id',
         appKey: 'test_key',
-        isEnabled: true,
       );
 
       expect(configWithName.displayName, '我的百度翻译');
@@ -156,7 +147,6 @@ void main() {
             name: '百度翻译',
             appId: 'test_id',
             appKey: 'test_key',
-            isEnabled: true,
           ),
           TranslationProviderConfig(
             id: 'test_id_9',
@@ -164,7 +154,6 @@ void main() {
             name: '有道翻译',
             appId: '',
             appKey: '',
-            isEnabled: true,
           ),
           TranslationProviderConfig(
             id: 'test_id_10',
@@ -172,7 +161,6 @@ void main() {
             name: '谷歌翻译',
             appId: 'google_id',
             appKey: 'google_key',
-            isEnabled: false,
           ),
         ],
       );
@@ -191,7 +179,6 @@ void main() {
             name: '百度翻译',
             appId: 'test_id',
             appKey: 'test_key',
-            isEnabled: true,
           ),
           TranslationProviderConfig(
             id: 'test_id_12',
@@ -199,7 +186,6 @@ void main() {
             name: '有道翻译',
             appId: 'youdao_id',
             appKey: 'youdao_key',
-            isEnabled: true,
           ),
         ],
       );

@@ -38,7 +38,6 @@ void main() {
         provider: TranslationProvider.baidu,
         appId: 'test_app_id',
         appKey: 'test_app_key',
-        isEnabled: true,
       );
 
       expect(config.isValid, true);
@@ -51,7 +50,6 @@ void main() {
         provider: TranslationProvider.youdao,
         appId: 'test_app_id',
         appKey: 'test_app_key',
-        isEnabled: true,
       );
 
       expect(config.isValid, true);
@@ -64,7 +62,6 @@ void main() {
         provider: TranslationProvider.google,
         appId: 'test_app_id',
         appKey: 'test_app_key',
-        isEnabled: true,
       );
 
       expect(config.isValid, true);
@@ -78,7 +75,6 @@ void main() {
         appId: 'test_auth_token',
         appKey: 'test_auth_key',
         apiUrl: 'https://api.example.com/translate',
-        isEnabled: true,
       );
 
       expect(config.isValid, true);
@@ -91,7 +87,6 @@ void main() {
         provider: TranslationProvider.baidu,
         appId: '',
         appKey: '',
-        isEnabled: true,
       );
 
       expect(config.isValid, false);

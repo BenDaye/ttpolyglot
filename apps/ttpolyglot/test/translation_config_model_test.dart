@@ -59,7 +59,6 @@ void main() {
             name: '百度翻译',
             appId: 'test_id',
             appKey: 'test_key',
-            isEnabled: true,
           ),
           TranslationProviderConfig(
             id: 'test_id_2',
@@ -67,7 +66,6 @@ void main() {
             name: '有道翻译',
             appId: 'test_id_2',
             appKey: 'test_key_2',
-            isEnabled: false,
           ),
         ],
       );
@@ -90,7 +88,6 @@ void main() {
             name: '百度翻译',
             appId: 'test_id',
             appKey: 'test_key',
-            isEnabled: true,
           ),
         ],
         maxRetries: 5,
@@ -106,7 +103,6 @@ void main() {
       expect(restoredConfig.providers.first.name, originalConfig.providers.first.name);
       expect(restoredConfig.providers.first.appId, originalConfig.providers.first.appId);
       expect(restoredConfig.providers.first.appKey, originalConfig.providers.first.appKey);
-      expect(restoredConfig.providers.first.isEnabled, originalConfig.providers.first.isEnabled);
       expect(restoredConfig.maxRetries, originalConfig.maxRetries);
       expect(restoredConfig.timeoutSeconds, originalConfig.timeoutSeconds);
     });

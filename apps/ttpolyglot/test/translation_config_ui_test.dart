@@ -50,29 +50,6 @@ void main() {
     expect(controller.config.timeoutSeconds, 30);
   });
 
-  testWidgets('Provider config should toggle correctly', (WidgetTester tester) async {
-    final controller = TranslationConfigController();
-    Get.put(controller);
-
-    // 添加测试数据
-    controller.addTranslationProvider(
-      provider: TranslationProvider.baidu,
-      name: '测试百度翻译',
-      appId: 'test_id',
-      appKey: 'test_key',
-    );
-
-    // 获取刚添加的配置
-    final config = controller.config.providers.first;
-
-    // 切换启用状态
-    controller.toggleProviderById(config.id);
-
-    // 检查配置是否更新
-    final updatedConfig = controller.getProviderConfigById(config.id);
-    expect(updatedConfig?.isEnabled, true);
-  });
-
   testWidgets('Translation config should update correctly', (WidgetTester tester) async {
     final controller = TranslationConfigController();
     Get.put(controller);
@@ -100,6 +77,5 @@ void main() {
     final updatedConfig = controller.getProviderConfigById(config.id);
     expect(updatedConfig?.appId, 'test_app_id');
     expect(updatedConfig?.appKey, 'test_app_key');
-    expect(updatedConfig?.isEnabled, true);
   });
 }

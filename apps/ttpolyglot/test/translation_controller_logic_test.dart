@@ -13,7 +13,6 @@ void main() {
             name: '百度翻译',
             appId: 'test_id',
             appKey: 'test_key',
-            isEnabled: true,
           ),
           TranslationProviderConfig(
             id: 'test_id_2',
@@ -21,7 +20,6 @@ void main() {
             name: '有道翻译',
             appId: 'test_id_2',
             appKey: 'test_key_2',
-            isEnabled: false,
           ),
         ],
       );
@@ -49,7 +47,6 @@ void main() {
             name: '百度翻译',
             appId: 'test_id',
             appKey: 'test_key',
-            isEnabled: true,
           ),
         ],
       );
@@ -75,7 +72,6 @@ void main() {
             name: '百度翻译',
             appId: 'test_id',
             appKey: 'test_key',
-            isEnabled: true,
           ),
         ],
       );
