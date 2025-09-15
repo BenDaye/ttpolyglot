@@ -201,7 +201,7 @@ class TranslationServiceManager extends GetxService {
             Container(
               padding: const EdgeInsets.all(12.0),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8.0),
               ),
               child: Column(
