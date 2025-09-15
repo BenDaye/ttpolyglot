@@ -283,8 +283,8 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
     try {
       final translationManager = Get.find<TranslationServiceManager>();
 
-      // 检查翻译配置
-      if (!translationManager.hasValidConfig) {
+      // 检查翻译配置（异步等待配置加载完成）
+      if (!await translationManager.hasValidConfigAsync()) {
         await TranslationServiceManager.showConfigCheckDialog(context);
         setState(() {
           _isTranslating = false;
@@ -435,7 +435,7 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
           ],
         ),
         content: SizedBox(
-          width: double.maxFinite,
+          width: 640.0,
           child: ListView.builder(
             shrinkWrap: true,
             itemCount: failedEntries.length,

@@ -19,6 +19,20 @@ class TranslationServiceManager extends GetxService {
     return config.enabledProviders.isNotEmpty;
   }
 
+  /// 异步检查翻译配置是否完整（等待配置加载完成）
+  Future<bool> hasValidConfigAsync() async {
+    // 如果正在加载配置，等待加载完成
+    if (_configController.isLoading) {
+      // 等待配置加载完成
+      while (_configController.isLoading) {
+        await Future.delayed(const Duration(milliseconds: 50));
+      }
+    }
+
+    final config = _configController.config;
+    return config.enabledProviders.isNotEmpty;
+  }
+
   /// 获取默认翻译接口
   TranslationProviderConfig? get defaultProvider {
     return _configController.config.defaultProvider;
@@ -38,8 +52,8 @@ class TranslationServiceManager extends GetxService {
     String? context,
   }) async {
     try {
-      // 检查配置
-      if (!hasValidConfig) {
+      // 检查配置（异步等待配置加载完成）
+      if (!await hasValidConfigAsync()) {
         return TranslationResult(
           success: false,
           translatedText: '',
