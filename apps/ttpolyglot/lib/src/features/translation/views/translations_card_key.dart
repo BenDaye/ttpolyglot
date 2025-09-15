@@ -67,7 +67,7 @@ class TranslationsCardByKey extends StatelessWidget {
                     // 去翻译（根据默认语言）
                     PopupMenuItem(
                       onTap: () {
-                        // onTranslateByDefaultLanguage?.call(key: translationKey, entries: translationEntries);
+                        //
                       },
                       child: Row(
                         children: [Icon(Icons.translate), SizedBox(width: 8.0), Text('去翻译（根据默认语言）')],
@@ -112,7 +112,7 @@ class TranslationsCardByKey extends StatelessWidget {
                   // 去翻译（根据默认语言）
                   IconButton(
                     onPressed: () {
-                      // onTranslateByDefaultLanguage?.call(key: translationKey, entries: translationEntries);
+                      //
                     },
                     icon: Icon(Icons.translate),
                   ),
