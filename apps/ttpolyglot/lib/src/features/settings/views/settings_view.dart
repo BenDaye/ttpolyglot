@@ -840,6 +840,14 @@ class _SettingsViewContentState extends State<_SettingsViewContent> {
       if (nameController.text.trim().isEmpty) {
         nameError = '请输入翻译接口名称';
         isValid = false;
+      } else {
+        // 检查名称唯一性
+        final nameExists =
+            controller.config.providers.any((p) => p.name?.toLowerCase() == nameController.text.trim().toLowerCase());
+        if (nameExists) {
+          nameError = '该名称已存在，请使用其他名称';
+          isValid = false;
+        }
       }
 
       // 验证App ID
@@ -1318,6 +1326,14 @@ class _SettingsViewContentState extends State<_SettingsViewContent> {
       if (nameController.text.trim().isEmpty) {
         nameError = '请输入翻译接口名称';
         isValid = false;
+      } else {
+        // 检查名称唯一性（更新时排除当前配置）
+        final nameExists = controller.config.providers
+            .any((p) => p.id != config.id && p.name?.toLowerCase() == nameController.text.trim().toLowerCase());
+        if (nameExists) {
+          nameError = '该名称已存在，请使用其他名称';
+          isValid = false;
+        }
       }
 
       // 验证App ID
