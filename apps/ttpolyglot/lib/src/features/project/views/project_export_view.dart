@@ -779,27 +779,24 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                                   if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                                     return TextButton.icon(
                                       onPressed: () async {
-                                        final result = await showDialog<bool>(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title: const Text('确认清空'),
-                                              content: const Text('确定要清空所有的导出历史记录吗？此操作不可撤销。'),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () => Navigator.of(context).pop(false),
-                                                  child: const Text('取消'),
+                                        final result = await Get.dialog<bool>(
+                                          AlertDialog(
+                                            title: const Text('确认清空'),
+                                            content: const Text('确定要清空所有的导出历史记录吗？此操作不可撤销。'),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Get.back(result: false),
+                                                child: const Text('取消'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () => Get.back(result: true),
+                                                style: TextButton.styleFrom(
+                                                  foregroundColor: Theme.of(context).colorScheme.error,
                                                 ),
-                                                TextButton(
-                                                  onPressed: () => Navigator.of(context).pop(true),
-                                                  style: TextButton.styleFrom(
-                                                    foregroundColor: Theme.of(context).colorScheme.error,
-                                                  ),
-                                                  child: const Text('清空'),
-                                                ),
-                                              ],
-                                            );
-                                          },
+                                                child: const Text('清空'),
+                                              ),
+                                            ],
+                                          ),
                                         );
 
                                         if (result == true) {

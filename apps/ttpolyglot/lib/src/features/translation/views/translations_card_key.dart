@@ -305,7 +305,7 @@ class TranslationsCardByKey extends StatelessWidget {
           translationEntries.where((entry) => entry.sourceLanguage.code == selectedSourceLanguage.code).toList();
 
       if (entriesToTranslate.isEmpty) {
-        Navigator.of(context).pop(); // 关闭加载对话框
+        Get.back(); // 关闭加载对话框
         _showErrorSnackBar(context, '没有找到需要翻译的条目');
         return;
       }
@@ -315,7 +315,7 @@ class TranslationsCardByKey extends StatelessWidget {
         entries: entriesToTranslate,
       );
 
-      Navigator.of(context).pop(); // 关闭加载对话框
+      Get.back(); // 关闭加载对话框
 
       // 处理翻译结果
       int successCount = 0;
@@ -355,7 +355,7 @@ class TranslationsCardByKey extends StatelessWidget {
     } catch (error, stackTrace) {
       log('翻译处理异常', error: error, stackTrace: stackTrace, name: 'TranslationsCardByKey');
       if (context.mounted) {
-        Navigator.of(context).pop(); // 关闭加载对话框
+        Get.back(); // 关闭加载对话框
         _showErrorSnackBar(context, '翻译处理异常: $error');
       }
     }
@@ -363,10 +363,8 @@ class TranslationsCardByKey extends StatelessWidget {
 
   /// 显示加载对话框
   void _showLoadingDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
+    Get.dialog(
+      AlertDialog(
         content: Row(
           children: [
             const CircularProgressIndicator(),
@@ -409,9 +407,8 @@ class TranslationsCardByKey extends StatelessWidget {
     List<TranslationEntry> failedEntries,
     List<String> errors,
   ) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
+    Get.dialog(
+      AlertDialog(
         title: Row(
           children: [
             Icon(
@@ -465,11 +462,12 @@ class TranslationsCardByKey extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Get.back(),
             child: const Text('确定'),
           ),
         ],
       ),
+      barrierDismissible: false,
     );
   }
 }

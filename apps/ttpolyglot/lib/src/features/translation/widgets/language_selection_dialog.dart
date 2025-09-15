@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 /// 语言选择弹窗
@@ -23,11 +24,10 @@ class LanguageSelectionDialog extends StatelessWidget {
     String title = '选择源语言',
     String subtitle = '请选择要翻译的源语言',
   }) {
-    return showDialog<Language>(
-      context: context,
-      builder: (context) => LanguageSelectionDialog(
+    return Get.dialog<Language>(
+      LanguageSelectionDialog(
         availableLanguages: availableLanguages,
-        onLanguageSelected: (language) => Navigator.of(context).pop(language),
+        onLanguageSelected: (language) => Get.back(result: language),
         title: title,
         subtitle: subtitle,
       ),
@@ -86,7 +86,7 @@ class LanguageSelectionDialog extends StatelessWidget {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => Get.back(),
           child: const Text('取消'),
         ),
       ],

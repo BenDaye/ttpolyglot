@@ -669,20 +669,19 @@ class _SettingsViewContentState extends State<_SettingsViewContent> {
                       width: double.infinity,
                       child: OutlinedButton.icon(
                         onPressed: () {
-                          showDialog(
-                            context: Get.context!,
-                            builder: (context) => AlertDialog(
+                          Get.dialog(
+                            AlertDialog(
                               title: const Text('确认重置'),
                               content: const Text('确定要重置所有翻译配置为默认值吗？'),
                               actions: [
                                 TextButton(
-                                  onPressed: () => Navigator.of(context).pop(),
+                                  onPressed: () => Get.back(),
                                   child: const Text('取消'),
                                 ),
                                 TextButton(
                                   onPressed: () {
                                     controller.resetToDefault();
-                                    Navigator.of(context).pop();
+                                    Get.back();
                                   },
                                   child: const Text('确认'),
                                 ),
@@ -1780,20 +1779,19 @@ class _SettingsViewContentState extends State<_SettingsViewContent> {
 
   /// 显示删除翻译接口对话框
   void _showDeleteProviderDialog(TranslationConfigController controller, TranslationProviderConfig config) {
-    showDialog(
-      context: Get.context!,
-      builder: (context) => AlertDialog(
+    Get.dialog(
+      AlertDialog(
         title: const Text('确认删除'),
         content: Text('确定要删除翻译接口 "${config.displayName}" 吗？此操作不可撤销。'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Get.back(),
             child: const Text('取消'),
           ),
           ElevatedButton(
             onPressed: () {
               controller.removeTranslationProvider(config.id);
-              Navigator.of(context).pop();
+              Get.back();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,

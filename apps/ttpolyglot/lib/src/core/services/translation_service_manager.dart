@@ -159,9 +159,8 @@ class TranslationServiceManager extends GetxService {
 
   /// 显示配置检查弹窗
   static Future<void> showConfigCheckDialog(BuildContext context) {
-    return showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
+    return Get.dialog(
+      AlertDialog(
         title: Row(
           children: [
             Icon(
@@ -187,12 +186,12 @@ class TranslationServiceManager extends GetxService {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Get.back(),
             child: const Text('取消'),
           ),
           ElevatedButton(
             onPressed: () {
-              Navigator.of(context).pop();
+              Get.back();
               // 导航到设置页面
               Get.toNamed('/settings');
             },
@@ -216,9 +215,8 @@ class TranslationServiceManager extends GetxService {
       return Future.value(providers.first);
     }
 
-    return showDialog<TranslationProviderConfig>(
-      context: context,
-      builder: (context) => AlertDialog(
+    return Get.dialog<TranslationProviderConfig>(
+      AlertDialog(
         title: Row(
           children: [
             Icon(
@@ -240,13 +238,13 @@ class TranslationServiceManager extends GetxService {
               ),
               title: Text(provider.displayName),
               subtitle: Text(provider.provider.name),
-              onTap: () => Navigator.of(context).pop(provider),
+              onTap: () => Get.back(result: provider),
             );
           }).toList(),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Get.back(),
             child: const Text('取消'),
           ),
         ],
@@ -273,9 +271,8 @@ class TranslationServiceManager extends GetxService {
     BuildContext context,
     TranslationResult result,
   ) {
-    return showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
+    return Get.dialog(
+      AlertDialog(
         title: Row(
           children: [
             Icon(
@@ -313,7 +310,7 @@ class TranslationServiceManager extends GetxService {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Get.back(),
             child: const Text('确定'),
           ),
         ],

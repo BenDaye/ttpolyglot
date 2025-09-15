@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/core/routing/app_pages.dart';
-
 import 'package:ttpolyglot/src/core/layout/layout_controller.dart';
 import 'package:ttpolyglot/src/core/layout/utils/layout_breakpoints.dart';
+import 'package:ttpolyglot/src/core/routing/app_pages.dart';
 
 /// 响应式侧边栏组件 - 微信风格设计
 class ResponsiveSidebar extends StatelessWidget {
@@ -297,7 +296,7 @@ class ResponsiveSidebar extends StatelessWidget {
             delegate?.offAndToNamed(route);
 
             if (ResponsiveUtils.isMobile(context)) {
-              Navigator.of(context).pop();
+              Get.back();
             }
           },
           child: Container(
