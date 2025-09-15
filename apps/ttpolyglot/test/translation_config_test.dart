@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ttpolyglot/src/features/settings/models/translation_provider.dart';
+import 'package:ttpolyglot_core/core.dart';
 
 void main() {
   group('TranslationProvider', () {

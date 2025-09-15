@@ -1,0 +1,19 @@
+name: ttpolyglot_translators
+description: TTPolyglot 翻译服务集成（Google、百度、腾讯等）
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.6.1
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  crypto: ^3.0.3
+  ttpolyglot_core: ^1.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0

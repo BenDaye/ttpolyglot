@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/theme/app_theme.dart';
 import 'package:ttpolyglot/src/features/settings/controllers/settings_controller.dart';
 import 'package:ttpolyglot/src/features/settings/controllers/translation_config_controller.dart';
-import 'package:ttpolyglot/src/features/settings/models/translation_provider.dart';
 import 'package:ttpolyglot/src/features/settings/views/settings_view.dart';
+import 'package:ttpolyglot_core/core.dart';
 
 void main() {
   setUp(() {

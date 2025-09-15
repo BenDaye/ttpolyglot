@@ -2,9 +2,9 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot_core/core.dart';
 
 import '../controllers/translation_config_controller.dart';
-import '../models/translation_provider.dart';
 
 /// 翻译接口弹窗模式
 enum ProviderDialogMode {

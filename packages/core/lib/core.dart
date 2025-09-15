@@ -12,6 +12,7 @@ export 'src/models/language.dart';
 // 数据模型
 export 'src/models/project.dart';
 export 'src/models/translation_entry.dart';
+export 'src/models/translation_provider.dart';
 export 'src/models/user.dart';
 export 'src/models/workspace_config.dart';
 export 'src/services/export_service.dart';

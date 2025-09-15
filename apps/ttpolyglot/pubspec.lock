@@ -1023,6 +1023,13 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
+  ttpolyglot_translators:
+    dependency: "direct main"
+    description:
+      path: "../../packages/translators"
+      relative: true
+    source: path
+    version: "1.0.0"
   typed_data:
     dependency: transitive
     description:

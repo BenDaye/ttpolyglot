@@ -4,6 +4,7 @@ import 'package:ttpolyglot/src/core/layout/layout_controller.dart';
 import 'package:ttpolyglot/src/core/routing/app_pages.dart';
 import 'package:ttpolyglot/src/core/theme/app_theme.dart';
 import 'package:ttpolyglot/src/features/settings/settings.dart';
+import 'package:ttpolyglot_core/core.dart';
 
 class SettingsView extends StatefulWidget {
   const SettingsView({super.key});

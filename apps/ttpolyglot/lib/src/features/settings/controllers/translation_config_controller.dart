@@ -3,8 +3,7 @@ import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../models/translation_provider.dart';
+import 'package:ttpolyglot_core/core.dart';
 
 /// 翻译配置控制器
 class TranslationConfigController extends GetxController {

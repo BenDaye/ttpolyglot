@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
-import 'package:ttpolyglot/src/features/settings/models/translation_provider.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 /// 翻译API服务

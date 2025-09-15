@@ -3,10 +3,9 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/routing/app_pages.dart';
-import 'package:ttpolyglot/src/core/services/translation_api_service.dart';
 import 'package:ttpolyglot/src/features/settings/controllers/translation_config_controller.dart';
-import 'package:ttpolyglot/src/features/settings/models/translation_provider.dart';
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_translators/translators.dart';
 
 /// 翻译服务管理器
 class TranslationServiceManager extends GetxService {

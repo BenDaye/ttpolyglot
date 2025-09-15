@@ -3,4 +3,5 @@ name: ttpolyglot
 packages:
   - packages/core
   - packages/parsers
+  - packages/translators
   - apps/ttpolyglot
