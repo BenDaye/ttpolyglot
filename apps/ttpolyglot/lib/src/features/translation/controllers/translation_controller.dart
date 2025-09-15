@@ -140,6 +140,36 @@ class TranslationController extends GetxController {
     }
   }
 
+  /// 批量更新翻译条目
+  Future<void> updateTranslationEntries(List<TranslationEntry> entries, {bool isShowSnackbar = true}) async {
+    if (entries.isEmpty) return;
+
+    try {
+      // 批量更新到服务
+      for (final entry in entries) {
+        await _translationService.updateTranslationEntry(entry);
+      }
+
+      // 更新本地列表
+      for (final entry in entries) {
+        final index = _translationEntries.indexWhere((e) => e.id == entry.id);
+        if (index != -1) {
+          _translationEntries[index] = entry;
+        }
+      }
+
+      // 重新应用筛选
+      _applyFilters();
+
+      if (isShowSnackbar) {
+        Get.snackbar('成功', '批量更新翻译条目成功');
+      }
+    } catch (error, stackTrace) {
+      Get.snackbar('错误', '批量更新翻译条目失败: $error');
+      log('批量更新翻译条目失败', error: error, stackTrace: stackTrace, name: 'TranslationController');
+    }
+  }
+
   /// 删除翻译条目
   Future<void> deleteTranslationEntry(String entryId) async {
     try {

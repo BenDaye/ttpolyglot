@@ -96,7 +96,7 @@ class TranslationsList extends StatelessWidget {
                           _showEditTranslationDialog(context, controller: controller, entry: entry);
                         },
                         onChangeTranslate: ({required List<TranslationEntry> entries}) {
-                          // controller.updateTranslationEntries(entries);
+                          controller.updateTranslationEntries(entries, isShowSnackbar: false);
                         },
                       ),
                     );
