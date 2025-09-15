@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/core/routing/app_pages.dart';
 import 'package:ttpolyglot/src/core/services/translation_api_service.dart';
 import 'package:ttpolyglot/src/features/settings/controllers/translation_config_controller.dart';
 import 'package:ttpolyglot/src/features/settings/models/translation_provider.dart';
@@ -193,7 +194,7 @@ class TranslationServiceManager extends GetxService {
             onPressed: () {
               Get.back();
               // 导航到设置页面
-              Get.toNamed('/settings');
+              Get.rootDelegate.offAndToNamed(Routes.settings);
             },
             child: const Text('去配置'),
           ),
