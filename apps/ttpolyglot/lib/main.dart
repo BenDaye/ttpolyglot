@@ -82,5 +82,6 @@ Future<void> _initializeService() async {
   await Get.putAsync(() => ProjectServiceImpl.create());
   await Get.putAsync(() => TranslationServiceImpl.create());
   await Get.putAsync(() => ExportServiceImpl.create());
+  Get.put(TranslationServiceManager());
   log('⚙️ Services initialized');
 }

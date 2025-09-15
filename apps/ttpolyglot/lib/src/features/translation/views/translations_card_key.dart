@@ -1,5 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ttpolyglot/src/core/services/translation_service_manager.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_core/core.dart';
 
@@ -10,6 +14,7 @@ class TranslationsCardByKey extends StatelessWidget {
     required this.translationEntries,
     this.onDeleteAllEntries,
     this.onEditEntry,
+    this.onTranslateByDefaultLanguage,
   });
 
   final String translationKey;
@@ -21,6 +26,10 @@ class TranslationsCardByKey extends StatelessWidget {
   final Function({
     required TranslationEntry entry,
   })? onEditEntry;
+  final Function({
+    required String key,
+    required List<TranslationEntry> entries,
+  })? onTranslateByDefaultLanguage;
 
   @override
   Widget build(BuildContext context) {
@@ -66,9 +75,7 @@ class TranslationsCardByKey extends StatelessWidget {
 
                     // 去翻译（根据默认语言）
                     PopupMenuItem(
-                      onTap: () {
-                        //
-                      },
+                      onTap: () => _handleTranslateByDefaultLanguage(context),
                       child: Row(
                         children: [Icon(Icons.translate), SizedBox(width: 8.0), Text('去翻译（根据默认语言）')],
                       ),
@@ -111,9 +118,7 @@ class TranslationsCardByKey extends StatelessWidget {
                   ),
                   // 去翻译（根据默认语言）
                   IconButton(
-                    onPressed: () {
-                      //
-                    },
+                    onPressed: () => _handleTranslateByDefaultLanguage(context),
                     icon: Icon(Icons.translate),
                   ),
                 ],
@@ -251,6 +256,219 @@ class TranslationsCardByKey extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// 处理根据默认语言翻译
+  Future<void> _handleTranslateByDefaultLanguage(BuildContext context) async {
+    try {
+      final translationManager = Get.find<TranslationServiceManager>();
+
+      // 检查翻译配置
+      if (!translationManager.hasValidConfig) {
+        await TranslationServiceManager.showConfigCheckDialog(context);
+        return;
+      }
+
+      // 获取可用的源语言（从翻译条目中提取）
+      final availableSourceLanguages = translationEntries.map((entry) => entry.sourceLanguage).toSet().toList();
+
+      if (availableSourceLanguages.isEmpty) {
+        _showErrorSnackBar(context, '没有可用的源语言');
+        return;
+      }
+
+      // 如果有多个源语言，让用户选择
+      Language selectedSourceLanguage;
+      if (availableSourceLanguages.length == 1) {
+        selectedSourceLanguage = availableSourceLanguages.first;
+      } else {
+        final selectedLanguage = await LanguageSelectionDialog.show(
+          context: context,
+          availableLanguages: availableSourceLanguages,
+          title: '选择源语言',
+          subtitle: '请选择要翻译的源语言',
+        );
+
+        if (selectedLanguage == null) {
+          return; // 用户取消了选择
+        }
+        selectedSourceLanguage = selectedLanguage;
+      }
+
+      // 显示加载对话框
+      _showLoadingDialog(context);
+
+      // 获取需要翻译的条目（基于选中的源语言）
+      final entriesToTranslate =
+          translationEntries.where((entry) => entry.sourceLanguage.code == selectedSourceLanguage.code).toList();
+
+      if (entriesToTranslate.isEmpty) {
+        Navigator.of(context).pop(); // 关闭加载对话框
+        _showErrorSnackBar(context, '没有找到需要翻译的条目');
+        return;
+      }
+
+      // 批量翻译
+      final results = await translationManager.batchTranslateEntries(
+        entries: entriesToTranslate,
+      );
+
+      Navigator.of(context).pop(); // 关闭加载对话框
+
+      // 处理翻译结果
+      int successCount = 0;
+      int failCount = 0;
+      final failedEntries = <TranslationEntry>[];
+
+      for (int i = 0; i < results.length; i++) {
+        final result = results[i];
+        final entry = entriesToTranslate[i];
+
+        if (result.success) {
+          successCount++;
+          // 更新翻译条目
+          final updatedEntry = entry.copyWith(
+            targetText: result.translatedText,
+            status: TranslationStatus.completed,
+            updatedAt: DateTime.now(),
+          );
+
+          // 调用回调更新条目
+          onEditEntry?.call(entry: updatedEntry);
+        } else {
+          failCount++;
+          failedEntries.add(entry);
+          log('翻译失败: ${entry.key} - ${result.error}', name: 'TranslationsCardByKey');
+        }
+      }
+
+      // 显示结果
+      _showTranslationResultSnackBar(context, successCount, failCount);
+
+      // 如果有失败的翻译，显示详细信息
+      if (failCount > 0) {
+        _showFailedTranslationsDialog(
+            context, failedEntries, results.where((r) => !r.success).map((r) => r.error ?? '未知错误').toList());
+      }
+    } catch (error, stackTrace) {
+      log('翻译处理异常', error: error, stackTrace: stackTrace, name: 'TranslationsCardByKey');
+      if (context.mounted) {
+        Navigator.of(context).pop(); // 关闭加载对话框
+        _showErrorSnackBar(context, '翻译处理异常: $error');
+      }
+    }
+  }
+
+  /// 显示加载对话框
+  void _showLoadingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        content: Row(
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(width: 16.0),
+            const Text('正在翻译...'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 显示错误提示
+  void _showErrorSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Theme.of(context).colorScheme.error,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  /// 显示翻译结果提示
+  void _showTranslationResultSnackBar(BuildContext context, int successCount, int failCount) {
+    final message = '翻译完成: 成功 $successCount 个，失败 $failCount 个';
+    final backgroundColor = failCount > 0 ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.primary;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: backgroundColor,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  /// 显示失败翻译详情对话框
+  void _showFailedTranslationsDialog(
+    BuildContext context,
+    List<TranslationEntry> failedEntries,
+    List<String> errors,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.error_outline,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const SizedBox(width: 8.0),
+            const Text('翻译失败详情'),
+          ],
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: failedEntries.length,
+            itemBuilder: (context, index) {
+              final entry = failedEntries[index];
+              final error = errors[index];
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 8.0),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        entry.key,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                      const SizedBox(height: 4.0),
+                      Text(
+                        entry.sourceText,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 4.0),
+                      Text(
+                        '错误: $error',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('确定'),
+          ),
+        ],
       ),
     );
   }
