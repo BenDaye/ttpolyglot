@@ -324,11 +324,11 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
         selectedSourceLanguage = selectedLanguage;
       }
 
-      // 获取需要翻译的条目（基于选中的源语言）
-      final entriesToTranslate =
-          widget.translationEntries.where((entry) => entry.sourceLanguage.code == selectedSourceLanguage.code).toList();
+      // 源语言文本
+      final TranslationEntry? entriesToTranslate = widget.translationEntries
+          .firstWhereOrNull((entry) => entry.targetLanguage.code == selectedSourceLanguage.code);
 
-      if (entriesToTranslate.isEmpty) {
+      if (entriesToTranslate == null) {
         _showErrorSnackBar(context, '没有找到需要翻译的条目');
         setState(() {
           _isTranslating = false;
@@ -336,9 +336,18 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
         return;
       }
 
+      // 获取需要翻译的条目
+      final List<TranslationEntry> translateEntries = [];
+      for (final entry in widget.translationEntries) {
+        if (entry.targetLanguage.code == selectedSourceLanguage.code) continue;
+        translateEntries.add(entry.copyWith(
+          sourceText: entriesToTranslate.sourceText,
+        ));
+      }
+
       // 批量翻译
       final results = await translationManager.batchTranslateEntries(
-        entries: entriesToTranslate,
+        entries: translateEntries,
       );
 
       // 处理翻译结果
@@ -349,7 +358,7 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
 
       for (int i = 0; i < results.length; i++) {
         final result = results[i];
-        final entry = entriesToTranslate[i];
+        final entry = translateEntries[i];
         if (result.success) {
           successCount++;
           updatedEntries.add(entry.copyWith(
