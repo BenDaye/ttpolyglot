@@ -74,7 +74,7 @@ class _ProviderDialogState extends State<ProviderDialog> {
       isDefault = config.isDefault;
     } else {
       // 添加模式：使用默认值
-      selectedProvider = TranslationProvider.baidu;
+      selectedProvider = TranslationProvider.google;
       nameController = TextEditingController();
       appIdController = TextEditingController();
       appKeyController = TextEditingController();

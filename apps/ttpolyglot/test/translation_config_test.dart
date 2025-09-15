@@ -14,8 +14,8 @@ void main() {
     test('getAllProviders should return all providers', () {
       final providers = TranslationProvider.getAllProviders();
       expect(providers.length, 4);
-      expect(providers[0]['code'], 'baidu');
-      expect(providers[0]['name'], '百度翻译');
+      expect(providers[0]['code'], 'google');
+      expect(providers[0]['name'], '谷歌翻译');
     });
   });
 

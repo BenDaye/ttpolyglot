@@ -1,13 +1,13 @@
 /// 翻译提供商枚举
 enum TranslationProvider {
+  /// 谷歌翻译
+  google('google', '谷歌翻译'),
+
   /// 百度翻译
   baidu('baidu', '百度翻译'),
 
   /// 有道翻译
   youdao('youdao', '有道翻译'),
-
-  /// 谷歌翻译
-  google('google', '谷歌翻译'),
 
   /// 自定义翻译
   custom('custom', '自定义翻译');
@@ -95,7 +95,7 @@ class TranslationProviderConfig {
   factory TranslationProviderConfig.fromMap(Map<String, dynamic> map) {
     return TranslationProviderConfig(
       id: map['id'] as String? ?? _generateId(),
-      provider: TranslationProvider.fromCode(map['provider'] as String) ?? TranslationProvider.baidu,
+      provider: TranslationProvider.fromCode(map['provider'] as String) ?? TranslationProvider.google,
       name: map['name'] as String?,
       appId: map['appId'] as String? ?? '',
       appKey: map['appKey'] as String? ?? '',
