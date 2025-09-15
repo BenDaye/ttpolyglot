@@ -48,7 +48,6 @@ class TranslationProviderConfig {
     required this.appId,
     required this.appKey,
     this.apiUrl,
-    this.isEnabled = false,
     this.isDefault = false,
     this.name,
   });
@@ -71,9 +70,6 @@ class TranslationProviderConfig {
   /// API地址（自定义翻译时使用）
   final String? apiUrl;
 
-  /// 是否启用
-  final bool isEnabled;
-
   /// 是否为默认翻译接口
   final bool isDefault;
 
@@ -86,7 +82,6 @@ class TranslationProviderConfig {
       'appId': appId,
       'appKey': appKey,
       'apiUrl': apiUrl,
-      'isEnabled': isEnabled,
       'isDefault': isDefault,
     };
   }
@@ -100,7 +95,6 @@ class TranslationProviderConfig {
       appId: map['appId'] as String? ?? '',
       appKey: map['appKey'] as String? ?? '',
       apiUrl: map['apiUrl'] as String?,
-      isEnabled: map['isEnabled'] as bool? ?? false,
       isDefault: map['isDefault'] as bool? ?? false,
     );
   }
@@ -118,7 +112,6 @@ class TranslationProviderConfig {
     String? appId,
     String? appKey,
     String? apiUrl,
-    bool? isEnabled,
     bool? isDefault,
   }) {
     return TranslationProviderConfig(
@@ -128,15 +121,12 @@ class TranslationProviderConfig {
       appId: appId ?? this.appId,
       appKey: appKey ?? this.appKey,
       apiUrl: apiUrl ?? this.apiUrl,
-      isEnabled: isEnabled ?? this.isEnabled,
       isDefault: isDefault ?? this.isDefault,
     );
   }
 
   /// 验证配置是否完整
   bool get isValid {
-    if (!isEnabled) return true;
-
     switch (provider) {
       case TranslationProvider.baidu:
       case TranslationProvider.youdao:
@@ -156,8 +146,6 @@ class TranslationProviderConfig {
   /// 获取验证错误信息
   List<String> getValidationErrors() {
     final errors = <String>[];
-
-    if (!isEnabled) return errors;
 
     // 谷歌翻译不需要API密钥，跳过验证
     if (provider != TranslationProvider.google) {
@@ -218,7 +206,7 @@ class TranslationConfig {
 
   /// 获取启用的提供商
   List<TranslationProviderConfig> get enabledProviders {
-    return providers.where((p) => p.isEnabled && p.isValid).toList();
+    return providers.where((p) => p.isValid).toList();
   }
 
   /// 获取指定ID的配置

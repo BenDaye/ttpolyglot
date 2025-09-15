@@ -38,7 +38,6 @@ class TranslationConfigController extends GetxController {
           appId: appId,
           appKey: appKey,
           apiUrl: apiUrl,
-          isEnabled: isEnabled,
         );
       }
       return p;
@@ -46,17 +45,6 @@ class TranslationConfigController extends GetxController {
 
     _config.value = config.copyWith(providers: updatedProviders);
     _saveConfig();
-  }
-
-  /// 切换提供商启用状态
-  void toggleProvider(TranslationProvider provider) {
-    final providerConfig = config.getProviderConfig(provider);
-    if (providerConfig != null) {
-      updateProviderConfig(
-        provider,
-        isEnabled: !providerConfig.isEnabled,
-      );
-    }
   }
 
   /// 设置最大重试次数
@@ -76,7 +64,7 @@ class TranslationConfigController extends GetxController {
   /// 验证配置
   bool validateConfig() {
     for (final provider in config.providers) {
-      if (provider.isEnabled && !provider.isValid) {
+      if (!provider.isValid) {
         return false;
       }
     }
@@ -87,7 +75,7 @@ class TranslationConfigController extends GetxController {
   List<String> getValidationErrors() {
     final errors = <String>[];
     for (final provider in config.providers) {
-      if (provider.isEnabled) {
+      if (provider.isValid) {
         errors.addAll(provider.getValidationErrors());
       }
     }
@@ -167,7 +155,6 @@ class TranslationConfigController extends GetxController {
       appId: appId ?? '',
       appKey: appKey ?? '',
       apiUrl: apiUrl,
-      isEnabled: false,
       isDefault: isDefault,
     );
 
@@ -179,19 +166,6 @@ class TranslationConfigController extends GetxController {
   /// 删除翻译接口
   void removeTranslationProvider(String id) {
     final updatedProviders = config.providers.where((p) => p.id != id).toList();
-    _config.value = config.copyWith(providers: updatedProviders);
-    _saveConfig();
-  }
-
-  /// 启用/禁用翻译接口
-  void toggleProviderById(String id) {
-    final updatedProviders = config.providers.map((p) {
-      if (p.id == id) {
-        return p.copyWith(isEnabled: !p.isEnabled);
-      }
-      return p;
-    }).toList();
-
     _config.value = config.copyWith(providers: updatedProviders);
     _saveConfig();
   }
@@ -219,7 +193,6 @@ class TranslationConfigController extends GetxController {
           appId: appId,
           appKey: appKey,
           apiUrl: apiUrl,
-          isEnabled: isEnabled,
           isDefault: isDefault,
         );
       }
