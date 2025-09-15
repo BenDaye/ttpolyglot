@@ -63,6 +63,16 @@ class TranslationsCardByKey extends StatelessWidget {
                         ],
                       ),
                     ),
+
+                    // 去翻译（根据默认语言）
+                    PopupMenuItem(
+                      onTap: () {
+                        // onTranslateByDefaultLanguage?.call(key: translationKey, entries: translationEntries);
+                      },
+                      child: Row(
+                        children: [Icon(Icons.translate), SizedBox(width: 8.0), Text('去翻译（根据默认语言）')],
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -78,19 +88,33 @@ class TranslationsCardByKey extends StatelessWidget {
                 color: Theme.of(context).colorScheme.surfaceContainer,
                 borderRadius: BorderRadius.circular(6.0),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    '源文本 (${firstEntry.sourceLanguage.code})',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '源文本 (${firstEntry.sourceLanguage.code})',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
                         ),
+                        const SizedBox(height: 4.0),
+                        Text(
+                          firstEntry.sourceText,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 4.0),
-                  Text(
-                    firstEntry.sourceText,
-                    style: Theme.of(context).textTheme.bodyMedium,
+                  // 去翻译（根据默认语言）
+                  IconButton(
+                    onPressed: () {
+                      // onTranslateByDefaultLanguage?.call(key: translationKey, entries: translationEntries);
+                    },
+                    icon: Icon(Icons.translate),
                   ),
                 ],
               ),
