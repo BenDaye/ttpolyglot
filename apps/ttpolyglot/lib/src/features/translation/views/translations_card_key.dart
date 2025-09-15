@@ -328,7 +328,7 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
       final TranslationEntry? entriesToTranslate = widget.translationEntries
           .firstWhereOrNull((entry) => entry.targetLanguage.code == selectedSourceLanguage.code);
 
-      if (entriesToTranslate == null) {
+      if (entriesToTranslate == null || entriesToTranslate.targetText.isEmpty) {
         _showErrorSnackBar(context, '没有找到需要翻译的条目');
         setState(() {
           _isTranslating = false;
@@ -341,7 +341,7 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
       for (final entry in widget.translationEntries) {
         if (entry.targetLanguage.code == selectedSourceLanguage.code) continue;
         translateEntries.add(entry.copyWith(
-          sourceText: entriesToTranslate.sourceText,
+          sourceText: entriesToTranslate.targetText,
         ));
       }
 
