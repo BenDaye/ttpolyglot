@@ -41,8 +41,16 @@ class SettingsViewContent extends StatelessWidget {
   }
 }
 
-class _SettingsViewContent extends StatelessWidget {
+class _SettingsViewContent extends StatefulWidget {
   const _SettingsViewContent();
+
+  @override
+  State<_SettingsViewContent> createState() => _SettingsViewContentState();
+}
+
+class _SettingsViewContentState extends State<_SettingsViewContent> {
+  // 控制翻译接口配置是否展开
+  bool _isTranslationConfigExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -265,13 +273,14 @@ class _SettingsViewContent extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // 添加翻译接口按钮
             Row(
               children: [
                 const Icon(Icons.translate),
                 const SizedBox(width: 12.0),
                 const Expanded(
                   child: Text(
-                    '翻译接口配置',
+                    '翻译设置',
                     style: TextStyle(
                       fontWeight: FontWeight.w500,
                       fontSize: 16.0,
@@ -279,7 +288,17 @@ class _SettingsViewContent extends StatelessWidget {
                   ),
                 ),
                 ElevatedButton.icon(
-                  onPressed: () => _showAddProviderDialog(translationController),
+                  onPressed: () => _showAddProviderDialog(
+                    translationController,
+                    onSuccess: () {
+                      // 只有在翻译接口列表没有展开时才自动展开
+                      if (!_isTranslationConfigExpanded) {
+                        setState(() {
+                          _isTranslationConfigExpanded = true;
+                        });
+                      }
+                    },
+                  ),
                   icon: const Icon(Icons.add),
                   label: const Text(
                     '添加翻译接口',
@@ -300,7 +319,7 @@ class _SettingsViewContent extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16.0),
-            // 翻译接口配置
+            // 翻译接口配置（可展开/收起）
             _buildProviderConfigs(context, translationController),
             const SizedBox(height: 16.0),
             // 高级设置
@@ -316,11 +335,87 @@ class _SettingsViewContent extends StatelessWidget {
     return Obx(() {
       final providers = controller.config.providers;
 
-      return Column(
-        children: [
-          // 翻译接口列表
-          ...providers.map((config) => _buildProviderItem(context, controller, config)),
-        ],
+      return Card(
+        margin: EdgeInsets.zero,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        child: Container(
+          decoration: AppThemeController.cardDecoration,
+          child: ExpansionTile(
+            initiallyExpanded: _isTranslationConfigExpanded,
+            onExpansionChanged: (expanded) {
+              setState(() {
+                _isTranslationConfigExpanded = expanded;
+              });
+            },
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    color: AppThemeController.primaryColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: Icon(
+                    Icons.translate,
+                    color: AppThemeController.primaryColor,
+                    size: 20.0,
+                  ),
+                ),
+                const SizedBox(width: 12.0),
+                const Text(
+                  '翻译接口配置',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16.0,
+                  ),
+                ),
+              ],
+            ),
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  children: [
+                    // 翻译接口列表
+                    ...providers.map((config) => _buildProviderItem(context, controller, config)),
+                    if (providers.isEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 40.0),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.translate,
+                              size: 48.0,
+                              color: Colors.grey.withValues(alpha: 0.3),
+                            ),
+                            const SizedBox(height: 16.0),
+                            Text(
+                              '暂无翻译接口配置',
+                              style: TextStyle(
+                                color: Colors.grey.withValues(alpha: 0.6),
+                                fontSize: 16.0,
+                              ),
+                            ),
+                            const SizedBox(height: 8.0),
+                            Text(
+                              '点击上方"添加翻译接口"按钮添加配置',
+                              style: TextStyle(
+                                color: Colors.grey.withValues(alpha: 0.5),
+                                fontSize: 14.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       );
     });
   }
@@ -421,6 +516,34 @@ class _SettingsViewContent extends StatelessWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    // 设为默认开关
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '设为默认',
+                          style: TextStyle(
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.w500,
+                            color: config.isDefault
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        const SizedBox(width: 8.0),
+                        Switch(
+                          value: config.isDefault,
+                          onChanged: (bool value) {
+                            controller.updateProviderConfigById(
+                              config.id,
+                              isDefault: value,
+                            );
+                          },
+                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 16.0),
                     // 编辑按钮
                     Container(
                       decoration: BoxDecoration(
@@ -457,34 +580,6 @@ class _SettingsViewContent extends StatelessWidget {
                         padding: const EdgeInsets.all(10.0),
                         constraints: const BoxConstraints(),
                       ),
-                    ),
-                    const SizedBox(width: 16.0),
-                    // 设为默认开关
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '设为默认',
-                          style: TextStyle(
-                            fontSize: 14.0,
-                            fontWeight: FontWeight.w500,
-                            color: config.isDefault
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-                          ),
-                        ),
-                        const SizedBox(width: 8.0),
-                        Switch(
-                          value: config.isDefault,
-                          onChanged: (bool value) {
-                            controller.updateProviderConfigById(
-                              config.id,
-                              isDefault: value,
-                            );
-                          },
-                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                      ],
                     ),
                   ],
                 ),
@@ -717,7 +812,7 @@ class _SettingsViewContent extends StatelessWidget {
   }
 
   /// 显示添加翻译接口对话框
-  void _showAddProviderDialog(TranslationConfigController controller) {
+  void _showAddProviderDialog(TranslationConfigController controller, {VoidCallback? onSuccess}) {
     TranslationProvider selectedProvider = TranslationProvider.baidu;
     final nameController = TextEditingController();
     final appIdController = TextEditingController();
@@ -1154,6 +1249,8 @@ class _SettingsViewContent extends StatelessWidget {
                     apiUrl: selectedProvider == TranslationProvider.custom ? apiUrlController.text.trim() : null,
                     isDefault: isDefault,
                   );
+                  // 调用成功回调来展开列表
+                  onSuccess?.call();
                   Get.back();
                 } else {
                   // 触发UI更新以显示错误信息
