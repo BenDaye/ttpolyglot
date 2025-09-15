@@ -161,32 +161,70 @@ class TranslationServiceManager extends GetxService {
   static Future<void> showConfigCheckDialog(BuildContext context) {
     return Get.dialog(
       AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
         title: Row(
           children: [
-            Icon(
-              Icons.warning_amber_rounded,
-              color: Theme.of(context).colorScheme.error,
-              size: 24.0,
+            Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Icon(
+                Icons.settings_outlined,
+                color: Theme.of(context).colorScheme.primary,
+                size: 20.0,
+              ),
             ),
-            const SizedBox(width: 8.0),
-            const Text('翻译配置未完成'),
+            const SizedBox(width: 12.0),
+            Text(
+              '翻译配置未完成',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
           ],
         ),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('请先配置翻译接口才能使用翻译功能：'),
-            SizedBox(height: 12.0),
-            Text('1. 前往设置页面'),
-            Text('2. 添加翻译接口（百度、有道、谷歌等）'),
-            Text('3. 填写API密钥和配置信息'),
-            Text('4. 启用翻译接口'),
+            Text(
+              '请先配置翻译接口才能使用翻译功能',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(height: 16.0),
+            Container(
+              padding: const EdgeInsets.all(12.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildStepItem(context, '1', '前往设置页面'),
+                  const SizedBox(height: 8.0),
+                  _buildStepItem(context, '2', '添加翻译接口（百度、有道、谷歌等）'),
+                  const SizedBox(height: 8.0),
+                  _buildStepItem(context, '3', '填写API密钥和配置信息'),
+                  const SizedBox(height: 8.0),
+                  _buildStepItem(context, '4', '启用翻译接口'),
+                ],
+              ),
+            ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            ),
             child: const Text('取消'),
           ),
           ElevatedButton(
@@ -195,10 +233,52 @@ class TranslationServiceManager extends GetxService {
               // 导航到设置页面
               Get.rootDelegate.offAndToNamed(Routes.settings);
             },
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+            ),
             child: const Text('去配置'),
           ),
         ],
       ),
+    );
+  }
+
+  /// 构建步骤项
+  static Widget _buildStepItem(BuildContext context, String step, String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 20.0,
+          height: 20.0,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary,
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          child: Center(
+            child: Text(
+              step,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 10.0,
+                  ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8.0),
+        Expanded(
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+          ),
+        ),
+      ],
     );
   }
 
