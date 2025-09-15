@@ -95,9 +95,8 @@ class TranslationsList extends StatelessWidget {
                         onEditEntry: ({required TranslationEntry entry}) {
                           _showEditTranslationDialog(context, controller: controller, entry: entry);
                         },
-                        onTranslateByDefaultLanguage: (
-                            {required String key, required List<TranslationEntry> entries}) async {
-                          // 翻译功能已集成在TranslationsCardByKey内部
+                        onChangeTranslate: ({required List<TranslationEntry> entries}) {
+                          // controller.updateTranslationEntries(entries);
                         },
                       ),
                     );

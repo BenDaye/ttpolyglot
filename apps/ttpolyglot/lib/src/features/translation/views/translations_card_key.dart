@@ -15,6 +15,7 @@ class TranslationsCardByKey extends StatefulWidget {
     this.onDeleteAllEntries,
     this.onEditEntry,
     this.onTranslateByDefaultLanguage,
+    this.onChangeTranslate,
   });
 
   final String translationKey;
@@ -26,6 +27,7 @@ class TranslationsCardByKey extends StatefulWidget {
   final Function({
     required TranslationEntry entry,
   })? onEditEntry;
+  final Function({required List<TranslationEntry> entries})? onChangeTranslate;
   final Function({
     required String key,
     required List<TranslationEntry> entries,
@@ -342,29 +344,28 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
       // 处理翻译结果
       int successCount = 0;
       int failCount = 0;
+      final updatedEntries = <TranslationEntry>[];
       final failedEntries = <TranslationEntry>[];
 
       for (int i = 0; i < results.length; i++) {
         final result = results[i];
         final entry = entriesToTranslate[i];
-
         if (result.success) {
           successCount++;
-          // 更新翻译条目
-          final updatedEntry = entry.copyWith(
+          updatedEntries.add(entry.copyWith(
             targetText: result.translatedText,
             status: TranslationStatus.completed,
             updatedAt: DateTime.now(),
-          );
-
-          // 调用回调更新条目
-          widget.onEditEntry?.call(entry: updatedEntry);
+          ));
         } else {
           failCount++;
           failedEntries.add(entry);
           log('翻译失败: ${entry.key} - ${result.error}', name: 'TranslationsCardByKey');
         }
       }
+
+      // 调用回调更新条目
+      widget.onChangeTranslate?.call(entries: updatedEntries);
 
       // 显示结果
       _showTranslationResultSnackBar(context, successCount, failCount);
@@ -394,7 +395,7 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
   void _showErrorSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: Text(message, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white)),
         backgroundColor: Theme.of(context).colorScheme.error,
         duration: const Duration(seconds: 3),
       ),
@@ -408,7 +409,7 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: Text(message, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white)),
         backgroundColor: backgroundColor,
         duration: const Duration(seconds: 3),
       ),
