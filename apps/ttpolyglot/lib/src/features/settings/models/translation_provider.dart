@@ -140,8 +140,9 @@ class TranslationProviderConfig {
     switch (provider) {
       case TranslationProvider.baidu:
       case TranslationProvider.youdao:
-      case TranslationProvider.google:
         return appId.isNotEmpty && appKey.isNotEmpty;
+      case TranslationProvider.google:
+        return true; // 谷歌翻译不需要API密钥
       case TranslationProvider.custom:
         return appId.isNotEmpty && apiUrl?.isNotEmpty == true;
     }
@@ -158,12 +159,15 @@ class TranslationProviderConfig {
 
     if (!isEnabled) return errors;
 
-    if (appId.isEmpty) {
-      errors.add('${provider.name} 的应用ID不能为空');
-    }
+    // 谷歌翻译不需要API密钥，跳过验证
+    if (provider != TranslationProvider.google) {
+      if (appId.isEmpty) {
+        errors.add('${provider.name} 的应用ID不能为空');
+      }
 
-    if (appKey.isEmpty) {
-      errors.add('${provider.name} 的应用密钥不能为空');
+      if (appKey.isEmpty) {
+        errors.add('${provider.name} 的应用密钥不能为空');
+      }
     }
 
     if (provider == TranslationProvider.custom && (apiUrl?.isEmpty ?? true)) {

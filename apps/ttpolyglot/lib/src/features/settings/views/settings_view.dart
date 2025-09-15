@@ -850,14 +850,16 @@ class _SettingsViewContentState extends State<_SettingsViewContent> {
         }
       }
 
-      // 验证App ID
-      if (appIdController.text.trim().isEmpty) {
+      // 验证App ID（谷歌翻译不需要）
+      if (selectedProvider != TranslationProvider.google && appIdController.text.trim().isEmpty) {
         appIdError = selectedProvider == TranslationProvider.custom ? '请输入API密钥' : '请输入应用ID';
         isValid = false;
       }
 
-      // 验证App Key（非自定义翻译）
-      if (selectedProvider != TranslationProvider.custom && appKeyController.text.trim().isEmpty) {
+      // 验证App Key（非自定义翻译和谷歌翻译）
+      if (selectedProvider != TranslationProvider.custom &&
+          selectedProvider != TranslationProvider.google &&
+          appKeyController.text.trim().isEmpty) {
         appKeyError = '请输入应用密钥';
         isValid = false;
       }

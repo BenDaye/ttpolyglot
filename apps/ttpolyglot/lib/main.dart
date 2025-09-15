@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/services/service.dart';
+import 'package:ttpolyglot/src/features/settings/controllers/translation_config_controller.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -82,6 +83,8 @@ Future<void> _initializeService() async {
   await Get.putAsync(() => ProjectServiceImpl.create());
   await Get.putAsync(() => TranslationServiceImpl.create());
   await Get.putAsync(() => ExportServiceImpl.create());
-  Get.put(TranslationServiceManager());
+  Get.lazyPut(() => TranslationServiceManager(), fenix: true);
+  Get.lazyPut(() => TranslationConfigController(), fenix: true);
+
   log('⚙️ Services initialized');
 }
