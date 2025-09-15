@@ -7,7 +7,7 @@ import 'package:ttpolyglot/src/core/services/translation_service_manager.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_core/core.dart';
 
-class TranslationsCardByKey extends StatelessWidget {
+class TranslationsCardByKey extends StatefulWidget {
   const TranslationsCardByKey({
     super.key,
     required this.translationKey,
@@ -32,8 +32,15 @@ class TranslationsCardByKey extends StatelessWidget {
   })? onTranslateByDefaultLanguage;
 
   @override
+  State<TranslationsCardByKey> createState() => _TranslationsCardByKeyState();
+}
+
+class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
+  bool _isTranslating = false;
+
+  @override
   Widget build(BuildContext context) {
-    final firstEntry = translationEntries.first;
+    final firstEntry = widget.translationEntries.first;
 
     return Card(
       child: Padding(
@@ -47,7 +54,7 @@ class TranslationsCardByKey extends StatelessWidget {
                 // 翻译键
                 Expanded(
                   child: Text(
-                    translationKey,
+                    widget.translationKey,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -59,9 +66,9 @@ class TranslationsCardByKey extends StatelessWidget {
                   itemBuilder: (context) => [
                     PopupMenuItem(
                       onTap: () {
-                        onDeleteAllEntries?.call(
-                          key: translationKey,
-                          entries: translationEntries,
+                        widget.onDeleteAllEntries?.call(
+                          key: widget.translationKey,
+                          entries: widget.translationEntries,
                         );
                       },
                       child: Row(
@@ -110,8 +117,19 @@ class TranslationsCardByKey extends StatelessWidget {
                   ),
                   // 去翻译（根据默认语言）
                   IconButton(
-                    onPressed: () => _handleTranslateByDefaultLanguage(context),
-                    icon: Icon(Icons.translate),
+                    onPressed: _isTranslating ? null : () => _handleTranslateByDefaultLanguage(context),
+                    icon: _isTranslating
+                        ? SizedBox(
+                            width: 20.0,
+                            height: 20.0,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.0,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                          )
+                        : Icon(Icons.translate),
                   ),
                 ],
               ),
@@ -159,7 +177,7 @@ class TranslationsCardByKey extends StatelessWidget {
             Column(
               spacing: 8.0,
               children: [
-                ...translationEntries.map(
+                ...widget.translationEntries.map(
                   (entry) => _buildLanguageTranslationItem(context, entry),
                 ),
               ],
@@ -176,7 +194,7 @@ class TranslationsCardByKey extends StatelessWidget {
     TranslationEntry entry,
   ) {
     return InkWell(
-      onTap: () => onEditEntry?.call(entry: entry),
+      onTap: () => widget.onEditEntry?.call(entry: entry),
       borderRadius: BorderRadius.circular(4.0),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
@@ -254,20 +272,32 @@ class TranslationsCardByKey extends StatelessWidget {
 
   /// 处理根据默认语言翻译
   Future<void> _handleTranslateByDefaultLanguage(BuildContext context) async {
+    if (_isTranslating) return; // 防止重复点击
+
+    setState(() {
+      _isTranslating = true;
+    });
+
     try {
       final translationManager = Get.find<TranslationServiceManager>();
 
       // 检查翻译配置
       if (!translationManager.hasValidConfig) {
         await TranslationServiceManager.showConfigCheckDialog(context);
+        setState(() {
+          _isTranslating = false;
+        });
         return;
       }
 
       // 获取可用的源语言（从翻译条目中提取）
-      final availableSourceLanguages = translationEntries.map((entry) => entry.sourceLanguage).toSet().toList();
+      final availableSourceLanguages = widget.translationEntries.map((entry) => entry.sourceLanguage).toSet().toList();
 
       if (availableSourceLanguages.isEmpty) {
         _showErrorSnackBar(context, '没有可用的源语言');
+        setState(() {
+          _isTranslating = false;
+        });
         return;
       }
 
@@ -284,21 +314,23 @@ class TranslationsCardByKey extends StatelessWidget {
         );
 
         if (selectedLanguage == null) {
+          setState(() {
+            _isTranslating = false;
+          });
           return; // 用户取消了选择
         }
         selectedSourceLanguage = selectedLanguage;
       }
 
-      // 显示加载对话框
-      _showLoadingDialog(context);
-
       // 获取需要翻译的条目（基于选中的源语言）
       final entriesToTranslate =
-          translationEntries.where((entry) => entry.sourceLanguage.code == selectedSourceLanguage.code).toList();
+          widget.translationEntries.where((entry) => entry.sourceLanguage.code == selectedSourceLanguage.code).toList();
 
       if (entriesToTranslate.isEmpty) {
-        Get.back(); // 关闭加载对话框
         _showErrorSnackBar(context, '没有找到需要翻译的条目');
+        setState(() {
+          _isTranslating = false;
+        });
         return;
       }
 
@@ -306,8 +338,6 @@ class TranslationsCardByKey extends StatelessWidget {
       final results = await translationManager.batchTranslateEntries(
         entries: entriesToTranslate,
       );
-
-      Get.back(); // 关闭加载对话框
 
       // 处理翻译结果
       int successCount = 0;
@@ -328,7 +358,7 @@ class TranslationsCardByKey extends StatelessWidget {
           );
 
           // 调用回调更新条目
-          onEditEntry?.call(entry: updatedEntry);
+          widget.onEditEntry?.call(entry: updatedEntry);
         } else {
           failCount++;
           failedEntries.add(entry);
@@ -344,28 +374,20 @@ class TranslationsCardByKey extends StatelessWidget {
         _showFailedTranslationsDialog(
             context, failedEntries, results.where((r) => !r.success).map((r) => r.error ?? '未知错误').toList());
       }
+
+      // 重置加载状态
+      setState(() {
+        _isTranslating = false;
+      });
     } catch (error, stackTrace) {
       log('翻译处理异常', error: error, stackTrace: stackTrace, name: 'TranslationsCardByKey');
       if (context.mounted) {
-        Get.back(); // 关闭加载对话框
         _showErrorSnackBar(context, '翻译处理异常: $error');
       }
+      setState(() {
+        _isTranslating = false;
+      });
     }
-  }
-
-  /// 显示加载对话框
-  void _showLoadingDialog(BuildContext context) {
-    Get.dialog(
-      AlertDialog(
-        content: Row(
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(width: 16.0),
-            const Text('正在翻译...'),
-          ],
-        ),
-      ),
-    );
   }
 
   /// 显示错误提示
@@ -382,7 +404,7 @@ class TranslationsCardByKey extends StatelessWidget {
   /// 显示翻译结果提示
   void _showTranslationResultSnackBar(BuildContext context, int successCount, int failCount) {
     final message = '翻译完成: 成功 $successCount 个，失败 $failCount 个';
-    final backgroundColor = failCount > 0 ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.primary;
+    final backgroundColor = failCount > 0 ? Theme.of(context).colorScheme.error : Colors.green;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
