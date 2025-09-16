@@ -389,7 +389,7 @@ class TranslationApiService {
       case 'zh-CN':
         return 'zh-cn';
       case 'zh-TW':
-        return 'zh-tw';
+        return 'zh_tw';
       case 'en-US':
         return 'en';
       case 'ja-JP':
