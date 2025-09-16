@@ -292,6 +292,15 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
         return;
       }
 
+      // 检查是否有设置默认翻译接口
+      if (!await translationManager.hasDefaultProviderAsync()) {
+        _showErrorSnackBar(context, '您还没有设置默认翻译接口');
+        setState(() {
+          _isTranslating = false;
+        });
+        return;
+      }
+
       // 获取可用的源语言（从翻译条目中提取）
       final availableSourceLanguages = widget.translationEntries.map((entry) => entry.sourceLanguage).toSet().toList();
 

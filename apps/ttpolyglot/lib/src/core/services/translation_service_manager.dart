@@ -9,38 +9,53 @@ import 'package:ttpolyglot_translators/translators.dart';
 
 /// 翻译服务管理器
 class TranslationServiceManager extends GetxService {
-  static TranslationServiceManager get instance => Get.find<TranslationServiceManager>();
-
-  final TranslationConfigController _configController = Get.find<TranslationConfigController>();
+  static TranslationServiceManager get instance => Get.isRegistered<TranslationServiceManager>()
+      ? Get.find<TranslationServiceManager>()
+      : Get.put(TranslationServiceManager());
 
   /// 检查翻译配置是否完整
   bool get hasValidConfig {
-    final config = _configController.config;
+    final config = TranslationConfigController.instance.config;
     return config.enabledProviders.isNotEmpty;
   }
 
   /// 异步检查翻译配置是否完整（等待配置加载完成）
   Future<bool> hasValidConfigAsync() async {
     // 如果正在加载配置，等待加载完成
-    if (_configController.isLoading) {
+    if (TranslationConfigController.instance.isLoading) {
       // 等待配置加载完成
-      while (_configController.isLoading) {
+      while (TranslationConfigController.instance.isLoading) {
         await Future.delayed(const Duration(milliseconds: 50));
       }
     }
 
-    final config = _configController.config;
+    final config = TranslationConfigController.instance.config;
     return config.enabledProviders.isNotEmpty;
   }
 
   /// 获取默认翻译接口
   TranslationProviderConfig? get defaultProvider {
-    return _configController.config.defaultProvider;
+    return TranslationConfigController.instance.config.defaultProvider;
+  }
+
+  /// 检查是否有设置默认翻译接口
+  Future<bool> hasDefaultProviderAsync() async {
+    // 如果正在加载配置，等待加载完成
+    if (TranslationConfigController.instance.isLoading) {
+      // 等待配置加载完成
+      while (TranslationConfigController.instance.isLoading) {
+        await Future.delayed(const Duration(milliseconds: 50));
+      }
+    }
+
+    final config = TranslationConfigController.instance.config;
+    // 检查是否有明确设置为默认的接口
+    return config.providers.any((p) => p.isDefault);
   }
 
   /// 获取所有启用的翻译接口
   List<TranslationProviderConfig> get enabledProviders {
-    return _configController.config.enabledProviders;
+    return TranslationConfigController.instance.config.enabledProviders;
   }
 
   /// 翻译文本
@@ -169,6 +184,95 @@ class TranslationServiceManager extends GetxService {
     }
 
     return results;
+  }
+
+  /// 显示默认接口未设置弹窗
+  static Future<void> showDefaultProviderNotSetDialog(BuildContext context) {
+    return Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Icon(
+                Icons.star_border,
+                color: Theme.of(context).colorScheme.primary,
+                size: 20.0,
+              ),
+            ),
+            const SizedBox(width: 12.0),
+            Text(
+              '未设置默认翻译接口',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '请先设置一个默认的翻译接口才能使用翻译功能',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(height: 16.0),
+            Container(
+              padding: const EdgeInsets.all(12.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildStepItem(context, '1', '前往设置页面'),
+                  const SizedBox(height: 8.0),
+                  _buildStepItem(context, '2', '添加翻译接口（百度、有道、谷歌等）'),
+                  const SizedBox(height: 8.0),
+                  _buildStepItem(context, '3', '启用翻译接口'),
+                  const SizedBox(height: 8.0),
+                  _buildStepItem(context, '4', '设置其中一个接口为默认接口'),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            ),
+            child: const Text('取消'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Get.back();
+              // 导航到设置页面
+              Get.rootDelegate.offAndToNamed(Routes.settings);
+            },
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+            ),
+            child: const Text('去设置'),
+          ),
+        ],
+      ),
+    );
   }
 
   /// 显示配置检查弹窗

@@ -7,6 +7,10 @@ import 'package:ttpolyglot_core/core.dart';
 
 /// 翻译配置控制器
 class TranslationConfigController extends GetxController {
+  static TranslationConfigController get instance => Get.isRegistered<TranslationConfigController>()
+      ? Get.find<TranslationConfigController>()
+      : Get.put(TranslationConfigController());
+
   // 响应式变量
   final _config = TranslationConfig(
     providers: [],
