@@ -338,7 +338,7 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
           .firstWhereOrNull((entry) => entry.targetLanguage.code == selectedSourceLanguage.code);
 
       if (entriesToTranslate == null || entriesToTranslate.targetText.isEmpty) {
-        _showErrorSnackBar(context, '没有找到需要翻译的条目');
+        _showErrorSnackBar(context, '主语言还没有设置翻译');
         setState(() {
           _isTranslating = false;
         });
