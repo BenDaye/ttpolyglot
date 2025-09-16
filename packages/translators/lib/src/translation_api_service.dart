@@ -388,6 +388,8 @@ class TranslationApiService {
     switch (languageCode) {
       case 'zh-CN':
         return 'zh-cn';
+      case 'zh-TW':
+        return 'zh-tw';
       case 'en-US':
         return 'en';
       case 'ja-JP':
