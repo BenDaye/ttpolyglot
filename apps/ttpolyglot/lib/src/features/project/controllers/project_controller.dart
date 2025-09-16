@@ -260,6 +260,8 @@ class ProjectController extends GetxController {
     }
   }
 
+  /// 导入内容到项目中
+  /// 这种设计确保了所有翻译都基于相同的源语言，提高了数据一致性。
   Future<void> importFiles(Map<String, Language> languageMap, Map<String, Map<String, String>> translationMap) async {
     final startTime = DateTime.now();
     try {
@@ -273,7 +275,11 @@ class ProjectController extends GetxController {
       // 获取现有翻译条目用于精确检查
       final existingEntries = await _translationService.getTranslationEntries(projectId);
 
-      // 处理每个文件的翻译
+      // 收集所有唯一的翻译键
+      final allKeys = <String>{};
+      final keyValueMap = <String, Map<String, String>>{};
+
+      // 处理每个文件的翻译，收集键和值
       for (final fileEntry in translationMap.entries) {
         final fileName = fileEntry.key;
         final translations = fileEntry.value;
@@ -286,11 +292,6 @@ class ProjectController extends GetxController {
         }
 
         log('处理文件 $fileName，语言: ${selectedLanguage.code}，条目数: ${translations.length}', name: 'ProjectController');
-
-        // 处理每个翻译条目
-        final importedEntries = <TranslationEntry>[];
-        final updatedEntries = <TranslationEntry>[];
-        final skippedKeys = <String>[];
 
         for (final translation in translations.entries) {
           final key = translation.key;
@@ -309,19 +310,38 @@ class ProjectController extends GetxController {
             continue;
           }
 
-          // 1. 判断key值是否已经存在
-          TranslationEntry? existingEntryForKey;
-          try {
-            existingEntryForKey = existingEntries.firstWhere(
-              (entry) => entry.key == key.trim(),
-            );
-          } catch (e) {
-            existingEntryForKey = null;
-          }
+          final trimmedKey = key.trim();
+          allKeys.add(trimmedKey);
 
-          if (existingEntryForKey == null) {
-            // key不存在，直接创建新条目
-            log('key "$key" 不存在，将创建新条目', name: 'ProjectController');
+          // 初始化键的语言映射
+          keyValueMap[trimmedKey] ??= {};
+          keyValueMap[trimmedKey]![selectedLanguage.code] = value;
+        }
+      }
+
+      // 获取项目的全部语言
+      final allProjectLanguages = _project.value!.allLanguages;
+
+      // 处理每个键，为缺少的语言创建翻译条目
+      for (final key in allKeys) {
+        log('处理键: "$key"', name: 'ProjectController');
+
+        // 检查该键在每个项目语言中的现有条目
+        final existingEntriesForKey = existingEntries.where((entry) => entry.key == key).toList();
+
+        // 为每个项目语言检查是否需要创建或更新条目
+        for (final language in allProjectLanguages) {
+          final languageCode = language.code;
+          final hasValue = keyValueMap[key]?.containsKey(languageCode) ?? false;
+          final value = keyValueMap[key]?[languageCode] ?? '';
+
+          // 查找该语言的现有条目
+          final existingEntryForLanguage =
+              existingEntriesForKey.where((entry) => entry.targetLanguage.code == languageCode).toList();
+
+          if (existingEntryForLanguage.isEmpty) {
+            // 该语言的条目不存在，需要创建
+            log('键 "$key" 缺少语言 "$languageCode" 的条目，将创建新条目', name: 'ProjectController');
 
             // 根据"自动审核"设置确定状态
             TranslationStatus entryStatus;
@@ -337,112 +357,59 @@ class ProjectController extends GetxController {
               id: DateTime.now().millisecondsSinceEpoch.toString() +
                   (DateTime.now().microsecond % 1000).toString().padLeft(3, '0'),
               projectId: projectId,
-              key: key.trim(),
-              sourceLanguage: selectedLanguage.code == _project.value!.primaryLanguage.code
-                  ? selectedLanguage
-                  : _project.value!.primaryLanguage,
-              targetLanguage: selectedLanguage,
-              sourceText: selectedLanguage.code == _project.value!.primaryLanguage.code ? value : key,
+              key: key,
+              sourceLanguage:
+                  languageCode == _project.value!.primaryLanguage.code ? language : _project.value!.primaryLanguage,
+              targetLanguage: language,
+              sourceText: languageCode == _project.value!.primaryLanguage.code ? value : key,
               targetText: value,
               status: entryStatus,
               createdAt: DateTime.now(),
               updatedAt: DateTime.now(),
             );
 
-            importedEntries.add(newEntry);
-          } else {
-            // 2. key存在，判断当前语言的值是否存在
-            TranslationEntry? existingTranslationForLanguage;
-            try {
-              existingTranslationForLanguage = existingEntries.firstWhere(
-                (entry) => entry.key == key.trim() && entry.targetLanguage.code == selectedLanguage.code,
-              );
-            } catch (e) {
-              existingTranslationForLanguage = null;
-            }
+            allImportedEntries.add(newEntry);
+          } else if (hasValue && overrideExisting) {
+            // 该语言的条目存在，且有值且允许覆盖，需要更新
+            log('键 "$key" 的语言 "$languageCode" 条目存在，根据配置将覆盖现有翻译', name: 'ProjectController');
 
-            if (existingTranslationForLanguage == null) {
-              // 3. 当前语言的值不存在，直接写入
-              log('key "$key" 存在但语言 "${selectedLanguage.code}" 的值不存在，将创建新条目', name: 'ProjectController');
-
-              TranslationStatus entryStatus;
-              if (value.trim().isEmpty) {
-                entryStatus = TranslationStatus.pending;
-              } else if (autoReview) {
-                entryStatus = TranslationStatus.completed;
-              } else {
-                entryStatus = TranslationStatus.reviewing;
-              }
-
-              final newEntry = TranslationEntry(
-                id: DateTime.now().millisecondsSinceEpoch.toString() +
-                    (DateTime.now().microsecond % 1000).toString().padLeft(3, '0'),
-                projectId: projectId,
-                key: key.trim(),
-                sourceLanguage: selectedLanguage.code == _project.value!.primaryLanguage.code
-                    ? selectedLanguage
-                    : _project.value!.primaryLanguage,
-                targetLanguage: selectedLanguage,
-                sourceText: selectedLanguage.code == _project.value!.primaryLanguage.code ? value : key,
-                targetText: value,
-                status: entryStatus,
-                createdAt: DateTime.now(),
-                updatedAt: DateTime.now(),
-              );
-
-              importedEntries.add(newEntry);
+            TranslationStatus entryStatus;
+            if (value.trim().isEmpty) {
+              entryStatus = TranslationStatus.pending;
+            } else if (autoReview) {
+              entryStatus = TranslationStatus.completed;
             } else {
-              // 4. 当前语言的值存在，根据配置判断是否需要覆盖
-              if (overrideExisting) {
-                // 覆盖现有翻译
-                log('key "$key" 的语言 "${selectedLanguage.code}" 值存在，根据配置将覆盖现有翻译', name: 'ProjectController');
-
-                TranslationStatus entryStatus;
-                if (value.trim().isEmpty) {
-                  entryStatus = TranslationStatus.pending;
-                } else if (autoReview) {
-                  entryStatus = TranslationStatus.completed;
-                } else {
-                  entryStatus = TranslationStatus.reviewing;
-                }
-
-                final updatedEntry = existingTranslationForLanguage.copyWith(
-                  sourceText: selectedLanguage.code == _project.value!.primaryLanguage.code ? value : key,
-                  targetText: value,
-                  status: entryStatus,
-                  updatedAt: DateTime.now(),
-                );
-
-                updatedEntries.add(updatedEntry);
-              } else {
-                // 不覆盖，跳过此条目
-                log('key "$key" 的语言 "${selectedLanguage.code}" 值存在，根据配置跳过覆盖', name: 'ProjectController');
-                skippedKeys.add(key.trim());
-                totalSkipped++;
-              }
+              entryStatus = TranslationStatus.reviewing;
             }
+
+            final updatedEntry = existingEntryForLanguage.first.copyWith(
+              sourceText: languageCode == _project.value!.primaryLanguage.code ? value : key,
+              targetText: value,
+              status: entryStatus,
+              updatedAt: DateTime.now(),
+            );
+
+            allUpdatedEntries.add(updatedEntry);
+          } else if (hasValue && !overrideExisting) {
+            // 该语言的条目存在，有值但不允许覆盖，跳过
+            log('键 "$key" 的语言 "$languageCode" 条目存在，根据配置跳过覆盖', name: 'ProjectController');
+            allSkippedEntries.add(key);
+            totalSkipped++;
           }
+          // 如果条目存在但没有新值，则保持原有条目不变
         }
+      }
 
-        // 批量创建新条目
-        if (importedEntries.isNotEmpty) {
-          final createdEntries = await _translationService.batchCreateTranslationEntries(importedEntries);
-          allImportedEntries.addAll(createdEntries);
-          log('文件 $fileName 创建了 ${createdEntries.length} 个新翻译条目', name: 'ProjectController');
-        }
+      // 批量创建新条目
+      if (allImportedEntries.isNotEmpty) {
+        final createdEntries = await _translationService.batchCreateTranslationEntries(allImportedEntries);
+        log('创建了 ${createdEntries.length} 个新翻译条目', name: 'ProjectController');
+      }
 
-        // 批量更新现有条目
-        if (updatedEntries.isNotEmpty) {
-          final updatedResult = await _translationService.batchUpdateTranslationEntries(updatedEntries);
-          allUpdatedEntries.addAll(updatedResult);
-          log('文件 $fileName 更新了 ${updatedResult.length} 个现有翻译条目', name: 'ProjectController');
-        }
-
-        // 记录跳过的条目
-        if (skippedKeys.isNotEmpty) {
-          allSkippedEntries.addAll(skippedKeys);
-          log('文件 $fileName 跳过了 ${skippedKeys.length} 个现有翻译条目', name: 'ProjectController');
-        }
+      // 批量更新现有条目
+      if (allUpdatedEntries.isNotEmpty) {
+        final updatedResult = await _translationService.batchUpdateTranslationEntries(allUpdatedEntries);
+        log('更新了 ${updatedResult.length} 个现有翻译条目', name: 'ProjectController');
       }
 
       // 清空文件列表
@@ -526,7 +493,7 @@ class ProjectController extends GetxController {
         success: true,
       );
 
-      log('导入完成：创建 ${allImportedEntries.length}，更新 ${allUpdatedEntries.length}，跳过 ${allSkippedEntries.length + (totalSkipped - allSkippedEntries.length)}',
+      log('导入完成：创建 ${allImportedEntries.length}，更新 ${allUpdatedEntries.length}，跳过 ${allSkippedEntries.length}',
           name: 'ProjectController');
     } catch (error, stackTrace) {
       log('导入文件失败', error: error, stackTrace: stackTrace, name: 'ProjectController');
