@@ -209,6 +209,7 @@ class ProjectsSidebar extends StatelessWidget {
               ),
               subtitle: Column(
                 spacing: 2.0,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     controller.description,
