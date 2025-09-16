@@ -7,10 +7,13 @@ import 'package:ttpolyglot/src/core/services/service.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 class ProjectExportController extends GetxController {
+  final String projectId;
+  ProjectExportController({required this.projectId});
+
   static ProjectExportController instance(String projectId) {
     return Get.isRegistered<ProjectExportController>(tag: projectId)
         ? Get.find<ProjectExportController>(tag: projectId)
-        : Get.put(ProjectExportController(), tag: projectId);
+        : Get.put(ProjectExportController(projectId: projectId), tag: projectId);
   }
 
   final ProjectServiceImpl _projectService = Get.find<ProjectServiceImpl>();
@@ -40,7 +43,6 @@ class ProjectExportController extends GetxController {
       final savePath = await controller._exportService.exportTranslationsShortcutJsonWithPath(
         project: project,
         entries: entries,
-        options: options,
       );
 
       if (savePath == null) return null;
@@ -232,7 +234,7 @@ class ProjectExportController extends GetxController {
   void initializeCustomExport(Project project) {
     // 默认选择所有语言
     _selectedLanguages.clear();
-    _selectedLanguages.add(project.defaultLanguage.code);
+    _selectedLanguages.add(project.primaryLanguage.code);
     _selectedLanguages.addAll(project.targetLanguages.map((lang) => lang.code));
 
     // 重置其他设置

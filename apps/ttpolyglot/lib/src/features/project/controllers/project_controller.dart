@@ -10,7 +10,7 @@ import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 class ProjectController extends GetxController {
-  final String projectId;
+  String projectId;
   ProjectController({required this.projectId});
 
   static ProjectController getInstance(String projectId) {
@@ -30,6 +30,11 @@ class ProjectController extends GetxController {
   Project? get project => _project.value;
   Rxn<Project> get projectObs => _project;
   bool get isLoading => _isLoading.value;
+
+  String get title => _project.value?.name ?? '-';
+  String get description => _project.value?.description ?? '-';
+  int get languageCount => _project.value?.allLanguages.length ?? 0;
+  int get translationCount => 0;
 
   // Files
   final RxList<PlatformFile> _files = <PlatformFile>[].obs;
@@ -329,11 +334,11 @@ class ProjectController extends GetxController {
                   (DateTime.now().microsecond % 1000).toString().padLeft(3, '0'),
               projectId: projectId,
               key: key.trim(),
-              sourceLanguage: selectedLanguage.code == _project.value!.defaultLanguage.code
+              sourceLanguage: selectedLanguage.code == _project.value!.primaryLanguage.code
                   ? selectedLanguage
-                  : _project.value!.defaultLanguage,
+                  : _project.value!.primaryLanguage,
               targetLanguage: selectedLanguage,
-              sourceText: selectedLanguage.code == _project.value!.defaultLanguage.code ? value : key,
+              sourceText: selectedLanguage.code == _project.value!.primaryLanguage.code ? value : key,
               targetText: value,
               status: entryStatus,
               createdAt: DateTime.now(),
@@ -370,11 +375,11 @@ class ProjectController extends GetxController {
                     (DateTime.now().microsecond % 1000).toString().padLeft(3, '0'),
                 projectId: projectId,
                 key: key.trim(),
-                sourceLanguage: selectedLanguage.code == _project.value!.defaultLanguage.code
+                sourceLanguage: selectedLanguage.code == _project.value!.primaryLanguage.code
                     ? selectedLanguage
-                    : _project.value!.defaultLanguage,
+                    : _project.value!.primaryLanguage,
                 targetLanguage: selectedLanguage,
-                sourceText: selectedLanguage.code == _project.value!.defaultLanguage.code ? value : key,
+                sourceText: selectedLanguage.code == _project.value!.primaryLanguage.code ? value : key,
                 targetText: value,
                 status: entryStatus,
                 createdAt: DateTime.now(),
@@ -398,7 +403,7 @@ class ProjectController extends GetxController {
                 }
 
                 final updatedEntry = existingTranslationForLanguage.copyWith(
-                  sourceText: selectedLanguage.code == _project.value!.defaultLanguage.code ? value : key,
+                  sourceText: selectedLanguage.code == _project.value!.primaryLanguage.code ? value : key,
                   targetText: value,
                   status: entryStatus,
                   updatedAt: DateTime.now(),

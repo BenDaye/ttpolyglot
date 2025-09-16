@@ -321,7 +321,7 @@ class _ProjectImportViewState extends State<ProjectImportView> {
                             builder: (context) {
                               // 组合默认语言 + 目标语言，并按 code 去重
                               final combinedLanguages = <Language>[
-                                if (controller.project?.defaultLanguage != null) controller.project!.defaultLanguage,
+                                if (controller.project?.primaryLanguage != null) controller.project!.primaryLanguage,
                                 ...(controller.project?.targetLanguages ?? []),
                               ];
 
