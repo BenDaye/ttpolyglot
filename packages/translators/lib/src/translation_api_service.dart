@@ -332,6 +332,10 @@ class TranslationApiService {
     switch (languageCode) {
       case 'zh-CN':
         return 'zh';
+      case 'zh-TW':
+        return 'cht';
+      case 'zh-HK':
+        return 'zh-HK';
       case 'en-US':
         return 'en';
       case 'ja-JP':
@@ -360,6 +364,10 @@ class TranslationApiService {
     switch (languageCode) {
       case 'zh-CN':
         return 'zh-CHS';
+      case 'zh-TW':
+        return 'zh-CHT';
+      case 'zh-HK':
+        return 'zh-HK';
       case 'en-US':
         return 'en';
       case 'ja-JP':
@@ -390,6 +398,8 @@ class TranslationApiService {
         return 'zh-cn';
       case 'zh-TW':
         return 'zh_tw';
+      case 'zh-HK':
+        return 'zh_hk';
       case 'en-US':
         return 'en';
       case 'ja-JP':
