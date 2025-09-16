@@ -77,7 +77,11 @@ class ProjectController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    projectId = Get.parameters['projectId'] ?? '';
+    final paramProjectId = Get.parameters['projectId'];
+    if (paramProjectId != null && paramProjectId.isNotEmpty) {
+      projectId = paramProjectId;
+    }
+    // 如果构造函数中已经传入了有效的 projectId，就保持不变
   }
 
   @override
@@ -96,7 +100,7 @@ class ProjectController extends GetxController {
   /// 加载项目详情
   Future<void> loadProject() async {
     if (projectId.isEmpty) {
-      Get.snackbar('错误', '项目ID不能为空');
+      log('项目ID为空，跳过项目加载', name: 'ProjectController');
       return;
     }
 

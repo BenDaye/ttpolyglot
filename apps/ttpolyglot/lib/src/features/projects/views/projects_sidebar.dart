@@ -253,7 +253,7 @@ class ProjectsSidebar extends StatelessWidget {
                   ),
                 ],
               ),
-              onTap: () => onTap(controller.project!),
+              onTap: () => onTap(project),
             ),
           );
         });
