@@ -11,7 +11,7 @@ class ProjectDialogController extends GetxController {
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
 
-  final _selectedDefaultLanguage = Rxn<Language>();
+  final _selectedPrimaryLanguage = Rxn<Language>();
   final _selectedTargetLanguages = <Language>[].obs;
   final _availableLanguages = <Language>[].obs;
   final _isLoading = false.obs;
@@ -20,7 +20,7 @@ class ProjectDialogController extends GetxController {
   final _editingProject = Rxn<Project>();
 
   // Getters
-  Language? get selectedDefaultLanguage => _selectedDefaultLanguage.value;
+  Language? get selectedPrimaryLanguage => _selectedPrimaryLanguage.value;
   List<Language> get selectedTargetLanguages => _selectedTargetLanguages;
   List<Language> get availableLanguages => _availableLanguages;
   bool get isLoading => _isLoading.value;
@@ -45,8 +45,8 @@ class ProjectDialogController extends GetxController {
   void _initializeLanguages() {
     final presetLanguages = ProjectsController.getPresetLanguages();
     _availableLanguages.assignAll(presetLanguages);
-    // 设置默认语言为中文
-    _selectedDefaultLanguage.value = presetLanguages.firstWhere(
+    // 设置主语言为中文
+    _selectedPrimaryLanguage.value = presetLanguages.firstWhere(
       (lang) => lang.code == 'zh-CN',
       orElse: () => presetLanguages.first,
     );
@@ -102,7 +102,7 @@ class ProjectDialogController extends GetxController {
     _refreshProject(project.id);
   }
 
-  /// 显示编辑项目默认语言弹窗
+  /// 显示编辑项目主语言弹窗
   static Future<void> showEditDefaultLanguagesDialog(Project project) async {
     final tag = 'project_dialog_controller_${DateTime.now().millisecondsSinceEpoch}_project_${project.id}';
     final controller = Get.put(ProjectDialogController(), tag: tag);
@@ -183,9 +183,9 @@ class ProjectDialogController extends GetxController {
     nameController.text = project.name;
     descriptionController.text = project.description;
 
-    // 设置默认语言
-    _selectedDefaultLanguage.value = _availableLanguages.firstWhere(
-      (lang) => lang.code == project.defaultLanguage.code,
+    // 设置主语言（编辑模式下不可修改）
+    _selectedPrimaryLanguage.value = _availableLanguages.firstWhere(
+      (lang) => lang.code == project.primaryLanguage.code,
       orElse: () => _availableLanguages.first,
     );
 
@@ -209,16 +209,16 @@ class ProjectDialogController extends GetxController {
     _selectedTargetLanguages.clear();
     _nameError.value = null;
 
-    // 重置默认语言为中文
-    _selectedDefaultLanguage.value = _availableLanguages.firstWhere(
+    // 重置主语言为中文
+    _selectedPrimaryLanguage.value = _availableLanguages.firstWhere(
       (lang) => lang.code == 'zh-CN',
       orElse: () => _availableLanguages.first,
     );
   }
 
-  /// 设置默认语言
-  void setDefaultLanguage(Language? language) {
-    _selectedDefaultLanguage.value = language;
+  /// 设置主语言
+  void setPrimaryLanguage(Language? language) {
+    _selectedPrimaryLanguage.value = language;
     if (language != null) {
       _selectedTargetLanguages.remove(language);
     }
@@ -242,8 +242,8 @@ class ProjectDialogController extends GetxController {
   Future<void> submitForm() async {
     if (!formKey.currentState!.validate()) return;
 
-    if (_selectedDefaultLanguage.value == null) {
-      Get.snackbar('错误', '请选择默认语言');
+    if (_selectedPrimaryLanguage.value == null) {
+      Get.snackbar('错误', '请选择主语言');
       return;
     }
 
@@ -252,9 +252,9 @@ class ProjectDialogController extends GetxController {
       return;
     }
 
-    // 检查默认语言是否在目标语言中
-    if (_selectedTargetLanguages.contains(_selectedDefaultLanguage.value)) {
-      Get.snackbar('错误', '默认语言不能同时作为目标语言');
+    // 检查主语言是否在目标语言中
+    if (_selectedTargetLanguages.contains(_selectedPrimaryLanguage.value)) {
+      Get.snackbar('错误', '主语言不能同时作为目标语言');
       return;
     }
 
@@ -280,7 +280,7 @@ class ProjectDialogController extends GetxController {
           _editingProject.value!.id,
           name: name,
           description: description,
-          defaultLanguage: _selectedDefaultLanguage.value!,
+          // 注意：主语言不可修改，不包含在更新请求中
           targetLanguages: _selectedTargetLanguages.toList()..sort((a, b) => a.sortIndex.compareTo(b.sortIndex)),
         );
 
@@ -298,7 +298,7 @@ class ProjectDialogController extends GetxController {
         await ProjectsController.createProject(
           name: name,
           description: description,
-          defaultLanguage: _selectedDefaultLanguage.value!,
+          primaryLanguage: _selectedPrimaryLanguage.value!,
           targetLanguages: _selectedTargetLanguages.toList()..sort((a, b) => a.sortIndex.compareTo(b.sortIndex)),
         );
 
@@ -306,7 +306,8 @@ class ProjectDialogController extends GetxController {
         Get.snackbar('成功', '项目创建成功');
       }
     } catch (error, stackTrace) {
-      log(_isEditMode.value ? '更新项目失败' : '创建项目失败', error: error, stackTrace: stackTrace, name: 'ProjectDialogController');
+      log(_isEditMode.value ? '更新项目失败' : '创建项目失败',
+          error: error, stackTrace: stackTrace, name: 'ProjectDialogController');
       Get.snackbar('错误', '${_isEditMode.value ? '更新' : '创建'}项目失败: $error');
     } finally {
       _isLoading.value = false;
@@ -437,9 +438,9 @@ class ProjectDialog extends StatelessWidget {
                               const SizedBox(height: 16.0),
                             ],
                             if (dialogModule.contains(ProjectDialogModule.defaultLanguage)) ...[
-                              // 默认语言
+                              // 主语言
                               Text(
-                                '默认语言',
+                                '主语言',
                                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -452,16 +453,16 @@ class ProjectDialog extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(8.0),
                                     ),
                                     child: DropdownButton<Language>(
-                                      value: controller.selectedDefaultLanguage != null &&
+                                      value: controller.selectedPrimaryLanguage != null &&
                                               controller.availableLanguages
-                                                  .any((lang) => lang.code == controller.selectedDefaultLanguage!.code)
+                                                  .any((lang) => lang.code == controller.selectedPrimaryLanguage!.code)
                                           ? controller.availableLanguages.firstWhere(
-                                              (lang) => lang.code == controller.selectedDefaultLanguage!.code)
+                                              (lang) => lang.code == controller.selectedPrimaryLanguage!.code)
                                           : null,
                                       isExpanded: true,
                                       menuMaxHeight: 240.0,
                                       underline: const SizedBox(),
-                                      hint: const Text('选择默认语言'),
+                                      hint: const Text('选择主语言'),
                                       items: controller.availableLanguages.map((language) {
                                         return DropdownMenuItem<Language>(
                                           value: language,
@@ -489,7 +490,7 @@ class ProjectDialog extends StatelessWidget {
                                           ),
                                         );
                                       }).toList(),
-                                      onChanged: controller.setDefaultLanguage,
+                                      onChanged: controller.setPrimaryLanguage,
                                     ),
                                   )),
                               const SizedBox(height: 16.0),
@@ -520,9 +521,9 @@ class ProjectDialog extends StatelessWidget {
                                     hint: const Text('选择目标语言'),
                                     items: controller.availableLanguages.map(
                                       (language) {
-                                        final isDefaultLanguage = controller.selectedDefaultLanguage == language;
+                                        final isPrimaryLanguage = controller.selectedPrimaryLanguage == language;
                                         final isAlreadySelected = controller.selectedTargetLanguages.contains(language);
-                                        final isDisabled = isDefaultLanguage || isAlreadySelected;
+                                        final isDisabled = isPrimaryLanguage || isAlreadySelected;
 
                                         return DropdownMenuItem<Language>(
                                           value: language,
@@ -555,11 +556,11 @@ class ProjectDialog extends StatelessWidget {
                                                   ),
                                                 ),
                                               ),
-                                              if (isDefaultLanguage)
+                                              if (isPrimaryLanguage)
                                                 const Padding(
                                                   padding: EdgeInsets.only(left: 8.0),
                                                   child: Text(
-                                                    '默认',
+                                                    '主语言',
                                                     style: TextStyle(
                                                       fontSize: 12.0,
                                                       fontWeight: FontWeight.w500,

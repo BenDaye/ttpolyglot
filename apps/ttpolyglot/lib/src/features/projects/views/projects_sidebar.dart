@@ -176,59 +176,86 @@ class ProjectsSidebar extends StatelessWidget {
     required Function(Project) onTap,
     bool isSelected = false,
   }) {
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      shape: ContinuousRectangleBorder(),
-      color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1) : null,
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
-        dense: true,
-        selected: isSelected,
-        leading: Container(
-          width: 40.0,
-          height: 40.0,
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(4.0),
-          ),
-          child: Icon(Icons.folder, color: Theme.of(context).colorScheme.primary),
-        ),
-        title: Text(
-          '${project.name} - ${project.description}',
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            overflow: TextOverflow.ellipsis,
-          ),
-          maxLines: 1,
-        ),
-        subtitle: Column(
-          spacing: 2.0,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.translate, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 4),
-                Text(
-                  '0 条翻译', // 暂时硬编码，后续可以从统计信息获取
-                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
+    final String projectId = project.id;
+    return GetBuilder<ProjectController>(
+        init: ProjectController(projectId: projectId),
+        tag: projectId,
+        builder: (controller) {
+          return Card(
+            elevation: 0,
+            margin: EdgeInsets.zero,
+            shape: ContinuousRectangleBorder(),
+            color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1) : null,
+            child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
+              dense: true,
+              selected: isSelected,
+              leading: Container(
+                width: 40.0,
+                height: 40.0,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(4.0),
                 ),
-              ],
-            ),
-            Row(
-              children: [
-                Icon(Icons.language, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 4),
-                Text(
-                  '${project.allLanguages.length} 种语言',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                child: Icon(Icons.folder, color: Theme.of(context).colorScheme.primary),
+              ),
+              title: Text(
+                controller.title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ],
+                maxLines: 1,
+              ),
+              subtitle: Column(
+                spacing: 2.0,
+                children: [
+                  Text(
+                    controller.description,
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    maxLines: 1,
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    spacing: 4.0,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(Icons.translate, size: 14, color: Colors.grey[600]),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${controller.translationCount}', // 暂时硬编码，后续可以从统计信息获取
+                            style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(Icons.language, size: 14, color: Colors.grey[600]),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${controller.languageCount}',
+                            style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              onTap: () => onTap(controller.project!),
             ),
-          ],
-        ),
-        onTap: () => onTap(project),
-      ),
-    );
+          );
+        });
   }
 }

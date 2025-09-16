@@ -21,9 +21,15 @@ class ExportServiceImpl extends GetxService implements ExportService {
   }
 
   @override
-  Future<bool> exportTranslationsShortcutJson({
+  Future<bool> exportTranslationsJson({
     required Project project,
     required List<TranslationEntry> entries,
+    ExportOptions options = const ExportOptions(
+      languages: [],
+      keyStyle: TranslationKeyStyle.nested,
+      separateFirstLevelKeyIntoFiles: false,
+      useLanguageCodeAsFolderName: false,
+    ),
   }) async {
     switch (_platformAdapter.currentPlatform) {
       case PlatformType.desktop:
@@ -49,6 +55,7 @@ class ExportServiceImpl extends GetxService implements ExportService {
         return await ExportServiceImplDesktop.exportTranslationsShortcutJson(
           project: project,
           entries: entries,
+          options: options,
         );
       case PlatformType.web:
       case PlatformType.mobile:
@@ -58,9 +65,15 @@ class ExportServiceImpl extends GetxService implements ExportService {
   }
 
   @override
-  Future<bool> exportTranslationsShortcutYaml({
+  Future<bool> exportTranslationsYaml({
     required Project project,
     required List<TranslationEntry> entries,
+    ExportOptions options = const ExportOptions(
+      languages: [],
+      keyStyle: TranslationKeyStyle.nested,
+      separateFirstLevelKeyIntoFiles: false,
+      useLanguageCodeAsFolderName: false,
+    ),
   }) async {
     switch (_platformAdapter.currentPlatform) {
       case PlatformType.desktop:
@@ -72,9 +85,15 @@ class ExportServiceImpl extends GetxService implements ExportService {
   }
 
   @override
-  Future<bool> exportTranslationsShortcutCsv({
+  Future<bool> exportTranslationsCsv({
     required Project project,
     required List<TranslationEntry> entries,
+    ExportOptions options = const ExportOptions(
+      languages: [],
+      keyStyle: TranslationKeyStyle.flat,
+      separateFirstLevelKeyIntoFiles: false,
+      useLanguageCodeAsFolderName: false,
+    ),
   }) async {
     switch (_platformAdapter.currentPlatform) {
       case PlatformType.desktop:
@@ -109,9 +128,15 @@ class ExportServiceImpl extends GetxService implements ExportService {
   }
 
   @override
-  Future<bool> exportTranslationsShortcutArb({
+  Future<bool> exportTranslationsArb({
     required Project project,
     required List<TranslationEntry> entries,
+    ExportOptions options = const ExportOptions(
+      languages: [],
+      keyStyle: TranslationKeyStyle.nested,
+      separateFirstLevelKeyIntoFiles: false,
+      useLanguageCodeAsFolderName: false,
+    ),
   }) async {
     switch (_platformAdapter.currentPlatform) {
       case PlatformType.desktop:
@@ -182,9 +207,15 @@ class ExportServiceImpl extends GetxService implements ExportService {
   }
 
   @override
-  Future<bool> exportTranslationsShortcutProperties({
+  Future<bool> exportTranslationsProperties({
     required Project project,
     required List<TranslationEntry> entries,
+    ExportOptions options = const ExportOptions(
+      languages: [],
+      keyStyle: TranslationKeyStyle.flat,
+      separateFirstLevelKeyIntoFiles: false,
+      useLanguageCodeAsFolderName: false,
+    ),
   }) async {
     switch (_platformAdapter.currentPlatform) {
       case PlatformType.desktop:
@@ -196,9 +227,15 @@ class ExportServiceImpl extends GetxService implements ExportService {
   }
 
   @override
-  Future<bool> exportTranslationsShortcutPo({
+  Future<bool> exportTranslationsPo({
     required Project project,
     required List<TranslationEntry> entries,
+    ExportOptions options = const ExportOptions(
+      languages: [],
+      keyStyle: TranslationKeyStyle.flat,
+      separateFirstLevelKeyIntoFiles: false,
+      useLanguageCodeAsFolderName: false,
+    ),
   }) async {
     switch (_platformAdapter.currentPlatform) {
       case PlatformType.desktop:

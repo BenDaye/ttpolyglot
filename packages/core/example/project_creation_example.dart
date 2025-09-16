@@ -32,14 +32,14 @@ void main() {
   final validRequest = CreateProjectRequest(
     name: '多语言翻译项目',
     description: '支持英语、中文、日语和韩语的翻译项目',
-    defaultLanguage: defaultLanguage,
+    primaryLanguage: defaultLanguage,
     targetLanguages: targetLanguages,
     ownerId: 'user-123',
   );
 
   print('项目名称: ${validRequest.name}');
   print('项目描述: ${validRequest.description}');
-  print('默认语言: ${validRequest.defaultLanguage.code} (${validRequest.defaultLanguage.name})');
+  print('默认语言: ${validRequest.primaryLanguage.code} (${validRequest.primaryLanguage.name})');
   print('目标语言:');
   for (final lang in validRequest.targetLanguages) {
     print('  - ${lang.code}: ${lang.name}');
@@ -59,7 +59,7 @@ void main() {
   final invalidRequest = CreateProjectRequest(
     name: '无效项目',
     description: '使用无效语言代码的项目',
-    defaultLanguage: invalidLanguage,
+    primaryLanguage: invalidLanguage,
     targetLanguages: [Language.getLanguageByCode('zh-CN')!],
     ownerId: 'user-123',
   );
@@ -78,7 +78,7 @@ void main() {
   final duplicateRequest = CreateProjectRequest(
     name: '重复语言项目',
     description: '包含重复目标语言的项目',
-    defaultLanguage: Language.getLanguageByCode('en-US')!,
+    primaryLanguage: Language.getLanguageByCode('en-US')!,
     targetLanguages: [
       Language.getLanguageByCode('zh-CN')!,
       Language.getLanguageByCode('zh-CN')!, // 重复
@@ -100,7 +100,7 @@ void main() {
   final sameLanguageRequest = CreateProjectRequest(
     name: '相同语言项目',
     description: '默认语言和目标语言相同的项目',
-    defaultLanguage: Language.getLanguageByCode('en-US')!,
+    primaryLanguage: Language.getLanguageByCode('en-US')!,
     targetLanguages: [
       Language.getLanguageByCode('en-US')!, // 与默认语言相同
       Language.getLanguageByCode('zh-CN')!,

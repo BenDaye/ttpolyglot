@@ -87,12 +87,15 @@ class ProjectSettings extends Equatable {
 }
 
 /// 翻译项目模型
+///
+/// 项目使用固定主语言设计，主语言在项目创建时设定且不可修改。
+/// 这种设计确保了翻译数据的一致性和系统的稳定性。
 class Project extends Equatable {
   const Project({
     required this.id,
     required this.name,
     required this.description,
-    required this.defaultLanguage,
+    required this.primaryLanguage,
     required this.targetLanguages,
     required this.owner,
     required this.createdAt,
@@ -111,8 +114,11 @@ class Project extends Equatable {
   /// 项目描述
   final String description;
 
-  /// 默认语言（源语言）
-  final Language defaultLanguage;
+  /// 主语言（源语言，不可修改）
+  ///
+  /// 项目的主语言在创建时设定，后续不可修改。
+  /// 所有翻译条目都应使用此语言作为源语言。
+  final Language primaryLanguage;
 
   /// 目标语言列表
   final List<Language> targetLanguages;
@@ -135,15 +141,20 @@ class Project extends Equatable {
   /// 项目设置
   final ProjectSettings? settings;
 
-  /// 获取所有语言（包括默认语言和目标语言）
-  List<Language> get allLanguages => [defaultLanguage, ...targetLanguages];
+  /// 获取所有语言（包括主语言和目标语言）
+  ///
+  /// 返回列表的第一个元素始终是主语言，后续为目标语言。
+  /// 这个顺序对于UI显示和数据处理很重要。
+  List<Language> get allLanguages => [primaryLanguage, ...targetLanguages];
 
   /// 复制并更新项目信息
+  ///
+  /// 注意：primaryLanguage（主语言）不可修改，确保项目数据一致性。
+  /// 如需更改主语言，请创建新项目。
   Project copyWith({
     String? id,
     String? name,
     String? description,
-    Language? defaultLanguage,
     List<Language>? targetLanguages,
     User? owner,
     DateTime? createdAt,
@@ -156,7 +167,7 @@ class Project extends Equatable {
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
-      defaultLanguage: defaultLanguage ?? this.defaultLanguage,
+      primaryLanguage: primaryLanguage, // 主语言不可修改
       targetLanguages: targetLanguages ?? this.targetLanguages,
       owner: owner ?? this.owner,
       createdAt: createdAt ?? this.createdAt,
@@ -173,7 +184,7 @@ class Project extends Equatable {
       'id': id,
       'name': name,
       'description': description,
-      'defaultLanguage': defaultLanguage.toJson(),
+      'primaryLanguage': primaryLanguage.toJson(),
       'targetLanguages': targetLanguages.map((lang) => lang.toJson()).toList(),
       'owner': owner.toJson(),
       'createdAt': createdAt.toIso8601String(),
@@ -186,11 +197,23 @@ class Project extends Equatable {
 
   /// 从 JSON 创建
   factory Project.fromJson(Map<String, dynamic> json) {
+    // 处理主语言字段的向后兼容性
+    Language primaryLanguage;
+    if (json['primaryLanguage'] != null) {
+      primaryLanguage = Language.fromJson(json['primaryLanguage'] as Map<String, dynamic>);
+    } else if (json['defaultLanguage'] != null) {
+      // 向后兼容：如果存在旧的 defaultLanguage 字段，使用它
+      primaryLanguage = Language.fromJson(json['defaultLanguage'] as Map<String, dynamic>);
+    } else {
+      // 如果都没有，抛出更明确的错误
+      throw FormatException('Project JSON missing required field: primaryLanguage or defaultLanguage');
+    }
+
     return Project(
       id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String,
-      defaultLanguage: Language.fromJson(json['defaultLanguage'] as Map<String, dynamic>),
+      primaryLanguage: primaryLanguage,
       targetLanguages: (json['targetLanguages'] as List<dynamic>)
           .map((lang) => Language.fromJson(lang as Map<String, dynamic>))
           .toList(),
@@ -198,12 +221,8 @@ class Project extends Equatable {
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       isActive: json['isActive'] as bool? ?? true,
-      lastAccessedAt: json['lastAccessedAt'] != null 
-          ? DateTime.parse(json['lastAccessedAt'] as String) 
-          : null,
-      settings: json['settings'] != null 
-          ? ProjectSettings.fromJson(json['settings'] as Map<String, dynamic>) 
-          : null,
+      lastAccessedAt: json['lastAccessedAt'] != null ? DateTime.parse(json['lastAccessedAt'] as String) : null,
+      settings: json['settings'] != null ? ProjectSettings.fromJson(json['settings'] as Map<String, dynamic>) : null,
     );
   }
 
@@ -212,7 +231,7 @@ class Project extends Equatable {
         id,
         name,
         description,
-        defaultLanguage,
+        primaryLanguage,
         targetLanguages,
         owner,
         createdAt,
@@ -224,6 +243,6 @@ class Project extends Equatable {
 
   @override
   String toString() {
-    return 'Project(id: $id, name: $name, defaultLanguage: ${defaultLanguage.code})';
+    return 'Project(id: $id, name: $name, primaryLanguage: ${primaryLanguage.code})';
   }
 }

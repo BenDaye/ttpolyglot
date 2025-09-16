@@ -82,7 +82,7 @@ class ProjectsController extends GetxController {
   static Future<void> createProject({
     required String name,
     required String description,
-    required Language defaultLanguage,
+    required Language primaryLanguage,
     required List<Language> targetLanguages,
   }) async {
     final controller = instance;
@@ -98,7 +98,7 @@ class ProjectsController extends GetxController {
       final request = CreateProjectRequest(
         name: name,
         description: description,
-        defaultLanguage: defaultLanguage,
+        primaryLanguage: primaryLanguage,
         targetLanguages: targetLanguages,
         ownerId: 'default-user',
       );
@@ -143,7 +143,6 @@ class ProjectsController extends GetxController {
       final request = UpdateProjectRequest(
         name: name,
         description: description,
-        defaultLanguage: defaultLanguage,
         targetLanguages: targetLanguages,
         isActive: isActive,
       );
@@ -155,7 +154,7 @@ class ProjectsController extends GetxController {
       // 如果语言配置发生变化，同步翻译条目
       if (hasLanguageChange) {
         await syncTranslationLanguages(
-          sourceLanguage: updatedProject.defaultLanguage,
+          sourceLanguage: updatedProject.primaryLanguage,
           targetLanguages: updatedProject.targetLanguages,
           projectId: project.id,
         );
@@ -218,11 +217,11 @@ class ProjectsController extends GetxController {
   /// 检查语言配置是否发生变化
   static bool hasLanguageConfigChanged(
     Project currentProject,
-    Language? newDefaultLanguage,
+    Language? newPrimaryLanguage,
     List<Language>? newTargetLanguages,
   ) {
     // 检查默认语言是否变化
-    if (newDefaultLanguage != null && currentProject.defaultLanguage.code != newDefaultLanguage.code) {
+    if (newPrimaryLanguage != null && currentProject.primaryLanguage.code != newPrimaryLanguage.code) {
       return true;
     }
 

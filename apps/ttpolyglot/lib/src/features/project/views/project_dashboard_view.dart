@@ -206,7 +206,7 @@ class ProjectDashboardView extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 16.0),
-                          _buildLanguageInfo('默认语言', project.defaultLanguage),
+                          _buildLanguageInfo('主语言', project.primaryLanguage),
                           const SizedBox(height: 8.0),
                           Text(
                             '目标语言:',

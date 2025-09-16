@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/features/features.dart';
 
-
 enum ProjectSubPage {
   dashboard,
   translations,
@@ -19,7 +18,14 @@ enum ProjectSubPage {
 
 /// 项目导航控制器
 class ProjectNavigationController extends GetxController {
-  late final String projectId;
+  final String projectId;
+  ProjectNavigationController({required this.projectId});
+
+  static ProjectNavigationController getInstance(String projectId) {
+    return Get.isRegistered<ProjectNavigationController>(tag: projectId)
+        ? Get.find<ProjectNavigationController>(tag: projectId)
+        : Get.put(ProjectNavigationController(projectId: projectId), tag: projectId);
+  }
 
   // 当前活跃的子页面
   final _currentSubPage = ProjectSubPage.dashboard.obs;
@@ -90,12 +96,6 @@ class ProjectNavigationController extends GetxController {
         tooltip: '项目设置',
       ),
     ];
-  }
-
-  @override
-  void onInit() {
-    super.onInit();
-    projectId = Get.parameters['projectId'] ?? '';
   }
 
   /// 导航到子页面

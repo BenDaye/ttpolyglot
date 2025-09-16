@@ -154,7 +154,7 @@ void main() {
   final projectRequest = TranslationUtils.createTranslationKeyRequestFromProject(
     projectId: 'project-1',
     key: 'error.network',
-    defaultLanguage: english,
+    primaryLanguage: english,
     targetLanguages: [chinese, japanese, korean],
     sourceText: 'Network connection failed. Please try again.',
     context: '网络连接失败时显示的错误消息',

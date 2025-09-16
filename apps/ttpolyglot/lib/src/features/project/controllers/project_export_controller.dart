@@ -40,6 +40,7 @@ class ProjectExportController extends GetxController {
       final savePath = await controller._exportService.exportTranslationsShortcutJsonWithPath(
         project: project,
         entries: entries,
+        options: options,
       );
 
       if (savePath == null) return null;

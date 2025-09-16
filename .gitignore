@@ -35,3 +35,4 @@ devtools_options.yaml
 # Releases
 releases/
 .github/
+.spec-workflow/session.json

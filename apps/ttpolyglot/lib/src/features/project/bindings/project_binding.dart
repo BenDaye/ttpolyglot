@@ -6,10 +6,10 @@ class ProjectBinding extends Bindings {
   void dependencies() {
     final projectId = Get.parameters['projectId'];
     if (projectId != null) {
-      Get.put(ProjectController(), tag: projectId);
-      Get.put(ProjectNavigationController(), tag: projectId);
+      Get.put(ProjectController(projectId: projectId), tag: projectId);
+      Get.put(ProjectNavigationController(projectId: projectId), tag: projectId);
       Get.put(TranslationController(projectId: projectId), tag: projectId);
-      Get.put(ProjectExportController(), tag: projectId);
+      Get.put(ProjectExportController(projectId: projectId), tag: projectId);
     }
   }
 }

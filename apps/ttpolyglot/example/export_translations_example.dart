@@ -25,7 +25,7 @@ class ExportTranslationsExample {
       print('\n2. 开始导出翻译文件...');
       print('注意: 这将打开文件选择器，请选择保存位置');
 
-      await ProjectExportController.exportTranslationsShortcutJson(project.id);
+      await ProjectExportController.getInstance(project.id).exportTranslationsJson();
 
       print('\n3. 导出完成！');
       print('文件已保存到用户选择的位置');
@@ -70,7 +70,7 @@ class ExportTranslationsExample {
 
     try {
       // 尝试导出不存在的项目
-      await ProjectExportController.exportTranslationsShortcutJson('non-existent-project');
+      await ProjectExportController.getInstance('non-existent-project').exportTranslationsJson();
     } catch (error) {
       print('预期的错误: $error');
     }

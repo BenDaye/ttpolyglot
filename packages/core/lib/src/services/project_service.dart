@@ -96,11 +96,14 @@ abstract class ProjectService {
 }
 
 /// 创建项目请求
+///
+/// 创建项目时必须指定主语言，主语言在项目生命周期内不可修改。
+/// 这种设计确保了翻译数据的一致性和系统的稳定性。
 class CreateProjectRequest {
   const CreateProjectRequest({
     required this.name,
     required this.description,
-    required this.defaultLanguage,
+    required this.primaryLanguage,
     required this.targetLanguages,
     required this.ownerId,
     this.isActive = true,
@@ -108,7 +111,12 @@ class CreateProjectRequest {
 
   final String name;
   final String description;
-  final Language defaultLanguage;
+
+  /// 主语言（项目创建后不可修改）
+  ///
+  /// 所有翻译都将基于此语言进行，决定了项目的翻译方向。
+  final Language primaryLanguage;
+
   final List<Language> targetLanguages;
   final String ownerId;
   final bool isActive;
@@ -128,13 +136,13 @@ class CreateProjectRequest {
         errors.add('项目描述不能为空');
       }
 
-      // 验证默认语言
-      if (!Language.isValidLanguageCode(defaultLanguage.code)) {
-        errors.add('默认语言代码格式错误: ${defaultLanguage.code}');
+      // 验证主语言
+      if (!Language.isValidLanguageCode(primaryLanguage.code)) {
+        errors.add('主语言代码格式错误: ${primaryLanguage.code}');
       }
 
-      if (!Language.isLanguageSupported(defaultLanguage.code)) {
-        errors.add('不支持的默认语言: ${defaultLanguage.code}');
+      if (!Language.isLanguageSupported(primaryLanguage.code)) {
+        errors.add('不支持的主语言: ${primaryLanguage.code}');
       }
 
       // 验证目标语言
@@ -152,9 +160,9 @@ class CreateProjectRequest {
         }
       }
 
-      // 验证默认语言不能在目标语言中
-      if (targetLanguages.any((lang) => lang.code == defaultLanguage.code)) {
-        errors.add('默认语言不能同时作为目标语言');
+      // 验证主语言不能在目标语言中
+      if (targetLanguages.any((lang) => lang.code == primaryLanguage.code)) {
+        errors.add('主语言不能同时作为目标语言');
       }
 
       // 验证目标语言不能重复
@@ -181,19 +189,25 @@ class CreateProjectRequest {
 }
 
 /// 更新项目请求
+///
+/// 注意：主语言（primaryLanguage）不可修改，已从更新请求中移除。
+/// 如需更改主语言，请创建新项目。
 class UpdateProjectRequest {
   const UpdateProjectRequest({
     this.name,
     this.description,
-    this.defaultLanguage,
     this.targetLanguages,
     this.isActive,
   });
 
   final String? name;
   final String? description;
-  final Language? defaultLanguage;
+
+  /// 目标语言列表
+  ///
+  /// 可以添加或移除目标语言，但不能包含主语言。
   final List<Language>? targetLanguages;
+
   final bool? isActive;
 
   /// 验证请求数据
@@ -211,16 +225,7 @@ class UpdateProjectRequest {
         errors.add('项目描述不能为空');
       }
 
-      // 验证默认语言
-      if (defaultLanguage != null) {
-        if (!Language.isValidLanguageCode(defaultLanguage!.code)) {
-          errors.add('默认语言代码格式错误: ${defaultLanguage!.code}');
-        }
-
-        if (!Language.isLanguageSupported(defaultLanguage!.code)) {
-          errors.add('不支持的默认语言: ${defaultLanguage!.code}');
-        }
-      }
+      // 注意：主语言不可修改，无需验证
 
       // 验证目标语言
       if (targetLanguages != null) {
@@ -238,10 +243,7 @@ class UpdateProjectRequest {
           }
         }
 
-        // 验证默认语言不能在目标语言中（如果同时提供了默认语言）
-        if (defaultLanguage != null && targetLanguages!.any((lang) => lang.code == defaultLanguage!.code)) {
-          errors.add('默认语言不能同时作为目标语言');
-        }
+        // 注意：主语言不可修改，此验证在创建项目时已完成
 
         // 验证目标语言不能重复
         final targetLanguageCodes = targetLanguages!.map((lang) => lang.code).toList();
