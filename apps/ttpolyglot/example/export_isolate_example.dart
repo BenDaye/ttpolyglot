@@ -148,7 +148,7 @@ class ExportIsolateExample {
       ];
 
       // 使用 isolate 导出方法
-      final success = await ExportServiceImplDesktop.exportTranslationsJson(
+      final success = await ExportServiceImplDesktop.exportTranslationsShortcutJson(
         project: project,
         entries: entries,
       );
