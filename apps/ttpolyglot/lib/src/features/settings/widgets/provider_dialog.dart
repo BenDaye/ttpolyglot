@@ -122,9 +122,11 @@ class _ProviderDialogState extends State<ProviderDialog> {
       }
     }
 
-    // 验证App ID（谷歌翻译不需要）
-    if (selectedProvider != TranslationProvider.google && appIdController.text.trim().isEmpty) {
-      appIdError = selectedProvider == TranslationProvider.custom ? '请输入API密钥' : '请输入应用ID';
+    // 验证App ID（谷歌翻译不需要，自定义翻译不校验API Key）
+    if (selectedProvider != TranslationProvider.google &&
+        selectedProvider != TranslationProvider.custom &&
+        appIdController.text.trim().isEmpty) {
+      appIdError = '请输入应用ID';
       isValid = false;
     }
 
@@ -166,7 +168,7 @@ class _ProviderDialogState extends State<ProviderDialog> {
         widget.controller.addTranslationProvider(
           provider: selectedProvider,
           name: nameController.text.trim(),
-          appId: appIdController.text.trim(),
+          appId: selectedProvider != TranslationProvider.custom ? appIdController.text.trim() : null,
           appKey: selectedProvider != TranslationProvider.custom ? appKeyController.text.trim() : null,
           apiUrl: selectedProvider == TranslationProvider.custom ? apiUrlController.text.trim() : null,
           isDefault: isDefault,
@@ -193,7 +195,7 @@ class _ProviderDialogState extends State<ProviderDialog> {
         widget.controller.updateProviderConfigById(
           widget.config!.id,
           name: nameController.text.trim(),
-          appId: appIdController.text.trim(),
+          appId: widget.config!.provider != TranslationProvider.custom ? appIdController.text.trim() : null,
           appKey: widget.config!.provider != TranslationProvider.custom ? appKeyController.text.trim() : null,
           apiUrl: widget.config!.provider == TranslationProvider.custom ? apiUrlController.text.trim() : null,
           isDefault: isDefault,
@@ -487,7 +489,7 @@ class _ProviderDialogState extends State<ProviderDialog> {
       controller: appIdController,
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.all(12.0),
-        labelText: selectedProvider == TranslationProvider.custom ? 'API Key' : 'App ID',
+        labelText: selectedProvider == TranslationProvider.custom ? 'API Key (可选)' : 'App ID',
         labelStyle: TextStyle(
           color: Theme.of(context).primaryColor,
           fontWeight: FontWeight.w500,
@@ -513,7 +515,7 @@ class _ProviderDialogState extends State<ProviderDialog> {
             width: 2.0,
           ),
         ),
-        hintText: selectedProvider == TranslationProvider.custom ? '输入API密钥' : '输入应用ID',
+        hintText: selectedProvider == TranslationProvider.custom ? '输入API密钥（可选）' : '输入应用ID',
         hintStyle: TextStyle(
           color: Colors.grey.withValues(alpha: 0.6),
           fontSize: 14.0,
