@@ -311,7 +311,7 @@ class TranslationApiService {
           final firstItem = data.first as Map?;
           if (firstItem != null) {
             final translatedText = firstItem[targetLanguageCode] as String?;
-            if (translatedText != null && translatedText.isNotEmpty && translatedText != text) {
+            if (translatedText != null && translatedText.isNotEmpty) {
               return TranslationResult(
                 success: true,
                 translatedText: translatedText,
