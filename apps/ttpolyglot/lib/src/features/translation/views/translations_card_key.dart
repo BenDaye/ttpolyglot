@@ -476,7 +476,7 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
                       ),
                       const SizedBox(height: 4.0),
                       Text(
-                        entry.sourceText,
+                        '(${entry.sourceLanguage.code} -> ${entry.targetLanguage.code}) ${entry.sourceText}',
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 4.0),

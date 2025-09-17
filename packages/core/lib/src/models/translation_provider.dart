@@ -134,7 +134,7 @@ class TranslationProviderConfig {
       case TranslationProvider.google:
         return true; // 谷歌翻译不需要API密钥
       case TranslationProvider.custom:
-        return appId.isNotEmpty && apiUrl?.isNotEmpty == true;
+        return apiUrl?.isNotEmpty == true;
     }
   }
 
