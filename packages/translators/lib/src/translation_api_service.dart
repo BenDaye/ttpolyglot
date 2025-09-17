@@ -60,6 +60,83 @@ class TranslationApiService {
     }
   }
 
+  /// 批量翻译文本
+  /// 支持将多个文本翻译到多个目标语言
+  static Future<BatchTranslationResult> translateBatchTexts({
+    required List<String> texts,
+    required Language sourceLanguage,
+    required List<Language> targetLanguages,
+    required TranslationProviderConfig config,
+    String? context,
+  }) async {
+    try {
+      // 对于自定义翻译提供商，使用专门的批量翻译方法
+      if (config.provider == TranslationProvider.custom) {
+        return await _translateBatchWithCustom(
+          texts: texts,
+          sourceLanguage: sourceLanguage,
+          targetLanguages: targetLanguages,
+          config: config,
+        );
+      }
+
+      // 对于其他翻译提供商，逐个翻译
+      final List<TranslationItem> items = [];
+
+      for (final text in texts) {
+        for (final targetLanguage in targetLanguages) {
+          final result = await translateText(
+            text: text,
+            sourceLanguage: sourceLanguage,
+            targetLanguage: targetLanguage,
+            config: config,
+            context: context,
+          );
+
+          items.add(TranslationItem(
+            originalText: text,
+            translatedText: result.translatedText,
+            targetLanguage: targetLanguage,
+            success: result.success,
+            error: result.error,
+          ));
+        }
+      }
+
+      // 检查是否所有翻译都成功
+      final allSuccessful = items.every((item) => item.success);
+
+      return BatchTranslationResult(
+        success: allSuccessful,
+        items: items,
+        sourceLanguage: sourceLanguage,
+      );
+    } catch (error, stackTrace) {
+      log('批量翻译失败', error: error, stackTrace: stackTrace, name: 'TranslationApiService');
+
+      // 返回失败的结果，所有项目都标记为失败
+      final failedItems = <TranslationItem>[];
+      for (final text in texts) {
+        for (final targetLanguage in targetLanguages) {
+          failedItems.add(TranslationItem(
+            originalText: text,
+            translatedText: '',
+            targetLanguage: targetLanguage,
+            success: false,
+            error: error.toString(),
+          ));
+        }
+      }
+
+      return BatchTranslationResult(
+        success: false,
+        items: failedItems,
+        sourceLanguage: sourceLanguage,
+        error: error.toString(),
+      );
+    }
+  }
+
   /// 百度翻译API
   static Future<TranslationResult> _translateWithBaidu({
     required String text,
@@ -552,6 +629,212 @@ class TranslationApiService {
     final digest = sha256.convert(bytes);
     return digest.toString();
   }
+
+  /// 自定义翻译API批量翻译（内部方法）
+  static Future<BatchTranslationResult> _translateBatchWithCustom({
+    required List<String> texts,
+    required Language sourceLanguage,
+    required List<Language> targetLanguages,
+    required TranslationProviderConfig config,
+  }) async {
+    try {
+      final apiUrl = config.apiUrl;
+      if (apiUrl == null || apiUrl.isEmpty) {
+        return BatchTranslationResult(
+          success: false,
+          items: _createFailedItems(texts, targetLanguages, '自定义翻译API地址未配置'),
+          sourceLanguage: sourceLanguage,
+          error: '自定义翻译API地址未配置',
+        );
+      }
+
+      final targetLanguageCode =
+          targetLanguages.map((language) => _convertToCustomLanguageCode(language.code)).toList();
+
+      // 按照curl命令构建请求体
+      final requestBody = {
+        'data': texts
+            .map((text) => {
+                  'lang': _convertToCustomLanguageCode(sourceLanguage.code),
+                  'content': text,
+                })
+            .toList(),
+        'force_trans': true, // 是否强制翻译
+        'trans': targetLanguageCode,
+      };
+
+      // 按照curl命令设置请求头
+      final headers = <String, String>{
+        'Content-Type': 'application/json',
+      };
+
+      // 如果配置了appId或appKey，可以添加到请求头中
+      if (config.appId.isNotEmpty) {
+        headers['appId'] = config.appId;
+      }
+      if (config.appKey.isNotEmpty) {
+        headers['Authorization'] = 'Bearer ${config.appKey}';
+      }
+
+      final response = await _makeHttpRequest(
+        url: apiUrl,
+        method: 'POST',
+        body: requestBody,
+        headers: headers,
+        timeout: const Duration(seconds: 30),
+      );
+
+      // 解析响应结果
+      if (response is Map) {
+        // 检查是否有错误码
+        final code = response['code'];
+        if (code != null && code != 200) {
+          final message = response['message'] as String? ?? '未知错误';
+          return BatchTranslationResult(
+            success: false,
+            items: _createFailedItems(texts, targetLanguages, '翻译API错误 [$code]: $message'),
+            sourceLanguage: sourceLanguage,
+            error: '翻译API错误 [$code]: $message',
+          );
+        }
+
+        // 处理响应数据
+        final data = response['data'];
+        if (data is List && data.isNotEmpty) {
+          final items = _parseCustomBatchResponse(data, texts, targetLanguages);
+          final allSuccessful = items.every((item) => item.success);
+
+          return BatchTranslationResult(
+            success: allSuccessful,
+            items: items,
+            sourceLanguage: sourceLanguage,
+          );
+        }
+      }
+
+      return BatchTranslationResult(
+        success: false,
+        items: _createFailedItems(texts, targetLanguages, '翻译结果为空或响应格式不正确'),
+        sourceLanguage: sourceLanguage,
+        error: '翻译结果为空或响应格式不正确',
+      );
+    } catch (error, stackTrace) {
+      log('自定义批量翻译失败', error: error, stackTrace: stackTrace, name: 'TranslationApiService');
+      return BatchTranslationResult(
+        success: false,
+        items: _createFailedItems(texts, targetLanguages, error.toString()),
+        sourceLanguage: sourceLanguage,
+        error: error.toString(),
+      );
+    }
+  }
+
+  /// 解析自定义API批量翻译响应
+  static List<TranslationItem> _parseCustomBatchResponse(
+    List<dynamic> responseData,
+    List<String> originalTexts,
+    List<Language> targetLanguages,
+  ) {
+    final items = <TranslationItem>[];
+
+    for (int i = 0; i < originalTexts.length; i++) {
+      final originalText = originalTexts[i];
+
+      for (final targetLanguage in targetLanguages) {
+        final targetCode = _convertToCustomLanguageCode(targetLanguage.code);
+
+        String translatedText = '';
+        bool success = false;
+        String? error;
+
+        try {
+          // 尝试从响应数据中获取翻译结果
+          if (i < responseData.length) {
+            final itemData = responseData[i] as Map?;
+            if (itemData != null && itemData.containsKey(targetCode)) {
+              translatedText = itemData[targetCode] as String? ?? '';
+              success = translatedText.isNotEmpty;
+            } else {
+              error = '响应数据中缺少目标语言 [$targetCode] 的翻译结果';
+            }
+          } else {
+            error = '响应数据长度不匹配';
+          }
+        } catch (e) {
+          error = '解析翻译结果失败: $e';
+        }
+
+        items.add(TranslationItem(
+          originalText: originalText,
+          translatedText: translatedText,
+          targetLanguage: targetLanguage,
+          success: success,
+          error: error,
+        ));
+      }
+    }
+
+    return items;
+  }
+
+  /// 创建失败的翻译项列表
+  static List<TranslationItem> _createFailedItems(
+    List<String> texts,
+    List<Language> targetLanguages,
+    String error,
+  ) {
+    final items = <TranslationItem>[];
+
+    for (final text in texts) {
+      for (final targetLanguage in targetLanguages) {
+        items.add(TranslationItem(
+          originalText: text,
+          translatedText: '',
+          targetLanguage: targetLanguage,
+          success: false,
+          error: error,
+        ));
+      }
+    }
+
+    return items;
+  }
+
+  /// 自定义翻译API，支持批量翻译（保留向后兼容）
+  /// @deprecated 使用 translateBatchTexts 方法以获得更好的批量翻译支持
+  static Future<TranslationResult> translateWithCustomBatch({
+    required List<String> texts, // 翻译文案
+    required Language sourceLanguage, // 源语言
+    required List<Language> targetLanguages, // 目标语言
+    required TranslationProviderConfig config,
+  }) async {
+    try {
+      // 使用新的批量翻译方法
+      final batchResult = await _translateBatchWithCustom(
+        texts: texts,
+        sourceLanguage: sourceLanguage,
+        targetLanguages: targetLanguages,
+        config: config,
+      );
+
+      // 转换为旧的 TranslationResult 格式以保持向后兼容
+      final allTranslatedTexts = batchResult.successfulTranslatedTexts;
+
+      return TranslationResult(
+        success: batchResult.success,
+        translatedText: allTranslatedTexts.isNotEmpty ? allTranslatedTexts.join('\n') : '',
+        sourceLanguage: sourceLanguage,
+        error: batchResult.error,
+      );
+    } catch (error, stackTrace) {
+      log('自定义翻译失败', error: error, stackTrace: stackTrace, name: 'TranslationApiService');
+      return TranslationResult(
+        success: false,
+        translatedText: '',
+        error: '自定义翻译请求失败: $error',
+      );
+    }
+  }
 }
 
 /// 翻译结果
@@ -578,6 +861,67 @@ class TranslationResult {
 
   /// 错误信息
   final String? error;
+}
+
+/// 单个翻译项结果
+class TranslationItem {
+  const TranslationItem({
+    required this.originalText,
+    required this.translatedText,
+    required this.targetLanguage,
+    required this.success,
+    this.error,
+  });
+
+  /// 原文
+  final String originalText;
+
+  /// 译文
+  final String translatedText;
+
+  /// 目标语言
+  final Language targetLanguage;
+
+  /// 是否成功
+  final bool success;
+
+  /// 错误信息
+  final String? error;
+}
+
+/// 批量翻译结果
+class BatchTranslationResult {
+  const BatchTranslationResult({
+    required this.success,
+    required this.items,
+    this.sourceLanguage,
+    this.error,
+  });
+
+  /// 整体是否成功
+  final bool success;
+
+  /// 翻译项列表
+  final List<TranslationItem> items;
+
+  /// 源语言
+  final Language? sourceLanguage;
+
+  /// 整体错误信息（如果有）
+  final String? error;
+
+  /// 获取成功翻译的数量
+  int get successfulTranslations => items.where((item) => item.success).length;
+
+  /// 获取失败翻译的数量
+  int get failedTranslations => items.where((item) => !item.success).length;
+
+  /// 获取所有成功翻译的文本
+  List<String> get successfulTranslatedTexts =>
+      items.where((item) => item.success).map((item) => item.translatedText).toList();
+
+  /// 获取所有失败翻译的项目
+  List<TranslationItem> get failedItems => items.where((item) => !item.success).toList();
 }
 
 /// 测试编码修复的方法
