@@ -248,7 +248,8 @@ class TranslationApiService {
     String? context,
   }) async {
     try {
-      if (config.apiUrl == null || config.apiUrl!.isEmpty) {
+      final apiUrl = config.apiUrl;
+      if (apiUrl == null || apiUrl.isEmpty) {
         return TranslationResult(
           success: false,
           translatedText: '',
@@ -256,40 +257,76 @@ class TranslationApiService {
         );
       }
 
+      final targetLanguageCode = _convertToCustomLanguageCode(targetLanguage.code);
+
+      // 按照curl命令构建请求体
       final requestBody = {
-        'text': text,
-        'source_language': sourceLanguage.code,
-        'target_language': targetLanguage.code,
-        'context': context,
+        'data': [
+          {
+            'lang': _convertToCustomLanguageCode(sourceLanguage.code),
+            'content': text,
+          }
+        ],
+        'force_trans': true,
+        'trans': [targetLanguageCode],
       };
 
+      // 按照curl命令设置请求头
+      final headers = <String, String>{
+        'Content-Type': 'application/json',
+      };
+
+      // 如果配置了appId或appKey，可以添加到请求头中
+      if (config.appId.isNotEmpty) {
+        headers['appId'] = config.appId;
+      }
+      if (config.appKey.isNotEmpty) {
+        headers['Authorization'] = 'Bearer ${config.appKey}';
+      }
+
       final response = await _makeHttpRequest(
-        url: config.apiUrl!,
+        url: apiUrl,
         method: 'POST',
         body: requestBody,
-        headers: {
-          'Content-Type': 'application/json',
-          if (config.appId.isNotEmpty) 'appId': config.appId,
-          if (config.appKey.isNotEmpty) 'Authorization': 'Bearer ${config.appKey}',
-        },
+        headers: headers,
         timeout: const Duration(seconds: 30),
       );
 
-      // 自定义API的响应格式需要根据实际API文档调整
-      final translatedText = response['translated_text'] as String? ?? '';
-      if (translatedText.isEmpty) {
-        return TranslationResult(
-          success: false,
-          translatedText: '',
-          error: '翻译结果为空',
-        );
+      // 解析响应结果
+      if (response is Map) {
+        // 检查是否有错误码
+        final code = response['code'];
+        if (code != null && code != 200) {
+          final message = response['message'] as String? ?? '未知错误';
+          return TranslationResult(
+            success: false,
+            translatedText: '',
+            error: '翻译API错误 [$code]: $message',
+          );
+        }
+
+        // 处理响应数据
+        final data = response['data'];
+        if (data is List && data.isNotEmpty) {
+          final firstItem = data.first as Map?;
+          if (firstItem != null) {
+            final translatedText = firstItem[targetLanguageCode] as String?;
+            if (translatedText != null && translatedText.isNotEmpty && translatedText != text) {
+              return TranslationResult(
+                success: true,
+                translatedText: translatedText,
+                sourceLanguage: sourceLanguage,
+                targetLanguage: targetLanguage,
+              );
+            }
+          }
+        }
       }
 
       return TranslationResult(
-        success: true,
-        translatedText: translatedText,
-        sourceLanguage: sourceLanguage,
-        targetLanguage: targetLanguage,
+        success: false,
+        translatedText: '',
+        error: '翻译结果为空或响应格式不正确',
       );
     } catch (error, stackTrace) {
       log('自定义翻译失败', error: error, stackTrace: stackTrace, name: 'TranslationApiService');
@@ -323,7 +360,7 @@ class TranslationApiService {
       case TranslationProvider.google:
         return _convertToGoogleLanguageCode(languageCode);
       case TranslationProvider.custom:
-        return languageCode; // 自定义API使用原始语言代码
+        return _convertToCustomLanguageCode(languageCode);
     }
   }
 
@@ -423,6 +460,36 @@ class TranslationApiService {
     }
   }
 
+  /// 转换为自定义API语言代码
+  static String _convertToCustomLanguageCode(String languageCode) {
+    switch (languageCode) {
+      case 'zh-CN':
+        return 'zh';
+      case 'zh-TW':
+        return 'zhtw';
+      case 'en-US':
+        return 'en';
+      case 'ja-JP':
+        return 'ja';
+      case 'ko-KR':
+        return 'ko';
+      case 'fr-FR':
+        return 'fr';
+      case 'de-DE':
+        return 'de';
+      case 'es-ES':
+        return 'es';
+      case 'ru-RU':
+        return 'ru';
+      case 'it-IT':
+        return 'it';
+      case 'pt-PT':
+        return 'pt';
+      default:
+        return languageCode.toLowerCase();
+    }
+  }
+
   /// 发起HTTP请求
   static Future<dynamic> _makeHttpRequest({
     required String url,
@@ -453,9 +520,9 @@ class TranslationApiService {
       if (body != null) {
         if (method == 'POST') {
           final jsonBody = jsonEncode(body);
-          request.headers.set('Content-Type', 'application/json');
-          request.headers.set('Content-Length', jsonBody.length.toString());
-          request.write(jsonBody);
+          request.headers.set('Content-Type', 'application/json; charset=UTF-8');
+          request.headers.set('Content-Length', utf8.encode(jsonBody).length.toString());
+          request.add(utf8.encode(jsonBody));
         }
       }
 
@@ -511,4 +578,38 @@ class TranslationResult {
 
   /// 错误信息
   final String? error;
+}
+
+/// 测试编码修复的方法
+/// 用于验证UTF-8编码是否正常工作
+class EncodingTest {
+  /// 测试JSON编码是否包含中文字符
+  static void testChineseEncoding() {
+    final testData = {
+      'data': [
+        {
+          'lang': 'zh',
+          'content': '欢迎使用应用',
+        }
+      ],
+      'force_trans': true,
+      'trans': ['ko'],
+    };
+
+    final jsonString = jsonEncode(testData);
+    log('测试JSON编码: $jsonString', name: 'EncodingTest');
+
+    // 测试UTF-8编码
+    final utf8Bytes = utf8.encode(jsonString);
+    final decodedString = utf8.decode(utf8Bytes);
+    log('UTF-8编码测试通过: ${jsonString == decodedString}', name: 'EncodingTest');
+
+    // 测试Latin1编码（应该会失败）
+    try {
+      latin1.encode(jsonString);
+      log('警告: Latin1编码意外成功', name: 'EncodingTest');
+    } catch (e) {
+      log('Latin1编码正确失败（预期行为）: $e', name: 'EncodingTest');
+    }
+  }
 }
