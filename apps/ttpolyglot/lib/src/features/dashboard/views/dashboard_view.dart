@@ -4,6 +4,7 @@ import 'package:ttpolyglot/src/core/layout/layout_controller.dart';
 import 'package:ttpolyglot/src/core/platform/platform_adapter.dart';
 import 'package:ttpolyglot/src/core/routing/app_pages.dart';
 import 'package:ttpolyglot/src/core/storage/storage_provider.dart';
+import 'package:ttpolyglot/src/core/theme/app_theme.dart';
 
 class DashboardView extends StatefulWidget {
   const DashboardView({super.key});
@@ -52,105 +53,195 @@ class _DashboardViewContentState extends State<DashboardViewContent> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildWelcomeCard(),
-            const SizedBox(height: 16),
-            _buildPlatformInfoCard(),
-            const SizedBox(height: 16),
-          ],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Theme.of(context).colorScheme.surface,
+              Theme.of(context).colorScheme.surfaceContainerLowest,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildWelcomeSection(),
+                const SizedBox(height: 40.0),
+                _buildPlatformInfoSection(),
+                const SizedBox(height: 32.0),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildWelcomeCard() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.translate, size: 32),
-                const SizedBox(width: 12),
-                Text(
-                  '欢迎使用 TTPolyglot',
-                  style: Theme.of(context).textTheme.headlineSmall,
+  Widget _buildWelcomeSection() {
+    return Container(
+      padding: const EdgeInsets.all(32.0),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppThemeController.primaryColor.withValues(alpha: 0.1),
+            AppThemeController.primaryColor.withValues(alpha: 0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(8.0),
+        boxShadow: [
+          BoxShadow(
+            color: AppThemeController.primaryColor.withValues(alpha: 0.1),
+            blurRadius: 12.0,
+            offset: const Offset(0, 4.0),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12.0),
+                decoration: BoxDecoration(
+                  color: AppThemeController.primaryColor.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(4.0),
                 ),
-              ],
+                child: Icon(
+                  Icons.translate,
+                  color: AppThemeController.primaryColor,
+                  size: 32.0,
+                ),
+              ),
+              const SizedBox(width: 16.0),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '欢迎使用 TTPolyglot',
+                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    const SizedBox(height: 4.0),
+                    Text(
+                      '让每个开发者都成为多语言专家',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w400,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24.0),
+          Container(
+            padding: const EdgeInsets.all(20.0),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerLowest,
+              borderRadius: BorderRadius.circular(4.0),
             ),
-            const SizedBox(height: 8),
-            Text(
-              '让每个开发者都成为多语言专家',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
-            const SizedBox(height: 16),
-            Text(
+            child: Text(
               'TTPolyglot 是一个跨平台的翻译管理工具，支持桌面、Web 和移动端。'
               '它提供了统一的界面来管理多语言项目，支持多种文件格式，'
               '并且可以在不同平台间同步数据。',
-              style: Theme.of(context).textTheme.bodySmall,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    height: 1.6,
+                  ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildPlatformInfoCard() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(_getPlatformIcon()),
-                const SizedBox(width: 12),
-                Text(
-                  '平台信息',
-                  style: Theme.of(context).textTheme.titleMedium,
+  Widget _buildPlatformInfoSection() {
+    return Container(
+      padding: const EdgeInsets.all(24.0),
+      decoration: AppThemeController.cardDecoration.copyWith(
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  color: AppThemeController.primaryColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(4.0),
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            _buildInfoRow('当前平台', _platformAdapter.platformName),
-            _buildInfoRow('平台类型', _platformAdapter.currentPlatform.name),
-            _buildInfoRow('存储类型', _storageProvider.currentPlatform.name),
-          ],
-        ),
+                child: Icon(
+                  _getPlatformIcon(),
+                  color: AppThemeController.primaryColor,
+                  size: 24.0,
+                ),
+              ),
+              const SizedBox(width: 16.0),
+              Text(
+                '平台信息',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24.0),
+          _buildInfoRow('当前平台', _platformAdapter.platformName),
+          const SizedBox(height: 16.0),
+          _buildInfoRow('平台类型', _platformAdapter.currentPlatform.name),
+          const SizedBox(height: 16.0),
+          _buildInfoRow('存储类型', _storageProvider.currentPlatform.name),
+        ],
       ),
     );
   }
 
   Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(4.0),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+          width: 1.0,
+        ),
+      ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: 80,
+            width: 100.0,
             child: Text(
               label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
                   ),
             ),
           ),
-          const SizedBox(width: 12),
           Expanded(
             child: Text(
               value,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontWeight: FontWeight.w500,
+                  ),
             ),
           ),
         ],
