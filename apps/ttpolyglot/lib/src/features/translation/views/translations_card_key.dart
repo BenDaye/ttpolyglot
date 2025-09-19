@@ -276,28 +276,38 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
   Future<void> _handleTranslateByDefaultLanguage(BuildContext context) async {
     if (_isTranslating) return; // 防止重复点击
 
-    setState(() {
-      _isTranslating = true;
-    });
+    if (mounted) {
+      setState(() {
+        _isTranslating = true;
+      });
+    }
 
     try {
       final translationManager = Get.find<TranslationServiceManager>();
 
       // 检查翻译配置（异步等待配置加载完成）
       if (!await translationManager.hasValidConfigAsync()) {
-        await TranslationServiceManager.showConfigCheckDialog(context);
-        setState(() {
-          _isTranslating = false;
-        });
+        if (context.mounted) {
+          await TranslationServiceManager.showConfigCheckDialog(context);
+        }
+        if (mounted) {
+          setState(() {
+            _isTranslating = false;
+          });
+        }
         return;
       }
 
       // 检查是否有设置默认翻译接口
       if (!await translationManager.hasDefaultProviderAsync()) {
-        _showErrorSnackBar(context, '您还没有设置默认翻译接口');
-        setState(() {
-          _isTranslating = false;
-        });
+        if (context.mounted) {
+          _showErrorSnackBar(context, '您还没有设置默认翻译接口');
+        }
+        if (mounted) {
+          setState(() {
+            _isTranslating = false;
+          });
+        }
         return;
       }
 
@@ -305,10 +315,14 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
       final availableSourceLanguages = widget.translationEntries.map((entry) => entry.sourceLanguage).toSet().toList();
 
       if (availableSourceLanguages.isEmpty) {
-        _showErrorSnackBar(context, '没有可用的源语言');
-        setState(() {
-          _isTranslating = false;
-        });
+        if (context.mounted) {
+          _showErrorSnackBar(context, '没有可用的源语言');
+        }
+        if (mounted) {
+          setState(() {
+            _isTranslating = false;
+          });
+        }
         return;
       }
 
@@ -317,6 +331,15 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
       if (availableSourceLanguages.length == 1) {
         selectedSourceLanguage = availableSourceLanguages.first;
       } else {
+        if (!context.mounted) {
+          if (mounted) {
+            setState(() {
+              _isTranslating = false;
+            });
+          }
+          return;
+        }
+
         final selectedLanguage = await LanguageSelectionDialog.show(
           context: context,
           availableLanguages: availableSourceLanguages,
@@ -325,9 +348,11 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
         );
 
         if (selectedLanguage == null) {
-          setState(() {
-            _isTranslating = false;
-          });
+          if (mounted) {
+            setState(() {
+              _isTranslating = false;
+            });
+          }
           return; // 用户取消了选择
         }
         selectedSourceLanguage = selectedLanguage;
@@ -338,10 +363,14 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
           .firstWhereOrNull((entry) => entry.targetLanguage.code == selectedSourceLanguage.code);
 
       if (entriesToTranslate == null || entriesToTranslate.targetText.isEmpty) {
-        _showErrorSnackBar(context, '主语言还没有设置翻译');
-        setState(() {
-          _isTranslating = false;
-        });
+        if (context.mounted) {
+          _showErrorSnackBar(context, '主语言还没有设置翻译');
+        }
+        if (mounted) {
+          setState(() {
+            _isTranslating = false;
+          });
+        }
         return;
       }
 
@@ -386,26 +415,32 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
       widget.onChangeTranslate?.call(entries: updatedEntries);
 
       // 显示结果
-      _showTranslationResultSnackBar(context, successCount, failCount);
+      if (context.mounted) {
+        _showTranslationResultSnackBar(context, successCount, failCount);
 
-      // 如果有失败的翻译，显示详细信息
-      if (failCount > 0) {
-        _showFailedTranslationsDialog(
-            context, failedEntries, results.where((r) => !r.success).map((r) => r.error ?? '未知错误').toList());
+        // 如果有失败的翻译，显示详细信息
+        if (failCount > 0) {
+          _showFailedTranslationsDialog(
+              context, failedEntries, results.where((r) => !r.success).map((r) => r.error ?? '未知错误').toList());
+        }
       }
 
       // 重置加载状态
-      setState(() {
-        _isTranslating = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isTranslating = false;
+        });
+      }
     } catch (error, stackTrace) {
       log('翻译处理异常', error: error, stackTrace: stackTrace, name: 'TranslationsCardByKey');
       if (context.mounted) {
         _showErrorSnackBar(context, '翻译处理异常: $error');
       }
-      setState(() {
-        _isTranslating = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isTranslating = false;
+        });
+      }
     }
   }
 
