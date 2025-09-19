@@ -170,20 +170,130 @@ class TranslationServiceManager extends GetxService {
     required List<TranslationEntry> entries,
     TranslationProviderConfig? provider,
   }) async {
-    final results = <TranslationResult>[];
+    try {
+      // 检查配置（异步等待配置加载完成）
+      if (!await hasValidConfigAsync()) {
+        return entries
+            .map((entry) => TranslationResult(
+                  success: false,
+                  translatedText: '',
+                  error: '请先配置翻译接口',
+                  sourceLanguage: entry.sourceLanguage,
+                  targetLanguage: entry.targetLanguage,
+                ))
+            .toList();
+      }
 
-    for (final entry in entries) {
-      final result = await translateEntry(
-        entry: entry,
-        provider: provider,
-      );
-      results.add(result);
+      // 使用指定的提供商或默认提供商
+      final selectedProvider = provider ?? defaultProvider;
+      if (selectedProvider == null) {
+        return entries
+            .map((entry) => TranslationResult(
+                  success: false,
+                  translatedText: '',
+                  error: '没有可用的翻译接口',
+                  sourceLanguage: entry.sourceLanguage,
+                  targetLanguage: entry.targetLanguage,
+                ))
+            .toList();
+      }
 
-      // 添加延迟避免API限制
-      await Future.delayed(const Duration(milliseconds: 100));
+      // 验证提供商配置
+      if (!selectedProvider.isValid) {
+        return entries
+            .map((entry) => TranslationResult(
+                  success: false,
+                  translatedText: '',
+                  error: '${selectedProvider.displayName} 配置不完整',
+                  sourceLanguage: entry.sourceLanguage,
+                  targetLanguage: entry.targetLanguage,
+                ))
+            .toList();
+      }
+
+      log('开始批量翻译 ${entries.length} 个条目，使用 ${selectedProvider.displayName}', name: 'TranslationServiceManager');
+
+      // 按源语言分组条目
+      final Map<Language, List<TranslationEntry>> entriesBySourceLanguage = {};
+      for (final entry in entries) {
+        if (!entriesBySourceLanguage.containsKey(entry.sourceLanguage)) {
+          entriesBySourceLanguage[entry.sourceLanguage] = [];
+        }
+        entriesBySourceLanguage[entry.sourceLanguage]!.add(entry);
+      }
+
+      final List<TranslationResult> results = [];
+
+      // 对每个源语言组进行批量翻译
+      for (final MapEntry(key: sourceLanguage, value: sourceEntries) in entriesBySourceLanguage.entries) {
+        // 收集该源语言组的所有目标语言
+        final targetLanguages = sourceEntries.map((e) => e.targetLanguage).toSet().toList();
+        final texts = sourceEntries.map((e) => e.sourceText).toList();
+
+        // 使用批量翻译API
+        final batchResult = await TranslationApiService.translateBatchTexts(
+          texts: texts,
+          sourceLanguage: sourceLanguage,
+          targetLanguages: targetLanguages,
+          config: selectedProvider,
+        );
+
+        if (batchResult.success) {
+          log('批量翻译成功: ${batchResult.items.length} 个翻译项', name: 'TranslationServiceManager');
+
+          // 将批量翻译结果转换为 TranslationResult 列表
+          for (final entry in sourceEntries) {
+            // 找到对应的翻译项
+            final translationItem = batchResult.items.firstWhere(
+              (item) => item.originalText == entry.sourceText && item.targetLanguage == entry.targetLanguage,
+              orElse: () => TranslationItem(
+                originalText: entry.sourceText,
+                translatedText: '',
+                targetLanguage: entry.targetLanguage,
+                success: false,
+                error: '未找到对应的翻译结果',
+              ),
+            );
+
+            results.add(TranslationResult(
+              success: translationItem.success,
+              translatedText: translationItem.translatedText,
+              sourceLanguage: sourceLanguage,
+              targetLanguage: entry.targetLanguage,
+              error: translationItem.error,
+            ));
+          }
+        } else {
+          log('批量翻译失败: ${batchResult.error}', name: 'TranslationServiceManager');
+
+          // 批量翻译失败，返回所有条目的失败结果
+          for (final entry in sourceEntries) {
+            results.add(TranslationResult(
+              success: false,
+              translatedText: '',
+              sourceLanguage: sourceLanguage,
+              targetLanguage: entry.targetLanguage,
+              error: batchResult.error ?? '批量翻译失败',
+            ));
+          }
+        }
+      }
+
+      return results;
+    } catch (error, stackTrace) {
+      log('批量翻译条目异常', error: error, stackTrace: stackTrace, name: 'TranslationServiceManager');
+
+      // 返回所有条目的失败结果
+      return entries
+          .map((entry) => TranslationResult(
+                success: false,
+                translatedText: '',
+                sourceLanguage: entry.sourceLanguage,
+                targetLanguage: entry.targetLanguage,
+                error: '批量翻译异常: $error',
+              ))
+          .toList();
     }
-
-    return results;
   }
 
   /// 显示默认接口未设置弹窗
