@@ -167,7 +167,8 @@ class TranslationServiceManager extends GetxService {
 
   /// 批量翻译翻译条目
   Future<List<TranslationResult>> batchTranslateEntries({
-    required List<TranslationEntry> entries,
+    required TranslationEntry sourceEntries, // 翻译源
+    required List<TranslationEntry> entries, // 需要的翻译条目
     TranslationProviderConfig? provider,
   }) async {
     try {
@@ -213,73 +214,23 @@ class TranslationServiceManager extends GetxService {
 
       log('开始批量翻译 ${entries.length} 个条目，使用 ${selectedProvider.displayName}', name: 'TranslationServiceManager');
 
-      // 按源语言分组条目
-      final Map<Language, List<TranslationEntry>> entriesBySourceLanguage = {};
-      for (final entry in entries) {
-        if (!entriesBySourceLanguage.containsKey(entry.sourceLanguage)) {
-          entriesBySourceLanguage[entry.sourceLanguage] = [];
-        }
-        entriesBySourceLanguage[entry.sourceLanguage]!.add(entry);
-      }
+      // 使用批量翻译API
+      final result = await TranslationApiService.translateBatchTexts(
+        sourceText: sourceEntries.targetText,
+        sourceLanguage: sourceEntries.sourceLanguage,
+        targetLanguages: entries.map((e) => e.targetLanguage).toSet().toList(),
+        config: selectedProvider,
+      );
 
-      final List<TranslationResult> results = [];
-
-      // 对每个源语言组进行批量翻译
-      for (final MapEntry(key: sourceLanguage, value: sourceEntries) in entriesBySourceLanguage.entries) {
-        // 收集该源语言组的所有目标语言
-        final targetLanguages = sourceEntries.map((e) => e.targetLanguage).toSet().toList();
-        final texts = sourceEntries.map((e) => e.sourceText).toList();
-
-        // 使用批量翻译API
-        final batchResult = await TranslationApiService.translateBatchTexts(
-          texts: texts,
-          sourceLanguage: sourceLanguage,
-          targetLanguages: targetLanguages,
-          config: selectedProvider,
-        );
-
-        if (batchResult.success) {
-          log('批量翻译成功: ${batchResult.items.length} 个翻译项', name: 'TranslationServiceManager');
-
-          // 将批量翻译结果转换为 TranslationResult 列表
-          for (final entry in sourceEntries) {
-            // 找到对应的翻译项
-            final translationItem = batchResult.items.firstWhere(
-              (item) => item.originalText == entry.sourceText && item.targetLanguage == entry.targetLanguage,
-              orElse: () => TranslationItem(
-                originalText: entry.sourceText,
-                translatedText: '',
-                targetLanguage: entry.targetLanguage,
-                success: false,
-                error: '未找到对应的翻译结果',
-              ),
-            );
-
-            results.add(TranslationResult(
-              success: translationItem.success,
-              translatedText: translationItem.translatedText,
-              sourceLanguage: sourceLanguage,
-              targetLanguage: entry.targetLanguage,
-              error: translationItem.error,
-            ));
-          }
-        } else {
-          log('批量翻译失败: ${batchResult.error}', name: 'TranslationServiceManager');
-
-          // 批量翻译失败，返回所有条目的失败结果
-          for (final entry in sourceEntries) {
-            results.add(TranslationResult(
-              success: false,
-              translatedText: '',
-              sourceLanguage: sourceLanguage,
-              targetLanguage: entry.targetLanguage,
-              error: batchResult.error ?? '批量翻译失败',
-            ));
-          }
-        }
-      }
-
-      return results;
+      return result.items
+          .map((item) => TranslationResult(
+                success: item.success,
+                translatedText: item.translatedText,
+                sourceLanguage: sourceEntries.sourceLanguage,
+                targetLanguage: item.targetLanguage,
+                error: item.error,
+              ))
+          .toList();
     } catch (error, stackTrace) {
       log('批量翻译条目异常', error: error, stackTrace: stackTrace, name: 'TranslationServiceManager');
 

@@ -385,6 +385,9 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
 
       // 批量翻译
       final results = await translationManager.batchTranslateEntries(
+        // 翻译源
+        sourceEntries: entriesToTranslate,
+        // 翻译条目
         entries: translateEntries,
       );
 

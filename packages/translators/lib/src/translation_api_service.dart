@@ -63,7 +63,7 @@ class TranslationApiService {
   /// 批量翻译文本
   /// 支持将多个文本翻译到多个目标语言
   static Future<BatchTranslationResult> translateBatchTexts({
-    required List<String> texts,
+    required String sourceText,
     required Language sourceLanguage,
     required List<Language> targetLanguages,
     required TranslationProviderConfig config,
@@ -73,7 +73,7 @@ class TranslationApiService {
       // 对于自定义翻译提供商，使用专门的批量翻译方法
       if (config.provider == TranslationProvider.custom) {
         return await _translateBatchWithCustom(
-          texts: texts,
+          sourceText: sourceText,
           sourceLanguage: sourceLanguage,
           targetLanguages: targetLanguages,
           config: config,
@@ -81,33 +81,37 @@ class TranslationApiService {
       }
 
       // 对于其他翻译提供商，逐个翻译
-      final List<TranslationItem> items = [];
-
-      for (final text in texts) {
-        for (final targetLanguage in targetLanguages) {
-          final result = await translateText(
-            text: text,
+      final List<Future<TranslationResult>> translationFutures = [];
+      for (final targetLanguage in targetLanguages) {
+        translationFutures.add(
+          translateText(
+            text: sourceText,
             sourceLanguage: sourceLanguage,
             targetLanguage: targetLanguage,
             config: config,
             context: context,
-          );
-
-          items.add(TranslationItem(
-            originalText: text,
-            translatedText: result.translatedText,
-            targetLanguage: targetLanguage,
-            success: result.success,
-            error: result.error,
-          ));
-        }
+          ),
+        );
       }
 
-      // 检查是否所有翻译都成功
-      final allSuccessful = items.every((item) => item.success);
+      // 并行执行所有翻译任务
+      final results = await Future.wait(translationFutures);
+
+      final items = <TranslationItem>[];
+      for (final targetLanguage in targetLanguages) {
+        items.add(
+          TranslationItem(
+            originalText: sourceText,
+            targetLanguage: targetLanguage,
+            translatedText: results.firstWhere((result) => result.targetLanguage == targetLanguage).translatedText,
+            success: results.firstWhere((result) => result.targetLanguage == targetLanguage).success,
+            error: results.firstWhere((result) => result.targetLanguage == targetLanguage).error,
+          ),
+        );
+      }
 
       return BatchTranslationResult(
-        success: allSuccessful,
+        success: results.every((result) => result.success),
         items: items,
         sourceLanguage: sourceLanguage,
       );
@@ -116,16 +120,16 @@ class TranslationApiService {
 
       // 返回失败的结果，所有项目都标记为失败
       final failedItems = <TranslationItem>[];
-      for (final text in texts) {
-        for (final targetLanguage in targetLanguages) {
-          failedItems.add(TranslationItem(
-            originalText: text,
+      for (final targetLanguage in targetLanguages) {
+        failedItems.add(
+          TranslationItem(
+            originalText: sourceText,
             translatedText: '',
             targetLanguage: targetLanguage,
             success: false,
             error: error.toString(),
-          ));
-        }
+          ),
+        );
       }
 
       return BatchTranslationResult(
@@ -632,7 +636,7 @@ class TranslationApiService {
 
   /// 自定义翻译API批量翻译（内部方法）
   static Future<BatchTranslationResult> _translateBatchWithCustom({
-    required List<String> texts,
+    required String sourceText,
     required Language sourceLanguage,
     required List<Language> targetLanguages,
     required TranslationProviderConfig config,
@@ -642,7 +646,7 @@ class TranslationApiService {
       if (apiUrl == null || apiUrl.isEmpty) {
         return BatchTranslationResult(
           success: false,
-          items: _createFailedItems(texts, targetLanguages, '自定义翻译API地址未配置'),
+          items: _createFailedItems(sourceText, targetLanguages, '自定义翻译API地址未配置'),
           sourceLanguage: sourceLanguage,
           error: '自定义翻译API地址未配置',
         );
@@ -653,10 +657,10 @@ class TranslationApiService {
 
       // 按照curl命令构建请求体
       final requestBody = {
-        'data': texts
-            .map((text) => {
-                  'lang': _convertToCustomLanguageCode(sourceLanguage.code),
-                  'content': text,
+        'data': targetLanguages
+            .map((targetLanguage) => {
+                  'lang': _convertToCustomLanguageCode(targetLanguage.code),
+                  'content': sourceText,
                 })
             .toList(),
         'force_trans': true, // 是否强制翻译
@@ -692,7 +696,7 @@ class TranslationApiService {
           final message = response['message'] as String? ?? '未知错误';
           return BatchTranslationResult(
             success: false,
-            items: _createFailedItems(texts, targetLanguages, '翻译API错误 [$code]: $message'),
+            items: _createFailedItems(sourceText, targetLanguages, '翻译API错误 [$code]: $message'),
             sourceLanguage: sourceLanguage,
             error: '翻译API错误 [$code]: $message',
           );
@@ -701,7 +705,7 @@ class TranslationApiService {
         // 处理响应数据
         final data = response['data'];
         if (data is List && data.isNotEmpty) {
-          final items = _parseCustomBatchResponse(data, texts, targetLanguages);
+          final items = _parseCustomBatchResponse(data, sourceText, targetLanguages);
           final allSuccessful = items.every((item) => item.success);
 
           return BatchTranslationResult(
@@ -714,7 +718,7 @@ class TranslationApiService {
 
       return BatchTranslationResult(
         success: false,
-        items: _createFailedItems(texts, targetLanguages, '翻译结果为空或响应格式不正确'),
+        items: _createFailedItems(sourceText, targetLanguages, '翻译结果为空或响应格式不正确'),
         sourceLanguage: sourceLanguage,
         error: '翻译结果为空或响应格式不正确',
       );
@@ -722,7 +726,7 @@ class TranslationApiService {
       log('自定义批量翻译失败', error: error, stackTrace: stackTrace, name: 'TranslationApiService');
       return BatchTranslationResult(
         success: false,
-        items: _createFailedItems(texts, targetLanguages, error.toString()),
+        items: _createFailedItems(sourceText, targetLanguages, error.toString()),
         sourceLanguage: sourceLanguage,
         error: error.toString(),
       );
@@ -732,46 +736,42 @@ class TranslationApiService {
   /// 解析自定义API批量翻译响应
   static List<TranslationItem> _parseCustomBatchResponse(
     List<dynamic> responseData,
-    List<String> originalTexts,
+    String originalText,
     List<Language> targetLanguages,
   ) {
     final items = <TranslationItem>[];
 
-    for (int i = 0; i < originalTexts.length; i++) {
-      final originalText = originalTexts[i];
+    for (final targetLanguage in targetLanguages) {
+      final targetCode = _convertToCustomLanguageCode(targetLanguage.code);
 
-      for (final targetLanguage in targetLanguages) {
-        final targetCode = _convertToCustomLanguageCode(targetLanguage.code);
+      String translatedText = '';
+      bool success = false;
+      String? error;
 
-        String translatedText = '';
-        bool success = false;
-        String? error;
-
-        try {
-          // 尝试从响应数据中获取翻译结果
-          if (i < responseData.length) {
-            final itemData = responseData[i] as Map?;
-            if (itemData != null && itemData.containsKey(targetCode)) {
-              translatedText = itemData[targetCode] as String? ?? '';
-              success = translatedText.isNotEmpty;
-            } else {
-              error = '响应数据中缺少目标语言 [$targetCode] 的翻译结果';
-            }
+      try {
+        // 尝试从响应数据中获取翻译结果
+        if (responseData.isNotEmpty) {
+          final itemData = responseData[0] as Map?;
+          if (itemData != null && itemData.containsKey(targetCode)) {
+            translatedText = itemData[targetCode] as String? ?? '';
+            success = translatedText.isNotEmpty;
           } else {
-            error = '响应数据长度不匹配';
+            error = '响应数据中缺少目标语言 [$targetCode] 的翻译结果';
           }
-        } catch (e) {
-          error = '解析翻译结果失败: $e';
+        } else {
+          error = '响应数据长度不匹配';
         }
-
-        items.add(TranslationItem(
-          originalText: originalText,
-          translatedText: translatedText,
-          targetLanguage: targetLanguage,
-          success: success,
-          error: error,
-        ));
+      } catch (e) {
+        error = '解析翻译结果失败: $e';
       }
+
+      items.add(TranslationItem(
+        originalText: originalText,
+        translatedText: translatedText,
+        targetLanguage: targetLanguage,
+        success: success,
+        error: error,
+      ));
     }
 
     return items;
@@ -779,61 +779,23 @@ class TranslationApiService {
 
   /// 创建失败的翻译项列表
   static List<TranslationItem> _createFailedItems(
-    List<String> texts,
+    String sourceText,
     List<Language> targetLanguages,
     String error,
   ) {
     final items = <TranslationItem>[];
 
-    for (final text in texts) {
-      for (final targetLanguage in targetLanguages) {
-        items.add(TranslationItem(
-          originalText: text,
-          translatedText: '',
-          targetLanguage: targetLanguage,
-          success: false,
-          error: error,
-        ));
-      }
+    for (final targetLanguage in targetLanguages) {
+      items.add(TranslationItem(
+        originalText: sourceText,
+        translatedText: '',
+        targetLanguage: targetLanguage,
+        success: false,
+        error: error,
+      ));
     }
 
     return items;
-  }
-
-  /// 自定义翻译API，支持批量翻译（保留向后兼容）
-  /// @deprecated 使用 translateBatchTexts 方法以获得更好的批量翻译支持
-  static Future<TranslationResult> translateWithCustomBatch({
-    required List<String> texts, // 翻译文案
-    required Language sourceLanguage, // 源语言
-    required List<Language> targetLanguages, // 目标语言
-    required TranslationProviderConfig config,
-  }) async {
-    try {
-      // 使用新的批量翻译方法
-      final batchResult = await _translateBatchWithCustom(
-        texts: texts,
-        sourceLanguage: sourceLanguage,
-        targetLanguages: targetLanguages,
-        config: config,
-      );
-
-      // 转换为旧的 TranslationResult 格式以保持向后兼容
-      final allTranslatedTexts = batchResult.successfulTranslatedTexts;
-
-      return TranslationResult(
-        success: batchResult.success,
-        translatedText: allTranslatedTexts.isNotEmpty ? allTranslatedTexts.join('\n') : '',
-        sourceLanguage: sourceLanguage,
-        error: batchResult.error,
-      );
-    } catch (error, stackTrace) {
-      log('自定义翻译失败', error: error, stackTrace: stackTrace, name: 'TranslationApiService');
-      return TranslationResult(
-        success: false,
-        translatedText: '',
-        error: '自定义翻译请求失败: $error',
-      );
-    }
   }
 }
 
