@@ -329,8 +329,7 @@ class TranslationApiService {
     String? context,
   }) async {
     try {
-      final apiUrl = config.apiUrl;
-      if (apiUrl == null || apiUrl.isEmpty) {
+      if (config.apiUrl == null || config.apiUrl!.isEmpty) {
         return TranslationResult(
           success: false,
           translatedText: '',
@@ -338,76 +337,40 @@ class TranslationApiService {
         );
       }
 
-      final targetLanguageCode = _convertToCustomLanguageCode(targetLanguage.code);
-
-      // 按照curl命令构建请求体
       final requestBody = {
-        'data': [
-          {
-            'lang': _convertToCustomLanguageCode(sourceLanguage.code),
-            'content': text,
-          }
-        ],
-        'force_trans': true,
-        'trans': [targetLanguageCode],
+        'text': text,
+        'source_language': sourceLanguage.code,
+        'target_language': targetLanguage.code,
+        'context': context,
       };
-
-      // 按照curl命令设置请求头
-      final headers = <String, String>{
-        'Content-Type': 'application/json',
-      };
-
-      // 如果配置了appId或appKey，可以添加到请求头中
-      if (config.appId.isNotEmpty) {
-        headers['appId'] = config.appId;
-      }
-      if (config.appKey.isNotEmpty) {
-        headers['Authorization'] = 'Bearer ${config.appKey}';
-      }
 
       final response = await _makeHttpRequest(
-        url: apiUrl,
+        url: config.apiUrl!,
         method: 'POST',
         body: requestBody,
-        headers: headers,
+        headers: {
+          'Content-Type': 'application/json',
+          if (config.appId.isNotEmpty) 'appId': config.appId,
+          if (config.appKey.isNotEmpty) 'Authorization': 'Bearer ${config.appKey}',
+        },
         timeout: const Duration(seconds: 30),
       );
 
-      // 解析响应结果
-      if (response is Map) {
-        // 检查是否有错误码
-        final code = response['code'];
-        if (code != null && code != 200) {
-          final message = response['message'] as String? ?? '未知错误';
-          return TranslationResult(
-            success: false,
-            translatedText: '',
-            error: '翻译API错误 [$code]: $message',
-          );
-        }
-
-        // 处理响应数据
-        final data = response['data'];
-        if (data is List && data.isNotEmpty) {
-          final firstItem = data.first as Map?;
-          if (firstItem != null) {
-            final translatedText = firstItem[targetLanguageCode] as String?;
-            if (translatedText != null && translatedText.isNotEmpty) {
-              return TranslationResult(
-                success: true,
-                translatedText: translatedText,
-                sourceLanguage: sourceLanguage,
-                targetLanguage: targetLanguage,
-              );
-            }
-          }
-        }
+      // 自定义API的响应格式需要根据实际API文档调整
+      final translatedText = response['translated_text'] as String? ?? '';
+      if (translatedText.isEmpty) {
+        return TranslationResult(
+          success: false,
+          translatedText: '',
+          error: '翻译结果为空',
+        );
       }
 
       return TranslationResult(
-        success: false,
-        translatedText: '',
-        error: '翻译结果为空或响应格式不正确',
+        success: true,
+        translatedText: translatedText,
+        sourceLanguage: sourceLanguage,
+        targetLanguage: targetLanguage,
       );
     } catch (error, stackTrace) {
       log('自定义翻译失败', error: error, stackTrace: stackTrace, name: 'TranslationApiService');
