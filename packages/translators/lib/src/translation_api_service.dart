@@ -848,37 +848,3 @@ class BatchTranslationResult {
   /// 获取所有失败翻译的项目
   List<TranslationItem> get failedItems => items.where((item) => !item.success).toList();
 }
-
-/// 测试编码修复的方法
-/// 用于验证UTF-8编码是否正常工作
-class EncodingTest {
-  /// 测试JSON编码是否包含中文字符
-  static void testChineseEncoding() {
-    final testData = {
-      'data': [
-        {
-          'lang': 'zh',
-          'content': '欢迎使用应用',
-        }
-      ],
-      'force_trans': true,
-      'trans': ['ko'],
-    };
-
-    final jsonString = jsonEncode(testData);
-    log('测试JSON编码: $jsonString', name: 'EncodingTest');
-
-    // 测试UTF-8编码
-    final utf8Bytes = utf8.encode(jsonString);
-    final decodedString = utf8.decode(utf8Bytes);
-    log('UTF-8编码测试通过: ${jsonString == decodedString}', name: 'EncodingTest');
-
-    // 测试Latin1编码（应该会失败）
-    try {
-      latin1.encode(jsonString);
-      log('警告: Latin1编码意外成功', name: 'EncodingTest');
-    } catch (e) {
-      log('Latin1编码正确失败（预期行为）: $e', name: 'EncodingTest');
-    }
-  }
-}
