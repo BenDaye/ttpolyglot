@@ -458,6 +458,17 @@ class TranslationController extends GetxController {
     return stats;
   }
 
+  /// 获取项目默认语言
+  Future<Language?> getProjectDefaultLanguage() async {
+    try {
+      final project = await ProjectsController.getProject(projectId);
+      return project?.primaryLanguage;
+    } catch (error, stackTrace) {
+      log('获取项目默认语言失败', error: error, stackTrace: stackTrace, name: 'TranslationController');
+      return null;
+    }
+  }
+
   /// 获取状态颜色
   static Color getStatusColor(TranslationStatus status) {
     switch (status) {

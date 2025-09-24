@@ -1,5 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:ttpolyglot/src/features/settings/controllers/translation_config_controller.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_core/core.dart';
 
@@ -99,7 +103,12 @@ class TranslationsList extends StatelessWidget {
                           controller.updateTranslationEntries(entries, isShowSnackbar: false);
                         },
                         onTranslateByCustom: ({required String key, required List<TranslationEntry> entries}) {
-                          _showTranslateByCustomDialog(context, controller: controller, key: key, entries: entries);
+                          _showTranslateByCustomDialog(
+                            context,
+                            controller: controller,
+                            key: key,
+                            entries: entries,
+                          );
                         },
                       ),
                     );
@@ -362,6 +371,7 @@ class TranslationsList extends StatelessWidget {
     required String key,
     required List<TranslationEntry> entries,
   }) async {
+    final defaultLanguage = await controller.getProjectDefaultLanguage();
     Get.dialog(AlertDialog(
       title: Row(
         children: [
@@ -401,9 +411,12 @@ class TranslationsList extends StatelessWidget {
             children: [
               // 选择翻译接口
               _buildProviderSelector(),
-              const SizedBox(height: 16.0),
+              const SizedBox(height: 24.0),
               // 选择源语言
-              _buildSourceLanguageSelector(),
+              _buildSourceLanguageSelector(
+                entries: entries,
+                defaultLanguage: defaultLanguage,
+              ),
             ],
           ),
         ),
@@ -450,65 +463,129 @@ class TranslationsList extends StatelessWidget {
 
   /// 构建翻译服务提供商选择器
   Widget _buildProviderSelector() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12.0),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            '翻译服务提供商',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 14.0,
-            ),
+    final instance = TranslationConfigController.instance;
+    final defaultProvider = instance.config.defaultProvider;
+
+    return DropdownButtonFormField<TranslationProviderConfig>(
+      value: defaultProvider,
+      decoration: InputDecoration(
+        contentPadding: const EdgeInsets.all(12.0),
+        labelText: '请选择翻译接口',
+        labelStyle: TextStyle(
+          color: Theme.of(Get.context!).primaryColor,
+          fontWeight: FontWeight.w500,
+        ),
+        prefixIcon: Icon(
+          Icons.translate,
+          color: Theme.of(Get.context!).primaryColor.withValues(alpha: 0.7),
+          size: 20.0,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: BorderSide(
+            color: Colors.grey.withValues(alpha: 0.3),
           ),
-          const SizedBox(height: 8.0),
-          Text(
-            '当前选择: ',
-            style: const TextStyle(
-              color: Colors.grey,
-              fontSize: 12.0,
-            ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: BorderSide(
+            color: Theme.of(Get.context!).primaryColor,
+            width: 2.0,
           ),
-        ],
+        ),
       ),
+      items: instance.config.providers.map((provider) {
+        return DropdownMenuItem<TranslationProviderConfig>(
+          value: provider,
+          child: Text(provider.displayName),
+        );
+      }).toList(),
+      onChanged: (value) {
+        if (value != null) {
+          // TODO: 实现选择翻译提供商的逻辑
+          log('_buildProviderSelector', name: 'TranslationsList');
+        }
+      },
     );
   }
 
   /// 构建源语言选择器
-  Widget _buildSourceLanguageSelector() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12.0),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(8.0),
+  Widget _buildSourceLanguageSelector({
+    required List<TranslationEntry> entries,
+    Language? defaultLanguage,
+  }) {
+    return DropdownButtonFormField<TranslationEntry>(
+      value: defaultLanguage != null
+          ? entries.firstWhereOrNull((item) => item.targetLanguage.code == defaultLanguage.code)
+          : entries.first,
+      decoration: InputDecoration(
+        contentPadding: const EdgeInsets.all(12.0),
+        labelText: '请选择源语言',
+        labelStyle: TextStyle(
+          color: Theme.of(Get.context!).primaryColor,
+          fontWeight: FontWeight.w500,
+        ),
+        prefixIcon: Icon(
+          Icons.language,
+          color: Theme.of(Get.context!).primaryColor.withValues(alpha: 0.7),
+          size: 20.0,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: BorderSide(
+            color: Colors.grey.withValues(alpha: 0.3),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: BorderSide(
+            color: Theme.of(Get.context!).primaryColor,
+            width: 2.0,
+          ),
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            '源语言',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 14.0,
+      items: entries.map((entry) {
+        return DropdownMenuItem<TranslationEntry>(
+          value: entry,
+          child: SizedBox(
+            width: 300.0,
+            child: Row(
+              spacing: 4.0,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                  decoration: BoxDecoration(
+                    color: Theme.of(Get.context!).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(6.0),
+                  ),
+                  child: Text(
+                    entry.targetLanguage.code,
+                    style: GoogleFonts.notoSansMono(
+                      color: Theme.of(Get.context!).colorScheme.onSecondaryContainer,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Flexible(
+                  child: Text(entry.targetText),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8.0),
-          const Text(
-            '请选择源语言',
-            style: TextStyle(
-              color: Colors.grey,
-              fontSize: 12.0,
-            ),
-          ),
-        ],
-      ),
+        );
+      }).toList(),
+      onChanged: (value) {
+        if (value != null) {
+          // TODO: 实现选择翻译提供商的逻辑
+          log('_buildProviderSelector', name: 'TranslationsList');
+        }
+      },
     );
   }
 
