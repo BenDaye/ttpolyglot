@@ -559,7 +559,7 @@ class TranslationsList extends StatelessWidget {
               spacing: 4.0,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 1.0),
                   decoration: BoxDecoration(
                     color: Theme.of(Get.context!).colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(6.0),
