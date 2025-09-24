@@ -317,7 +317,7 @@ class TranslationsList extends StatelessWidget {
                       value: selectedStatus,
                       decoration: const InputDecoration(
                         labelText: '状态',
-                        contentPadding: EdgeInsets.all(16.0),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
                         border: OutlineInputBorder(),
                       ),
                       items: TranslationStatus.values.map((status) {
@@ -469,7 +469,7 @@ class TranslationsList extends StatelessWidget {
     return DropdownButtonFormField<TranslationProviderConfig>(
       value: defaultProvider,
       decoration: InputDecoration(
-        contentPadding: const EdgeInsets.all(12.0),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20.0),
         labelText: '请选择翻译接口',
         labelStyle: TextStyle(
           color: Theme.of(Get.context!).primaryColor,
@@ -522,7 +522,7 @@ class TranslationsList extends StatelessWidget {
           ? entries.firstWhereOrNull((item) => item.targetLanguage.code == defaultLanguage.code)
           : entries.first,
       decoration: InputDecoration(
-        contentPadding: const EdgeInsets.all(12.0),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20.0),
         labelText: '请选择源语言',
         labelStyle: TextStyle(
           color: Theme.of(Get.context!).primaryColor,
