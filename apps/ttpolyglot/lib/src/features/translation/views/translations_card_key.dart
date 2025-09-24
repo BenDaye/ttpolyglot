@@ -16,6 +16,7 @@ class TranslationsCardByKey extends StatefulWidget {
     this.onEditEntry,
     this.onTranslateByDefaultLanguage,
     this.onChangeTranslate,
+    this.onTranslateByCustom,
   });
 
   final String translationKey;
@@ -32,6 +33,10 @@ class TranslationsCardByKey extends StatefulWidget {
     required String key,
     required List<TranslationEntry> entries,
   })? onTranslateByDefaultLanguage;
+  final Function({
+    required String key,
+    required List<TranslationEntry> entries,
+  })? onTranslateByCustom;
 
   @override
   State<TranslationsCardByKey> createState() => _TranslationsCardByKeyState();
@@ -78,6 +83,21 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
                           Icon(Icons.delete_sweep),
                           SizedBox(width: 8.0),
                           Text('删除整个键'),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      onTap: () {
+                        widget.onTranslateByCustom?.call(
+                          key: widget.translationKey,
+                          entries: widget.translationEntries,
+                        );
+                      },
+                      child: Row(
+                        children: [
+                          Icon(Icons.translate),
+                          SizedBox(width: 8.0),
+                          Text('自定义翻译'),
                         ],
                       ),
                     ),

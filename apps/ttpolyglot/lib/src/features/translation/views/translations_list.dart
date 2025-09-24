@@ -98,6 +98,9 @@ class TranslationsList extends StatelessWidget {
                         onChangeTranslate: ({required List<TranslationEntry> entries}) {
                           controller.updateTranslationEntries(entries, isShowSnackbar: false);
                         },
+                        onTranslateByCustom: ({required String key, required List<TranslationEntry> entries}) {
+                          _showTranslateByCustomDialog(context, controller: controller, key: key, entries: entries);
+                        },
                       ),
                     );
                   },
@@ -350,5 +353,168 @@ class TranslationsList extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// 显示自定义翻译选择弹窗
+  void _showTranslateByCustomDialog(
+    BuildContext context, {
+    required TranslationController controller,
+    required String key,
+    required List<TranslationEntry> entries,
+  }) async {
+    Get.dialog(AlertDialog(
+      title: Row(
+        children: [
+          Text(
+            '自定义翻译',
+            style: TextStyle(
+              fontSize: 20.0,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+          const Spacer(),
+          IconButton(
+            onPressed: () => Get.back(),
+            icon: Icon(
+              Icons.close,
+              color: Colors.grey.shade600,
+              size: 24.0,
+            ),
+            padding: const EdgeInsets.all(8.0),
+            constraints: const BoxConstraints(),
+            splashRadius: 28.0,
+          ),
+        ],
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      elevation: 8.0,
+      backgroundColor: Theme.of(context).dialogBackgroundColor,
+      content: Container(
+        width: 480.0,
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 选择翻译接口
+              _buildProviderSelector(),
+              const SizedBox(height: 16.0),
+              // 选择源语言
+              _buildSourceLanguageSelector(),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Get.back(),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+          child: Text(
+            '取消',
+            style: TextStyle(
+              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8.0),
+        ElevatedButton(
+          onPressed: _saveCustomTranslation,
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            elevation: 2.0,
+            shadowColor: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+          ),
+          child: Text(
+            '开始翻译',
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 14.0,
+            ),
+          ),
+        ),
+      ],
+    ));
+  }
+
+  /// 构建翻译服务提供商选择器
+  Widget _buildProviderSelector() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12.0),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '翻译服务提供商',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 14.0,
+            ),
+          ),
+          const SizedBox(height: 8.0),
+          Text(
+            '当前选择: ',
+            style: const TextStyle(
+              color: Colors.grey,
+              fontSize: 12.0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 构建源语言选择器
+  Widget _buildSourceLanguageSelector() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12.0),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '源语言',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 14.0,
+            ),
+          ),
+          const SizedBox(height: 8.0),
+          const Text(
+            '请选择源语言',
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 12.0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 保存自定义翻译设置
+  void _saveCustomTranslation() {
+    // TODO: 实现自定义翻译逻辑
+    Get.back();
   }
 }
