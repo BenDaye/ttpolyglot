@@ -464,52 +464,56 @@ class TranslationsList extends StatelessWidget {
   /// 构建翻译服务提供商选择器
   Widget _buildProviderSelector() {
     final instance = TranslationConfigController.instance;
-    final defaultProvider = instance.config.defaultProvider;
 
-    return DropdownButtonFormField<TranslationProviderConfig>(
-      value: defaultProvider,
-      decoration: InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20.0),
-        labelText: '请选择翻译接口',
-        labelStyle: TextStyle(
-          color: Theme.of(Get.context!).primaryColor,
-          fontWeight: FontWeight.w500,
-        ),
-        prefixIcon: Icon(
-          Icons.translate,
-          color: Theme.of(Get.context!).primaryColor.withValues(alpha: 0.7),
-          size: 20.0,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8.0),
-          borderSide: BorderSide(
-            color: Colors.grey.withValues(alpha: 0.3),
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8.0),
-          borderSide: BorderSide(
+    return Obx(() {
+      final providers = instance.config.providers;
+      final defaultProvider = instance.config.defaultProvider;
+
+      return DropdownButtonFormField<TranslationProviderConfig>(
+        value: providers.isEmpty ? null : defaultProvider,
+        decoration: InputDecoration(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20.0),
+          labelText: '请选择翻译接口',
+          labelStyle: TextStyle(
             color: Theme.of(Get.context!).primaryColor,
-            width: 2.0,
+            fontWeight: FontWeight.w500,
+          ),
+          prefixIcon: Icon(
+            Icons.translate,
+            color: Theme.of(Get.context!).primaryColor.withValues(alpha: 0.7),
+            size: 20.0,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide: BorderSide(
+              color: Colors.grey.withValues(alpha: 0.3),
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide: BorderSide(
+              color: Theme.of(Get.context!).primaryColor,
+              width: 2.0,
+            ),
           ),
         ),
-      ),
-      items: instance.config.providers.map((provider) {
-        return DropdownMenuItem<TranslationProviderConfig>(
-          value: provider,
-          child: Text(provider.displayName),
-        );
-      }).toList(),
-      onChanged: (value) {
-        if (value != null) {
-          // TODO: 实现选择翻译提供商的逻辑
-          log('_buildProviderSelector', name: 'TranslationsList');
-        }
-      },
-    );
+        items: providers.map((provider) {
+          return DropdownMenuItem<TranslationProviderConfig>(
+            value: provider,
+            child: Text(provider.displayName),
+          );
+        }).toList(),
+        onChanged: (value) {
+          if (value != null) {
+            // TODO: 实现选择翻译提供商的逻辑
+            log('_buildProviderSelector', name: 'TranslationsList');
+          }
+        },
+      );
+    });
   }
 
   /// 构建源语言选择器
