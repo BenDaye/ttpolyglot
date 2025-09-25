@@ -428,6 +428,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
     for (int i = 0; i < results.length; i++) {
       final result = results[i];
       final entry = translateEntries[i];
+      // 如果不覆盖，则直接跳过
       if (!_isOverride && entry.targetText.trim().isNotEmpty) {
         continue;
       }
