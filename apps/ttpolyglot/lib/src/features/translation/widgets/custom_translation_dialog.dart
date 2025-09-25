@@ -46,6 +46,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
   TranslationProviderConfig? _selectedProvider;
   TranslationEntry? _selectedSourceEntry;
   bool _isTranslating = false;
+  bool _isOverride = true; // 是否覆盖
 
   @override
   Widget build(BuildContext context) {
@@ -101,6 +102,9 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
               _buildSourceLanguageSelector(
                 list: widget.entries,
               ),
+              const SizedBox(height: 24.0),
+              // 是否覆盖翻译条目
+              _buildDefaultSwitch(),
             ],
           ),
         ),
@@ -478,6 +482,46 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
         content: Text(message, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white)),
         backgroundColor: backgroundColor,
         duration: const Duration(seconds: 4),
+      ),
+    );
+  }
+
+  /// 构建默认翻译开关
+  Widget _buildDefaultSwitch() {
+    return Container(
+      padding: const EdgeInsets.all(12.0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).primaryColor.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(8.0),
+        border: Border.all(
+          color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.autorenew,
+            color: Theme.of(context).primaryColor,
+            size: 20.0,
+          ),
+          const SizedBox(width: 12.0),
+          const Expanded(
+            child: Text(
+              '是否覆盖翻译条目',
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Switch(
+            value: _isOverride,
+            onChanged: (value) {
+              setState(() {
+                _isOverride = value;
+              });
+            },
+          ),
+        ],
       ),
     );
   }
