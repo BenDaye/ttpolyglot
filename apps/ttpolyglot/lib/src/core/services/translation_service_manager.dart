@@ -217,7 +217,7 @@ class TranslationServiceManager extends GetxService {
       // 使用批量翻译API
       final result = await TranslationApiService.translateBatchTexts(
         sourceText: sourceEntries.targetText,
-        sourceLanguage: sourceEntries.sourceLanguage,
+        sourceLanguage: sourceEntries.targetLanguage,
         targetLanguages: entries.map((e) => e.targetLanguage).toSet().toList(),
         config: selectedProvider,
       );
