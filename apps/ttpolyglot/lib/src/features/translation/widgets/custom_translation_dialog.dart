@@ -383,6 +383,13 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
       ));
     }
 
+    // 如果不覆盖，则直接返回
+    if (!_isOverride && !translateEntries.any((e) => e.targetText.trim().isEmpty)) {
+      _showErrorSnackBar('没有可翻译语言');
+      _resetTranslatingState();
+      return;
+    }
+
     if (translateEntries.isEmpty) {
       _showErrorSnackBar('没有需要翻译的目标语言');
       _resetTranslatingState();
@@ -464,7 +471,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(message),
+          content: Text(message, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white)),
           backgroundColor: Theme.of(context).colorScheme.error,
           duration: const Duration(seconds: 3),
         ),
