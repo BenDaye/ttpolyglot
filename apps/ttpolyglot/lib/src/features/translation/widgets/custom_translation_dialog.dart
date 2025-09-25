@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ttpolyglot/src/core/services/translation_service_manager.dart';
+import 'package:ttpolyglot/src/features/project/controllers/project_controller.dart';
 import 'package:ttpolyglot/src/features/settings/controllers/translation_config_controller.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_core/core.dart';
@@ -48,127 +49,123 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Language?>(
-      future: widget.controller.getProjectDefaultLanguage(),
-      builder: (context, snapshot) {
-        _selectedSourceEntry ??= (snapshot.data != null
-            ? widget.entries.firstWhereOrNull((item) => item.targetLanguage.code == snapshot.data?.code)
-            : widget.entries.first);
-        _selectedProvider ??= TranslationConfigController.instance.config.defaultProvider;
+    final primaryLanguage = ProjectController.getInstance(widget.controller.projectId).project?.primaryLanguage;
+    _selectedSourceEntry ??= (primaryLanguage != null
+        ? widget.entries.firstWhereOrNull((item) => item.targetLanguage.code == primaryLanguage.code)
+        : widget.entries.first);
+    _selectedProvider ??= TranslationConfigController.instance.config.defaultProvider;
 
-        return AlertDialog(
-          title: Row(
+    return AlertDialog(
+      title: Row(
+        children: [
+          Text(
+            '自定义翻译',
+            style: TextStyle(
+              fontSize: 20.0,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+          const Spacer(),
+          IconButton(
+            onPressed: () => Get.back(),
+            icon: Icon(
+              Icons.close,
+              color: Colors.grey.shade600,
+              size: 24.0,
+            ),
+            padding: const EdgeInsets.all(8.0),
+            constraints: const BoxConstraints(),
+            splashRadius: 28.0,
+          ),
+        ],
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      elevation: 8.0,
+      backgroundColor: Theme.of(context).dialogBackgroundColor,
+      content: Container(
+        width: 480.0,
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                '自定义翻译',
-                style: TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).primaryColor,
-                ),
+              // 选择翻译接口
+              _buildProviderSelector(
+                list: TranslationConfigController.instance.config.providers,
               ),
-              const Spacer(),
-              IconButton(
-                onPressed: () => Get.back(),
-                icon: Icon(
-                  Icons.close,
-                  color: Colors.grey.shade600,
-                  size: 24.0,
-                ),
-                padding: const EdgeInsets.all(8.0),
-                constraints: const BoxConstraints(),
-                splashRadius: 28.0,
+              const SizedBox(height: 24.0),
+              // 选择源语言
+              _buildSourceLanguageSelector(
+                list: widget.entries,
               ),
             ],
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.0),
-          ),
-          elevation: 8.0,
-          backgroundColor: Theme.of(context).dialogBackgroundColor,
-          content: Container(
-            width: 480.0,
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // 选择翻译接口
-                  _buildProviderSelector(
-                    list: TranslationConfigController.instance.config.providers,
-                  ),
-                  const SizedBox(height: 24.0),
-                  // 选择源语言
-                  _buildSourceLanguageSelector(
-                    list: widget.entries,
-                  ),
-                ],
-              ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Get.back(),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Get.back(),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-              child: Text(
-                '取消',
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+          child: Text(
+            '取消',
+            style: TextStyle(
+              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w500,
             ),
-            const SizedBox(width: 8.0),
-            ElevatedButton(
-              onPressed: _isTranslating ? null : _saveCustomTranslation,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                elevation: 2.0,
-                shadowColor: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-              ),
-              child: _isTranslating
-                  ? Row(
-                      mainAxisSize: MainAxisSize.min,
-                      spacing: 8.0,
-                      children: [
-                        SizedBox(
-                          width: 16.0,
-                          height: 16.0,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.0,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
-                            ),
-                          ),
+          ),
+        ),
+        const SizedBox(width: 8.0),
+        ElevatedButton(
+          onPressed: _isTranslating ? null : _saveCustomTranslation,
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            elevation: 2.0,
+            shadowColor: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+          ),
+          child: _isTranslating
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 8.0,
+                  children: [
+                    SizedBox(
+                      width: 16.0,
+                      height: 16.0,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.0,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Colors.white,
                         ),
-                        const Text(
-                          '翻译中...',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14.0,
-                          ),
-                        ),
-                      ],
-                    )
-                  : const Text(
-                      '开始翻译',
+                      ),
+                    ),
+                    const Text(
+                      '翻译中...',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14.0,
                       ),
                     ),
-            ),
-          ],
-        );
-      },
+                  ],
+                )
+              : const Text(
+                  '开始翻译',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14.0,
+                  ),
+                ),
+        ),
+      ],
     );
   }
 
