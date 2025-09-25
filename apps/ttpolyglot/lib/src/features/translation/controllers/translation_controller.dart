@@ -139,7 +139,7 @@ class TranslationController extends GetxController {
   }
 
   /// 更新翻译条目
-  Future<void> updateTranslationEntry(TranslationEntry entry) async {
+  Future<void> updateTranslationEntry(TranslationEntry entry, {bool isShowSnackbar = true}) async {
     try {
       await _translationService.updateTranslationEntry(entry);
 
@@ -150,9 +150,13 @@ class TranslationController extends GetxController {
         _applyFilters();
       }
 
-      Get.snackbar('成功', '翻译条目更新成功');
+      if (isShowSnackbar) {
+        Get.snackbar('成功', '翻译条目更新成功');
+      }
     } catch (error, stackTrace) {
-      Get.snackbar('错误', '更新翻译条目失败: $error');
+      if (isShowSnackbar) {
+        Get.snackbar('错误', '更新翻译条目失败: $error');
+      }
       log('更新翻译条目失败', error: error, stackTrace: stackTrace, name: 'TranslationController');
     }
   }
