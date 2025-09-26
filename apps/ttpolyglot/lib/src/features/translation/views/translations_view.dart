@@ -279,6 +279,13 @@ class ProjectTranslationsView extends StatelessWidget {
             icon: const Icon(Icons.add),
             tooltip: '添加翻译键',
           ),
+
+          // 翻译所有语言按钮
+          IconButton(
+            onPressed: () => _showTranslateAllDialog(context, controller: controller, project: project),
+            icon: const Icon(Icons.translate),
+            tooltip: '翻译所有语言',
+          ),
         ],
       ),
     );
@@ -380,6 +387,17 @@ class ProjectTranslationsView extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  /// 显示批量翻译对话框
+  void _showTranslateAllDialog(
+    BuildContext context, {
+    required TranslationController controller,
+    required Project project,
+  }) {
+    BatchTranslationDialog.show(
+      controller: controller,
     );
   }
 }
