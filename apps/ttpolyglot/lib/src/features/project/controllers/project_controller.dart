@@ -104,11 +104,13 @@ class ProjectController extends GetxController {
       return;
     }
 
+    log('开始加载项目: $projectId', name: 'ProjectController');
     _isLoading.value = true;
 
     try {
       final project = await ProjectsController.getProject(projectId);
       if (project != null) {
+        log('项目加载成功: ID=${project.id}, 名称="${project.name}"', name: 'ProjectController');
         _project.value = project;
 
         // 验证项目源语言数据一致性
@@ -119,6 +121,7 @@ class ProjectController extends GetxController {
         return;
       }
 
+      log('项目不存在: $projectId', name: 'ProjectController');
       Get.snackbar('错误', '项目不存在: $projectId');
     } catch (error, stackTrace) {
       Get.snackbar('错误', '加载项目失败: $error');

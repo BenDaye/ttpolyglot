@@ -49,11 +49,17 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
   @override
   Future<Project?> getProject(String projectId) async {
     try {
+      log('从存储读取项目: $projectId', name: 'ProjectServiceImpl');
       final projectJson = await _storageService.read(StorageKeys.projectConfig(projectId));
-      if (projectJson == null) return null;
+      if (projectJson == null) {
+        log('项目数据不存在: $projectId', name: 'ProjectServiceImpl');
+        return null;
+      }
 
       final projectData = jsonDecode(projectJson) as Map<String, dynamic>;
-      return Project.fromJson(projectData);
+      final project = Project.fromJson(projectData);
+      log('项目读取成功: ID=${project.id}, 名称="${project.name}"', name: 'ProjectServiceImpl');
+      return project;
     } catch (error, stackTrace) {
       log('获取项目失败', error: error, stackTrace: stackTrace, name: 'ProjectServiceImpl');
       return null;
@@ -268,8 +274,10 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
 
   /// 保存项目到存储
   Future<void> _saveProject(Project project) async {
+    log('保存项目到存储: ID=${project.id}, 名称="${project.name}"', name: 'ProjectServiceImpl');
     final projectJson = jsonEncode(project.toJson());
     await _storageService.write(StorageKeys.projectConfig(project.id), projectJson);
+    log('项目保存完成: ${project.id}', name: 'ProjectServiceImpl');
   }
 
   /// 更新项目列表索引

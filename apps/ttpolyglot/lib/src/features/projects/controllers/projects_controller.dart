@@ -105,8 +105,13 @@ class ProjectsController extends GetxController {
 
       final newProject = await controller._projectService.createProject(request);
 
+      log('项目创建成功: ID=${newProject.id}, 名称="${newProject.name}"', name: 'ProjectsController');
+
       /// 更新本地列表
       controller._projects.add(newProject);
+
+      // 确保项目数据同步：重新从存储中加载项目列表
+      await loadProjects();
 
       Get.snackbar('成功', '项目创建成功');
     } catch (error, stackTrace) {
