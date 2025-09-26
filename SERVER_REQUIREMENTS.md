@@ -17,7 +17,7 @@ TTPolyglot 是一个多语言翻译管理系统，目前为本地应用。为了
 ### 后端技术栈
 - **语言**: Dart
 - **框架**: Shelf + Shelf Router (轻量级 HTTP 服务器)
-- **数据库**: SQLite (可扩展到 PostgreSQL)
+- **数据库**: PostgreSQL (容器化部署)
 - **ORM**: Drift (原 Moor) - Dart 的类型安全数据库层
 - **身份验证**: JWT (JSON Web Tokens)
 - **容器化**: Docker + Docker Compose
@@ -26,15 +26,22 @@ TTPolyglot 是一个多语言翻译管理系统，目前为本地应用。为了
 ### 系统架构
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  Flutter Client │───▶│  Dart Server    │───▶│   SQLite DB     │
-│                 │    │  (Shelf)        │    │                 │
+│  Flutter Client │───▶│  Dart Server    │───▶│ PostgreSQL DB   │
+│                 │    │  (Shelf)        │    │   Container     │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
-                              │
-                              ▼
-                       ┌─────────────────┐
-                       │   Docker        │
-                       │   Container     │
-                       └─────────────────┘
+                              │                          │
+                              ▼                          ▼
+                       ┌─────────────────┐    ┌─────────────────┐
+                       │   App Docker    │    │   DB Docker     │
+                       │   Container     │    │   Container     │
+                       └─────────────────┘    └─────────────────┘
+                              │                          │
+                              └──────────┬───────────────┘
+                                         ▼
+                              ┌─────────────────┐
+                              │ Docker Network  │
+                              │ ttpolyglot-net  │
+                              └─────────────────┘
 ```
 
 ## 数据库设计
@@ -470,13 +477,35 @@ networks:
   ttpolyglot-network:
     driver: bridge
 
+volumes:
+  postgres_data:
+    driver: local
+
 services:
+  ttpolyglot-db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=${DB_NAME:-ttpolyglot}
+      - POSTGRES_USER=${DB_USER:-ttpolyglot}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_INITDB_ARGS="--encoding=UTF8 --locale=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+      - ./logs/postgres:/var/log/postgresql
+    networks:
+      - ttpolyglot-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-ttpolyglot} -d ${DB_NAME:-ttpolyglot}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   ttpolyglot-server:
     build: .
-    expose:
-      - "8080"  # 只对内部网络暴露端口
     environment:
-      - DATABASE_PATH=/app/data/ttpolyglot.db
+      - DATABASE_URL=postgresql://${DB_USER:-ttpolyglot}:${DB_PASSWORD}@ttpolyglot-db:5432/${DB_NAME:-ttpolyglot}
       - JWT_SECRET=${JWT_SECRET}
       - LOG_LEVEL=info
       - SERVER_HOST=0.0.0.0
@@ -487,6 +516,9 @@ services:
     networks:
       - ttpolyglot-network
     restart: unless-stopped
+    depends_on:
+      ttpolyglot-db:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
@@ -701,7 +733,10 @@ server {
 #### .env 文件
 ```bash
 # 数据库配置
-DATABASE_PATH=./data/ttpolyglot.db
+DB_NAME=ttpolyglot
+DB_USER=ttpolyglot
+DB_PASSWORD=your-secure-password-change-in-production
+DATABASE_URL=postgresql://ttpolyglot:your-secure-password-change-in-production@ttpolyglot-db:5432/ttpolyglot
 
 # 服务器配置
 SERVER_HOST=0.0.0.0
@@ -851,11 +886,16 @@ echo "💾 开始备份数据..."
 # 创建备份目录
 mkdir -p $BACKUP_DIR
 
-# 停止服务（可选，确保数据一致性）
-echo "⏸️  暂停服务..."
-docker-compose stop ttpolyglot-server
+# 停止应用服务（保持数据库运行以进行备份）
+echo "⏸️  暂停应用服务..."
+docker-compose stop ttpolyglot-server nginx
 
-# 备份数据库和日志
+# 备份PostgreSQL数据库
+echo "💾 备份数据库..."
+DB_BACKUP_FILE="$BACKUP_DIR/database_$DATE.sql"
+docker-compose exec -T ttpolyglot-db pg_dump -U ${DB_USER:-ttpolyglot} ${DB_NAME:-ttpolyglot} > "$DB_BACKUP_FILE"
+
+# 备份应用数据和配置
 echo "📦 创建备份文件..."
 tar -czf "$BACKUP_DIR/$BACKUP_FILE" \
     data/ \
@@ -865,9 +905,14 @@ tar -czf "$BACKUP_DIR/$BACKUP_FILE" \
     --exclude="logs/nginx/access.log*" \
     --exclude="logs/nginx/error.log*"
 
+# 将数据库备份添加到tar文件
+tar -rf "${BACKUP_DIR}/${BACKUP_FILE%.tar.gz}.tar" "$DB_BACKUP_FILE"
+gzip "${BACKUP_DIR}/${BACKUP_FILE%.tar.gz}.tar"
+rm "$DB_BACKUP_FILE"
+
 # 重启服务
 echo "▶️  重启服务..."
-docker-compose start ttpolyglot-server
+docker-compose start ttpolyglot-server nginx
 
 # 清理旧备份（保留最近10个）
 echo "🧹 清理旧备份..."
@@ -913,12 +958,29 @@ echo "💾 备份当前数据..."
 DATE=$(date +%Y%m%d_%H%M%S)
 tar -czf "./backups/pre_restore_backup_$DATE.tar.gz" data/ logs/ .env nginx/ 2>/dev/null || true
 
-# 恢复数据
-echo "📤 恢复数据..."
+# 恢复应用数据
+echo "📤 恢复应用数据..."
 tar -xzf "$BACKUP_FILE"
 
-# 重启服务
-echo "🚀 重启服务..."
+# 检查是否包含数据库备份文件
+if tar -tzf "$BACKUP_FILE" | grep -q "database_.*\.sql"; then
+    echo "📥 恢复数据库..."
+    # 提取数据库备份文件
+    tar -xzf "$BACKUP_FILE" --wildcards "*/database_*.sql" -O > /tmp/db_restore.sql
+    
+    # 启动数据库服务
+    docker-compose up -d ttpolyglot-db
+    sleep 10  # 等待数据库启动
+    
+    # 恢复数据库
+    docker-compose exec -T ttpolyglot-db psql -U ${DB_USER:-ttpolyglot} -d ${DB_NAME:-ttpolyglot} < /tmp/db_restore.sql
+    rm /tmp/db_restore.sql
+    
+    echo "✅ 数据库恢复完成"
+fi
+
+# 重启所有服务
+echo "🚀 重启所有服务..."
 docker-compose up -d
 
 echo "✅ 数据恢复完成!"
@@ -940,7 +1002,8 @@ ttpolyglot-server/
 │   └── server.dart             # 服务器核心逻辑
 ├── database/
 │   ├── migrations/             # 数据库迁移文件
-│   └── seeds/                  # 初始数据
+│   ├── seeds/                  # 初始数据
+│   └── init/                   # PostgreSQL 初始化脚本
 ├── test/                       # 测试文件
 ├── nginx/
 │   ├── nginx.conf              # Nginx 主配置
@@ -1111,6 +1174,7 @@ docker-compose ps
 
 # 查看日志
 docker-compose logs ttpolyglot-server
+docker-compose logs ttpolyglot-db
 docker-compose logs nginx
 
 # 重启服务
@@ -1118,6 +1182,22 @@ docker-compose restart
 
 # 停止服务
 docker-compose down
+
+# 数据库操作
+# 连接到数据库
+docker-compose exec ttpolyglot-db psql -U ttpolyglot -d ttpolyglot
+
+# 查看数据库状态
+docker-compose exec ttpolyglot-db pg_isready -U ttpolyglot -d ttpolyglot
+
+# 手动备份数据库
+docker-compose exec ttpolyglot-db pg_dump -U ttpolyglot ttpolyglot > backup.sql
+
+# 手动恢复数据库
+docker-compose exec -T ttpolyglot-db psql -U ttpolyglot -d ttpolyglot < backup.sql
+
+# 查看数据库大小
+docker-compose exec ttpolyglot-db psql -U ttpolyglot -d ttpolyglot -c "\l+"
 
 # 数据备份
 ./scripts/backup.sh
@@ -1128,6 +1208,13 @@ docker-compose down
 # 更新服务
 docker-compose pull
 docker-compose up -d --build
+
+# 仅重启应用服务（保持数据库运行）
+docker-compose restart ttpolyglot-server nginx
+
+# 清理未使用的Docker资源
+docker system prune -f
+docker volume prune -f
 ```
 
 ---
