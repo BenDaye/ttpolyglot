@@ -29,31 +29,89 @@ TTPolyglot 是一个多语言翻译管理系统，目前为本地应用。为了
 
 ### 系统架构
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  Flutter Client │───▶│  Nginx Proxy    │───▶│  Dart Server    │───▶│ PostgreSQL DB   │    │  Redis Cache    │
-│                 │    │  (Reverse Proxy)│    │  (Shelf)        │    │   Container     │    │   Container     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘
-                              │                          │                          │                    ▲
-                              ▼                          ▼                          ▼                    │
-                       ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-                       │  Nginx Docker   │    │   App Docker    │    │   DB Docker     │    │ Redis Docker    │
-                       │   Container     │    │   Container     │    │   Container     │    │   Container     │
-                       └─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘
-                              │                          │                          │                    │
-                              └────────────┬─────────────┴──────────────────────────┴────────────────────┘
-                                           ▼
-                                ┌─────────────────┐
-                                │ Docker Network  │
-                                │ ttpolyglot-net  │
-                                └─────────────────┘
+                                           数据流和缓存策略
+                    ┌────────────────────────────────────────────────────────────────┐
+                    │                                                                │
+┌─────────────────┐ │ ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐ │ ┌─────────────────┐
+│  Flutter Client │─┼─│  Nginx Proxy    │───▶│  Dart Server    │───▶│ PostgreSQL DB   │ │ │  Redis Cache    │
+│                 │ │ │  (Reverse Proxy)│    │  (Shelf)        │    │   Container     │ │ │   Container     │
+│  • 用户会话     │ │ │  • 静态文件缓存  │    │  • 业务逻辑     │    │  • 持久化数据   │ │ │  • 会话存储     │
+│  • API 请求     │ │ │  • 请求分发     │    │  • 权限验证     │    │  • 用户数据     │ │ │  • API 响应缓存 │
+│  • 界面展示     │ │ │  • 负载均衡     │    │  • 缓存管理     │    │  • 项目数据     │ │ │  • 热点数据     │
+└─────────────────┘ │ └─────────────────┘    └─────────────────┘    └─────────────────┘ │ │  • JWT Token    │
+         │          │          │                         │                         │    │ │  • 翻译接口配置 │
+         │          │          │                         │                         │    │ └─────────────────┘
+         │          │          │          ┌──────────────┼─────────────────────────┼────┘          ▲
+         │          │          │          │              ▼                         │               │
+         │          │          │          │    ┌─────────────────┐                │               │
+         │          │          │          │    │   缓存策略：    │                │               │
+         │          │          │          │    │                 │                │               │
+         │          │          │          │    │ 1.读取时机：    │                │               │
+         │          │          │          │    │  • 频繁查询API  │                │               │
+         │          │          │          │    │  • 用户会话验证  │               │               │
+         │          │          │          │    │  • 翻译接口配置  │               │               │
+         │          │          │          │    │  • 项目权限检查  │               │               │
+         │          │          │          │    │                 │                │               │
+         │          │          │          │    │ 2.写入时机：    │                │               │
+         │          │          │          │    │  • 用户登录后   │                │               │
+         │          │          │          │    │  • API响应缓存  │                │               │
+         │          │          │          │    │  • 配置更新后   │                │               │
+         │          │          │          │    │  • 热点数据计算  │               │               │
+         │          │          │          │    └─────────────────┘                │               │
+         │          │          │          └──────────────────────────────────────┘               │
+         │          │          │                                                                   │
+         ▼          │          ▼                         ▼                                        │
+┌─────────────────┐ │ ┌─────────────────┐    ┌─────────────────┐                                 │
+│  Nginx Docker   │ │ │   App Docker    │    │   DB Docker     │ ◄──────────────────────────────┘
+│   Container     │ │ │   Container     │    │   Container     │    Redis Docker Container
+└─────────────────┘ │ └─────────────────┘    └─────────────────┘    ┌─────────────────┐
+         │          │          │                         │           │ Redis Docker    │
+         │          │          │                         │           │   Container     │
+         │          │          │                         │           │                 │
+         │          │          │                         │           │ 缓存场景：      │
+         │          │          │                         │           │ • TTL: 1-24小时 │
+         │          │          │                         │           │ • 自动过期清理   │
+         │          │          │                         │           │ • 集群同步支持   │
+         │          │          │                         │           └─────────────────┘
+         │          │          │                         │                    │
+         │          └──────────┼─────────────────────────┼────────────────────┘
+         │                     │                         │
+         └─────────────────────┼─────────────────────────┼──────────────────────────────────┐
+                               ▼                         ▼                                   │
+                    ┌─────────────────────────────────────────────────────────────────────┐ │
+                    │                    Docker Network                                    │ │
+                    │                    ttpolyglot-net                                    │ │
+                    │                                                                     │ │
+                    │ 容器间通信：                                                        │ │
+                    │ • App ↔ DB: 数据持久化操作                                          │ │
+                    │ • App ↔ Redis: 缓存读写操作                                        │ │
+                    │ • Nginx ↔ App: HTTP 请求代理                                       │ │
+                    └─────────────────────────────────────────────────────────────────────┘ │
+                                                     │                                       │
+                                                     └───────────────────────────────────────┘
 ```
 
 **架构说明：**
 - **Nginx 反向代理**: 处理HTTP/HTTPS请求，SSL终止，负载均衡，静态文件服务
-- **Dart 服务器**: 处理API业务逻辑，身份验证，数据处理
-- **PostgreSQL**: 持久化数据存储
-- **Redis 缓存**: 缓存热点数据，会话存储，提升性能
-- **Docker 网络**: 容器间安全通信
+- **Dart 服务器**: 处理API业务逻辑，身份验证，数据处理，缓存策略管理
+- **PostgreSQL**: 持久化数据存储，主数据源
+- **Redis 缓存**: 
+  - **会话存储**: JWT Token，用户登录状态缓存
+  - **API响应缓存**: 频繁查询的数据（如项目列表、用户权限）
+  - **热点数据缓存**: 翻译接口配置、系统配置、语言列表
+  - **临时数据**: 密码重置token、邮件验证码
+  - **使用时机**: 
+    * 读取：每次API权限验证、用户会话检查、频繁查询数据时优先从缓存读取
+    * 写入：用户登录成功、数据更新后、定时任务计算的统计数据
+    * 过期：根据数据性质设置1小时-24小时TTL，自动过期清理
+- **Docker 网络**: 容器间安全通信，支持服务发现和负载均衡
+
+**数据流说明：**
+1. **客户端请求** → Nginx → Dart Server
+2. **权限验证** → Dart Server 首先检查 Redis 中的用户会话
+3. **数据查询** → Dart Server 优先从 Redis 读取缓存，缓存miss时查询 PostgreSQL
+4. **数据更新** → Dart Server 更新 PostgreSQL 后，同步更新或删除 Redis 相关缓存
+5. **响应返回** → 新数据缓存到 Redis（如有必要）→ 返回客户端
 
 ## 数据库设计
 
@@ -826,9 +884,19 @@ RATE_LIMIT_WINDOW_MINUTES=15
 # 缓存配置 (Redis)
 REDIS_URL=redis://ttpolyglot-redis:6379
 REDIS_PASSWORD=your-redis-password-change-in-production
-CACHE_TTL_SECONDS=3600
+
+# 缓存TTL配置 (根据数据类型设置不同过期时间)
+CACHE_SESSION_TTL=86400        # 用户会话缓存：24小时
+CACHE_API_RESPONSE_TTL=3600    # API响应缓存：1小时
+CACHE_CONFIG_TTL=21600         # 系统配置缓存：6小时
+CACHE_PERMISSION_TTL=7200      # 权限数据缓存：2小时
+CACHE_TEMP_DATA_TTL=300        # 临时数据（验证码等）：5分钟
+
+# Redis连接池配置
 REDIS_MAX_CONNECTIONS=10
 REDIS_CONNECTION_TIMEOUT=5
+REDIS_RETRY_ATTEMPTS=3
+REDIS_RETRY_DELAY=1000
 
 # 安全配置
 BCRYPT_ROUNDS=12
@@ -1180,7 +1248,14 @@ ttpolyglot-server/
 - [ ] Docker 多阶段构建优化
 - [ ] Nginx 反向代理配置
 - [ ] SSL/HTTPS 配置
-- [ ] 性能优化和缓存 (Redis集成)
+- [ ] **Redis缓存系统实现**:
+  - [ ] Redis连接池和配置
+  - [ ] 用户会话缓存机制
+  - [ ] API响应缓存中间件
+  - [ ] 权限数据缓存策略
+  - [ ] 系统配置缓存管理
+  - [ ] 缓存失效和更新机制
+  - [ ] 缓存监控和统计
 - [ ] 监控和日志系统
 - [ ] 自动化测试 (单元测试、集成测试)
 - [ ] 部署脚本和备份策略
@@ -1196,10 +1271,42 @@ ttpolyglot-server/
 ## 技术考虑
 
 ### 性能优化
-- 数据库索引优化
-- API 响应缓存
-- 分页查询
-- 连接池管理
+
+#### 数据库优化
+- 数据库索引优化（主键、外键、查询字段）
+- 分页查询（避免大量数据传输）
+- 连接池管理（PostgreSQL连接复用）
+- 查询优化（JOIN优化、N+1查询避免）
+
+#### 缓存策略
+- **多层缓存架构**:
+  ```
+  客户端 → Nginx静态缓存 → Redis缓存 → PostgreSQL数据库
+  ```
+
+- **Redis缓存使用场景**:
+  - **会话管理**: 用户登录状态、JWT Token黑名单
+  - **权限缓存**: 用户角色权限矩阵，避免每次请求查询数据库
+  - **配置缓存**: 系统配置、翻译接口配置等相对静态的数据
+  - **API响应缓存**: GET请求的热点数据（项目列表、语言列表）
+  - **计算结果缓存**: 统计数据、报告生成结果
+  - **临时数据**: 验证码、密码重置token、文件上传临时ID
+
+- **缓存更新策略**:
+  - **Cache-Aside**: 应用层控制缓存读写
+  - **Write-Through**: 数据更新时同步更新缓存
+  - **TTL过期**: 根据数据特性设置合理的过期时间
+  - **手动失效**: 数据变更时主动删除相关缓存
+
+- **缓存键命名规范**:
+  ```
+  user:session:{userId}           # 用户会话
+  user:permissions:{userId}       # 用户权限
+  project:list:{userId}          # 用户项目列表
+  config:system:{key}            # 系统配置
+  api:response:{endpoint}:{hash} # API响应缓存
+  temp:reset_token:{token}       # 临时重置token
+  ```
 
 ### 安全措施
 - SQL 注入防护
@@ -1343,8 +1450,42 @@ docker-compose exec ttpolyglot-redis redis-cli info
 # 查看Redis缓存统计
 docker-compose exec ttpolyglot-redis redis-cli info stats
 
-# 清空Redis缓存
+# 查看Redis内存使用情况
+docker-compose exec ttpolyglot-redis redis-cli info memory
+
+# 查看所有键（谨慎使用，数据多时会很慢）
+docker-compose exec ttpolyglot-redis redis-cli keys "*"
+
+# 查看特定类型的缓存键
+docker-compose exec ttpolyglot-redis redis-cli keys "user:session:*"
+docker-compose exec ttpolyglot-redis redis-cli keys "config:*"
+docker-compose exec ttpolyglot-redis redis-cli keys "api:response:*"
+
+# 查看缓存命中率
+docker-compose exec ttpolyglot-redis redis-cli info stats | grep "keyspace_hits\|keyspace_misses"
+
+# 监控Redis实时命令
+docker-compose exec ttpolyglot-redis redis-cli monitor
+
+# 查看特定key的信息
+docker-compose exec ttpolyglot-redis redis-cli type "user:session:123"
+docker-compose exec ttpolyglot-redis redis-cli ttl "user:session:123"
+docker-compose exec ttpolyglot-redis redis-cli get "config:system:max_upload_size"
+
+# 删除特定缓存
+docker-compose exec ttpolyglot-redis redis-cli del "user:session:123"
+
+# 批量删除缓存
+docker-compose exec ttpolyglot-redis redis-cli eval "return redis.call('del', unpack(redis.call('keys', ARGV[1])))" 0 "user:session:*"
+
+# 查看Redis连接数
+docker-compose exec ttpolyglot-redis redis-cli info clients
+
+# 清空Redis缓存（谨慎使用）
 docker-compose exec ttpolyglot-redis redis-cli flushall
+
+# 仅清空当前数据库（默认db 0）
+docker-compose exec ttpolyglot-redis redis-cli flushdb
 
 # 数据备份
 ./scripts/backup.sh
