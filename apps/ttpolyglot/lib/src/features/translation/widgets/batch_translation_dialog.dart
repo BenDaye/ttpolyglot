@@ -56,12 +56,15 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
   int _currentIndex = 0;
   int _successCount = 0;
   int _failCount = 0;
-  final List<TranslationEntry> _pendingEntries = [];
+  final List<String> _pendingKeys = []; // 按key分组的待翻译键列表
+  final Map<String, List<TranslationEntry>> _keyEntries = {}; // key对应的条目映射
+  final Map<String, TranslationEntry> _keySourceEntries = {}; // key对应的源语言条目
   final List<TranslationEntry> _processedEntries = [];
 
   // 控制相关
   Timer? _translationTimer;
   bool _shouldStop = false;
+  bool _isTranslating = false; // 防止并发翻译
 
   @override
   void dispose() {
@@ -277,9 +280,9 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
   /// 构建进度区域
   Widget _buildProgressSection() {
-    // 修复进度计算：使用实际完成的数量（成功+失败）
-    final completedCount = _successCount + _failCount;
-    final progress = _totalCount > 0 ? (completedCount / _totalCount).clamp(0.0, 1.0) : 0.0;
+    // 按key数量计算进度（已处理的key数量 / 总的key数量）
+    final completedKeyCount = _currentIndex;
+    final progress = _totalCount > 0 ? (completedKeyCount / _totalCount).clamp(0.0, 1.0) : 0.0;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -296,14 +299,14 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '翻译进度',
+                  '翻译进度 (按翻译键)',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     color: Theme.of(context).primaryColor,
                   ),
                 ),
                 Text(
-                  '$completedCount / $_totalCount',
+                  '$completedKeyCount / $_totalCount 个键',
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
                     color: Theme.of(context).primaryColor,
@@ -336,7 +339,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
         // 当前翻译项
         if (_translationStatus == BatchTranslationStatus.running &&
-            _currentIndex < _pendingEntries.length &&
+            _currentIndex < _pendingKeys.length &&
             _currentIndex >= 0)
           _buildCurrentTranslationItem(),
       ],
@@ -401,22 +404,21 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
   /// 构建结果统计
   Widget _buildResultStatistics() {
-    // 修复剩余数量计算：使用实际完成的数量计算剩余
-    final completedCount = _successCount + _failCount;
-    final remainingCount = (_totalCount - completedCount).clamp(0, _totalCount);
+    // 按key级别计算剩余数量
+    final remainingKeyCount = (_totalCount - _currentIndex).clamp(0, _totalCount);
 
     return Row(
       children: [
         Expanded(
-          child: _buildResultCard('成功', _successCount, Colors.green, Icons.check_circle),
+          child: _buildResultCard('成功条目', _successCount, Colors.green, Icons.check_circle),
         ),
         const SizedBox(width: 8.0),
         Expanded(
-          child: _buildResultCard('失败', _failCount, Colors.red, Icons.error),
+          child: _buildResultCard('失败条目', _failCount, Colors.red, Icons.error),
         ),
         const SizedBox(width: 8.0),
         Expanded(
-          child: _buildResultCard('剩余', remainingCount, Colors.blue, Icons.pending),
+          child: _buildResultCard('剩余键', remainingKeyCount, Colors.blue, Icons.pending),
         ),
       ],
     );
@@ -458,11 +460,13 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
   /// 构建当前翻译项
   Widget _buildCurrentTranslationItem() {
     // 安全检查索引边界
-    if (_currentIndex < 0 || _currentIndex >= _pendingEntries.length) {
+    if (_currentIndex < 0 || _currentIndex >= _pendingKeys.length) {
       return const SizedBox.shrink();
     }
 
-    final currentEntry = _pendingEntries[_currentIndex];
+    final currentKey = _pendingKeys[_currentIndex];
+    final currentEntries = _keyEntries[currentKey]!;
+    final sourceEntry = _keySourceEntries[currentKey]!;
 
     return Container(
       padding: const EdgeInsets.all(12.0),
@@ -485,7 +489,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
                   borderRadius: BorderRadius.circular(4.0),
                 ),
                 child: Text(
-                  currentEntry.targetLanguage.code,
+                  '${currentEntries.length} 种语言',
                   style: GoogleFonts.notoSansMono(
                     color: Colors.white,
                     fontSize: 10.0,
@@ -496,7 +500,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
               const SizedBox(width: 8.0),
               Expanded(
                 child: Text(
-                  currentEntry.key,
+                  currentKey,
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
                     color: Theme.of(context).primaryColor,
@@ -507,7 +511,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
           ),
           const SizedBox(height: 8.0),
           Text(
-            currentEntry.sourceText,
+            sourceEntry.targetText,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -907,11 +911,13 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
       entriesByKey.putIfAbsent(entry.key, () => []).add(entry);
     }
 
-    // 获取需要翻译的条目
-    _pendingEntries.clear();
+    // 清空之前的数据
+    _pendingKeys.clear();
+    _keyEntries.clear();
+    _keySourceEntries.clear();
     final sourceLanguageCode = _selectedSourceEntry!.targetLanguage.code;
 
-    // 遍历所有翻译键，翻译整个项目
+    // 遍历所有翻译键，按key分组准备翻译数据
     for (final translationKey in entriesByKey.keys) {
       final keyEntries = entriesByKey[translationKey]!;
 
@@ -923,7 +929,8 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
       // 如果源语言没有对应的翻译，跳过这个key
       if (sourceEntry == null) continue;
 
-      // 翻译其他语言的条目
+      // 获取需要翻译的目标语言条目
+      final targetEntries = <TranslationEntry>[];
       for (final entry in keyEntries) {
         // 跳过源语言本身
         if (entry.targetLanguage.code == sourceLanguageCode) continue;
@@ -931,26 +938,34 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
         // 如果不覆盖且已有翻译，则跳过
         if (!_isOverride && entry.targetText.trim().isNotEmpty) continue;
 
-        _pendingEntries.add(entry.copyWith(
+        targetEntries.add(entry.copyWith(
           sourceText: sourceEntry.targetText,
         ));
       }
+
+      // 如果这个key有需要翻译的目标语言，添加到待处理列表
+      if (targetEntries.isNotEmpty) {
+        _pendingKeys.add(translationKey);
+        _keyEntries[translationKey] = targetEntries;
+        _keySourceEntries[translationKey] = sourceEntry;
+      }
     }
 
-    _totalCount = _pendingEntries.length;
+    _totalCount = _pendingKeys.length; // 总数改为key的数量
     _currentIndex = 0;
     _successCount = 0;
     _failCount = 0;
     _processedEntries.clear();
     _shouldStop = false;
+    _isTranslating = false; // 重置翻译状态
   }
 
   /// 开始翻译流程
   void _startTranslationProcess() {
     _translationTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
-      if (_shouldStop || _currentIndex >= _pendingEntries.length) {
+      if (_shouldStop || _currentIndex >= _pendingKeys.length) {
         timer.cancel();
-        if (_currentIndex >= _pendingEntries.length) {
+        if (_currentIndex >= _pendingKeys.length) {
           setState(() {
             _translationStatus = BatchTranslationStatus.completed;
           });
@@ -959,47 +974,72 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
         return;
       }
 
-      if (_translationStatus == BatchTranslationStatus.running) {
-        _translateNextEntry();
+      // 防止并发翻译：只有当前没有正在进行翻译时才开始新的翻译
+      if (_translationStatus == BatchTranslationStatus.running && !_isTranslating) {
+        _translateNextKey();
       }
     });
   }
 
-  /// 翻译下一个条目
-  Future<void> _translateNextEntry() async {
-    if (_currentIndex >= _pendingEntries.length) return;
+  /// 翻译下一个Key的所有目标语言
+  Future<void> _translateNextKey() async {
+    if (_currentIndex >= _pendingKeys.length || _isTranslating) return;
 
-    final entry = _pendingEntries[_currentIndex];
+    // 设置翻译状态，防止并发
+    _isTranslating = true;
+
+    final translationKey = _pendingKeys[_currentIndex];
+    final targetEntries = _keyEntries[translationKey]!;
+    final sourceEntry = _keySourceEntries[translationKey]!;
 
     try {
       final translationManager = Get.find<TranslationServiceManager>();
 
+      log('开始翻译Key: "$translationKey" (${targetEntries.length}个目标语言)', name: 'BatchTranslationDialog');
+
+      // 按key分组批量翻译，一次性翻译这个key的所有目标语言
       final results = await translationManager.batchTranslateEntries(
-        sourceEntries: _selectedSourceEntry!,
-        entries: [entry],
+        sourceEntries: sourceEntry,
+        entries: targetEntries,
         provider: _selectedProvider!,
       );
 
-      if (results.isNotEmpty && results.first.success) {
-        _successCount++;
-        final result = results.first;
-        final updatedEntry = entry.copyWith(
-          targetText: result.translatedText,
-          status: TranslationStatus.completed,
-          updatedAt: DateTime.now(),
-        );
-        _processedEntries.add(updatedEntry);
+      // 处理翻译结果
+      int keySuccessCount = 0;
+      int keyFailCount = 0;
 
-        // 立即更新到控制器
-        await widget.controller.updateTranslationEntry(updatedEntry, isShowSnackbar: false);
-      } else {
-        _failCount++;
-        final errorMessage = results.isNotEmpty ? results.first.error : '翻译失败';
-        log('翻译失败: ${entry.key} - $errorMessage', name: 'BatchTranslationDialog');
+      for (int i = 0; i < results.length; i++) {
+        final result = results[i];
+        final entry = targetEntries[i];
+
+        if (result.success) {
+          keySuccessCount++;
+          final updatedEntry = entry.copyWith(
+            targetText: result.translatedText,
+            status: TranslationStatus.completed,
+            updatedAt: DateTime.now(),
+          );
+          _processedEntries.add(updatedEntry);
+
+          // 立即更新到控制器
+          await widget.controller.updateTranslationEntry(updatedEntry, isShowSnackbar: false);
+        } else {
+          keyFailCount++;
+          final errorMessage = result.error ?? '翻译失败';
+          log('翻译失败: ${entry.key} (${entry.targetLanguage.code}) - $errorMessage', name: 'BatchTranslationDialog');
+        }
       }
+
+      _successCount += keySuccessCount;
+      _failCount += keyFailCount;
+
+      log('Key "$translationKey" 翻译完成: 成功 $keySuccessCount 个，失败 $keyFailCount 个', name: 'BatchTranslationDialog');
     } catch (error, stackTrace) {
-      _failCount++;
-      log('翻译条目异常', error: error, stackTrace: stackTrace, name: 'BatchTranslationDialog');
+      _failCount += targetEntries.length;
+      log('翻译Key异常', error: error, stackTrace: stackTrace, name: 'BatchTranslationDialog');
+    } finally {
+      // 确保无论成功还是失败都重置翻译状态
+      _isTranslating = false;
     }
 
     setState(() {
@@ -1013,6 +1053,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
       _translationStatus = BatchTranslationStatus.paused;
     });
     _translationTimer?.cancel();
+    _isTranslating = false; // 重置翻译状态
   }
 
   /// 继续翻译
@@ -1027,6 +1068,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
   void _stopTranslation() {
     _shouldStop = true;
     _translationTimer?.cancel();
+    _isTranslating = false; // 重置翻译状态
     setState(() {
       _translationStatus = BatchTranslationStatus.cancelled;
     });
