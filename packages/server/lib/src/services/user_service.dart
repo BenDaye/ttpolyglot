@@ -453,6 +453,48 @@ class UserService {
     await _redisService.deleteUserSession(userId);
   }
 
+  /// 获取用户会话列表
+  Future<List<Map<String, dynamic>>> getUserSessions(String userId) async {
+    try {
+      log('获取用户会话: $userId', name: 'UserService');
+
+      final result = await _databaseService.query('''
+        SELECT
+          id, device_name, device_type, ip_address,
+          user_agent, location_info, last_activity_at,
+          created_at, expires_at, is_active
+        FROM user_sessions
+        WHERE user_id = @user_id AND is_active = true
+        ORDER BY last_activity_at DESC
+      ''', {'user_id': userId});
+
+      return result.map((row) => row.toColumnMap()).toList();
+    } catch (error, stackTrace) {
+      log('获取用户会话失败: $userId', error: error, stackTrace: stackTrace, name: 'UserService');
+      rethrow;
+    }
+  }
+
+  /// 删除用户会话
+  Future<void> deleteUserSession(String userId, String sessionId) async {
+    try {
+      log('删除用户会话: user=$userId, session=$sessionId', name: 'UserService');
+
+      await _databaseService.query('''
+        UPDATE user_sessions
+        SET is_active = false, updated_at = CURRENT_TIMESTAMP
+        WHERE id = @session_id AND user_id = @user_id
+      ''', {'session_id': sessionId, 'user_id': userId});
+
+      await _redisService.deleteUserSession(userId);
+
+      log('用户会话删除成功', name: 'UserService');
+    } catch (error, stackTrace) {
+      log('删除用户会话失败', error: error, stackTrace: stackTrace, name: 'UserService');
+      rethrow;
+    }
+  }
+
   Future<void> _clearUserCache(String userId) async {
     await _redisService.delete('user:details:$userId');
     await _redisService.delete('user:stats');

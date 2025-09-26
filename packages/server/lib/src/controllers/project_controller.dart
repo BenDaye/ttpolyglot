@@ -47,6 +47,9 @@ class ProjectController {
   Future<Response> Function(Request, String) get getProjectLanguages => _getProjectLanguages;
   Future<Response> Function(Request, String) get addProjectLanguage => _addProjectLanguage;
   Future<Response> Function(Request, String, String) get removeProjectLanguage => _removeProjectLanguage;
+  Future<Response> Function(Request, String) get updateLanguageSettings => _updateLanguageSettings;
+  Future<Response> Function(Request, String) get getProjectStatistics => _getProjectStatistics;
+  Future<Response> Function(Request, String) get getProjectActivity => _getProjectActivity;
   Future<Response> Function(Request) get stats => _getProjectStats;
 
   Future<Response> _getProjects(Request request) async {
@@ -384,6 +387,69 @@ class ProjectController {
       log('移除项目语言失败: $id, language: $languageCode', error: error, stackTrace: stackTrace, name: 'ProjectController');
       return ResponseBuilder.errorFromRequest(
           request: request, code: 'REMOVE_PROJECT_LANGUAGE_FAILED', message: '移除项目语言失败', statusCode: 500);
+    }
+  }
+
+  /// 更新语言设置
+  Future<Response> _updateLanguageSettings(Request request, String id) async {
+    try {
+      Validator.validateUuid(id, 'project_id');
+
+      final body = await request.readAsString();
+      final data = jsonDecode(body) as Map<String, dynamic>;
+      final languageCode = data['language_code'] as String?;
+      final settings = data['settings'] as Map<String, dynamic>?;
+
+      if (languageCode == null) {
+        return ResponseBuilder.validationErrorFromRequest(
+            request: request, fieldErrors: [FieldError(field: 'language_code', code: 'REQUIRED', message: '语言代码不能为空')]);
+      }
+
+      await _projectService.updateLanguageSettings(id, languageCode, settings ?? {});
+      return ResponseBuilder.success(message: '语言设置已更新');
+    } catch (error, stackTrace) {
+      log('更新语言设置失败: $id', error: error, stackTrace: stackTrace, name: 'ProjectController');
+      if (error is ValidationException) {
+        return ResponseBuilder.validationErrorFromRequest(request: request, fieldErrors: error.fieldErrors);
+      }
+      return ResponseBuilder.errorFromRequest(
+          request: request, code: 'UPDATE_LANGUAGE_SETTINGS_FAILED', message: '更新语言设置失败', statusCode: 500);
+    }
+  }
+
+  /// 获取项目统计信息
+  Future<Response> _getProjectStatistics(Request request, String id) async {
+    try {
+      Validator.validateUuid(id, 'project_id');
+      final stats = await _projectService.getProjectStatistics(id);
+      return ResponseBuilder.success(message: '获取项目统计信息成功', data: stats);
+    } catch (error, stackTrace) {
+      log('获取项目统计信息失败: $id', error: error, stackTrace: stackTrace, name: 'ProjectController');
+      return ResponseBuilder.errorFromRequest(
+          request: request, code: 'GET_PROJECT_STATISTICS_FAILED', message: '获取项目统计信息失败', statusCode: 500);
+    }
+  }
+
+  /// 获取项目活动日志
+  Future<Response> _getProjectActivity(Request request, String id) async {
+    try {
+      Validator.validateUuid(id, 'project_id');
+      final params = request.url.queryParameters;
+      final page = int.tryParse(params['page'] ?? '1') ?? 1;
+      final limit = int.tryParse(params['limit'] ?? '20') ?? 20;
+
+      final activity = await _projectService.getProjectActivity(id, page: page, limit: limit);
+      return ResponseBuilder.paginated(
+        message: '获取项目活动成功',
+        data: activity,
+        page: page,
+        limit: limit,
+        total: activity.length, // 这里需要从服务层获取总数
+      );
+    } catch (error, stackTrace) {
+      log('获取项目活动失败: $id', error: error, stackTrace: stackTrace, name: 'ProjectController');
+      return ResponseBuilder.errorFromRequest(
+          request: request, code: 'GET_PROJECT_ACTIVITY_FAILED', message: '获取项目活动失败', statusCode: 500);
     }
   }
 }

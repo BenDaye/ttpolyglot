@@ -239,3 +239,13 @@ class PasswordStrength {
   /// 是否通过最低要求
   bool get isAcceptable => level != PasswordStrengthLevel.weak;
 }
+
+/// 令牌哈希方法
+extension TokenHashing on CryptoUtils {
+  /// 生成令牌的SHA256哈希值
+  String hashToken(String token) {
+    final bytes = utf8.encode(token);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+}

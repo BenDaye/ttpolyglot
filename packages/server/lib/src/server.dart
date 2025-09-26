@@ -9,9 +9,7 @@ import 'package:shelf_router/shelf_router.dart';
 import 'config/server_config.dart';
 import 'middleware/middleware.dart';
 import 'routes/api_routes.dart';
-import 'services/database_service.dart';
-import 'services/migration_service.dart';
-import 'services/redis_service.dart';
+import 'services/services.dart';
 
 /// TTPolyglot 服务器主类
 class TTPolyglotServer {
@@ -67,7 +65,6 @@ class TTPolyglotServer {
       _authService = AuthService(
         databaseService: _databaseService,
         redisService: _redisService,
-        permissionService: _permissionService,
         config: _config,
       );
       log('认证服务初始化完成', name: 'TTPolyglotServer');

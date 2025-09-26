@@ -770,4 +770,91 @@ class ProjectService {
       rethrow;
     }
   }
+
+  /// 更新语言设置
+  Future<void> updateLanguageSettings(String projectId, String languageCode, Map<String, dynamic> settings) async {
+    try {
+      log('更新语言设置: project=$projectId, language=$languageCode', name: 'ProjectService');
+
+      await _databaseService.query('''
+        UPDATE project_languages
+        SET settings = @settings, updated_at = CURRENT_TIMESTAMP
+        WHERE project_id = @project_id AND language_code = @language_code
+      ''', {
+        'project_id': projectId,
+        'language_code': languageCode,
+        'settings': settings.toString(),
+      });
+
+      await _clearProjectCache(projectId);
+
+      log('语言设置更新成功', name: 'ProjectService');
+    } catch (error, stackTrace) {
+      log('更新语言设置失败', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      rethrow;
+    }
+  }
+
+  /// 获取项目统计信息
+  Future<Map<String, dynamic>> getProjectStatistics(String projectId) async {
+    try {
+      log('获取项目统计信息: $projectId', name: 'ProjectService');
+
+      // 获取基本统计信息
+      final basicStats = await _databaseService.query('''
+        SELECT
+          COUNT(DISTINCT pl.language_code) as language_count,
+          COUNT(DISTINCT pm.user_id) as member_count,
+          COUNT(te.id) as total_entries,
+          COUNT(te.id) FILTER (WHERE te.status = 'completed') as completed_entries,
+          COUNT(te.id) FILTER (WHERE te.status = 'reviewing') as reviewing_entries,
+          COUNT(te.id) FILTER (WHERE te.status = 'approved') as approved_entries,
+          COALESCE(AVG(te.quality_score), 0) as avg_quality_score
+        FROM projects p
+        LEFT JOIN project_languages pl ON p.id = pl.project_id AND pl.is_enabled = true
+        LEFT JOIN project_members pm ON p.id = pm.project_id AND pm.status = 'active'
+        LEFT JOIN translation_entries te ON p.id = te.project_id
+        WHERE p.id = @project_id
+        GROUP BY p.id
+      ''', {'project_id': projectId});
+
+      return basicStats.isNotEmpty ? basicStats.first.toColumnMap() : {};
+    } catch (error, stackTrace) {
+      log('获取项目统计信息失败: $projectId', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      rethrow;
+    }
+  }
+
+  /// 获取项目活动日志
+  Future<List<Map<String, dynamic>>> getProjectActivity(String projectId, {int page = 1, int limit = 20}) async {
+    try {
+      log('获取项目活动: $projectId, page=$page, limit=$limit', name: 'ProjectService');
+
+      const offset = (page - 1) * limit;
+
+      final activities = await _databaseService.query('''
+        SELECT
+          'translation_updated' as activity_type,
+          te.entry_key,
+          te.language_code,
+          u.username as user_name,
+          te.status,
+          te.updated_at as activity_at
+        FROM translation_entries te
+        JOIN users u ON te.translator_id = u.id OR te.reviewer_id = u.id
+        WHERE te.project_id = @project_id
+        ORDER BY te.updated_at DESC
+        LIMIT @limit OFFSET @offset
+      ''', {
+        'project_id': projectId,
+        'limit': limit,
+        'offset': offset,
+      });
+
+      return activities.map((row) => row.toColumnMap()).toList();
+    } catch (error, stackTrace) {
+      log('获取项目活动失败: $projectId', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      rethrow;
+    }
+  }
 }

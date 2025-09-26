@@ -451,7 +451,7 @@ class AuthService {
       // 这里应该调用邮件服务发送验证邮件
       log('重发验证邮件: $email, token: $tokenHash', name: 'AuthService');
 
-      return AuthResult.success('验证邮件已发送到您的邮箱');
+      return AuthResult.success(message: '验证邮件已发送到您的邮箱');
     } catch (error, stackTrace) {
       log('重发验证邮件失败', error: error, stackTrace: stackTrace, name: 'AuthService');
       return AuthResult.failure('RESEND_VERIFICATION_FAILED', '重发验证邮件失败，请稍后重试');
