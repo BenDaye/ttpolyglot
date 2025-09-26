@@ -49,7 +49,7 @@ class FileUpload {
       entityType: json['entity_type'] as String?,
       entityId: json['entity_id'] as String?,
       uploadedBy: json['uploaded_by'] as String,
-      storageType: json['storage_type'] as String?,
+      storageType: json['storage_type'] as String? ?? 'local',
       metadata: json['metadata'] as Map<String, dynamic>?,
       isPublic: json['is_public'] as bool? ?? false,
       uploadedAt: DateTime.parse(json['uploaded_at'] as String),

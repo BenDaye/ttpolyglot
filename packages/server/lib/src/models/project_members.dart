@@ -1,9 +1,4 @@
-import 'package:json_annotation/json_annotation.dart';
-
-part 'project_members.g.dart';
-
 /// 项目成员模型
-@JsonSerializable()
 class ProjectMember {
   final String id;
   final String projectId;
@@ -37,8 +32,43 @@ class ProjectMember {
     required this.updatedAt,
   });
 
-  factory ProjectMember.fromJson(Map<String, dynamic> json) => _$ProjectMemberFromJson(json);
-  Map<String, dynamic> toJson() => _$ProjectMemberToJson(this);
+  factory ProjectMember.fromJson(Map<String, dynamic> json) {
+    return ProjectMember(
+      id: json['id'] as String,
+      projectId: json['project_id'] as String,
+      userId: json['user_id'] as String,
+      roleId: json['role_id'] as String,
+      status: json['status'] as String? ?? 'pending',
+      invitedBy: json['invited_by'] as String,
+      invitedByEmail: json['invited_by_email'] as String?,
+      expiresAt: json['expires_at'] != null ? DateTime.parse(json['expires_at'] as String) : null,
+      invitedAt: DateTime.parse(json['invited_at'] as String),
+      joinedAt: json['joined_at'] != null ? DateTime.parse(json['joined_at'] as String) : null,
+      lastActivityAt: json['last_activity_at'] != null ? DateTime.parse(json['last_activity_at'] as String) : null,
+      permissions: json['permissions'] as Map<String, dynamic>?,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: DateTime.parse(json['updated_at'] as String),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'project_id': projectId,
+      'user_id': userId,
+      'role_id': roleId,
+      'status': status,
+      'invited_by': invitedBy,
+      'invited_by_email': invitedByEmail,
+      'expires_at': expiresAt?.toIso8601String(),
+      'invited_at': invitedAt.toIso8601String(),
+      'joined_at': joinedAt?.toIso8601String(),
+      'last_activity_at': lastActivityAt?.toIso8601String(),
+      'permissions': permissions,
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
+    };
+  }
 
   factory ProjectMember.fromMap(Map<String, dynamic> map) {
     return ProjectMember(
