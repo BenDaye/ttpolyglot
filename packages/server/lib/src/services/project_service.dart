@@ -627,4 +627,147 @@ class ProjectService {
     await _redisService.delete('project:details:$projectId');
     await _redisService.delete('project:stats');
   }
+
+  /// 归档项目
+  Future<void> archiveProject(String projectId) async {
+    try {
+      log('归档项目: $projectId', name: 'ProjectService');
+
+      await _databaseService.query('''
+        UPDATE projects
+        SET status = 'archived', archived_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+        WHERE id = @project_id
+      ''', {'project_id': projectId});
+
+      await _clearProjectCache(projectId);
+
+      log('项目归档成功: $projectId', name: 'ProjectService');
+    } catch (error, stackTrace) {
+      log('归档项目失败: $projectId', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      rethrow;
+    }
+  }
+
+  /// 恢复项目
+  Future<void> restoreProject(String projectId) async {
+    try {
+      log('恢复项目: $projectId', name: 'ProjectService');
+
+      await _databaseService.query('''
+        UPDATE projects
+        SET status = 'active', archived_at = NULL, updated_at = CURRENT_TIMESTAMP
+        WHERE id = @project_id
+      ''', {'project_id': projectId});
+
+      await _clearProjectCache(projectId);
+
+      log('项目恢复成功: $projectId', name: 'ProjectService');
+    } catch (error, stackTrace) {
+      log('恢复项目失败: $projectId', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      rethrow;
+    }
+  }
+
+  /// 更新项目成员角色
+  Future<void> updateProjectMemberRole(String projectId, String userId, String roleId) async {
+    try {
+      log('更新项目成员角色: project=$projectId, user=$userId, role=$roleId', name: 'ProjectService');
+
+      await _databaseService.query('''
+        UPDATE project_members
+        SET role_id = @role_id, updated_at = CURRENT_TIMESTAMP
+        WHERE project_id = @project_id AND user_id = @user_id
+      ''', {
+        'project_id': projectId,
+        'user_id': userId,
+        'role_id': roleId,
+      });
+
+      await _clearProjectCache(projectId);
+
+      log('项目成员角色更新成功', name: 'ProjectService');
+    } catch (error, stackTrace) {
+      log('更新项目成员角色失败', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      rethrow;
+    }
+  }
+
+  /// 获取项目语言
+  Future<List<Map<String, dynamic>>> getProjectLanguages(String projectId) async {
+    try {
+      log('获取项目语言: $projectId', name: 'ProjectService');
+
+      final result = await _databaseService.query('''
+        SELECT pl.*, l.name, l.native_name, l.direction, l.is_rtl
+        FROM project_languages pl
+        JOIN languages l ON pl.language_code = l.code
+        WHERE pl.project_id = @project_id AND pl.is_enabled = true
+        ORDER BY l.sort_index, l.name
+      ''', {'project_id': projectId});
+
+      return result.map((row) => row.toColumnMap()).toList();
+    } catch (error, stackTrace) {
+      log('获取项目语言失败: $projectId', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      rethrow;
+    }
+  }
+
+  /// 添加项目语言
+  Future<void> addProjectLanguage(String projectId, String languageCode) async {
+    try {
+      log('添加项目语言: project=$projectId, language=$languageCode', name: 'ProjectService');
+
+      // 检查语言是否存在
+      if (!await _isLanguageExists(languageCode)) {
+        throw const BusinessException('LANGUAGE_NOT_FOUND', '语言不存在');
+      }
+
+      // 检查是否已存在
+      final existing = await _databaseService.query('''
+        SELECT 1 FROM project_languages
+        WHERE project_id = @project_id AND language_code = @language_code
+      ''', {'project_id': projectId, 'language_code': languageCode});
+
+      if (existing.isNotEmpty) {
+        throw const BusinessException('LANGUAGE_ALREADY_EXISTS', '语言已存在于项目中');
+      }
+
+      await _databaseService.query('''
+        INSERT INTO project_languages (project_id, language_code, is_enabled)
+        VALUES (@project_id, @language_code, true)
+      ''', {
+        'project_id': projectId,
+        'language_code': languageCode,
+      });
+
+      await _clearProjectCache(projectId);
+
+      log('项目语言添加成功', name: 'ProjectService');
+    } catch (error, stackTrace) {
+      log('添加项目语言失败', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      rethrow;
+    }
+  }
+
+  /// 移除项目语言
+  Future<void> removeProjectLanguage(String projectId, String languageCode) async {
+    try {
+      log('移除项目语言: project=$projectId, language=$languageCode', name: 'ProjectService');
+
+      await _databaseService.query('''
+        DELETE FROM project_languages
+        WHERE project_id = @project_id AND language_code = @language_code
+      ''', {
+        'project_id': projectId,
+        'language_code': languageCode,
+      });
+
+      await _clearProjectCache(projectId);
+
+      log('项目语言移除成功', name: 'ProjectService');
+    } catch (error, stackTrace) {
+      log('移除项目语言失败', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      rethrow;
+    }
+  }
 }

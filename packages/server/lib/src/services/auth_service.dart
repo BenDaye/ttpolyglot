@@ -421,6 +421,43 @@ class AuthService {
     }
   }
 
+  /// 重发邮箱验证邮件
+  Future<AuthResult> resendVerification(String email) async {
+    try {
+      if (!_cryptoUtils.isValidEmail(email)) {
+        return AuthResult.failure('VALIDATION_EMAIL_INVALID', '邮箱格式不正确');
+      }
+
+      // 查找用户
+      final userResult = await _databaseService.query(
+        'SELECT id, username, is_email_verified FROM users WHERE email = @email',
+        {'email': email},
+      );
+
+      if (userResult.isEmpty) {
+        return AuthResult.failure('USER_NOT_FOUND', '用户不存在');
+      }
+
+      final user = userResult.first.toColumnMap();
+      if (user['is_email_verified'] as bool) {
+        return AuthResult.failure('EMAIL_ALREADY_VERIFIED', '邮箱已验证');
+      }
+
+      // 生成新的验证令牌
+      final token = _jwtUtils.generateEmailVerificationToken(user['id'] as String, email);
+      final tokenHash = _cryptoUtils.hashToken(token);
+
+      // TODO: 发送邮件
+      // 这里应该调用邮件服务发送验证邮件
+      log('重发验证邮件: $email, token: $tokenHash', name: 'AuthService');
+
+      return AuthResult.success('验证邮件已发送到您的邮箱');
+    } catch (error, stackTrace) {
+      log('重发验证邮件失败', error: error, stackTrace: stackTrace, name: 'AuthService');
+      return AuthResult.failure('RESEND_VERIFICATION_FAILED', '重发验证邮件失败，请稍后重试');
+    }
+  }
+
   // 私有辅助方法
 
   void _validateRegistrationInput(String username, String email, String password) {

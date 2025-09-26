@@ -281,4 +281,109 @@ class ProjectController {
           request: request, code: 'GET_PROJECT_STATS_FAILED', message: '获取统计信息失败', statusCode: 500);
     }
   }
+
+  /// 归档项目
+  Future<Response> _archiveProject(Request request, String id) async {
+    try {
+      Validator.validateUuid(id, 'project_id');
+      await _projectService.archiveProject(id);
+      return ResponseBuilder.success(message: '项目已归档');
+    } catch (error, stackTrace) {
+      log('归档项目失败: $id', error: error, stackTrace: stackTrace, name: 'ProjectController');
+      return ResponseBuilder.errorFromRequest(
+          request: request, code: 'ARCHIVE_PROJECT_FAILED', message: '归档项目失败', statusCode: 500);
+    }
+  }
+
+  /// 恢复项目
+  Future<Response> _restoreProject(Request request, String id) async {
+    try {
+      Validator.validateUuid(id, 'project_id');
+      await _projectService.restoreProject(id);
+      return ResponseBuilder.success(message: '项目已恢复');
+    } catch (error, stackTrace) {
+      log('恢复项目失败: $id', error: error, stackTrace: stackTrace, name: 'ProjectController');
+      return ResponseBuilder.errorFromRequest(
+          request: request, code: 'RESTORE_PROJECT_FAILED', message: '恢复项目失败', statusCode: 500);
+    }
+  }
+
+  /// 更新项目成员角色
+  Future<Response> _updateMemberRole(Request request, String id, String userId) async {
+    try {
+      Validator.validateUuid(id, 'project_id');
+      Validator.validateUuid(userId, 'user_id');
+
+      final body = await request.readAsString();
+      final data = jsonDecode(body) as Map<String, dynamic>;
+      final roleId = data['role_id'] as String?;
+
+      if (roleId == null) {
+        return ResponseBuilder.validationErrorFromRequest(
+            request: request, fieldErrors: [FieldError(field: 'role_id', code: 'REQUIRED', message: '角色ID不能为空')]);
+      }
+
+      await _projectService.updateProjectMemberRole(id, userId, roleId);
+      return ResponseBuilder.success(message: '成员角色已更新');
+    } catch (error, stackTrace) {
+      log('更新成员角色失败: $id, user: $userId', error: error, stackTrace: stackTrace, name: 'ProjectController');
+      if (error is ValidationException) {
+        return ResponseBuilder.validationErrorFromRequest(request: request, fieldErrors: error.fieldErrors);
+      }
+      return ResponseBuilder.errorFromRequest(
+          request: request, code: 'UPDATE_MEMBER_ROLE_FAILED', message: '更新成员角色失败', statusCode: 500);
+    }
+  }
+
+  /// 获取项目语言
+  Future<Response> _getProjectLanguages(Request request, String id) async {
+    try {
+      Validator.validateUuid(id, 'project_id');
+      final languages = await _projectService.getProjectLanguages(id);
+      return ResponseBuilder.success(message: '获取项目语言成功', data: languages);
+    } catch (error, stackTrace) {
+      log('获取项目语言失败: $id', error: error, stackTrace: stackTrace, name: 'ProjectController');
+      return ResponseBuilder.errorFromRequest(
+          request: request, code: 'GET_PROJECT_LANGUAGES_FAILED', message: '获取项目语言失败', statusCode: 500);
+    }
+  }
+
+  /// 添加项目语言
+  Future<Response> _addProjectLanguage(Request request, String id) async {
+    try {
+      Validator.validateUuid(id, 'project_id');
+
+      final body = await request.readAsString();
+      final data = jsonDecode(body) as Map<String, dynamic>;
+      final languageCode = data['language_code'] as String?;
+
+      if (languageCode == null) {
+        return ResponseBuilder.validationErrorFromRequest(
+            request: request, fieldErrors: [FieldError(field: 'language_code', code: 'REQUIRED', message: '语言代码不能为空')]);
+      }
+
+      await _projectService.addProjectLanguage(id, languageCode);
+      return ResponseBuilder.created(message: '语言已添加到项目');
+    } catch (error, stackTrace) {
+      log('添加项目语言失败: $id', error: error, stackTrace: stackTrace, name: 'ProjectController');
+      if (error is ValidationException) {
+        return ResponseBuilder.validationErrorFromRequest(request: request, fieldErrors: error.fieldErrors);
+      }
+      return ResponseBuilder.errorFromRequest(
+          request: request, code: 'ADD_PROJECT_LANGUAGE_FAILED', message: '添加项目语言失败', statusCode: 500);
+    }
+  }
+
+  /// 移除项目语言
+  Future<Response> _removeProjectLanguage(Request request, String id, String languageCode) async {
+    try {
+      Validator.validateUuid(id, 'project_id');
+      await _projectService.removeProjectLanguage(id, languageCode);
+      return ResponseBuilder.success(message: '语言已从项目中移除');
+    } catch (error, stackTrace) {
+      log('移除项目语言失败: $id, language: $languageCode', error: error, stackTrace: stackTrace, name: 'ProjectController');
+      return ResponseBuilder.errorFromRequest(
+          request: request, code: 'REMOVE_PROJECT_LANGUAGE_FAILED', message: '移除项目语言失败', statusCode: 500);
+    }
+  }
 }

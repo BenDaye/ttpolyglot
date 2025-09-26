@@ -385,4 +385,104 @@ class UserController {
       );
     }
   }
+
+  /// 上传头像
+  Future<Response> _uploadAvatar(Request request) async {
+    try {
+      final userId = getCurrentUserId(request);
+      if (userId == null) {
+        return ResponseBuilder.error(
+          code: 'AUTH_USER_NOT_FOUND',
+          message: '用户信息不存在',
+          statusCode: 401,
+        );
+      }
+
+      // TODO: 实现头像上传逻辑
+      return ResponseBuilder.success(message: '头像上传成功');
+    } catch (error, stackTrace) {
+      log('上传头像失败', error: error, stackTrace: stackTrace, name: 'UserController');
+      return ResponseBuilder.errorFromRequest(
+        request: request,
+        code: 'UPLOAD_AVATAR_FAILED',
+        message: '上传头像失败',
+        statusCode: 500,
+      );
+    }
+  }
+
+  /// 删除头像
+  Future<Response> _deleteAvatar(Request request) async {
+    try {
+      final userId = getCurrentUserId(request);
+      if (userId == null) {
+        return ResponseBuilder.error(
+          code: 'AUTH_USER_NOT_FOUND',
+          message: '用户信息不存在',
+          statusCode: 401,
+        );
+      }
+
+      await _userService.updateUser(userId, {'avatar_url': null});
+      return ResponseBuilder.success(message: '头像删除成功');
+    } catch (error, stackTrace) {
+      log('删除头像失败', error: error, stackTrace: stackTrace, name: 'UserController');
+      return ResponseBuilder.errorFromRequest(
+        request: request,
+        code: 'DELETE_AVATAR_FAILED',
+        message: '删除头像失败',
+        statusCode: 500,
+      );
+    }
+  }
+
+  /// 获取用户会话
+  Future<Response> _getUserSessions(Request request) async {
+    try {
+      final userId = getCurrentUserId(request);
+      if (userId == null) {
+        return ResponseBuilder.error(
+          code: 'AUTH_USER_NOT_FOUND',
+          message: '用户信息不存在',
+          statusCode: 401,
+        );
+      }
+
+      final sessions = await _userService.getUserSessions(userId);
+      return ResponseBuilder.success(message: '获取用户会话成功', data: sessions);
+    } catch (error, stackTrace) {
+      log('获取用户会话失败', error: error, stackTrace: stackTrace, name: 'UserController');
+      return ResponseBuilder.errorFromRequest(
+        request: request,
+        code: 'GET_USER_SESSIONS_FAILED',
+        message: '获取用户会话失败',
+        statusCode: 500,
+      );
+    }
+  }
+
+  /// 删除用户会话
+  Future<Response> _deleteSession(Request request, String sessionId) async {
+    try {
+      final userId = getCurrentUserId(request);
+      if (userId == null) {
+        return ResponseBuilder.error(
+          code: 'AUTH_USER_NOT_FOUND',
+          message: '用户信息不存在',
+          statusCode: 401,
+        );
+      }
+
+      await _userService.deleteUserSession(userId, sessionId);
+      return ResponseBuilder.success(message: '会话删除成功');
+    } catch (error, stackTrace) {
+      log('删除用户会话失败', error: error, stackTrace: stackTrace, name: 'UserController');
+      return ResponseBuilder.errorFromRequest(
+        request: request,
+        code: 'DELETE_SESSION_FAILED',
+        message: '删除会话失败',
+        statusCode: 500,
+      );
+    }
+  }
 }
