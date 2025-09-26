@@ -10,6 +10,7 @@ class ProjectFloatingNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ProjectNavigationController>(
+      init: ProjectNavigationController.getInstance(projectId),
       tag: projectId,
       builder: (controller) {
         return Positioned(
@@ -84,7 +85,10 @@ class ProjectFloatingNavigationCompact extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final projectId = Get.parameters['projectId'] ?? '';
     return GetBuilder<ProjectNavigationController>(
+      init: ProjectNavigationController.getInstance(projectId),
+      tag: projectId,
       builder: (controller) {
         return Positioned(
           right: 16.0,
@@ -173,6 +177,7 @@ class ProjectFloatingNavigationHorizontal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ProjectNavigationController>(
+      init: ProjectNavigationController.getInstance(projectId),
       tag: projectId,
       builder: (controller) {
         return Positioned(

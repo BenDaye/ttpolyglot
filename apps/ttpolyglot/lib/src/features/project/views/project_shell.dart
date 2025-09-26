@@ -19,6 +19,7 @@ class _ProjectShellState extends State<ProjectShell> {
     final isCompact = ResponsiveUtils.shouldShowDrawer(context);
 
     return GetBuilder<ProjectController>(
+      init: ProjectController.getInstance(projectId),
       tag: projectId,
       builder: (controller) {
         return Scaffold(
@@ -42,6 +43,7 @@ class _ProjectShellState extends State<ProjectShell> {
 
                   // 根据当前子页面显示不同内容
                   return GetBuilder<ProjectNavigationController>(
+                    init: ProjectNavigationController.getInstance(projectId),
                     tag: projectId,
                     builder: (navController) {
                       return Obx(() => navController.subPage);
