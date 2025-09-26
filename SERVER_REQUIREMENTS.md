@@ -525,7 +525,7 @@ services:
       timeout: 10s
       retries: 3
 
-  nginx:
+  ttpolyglot-nginx:
     image: nginx:alpine
     ports:
       - "80:80"
