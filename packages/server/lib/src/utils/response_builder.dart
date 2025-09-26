@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:shelf/shelf.dart';
 import 'package:uuid/uuid.dart';
 
+import '../models/api_error.dart';
+
 /// API响应构建器
 class ResponseBuilder {
   static const String _contentTypeJson = 'application/json; charset=utf-8';

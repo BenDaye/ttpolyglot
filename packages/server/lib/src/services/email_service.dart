@@ -106,9 +106,7 @@ class EmailService {
       log('邮件发送成功: $to, 主题: $subject', name: 'EmailService');
 
       // 记录发送报告
-      for (final report in sendReport) {
-        log('发送报告: ${report.mail} -> ${report.recipient} (${report.smtpResponseCode})', name: 'EmailService');
-      }
+      log('邮件发送成功: $to, 主题: $subject', name: 'EmailService');
     } catch (error, stackTrace) {
       log('邮件发送失败: $to', error: error, stackTrace: stackTrace, name: 'EmailService');
       rethrow;
