@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import '../middleware/error_handler_middleware.dart';
+import '../models/api_error.dart';
 
 /// 数据验证工具类
 class Validator {
@@ -191,7 +191,7 @@ class Validator {
   }) {
     if (value == null) {
       if (required) {
-        throw ValidationException([
+        throw ValidationException(code: 'VALIDATION_FAILED', message: '输入验证失败', fieldErrors: [
           FieldError(
             field: fieldName,
             code: 'VALIDATION_REQUIRED',
@@ -238,7 +238,7 @@ class Validator {
   }) {
     if (value == null) {
       if (required) {
-        throw ValidationException([
+        throw ValidationException(code: 'VALIDATION_FAILED', message: '输入验证失败', fieldErrors: [
           FieldError(
             field: fieldName,
             code: 'VALIDATION_REQUIRED',
@@ -312,7 +312,7 @@ class Validator {
   }) {
     if (value == null) {
       if (required) {
-        throw ValidationException([
+        throw ValidationException(code: 'VALIDATION_FAILED', message: '输入验证失败', fieldErrors: [
           FieldError(
             field: fieldName,
             code: 'VALIDATION_REQUIRED',
@@ -391,7 +391,7 @@ class Validator {
   }) {
     if (value == null) {
       if (required) {
-        throw ValidationException([
+        throw ValidationException(code: 'VALIDATION_FAILED', message: '输入验证失败', fieldErrors: [
           FieldError(
             field: fieldName,
             code: 'VALIDATION_REQUIRED',
@@ -426,7 +426,7 @@ class Validator {
   }) {
     if (value == null) {
       if (required) {
-        throw ValidationException([
+        throw ValidationException(code: 'VALIDATION_FAILED', message: '输入验证失败', fieldErrors: [
           FieldError(
             field: fieldName,
             code: 'VALIDATION_REQUIRED',
