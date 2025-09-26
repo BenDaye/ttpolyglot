@@ -3,6 +3,8 @@ import 'dart:developer';
 
 import 'package:shelf/shelf.dart';
 
+import '../models/api_error.dart';
+
 /// 错误处理中间件
 class ErrorHandlerMiddleware {
   /// 创建中间件处理器
@@ -138,23 +140,6 @@ class ValidationException implements Exception {
 }
 
 /// 字段错误
-class FieldError {
-  final String field;
-  final String code;
-  final String message;
-
-  const FieldError({
-    required this.field,
-    required this.code,
-    required this.message,
-  });
-
-  Map<String, dynamic> toJson() => {
-        'field': field,
-        'code': code,
-        'message': message,
-      };
-}
 
 /// 认证异常
 class AuthenticationException implements Exception {

@@ -63,7 +63,11 @@ class Validator {
     }
 
     if (errors.isNotEmpty) {
-      throw ValidationException(errors);
+      throw ValidationException(
+        code: 'VALIDATION_FAILED',
+        message: '输入验证失败',
+        fieldErrors: errors,
+      );
     }
 
     return value as String;
@@ -95,7 +99,11 @@ class Validator {
           return error;
         }).toList();
 
-        throw ValidationException(emailErrors);
+        throw ValidationException(
+          code: 'VALIDATION_FAILED',
+          message: '输入验证失败',
+          fieldErrors: emailErrors,
+        );
       }
       rethrow;
     }
@@ -118,7 +126,11 @@ class Validator {
           code: 'VALIDATION_REQUIRED',
           message: '$fieldName是必填项',
         ));
-        throw ValidationException(errors);
+        throw ValidationException(
+          code: 'VALIDATION_FAILED',
+          message: '输入验证失败',
+          fieldErrors: errors,
+        );
       } else {
         return 0;
       }
@@ -160,7 +172,11 @@ class Validator {
     }
 
     if (errors.isNotEmpty) {
-      throw ValidationException(errors);
+      throw ValidationException(
+        code: 'VALIDATION_FAILED',
+        message: '输入验证失败',
+        fieldErrors: errors,
+      );
     }
 
     return intValue!;
@@ -453,7 +469,11 @@ class Validator {
     }
 
     if (errors.isNotEmpty) {
-      throw ValidationException(errors);
+      throw ValidationException(
+        code: 'VALIDATION_FAILED',
+        message: '输入验证失败',
+        fieldErrors: errors,
+      );
     }
 
     try {
