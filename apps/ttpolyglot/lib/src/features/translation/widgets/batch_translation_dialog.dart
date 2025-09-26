@@ -261,7 +261,9 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
   /// 构建进度区域
   Widget _buildProgressSection() {
-    final progress = _totalCount > 0 ? _currentIndex / _totalCount : 0.0;
+    // 修复进度计算：使用实际完成的数量（成功+失败）
+    final completedCount = _successCount + _failCount;
+    final progress = _totalCount > 0 ? (completedCount / _totalCount).clamp(0.0, 1.0) : 0.0;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -285,7 +287,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
                   ),
                 ),
                 Text(
-                  '$_currentIndex / $_totalCount',
+                  '$completedCount / $_totalCount',
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
                     color: Theme.of(context).primaryColor,
@@ -317,7 +319,9 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
         const SizedBox(height: 16.0),
 
         // 当前翻译项
-        if (_translationStatus == BatchTranslationStatus.running && _currentIndex < _pendingEntries.length)
+        if (_translationStatus == BatchTranslationStatus.running &&
+            _currentIndex < _pendingEntries.length &&
+            _currentIndex >= 0)
           _buildCurrentTranslationItem(),
       ],
     );
@@ -381,6 +385,10 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
   /// 构建结果统计
   Widget _buildResultStatistics() {
+    // 修复剩余数量计算：使用实际完成的数量计算剩余
+    final completedCount = _successCount + _failCount;
+    final remainingCount = (_totalCount - completedCount).clamp(0, _totalCount);
+
     return Row(
       children: [
         Expanded(
@@ -392,7 +400,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
         ),
         const SizedBox(width: 8.0),
         Expanded(
-          child: _buildResultCard('剩余', _totalCount - _currentIndex, Colors.blue, Icons.pending),
+          child: _buildResultCard('剩余', remainingCount, Colors.blue, Icons.pending),
         ),
       ],
     );
@@ -433,6 +441,11 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
   /// 构建当前翻译项
   Widget _buildCurrentTranslationItem() {
+    // 安全检查索引边界
+    if (_currentIndex < 0 || _currentIndex >= _pendingEntries.length) {
+      return const SizedBox.shrink();
+    }
+
     final currentEntry = _pendingEntries[_currentIndex];
 
     return Container(
