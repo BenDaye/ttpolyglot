@@ -21,7 +21,7 @@ TTPolyglot 是一个多语言翻译管理系统，目前为本地应用。为了
 - **数据库**: PostgreSQL (容器化部署)
 - **ORM**: Drift (原 Moor) - Dart 的类型安全数据库层
 - **身份验证**: JWT (JSON Web Tokens)
-- **缓存**: Redis (可选，用于会话和API响应缓存)
+- **缓存**: Redis (用于会话、API响应和热点数据缓存)
 - **容器化**: Docker + Docker Compose
 - **监控**: 健康检查端点，系统指标收集
 - **日志**: 结构化日志记录和分析
@@ -29,18 +29,18 @@ TTPolyglot 是一个多语言翻译管理系统，目前为本地应用。为了
 
 ### 系统架构
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  Flutter Client │───▶│  Nginx Proxy    │───▶│  Dart Server    │───▶│ PostgreSQL DB   │
-│                 │    │  (Reverse Proxy)│    │  (Shelf)        │    │   Container     │
-└─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘
-                              │                          │                          │
-                              ▼                          ▼                          ▼
-                       ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-                       │  Nginx Docker   │    │   App Docker    │    │   DB Docker     │
-                       │   Container     │    │   Container     │    │   Container     │
-                       └─────────────────┘    └─────────────────┘    └─────────────────┘
-                              │                          │                          │
-                              └────────────┬─────────────┴──────────────────────────┘
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  Flutter Client │───▶│  Nginx Proxy    │───▶│  Dart Server    │───▶│ PostgreSQL DB   │    │  Redis Cache    │
+│                 │    │  (Reverse Proxy)│    │  (Shelf)        │    │   Container     │    │   Container     │
+└─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘
+                              │                          │                          │                    ▲
+                              ▼                          ▼                          ▼                    │
+                       ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+                       │  Nginx Docker   │    │   App Docker    │    │   DB Docker     │    │ Redis Docker    │
+                       │   Container     │    │   Container     │    │   Container     │    │   Container     │
+                       └─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘
+                              │                          │                          │                    │
+                              └────────────┬─────────────┴──────────────────────────┴────────────────────┘
                                            ▼
                                 ┌─────────────────┐
                                 │ Docker Network  │
@@ -52,6 +52,7 @@ TTPolyglot 是一个多语言翻译管理系统，目前为本地应用。为了
 - **Nginx 反向代理**: 处理HTTP/HTTPS请求，SSL终止，负载均衡，静态文件服务
 - **Dart 服务器**: 处理API业务逻辑，身份验证，数据处理
 - **PostgreSQL**: 持久化数据存储
+- **Redis 缓存**: 缓存热点数据，会话存储，提升性能
 - **Docker 网络**: 容器间安全通信
 
 ## 数据库设计
@@ -506,6 +507,8 @@ networks:
 volumes:
   postgres_data:
     driver: local
+  redis_data:
+    driver: local
 
 services:
   ttpolyglot-db:
@@ -528,10 +531,36 @@ services:
       timeout: 10s
       retries: 5
 
+  ttpolyglot-redis:
+    image: redis:7-alpine
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    volumes:
+      - redis_data:/data
+      - ./logs/redis:/var/log/redis
+    networks:
+      - ttpolyglot-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    command: >
+      sh -c "
+        if [ -n \"$$REDIS_PASSWORD\" ]; then
+          redis-server --requirepass $$REDIS_PASSWORD --appendonly yes --dir /data
+        else
+          redis-server --appendonly yes --dir /data
+        fi
+      "
+
   ttpolyglot-server:
     build: .
     environment:
       - DATABASE_URL=postgresql://${DB_USER:-ttpolyglot}:${DB_PASSWORD}@ttpolyglot-db:5432/${DB_NAME:-ttpolyglot}
+      - REDIS_URL=redis://ttpolyglot-redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - JWT_SECRET=${JWT_SECRET}
       - LOG_LEVEL=info
       - SERVER_HOST=0.0.0.0
@@ -544,6 +573,8 @@ services:
     restart: unless-stopped
     depends_on:
       ttpolyglot-db:
+        condition: service_healthy
+      ttpolyglot-redis:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
@@ -792,10 +823,12 @@ MAX_REQUEST_SIZE=10MB
 RATE_LIMIT_REQUESTS=1000
 RATE_LIMIT_WINDOW_MINUTES=15
 
-# 缓存配置 (可选，如果使用Redis)
-REDIS_URL=redis://localhost:6379
-REDIS_PASSWORD=
+# 缓存配置 (Redis)
+REDIS_URL=redis://ttpolyglot-redis:6379
+REDIS_PASSWORD=your-redis-password-change-in-production
 CACHE_TTL_SECONDS=3600
+REDIS_MAX_CONNECTIONS=10
+REDIS_CONNECTION_TIMEOUT=5
 
 # 安全配置
 BCRYPT_ROUNDS=12
@@ -843,7 +876,7 @@ fi
 
 # 创建必要的目录
 echo "📁 创建目录结构..."
-mkdir -p data logs logs/nginx ssl nginx/conf.d
+mkdir -p data logs logs/nginx logs/redis ssl nginx/conf.d
 
 # 检查 Docker 和 Docker Compose
 if ! command -v docker &> /dev/null; then
@@ -944,7 +977,7 @@ echo "💾 开始备份数据..."
 # 创建备份目录
 mkdir -p $BACKUP_DIR
 
-# 停止应用服务（保持数据库运行以进行备份）
+# 停止应用服务（保持数据库和Redis运行以进行备份）
 echo "⏸️  暂停应用服务..."
 docker-compose stop ttpolyglot-server nginx
 
@@ -952,6 +985,12 @@ docker-compose stop ttpolyglot-server nginx
 echo "💾 备份数据库..."
 DB_BACKUP_FILE="$BACKUP_DIR/database_$DATE.sql"
 docker-compose exec -T ttpolyglot-db pg_dump -U ${DB_USER:-ttpolyglot} ${DB_NAME:-ttpolyglot} > "$DB_BACKUP_FILE"
+
+# 备份Redis数据
+echo "💾 备份Redis缓存..."
+REDIS_BACKUP_FILE="$BACKUP_DIR/redis_$DATE.rdb"
+docker-compose exec ttpolyglot-redis redis-cli save
+docker cp $(docker-compose ps -q ttpolyglot-redis):/data/dump.rdb "$REDIS_BACKUP_FILE"
 
 # 备份应用数据和配置
 echo "📦 创建备份文件..."
@@ -963,10 +1002,10 @@ tar -czf "$BACKUP_DIR/$BACKUP_FILE" \
     --exclude="logs/nginx/access.log*" \
     --exclude="logs/nginx/error.log*"
 
-# 将数据库备份添加到tar文件
-tar -rf "${BACKUP_DIR}/${BACKUP_FILE%.tar.gz}.tar" "$DB_BACKUP_FILE"
+# 将数据库和Redis备份添加到tar文件
+tar -rf "${BACKUP_DIR}/${BACKUP_FILE%.tar.gz}.tar" "$DB_BACKUP_FILE" "$REDIS_BACKUP_FILE"
 gzip "${BACKUP_DIR}/${BACKUP_FILE%.tar.gz}.tar"
-rm "$DB_BACKUP_FILE"
+rm "$DB_BACKUP_FILE" "$REDIS_BACKUP_FILE"
 
 # 重启服务
 echo "▶️  重启服务..."
@@ -1037,6 +1076,29 @@ if tar -tzf "$BACKUP_FILE" | grep -q "database_.*\.sql"; then
     echo "✅ 数据库恢复完成"
 fi
 
+# 检查是否包含Redis备份文件
+if tar -tzf "$BACKUP_FILE" | grep -q "redis_.*\.rdb"; then
+    echo "📥 恢复Redis缓存..."
+    # 提取Redis备份文件
+    tar -xzf "$BACKUP_FILE" --wildcards "*/redis_*.rdb" -O > /tmp/redis_restore.rdb
+    
+    # 启动Redis服务
+    docker-compose up -d ttpolyglot-redis
+    sleep 5  # 等待Redis启动
+    
+    # 停止Redis以恢复数据
+    docker-compose stop ttpolyglot-redis
+    
+    # 复制备份文件到Redis数据目录
+    docker cp /tmp/redis_restore.rdb $(docker-compose ps -q ttpolyglot-redis):/data/dump.rdb
+    
+    # 重启Redis
+    docker-compose start ttpolyglot-redis
+    rm /tmp/redis_restore.rdb
+    
+    echo "✅ Redis缓存恢复完成"
+fi
+
 # 重启所有服务
 echo "🚀 重启所有服务..."
 docker-compose up -d
@@ -1073,7 +1135,8 @@ ttpolyglot-server/
 │   └── restore.sh              # 恢复脚本
 ├── data/                       # 数据文件 (运行时创建)
 ├── logs/                       # 日志文件 (运行时创建)
-│   └── nginx/                  # Nginx 日志
+│   ├── nginx/                  # Nginx 日志
+│   └── redis/                  # Redis 日志
 ├── ssl/                        # SSL 证书
 ├── Dockerfile                  # Docker 构建文件
 ├── docker-compose.yml          # Docker Compose 配置
@@ -1242,6 +1305,7 @@ docker-compose ps
 # 查看日志
 docker-compose logs ttpolyglot-server
 docker-compose logs ttpolyglot-db
+docker-compose logs ttpolyglot-redis
 docker-compose logs nginx
 
 # 重启服务
@@ -1265,6 +1329,22 @@ docker-compose exec -T ttpolyglot-db psql -U ttpolyglot -d ttpolyglot < backup.s
 
 # 查看数据库大小
 docker-compose exec ttpolyglot-db psql -U ttpolyglot -d ttpolyglot -c "\l+"
+
+# Redis 操作
+# 连接到Redis
+docker-compose exec ttpolyglot-redis redis-cli
+
+# 如果Redis有密码，使用AUTH命令
+# docker-compose exec ttpolyglot-redis redis-cli -a your-redis-password
+
+# 查看Redis信息
+docker-compose exec ttpolyglot-redis redis-cli info
+
+# 查看Redis缓存统计
+docker-compose exec ttpolyglot-redis redis-cli info stats
+
+# 清空Redis缓存
+docker-compose exec ttpolyglot-redis redis-cli flushall
 
 # 数据备份
 ./scripts/backup.sh
