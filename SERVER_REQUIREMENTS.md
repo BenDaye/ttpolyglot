@@ -21,7 +21,10 @@ TTPolyglot 是一个多语言翻译管理系统，目前为本地应用。为了
 - **数据库**: PostgreSQL (容器化部署)
 - **ORM**: Drift (原 Moor) - Dart 的类型安全数据库层
 - **身份验证**: JWT (JSON Web Tokens)
+- **缓存**: Redis (可选，用于会话和API响应缓存)
 - **容器化**: Docker + Docker Compose
+- **监控**: 健康检查端点，系统指标收集
+- **日志**: 结构化日志记录和分析
 - **API 文档**: OpenAPI 3.0 (Swagger)
 
 ### 系统架构
@@ -351,88 +354,104 @@ CREATE TABLE system_configs (
 
 ## API 设计
 
+### API版本控制
+所有API端点都使用版本前缀 `/api/v1/`，例如：
+- `/api/v1/auth/login`
+- `/api/v1/projects`
+- `/api/v1/users/me`
+
 ### 身份验证
 ```
-POST /auth/login
-POST /auth/logout
-POST /auth/refresh
-POST /auth/register
-POST /auth/forgot-password
-POST /auth/reset-password
+POST /api/v1/auth/login
+POST /api/v1/auth/logout
+POST /api/v1/auth/refresh
+POST /api/v1/auth/register
+POST /api/v1/auth/forgot-password
+POST /api/v1/auth/reset-password
 ```
 
 ### 用户管理
 ```
-GET    /users              # 获取用户列表
-GET    /users/{id}         # 获取用户详情
-PUT    /users/{id}         # 更新用户信息
-DELETE /users/{id}         # 删除用户
-GET    /users/me           # 获取当前用户信息
-PUT    /users/me           # 更新当前用户信息
+GET    /api/v1/users              # 获取用户列表
+GET    /api/v1/users/{id}         # 获取用户详情
+PUT    /api/v1/users/{id}         # 更新用户信息
+DELETE /api/v1/users/{id}         # 删除用户
+GET    /api/v1/users/me           # 获取当前用户信息
+PUT    /api/v1/users/me           # 更新当前用户信息
 ```
 
 ### 项目管理
 ```
-GET    /projects           # 获取项目列表
-POST   /projects           # 创建项目
-GET    /projects/{id}      # 获取项目详情
-PUT    /projects/{id}      # 更新项目
-DELETE /projects/{id}      # 删除项目
-GET    /projects/{id}/members    # 获取项目成员
-POST   /projects/{id}/members    # 添加项目成员
-DELETE /projects/{id}/members/{userId}  # 移除项目成员
+GET    /api/v1/projects           # 获取项目列表
+POST   /api/v1/projects           # 创建项目
+GET    /api/v1/projects/{id}      # 获取项目详情
+PUT    /api/v1/projects/{id}      # 更新项目
+DELETE /api/v1/projects/{id}      # 删除项目
+GET    /api/v1/projects/{id}/members    # 获取项目成员
+POST   /api/v1/projects/{id}/members    # 添加项目成员
+DELETE /api/v1/projects/{id}/members/{userId}  # 移除项目成员
 ```
 
 ### 翻译管理
 ```
-GET    /projects/{id}/translations           # 获取翻译条目
-POST   /projects/{id}/translations           # 创建翻译条目
-GET    /projects/{id}/translations/{entryId} # 获取翻译条目详情
-PUT    /projects/{id}/translations/{entryId} # 更新翻译条目
-DELETE /projects/{id}/translations/{entryId} # 删除翻译条目
-POST   /projects/{id}/translations/batch     # 批量操作
-GET    /projects/{id}/translations/{entryId}/history  # 获取翻译历史
+GET    /api/v1/projects/{id}/translations           # 获取翻译条目
+POST   /api/v1/projects/{id}/translations           # 创建翻译条目
+GET    /api/v1/projects/{id}/translations/{entryId} # 获取翻译条目详情
+PUT    /api/v1/projects/{id}/translations/{entryId} # 更新翻译条目
+DELETE /api/v1/projects/{id}/translations/{entryId} # 删除翻译条目
+POST   /api/v1/projects/{id}/translations/batch     # 批量操作
+GET    /api/v1/projects/{id}/translations/{entryId}/history  # 获取翻译历史
 ```
 
 ### 语言管理
 ```
-GET    /languages          # 获取支持的语言列表
-POST   /languages          # 添加语言
-PUT    /languages/{code}   # 更新语言信息
+GET    /api/v1/languages          # 获取支持的语言列表
+POST   /api/v1/languages          # 添加语言
+PUT    /api/v1/languages/{code}   # 更新语言信息
 ```
 
 ### 角色权限管理
 ```
-GET    /roles              # 获取角色列表
-POST   /roles              # 创建角色
-PUT    /roles/{id}         # 更新角色
-DELETE /roles/{id}         # 删除角色
-GET    /permissions        # 获取权限列表
+GET    /api/v1/roles              # 获取角色列表
+POST   /api/v1/roles              # 创建角色
+PUT    /api/v1/roles/{id}         # 更新角色
+DELETE /api/v1/roles/{id}         # 删除角色
+GET    /api/v1/permissions        # 获取权限列表
 ```
 
 ### 翻译接口配置管理
 ```
-GET    /users/me/translation-providers           # 获取当前用户的翻译接口配置列表
-POST   /users/me/translation-providers           # 创建翻译接口配置
-GET    /users/me/translation-providers/{id}      # 获取翻译接口配置详情
-PUT    /users/me/translation-providers/{id}      # 更新翻译接口配置
-DELETE /users/me/translation-providers/{id}      # 删除翻译接口配置
-POST   /users/me/translation-providers/{id}/test # 测试翻译接口配置
-PUT    /users/me/translation-providers/{id}/default  # 设置为默认接口
-GET    /users/me/translation-providers/types     # 获取支持的翻译接口类型
+GET    /api/v1/users/me/translation-providers           # 获取当前用户的翻译接口配置列表
+POST   /api/v1/users/me/translation-providers           # 创建翻译接口配置
+GET    /api/v1/users/me/translation-providers/{id}      # 获取翻译接口配置详情
+PUT    /api/v1/users/me/translation-providers/{id}      # 更新翻译接口配置
+DELETE /api/v1/users/me/translation-providers/{id}      # 删除翻译接口配置
+POST   /api/v1/users/me/translation-providers/{id}/test # 测试翻译接口配置
+PUT    /api/v1/users/me/translation-providers/{id}/default  # 设置为默认接口
+GET    /api/v1/translation-providers/types              # 获取支持的翻译接口类型 (公共端点)
 ```
 
 ### 系统配置管理
 ```
-GET    /configs              # 获取系统配置列表 (按分类)
-GET    /configs/public       # 获取公开配置 (前端可访问)
-GET    /configs/{key}        # 获取特定配置项
-PUT    /configs/{key}        # 更新配置项
-POST   /configs              # 创建新配置项
-DELETE /configs/{key}        # 删除配置项
-GET    /configs/categories   # 获取配置分类列表
-POST   /configs/batch        # 批量更新配置
-POST   /configs/reset/{key}  # 重置配置为默认值
+GET    /api/v1/configs              # 获取系统配置列表 (按分类)
+GET    /api/v1/configs/public       # 获取公开配置 (前端可访问)
+GET    /api/v1/configs/{key}        # 获取特定配置项
+PUT    /api/v1/configs/{key}        # 更新配置项
+POST   /api/v1/configs              # 创建新配置项
+DELETE /api/v1/configs/{key}        # 删除配置项
+GET    /api/v1/configs/categories   # 获取配置分类列表
+POST   /api/v1/configs/batch        # 批量更新配置
+POST   /api/v1/configs/reset/{key}  # 重置配置为默认值
+```
+
+### 系统监控和健康检查
+```
+GET    /health               # 健康检查端点 (无版本前缀)
+GET    /health/db           # 数据库连接检查 (无版本前缀)
+GET    /health/ready        # 服务就绪检查 (无版本前缀)
+GET    /metrics             # 系统指标 (Prometheus格式，无版本前缀)
+GET    /api/v1/status       # 系统状态信息
+GET    /api/v1/version      # 服务版本信息
 ```
 
 ## 权限设计
@@ -468,7 +487,7 @@ COPY . .
 RUN dart compile exe bin/server.dart -o bin/server
 
 FROM debian:bullseye-slim
-RUN apt-get update && apt-get install -y sqlite3 ca-certificates
+RUN apt-get update && apt-get install -y ca-certificates curl
 COPY --from=build /app/bin/server /app/server
 COPY --from=build /app/database/ /app/database/
 
@@ -652,6 +671,9 @@ server {
         proxy_connect_timeout 60s;
         proxy_send_timeout 60s;
         proxy_read_timeout 60s;
+        
+        # API版本控制支持
+        add_header X-API-Version "v1" always;
     }
 
     # 健康检查端点
@@ -723,6 +745,9 @@ server {
         proxy_connect_timeout 60s;
         proxy_send_timeout 60s;
         proxy_read_timeout 60s;
+        
+        # API版本控制支持
+        add_header X-API-Version "v1" always;
     }
 
     # 健康检查端点
@@ -744,23 +769,49 @@ DB_NAME=ttpolyglot
 DB_USER=ttpolyglot
 DB_PASSWORD=your-secure-password-change-in-production
 DATABASE_URL=postgresql://ttpolyglot:your-secure-password-change-in-production@ttpolyglot-db:5432/ttpolyglot
+DB_POOL_SIZE=20
+DB_CONNECTION_TIMEOUT=30
 
 # 服务器配置
 SERVER_HOST=0.0.0.0
 SERVER_PORT=8080
 LOG_LEVEL=info
+REQUEST_TIMEOUT=30
 
 # JWT 配置
 JWT_SECRET=your-super-secret-jwt-key-change-in-production
 JWT_EXPIRE_HOURS=24
+JWT_REFRESH_EXPIRE_DAYS=7
 
 # CORS 配置
 CORS_ORIGINS=http://localhost:3000,https://your-domain.com
+CORS_ALLOW_CREDENTIALS=true
 
 # 请求限制
 MAX_REQUEST_SIZE=10MB
 RATE_LIMIT_REQUESTS=1000
 RATE_LIMIT_WINDOW_MINUTES=15
+
+# 缓存配置 (可选，如果使用Redis)
+REDIS_URL=redis://localhost:6379
+REDIS_PASSWORD=
+CACHE_TTL_SECONDS=3600
+
+# 安全配置
+BCRYPT_ROUNDS=12
+SESSION_SECRET=your-session-secret-change-in-production
+
+# 监控配置
+HEALTH_CHECK_ENABLED=true
+METRICS_ENABLED=true
+METRICS_PORT=9090
+
+# 邮件配置 (可选)
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASSWORD=
+SMTP_FROM_ADDRESS=noreply@your-domain.com
 
 # Nginx 配置
 NGINX_DOMAIN=your-domain.com
@@ -1041,6 +1092,8 @@ ttpolyglot-server/
 - [ ] 基础 HTTP 服务器搭建
 - [ ] JWT 身份验证实现
 - [ ] 基础中间件 (CORS, 日志, 错误处理)
+- [ ] 健康检查和监控端点
+- [ ] 容器化配置 (Docker, docker-compose)
 
 ### Phase 2: 核心功能 (3-4 周)
 - [ ] 用户注册登录系统
@@ -1056,16 +1109,20 @@ ttpolyglot-server/
 - [ ] 批量操作 API
 - [ ] 项目成员管理
 - [ ] 权限细粒度控制
-- [ ] API 文档生成
+- [ ] API 文档生成 (OpenAPI/Swagger)
+- [ ] 数据导入导出功能
+- [ ] 邮件通知系统 (可选)
 
 ### Phase 4: 部署和优化 (1-2 周)
 - [ ] Docker 多阶段构建优化
 - [ ] Nginx 反向代理配置
 - [ ] SSL/HTTPS 配置
-- [ ] 性能优化和缓存
+- [ ] 性能优化和缓存 (Redis集成)
 - [ ] 监控和日志系统
-- [ ] 自动化测试
+- [ ] 自动化测试 (单元测试、集成测试)
 - [ ] 部署脚本和备份策略
+- [ ] 安全配置强化
+- [ ] 负载测试和性能调优
 
 ### Phase 5: 客户端集成 (2-3 周)
 - [ ] Flutter 客户端 API 集成
@@ -1148,6 +1205,9 @@ ttpolyglot-server/
    ```bash
    # 检查服务状态
    curl http://localhost/health
+   
+   # 测试API端点
+   curl http://localhost/api/v1/version
    
    # 查看日志
    docker-compose logs -f
