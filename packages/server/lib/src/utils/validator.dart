@@ -435,13 +435,17 @@ class Validator {
       return value;
     }
 
-    throw ValidationException(code: 'VALIDATION_FAILED', message: '输入验证失败', fieldErrors: [
-      FieldError(
-        field: fieldName,
-        code: 'VALIDATION_TYPE_INVALID',
-        message: '$fieldName必须是JSON对象',
-      ),
-    ]);
+    throw ValidationException(
+      code: 'VALIDATION_FAILED',
+      message: '输入验证失败',
+      fieldErrors: [
+        FieldError(
+          field: fieldName,
+          code: 'VALIDATION_TYPE_INVALID',
+          message: '$fieldName必须是JSON对象',
+        ),
+      ],
+    );
   }
 
   /// 验证数组
