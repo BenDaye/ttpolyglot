@@ -28,7 +28,7 @@ class PermissionMiddleware {
           }
 
           // 从路径参数中获取项目ID（如果未明确指定）
-          final actualProjectId = projectId ?? request.params['projectId'];
+          final actualProjectId = projectId;
 
           // 检查权限
           final hasPermission = await _permissionService.checkUserPermission(
@@ -75,7 +75,7 @@ class PermissionMiddleware {
           }
 
           // 从路径参数中获取项目ID（如果未明确指定）
-          final actualProjectId = projectId ?? request.params['projectId'];
+          final actualProjectId = projectId;
 
           // 检查所有权限
           for (final permission in permissions) {
@@ -124,7 +124,7 @@ class PermissionMiddleware {
           }
 
           // 从路径参数中获取项目ID（如果未明确指定）
-          final actualProjectId = projectId ?? request.params['projectId'];
+          final actualProjectId = projectId;
 
           // 检查是否满足任一权限
           bool hasAnyPermission = false;
@@ -182,11 +182,9 @@ class PermissionMiddleware {
             return _forbidden('无效的用户信息');
           }
 
-          // 从路径参数中获取项目ID
-          final projectId = request.params['projectId'];
-          if (projectId == null) {
-            return _forbidden('缺少项目ID');
-          }
+          // 注意：项目ID应该通过其他方式传递给中间件
+          // 这里需要重新设计API路由以传递项目ID
+          return _internalError('项目所有者检查需要重新设计API路由');
 
           // 检查是否为项目所有者
           final isOwner = await _permissionService.isProjectOwner(

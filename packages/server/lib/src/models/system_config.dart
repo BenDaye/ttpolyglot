@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 /// 系统配置模型
 class SystemConfig {
   final String id;

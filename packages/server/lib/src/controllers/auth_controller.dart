@@ -14,7 +14,9 @@ import '../utils/validator.dart';
 class AuthController {
   final AuthService _authService;
 
-  AuthController(this._authService);
+  AuthController({
+    required AuthService authService,
+  }) : _authService = authService;
 
   Router get router {
     final router = Router();
@@ -33,6 +35,17 @@ class AuthController {
 
     return router;
   }
+
+  // 公共方法用于路由配置
+  Future<Response> Function(Request) get login => _login;
+  Future<Response> Function(Request) get logout => _logout;
+  Future<Response> Function(Request) get refresh => _refreshToken;
+  Future<Response> Function(Request) get register => _register;
+  Future<Response> Function(Request) get forgotPassword => _forgotPassword;
+  Future<Response> Function(Request) get resetPassword => _resetPassword;
+  Future<Response> Function(Request) get verifyEmail => _verifyEmail;
+  Future<Response> Function(Request) get resendVerification => _resendVerification;
+  Future<Response> Function(Request) get me => _getCurrentUser;
 
   /// 用户注册
   Future<Response> _register(Request request) async {
@@ -62,10 +75,9 @@ class AuthController {
       );
 
       if (result.success) {
-        return ResponseBuilder.success(
+        return ResponseBuilder.created(
           message: result.message,
           data: result.data,
-          statusCode: 201,
         );
       } else {
         return ResponseBuilder.error(
@@ -78,7 +90,10 @@ class AuthController {
       log('用户注册失败', error: error, stackTrace: stackTrace, name: 'AuthController');
 
       if (error is ValidationException) {
-        return ResponseBuilder.validationError(error.fieldErrors);
+        return ResponseBuilder.validationError(
+          message: '用户注册参数验证失败',
+          fieldErrors: error.fieldErrors,
+        );
       }
 
       return ResponseBuilder.error(
@@ -136,7 +151,10 @@ class AuthController {
       log('用户登录失败', error: error, stackTrace: stackTrace, name: 'AuthController');
 
       if (error is ValidationException) {
-        return ResponseBuilder.validationError(error.fieldErrors);
+        return ResponseBuilder.validationError(
+          message: '用户登录参数验证失败',
+          fieldErrors: error.fieldErrors,
+        );
       }
 
       return ResponseBuilder.error(
@@ -212,7 +230,10 @@ class AuthController {
       log('刷新令牌失败', error: error, stackTrace: stackTrace, name: 'AuthController');
 
       if (error is ValidationException) {
-        return ResponseBuilder.validationError(error.fieldErrors);
+        return ResponseBuilder.validationError(
+          message: '令牌刷新参数验证失败',
+          fieldErrors: error.fieldErrors,
+        );
       }
 
       return ResponseBuilder.error(
@@ -281,7 +302,10 @@ class AuthController {
       log('邮箱验证失败', error: error, stackTrace: stackTrace, name: 'AuthController');
 
       if (error is ValidationException) {
-        return ResponseBuilder.validationError(error.fieldErrors);
+        return ResponseBuilder.validationError(
+          message: '邮箱验证参数验证失败',
+          fieldErrors: error.fieldErrors,
+        );
       }
 
       return ResponseBuilder.error(

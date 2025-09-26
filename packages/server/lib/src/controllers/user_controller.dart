@@ -14,7 +14,9 @@ import '../utils/validator.dart';
 class UserController {
   final UserService _userService;
 
-  UserController(this._userService);
+  UserController({
+    required UserService userService,
+  }) : _userService = userService;
 
   Router get router {
     final router = Router();
@@ -31,6 +33,16 @@ class UserController {
 
     return router;
   }
+
+  // 公共方法用于路由配置
+  Future<Response> Function(Request) get getUsers => _getUsers;
+  Future<Response> Function(Request, String) get getUser => _getUserById;
+  Future<Response> Function(Request, String) get updateUser => _updateUser;
+  Future<Response> Function(Request, String) get deleteUser => _deleteUser;
+  Future<Response> Function(Request) get me => _getCurrentUser;
+  Future<Response> Function(Request) get updateCurrentUser => _updateCurrentUser;
+  Future<Response> Function(Request) get changePassword => _changePassword;
+  Future<Response> Function(Request) get stats => _getUserStats;
 
   /// 获取用户列表
   Future<Response> _getUsers(Request request) async {

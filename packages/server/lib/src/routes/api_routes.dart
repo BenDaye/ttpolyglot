@@ -11,6 +11,10 @@ class ApiRoutes {
   final DatabaseService databaseService;
   final RedisService redisService;
   final ServerConfig config;
+  final AuthService authService;
+  final UserService userService;
+  final ProjectService projectService;
+  final PermissionService permissionService;
 
   late final Router _router;
 
@@ -18,6 +22,10 @@ class ApiRoutes {
     required this.databaseService,
     required this.redisService,
     required this.config,
+    required this.authService,
+    required this.userService,
+    required this.projectService,
+    required this.permissionService,
   }) {
     _router = Router();
     _setupRoutes();
@@ -63,9 +71,7 @@ class ApiRoutes {
   /// 设置认证路由
   void _setupAuthRoutes() {
     final authController = AuthController(
-      databaseService: databaseService,
-      redisService: redisService,
-      config: config,
+      authService: authService,
     );
 
     _router.post('/auth/login', authController.login);
@@ -81,9 +87,7 @@ class ApiRoutes {
   /// 设置用户路由
   void _setupUserRoutes() {
     final userController = UserController(
-      databaseService: databaseService,
-      redisService: redisService,
-      config: config,
+      userService: userService,
     );
 
     _router.get('/users', userController.getUsers);
@@ -102,9 +106,7 @@ class ApiRoutes {
   /// 设置项目路由
   void _setupProjectRoutes() {
     final projectController = ProjectController(
-      databaseService: databaseService,
-      redisService: redisService,
-      config: config,
+      projectService: projectService,
     );
 
     _router.get('/projects', projectController.getProjects);

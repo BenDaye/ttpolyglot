@@ -14,7 +14,9 @@ import '../utils/validator.dart';
 class ProjectController {
   final ProjectService _projectService;
 
-  ProjectController(this._projectService);
+  ProjectController({
+    required ProjectService projectService,
+  }) : _projectService = projectService;
 
   Router get router {
     final router = Router();
@@ -29,6 +31,17 @@ class ProjectController {
     router.get('/stats', _getProjectStats);
     return router;
   }
+
+  // 公共方法用于路由配置
+  Future<Response> Function(Request) get getProjects => _getProjects;
+  Future<Response> Function(Request) get createProject => _createProject;
+  Future<Response> Function(Request, String) get getProject => _getProjectById;
+  Future<Response> Function(Request, String) get updateProject => _updateProject;
+  Future<Response> Function(Request, String) get deleteProject => _deleteProject;
+  Future<Response> Function(Request, String) get getProjectMembers => _getProjectMembers;
+  Future<Response> Function(Request, String) get addProjectMember => _addProjectMember;
+  Future<Response> Function(Request, String, String) get removeProjectMember => _removeProjectMember;
+  Future<Response> Function(Request) get stats => _getProjectStats;
 
   Future<Response> _getProjects(Request request) async {
     try {
@@ -85,7 +98,7 @@ class ProjectController {
               ? Validator.validateJson(data['settings'], 'settings', required: false)
               : null);
 
-      return ResponseBuilder.success(message: '项目创建成功', data: project, statusCode: 201);
+      return ResponseBuilder.created(message: '项目创建成功', data: project);
     } catch (error, stackTrace) {
       log('创建项目失败', error: error, stackTrace: stackTrace, name: 'ProjectController');
 
@@ -222,7 +235,7 @@ class ProjectController {
       await _projectService.addProjectMember(
           projectId: id, userId: userId, roleId: roleId, grantedBy: grantedBy, expiresAt: expiresAt);
 
-      return ResponseBuilder.success(message: '项目成员添加成功', statusCode: 201);
+      return ResponseBuilder.created(message: '项目成员添加成功');
     } catch (error, stackTrace) {
       log('添加项目成员失败: $id', error: error, stackTrace: stackTrace, name: 'ProjectController');
 

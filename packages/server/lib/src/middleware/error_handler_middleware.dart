@@ -19,7 +19,7 @@ class ErrorHandlerMiddleware {
   /// 处理错误
   Response _handleError(dynamic error, StackTrace stackTrace, Request request) {
     // 生成请求ID用于追踪
-    final requestId = request.context['request_id'] ?? 'unknown';
+    final requestId = (request.context['request_id'] ?? 'unknown').toString();
 
     // 记录错误日志
     log('未处理的异常', error: error, stackTrace: stackTrace, name: 'ErrorHandler');

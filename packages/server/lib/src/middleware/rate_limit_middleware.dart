@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:shelf/shelf.dart';
 
@@ -57,7 +58,8 @@ class RateLimitMiddleware {
     // 使用IP地址作为标识
     final forwarded = request.headers['x-forwarded-for'];
     final realIp = request.headers['x-real-ip'];
-    final remoteAddress = request.context['shelf.io.connection_info']?.remoteAddress?.address;
+    final connectionInfo = request.context['shelf.io.connection_info'] as HttpConnectionInfo?;
+    final remoteAddress = connectionInfo?.remoteAddress.address;
 
     final clientIp = forwarded?.split(',').first.trim() ?? realIp ?? remoteAddress ?? 'unknown';
 

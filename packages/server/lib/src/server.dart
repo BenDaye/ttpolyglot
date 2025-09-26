@@ -19,6 +19,10 @@ class TTPolyglotServer {
   late final DatabaseService _databaseService;
   late final RedisService _redisService;
   late final MigrationService _migrationService;
+  late final AuthService _authService;
+  late final UserService _userService;
+  late final ProjectService _projectService;
+  late final PermissionService _permissionService;
   HttpServer? _server;
 
   /// 初始化服务器
@@ -51,6 +55,36 @@ class TTPolyglotServer {
       _redisService = RedisService(_config);
       await _redisService.initialize();
       log('Redis连接初始化完成', name: 'TTPolyglotServer');
+
+      // 初始化业务服务
+      _permissionService = PermissionService(
+        databaseService: _databaseService,
+        redisService: _redisService,
+        config: _config,
+      );
+      log('权限服务初始化完成', name: 'TTPolyglotServer');
+
+      _authService = AuthService(
+        databaseService: _databaseService,
+        redisService: _redisService,
+        permissionService: _permissionService,
+        config: _config,
+      );
+      log('认证服务初始化完成', name: 'TTPolyglotServer');
+
+      _userService = UserService(
+        databaseService: _databaseService,
+        redisService: _redisService,
+        config: _config,
+      );
+      log('用户服务初始化完成', name: 'TTPolyglotServer');
+
+      _projectService = ProjectService(
+        databaseService: _databaseService,
+        redisService: _redisService,
+        config: _config,
+      );
+      log('项目服务初始化完成', name: 'TTPolyglotServer');
 
       // 创建中间件管道
       final handler = _createHandler();
@@ -106,6 +140,10 @@ class TTPolyglotServer {
       databaseService: _databaseService,
       redisService: _redisService,
       config: _config,
+      authService: _authService,
+      userService: _userService,
+      projectService: _projectService,
+      permissionService: _permissionService,
     );
     router.mount('/api/v1/', apiRoutes.handler);
 
@@ -156,8 +194,8 @@ class TTPolyglotServer {
         return Response.ok('{"status": "ready", "services": {"database": true, "redis": true}}',
             headers: {'Content-Type': 'application/json'});
       } else {
-        return Response.serviceUnavailable(
-            '{"status": "not_ready", "services": {"database": $dbHealthy, "redis": $redisHealthy}}',
+        return Response(503,
+            body: '{"status": "not_ready", "services": {"database": $dbHealthy, "redis": $redisHealthy}}',
             headers: {'Content-Type': 'application/json'});
       }
     } catch (error) {
