@@ -135,24 +135,40 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
       entriesByKey.putIfAbsent(entry.key, () => []).add(entry);
     }
 
-    // 获取可用的源语言条目
-    final availableSourceEntries = <TranslationEntry>[];
+    // 获取可用的源语言条目（按语言去重）
+    final Map<String, TranslationEntry> languageEntryMap = {};
+
     for (final entries in entriesByKey.values) {
       if (entries.isNotEmpty) {
-        // 优先选择主语言，如果没有则选择第一个有内容的条目
-        final primaryEntry = entries.firstWhereOrNull(
-          (e) => e.targetLanguage.code == primaryLanguage?.code && e.targetText.isNotEmpty,
-        );
-        if (primaryEntry != null) {
-          availableSourceEntries.add(primaryEntry);
-        } else {
-          final firstValidEntry = entries.firstWhereOrNull((e) => e.targetText.isNotEmpty);
-          if (firstValidEntry != null) {
-            availableSourceEntries.add(firstValidEntry);
+        for (final entry in entries) {
+          final langCode = entry.targetLanguage.code;
+
+          // 如果该语言还没有条目，或者当前条目有内容而之前的没有内容，则更新
+          if (!languageEntryMap.containsKey(langCode) ||
+              (entry.targetText.isNotEmpty && languageEntryMap[langCode]!.targetText.isEmpty)) {
+            // 优先选择主语言，如果是主语言且有内容则直接使用
+            if (langCode == primaryLanguage?.code && entry.targetText.isNotEmpty) {
+              languageEntryMap[langCode] = entry;
+            } else if (entry.targetText.isNotEmpty) {
+              languageEntryMap[langCode] = entry;
+            } else if (!languageEntryMap.containsKey(langCode)) {
+              // 如果该语言还没有任何条目，即使内容为空也先保存
+              languageEntryMap[langCode] = entry;
+            }
           }
         }
       }
     }
+
+    // 获取有内容的语言条目，按语言排序
+    final availableSourceEntries = languageEntryMap.values.where((entry) => entry.targetText.isNotEmpty).toList()
+      ..sort((a, b) {
+        // 主语言排在最前面
+        if (a.targetLanguage.code == primaryLanguage?.code) return -1;
+        if (b.targetLanguage.code == primaryLanguage?.code) return 1;
+        // 其他语言按sortIndex排序
+        return a.targetLanguage.sortIndex.compareTo(b.targetLanguage.sortIndex);
+      });
 
     _selectedSourceEntry ??= availableSourceEntries.isNotEmpty ? availableSourceEntries.first : null;
 
@@ -640,7 +656,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
                 ),
                 Flexible(
                   child: Text(
-                    '${entry.key}: ${entry.targetText}',
+                    entry.targetLanguage.nativeName,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -654,7 +670,8 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
           setState(() {
             _selectedSourceEntry = value;
           });
-          log('选择源语言: ${value.targetLanguage.code} - ${value.key}', name: 'BatchTranslationDialog');
+          log('选择源语言: ${value.targetLanguage.code} - ${value.targetLanguage.nativeName}',
+              name: 'BatchTranslationDialog');
         }
       },
     );
@@ -892,21 +909,32 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
     // 获取需要翻译的条目
     _pendingEntries.clear();
-    final sourceKey = _selectedSourceEntry!.key;
     final sourceLanguageCode = _selectedSourceEntry!.targetLanguage.code;
 
-    // 找到与源条目相同 key 的其他语言条目
-    final relatedEntries = entriesByKey[sourceKey] ?? [];
-    for (final entry in relatedEntries) {
-      // 跳过源语言本身
-      if (entry.targetLanguage.code == sourceLanguageCode) continue;
+    // 遍历所有翻译键，翻译整个项目
+    for (final translationKey in entriesByKey.keys) {
+      final keyEntries = entriesByKey[translationKey]!;
 
-      // 如果不覆盖且已有翻译，则跳过
-      if (!_isOverride && entry.targetText.trim().isNotEmpty) continue;
+      // 找到源语言的条目
+      final sourceEntry = keyEntries.firstWhereOrNull(
+        (entry) => entry.targetLanguage.code == sourceLanguageCode && entry.targetText.isNotEmpty,
+      );
 
-      _pendingEntries.add(entry.copyWith(
-        sourceText: _selectedSourceEntry!.targetText,
-      ));
+      // 如果源语言没有对应的翻译，跳过这个key
+      if (sourceEntry == null) continue;
+
+      // 翻译其他语言的条目
+      for (final entry in keyEntries) {
+        // 跳过源语言本身
+        if (entry.targetLanguage.code == sourceLanguageCode) continue;
+
+        // 如果不覆盖且已有翻译，则跳过
+        if (!_isOverride && entry.targetText.trim().isNotEmpty) continue;
+
+        _pendingEntries.add(entry.copyWith(
+          sourceText: sourceEntry.targetText,
+        ));
+      }
     }
 
     _totalCount = _pendingEntries.length;
