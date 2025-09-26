@@ -974,16 +974,15 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
     try {
       final translationManager = Get.find<TranslationServiceManager>();
 
-      final result = await translationManager.translateText(
-        text: entry.sourceText,
-        sourceLanguage: _selectedSourceEntry!.targetLanguage,
-        targetLanguage: entry.targetLanguage,
+      final results = await translationManager.batchTranslateEntries(
+        sourceEntries: _selectedSourceEntry!,
+        entries: [entry],
         provider: _selectedProvider!,
-        context: entry.context,
       );
 
-      if (result.success) {
+      if (results.isNotEmpty && results.first.success) {
         _successCount++;
+        final result = results.first;
         final updatedEntry = entry.copyWith(
           targetText: result.translatedText,
           status: TranslationStatus.completed,
@@ -995,7 +994,8 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
         await widget.controller.updateTranslationEntry(updatedEntry, isShowSnackbar: false);
       } else {
         _failCount++;
-        log('翻译失败: ${entry.key} - ${result.error}', name: 'BatchTranslationDialog');
+        final errorMessage = results.isNotEmpty ? results.first.error : '翻译失败';
+        log('翻译失败: ${entry.key} - $errorMessage', name: 'BatchTranslationDialog');
       }
     } catch (error, stackTrace) {
       _failCount++;
