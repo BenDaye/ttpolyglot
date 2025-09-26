@@ -1146,6 +1146,530 @@ GET    /api/v1/status       # 系统状态信息
 GET    /api/v1/version      # 服务版本信息
 ```
 
+## API 标准化设计
+
+### HTTP 状态码规范
+
+#### 成功响应 (2xx)
+```
+200 OK                    # 请求成功，返回数据
+201 Created               # 资源创建成功
+202 Accepted              # 请求已接受，异步处理
+204 No Content            # 成功但无返回内容 (DELETE操作)
+```
+
+#### 客户端错误 (4xx)
+```
+400 Bad Request           # 请求参数错误
+401 Unauthorized          # 未认证或认证失败
+403 Forbidden             # 已认证但无权限
+404 Not Found             # 资源不存在
+405 Method Not Allowed    # HTTP方法不支持
+409 Conflict              # 资源冲突 (如重复创建)
+422 Unprocessable Entity  # 请求格式正确但语义错误
+429 Too Many Requests     # 请求过于频繁
+```
+
+#### 服务器错误 (5xx)
+```
+500 Internal Server Error # 服务器内部错误
+502 Bad Gateway           # 上游服务错误
+503 Service Unavailable   # 服务暂时不可用
+504 Gateway Timeout       # 上游服务超时
+```
+
+### 标准错误响应格式
+
+#### 基础错误结构
+```json
+{
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "人类可读的错误信息",
+    "details": "详细错误描述或调试信息",
+    "field_errors": [
+      {
+        "field": "字段名",
+        "code": "FIELD_ERROR_CODE", 
+        "message": "字段错误信息"
+      }
+    ],
+    "metadata": {
+      "request_id": "req_1234567890abcdef",
+      "timestamp": "2024-12-26T10:30:00.000Z",
+      "path": "/api/v1/projects",
+      "method": "POST",
+      "user_id": "user_uuid_123",
+      "trace_id": "trace_xyz789"
+    }
+  }
+}
+```
+
+### 错误代码分类
+
+#### 认证授权错误 (AUTH_*)
+```json
+{
+  "error": {
+    "code": "AUTH_TOKEN_MISSING",
+    "message": "认证令牌缺失",
+    "details": "请在请求头中提供 Authorization: Bearer <token>"
+  }
+}
+
+{
+  "error": {
+    "code": "AUTH_TOKEN_EXPIRED", 
+    "message": "认证令牌已过期",
+    "details": "请使用 refresh token 刷新或重新登录"
+  }
+}
+
+{
+  "error": {
+    "code": "AUTH_INVALID_CREDENTIALS",
+    "message": "用户名或密码错误",
+    "details": "请检查您的登录凭据"
+  }
+}
+
+{
+  "error": {
+    "code": "AUTH_PERMISSION_DENIED",
+    "message": "权限不足",
+    "details": "您没有执行此操作的权限"
+  }
+}
+
+{
+  "error": {
+    "code": "AUTH_ACCOUNT_LOCKED",
+    "message": "账户已被锁定",
+    "details": "由于多次登录失败，账户已被临时锁定"
+  }
+}
+```
+
+#### 验证错误 (VALIDATION_*)
+```json
+{
+  "error": {
+    "code": "VALIDATION_FAILED",
+    "message": "请求参数验证失败",
+    "field_errors": [
+      {
+        "field": "email",
+        "code": "VALIDATION_EMAIL_INVALID",
+        "message": "邮箱格式不正确"
+      },
+      {
+        "field": "password",
+        "code": "VALIDATION_PASSWORD_TOO_SHORT", 
+        "message": "密码长度至少8位"
+      },
+      {
+        "field": "project_name",
+        "code": "VALIDATION_REQUIRED",
+        "message": "项目名称为必填项"
+      }
+    ]
+  }
+}
+
+{
+  "error": {
+    "code": "VALIDATION_DUPLICATE_RESOURCE",
+    "message": "资源已存在",
+    "details": "该项目名称已被使用，请选择其他名称"
+  }
+}
+```
+
+#### 资源错误 (RESOURCE_*)
+```json
+{
+  "error": {
+    "code": "RESOURCE_NOT_FOUND",
+    "message": "请求的资源不存在",
+    "details": "项目ID 'proj_123' 未找到"
+  }
+}
+
+{
+  "error": {
+    "code": "RESOURCE_ALREADY_EXISTS", 
+    "message": "资源已存在",
+    "details": "项目名称 'my-project' 已被使用"
+  }
+}
+
+{
+  "error": {
+    "code": "RESOURCE_IN_USE",
+    "message": "资源正在使用中，无法删除",
+    "details": "该项目包含翻译数据，请先清空后再删除"
+  }
+}
+```
+
+#### 业务逻辑错误 (BUSINESS_*)
+```json
+{
+  "error": {
+    "code": "BUSINESS_TRANSLATION_LIMIT_EXCEEDED",
+    "message": "翻译配额已用完", 
+    "details": "本月翻译配额已达上限，请升级套餐或等待下月重置"
+  }
+}
+
+{
+  "error": {
+    "code": "BUSINESS_FILE_TOO_LARGE",
+    "message": "文件大小超出限制",
+    "details": "文件大小不能超过 10MB"
+  }
+}
+
+{
+  "error": {
+    "code": "BUSINESS_UNSUPPORTED_FILE_TYPE",
+    "message": "不支持的文件类型",
+    "details": "仅支持 .json, .csv, .po, .xlsx 格式的文件"
+  }
+}
+```
+
+#### 外部服务错误 (EXTERNAL_*)
+```json
+{
+  "error": {
+    "code": "EXTERNAL_TRANSLATION_API_ERROR",
+    "message": "翻译服务暂时不可用",
+    "details": "百度翻译API返回错误，请稍后重试"
+  }
+}
+
+{
+  "error": {
+    "code": "EXTERNAL_EMAIL_SEND_FAILED",
+    "message": "邮件发送失败", 
+    "details": "SMTP服务器连接超时"
+  }
+}
+```
+
+#### 系统错误 (SYSTEM_*)
+```json
+{
+  "error": {
+    "code": "SYSTEM_DATABASE_ERROR",
+    "message": "数据库连接错误",
+    "details": "系统正在维护中，请稍后重试"
+  }
+}
+
+{
+  "error": {
+    "code": "SYSTEM_RATE_LIMIT_EXCEEDED", 
+    "message": "请求频率过高",
+    "details": "您在15分钟内的请求次数已达上限，请稍后重试",
+    "metadata": {
+      "retry_after": 900,
+      "limit": 1000,
+      "remaining": 0,
+      "reset_time": "2024-12-26T11:00:00.000Z"
+    }
+  }
+}
+
+{
+  "error": {
+    "code": "SYSTEM_MAINTENANCE_MODE",
+    "message": "系统维护中",
+    "details": "系统正在进行维护升级，预计30分钟后恢复服务"
+  }
+}
+```
+
+### 成功响应格式
+
+#### 单个资源响应
+```json
+{
+  "data": {
+    "id": "proj_123",
+    "name": "我的项目",
+    "status": "active",
+    "created_at": "2024-12-26T10:30:00.000Z"
+  },
+  "metadata": {
+    "request_id": "req_1234567890abcdef",
+    "timestamp": "2024-12-26T10:30:00.000Z"
+  }
+}
+```
+
+#### 列表响应 (带分页)
+```json
+{
+  "data": [
+    {
+      "id": "proj_123",
+      "name": "项目1"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 100,
+    "pages": 5,
+    "has_next": true,
+    "has_prev": false
+  },
+  "metadata": {
+    "request_id": "req_1234567890abcdef",
+    "timestamp": "2024-12-26T10:30:00.000Z"
+  }
+}
+```
+
+#### 批量操作响应
+```json
+{
+  "data": {
+    "total": 100,
+    "success": 95,
+    "failed": 5,
+    "results": [
+      {
+        "id": "entry_1",
+        "status": "success",
+        "data": { "id": "entry_1", "text": "翻译成功" }
+      },
+      {
+        "id": "entry_2", 
+        "status": "failed",
+        "error": {
+          "code": "BUSINESS_TRANSLATION_FAILED",
+          "message": "翻译失败"
+        }
+      }
+    ]
+  }
+}
+```
+
+### API 错误处理中间件
+
+#### 错误处理流程
+```dart
+// Dart 服务端错误处理中间件示例
+class ErrorHandlerMiddleware {
+  Handler call(Handler handler) {
+    return (Request request) async {
+      try {
+        return await handler(request);
+      } on ValidationException catch (e) {
+        return _buildErrorResponse(
+          statusCode: 422,
+          code: 'VALIDATION_FAILED',
+          message: '请求参数验证失败',
+          fieldErrors: e.fieldErrors,
+          request: request,
+        );
+      } on AuthenticationException catch (e) {
+        return _buildErrorResponse(
+          statusCode: 401,
+          code: e.code,
+          message: e.message,
+          request: request,
+        );
+      } on AuthorizationException catch (e) {
+        return _buildErrorResponse(
+          statusCode: 403,
+          code: 'AUTH_PERMISSION_DENIED',
+          message: '权限不足',
+          request: request,
+        );
+      } on NotFoundException catch (e) {
+        return _buildErrorResponse(
+          statusCode: 404,
+          code: 'RESOURCE_NOT_FOUND', 
+          message: '请求的资源不存在',
+          details: e.message,
+          request: request,
+        );
+      } on BusinessException catch (e) {
+        return _buildErrorResponse(
+          statusCode: 400,
+          code: e.code,
+          message: e.message,
+          details: e.details,
+          request: request,
+        );
+      } catch (e, stackTrace) {
+        // 记录未处理的异常
+        logger.error('Unhandled exception', 
+          error: e, 
+          stackTrace: stackTrace,
+          name: 'ErrorHandler'
+        );
+        
+        return _buildErrorResponse(
+          statusCode: 500,
+          code: 'SYSTEM_INTERNAL_ERROR',
+          message: '服务器内部错误',
+          details: 'An unexpected error occurred',
+          request: request,
+        );
+      }
+    };
+  }
+  
+  Response _buildErrorResponse({
+    required int statusCode,
+    required String code,
+    required String message,
+    String? details,
+    List<FieldError>? fieldErrors,
+    required Request request,
+  }) {
+    final requestId = request.headers['x-request-id'] ?? _generateRequestId();
+    
+    final errorResponse = {
+      'error': {
+        'code': code,
+        'message': message,
+        if (details != null) 'details': details,
+        if (fieldErrors != null) 'field_errors': fieldErrors.map((e) => e.toJson()).toList(),
+        'metadata': {
+          'request_id': requestId,
+          'timestamp': DateTime.now().toUtc().toIso8601String(),
+          'path': request.requestedUri.path,
+          'method': request.method,
+          if (request.context['user_id'] != null) 'user_id': request.context['user_id'],
+        }
+      }
+    };
+    
+    return Response.json(
+      errorResponse,
+      statusCode,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Request-ID': requestId,
+      },
+    );
+  }
+}
+```
+
+### 客户端错误处理
+
+#### Flutter 客户端处理示例
+```dart
+class ApiException implements Exception {
+  final int statusCode;
+  final String code;
+  final String message;
+  final String? details;
+  final List<FieldError>? fieldErrors;
+  final Map<String, dynamic>? metadata;
+
+  const ApiException({
+    required this.statusCode,
+    required this.code,
+    required this.message,
+    this.details,
+    this.fieldErrors,
+    this.metadata,
+  });
+
+  factory ApiException.fromJson(Map<String, dynamic> json, int statusCode) {
+    final error = json['error'] as Map<String, dynamic>;
+    return ApiException(
+      statusCode: statusCode,
+      code: error['code'] as String,
+      message: error['message'] as String,
+      details: error['details'] as String?,
+      fieldErrors: (error['field_errors'] as List<dynamic>?)
+          ?.map((e) => FieldError.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      metadata: error['metadata'] as Map<String, dynamic>?,
+    );
+  }
+}
+
+class ApiClient {
+  Future<T> request<T>(String endpoint, {
+    required T Function(Map<String, dynamic>) fromJson,
+  }) async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl$endpoint'));
+      
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final json = jsonDecode(response.body) as Map<String, dynamic>;
+        return fromJson(json['data']);
+      } else {
+        final json = jsonDecode(response.body) as Map<String, dynamic>;
+        throw ApiException.fromJson(json, response.statusCode);
+      }
+    } on SocketException {
+      throw const ApiException(
+        statusCode: 0,
+        code: 'NETWORK_ERROR',
+        message: '网络连接错误',
+      );
+    }
+  }
+}
+
+// 全局错误处理
+class ErrorHandler {
+  static String getDisplayMessage(ApiException error) {
+    switch (error.code) {
+      case 'AUTH_TOKEN_EXPIRED':
+        return '登录已过期，请重新登录';
+      case 'AUTH_PERMISSION_DENIED':
+        return '您没有权限执行此操作';
+      case 'VALIDATION_FAILED':
+        return '输入信息有误，请检查后重试';
+      case 'BUSINESS_TRANSLATION_LIMIT_EXCEEDED':
+        return '翻译配额已用完，请升级套餐';
+      case 'SYSTEM_RATE_LIMIT_EXCEEDED':
+        return '操作过于频繁，请稍后重试';
+      default:
+        return error.message;
+    }
+  }
+  
+  static void handleError(ApiException error, BuildContext context) {
+    // 记录错误日志
+    log('API Error: ${error.code}', 
+        error: error, 
+        name: 'ApiClient');
+    
+    // 根据错误类型处理
+    switch (error.code) {
+      case 'AUTH_TOKEN_EXPIRED':
+        // 自动跳转到登录页
+        Navigator.pushReplacementNamed(context, '/login');
+        break;
+      case 'SYSTEM_MAINTENANCE_MODE':
+        // 显示维护页面
+        Navigator.pushNamed(context, '/maintenance');
+        break;
+      default:
+        // 显示错误提示
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(getDisplayMessage(error))),
+        );
+    }
+  }
+}
+```
+
 ## 权限设计
 
 ### 权限级别
