@@ -3,10 +3,15 @@ library models;
 
 export 'api_error.dart';
 export 'api_response.dart';
+export 'audit_logs.dart';
+export 'file_uploads.dart';
 export 'language.dart';
+export 'notifications.dart';
 export 'permission.dart';
 // 项目相关模型
 export 'project.dart';
+export 'project_languages.dart';
+export 'project_members.dart';
 // 请求响应模型
 export 'request/request_models.dart';
 export 'response/response_models.dart';
@@ -14,5 +19,8 @@ export 'role.dart';
 // 系统相关模型
 export 'system_config.dart';
 export 'translation_entry.dart';
+export 'translation_history.dart';
 // 用户相关模型
 export 'user.dart';
+export 'user_session.dart';
+export 'user_translation_providers.dart';
