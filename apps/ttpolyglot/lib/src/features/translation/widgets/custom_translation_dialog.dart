@@ -47,6 +47,13 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
   TranslationEntry? _selectedSourceEntry;
   bool _isTranslating = false;
   bool _isOverride = true; // 是否覆盖
+  CancelToken? _cancelToken; // 取消令牌
+
+  @override
+  void dispose() {
+    _cancelToken?.cancel(); // 取消正在进行的翻译请求
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -131,48 +138,71 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
           ),
         ),
         const SizedBox(width: 8.0),
-        ElevatedButton(
-          onPressed: _isTranslating ? null : _saveCustomTranslation,
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
+        if (_isTranslating) ...[
+          ElevatedButton.icon(
+            onPressed: _cancelTranslation,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
             ),
-            elevation: 2.0,
-            shadowColor: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+            icon: const Icon(Icons.stop, size: 16.0, color: Colors.white),
+            label: const Text('取消'),
           ),
-          child: _isTranslating
-              ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: 8.0,
-                  children: [
-                    SizedBox(
-                      width: 16.0,
-                      height: 16.0,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.0,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Colors.white,
-                        ),
-                      ),
+          const SizedBox(width: 8.0),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8.0),
+              border: Border.all(color: Theme.of(context).primaryColor),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 8.0,
+              children: [
+                SizedBox(
+                  width: 16.0,
+                  height: 16.0,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.0,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Theme.of(context).primaryColor,
                     ),
-                    const Text(
-                      '翻译中...',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14.0,
-                      ),
-                    ),
-                  ],
-                )
-              : const Text(
-                  '开始翻译',
+                  ),
+                ),
+                const Text(
+                  '翻译中...',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14.0,
                   ),
                 ),
-        ),
+              ],
+            ),
+          ),
+        ] else
+          ElevatedButton(
+            onPressed: _saveCustomTranslation,
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              elevation: 2.0,
+              shadowColor: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+            ),
+            child: const Text(
+              '开始翻译',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 14.0,
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -331,6 +361,12 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
     );
   }
 
+  /// 取消翻译
+  void _cancelTranslation() {
+    _cancelToken?.cancel();
+    _resetTranslatingState();
+  }
+
   /// 保存自定义翻译设置
   Future<void> _saveCustomTranslation() async {
     if (_isTranslating) return; // 防止重复点击
@@ -350,6 +386,9 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
       _showErrorSnackBar('源语言文本不能为空');
       return;
     }
+
+    // 创建新的取消令牌
+    _cancelToken = CancelToken();
 
     setState(() {
       _isTranslating = true;
@@ -406,6 +445,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
         sourceEntries: _selectedSourceEntry!,
         entries: translateEntries,
         provider: _selectedProvider!,
+        cancelToken: _cancelToken,
       );
 
       // 如果翻译成功，关闭对话框
@@ -414,6 +454,12 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
       // 处理翻译结果
       await _handleTranslationResults(results, translateEntries);
     } catch (error, stackTrace) {
+      // 如果是取消异常，直接返回
+      if (error is CancelException) {
+        log('翻译被取消: $error', name: 'CustomTranslationDialog');
+        return;
+      }
+
       log('自定义翻译异常', error: error, stackTrace: stackTrace, name: 'CustomTranslationDialog');
       _showErrorSnackBar('翻译处理异常: $error');
       _resetTranslatingState();
