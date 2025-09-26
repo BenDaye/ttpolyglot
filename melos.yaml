@@ -1,6 +1,7 @@
 name: ttpolyglot
 
 packages:
+  - packages/server
   - packages/core
   - packages/parsers
   - packages/translators

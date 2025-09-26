@@ -1,0 +1,407 @@
+-- 种子数据: 005 - 插入系统配置
+-- 创建时间: 2024-12-26
+-- 描述: 插入系统默认配置
+
+INSERT INTO
+    system_configs (
+        config_key,
+        config_value,
+        value_type,
+        category,
+        display_name,
+        description,
+        is_public,
+        sort_order
+    )
+VALUES
+    -- 系统配置
+    (
+        'system.site_title',
+        'TTPolyglot',
+        'string',
+        'system',
+        '网站标题',
+        '系统显示的标题',
+        true,
+        1
+    ),
+    (
+        'system.site_description',
+        'Multi-language translation management system',
+        'string',
+        'system',
+        '网站描述',
+        '系统描述信息',
+        true,
+        2
+    ),
+    (
+        'system.max_upload_size',
+        '10485760',
+        'number',
+        'system',
+        '最大上传文件大小',
+        '单位：字节 (10MB)',
+        false,
+        3
+    ),
+    (
+        'system.session_timeout',
+        '1440',
+        'number',
+        'system',
+        '会话超时时间',
+        '单位：分钟 (24小时)',
+        false,
+        4
+    ),
+    (
+        'system.maintenance_mode',
+        'false',
+        'boolean',
+        'system',
+        '维护模式',
+        '是否启用维护模式',
+        false,
+        5
+    ),
+
+-- 安全配置
+(
+    'security.password_min_length',
+    '8',
+    'number',
+    'security',
+    '密码最小长度',
+    '用户密码最小长度要求',
+    false,
+    1
+),
+(
+    'security.password_require_special',
+    'true',
+    'boolean',
+    'security',
+    '密码需要特殊字符',
+    '是否要求密码包含特殊字符',
+    false,
+    2
+),
+(
+    'security.password_require_number',
+    'true',
+    'boolean',
+    'security',
+    '密码需要数字',
+    '是否要求密码包含数字',
+    false,
+    3
+),
+(
+    'security.password_require_uppercase',
+    'true',
+    'boolean',
+    'security',
+    '密码需要大写字母',
+    '是否要求密码包含大写字母',
+    false,
+    4
+),
+(
+    'security.login_max_attempts',
+    '5',
+    'number',
+    'security',
+    '登录最大尝试次数',
+    '账户锁定前的最大登录尝试次数',
+    false,
+    5
+),
+(
+    'security.account_lock_duration',
+    '30',
+    'number',
+    'security',
+    '账户锁定时长',
+    '单位：分钟',
+    false,
+    6
+),
+(
+    'security.jwt_expire_hours',
+    '24',
+    'number',
+    'security',
+    'JWT过期时间',
+    '单位：小时',
+    false,
+    7
+),
+(
+    'security.jwt_refresh_expire_days',
+    '7',
+    'number',
+    'security',
+    'JWT刷新过期时间',
+    '单位：天',
+    false,
+    8
+),
+(
+    'security.two_factor_enabled',
+    'false',
+    'boolean',
+    'security',
+    '启用双因子认证',
+    '是否启用双因子认证功能',
+    false,
+    9
+),
+
+-- 翻译配置
+(
+    'translation.max_text_length',
+    '5000',
+    'number',
+    'translation',
+    '单次翻译最大字符数',
+    '每次翻译请求的最大字符数限制',
+    false,
+    1
+),
+(
+    'translation.auto_save_interval',
+    '30',
+    'number',
+    'translation',
+    '自动保存间隔',
+    '单位：秒',
+    true,
+    2
+),
+(
+    'translation.batch_size_limit',
+    '100',
+    'number',
+    'translation',
+    '批量翻译数量限制',
+    '批量操作的最大条目数',
+    false,
+    3
+),
+(
+    'translation.auto_translate_enabled',
+    'true',
+    'boolean',
+    'translation',
+    '启用自动翻译',
+    '是否启用AI自动翻译功能',
+    true,
+    4
+),
+(
+    'translation.quality_threshold',
+    '0.8',
+    'number',
+    'translation',
+    '翻译质量阈值',
+    '自动批准翻译的最低质量分数',
+    false,
+    5
+),
+(
+    'translation.review_required',
+    'true',
+    'boolean',
+    'translation',
+    '需要审核',
+    '翻译是否需要审核才能发布',
+    false,
+    6
+),
+
+-- 通知配置
+(
+    'notification.email_enabled',
+    'false',
+    'boolean',
+    'notification',
+    '邮件通知开关',
+    '是否启用邮件通知',
+    false,
+    1
+),
+(
+    'notification.email_smtp_host',
+    '',
+    'string',
+    'notification',
+    'SMTP服务器地址',
+    'SMTP服务器地址',
+    false,
+    2
+),
+(
+    'notification.email_smtp_port',
+    '587',
+    'number',
+    'notification',
+    'SMTP端口',
+    'SMTP服务器端口',
+    false,
+    3
+),
+(
+    'notification.email_from_address',
+    'noreply@ttpolyglot.com',
+    'string',
+    'notification',
+    '发件人邮箱',
+    '系统发件人邮箱地址',
+    false,
+    4
+),
+(
+    'notification.push_enabled',
+    'true',
+    'boolean',
+    'notification',
+    '推送通知开关',
+    '是否启用推送通知',
+    true,
+    5
+),
+(
+    'notification.retention_days',
+    '30',
+    'number',
+    'notification',
+    '通知保留天数',
+    '通知的保留天数',
+    false,
+    6
+),
+
+-- UI配置
+(
+    'ui.default_language',
+    'en',
+    'string',
+    'ui',
+    '默认语言',
+    '系统默认显示语言',
+    true,
+    1
+),
+(
+    'ui.theme',
+    'light',
+    'string',
+    'ui',
+    '默认主题',
+    '系统默认主题',
+    true,
+    2
+),
+(
+    'ui.items_per_page',
+    '20',
+    'number',
+    'ui',
+    '每页显示数量',
+    '列表页面每页显示的项目数量',
+    true,
+    3
+),
+(
+    'ui.date_format',
+    'YYYY-MM-DD',
+    'string',
+    'ui',
+    '日期格式',
+    '系统显示的日期格式',
+    true,
+    4
+),
+(
+    'ui.time_format',
+    'HH:mm:ss',
+    'string',
+    'ui',
+    '时间格式',
+    '系统显示的时间格式',
+    true,
+    5
+),
+(
+    'ui.timezone',
+    'UTC',
+    'string',
+    'ui',
+    '默认时区',
+    '系统默认时区',
+    true,
+    6
+),
+
+-- API配置
+(
+    'api.rate_limit_requests',
+    '1000',
+    'number',
+    'api',
+    'API速率限制',
+    '每15分钟最大请求数',
+    false,
+    1
+),
+(
+    'api.rate_limit_window',
+    '15',
+    'number',
+    'api',
+    '速率限制窗口',
+    '速率限制时间窗口（分钟）',
+    false,
+    2
+),
+(
+    'api.request_timeout',
+    '30',
+    'number',
+    'api',
+    '请求超时时间',
+    'API请求超时时间（秒）',
+    false,
+    3
+),
+(
+    'api.cors_enabled',
+    'true',
+    'boolean',
+    'api',
+    '启用CORS',
+    '是否启用跨域资源共享',
+    false,
+    4
+),
+(
+    'api.documentation_enabled',
+    'true',
+    'boolean',
+    'api',
+    '启用API文档',
+    '是否启用API文档页面',
+    true,
+    5
+),
+(
+    'api.version',
+    'v1',
+    'string',
+    'api',
+    'API版本',
+    '当前API版本',
+    true,
+    6
+);

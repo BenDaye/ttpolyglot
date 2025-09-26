@@ -1,0 +1,240 @@
+-- 种子数据: 002 - 插入系统权限
+-- 创建时间: 2024-12-26
+-- 描述: 插入系统权限数据
+
+-- 项目权限
+INSERT INTO
+    permissions (
+        name,
+        display_name,
+        description,
+        resource,
+        action,
+        scope
+    )
+VALUES (
+        'project.create',
+        '创建项目',
+        '创建新项目',
+        'project',
+        'create',
+        'global'
+    ),
+    (
+        'project.read',
+        '查看项目',
+        '查看项目信息',
+        'project',
+        'read',
+        'project'
+    ),
+    (
+        'project.update',
+        '编辑项目',
+        '编辑项目信息',
+        'project',
+        'update',
+        'project'
+    ),
+    (
+        'project.delete',
+        '删除项目',
+        '删除项目',
+        'project',
+        'delete',
+        'project'
+    ),
+    (
+        'project.manage',
+        '管理项目',
+        '管理项目成员和权限',
+        'project',
+        'manage',
+        'project'
+    ),
+
+-- 翻译权限
+(
+    'translation.create',
+    '创建翻译',
+    '创建翻译条目',
+    'translation',
+    'create',
+    'project'
+),
+(
+    'translation.read',
+    '查看翻译',
+    '查看翻译条目',
+    'translation',
+    'read',
+    'project'
+),
+(
+    'translation.update',
+    '编辑翻译',
+    '编辑翻译条目',
+    'translation',
+    'update',
+    'project'
+),
+(
+    'translation.delete',
+    '删除翻译',
+    '删除翻译条目',
+    'translation',
+    'delete',
+    'project'
+),
+(
+    'translation.review',
+    '审核翻译',
+    '审核翻译条目',
+    'translation',
+    'review',
+    'project'
+),
+(
+    'translation.approve',
+    '批准翻译',
+    '批准翻译条目',
+    'translation',
+    'approve',
+    'project'
+),
+
+-- 用户权限
+(
+    'user.read',
+    '查看用户',
+    '查看用户信息',
+    'user',
+    'read',
+    'global'
+),
+(
+    'user.update',
+    '编辑用户',
+    '编辑用户信息',
+    'user',
+    'update',
+    'global'
+),
+(
+    'user.delete',
+    '删除用户',
+    '删除用户',
+    'user',
+    'delete',
+    'global'
+),
+(
+    'user.manage_roles',
+    '管理用户角色',
+    '分配和撤销用户角色',
+    'user',
+    'manage',
+    'global'
+),
+
+-- 系统权限
+(
+    'system.admin',
+    '系统管理',
+    '系统管理权限',
+    'system',
+    'manage',
+    'global'
+),
+(
+    'system.backup',
+    '数据备份',
+    '数据备份权限',
+    'system',
+    'create',
+    'global'
+),
+(
+    'system.restore',
+    '数据恢复',
+    '数据恢复权限',
+    'system',
+    'update',
+    'global'
+),
+
+-- 配置权限
+(
+    'config.read',
+    '查看配置',
+    '查看系统配置',
+    'config',
+    'read',
+    'global'
+),
+(
+    'config.update',
+    '修改配置',
+    '修改系统配置',
+    'config',
+    'update',
+    'global'
+),
+(
+    'config.create',
+    '创建配置',
+    '创建系统配置',
+    'config',
+    'create',
+    'global'
+),
+(
+    'config.delete',
+    '删除配置',
+    '删除系统配置',
+    'config',
+    'delete',
+    'global'
+),
+
+-- 翻译接口权限
+(
+    'provider.create',
+    '创建翻译接口',
+    '创建翻译接口配置',
+    'provider',
+    'create',
+    'resource'
+),
+(
+    'provider.read',
+    '查看翻译接口',
+    '查看翻译接口配置',
+    'provider',
+    'read',
+    'resource'
+),
+(
+    'provider.update',
+    '编辑翻译接口',
+    '编辑翻译接口配置',
+    'provider',
+    'update',
+    'resource'
+),
+(
+    'provider.delete',
+    '删除翻译接口',
+    '删除翻译接口配置',
+    'provider',
+    'delete',
+    'resource'
+),
+(
+    'provider.use',
+    '使用翻译接口',
+    '使用翻译接口进行翻译',
+    'provider',
+    'read',
+    'resource'
+);

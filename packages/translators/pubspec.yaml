@@ -1,7 +1,7 @@
 name: ttpolyglot_translators
 description: TTPolyglot 翻译服务集成（Google、百度、腾讯等）
 version: 1.0.0
-publish_to: none
+publish_to: none 
 
 environment:
   sdk: ^3.6.1
