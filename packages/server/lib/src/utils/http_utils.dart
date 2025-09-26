@@ -113,7 +113,7 @@ class HttpUtils {
 
   /// 获取请求大小
   static int getContentLength(HttpRequest request) {
-    return request.headers.contentLength ?? 0;
+    return request.headers.contentLength;
   }
 
   /// 格式化HTTP状态码描述

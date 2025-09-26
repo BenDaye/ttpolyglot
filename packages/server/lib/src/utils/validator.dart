@@ -220,13 +220,17 @@ class Validator {
       return value != 0;
     }
 
-    throw ValidationException([
-      FieldError(
-        field: fieldName,
-        code: 'VALIDATION_TYPE_INVALID',
-        message: '$fieldName必须是布尔值',
-      ),
-    ]);
+    throw ValidationException(
+      code: 'VALIDATION_FAILED',
+      message: '输入验证失败',
+      fieldErrors: [
+        FieldError(
+          field: fieldName,
+          code: 'VALIDATION_TYPE_INVALID',
+          message: '$fieldName必须是布尔值',
+        ),
+      ],
+    );
   }
 
   /// 验证枚举值
@@ -251,23 +255,31 @@ class Validator {
     }
 
     if (value is! String) {
-      throw ValidationException([
-        FieldError(
-          field: fieldName,
-          code: 'VALIDATION_TYPE_INVALID',
-          message: '$fieldName必须是字符串',
-        ),
-      ]);
+      throw ValidationException(
+        code: 'VALIDATION_FAILED',
+        message: '输入验证失败',
+        fieldErrors: [
+          FieldError(
+            field: fieldName,
+            code: 'VALIDATION_TYPE_INVALID',
+            message: '$fieldName必须是字符串',
+          ),
+        ],
+      );
     }
 
     if (!allowedValues.contains(value)) {
-      throw ValidationException([
-        FieldError(
-          field: fieldName,
-          code: 'VALIDATION_ENUM_INVALID',
-          message: '$fieldName必须是以下值之一: ${allowedValues.join(', ')}',
-        ),
-      ]);
+      throw ValidationException(
+        code: 'VALIDATION_FAILED',
+        message: '输入验证失败',
+        fieldErrors: [
+          FieldError(
+            field: fieldName,
+            code: 'VALIDATION_ENUM_INVALID',
+            message: '$fieldName必须是以下值之一: ${allowedValues.join(', ')}',
+          ),
+        ],
+      );
     }
 
     return value;
@@ -298,7 +310,11 @@ class Validator {
           return error;
         }).toList();
 
-        throw ValidationException(uuidErrors);
+        throw ValidationException(
+          code: 'VALIDATION_FAILED',
+          message: '输入验证失败',
+          fieldErrors: uuidErrors,
+        );
       }
       rethrow;
     }
@@ -329,25 +345,33 @@ class Validator {
     }
 
     if (value is! String) {
-      throw ValidationException([
-        FieldError(
-          field: fieldName,
-          code: 'VALIDATION_TYPE_INVALID',
-          message: '$fieldName必须是日期时间字符串',
-        ),
-      ]);
+      throw ValidationException(
+        code: 'VALIDATION_FAILED',
+        message: '输入验证失败',
+        fieldErrors: [
+          FieldError(
+            field: fieldName,
+            code: 'VALIDATION_TYPE_INVALID',
+            message: '$fieldName必须是日期时间字符串',
+          ),
+        ],
+      );
     }
 
     try {
       return DateTime.parse(value);
     } catch (e) {
-      throw ValidationException([
-        FieldError(
-          field: fieldName,
-          code: 'VALIDATION_DATETIME_INVALID',
-          message: '$fieldName必须是有效的日期时间格式',
-        ),
-      ]);
+      throw ValidationException(
+        code: 'VALIDATION_FAILED',
+        message: '输入验证失败',
+        fieldErrors: [
+          FieldError(
+            field: fieldName,
+            code: 'VALIDATION_DATETIME_INVALID',
+            message: '$fieldName必须是有效的日期时间格式',
+          ),
+        ],
+      );
     }
   }
 
@@ -377,7 +401,11 @@ class Validator {
           return error;
         }).toList();
 
-        throw ValidationException(urlErrors);
+        throw ValidationException(
+          code: 'VALIDATION_FAILED',
+          message: '输入验证失败',
+          fieldErrors: urlErrors,
+        );
       }
       rethrow;
     }
@@ -407,7 +435,7 @@ class Validator {
       return value;
     }
 
-    throw ValidationException([
+    throw ValidationException(code: 'VALIDATION_FAILED', message: '输入验证失败', fieldErrors: [
       FieldError(
         field: fieldName,
         code: 'VALIDATION_TYPE_INVALID',
@@ -439,13 +467,17 @@ class Validator {
     }
 
     if (value is! List) {
-      throw ValidationException([
-        FieldError(
-          field: fieldName,
-          code: 'VALIDATION_TYPE_INVALID',
-          message: '$fieldName必须是数组',
-        ),
-      ]);
+      throw ValidationException(
+        code: 'VALIDATION_FAILED',
+        message: '输入验证失败',
+        fieldErrors: [
+          FieldError(
+            field: fieldName,
+            code: 'VALIDATION_TYPE_INVALID',
+            message: '$fieldName必须是数组',
+          ),
+        ],
+      );
     }
 
     final list = value as List;
@@ -479,13 +511,17 @@ class Validator {
     try {
       return list.cast<T>();
     } catch (e) {
-      throw ValidationException([
-        FieldError(
-          field: fieldName,
-          code: 'VALIDATION_TYPE_INVALID',
-          message: '$fieldName数组元素类型不正确',
-        ),
-      ]);
+      throw ValidationException(
+        code: 'VALIDATION_FAILED',
+        message: '输入验证失败',
+        fieldErrors: [
+          FieldError(
+            field: fieldName,
+            code: 'VALIDATION_TYPE_INVALID',
+            message: '$fieldName数组元素类型不正确',
+          ),
+        ],
+      );
     }
   }
 
@@ -506,7 +542,11 @@ class Validator {
     }
 
     if (allErrors.isNotEmpty) {
-      throw ValidationException(allErrors);
+      throw ValidationException(
+        code: 'VALIDATION_FAILED',
+        message: '输入验证失败',
+        fieldErrors: allErrors,
+      );
     }
   }
 }

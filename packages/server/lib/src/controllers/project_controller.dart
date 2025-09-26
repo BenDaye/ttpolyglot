@@ -6,6 +6,7 @@ import 'package:shelf_router/shelf_router.dart';
 
 import '../middleware/auth_middleware.dart';
 import '../middleware/error_handler_middleware.dart';
+import '../models/api_error.dart';
 import '../services/project_service.dart';
 import '../utils/response_builder.dart';
 import '../utils/validator.dart';
