@@ -9,6 +9,7 @@ import 'package:ttpolyglot/src/features/project/controllers/project_controller.d
 import 'package:ttpolyglot/src/features/settings/controllers/translation_config_controller.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_translators/translators.dart';
 
 /// 批量翻译状态枚举
 enum BatchTranslationStatus {
@@ -66,6 +67,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
   bool _shouldStop = false;
   bool _isTranslating = false; // 防止并发翻译
   bool _isDisposed = false; // 弹窗是否已被关闭
+  CancelToken? _cancelToken; // 取消令牌
 
   @override
   void dispose() {
@@ -73,6 +75,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
     _shouldStop = true; // 停止翻译
     _isTranslating = false; // 重置翻译状态
     _translationTimer?.cancel(); // 取消定时器
+    _cancelToken?.cancel(); // 取消正在进行的翻译请求
     super.dispose();
   }
 
@@ -931,6 +934,10 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
     _pendingKeys.clear();
     _keyEntries.clear();
     _keySourceEntries.clear();
+
+    // 创建新的取消令牌
+    _cancelToken = CancelToken();
+
     final sourceLanguageCode = _selectedSourceEntry!.targetLanguage.code;
 
     // 遍历所有翻译键，按key分组准备翻译数据
@@ -1020,6 +1027,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
         sourceEntries: sourceEntry,
         entries: targetEntries,
         provider: _selectedProvider!,
+        cancelToken: _cancelToken,
       );
 
       // 检查弹窗是否已关闭，如果已关闭则停止处理
@@ -1067,6 +1075,18 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
       log('Key "$translationKey" 翻译完成: 成功 $keySuccessCount 个，失败 $keyFailCount 个', name: 'BatchTranslationDialog');
     } catch (error, stackTrace) {
+      // 如果是取消异常，更新状态为取消
+      if (error is CancelException) {
+        log('翻译被取消: $error', name: 'BatchTranslationDialog');
+        _shouldStop = true;
+        if (!_isDisposed && mounted) {
+          setState(() {
+            _translationStatus = BatchTranslationStatus.cancelled;
+          });
+        }
+        return; // 取消时直接返回，不继续处理
+      }
+
       _failCount += targetEntries.length;
       log('翻译Key异常', error: error, stackTrace: stackTrace, name: 'BatchTranslationDialog');
     } finally {
@@ -1084,6 +1104,9 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
   /// 暂停翻译
   void _pauseTranslation() {
+    // 取消当前正在进行的翻译请求
+    _cancelToken?.cancel();
+
     if (!_isDisposed && mounted) {
       setState(() {
         _translationStatus = BatchTranslationStatus.paused;
@@ -1095,6 +1118,9 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
   /// 继续翻译
   void _resumeTranslation() {
+    // 创建新的取消令牌，因为之前的已经被取消了
+    _cancelToken = CancelToken();
+
     if (!_isDisposed && mounted) {
       setState(() {
         _translationStatus = BatchTranslationStatus.running;
@@ -1106,8 +1132,13 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
   /// 停止翻译
   void _stopTranslation() {
     _shouldStop = true;
+
+    // 取消当前正在进行的翻译请求
+    _cancelToken?.cancel();
+
     _translationTimer?.cancel();
     _isTranslating = false; // 重置翻译状态
+
     if (!_isDisposed && mounted) {
       setState(() {
         _translationStatus = BatchTranslationStatus.cancelled;

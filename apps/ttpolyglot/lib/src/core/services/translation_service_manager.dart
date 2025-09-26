@@ -63,6 +63,7 @@ class TranslationServiceManager extends GetxService {
     required TranslationEntry sourceEntries, // 翻译源
     required List<TranslationEntry> entries, // 需要的翻译条目
     TranslationProviderConfig? provider,
+    CancelToken? cancelToken, // 取消令牌
   }) async {
     try {
       // 检查配置（异步等待配置加载完成）
@@ -113,6 +114,7 @@ class TranslationServiceManager extends GetxService {
         sourceLanguage: sourceEntries.targetLanguage,
         targetLanguages: entries.map((e) => e.targetLanguage).toSet().toList(),
         config: selectedProvider,
+        cancelToken: cancelToken,
       );
 
       return result.items
