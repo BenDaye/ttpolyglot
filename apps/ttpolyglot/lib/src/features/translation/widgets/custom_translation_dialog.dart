@@ -54,7 +54,6 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
     _selectedSourceEntry ??= (primaryLanguage != null
         ? widget.entries.firstWhereOrNull((item) => item.targetLanguage.code == primaryLanguage.code)
         : widget.entries.first);
-    _selectedProvider ??= TranslationConfigController.instance.config.defaultProvider;
 
     return AlertDialog(
       title: Row(
@@ -94,8 +93,13 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
             mainAxisSize: MainAxisSize.min,
             children: [
               // 选择翻译接口
-              _buildProviderSelector(
-                list: TranslationConfigController.instance.config.providers,
+              Obx(
+                () {
+                  _selectedProvider ??= TranslationConfigController.instance.config.defaultProvider;
+                  return _buildProviderSelector(
+                    list: TranslationConfigController.instance.config.providers,
+                  );
+                },
               ),
               const SizedBox(height: 24.0),
               // 选择源语言
