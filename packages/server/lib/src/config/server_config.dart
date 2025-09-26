@@ -46,6 +46,7 @@ class ServerConfig {
   // 安全配置
   late final int bcryptRounds;
   late final String sessionSecret;
+  late final String encryptionKey;
   late final List<String> corsOrigins;
   late final bool corsAllowCredentials;
 
@@ -65,6 +66,7 @@ class ServerConfig {
   late final String? smtpUser;
   late final String? smtpPassword;
   late final String? smtpFromAddress;
+  late final String? siteUrl;
 
   /// 加载配置
   Future<void> load() async {
@@ -141,6 +143,7 @@ class ServerConfig {
   void _loadSecurityConfig() {
     bcryptRounds = int.parse(_env['BCRYPT_ROUNDS'] ?? '12');
     sessionSecret = _env['SESSION_SECRET'] ?? 'your-session-secret';
+    encryptionKey = _env['ENCRYPTION_KEY'] ?? 'your-encryption-key-32-chars';
 
     final originsString = _env['CORS_ORIGINS'] ?? 'http://localhost:3000';
     corsOrigins = originsString.split(',').map((e) => e.trim()).toList();
@@ -165,6 +168,7 @@ class ServerConfig {
     smtpUser = _env['SMTP_USER'];
     smtpPassword = _env['SMTP_PASSWORD'];
     smtpFromAddress = _env['SMTP_FROM_ADDRESS'];
+    siteUrl = _env['SITE_URL'];
   }
 
   /// 获取环境变量值

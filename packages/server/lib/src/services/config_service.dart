@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import '../config/server_config.dart';
+import '../models/api_error.dart';
 import '../models/system_config.dart';
 import '../utils/cache_utils.dart';
 import 'database_service.dart';
@@ -309,7 +310,7 @@ class ConfigService {
       final cached = await _redisService.getJson(cacheKey);
 
       if (cached != null) {
-        return List<String>.from(cached);
+        return List<String>.from(cached['categories'] ?? []);
       }
 
       final result = await _databaseService.query('''
@@ -322,7 +323,7 @@ class ConfigService {
       final categories = result.map((row) => row[0] as String).toList();
 
       // 缓存分类列表
-      await _redisService.setJson(cacheKey, categories, _config.cacheConfigTtl);
+      await _redisService.setJson(cacheKey, {'categories': categories}, _config.cacheConfigTtl);
 
       return categories;
     } catch (error, stackTrace) {

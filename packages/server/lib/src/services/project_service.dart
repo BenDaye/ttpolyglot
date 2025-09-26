@@ -830,7 +830,7 @@ class ProjectService {
     try {
       log('获取项目活动: $projectId, page=$page, limit=$limit', name: 'ProjectService');
 
-      const offset = (page - 1) * limit;
+      final offset = (page - 1) * limit;
 
       final activities = await _databaseService.query('''
         SELECT

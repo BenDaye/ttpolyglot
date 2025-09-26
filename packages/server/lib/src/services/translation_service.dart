@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import '../config/server_config.dart';
+import '../models/api_error.dart';
 import '../models/translation_entry.dart';
 import 'database_service.dart';
 import 'redis_service.dart';
