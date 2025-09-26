@@ -182,29 +182,9 @@ class PermissionMiddleware {
             return _forbidden('无效的用户信息');
           }
 
-          // 注意：项目ID应该通过其他方式传递给中间件
-          // 这里需要重新设计API路由以传递项目ID
-          return _internalError('项目所有者检查需要重新设计API路由');
-
-          // 检查是否为项目所有者
-          final isOwner = await _permissionService.isProjectOwner(
-            userId: userId,
-            projectId: projectId,
-          );
-
-          if (!isOwner) {
-            log('项目所有者检查失败: $userId 不是项目 $projectId 的所有者', name: 'PermissionMiddleware');
-            return _forbidden('只有项目所有者可以执行此操作');
-          }
-
-          // 将项目所有者信息添加到请求上下文
-          final updatedRequest = request.change(context: {
-            ...request.context,
-            'is_project_owner': true,
-            'project_id': projectId,
-          });
-
-          return await handler(updatedRequest);
+          // 注意：项目ID应该在路由级别处理
+          // 此方法需要重新设计为接受projectId参数
+          return _internalError('项目所有者检查需要projectId参数');
         } catch (error, stackTrace) {
           log('项目所有者中间件错误', error: error, stackTrace: stackTrace, name: 'PermissionMiddleware');
 
@@ -251,6 +231,21 @@ class PermissionMiddleware {
         }
       };
     };
+  }
+
+  /// 返回内部错误响应
+  Response _internalError(String message) {
+    final errorResponse = {
+      'error': {
+        'code': 'SYSTEM_INTERNAL_ERROR',
+        'message': message,
+        'metadata': {
+          'timestamp': DateTime.now().toUtc().toIso8601String(),
+        },
+      },
+    };
+
+    return Response(500, headers: {'Content-Type': 'application/json'}, body: jsonEncode(errorResponse));
   }
 
   /// 返回权限不足响应

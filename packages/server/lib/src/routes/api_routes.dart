@@ -3,8 +3,7 @@ import 'package:shelf_router/shelf_router.dart';
 
 import '../config/server_config.dart';
 import '../controllers/controllers.dart';
-import '../services/database_service.dart';
-import '../services/redis_service.dart';
+import '../services/services.dart';
 
 /// API路由配置
 class ApiRoutes {

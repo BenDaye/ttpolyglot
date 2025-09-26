@@ -40,8 +40,13 @@ class UserController {
   Future<Response> Function(Request, String) get updateUser => _updateUser;
   Future<Response> Function(Request, String) get deleteUser => _deleteUser;
   Future<Response> Function(Request) get me => _getCurrentUser;
+  Future<Response> Function(Request) get getCurrentUser => _getCurrentUser;
   Future<Response> Function(Request) get updateCurrentUser => _updateCurrentUser;
   Future<Response> Function(Request) get changePassword => _changePassword;
+  Future<Response> Function(Request) get uploadAvatar => _uploadAvatar;
+  Future<Response> Function(Request) get deleteAvatar => _deleteAvatar;
+  Future<Response> Function(Request) get getUserSessions => _getUserSessions;
+  Future<Response> Function(Request, String) get deleteSession => _deleteSession;
   Future<Response> Function(Request) get stats => _getUserStats;
 
   /// 获取用户列表

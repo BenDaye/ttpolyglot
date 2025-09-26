@@ -370,4 +370,41 @@ class AuthController {
 
     return null;
   }
+
+  /// 重发验证邮件
+  Future<Response> _resendVerification(Request request) async {
+    try {
+      final body = await request.readAsString();
+      final data = jsonDecode(body) as Map<String, dynamic>;
+
+      final email = data['email'] as String?;
+      if (email == null || email.isEmpty) {
+        return ResponseBuilder.error(
+          code: 'VALIDATION_MISSING_EMAIL',
+          message: '邮箱地址不能为空',
+          statusCode: 400,
+        );
+      }
+
+      final result = await _authService.resendVerification(email);
+
+      if (result.success) {
+        return ResponseBuilder.success(message: result.message);
+      } else {
+        return ResponseBuilder.error(
+          code: result.code,
+          message: result.message,
+          statusCode: 400,
+        );
+      }
+    } catch (error, stackTrace) {
+      log('重发验证邮件失败', error: error, stackTrace: stackTrace, name: 'AuthController');
+
+      return ResponseBuilder.error(
+        code: 'RESEND_VERIFICATION_FAILED',
+        message: '重发验证邮件失败，请稍后重试',
+        statusCode: 500,
+      );
+    }
+  }
 }

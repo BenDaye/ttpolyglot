@@ -41,6 +41,12 @@ class ProjectController {
   Future<Response> Function(Request, String) get getProjectMembers => _getProjectMembers;
   Future<Response> Function(Request, String) get addProjectMember => _addProjectMember;
   Future<Response> Function(Request, String, String) get removeProjectMember => _removeProjectMember;
+  Future<Response> Function(Request, String) get archiveProject => _archiveProject;
+  Future<Response> Function(Request, String) get restoreProject => _restoreProject;
+  Future<Response> Function(Request, String, String) get updateMemberRole => _updateMemberRole;
+  Future<Response> Function(Request, String) get getProjectLanguages => _getProjectLanguages;
+  Future<Response> Function(Request, String) get addProjectLanguage => _addProjectLanguage;
+  Future<Response> Function(Request, String, String) get removeProjectLanguage => _removeProjectLanguage;
   Future<Response> Function(Request) get stats => _getProjectStats;
 
   Future<Response> _getProjects(Request request) async {
