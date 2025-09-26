@@ -1,9 +1,50 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:ttpolyglot_core/core.dart';
+
+/// 取消令牌，用于中止翻译请求
+class CancelToken {
+  CancelToken();
+
+  bool _isCancelled = false;
+  final Completer<void> _completer = Completer<void>();
+
+  /// 是否已取消
+  bool get isCancelled => _isCancelled;
+
+  /// 取消future，当取消时会完成
+  Future<void> get whenCancelled => _completer.future;
+
+  /// 取消操作
+  void cancel() {
+    if (!_isCancelled) {
+      _isCancelled = true;
+      if (!_completer.isCompleted) {
+        _completer.complete();
+      }
+    }
+  }
+
+  /// 检查是否被取消，如果被取消则抛出异常
+  void throwIfCancelled() {
+    if (_isCancelled) {
+      throw CancelException('翻译请求已被取消');
+    }
+  }
+}
+
+/// 取消异常
+class CancelException implements Exception {
+  const CancelException(this.message);
+  final String message;
+
+  @override
+  String toString() => 'CancelException: $message';
+}
 
 /// 翻译API服务
 class TranslationApiService {
@@ -14,8 +55,12 @@ class TranslationApiService {
     required Language targetLanguage,
     required TranslationProviderConfig config,
     String? context,
+    CancelToken? cancelToken,
   }) async {
     try {
+      // 检查是否已被取消
+      cancelToken?.throwIfCancelled();
+
       switch (config.provider) {
         case TranslationProvider.baidu:
           return await _translateWithBaidu(
@@ -24,6 +69,7 @@ class TranslationApiService {
             targetLanguage: targetLanguage,
             config: config,
             context: context,
+            cancelToken: cancelToken,
           );
         case TranslationProvider.youdao:
           return await _translateWithYoudao(
@@ -32,6 +78,7 @@ class TranslationApiService {
             targetLanguage: targetLanguage,
             config: config,
             context: context,
+            cancelToken: cancelToken,
           );
         case TranslationProvider.google:
           return await _translateWithGoogle(
@@ -40,6 +87,7 @@ class TranslationApiService {
             targetLanguage: targetLanguage,
             config: config,
             context: context,
+            cancelToken: cancelToken,
           );
         case TranslationProvider.custom:
           return await _translateWithCustom(
@@ -48,6 +96,7 @@ class TranslationApiService {
             targetLanguage: targetLanguage,
             config: config,
             context: context,
+            cancelToken: cancelToken,
           );
       }
     } catch (error, stackTrace) {
@@ -68,8 +117,12 @@ class TranslationApiService {
     required List<Language> targetLanguages,
     required TranslationProviderConfig config,
     String? context,
+    CancelToken? cancelToken,
   }) async {
     try {
+      // 检查是否已被取消
+      cancelToken?.throwIfCancelled();
+
       // 对于自定义翻译提供商，使用专门的批量翻译方法
       if (config.provider == TranslationProvider.custom) {
         return await _translateBatchWithCustom(
@@ -77,12 +130,16 @@ class TranslationApiService {
           sourceLanguage: sourceLanguage,
           targetLanguages: targetLanguages,
           config: config,
+          cancelToken: cancelToken,
         );
       }
 
       // 对于其他翻译提供商，逐个翻译
       final List<Future<TranslationResult>> translationFutures = [];
       for (final targetLanguage in targetLanguages) {
+        // 在添加每个翻译任务前检查是否被取消
+        cancelToken?.throwIfCancelled();
+
         translationFutures.add(
           translateText(
             text: sourceText,
@@ -90,6 +147,7 @@ class TranslationApiService {
             targetLanguage: targetLanguage,
             config: config,
             context: context,
+            cancelToken: cancelToken,
           ),
         );
       }
@@ -98,14 +156,17 @@ class TranslationApiService {
       final results = await Future.wait(translationFutures);
 
       final items = <TranslationItem>[];
-      for (final targetLanguage in targetLanguages) {
+      for (int i = 0; i < targetLanguages.length; i++) {
+        final targetLanguage = targetLanguages[i];
+        final result = i < results.length ? results[i] : null;
+
         items.add(
           TranslationItem(
             originalText: sourceText,
             targetLanguage: targetLanguage,
-            translatedText: results.firstWhere((result) => result.targetLanguage == targetLanguage).translatedText,
-            success: results.firstWhere((result) => result.targetLanguage == targetLanguage).success,
-            error: results.firstWhere((result) => result.targetLanguage == targetLanguage).error,
+            translatedText: result?.translatedText ?? '',
+            success: result?.success ?? false,
+            error: result?.error ?? '翻译请求失败',
           ),
         );
       }
@@ -148,12 +209,19 @@ class TranslationApiService {
     required Language targetLanguage,
     required TranslationProviderConfig config,
     String? context,
+    CancelToken? cancelToken,
   }) async {
     try {
+      // 检查是否已被取消
+      cancelToken?.throwIfCancelled();
+
       final appId = config.appId;
       final appKey = config.appKey;
       final salt = DateTime.now().millisecondsSinceEpoch.toString();
       final sign = _generateBaiduSign(appId, text, salt, appKey);
+
+      // 再次检查是否已被取消
+      cancelToken?.throwIfCancelled();
 
       final requestBody = {
         'q': text,
@@ -169,6 +237,7 @@ class TranslationApiService {
         method: 'POST',
         body: requestBody,
         timeout: const Duration(seconds: 30),
+        cancelToken: cancelToken,
       );
 
       if (response['error_code'] != null) {
@@ -212,12 +281,19 @@ class TranslationApiService {
     required Language targetLanguage,
     required TranslationProviderConfig config,
     String? context,
+    CancelToken? cancelToken,
   }) async {
     try {
+      // 检查是否已被取消
+      cancelToken?.throwIfCancelled();
+
       final appId = config.appId;
       final appKey = config.appKey;
       final salt = DateTime.now().millisecondsSinceEpoch.toString();
       final sign = _generateYoudaoSign(appId, text, salt, appKey);
+
+      // 再次检查是否已被取消
+      cancelToken?.throwIfCancelled();
 
       final requestBody = {
         'q': text,
@@ -235,6 +311,7 @@ class TranslationApiService {
         method: 'POST',
         body: requestBody,
         timeout: const Duration(seconds: 30),
+        cancelToken: cancelToken,
       );
 
       if (response['errorCode'] != '0') {
@@ -278,8 +355,12 @@ class TranslationApiService {
     required Language targetLanguage,
     required TranslationProviderConfig config,
     String? context,
+    CancelToken? cancelToken,
   }) async {
     try {
+      // 检查是否已被取消
+      cancelToken?.throwIfCancelled();
+
       final url = 'https://translate.googleapis.com/translate_a/single?'
           'client=gtx&'
           'sl=${_convertLanguageCode(sourceLanguage.code, TranslationProvider.google)}&'
@@ -290,6 +371,7 @@ class TranslationApiService {
         url: url,
         method: 'GET',
         timeout: const Duration(seconds: 30),
+        cancelToken: cancelToken,
       );
 
       if (response is List && response.isNotEmpty) {
@@ -327,8 +409,12 @@ class TranslationApiService {
     required Language targetLanguage,
     required TranslationProviderConfig config,
     String? context,
+    CancelToken? cancelToken,
   }) async {
     try {
+      // 检查是否已被取消
+      cancelToken?.throwIfCancelled();
+
       if (config.apiUrl == null || config.apiUrl!.isEmpty) {
         return TranslationResult(
           success: false,
@@ -336,6 +422,9 @@ class TranslationApiService {
           error: '自定义翻译API地址未配置',
         );
       }
+
+      // 再次检查是否已被取消
+      cancelToken?.throwIfCancelled();
 
       final requestBody = {
         'text': text,
@@ -354,6 +443,7 @@ class TranslationApiService {
           if (config.appKey.isNotEmpty) 'Authorization': 'Bearer ${config.appKey}',
         },
         timeout: const Duration(seconds: 30),
+        cancelToken: cancelToken,
       );
 
       // 自定义API的响应格式需要根据实际API文档调整
@@ -541,10 +631,16 @@ class TranslationApiService {
     Map<String, dynamic>? body,
     Map<String, String>? headers,
     Duration? timeout,
+    CancelToken? cancelToken,
   }) async {
     final client = HttpClient();
+    HttpClientRequest? request;
+
     try {
-      final request = await client.openUrl(method, Uri.parse(url));
+      // 检查是否已被取消
+      cancelToken?.throwIfCancelled();
+
+      request = await client.openUrl(method, Uri.parse(url));
 
       // 设置超时
       if (timeout != null) {
@@ -554,11 +650,9 @@ class TranslationApiService {
 
       // 设置请求头
       request.headers.set('User-Agent', 'TTPolyglot/1.0');
-      if (headers != null) {
-        headers.forEach((key, value) {
-          request.headers.set(key, value);
-        });
-      }
+      headers?.forEach((key, value) {
+        request?.headers.set(key, value);
+      });
 
       // 设置请求体
       if (body != null) {
@@ -570,7 +664,30 @@ class TranslationApiService {
         }
       }
 
-      final response = await request.close();
+      // 再次检查是否已被取消
+      cancelToken?.throwIfCancelled();
+
+      // 如果有取消令牌，使用 Future.any 来实现取消机制
+      late Future<HttpClientResponse> responseFuture;
+
+      if (cancelToken != null) {
+        responseFuture = Future.any([
+          request.close(),
+          cancelToken.whenCancelled.then<HttpClientResponse>((_) {
+            // 如果被取消，中止请求
+            request?.abort();
+            throw CancelException('请求已被取消');
+          }),
+        ]);
+      } else {
+        responseFuture = request.close();
+      }
+
+      final response = await responseFuture;
+
+      // 检查是否在读取响应时被取消
+      cancelToken?.throwIfCancelled();
+
       final responseBody = await response.transform(utf8.decoder).join();
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -578,6 +695,13 @@ class TranslationApiService {
       } else {
         throw Exception('HTTP ${response.statusCode}: $responseBody');
       }
+    } catch (error) {
+      // 如果是取消异常，直接重新抛出
+      if (error is CancelException) {
+        rethrow;
+      }
+      // 其他异常继续抛出
+      rethrow;
     } finally {
       client.close();
     }
@@ -603,8 +727,12 @@ class TranslationApiService {
     required Language sourceLanguage,
     required List<Language> targetLanguages,
     required TranslationProviderConfig config,
+    CancelToken? cancelToken,
   }) async {
     try {
+      // 检查是否已被取消
+      cancelToken?.throwIfCancelled();
+
       final apiUrl = config.apiUrl;
       if (apiUrl == null || apiUrl.isEmpty) {
         return BatchTranslationResult(
@@ -614,6 +742,9 @@ class TranslationApiService {
           error: '自定义翻译API地址未配置',
         );
       }
+
+      // 再次检查是否已被取消
+      cancelToken?.throwIfCancelled();
 
       final targetLanguageCode =
           targetLanguages.map((language) => _convertToCustomLanguageCode(language.code)).toList();
@@ -649,6 +780,7 @@ class TranslationApiService {
         body: requestBody,
         headers: headers,
         timeout: const Duration(seconds: 30),
+        cancelToken: cancelToken,
       );
 
       // 解析响应结果

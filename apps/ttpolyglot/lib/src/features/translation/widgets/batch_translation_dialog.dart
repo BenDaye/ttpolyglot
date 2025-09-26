@@ -65,10 +65,14 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
   Timer? _translationTimer;
   bool _shouldStop = false;
   bool _isTranslating = false; // 防止并发翻译
+  bool _isDisposed = false; // 弹窗是否已被关闭
 
   @override
   void dispose() {
-    _translationTimer?.cancel();
+    _isDisposed = true; // 标记弹窗已关闭
+    _shouldStop = true; // 停止翻译
+    _isTranslating = false; // 重置翻译状态
+    _translationTimer?.cancel(); // 取消定时器
     super.dispose();
   }
 
@@ -591,7 +595,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
         );
       }).toList(),
       onChanged: (value) {
-        if (value != null) {
+        if (value != null && mounted) {
           setState(() {
             _selectedProvider = value;
           });
@@ -670,7 +674,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
         );
       }).toList(),
       onChanged: (value) {
-        if (value != null) {
+        if (value != null && mounted) {
           setState(() {
             _selectedSourceEntry = value;
           });
@@ -711,9 +715,11 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
           Switch(
             value: _isOverride,
             onChanged: (value) {
-              setState(() {
-                _isOverride = value;
-              });
+              if (mounted) {
+                setState(() {
+                  _isOverride = value;
+                });
+              }
             },
           ),
         ],
@@ -898,9 +904,11 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
       _prepareBatchTranslation();
 
       // 开始翻译
-      setState(() {
-        _translationStatus = BatchTranslationStatus.running;
-      });
+      if (!_isDisposed && mounted) {
+        setState(() {
+          _translationStatus = BatchTranslationStatus.running;
+        });
+      }
 
       _startTranslationProcess();
     } catch (error, stackTrace) {
@@ -974,10 +982,12 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
       if (_shouldStop || _currentIndex >= _pendingKeys.length) {
         timer.cancel();
         if (_currentIndex >= _pendingKeys.length) {
-          setState(() {
-            _translationStatus = BatchTranslationStatus.completed;
-          });
-          _showCompletionDialog();
+          if (!_isDisposed && mounted) {
+            setState(() {
+              _translationStatus = BatchTranslationStatus.completed;
+            });
+            _showCompletionDialog();
+          }
         }
         return;
       }
@@ -991,7 +1001,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
   /// 翻译下一个Key的所有目标语言
   Future<void> _translateNextKey() async {
-    if (_currentIndex >= _pendingKeys.length || _isTranslating) return;
+    if (_currentIndex >= _pendingKeys.length || _isTranslating || _isDisposed) return;
 
     // 设置翻译状态，防止并发
     _isTranslating = true;
@@ -1012,11 +1022,23 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
         provider: _selectedProvider!,
       );
 
+      // 检查弹窗是否已关闭，如果已关闭则停止处理
+      if (_isDisposed) {
+        log('弹窗已关闭，停止处理翻译结果', name: 'BatchTranslationDialog');
+        return;
+      }
+
       // 处理翻译结果
       int keySuccessCount = 0;
       int keyFailCount = 0;
 
       for (int i = 0; i < results.length; i++) {
+        // 再次检查弹窗状态
+        if (_isDisposed) {
+          log('弹窗已关闭，停止处理翻译结果', name: 'BatchTranslationDialog');
+          return;
+        }
+
         final result = results[i];
         final entry = targetEntries[i];
 
@@ -1029,8 +1051,10 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
           );
           _processedEntries.add(updatedEntry);
 
-          // 立即更新到控制器
-          await widget.controller.updateTranslationEntry(updatedEntry, isShowSnackbar: false);
+          // 立即更新到控制器（只有在弹窗未关闭时）
+          if (!_isDisposed) {
+            await widget.controller.updateTranslationEntry(updatedEntry, isShowSnackbar: false);
+          }
         } else {
           keyFailCount++;
           final errorMessage = result.error ?? '翻译失败';
@@ -1050,25 +1074,32 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
       _isTranslating = false;
     }
 
-    setState(() {
-      _currentIndex++;
-    });
+    // 只有在弹窗未关闭时才更新状态
+    if (!_isDisposed && mounted) {
+      setState(() {
+        _currentIndex++;
+      });
+    }
   }
 
   /// 暂停翻译
   void _pauseTranslation() {
-    setState(() {
-      _translationStatus = BatchTranslationStatus.paused;
-    });
+    if (!_isDisposed && mounted) {
+      setState(() {
+        _translationStatus = BatchTranslationStatus.paused;
+      });
+    }
     _translationTimer?.cancel();
     _isTranslating = false; // 重置翻译状态
   }
 
   /// 继续翻译
   void _resumeTranslation() {
-    setState(() {
-      _translationStatus = BatchTranslationStatus.running;
-    });
+    if (!_isDisposed && mounted) {
+      setState(() {
+        _translationStatus = BatchTranslationStatus.running;
+      });
+    }
     _startTranslationProcess();
   }
 
@@ -1077,9 +1108,11 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
     _shouldStop = true;
     _translationTimer?.cancel();
     _isTranslating = false; // 重置翻译状态
-    setState(() {
-      _translationStatus = BatchTranslationStatus.cancelled;
-    });
+    if (!_isDisposed && mounted) {
+      setState(() {
+        _translationStatus = BatchTranslationStatus.cancelled;
+      });
+    }
   }
 
   /// 保存当前进度
@@ -1097,6 +1130,8 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
   /// 显示完成对话框
   void _showCompletionDialog() {
+    if (_isDisposed) return; // 如果弹窗已关闭，不显示完成对话框
+
     final message = '批量翻译完成！\n成功: $_successCount 个\n失败: $_failCount 个';
 
     Get.snackbar(
