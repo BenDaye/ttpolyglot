@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 
@@ -18,10 +16,9 @@ class EmailService {
     required String username,
     required String token,
   }) async {
+    final logger = LoggerFactory.getLogger('EmailService');
+    logger.info('发送邮箱验证邮件: $to');
     try {
-      final logger = LoggerFactory.getLogger('EmailService');
-      logger.info('发送邮箱验证邮件: $to');
-
       if (!_isEmailConfigured()) {
         logger.warn('邮件服务未配置，跳过发送');
         return false;
@@ -41,7 +38,7 @@ class EmailService {
         htmlContent: htmlContent,
       );
     } catch (error, stackTrace) {
-      log('sendEmailVerification', error: error, stackTrace: stackTrace, name: 'EmailService');
+      logger.error('sendEmailVerification', error: error, stackTrace: stackTrace);
       return false;
     }
   }
@@ -52,10 +49,9 @@ class EmailService {
     required String username,
     required String token,
   }) async {
+    final logger = LoggerFactory.getLogger('EmailService');
+    logger.info('发送密码重置邮件: $to');
     try {
-      final logger = LoggerFactory.getLogger('EmailService');
-      logger.info('发送密码重置邮件: $to');
-
       if (!_isEmailConfigured()) {
         logger.warn('邮件服务未配置，跳过发送');
         return false;
@@ -75,7 +71,7 @@ class EmailService {
         htmlContent: htmlContent,
       );
     } catch (error, stackTrace) {
-      log('sendPasswordReset', error: error, stackTrace: stackTrace, name: 'EmailService');
+      logger.error('sendPasswordReset', error: error, stackTrace: stackTrace);
       return false;
     }
   }
@@ -86,10 +82,9 @@ class EmailService {
     required String username,
     required String token,
   }) async {
+    final logger = LoggerFactory.getLogger('EmailService');
+    logger.info('发送忘记密码邮件: $to');
     try {
-      final logger = LoggerFactory.getLogger('EmailService');
-      logger.info('发送忘记密码邮件: $to');
-
       if (!_isEmailConfigured()) {
         logger.warn('邮件服务未配置，跳过发送');
         return false;
@@ -109,7 +104,7 @@ class EmailService {
         htmlContent: htmlContent,
       );
     } catch (error, stackTrace) {
-      log('sendForgotPassword', error: error, stackTrace: stackTrace, name: 'EmailService');
+      logger.error('sendForgotPassword', error: error, stackTrace: stackTrace);
       return false;
     }
   }
@@ -129,11 +124,10 @@ class EmailService {
     required String subject,
     required String htmlContent,
   }) async {
+    final logger = LoggerFactory.getLogger('EmailService');
+    logger.info('发送邮件到: $to');
+    logger.info('主题: $subject');
     try {
-      final logger = LoggerFactory.getLogger('EmailService');
-      logger.info('发送邮件到: $to');
-      logger.info('主题: $subject');
-
       final message = Message()
         ..from = Address(_config.smtpFromAddress!, 'TTPolyglot')
         ..recipients.add(to)
@@ -155,7 +149,7 @@ class EmailService {
       logger.error('邮件发送失败', error: result.error, stackTrace: result.stackTrace);
       return false;
     } catch (error, stackTrace) {
-      log('_sendEmail', error: error, stackTrace: stackTrace, name: 'EmailService');
+      logger.error('_sendEmail', error: error, stackTrace: stackTrace);
       return false;
     }
   }
