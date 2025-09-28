@@ -2,6 +2,15 @@
 -- 创建时间: 2024-12-26
 -- 描述: 创建用户认证和权限管理相关的核心表
 
+-- 创建通用触发器函数
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 -- 1. 用户表
 CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
