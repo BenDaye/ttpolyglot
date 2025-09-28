@@ -58,6 +58,32 @@ start() {
     fi
 }
 
+# 生成开发环境配置文件
+generate_env_dev() {
+    echo "🔧 检查开发环境配置..."
+    
+    if [ ! -f ".env.dev" ]; then
+        if [ -f ".env.example" ]; then
+            echo "📋 根据 .env.example 生成 .env.dev 文件..."
+            cp .env.example .env.dev
+            
+            # 修改开发环境特定的配置
+            sed -i '' 's/ENVIRONMENT=dev/ENVIRONMENT=dev/' .env.dev
+            sed -i '' 's/LOG_LEVEL=info/LOG_LEVEL=debug/' .env.dev
+            sed -i '' 's/DEBUG=true/DEBUG=true/' .env.dev
+            sed -i '' 's/HOT_RELOAD=true/HOT_RELOAD=true/' .env.dev
+            
+            echo "✅ .env.dev 文件已生成"
+            echo "💡 提示: 如需自定义配置，请编辑 .env.dev 文件"
+        else
+            echo "❌ 未找到 .env.example 文件，无法生成 .env.dev"
+            echo "ℹ️  将使用默认配置启动"
+        fi
+    else
+        echo "✅ .env.dev 文件已存在"
+    fi
+}
+
 # 启动应用服务器
 start_application() {
     echo "🚀 启动应用服务器..."
@@ -68,6 +94,9 @@ start_application() {
         pkill -f "dart run bin/server.dart"
         sleep 2
     fi
+    
+    # 生成开发环境配置
+    generate_env_dev
     
     # 加载环境变量（如果存在）
     if [ -f ".env.dev" ]; then
