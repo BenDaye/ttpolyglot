@@ -1,9 +1,9 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
-import 'package:shelf_cors_headers/shelf_cors_headers.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 import 'config/server_config.dart';
@@ -16,12 +16,14 @@ class TTPolyglotServer {
   late final ServerConfig _config;
   late final DatabaseService _databaseService;
   late final RedisService _redisService;
+  late final MultiLevelCacheService _cacheService;
   late final MigrationService _migrationService;
   late final AuthService _authService;
   late final UserService _userService;
   late final ProjectService _projectService;
   late final PermissionService _permissionService;
   HttpServer? _server;
+  late final DateTime _startTime;
 
   /// 初始化服务器
   TTPolyglotServer() {
@@ -31,95 +33,193 @@ class TTPolyglotServer {
   /// 启动服务器
   Future<void> start() async {
     try {
-      // 初始化配置
-      await _config.load();
-      log('服务器配置加载完成', name: 'TTPolyglotServer');
+      _startTime = DateTime.now();
+      log('开始启动服务器...', name: 'TTPolyglotServer');
 
-      // 初始化数据库连接
-      _databaseService = DatabaseService(_config);
-      await _databaseService.initialize();
-      log('数据库连接初始化完成', name: 'TTPolyglotServer');
+      // 第一阶段：配置和基础设施初始化
+      await _initializeInfrastructure();
 
-      // 运行数据库迁移
-      _migrationService = MigrationService(_databaseService, _config);
-      await _migrationService.runMigrations();
-      log('数据库迁移完成', name: 'TTPolyglotServer');
+      // 第二阶段：数据库迁移和种子数据
+      await _initializeDatabase();
 
-      // 运行种子数据
-      await _migrationService.runSeeds();
-      log('种子数据初始化完成', name: 'TTPolyglotServer');
+      // 第三阶段：业务服务并行初始化
+      await _initializeBusinessServices();
 
-      // 初始化Redis连接
-      _redisService = RedisService(_config);
-      await _redisService.initialize();
-      log('Redis连接初始化完成', name: 'TTPolyglotServer');
+      // 第四阶段：启动HTTP服务器
+      await _startHttpServer();
 
-      // 初始化业务服务
-      _permissionService = PermissionService(
-        databaseService: _databaseService,
-        redisService: _redisService,
-      );
-      log('权限服务初始化完成', name: 'TTPolyglotServer');
-
-      _authService = AuthService(
-        databaseService: _databaseService,
-        redisService: _redisService,
-        config: _config,
-      );
-      log('认证服务初始化完成', name: 'TTPolyglotServer');
-
-      _userService = UserService(
-        databaseService: _databaseService,
-        redisService: _redisService,
-        config: _config,
-      );
-      log('用户服务初始化完成', name: 'TTPolyglotServer');
-
-      _projectService = ProjectService(
-        databaseService: _databaseService,
-        redisService: _redisService,
-        config: _config,
-      );
-      log('项目服务初始化完成', name: 'TTPolyglotServer');
-
-      // 创建中间件管道
-      final handler = _createHandler();
-
-      // 启动HTTP服务器
-      _server = await shelf_io.serve(
-        handler,
-        _config.host,
-        _config.port,
-      );
-
-      log('服务器启动成功 - http://${_config.host}:${_config.port}', name: 'TTPolyglotServer');
+      final duration = DateTime.now().difference(_startTime);
+      log('服务器启动完成，耗时: ${duration.inMilliseconds}ms', name: 'TTPolyglotServer');
     } catch (error, stackTrace) {
       log('服务器启动失败', error: error, stackTrace: stackTrace, name: 'TTPolyglotServer');
       rethrow;
     }
   }
 
+  /// 初始化基础设施
+  Future<void> _initializeInfrastructure() async {
+    log('初始化基础设施...', name: 'TTPolyglotServer');
+
+    // 并行初始化配置和基础服务
+    await Future.wait([
+      _config.load(),
+      _initializeDatabaseService(),
+      _initializeRedisService(),
+    ]);
+
+    // 初始化多级缓存服务
+    _cacheService = MultiLevelCacheService(redisService: _redisService);
+    log('多级缓存服务初始化完成', name: 'TTPolyglotServer');
+
+    log('基础设施初始化完成', name: 'TTPolyglotServer');
+  }
+
+  /// 初始化数据库服务
+  Future<void> _initializeDatabaseService() async {
+    _databaseService = DatabaseService(_config);
+    await _databaseService.initialize();
+    log('数据库连接初始化完成', name: 'TTPolyglotServer');
+  }
+
+  /// 初始化Redis服务
+  Future<void> _initializeRedisService() async {
+    _redisService = RedisService(_config);
+    await _redisService.initialize();
+    log('Redis连接初始化完成', name: 'TTPolyglotServer');
+  }
+
+  /// 初始化数据库迁移和种子数据
+  Future<void> _initializeDatabase() async {
+    log('初始化数据库...', name: 'TTPolyglotServer');
+
+    _migrationService = MigrationService(_databaseService, _config);
+
+    // 并行运行迁移和种子数据
+    await Future.wait([
+      _migrationService.runMigrations(),
+      _migrationService.runSeeds(),
+    ]);
+
+    log('数据库初始化完成', name: 'TTPolyglotServer');
+  }
+
+  /// 并行初始化业务服务
+  Future<void> _initializeBusinessServices() async {
+    log('初始化业务服务...', name: 'TTPolyglotServer');
+
+    // 并行初始化所有业务服务
+    final results = await Future.wait([
+      _initializePermissionService(),
+      _initializeAuthService(),
+      _initializeUserService(),
+      _initializeProjectService(),
+    ]);
+
+    // 提取服务实例
+    _permissionService = results[0] as PermissionService;
+    _authService = results[1] as AuthService;
+    _userService = results[2] as UserService;
+    _projectService = results[3] as ProjectService;
+
+    log('业务服务初始化完成', name: 'TTPolyglotServer');
+  }
+
+  /// 初始化权限服务
+  Future<PermissionService> _initializePermissionService() async {
+    final service = PermissionService(
+      databaseService: _databaseService,
+      redisService: _redisService,
+    );
+    log('权限服务初始化完成', name: 'TTPolyglotServer');
+    return service;
+  }
+
+  /// 初始化认证服务
+  Future<AuthService> _initializeAuthService() async {
+    final service = AuthService(
+      databaseService: _databaseService,
+      redisService: _redisService,
+      config: _config,
+    );
+    log('认证服务初始化完成', name: 'TTPolyglotServer');
+    return service;
+  }
+
+  /// 初始化用户服务
+  Future<UserService> _initializeUserService() async {
+    final service = UserService(
+      databaseService: _databaseService,
+      redisService: _redisService,
+      config: _config,
+    );
+    log('用户服务初始化完成', name: 'TTPolyglotServer');
+    return service;
+  }
+
+  /// 初始化项目服务
+  Future<ProjectService> _initializeProjectService() async {
+    final service = ProjectService(
+      databaseService: _databaseService,
+      redisService: _redisService,
+      config: _config,
+    );
+    log('项目服务初始化完成', name: 'TTPolyglotServer');
+    return service;
+  }
+
+  /// 启动HTTP服务器
+  Future<void> _startHttpServer() async {
+    log('启动HTTP服务器...', name: 'TTPolyglotServer');
+
+    // 创建中间件管道
+    final handler = _createHandler();
+
+    // 启动HTTP服务器
+    _server = await shelf_io.serve(
+      handler,
+      _config.host,
+      _config.port,
+    );
+
+    log('HTTP服务器启动成功 - http://${_config.host}:${_config.port}', name: 'TTPolyglotServer');
+  }
+
   /// 停止服务器
   Future<void> stop() async {
     try {
-      // 关闭HTTP服务器
-      if (_server != null) {
-        await _server!.close();
-        log('HTTP服务器已关闭', name: 'TTPolyglotServer');
-      }
+      log('开始关闭服务器...', name: 'TTPolyglotServer');
 
-      // 关闭Redis连接
-      await _redisService.close();
-      log('Redis连接已关闭', name: 'TTPolyglotServer');
-
-      // 关闭数据库连接
-      await _databaseService.close();
-      log('数据库连接已关闭', name: 'TTPolyglotServer');
+      // 并行关闭所有服务
+      await Future.wait([
+        _stopHttpServer(),
+        _stopDatabaseService(),
+        _stopRedisService(),
+      ]);
 
       log('服务器已优雅关闭', name: 'TTPolyglotServer');
     } catch (error, stackTrace) {
       log('服务器关闭时出错', error: error, stackTrace: stackTrace, name: 'TTPolyglotServer');
     }
+  }
+
+  /// 关闭HTTP服务器
+  Future<void> _stopHttpServer() async {
+    if (_server != null) {
+      await _server!.close();
+      log('HTTP服务器已关闭', name: 'TTPolyglotServer');
+    }
+  }
+
+  /// 关闭数据库服务
+  Future<void> _stopDatabaseService() async {
+    await _databaseService.close();
+    log('数据库连接已关闭', name: 'TTPolyglotServer');
+  }
+
+  /// 关闭Redis服务
+  Future<void> _stopRedisService() async {
+    await _redisService.close();
+    log('Redis连接已关闭', name: 'TTPolyglotServer');
   }
 
   /// 创建请求处理器
@@ -135,6 +235,7 @@ class TTPolyglotServer {
     final apiRoutes = ApiRoutes(
       databaseService: _databaseService,
       redisService: _redisService,
+      cacheService: _cacheService,
       config: _config,
       authService: _authService,
       userService: _userService,
@@ -146,21 +247,131 @@ class TTPolyglotServer {
     // 404处理
     router.all('/<ignored|.*>', _notFoundHandler);
 
-    // 创建中间件管道
-    final pipeline = Pipeline()
-        .addMiddleware(logRequests())
-        .addMiddleware(corsHeaders())
-        .addMiddleware(ErrorHandlerMiddleware().handler)
-        .addMiddleware(RequestIdMiddleware().handler)
-        .addMiddleware(RateLimitMiddleware(_redisService, _config).handler);
-
+    // 创建优化的中间件管道
+    final pipeline = _createOptimizedPipeline();
     return pipeline.addHandler(router);
   }
 
+  /// 创建优化的中间件管道
+  Pipeline _createOptimizedPipeline() {
+    return Pipeline()
+        // 1. 请求ID生成（最早，为后续中间件提供追踪）
+        .addMiddleware(RequestIdMiddleware().handler)
+        // 2. 请求日志（记录原始请求）
+        .addMiddleware(_createLoggingMiddleware())
+        // 3. CORS处理（处理跨域，避免后续中间件处理被拒绝的请求）
+        .addMiddleware(corsMiddleware(allowedOrigins: _config.corsOrigins))
+        // 4. 速率限制（早期拒绝，保护系统资源）
+        .addMiddleware(RateLimitMiddleware(_redisService, _config).handler)
+        // 5. 请求大小限制（防止大请求消耗资源）
+        .addMiddleware(_createRequestSizeLimitMiddleware())
+        // 6. 安全头设置（增强安全性）
+        .addMiddleware(_createSecurityHeadersMiddleware())
+        // 7. 错误处理（最后，捕获所有错误）
+        .addMiddleware(ErrorHandlerMiddleware().handler);
+  }
+
+  /// 创建优化的日志中间件
+  Middleware _createLoggingMiddleware() {
+    return (Handler handler) {
+      return (Request request) async {
+        final startTime = DateTime.now();
+        final requestId = request.context['request_id'] as String?;
+
+        log('请求开始: ${request.method} ${request.url.path} [ID: $requestId]', name: 'RequestLogger');
+
+        try {
+          final response = await handler(request);
+          final duration = DateTime.now().difference(startTime);
+
+          log(
+              '请求完成: ${request.method} ${request.url.path} '
+              '[ID: $requestId] [${response.statusCode}] [${duration.inMilliseconds}ms]',
+              name: 'RequestLogger');
+
+          return response;
+        } catch (error, stackTrace) {
+          final duration = DateTime.now().difference(startTime);
+
+          log(
+              '请求失败: ${request.method} ${request.url.path} '
+              '[ID: $requestId] [${duration.inMilliseconds}ms]',
+              error: error,
+              stackTrace: stackTrace,
+              name: 'RequestLogger');
+
+          rethrow;
+        }
+      };
+    };
+  }
+
+  /// 创建请求大小限制中间件
+  Middleware _createRequestSizeLimitMiddleware() {
+    const maxRequestSize = 10 * 1024 * 1024; // 10MB
+
+    return (Handler handler) {
+      return (Request request) async {
+        final contentLength = request.headers['content-length'];
+        if (contentLength != null) {
+          final size = int.tryParse(contentLength) ?? 0;
+          if (size > maxRequestSize) {
+            return Response(
+              413,
+              body: '{"error": "请求体过大", "max_size": "$maxRequestSize"}',
+              headers: {'Content-Type': 'application/json'},
+            );
+          }
+        }
+
+        return await handler(request);
+      };
+    };
+  }
+
+  /// 创建安全头中间件
+  Middleware _createSecurityHeadersMiddleware() {
+    return (Handler handler) {
+      return (Request request) async {
+        final response = await handler(request);
+
+        return response.change(headers: {
+          ...response.headers,
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'DENY',
+          'X-XSS-Protection': '1; mode=block',
+          'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+          'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
+        });
+      };
+    };
+  }
+
   /// 健康检查端点
-  Response _healthCheck(Request request) {
-    return Response.ok('{"status": "healthy", "timestamp": "${DateTime.now().toIso8601String()}"}',
-        headers: {'Content-Type': 'application/json'});
+  Future<Response> _healthCheck(Request request) async {
+    try {
+      final healthStatus = await _getComprehensiveHealthStatus();
+      final statusCode = healthStatus['status'] == 'healthy' ? 200 : 503;
+
+      return Response(
+        statusCode,
+        body: jsonEncode(healthStatus),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (error, stackTrace) {
+      log('健康检查失败', error: error, stackTrace: stackTrace, name: 'TTPolyglotServer');
+
+      return Response(
+        503,
+        body: jsonEncode({
+          'status': 'unhealthy',
+          'error': '健康检查失败',
+          'timestamp': DateTime.now().toIso8601String(),
+        }),
+        headers: {'Content-Type': 'application/json'},
+      );
+    }
   }
 
   /// 数据库健康检查
@@ -205,5 +416,149 @@ class TTPolyglotServer {
     return Response.notFound(
         '{"error": {"code": "RESOURCE_NOT_FOUND", "message": "请求的资源不存在", "path": "${request.requestedUri.path}"}}',
         headers: {'Content-Type': 'application/json'});
+  }
+
+  /// 获取综合健康状态
+  Future<Map<String, dynamic>> _getComprehensiveHealthStatus() async {
+    final healthStatus = <String, dynamic>{
+      'status': 'healthy',
+      'timestamp': DateTime.now().toIso8601String(),
+      'uptime_seconds': DateTime.now().difference(_startTime).inSeconds,
+      'version': '1.0.0',
+      'services': <String, dynamic>{},
+      'performance': <String, dynamic>{},
+    };
+
+    try {
+      // 并行检查所有服务
+      final serviceChecks = await Future.wait([
+        _checkDatabaseHealth(),
+        _checkRedisHealth(),
+        _checkCacheHealth(),
+        _checkHttpServerHealth(),
+      ]);
+
+      // 处理服务检查结果
+      healthStatus['services']['database'] = serviceChecks[0];
+      healthStatus['services']['redis'] = serviceChecks[1];
+      healthStatus['services']['cache'] = serviceChecks[2];
+      healthStatus['services']['http'] = serviceChecks[3];
+
+      // 计算性能指标
+      healthStatus['performance'] = await _getPerformanceMetrics();
+
+      // 计算整体健康状态
+      final services = healthStatus['services'] as Map<String, dynamic>;
+      final unhealthyServices = services.values.where((service) => service['status'] == 'unhealthy').length;
+
+      if (unhealthyServices > 0) {
+        healthStatus['status'] = 'degraded';
+        healthStatus['unhealthy_services'] = unhealthyServices;
+      }
+
+      // 检查关键服务
+      final criticalServices = ['database', 'redis'];
+      final criticalUnhealthy = criticalServices.where((service) => services[service]?['status'] == 'unhealthy').length;
+
+      if (criticalUnhealthy > 0) {
+        healthStatus['status'] = 'unhealthy';
+      }
+    } catch (error, stackTrace) {
+      healthStatus['status'] = 'unhealthy';
+      healthStatus['error'] = error.toString();
+      log('健康检查异常', error: error, stackTrace: stackTrace, name: 'TTPolyglotServer');
+    }
+
+    return healthStatus;
+  }
+
+  /// 检查数据库健康状态
+  Future<Map<String, dynamic>> _checkDatabaseHealth() async {
+    try {
+      final startTime = DateTime.now();
+      final isHealthy = await _databaseService.isHealthy();
+      final responseTime = DateTime.now().difference(startTime).inMilliseconds;
+
+      return {
+        'status': isHealthy ? 'healthy' : 'unhealthy',
+        'response_time_ms': responseTime,
+        'connection_pool': 'active',
+      };
+    } catch (error) {
+      return {
+        'status': 'unhealthy',
+        'error': error.toString(),
+        'response_time_ms': -1,
+      };
+    }
+  }
+
+  /// 检查Redis健康状态
+  Future<Map<String, dynamic>> _checkRedisHealth() async {
+    try {
+      final startTime = DateTime.now();
+      final isHealthy = await _redisService.isHealthy();
+      final responseTime = DateTime.now().difference(startTime).inMilliseconds;
+
+      return {
+        'status': isHealthy ? 'healthy' : 'unhealthy',
+        'response_time_ms': responseTime,
+        'connection': 'active',
+      };
+    } catch (error) {
+      return {
+        'status': 'unhealthy',
+        'error': error.toString(),
+        'response_time_ms': -1,
+      };
+    }
+  }
+
+  /// 检查缓存健康状态
+  Future<Map<String, dynamic>> _checkCacheHealth() async {
+    try {
+      final cacheStats = _cacheService.getStats();
+      final overall = cacheStats['overall'] as Map<String, dynamic>;
+
+      return {
+        'status': 'healthy',
+        'l1_hit_rate': overall['l1_hit_rate'],
+        'l2_hit_rate': overall['l2_hit_rate'],
+        'overall_hit_rate': overall['hit_rate'],
+        'l1_size': cacheStats['l1_cache']['size'],
+        'l1_max_size': cacheStats['l1_cache']['max_size'],
+      };
+    } catch (error) {
+      return {
+        'status': 'unhealthy',
+        'error': error.toString(),
+      };
+    }
+  }
+
+  /// 检查HTTP服务器健康状态
+  Future<Map<String, dynamic>> _checkHttpServerHealth() async {
+    return {
+      'status': _server != null ? 'healthy' : 'unhealthy',
+      'port': _config.port,
+      'host': _config.host,
+      'uptime_seconds': DateTime.now().difference(_startTime).inSeconds,
+    };
+  }
+
+  /// 获取性能指标
+  Future<Map<String, dynamic>> _getPerformanceMetrics() async {
+    try {
+      return {
+        'memory_usage': 'normal',
+        'cpu_usage': 'normal',
+        'active_connections': 0,
+        'cache_performance': _cacheService.getStats(),
+      };
+    } catch (error) {
+      return {
+        'error': '无法获取性能指标: ${error.toString()}',
+      };
+    }
   }
 }

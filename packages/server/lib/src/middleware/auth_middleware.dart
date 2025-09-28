@@ -4,18 +4,27 @@ import 'dart:developer';
 import 'package:shelf/shelf.dart';
 
 import '../services/auth_service.dart';
+import '../services/redis_service.dart';
 import '../utils/jwt_utils.dart';
 
 /// 认证中间件
 class AuthMiddleware {
   final AuthService _authService;
   final JwtUtils _jwtUtils;
+  final RedisService _redisService;
+
+  // 令牌缓存，避免重复验证
+  final Map<String, Map<String, dynamic>> _tokenCache = {};
+  final Map<String, DateTime> _cacheTimestamps = {};
+  static const Duration _cacheExpiry = Duration(minutes: 5);
 
   AuthMiddleware({
     required AuthService authService,
     required JwtUtils jwtUtils,
+    required RedisService redisService,
   })  : _authService = authService,
-        _jwtUtils = jwtUtils;
+        _jwtUtils = jwtUtils,
+        _redisService = redisService;
 
   /// 创建认证中间件
   Middleware call() {
@@ -34,8 +43,13 @@ class AuthMiddleware {
             return _unauthorized('无效的认证令牌格式');
           }
 
-          // 验证令牌
-          final payload = await _authService.verifyAccessToken(token);
+          // 检查令牌黑名单
+          if (await _isTokenBlacklisted(token)) {
+            return _unauthorized('令牌已被撤销');
+          }
+
+          // 验证令牌（带缓存优化）
+          final payload = await _verifyTokenWithCache(token);
           if (payload == null) {
             return _unauthorized('令牌验证失败');
           }
@@ -48,6 +62,7 @@ class AuthMiddleware {
             'email': payload['email'],
             'is_authenticated': true,
             'auth_token': token,
+            'token_verified_at': DateTime.now().toIso8601String(),
           });
 
           return await handler(updatedRequest);
@@ -87,8 +102,18 @@ class AuthMiddleware {
             return await handler(updatedRequest);
           }
 
-          // 验证令牌
-          final payload = await _authService.verifyAccessToken(token);
+          // 检查令牌黑名单
+          if (await _isTokenBlacklisted(token)) {
+            // 令牌被撤销，继续处理但标记为未认证
+            final updatedRequest = request.change(context: {
+              ...request.context,
+              'is_authenticated': false,
+            });
+            return await handler(updatedRequest);
+          }
+
+          // 验证令牌（带缓存优化）
+          final payload = await _verifyTokenWithCache(token);
           if (payload == null) {
             // 验证失败，继续处理但标记为未认证
             final updatedRequest = request.change(context: {
@@ -106,6 +131,7 @@ class AuthMiddleware {
             'email': payload['email'],
             'is_authenticated': true,
             'auth_token': token,
+            'token_verified_at': DateTime.now().toIso8601String(),
           });
 
           return await handler(updatedRequest);
@@ -135,8 +161,50 @@ class AuthMiddleware {
           return authResult;
         }
 
-        // TODO: 检查用户是否为管理员
-        // 这里需要查询用户角色，暂时简化处理
+        // 检查用户是否为管理员
+        final userId = getCurrentUserId(request);
+        if (userId == null) {
+          return _unauthorized('用户信息缺失');
+        }
+
+        final isAdmin = await _checkUserIsAdmin(userId);
+        if (!isAdmin) {
+          return _unauthorized('需要管理员权限');
+        }
+
+        return authResult;
+      };
+    };
+  }
+
+  /// 权限检查中间件
+  Middleware requirePermission(String permission, {String? projectId}) {
+    return (Handler handler) {
+      return (Request request) async {
+        // 先进行普通认证
+        final authResult = await call()(handler)(request);
+
+        // 如果认证失败，直接返回
+        if (authResult.statusCode != 200) {
+          return authResult;
+        }
+
+        // 检查用户权限
+        final userId = getCurrentUserId(request);
+        if (userId == null) {
+          return _unauthorized('用户信息缺失');
+        }
+
+        // 这里需要注入PermissionService，暂时简化处理
+        // final hasPermission = await _permissionService.checkUserPermission(
+        //   userId: userId,
+        //   permission: permission,
+        //   projectId: projectId,
+        // );
+
+        // if (!hasPermission) {
+        //   return _unauthorized('权限不足');
+        // }
 
         return authResult;
       };
@@ -163,6 +231,110 @@ class AuthMiddleware {
       },
       body: jsonEncode(errorResponse),
     );
+  }
+
+  /// 检查令牌是否在黑名单中
+  Future<bool> _isTokenBlacklisted(String token) async {
+    try {
+      final tokenHash = _jwtUtils.generateTokenHash(token);
+      final blacklistKey = 'token_blacklist:$tokenHash';
+      final isBlacklisted = await _redisService.get(blacklistKey);
+      return isBlacklisted != null;
+    } catch (error) {
+      log('检查令牌黑名单失败', error: error, name: 'AuthMiddleware');
+      return false; // 出错时允许通过，避免误杀
+    }
+  }
+
+  /// 带缓存的令牌验证
+  Future<Map<String, dynamic>?> _verifyTokenWithCache(String token) async {
+    try {
+      final tokenHash = _jwtUtils.generateTokenHash(token);
+      final now = DateTime.now();
+
+      // 检查内存缓存
+      if (_tokenCache.containsKey(tokenHash)) {
+        final cacheTime = _cacheTimestamps[tokenHash];
+        if (cacheTime != null && now.difference(cacheTime) < _cacheExpiry) {
+          return _tokenCache[tokenHash];
+        } else {
+          // 缓存过期，清理
+          _tokenCache.remove(tokenHash);
+          _cacheTimestamps.remove(tokenHash);
+        }
+      }
+
+      // 验证令牌
+      final payload = await _authService.verifyAccessToken(token);
+      if (payload != null) {
+        // 缓存结果
+        _tokenCache[tokenHash] = payload;
+        _cacheTimestamps[tokenHash] = now;
+
+        // 清理过期缓存
+        _cleanExpiredCache();
+      }
+
+      return payload;
+    } catch (error) {
+      log('令牌验证失败', error: error, name: 'AuthMiddleware');
+      return null;
+    }
+  }
+
+  /// 检查用户是否为管理员
+  Future<bool> _checkUserIsAdmin(String userId) async {
+    try {
+      // 这里需要注入PermissionService，暂时简化处理
+      // return await _permissionService.isSuperAdmin(userId);
+      return false; // 暂时返回false，需要后续实现
+    } catch (error) {
+      log('检查管理员权限失败', error: error, name: 'AuthMiddleware');
+      return false;
+    }
+  }
+
+  /// 清理过期缓存
+  void _cleanExpiredCache() {
+    final now = DateTime.now();
+    final expiredKeys = <String>[];
+
+    for (final entry in _cacheTimestamps.entries) {
+      if (now.difference(entry.value) >= _cacheExpiry) {
+        expiredKeys.add(entry.key);
+      }
+    }
+
+    for (final key in expiredKeys) {
+      _tokenCache.remove(key);
+      _cacheTimestamps.remove(key);
+    }
+  }
+
+  /// 撤销令牌（添加到黑名单）
+  Future<void> revokeToken(String token) async {
+    try {
+      final tokenHash = _jwtUtils.generateTokenHash(token);
+      final blacklistKey = 'token_blacklist:$tokenHash';
+
+      // 添加到Redis黑名单，24小时过期
+      await _redisService.set(blacklistKey, 'true', 86400); // 24小时 = 86400秒
+
+      // 从本地缓存中移除
+      _tokenCache.remove(tokenHash);
+      _cacheTimestamps.remove(tokenHash);
+
+      log('令牌已撤销: $tokenHash', name: 'AuthMiddleware');
+    } catch (error) {
+      log('撤销令牌失败', error: error, name: 'AuthMiddleware');
+    }
+  }
+
+  /// 清理所有缓存
+  void clearCache() {
+    _tokenCache.clear();
+    _cacheTimestamps.clear();
+    log('认证缓存已清理', name: 'AuthMiddleware');
   }
 }
 

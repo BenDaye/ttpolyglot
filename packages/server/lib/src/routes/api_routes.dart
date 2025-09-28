@@ -9,6 +9,7 @@ import '../services/services.dart';
 class ApiRoutes {
   final DatabaseService databaseService;
   final RedisService redisService;
+  final MultiLevelCacheService cacheService;
   final ServerConfig config;
   final AuthService authService;
   final UserService userService;
@@ -20,6 +21,7 @@ class ApiRoutes {
   ApiRoutes({
     required this.databaseService,
     required this.redisService,
+    required this.cacheService,
     required this.config,
     required this.authService,
     required this.userService,
