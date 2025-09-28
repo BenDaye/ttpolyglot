@@ -212,6 +212,7 @@ class StructuredLogger {
     final level = entry['level'] as String;
     final message = entry['message'] as String;
     final logger = entry['logger'] as String;
+    final stackTrace = entry['stack_trace'] != null ? StackTrace.fromString(entry['stack_trace'] as String) : null;
 
     // 获取颜色代码
     final colorCode = _getLogLevelColor(level);
@@ -239,6 +240,7 @@ class StructuredLogger {
   /// 输出JSON格式
   void _logToJson(Map<String, dynamic> entry) {
     final jsonStr = jsonEncode(entry);
+    final stackTrace = entry['stack_trace'] != null ? StackTrace.fromString(entry['stack_trace'] as String) : null;
     dev.log(jsonStr, name: name, stackTrace: stackTrace);
   }
 
