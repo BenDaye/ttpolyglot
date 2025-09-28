@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:shelf/shelf.dart';
@@ -10,6 +9,7 @@ import '../middleware/error_handler_middleware.dart';
 import '../services/file_upload_service.dart';
 import '../services/user_service.dart';
 import '../utils/response_builder.dart';
+import '../utils/structured_logger.dart';
 import '../utils/validator.dart';
 
 /// 用户管理控制器
@@ -85,7 +85,8 @@ class UserController {
         message: '获取用户列表成功',
       );
     } catch (error, stackTrace) {
-      log('获取用户列表失败', error: error, stackTrace: stackTrace, name: 'UserController');
+      final logger = LoggerFactory.getLogger('UserController');
+      logger.error('获取用户列表失败', error: error, stackTrace: stackTrace);
 
       return ResponseBuilder.errorFromRequest(
         request: request,
@@ -112,7 +113,7 @@ class UserController {
         data: user,
       );
     } catch (error, stackTrace) {
-      log('获取用户详情失败: $id', error: error, stackTrace: stackTrace, name: 'UserController');
+      logger.error('获取用户详情失败: $id', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseBuilder.validationErrorFromRequest(
@@ -172,7 +173,7 @@ class UserController {
         data: updatedUser,
       );
     } catch (error, stackTrace) {
-      log('更新用户信息失败: $id', error: error, stackTrace: stackTrace, name: 'UserController');
+      logger.error('更新用户信息失败: $id', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseBuilder.validationErrorFromRequest(request: request, fieldErrors: error.fieldErrors);
@@ -210,7 +211,7 @@ class UserController {
 
       return ResponseBuilder.noContent();
     } catch (error, stackTrace) {
-      log('删除用户失败: $id', error: error, stackTrace: stackTrace, name: 'UserController');
+      logger.error('删除用户失败: $id', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseBuilder.validationErrorFromRequest(request: request, fieldErrors: error.fieldErrors);
@@ -254,7 +255,7 @@ class UserController {
         data: user,
       );
     } catch (error, stackTrace) {
-      log('获取当前用户信息失败', error: error, stackTrace: stackTrace, name: 'UserController');
+      logger.error('获取当前用户信息失败', error: error, stackTrace: stackTrace);
 
       return ResponseBuilder.errorFromRequest(
         request: request,
@@ -309,7 +310,7 @@ class UserController {
         data: updatedUser,
       );
     } catch (error, stackTrace) {
-      log('更新当前用户信息失败', error: error, stackTrace: stackTrace, name: 'UserController');
+      logger.error('更新当前用户信息失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseBuilder.validationErrorFromRequest(request: request, fieldErrors: error.fieldErrors);
@@ -350,7 +351,7 @@ class UserController {
 
       return ResponseBuilder.success(message: '密码修改成功，请重新登录');
     } catch (error, stackTrace) {
-      log('修改密码失败', error: error, stackTrace: stackTrace, name: 'UserController');
+      logger.error('修改密码失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseBuilder.validationErrorFromRequest(request: request, fieldErrors: error.fieldErrors);
@@ -380,7 +381,7 @@ class UserController {
         data: stats,
       );
     } catch (error, stackTrace) {
-      log('获取用户统计信息失败', error: error, stackTrace: stackTrace, name: 'UserController');
+      logger.error('获取用户统计信息失败', error: error, stackTrace: stackTrace);
 
       return ResponseBuilder.errorFromRequest(
         request: request,
@@ -460,7 +461,7 @@ class UserController {
         },
       );
     } catch (error, stackTrace) {
-      log('上传头像失败', error: error, stackTrace: stackTrace, name: 'UserController');
+      logger.error('上传头像失败', error: error, stackTrace: stackTrace);
       return ResponseBuilder.errorFromRequest(
         request: request,
         code: 'UPLOAD_AVATAR_FAILED',
@@ -485,7 +486,7 @@ class UserController {
       await _userService.updateUser(userId, {'avatar_url': null});
       return ResponseBuilder.success(message: '头像删除成功');
     } catch (error, stackTrace) {
-      log('删除头像失败', error: error, stackTrace: stackTrace, name: 'UserController');
+      logger.error('删除头像失败', error: error, stackTrace: stackTrace);
       return ResponseBuilder.errorFromRequest(
         request: request,
         code: 'DELETE_AVATAR_FAILED',
@@ -510,7 +511,7 @@ class UserController {
       final sessions = await _userService.getUserSessions(userId);
       return ResponseBuilder.success(message: '获取用户会话成功', data: sessions);
     } catch (error, stackTrace) {
-      log('获取用户会话失败', error: error, stackTrace: stackTrace, name: 'UserController');
+      logger.error('获取用户会话失败', error: error, stackTrace: stackTrace);
       return ResponseBuilder.errorFromRequest(
         request: request,
         code: 'GET_USER_SESSIONS_FAILED',
@@ -535,7 +536,7 @@ class UserController {
       await _userService.deleteUserSession(userId, sessionId);
       return ResponseBuilder.success(message: '会话删除成功');
     } catch (error, stackTrace) {
-      log('删除用户会话失败', error: error, stackTrace: stackTrace, name: 'UserController');
+      logger.error('删除用户会话失败', error: error, stackTrace: stackTrace);
       return ResponseBuilder.errorFromRequest(
         request: request,
         code: 'DELETE_SESSION_FAILED',

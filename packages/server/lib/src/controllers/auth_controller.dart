@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
@@ -8,6 +7,7 @@ import '../middleware/auth_middleware.dart';
 import '../middleware/error_handler_middleware.dart';
 import '../services/auth_service.dart';
 import '../utils/response_builder.dart';
+import '../utils/structured_logger.dart';
 import '../utils/validator.dart';
 
 /// 认证控制器
@@ -87,7 +87,8 @@ class AuthController {
         );
       }
     } catch (error, stackTrace) {
-      log('用户注册失败', error: error, stackTrace: stackTrace, name: 'AuthController');
+      final logger = LoggerFactory.getLogger('AuthController');
+      logger.error('用户注册失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseBuilder.validationError(
@@ -148,7 +149,7 @@ class AuthController {
         );
       }
     } catch (error, stackTrace) {
-      log('用户登录失败', error: error, stackTrace: stackTrace, name: 'AuthController');
+      logger.error('用户登录失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseBuilder.validationError(
@@ -191,7 +192,7 @@ class AuthController {
         );
       }
     } catch (error, stackTrace) {
-      log('用户登出失败', error: error, stackTrace: stackTrace, name: 'AuthController');
+      logger.error('用户登出失败', error: error, stackTrace: stackTrace);
 
       return ResponseBuilder.error(
         code: 'LOGOUT_FAILED',
@@ -227,7 +228,7 @@ class AuthController {
         );
       }
     } catch (error, stackTrace) {
-      log('刷新令牌失败', error: error, stackTrace: stackTrace, name: 'AuthController');
+      logger.error('刷新令牌失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseBuilder.validationError(
@@ -267,7 +268,7 @@ class AuthController {
         );
       }
     } catch (error, stackTrace) {
-      log('忘记密码失败', error: error, stackTrace: stackTrace, name: 'AuthController');
+      logger.error('忘记密码失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseBuilder.validationError(
@@ -308,7 +309,7 @@ class AuthController {
         );
       }
     } catch (error, stackTrace) {
-      log('重置密码失败', error: error, stackTrace: stackTrace, name: 'AuthController');
+      logger.error('重置密码失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseBuilder.validationError(
@@ -348,7 +349,7 @@ class AuthController {
         );
       }
     } catch (error, stackTrace) {
-      log('邮箱验证失败', error: error, stackTrace: stackTrace, name: 'AuthController');
+      logger.error('邮箱验证失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseBuilder.validationError(
@@ -393,7 +394,7 @@ class AuthController {
         data: user,
       );
     } catch (error, stackTrace) {
-      log('获取当前用户信息失败', error: error, stackTrace: stackTrace, name: 'AuthController');
+      logger.error('获取当前用户信息失败', error: error, stackTrace: stackTrace);
 
       return ResponseBuilder.error(
         code: 'GET_USER_INFO_FAILED',
@@ -453,7 +454,7 @@ class AuthController {
         );
       }
     } catch (error, stackTrace) {
-      log('重发验证邮件失败', error: error, stackTrace: stackTrace, name: 'AuthController');
+      logger.error('重发验证邮件失败', error: error, stackTrace: stackTrace);
 
       return ResponseBuilder.error(
         code: 'RESEND_VERIFICATION_FAILED',

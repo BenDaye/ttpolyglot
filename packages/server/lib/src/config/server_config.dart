@@ -1,7 +1,8 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:dotenv/dotenv.dart';
+
+import '../utils/structured_logger.dart';
 
 /// 服务器配置类
 class ServerConfig {
@@ -81,9 +82,10 @@ class ServerConfig {
       final envFile = File('.env');
       if (await envFile.exists()) {
         _env.load(['.env']);
-        log('已加载.env文件', name: 'ServerConfig');
+        final logger = LoggerFactory.getLogger('ServerConfig');
+        logger.info('已加载.env文件');
       } else {
-        log('未找到.env文件，使用环境变量', name: 'ServerConfig');
+        logger.info('未找到.env文件，使用环境变量');
       }
 
       _loadServerConfig();
@@ -96,9 +98,9 @@ class ServerConfig {
       _loadMonitoringConfig();
       _loadEmailConfig();
 
-      log('服务器配置加载完成', name: 'ServerConfig');
+      logger.info('服务器配置加载完成');
     } catch (error, stackTrace) {
-      log('配置加载失败', error: error, stackTrace: stackTrace, name: 'ServerConfig');
+      logger.error('配置加载失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

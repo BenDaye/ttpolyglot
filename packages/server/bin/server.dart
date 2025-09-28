@@ -4,6 +4,7 @@ import 'package:ttpolyglot_server/server.dart';
 
 void main(List<String> args) async {
   try {
+    final logger = LoggerFactory.getLogger('ServerMain');
     // 启动服务器
     final server = TTPolyglotServer();
     await server.start();

@@ -1,8 +1,8 @@
-import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
 import '../config/server_config.dart';
+import '../utils/structured_logger.dart';
 
 /// 文件上传结果
 class FileUploadResult {
@@ -74,7 +74,8 @@ class FileUploadService {
     required String contentType,
   }) async {
     try {
-      log('开始上传头像: $userId, 文件名: $fileName', name: 'FileUploadService');
+      final logger = LoggerFactory.getLogger('FileUploadService');
+      logger.info('开始上传头像: $userId, 文件名: $fileName');
 
       // 验证文件类型
       if (!_isValidImageType(contentType)) {
@@ -105,7 +106,7 @@ class FileUploadService {
       // 生成访问URL
       final avatarUrl = '${_config.siteUrl ?? 'http://localhost:8080'}/$filePath';
 
-      log('头像上传成功: $avatarUrl', name: 'FileUploadService');
+      logger.info('头像上传成功: $avatarUrl');
 
       return FileUploadResult.success(
         filePath: filePath,
@@ -116,7 +117,7 @@ class FileUploadService {
         url: avatarUrl,
       );
     } catch (error, stackTrace) {
-      log('头像上传失败', error: error, stackTrace: stackTrace, name: 'FileUploadService');
+      logger.error('头像上传失败', error: error, stackTrace: stackTrace);
       return FileUploadResult.failure('UPLOAD_FAILED', '上传失败，请稍后重试');
     }
   }
@@ -124,19 +125,20 @@ class FileUploadService {
   /// 删除头像
   Future<bool> deleteAvatar(String filePath) async {
     try {
-      log('删除头像: $filePath', name: 'FileUploadService');
+      final logger = LoggerFactory.getLogger('FileUploadService');
+      logger.info('删除头像: $filePath');
 
       final file = File(filePath);
       if (await file.exists()) {
         await file.delete();
-        log('头像删除成功: $filePath', name: 'FileUploadService');
+        logger.info('头像删除成功: $filePath');
         return true;
       }
 
-      log('头像文件不存在: $filePath', name: 'FileUploadService');
+      logger.warn('头像文件不存在: $filePath');
       return false;
     } catch (error, stackTrace) {
-      log('删除头像失败', error: error, stackTrace: stackTrace, name: 'FileUploadService');
+      logger.error('删除头像失败', error: error, stackTrace: stackTrace);
       return false;
     }
   }
@@ -163,7 +165,8 @@ class FileUploadService {
   /// 清理旧的头像文件
   Future<void> cleanupOldAvatars(String userId) async {
     try {
-      log('清理用户旧头像: $userId', name: 'FileUploadService');
+      final logger = LoggerFactory.getLogger('FileUploadService');
+      logger.info('清理用户旧头像: $userId');
 
       final uploadDir = Directory(_uploadDir);
       if (!await uploadDir.exists()) return;
@@ -172,11 +175,11 @@ class FileUploadService {
       for (final file in files) {
         if (file is File && file.path.contains('${userId}_')) {
           await file.delete();
-          log('删除旧头像: ${file.path}', name: 'FileUploadService');
+          logger.info('删除旧头像: ${file.path}');
         }
       }
     } catch (error, stackTrace) {
-      log('清理旧头像失败', error: error, stackTrace: stackTrace, name: 'FileUploadService');
+      logger.error('清理旧头像失败', error: error, stackTrace: stackTrace);
     }
   }
 }

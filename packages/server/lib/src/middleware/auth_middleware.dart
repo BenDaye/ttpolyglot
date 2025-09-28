@@ -1,11 +1,11 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:shelf/shelf.dart';
 
 import '../services/auth_service.dart';
 import '../services/redis_service.dart';
 import '../utils/jwt_utils.dart';
+import '../utils/structured_logger.dart';
 
 /// 认证中间件
 class AuthMiddleware {
@@ -67,7 +67,8 @@ class AuthMiddleware {
 
           return await handler(updatedRequest);
         } catch (error, stackTrace) {
-          log('认证中间件错误', error: error, stackTrace: stackTrace, name: 'AuthMiddleware');
+          final logger = LoggerFactory.getLogger('AuthMiddleware');
+          logger.error('认证中间件错误', error: error, stackTrace: stackTrace);
 
           return _unauthorized('认证失败');
         }
@@ -136,7 +137,7 @@ class AuthMiddleware {
 
           return await handler(updatedRequest);
         } catch (error, stackTrace) {
-          log('可选认证中间件错误', error: error, stackTrace: stackTrace, name: 'AuthMiddleware');
+          logger.error('可选认证中间件错误', error: error, stackTrace: stackTrace);
 
           // 出错时标记为未认证，继续处理
           final updatedRequest = request.change(context: {
@@ -241,7 +242,8 @@ class AuthMiddleware {
       final isBlacklisted = await _redisService.get(blacklistKey);
       return isBlacklisted != null;
     } catch (error) {
-      log('检查令牌黑名单失败', error: error, name: 'AuthMiddleware');
+      final logger = LoggerFactory.getLogger('AuthMiddleware');
+      logger.error('检查令牌黑名单失败', error: error);
       return false; // 出错时允许通过，避免误杀
     }
   }
@@ -277,7 +279,7 @@ class AuthMiddleware {
 
       return payload;
     } catch (error) {
-      log('令牌验证失败', error: error, name: 'AuthMiddleware');
+      logger.error('令牌验证失败', error: error);
       return null;
     }
   }
@@ -289,7 +291,7 @@ class AuthMiddleware {
       // return await _permissionService.isSuperAdmin(userId);
       return false; // 暂时返回false，需要后续实现
     } catch (error) {
-      log('检查管理员权限失败', error: error, name: 'AuthMiddleware');
+      logger.error('检查管理员权限失败', error: error);
       return false;
     }
   }
@@ -324,9 +326,9 @@ class AuthMiddleware {
       _tokenCache.remove(tokenHash);
       _cacheTimestamps.remove(tokenHash);
 
-      log('令牌已撤销: $tokenHash', name: 'AuthMiddleware');
+      logger.info('令牌已撤销: $tokenHash');
     } catch (error) {
-      log('撤销令牌失败', error: error, name: 'AuthMiddleware');
+      logger.error('撤销令牌失败', error: error);
     }
   }
 
@@ -334,7 +336,7 @@ class AuthMiddleware {
   void clearCache() {
     _tokenCache.clear();
     _cacheTimestamps.clear();
-    log('认证缓存已清理', name: 'AuthMiddleware');
+    logger.info('认证缓存已清理');
   }
 }
 

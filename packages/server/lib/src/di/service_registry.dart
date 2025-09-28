@@ -1,7 +1,6 @@
-import 'dart:developer';
-
 import '../config/server_config.dart';
 import '../services/services.dart';
+import '../utils/structured_logger.dart';
 import 'dependency_injection.dart';
 
 /// 服务注册器
@@ -14,7 +13,7 @@ class ServiceRegistry {
 
   /// 注册所有服务
   Future<void> registerAllServices() async {
-    log('开始注册所有服务...', name: 'ServiceRegistry');
+    logger.info('开始注册所有服务...');
 
     try {
       // 1. 注册配置服务
@@ -29,17 +28,18 @@ class ServiceRegistry {
       // 4. 注册中间件服务
       await _registerMiddlewareServices();
 
-      log('所有服务注册完成', name: 'ServiceRegistry');
+      logger.info('所有服务注册完成');
       _logRegisteredServices();
     } catch (error, stackTrace) {
-      log('服务注册失败', error: error, stackTrace: stackTrace, name: 'ServiceRegistry');
+      logger.error('服务注册失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
 
   /// 注册配置服务
   Future<void> _registerConfigServices() async {
-    log('注册配置服务...', name: 'ServiceRegistry');
+    final logger = LoggerFactory.getLogger('ServiceRegistry');
+    logger.info('注册配置服务...');
 
     // 注册服务器配置
     _container.registerSingleton<ServerConfig>(ServerConfig());
@@ -48,12 +48,13 @@ class ServiceRegistry {
     final config = _container.get<ServerConfig>();
     await config.load();
 
-    log('配置服务注册完成', name: 'ServiceRegistry');
+    logger.info('配置服务注册完成');
   }
 
   /// 注册基础设施服务
   Future<void> _registerInfrastructureServices() async {
-    log('注册基础设施服务...', name: 'ServiceRegistry');
+    final logger = LoggerFactory.getLogger('ServiceRegistry');
+    logger.info('注册基础设施服务...');
 
     final config = _container.get<ServerConfig>();
 
@@ -92,12 +93,13 @@ class ServiceRegistry {
       lifetime: ServiceLifetime.singleton,
     );
 
-    log('基础设施服务注册完成', name: 'ServiceRegistry');
+    logger.info('基础设施服务注册完成');
   }
 
   /// 注册业务服务
   Future<void> _registerBusinessServices() async {
-    log('注册业务服务...', name: 'ServiceRegistry');
+    final logger = LoggerFactory.getLogger('ServiceRegistry');
+    logger.info('注册业务服务...');
 
     // 注册权限服务
     _container.register<PermissionService>(
@@ -162,22 +164,24 @@ class ServiceRegistry {
       lifetime: ServiceLifetime.singleton,
     );
 
-    log('业务服务注册完成', name: 'ServiceRegistry');
+    logger.info('业务服务注册完成');
   }
 
   /// 注册中间件服务
   Future<void> _registerMiddlewareServices() async {
-    log('注册中间件服务...', name: 'ServiceRegistry');
+    final logger = LoggerFactory.getLogger('ServiceRegistry');
+    logger.info('注册中间件服务...');
 
     // 这里可以注册中间件相关的服务
     // 例如：认证中间件、CORS中间件等
 
-    log('中间件服务注册完成', name: 'ServiceRegistry');
+    logger.info('中间件服务注册完成');
   }
 
   /// 初始化所有服务
   Future<void> initializeAllServices() async {
-    log('开始初始化所有服务...', name: 'ServiceRegistry');
+    final logger = LoggerFactory.getLogger('ServiceRegistry');
+    logger.info('开始初始化所有服务...');
 
     try {
       // 初始化基础设施服务
@@ -186,16 +190,17 @@ class ServiceRegistry {
       // 初始化业务服务
       await _initializeBusinessServices();
 
-      log('所有服务初始化完成', name: 'ServiceRegistry');
+      logger.info('所有服务初始化完成');
     } catch (error, stackTrace) {
-      log('服务初始化失败', error: error, stackTrace: stackTrace, name: 'ServiceRegistry');
+      logger.error('服务初始化失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
 
   /// 初始化基础设施服务
   Future<void> _initializeInfrastructureServices() async {
-    log('初始化基础设施服务...', name: 'ServiceRegistry');
+    final logger = LoggerFactory.getLogger('ServiceRegistry');
+    logger.info('初始化基础设施服务...');
 
     // 并行初始化基础设施服务
     await Future.wait([
@@ -208,21 +213,22 @@ class ServiceRegistry {
     await _container.get<MigrationService>().runMigrations();
     await _container.get<MigrationService>().runSeeds();
 
-    log('基础设施服务初始化完成', name: 'ServiceRegistry');
+    logger.info('基础设施服务初始化完成');
   }
 
   /// 初始化业务服务
   Future<void> _initializeBusinessServices() async {
-    log('初始化业务服务...', name: 'ServiceRegistry');
+    final logger = LoggerFactory.getLogger('ServiceRegistry');
+    logger.info('初始化业务服务...');
 
     // 业务服务通常不需要特殊的初始化
     // 但可以在这里添加预热逻辑
 
     // 预热缓存服务
     _container.get<MultiLevelCacheService>();
-    log('缓存服务预热完成', name: 'ServiceRegistry');
+    logger.info('缓存服务预热完成');
 
-    log('业务服务初始化完成', name: 'ServiceRegistry');
+    logger.info('业务服务初始化完成');
   }
 
   /// 获取服务实例
@@ -240,12 +246,14 @@ class ServiceRegistry {
   /// 记录已注册的服务
   void _logRegisteredServices() {
     final stats = _container.getStats();
-    log('已注册服务统计: $stats', name: 'ServiceRegistry');
+    final logger = LoggerFactory.getLogger('ServiceRegistry');
+    logger.info('已注册服务统计: $stats');
   }
 
   /// 清理所有服务
   Future<void> dispose() async {
-    log('开始清理所有服务...', name: 'ServiceRegistry');
+    final logger = LoggerFactory.getLogger('ServiceRegistry');
+    logger.info('开始清理所有服务...');
 
     try {
       // 清理数据库连接池
@@ -271,9 +279,9 @@ class ServiceRegistry {
       // 清理容器
       _container.clear();
 
-      log('所有服务清理完成', name: 'ServiceRegistry');
+      logger.info('所有服务清理完成');
     } catch (error, stackTrace) {
-      log('服务清理失败', error: error, stackTrace: stackTrace, name: 'ServiceRegistry');
+      logger.error('服务清理失败', error: error, stackTrace: stackTrace);
     }
   }
 }

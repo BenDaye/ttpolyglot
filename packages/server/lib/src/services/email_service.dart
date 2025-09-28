@@ -1,6 +1,10 @@
 import 'dart:developer';
 
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server.dart';
+
 import '../config/server_config.dart';
+import '../utils/structured_logger.dart';
 
 /// 邮件服务
 class EmailService {
@@ -15,10 +19,11 @@ class EmailService {
     required String token,
   }) async {
     try {
-      log('发送邮箱验证邮件: $to', name: 'EmailService');
+      final logger = LoggerFactory.getLogger('EmailService');
+      logger.info('发送邮箱验证邮件: $to');
 
       if (!_isEmailConfigured()) {
-        log('邮件服务未配置，跳过发送', name: 'EmailService');
+        logger.warn('邮件服务未配置，跳过发送');
         return false;
       }
 
@@ -36,7 +41,7 @@ class EmailService {
         htmlContent: htmlContent,
       );
     } catch (error, stackTrace) {
-      log('发送邮箱验证邮件失败', error: error, stackTrace: stackTrace, name: 'EmailService');
+      log('sendEmailVerification', error: error, stackTrace: stackTrace, name: 'EmailService');
       return false;
     }
   }
@@ -48,10 +53,11 @@ class EmailService {
     required String token,
   }) async {
     try {
-      log('发送密码重置邮件: $to', name: 'EmailService');
+      final logger = LoggerFactory.getLogger('EmailService');
+      logger.info('发送密码重置邮件: $to');
 
       if (!_isEmailConfigured()) {
-        log('邮件服务未配置，跳过发送', name: 'EmailService');
+        logger.warn('邮件服务未配置，跳过发送');
         return false;
       }
 
@@ -69,7 +75,7 @@ class EmailService {
         htmlContent: htmlContent,
       );
     } catch (error, stackTrace) {
-      log('发送密码重置邮件失败', error: error, stackTrace: stackTrace, name: 'EmailService');
+      log('sendPasswordReset', error: error, stackTrace: stackTrace, name: 'EmailService');
       return false;
     }
   }
@@ -81,10 +87,11 @@ class EmailService {
     required String token,
   }) async {
     try {
-      log('发送忘记密码邮件: $to', name: 'EmailService');
+      final logger = LoggerFactory.getLogger('EmailService');
+      logger.info('发送忘记密码邮件: $to');
 
       if (!_isEmailConfigured()) {
-        log('邮件服务未配置，跳过发送', name: 'EmailService');
+        logger.warn('邮件服务未配置，跳过发送');
         return false;
       }
 
@@ -102,7 +109,7 @@ class EmailService {
         htmlContent: htmlContent,
       );
     } catch (error, stackTrace) {
-      log('发送忘记密码邮件失败', error: error, stackTrace: stackTrace, name: 'EmailService');
+      log('sendForgotPassword', error: error, stackTrace: stackTrace, name: 'EmailService');
       return false;
     }
   }
@@ -123,31 +130,32 @@ class EmailService {
     required String htmlContent,
   }) async {
     try {
-      // 这里应该使用实际的SMTP客户端，比如mailer包
-      // 为了演示，我们使用简单的HTTP请求模拟
-      log('模拟发送邮件到: $to', name: 'EmailService');
-      log('主题: $subject', name: 'EmailService');
+      final logger = LoggerFactory.getLogger('EmailService');
+      logger.info('发送邮件到: $to');
+      logger.info('主题: $subject');
 
-      // 在实际实现中，这里应该使用SMTP客户端发送邮件
-      // 例如使用 mailer 包：
-      // final message = Message()
-      //   ..from = Address(_config.smtpFromAddress!, 'TTPolyglot')
-      //   ..recipients.add(to)
-      //   ..subject = subject
-      //   ..html = htmlContent;
-      //
-      // final smtpServer = SmtpServer(
-      //   _config.smtpHost!,
-      //   port: _config.smtpPort!,
-      //   username: _config.smtpUser,
-      //   password: _config.smtpPassword,
-      // );
-      //
-      // await send(message, smtpServer);
+      final message = Message()
+        ..from = Address(_config.smtpFromAddress!, 'TTPolyglot')
+        ..recipients.add(to)
+        ..subject = subject
+        ..html = htmlContent;
 
-      return true;
+      final smtpServer = SmtpServer(
+        _config.smtpHost!,
+        port: _config.smtpPort!,
+        username: _config.smtpUser,
+        password: _config.smtpPassword,
+      );
+
+      final result = await send(message, smtpServer);
+      if (result.success) {
+        logger.info('邮件发送成功');
+        return true;
+      }
+      logger.error('邮件发送失败', error: result.error, stackTrace: result.stackTrace);
+      return false;
     } catch (error, stackTrace) {
-      log('发送邮件失败', error: error, stackTrace: stackTrace, name: 'EmailService');
+      log('_sendEmail', error: error, stackTrace: stackTrace, name: 'EmailService');
       return false;
     }
   }

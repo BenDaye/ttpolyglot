@@ -1,9 +1,8 @@
-import 'dart:developer';
-
 import '../config/server_config.dart';
 import '../middleware/error_handler_middleware.dart';
 import '../utils/crypto_utils.dart';
 import '../utils/jwt_utils.dart';
+import '../utils/structured_logger.dart';
 import 'database_service.dart';
 import 'email_service.dart';
 import 'redis_service.dart';
@@ -40,7 +39,8 @@ class AuthService {
     String? locale,
   }) async {
     try {
-      log('用户注册: $username, $email', name: 'AuthService');
+      final logger = LoggerFactory.getLogger('AuthService');
+      logger.info('用户注册: $username, $email');
 
       // 验证输入
       _validateRegistrationInput(username, email, password);
@@ -87,7 +87,7 @@ class AuthService {
         return result.first[0] as String;
       });
 
-      log('用户注册成功: $userId', name: 'AuthService');
+      logger.info('用户注册成功: $userId');
 
       // 生成邮箱验证令牌
       final verificationToken = _jwtUtils.generateEmailVerificationToken(userId, email);
@@ -107,7 +107,7 @@ class AuthService {
         },
       );
     } catch (error, stackTrace) {
-      log('用户注册失败', error: error, stackTrace: stackTrace, name: 'AuthService');
+      logger.error('用户注册失败', error: error, stackTrace: stackTrace);
 
       if (error is BusinessException) {
         return AuthResult.failure(error.code, error.message);
@@ -128,7 +128,8 @@ class AuthService {
     String? userAgent,
   }) async {
     try {
-      log('用户登录尝试: $emailOrUsername', name: 'AuthService');
+      final logger = LoggerFactory.getLogger('AuthService');
+      logger.info('用户登录尝试: $emailOrUsername');
 
       // 查找用户
       final user = await _findUserByEmailOrUsername(emailOrUsername);
@@ -200,7 +201,7 @@ class AuthService {
       // 更新最后登录时间
       await _updateLastLogin(userId, ipAddress);
 
-      log('用户登录成功: $userId', name: 'AuthService');
+      logger.info('用户登录成功: $userId');
 
       return AuthResult.success(
         userId: userId,
@@ -225,7 +226,7 @@ class AuthService {
         },
       );
     } catch (error, stackTrace) {
-      log('用户登录失败: $emailOrUsername', error: error, stackTrace: stackTrace, name: 'AuthService');
+      logger.error('用户登录失败: $emailOrUsername', error: error, stackTrace: stackTrace);
 
       if (error is BusinessException) {
         return AuthResult.failure(error.code, error.message);
@@ -238,7 +239,8 @@ class AuthService {
   /// 刷新令牌
   Future<AuthResult> refreshToken(String refreshToken) async {
     try {
-      log('刷新令牌', name: 'AuthService');
+      final logger = LoggerFactory.getLogger('AuthService');
+      logger.info('刷新令牌');
 
       // 验证刷新令牌
       final payload = _jwtUtils.verifyToken(refreshToken);
@@ -284,7 +286,7 @@ class AuthService {
         'refreshed_at': DateTime.now().toIso8601String(),
       });
 
-      log('令牌刷新成功: $userId', name: 'AuthService');
+      logger.info('令牌刷新成功: $userId');
 
       return AuthResult.success(
         userId: userId,
@@ -296,7 +298,7 @@ class AuthService {
         },
       );
     } catch (error, stackTrace) {
-      log('令牌刷新失败', error: error, stackTrace: stackTrace, name: 'AuthService');
+      logger.error('令牌刷新失败', error: error, stackTrace: stackTrace);
 
       if (error is BusinessException) {
         return AuthResult.failure(error.code, error.message);
@@ -309,7 +311,8 @@ class AuthService {
   /// 用户登出
   Future<AuthResult> logout(String accessToken) async {
     try {
-      log('用户登出', name: 'AuthService');
+      final logger = LoggerFactory.getLogger('AuthService');
+      logger.info('用户登出');
 
       // 验证访问令牌
       final payload = _jwtUtils.verifyToken(accessToken);
@@ -326,14 +329,14 @@ class AuthService {
       // 删除Redis缓存
       await _redisService.deleteUserSession(userId);
 
-      log('用户登出成功: $userId', name: 'AuthService');
+      logger.info('用户登出成功: $userId');
 
       return AuthResult.success(
         userId: userId,
         message: '登出成功',
       );
     } catch (error, stackTrace) {
-      log('用户登出失败', error: error, stackTrace: stackTrace, name: 'AuthService');
+      logger.error('用户登出失败', error: error, stackTrace: stackTrace);
 
       if (error is BusinessException) {
         return AuthResult.failure(error.code, error.message);
@@ -357,20 +360,21 @@ class AuthService {
       // 检查Redis缓存中的会话
       final session = await _redisService.getUserSession(userId);
       if (session == null) {
-        log('用户会话不存在: $userId', name: 'AuthService');
+        final logger = LoggerFactory.getLogger('AuthService');
+        logger.warn('用户会话不存在: $userId');
         return null;
       }
 
       // 验证令牌哈希
       final accessTokenHash = _jwtUtils.generateTokenHash(accessToken);
       if (session['access_token_hash'] != accessTokenHash) {
-        log('访问令牌哈希不匹配: $userId', name: 'AuthService');
+        logger.warn('访问令牌哈希不匹配: $userId');
         return null;
       }
 
       return payload;
     } catch (error, stackTrace) {
-      log('访问令牌验证失败', error: error, stackTrace: stackTrace, name: 'AuthService');
+      logger.error('访问令牌验证失败', error: error, stackTrace: stackTrace);
       return null;
     }
   }
@@ -378,7 +382,8 @@ class AuthService {
   /// 邮箱验证
   Future<AuthResult> verifyEmail(String token) async {
     try {
-      log('邮箱验证', name: 'AuthService');
+      final logger = LoggerFactory.getLogger('AuthService');
+      logger.info('邮箱验证');
 
       // 验证邮箱验证令牌
       final payload = _jwtUtils.verifyEmailVerificationToken(token);
@@ -408,14 +413,14 @@ class AuthService {
       // 删除验证令牌
       await _redisService.delete('temp:email_verification:$userId');
 
-      log('邮箱验证成功: $userId', name: 'AuthService');
+      logger.info('邮箱验证成功: $userId');
 
       return AuthResult.success(
         userId: userId,
         message: '邮箱验证成功',
       );
     } catch (error, stackTrace) {
-      log('邮箱验证失败', error: error, stackTrace: stackTrace, name: 'AuthService');
+      logger.error('邮箱验证失败', error: error, stackTrace: stackTrace);
 
       if (error is BusinessException) {
         return AuthResult.failure(error.code, error.message);
@@ -428,7 +433,8 @@ class AuthService {
   /// 忘记密码
   Future<AuthResult> forgotPassword(String email) async {
     try {
-      log('忘记密码请求: $email', name: 'AuthService');
+      final logger = LoggerFactory.getLogger('AuthService');
+      logger.info('忘记密码请求: $email');
 
       if (!_cryptoUtils.isValidEmail(email)) {
         return AuthResult.failure('VALIDATION_EMAIL_INVALID', '邮箱格式不正确');
@@ -464,14 +470,14 @@ class AuthService {
       );
 
       if (emailSent) {
-        log('密码重置邮件发送成功: $email', name: 'AuthService');
+        logger.info('密码重置邮件发送成功: $email');
       } else {
-        log('密码重置邮件发送失败: $email', name: 'AuthService');
+        logger.warn('密码重置邮件发送失败: $email');
       }
 
       return AuthResult.success(message: '如果该邮箱存在，重置密码邮件已发送');
     } catch (error, stackTrace) {
-      log('忘记密码失败', error: error, stackTrace: stackTrace, name: 'AuthService');
+      logger.error('忘记密码失败', error: error, stackTrace: stackTrace);
       return AuthResult.failure('FORGOT_PASSWORD_FAILED', '请求失败，请稍后重试');
     }
   }
@@ -479,7 +485,8 @@ class AuthService {
   /// 重置密码
   Future<AuthResult> resetPassword(String token, String newPassword) async {
     try {
-      log('重置密码', name: 'AuthService');
+      final logger = LoggerFactory.getLogger('AuthService');
+      logger.info('重置密码');
 
       // 验证密码重置令牌
       final payload = _jwtUtils.verifyPasswordResetToken(token);
@@ -523,14 +530,14 @@ class AuthService {
       // 删除所有用户会话（强制重新登录）
       await _deleteAllUserSessions(userId);
 
-      log('密码重置成功: $userId', name: 'AuthService');
+      logger.info('密码重置成功: $userId');
 
       return AuthResult.success(
         userId: userId,
         message: '密码重置成功，请重新登录',
       );
     } catch (error, stackTrace) {
-      log('重置密码失败', error: error, stackTrace: stackTrace, name: 'AuthService');
+      logger.error('重置密码失败', error: error, stackTrace: stackTrace);
 
       if (error is BusinessException) {
         return AuthResult.failure(error.code, error.message);
@@ -577,14 +584,14 @@ class AuthService {
       );
 
       if (emailSent) {
-        log('验证邮件发送成功: $email', name: 'AuthService');
+        logger.info('验证邮件发送成功: $email');
       } else {
-        log('验证邮件发送失败: $email', name: 'AuthService');
+        logger.warn('验证邮件发送失败: $email');
       }
 
       return AuthResult.success(message: '验证邮件已发送到您的邮箱');
     } catch (error, stackTrace) {
-      log('重发验证邮件失败', error: error, stackTrace: stackTrace, name: 'AuthService');
+      logger.error('重发验证邮件失败', error: error, stackTrace: stackTrace);
       return AuthResult.failure('RESEND_VERIFICATION_FAILED', '重发验证邮件失败，请稍后重试');
     }
   }
@@ -643,7 +650,8 @@ class AuthService {
   /// 根据ID获取用户信息（公开方法）
   Future<Map<String, dynamic>?> getUserById(String userId) async {
     try {
-      log('获取用户信息: $userId', name: 'AuthService');
+      final logger = LoggerFactory.getLogger('AuthService');
+      logger.info('获取用户信息: $userId');
 
       final result = await _databaseService.query('''
         SELECT id, username, email, display_name, avatar_url,
@@ -667,7 +675,7 @@ class AuthService {
 
       return user;
     } catch (error, stackTrace) {
-      log('获取用户信息失败', error: error, stackTrace: stackTrace, name: 'AuthService');
+      logger.error('获取用户信息失败', error: error, stackTrace: stackTrace);
       return null;
     }
   }

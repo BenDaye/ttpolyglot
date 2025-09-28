@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:shelf/shelf.dart';
@@ -242,7 +241,7 @@ class TTPolyglotServer {
         headers: {'Content-Type': 'application/json'},
       );
     } catch (error, stackTrace) {
-      log('健康检查失败', error: error, stackTrace: stackTrace, name: 'TTPolyglotServer');
+      _logger.error('健康检查失败', error: error, stackTrace: stackTrace);
 
       return Response(
         503,
@@ -348,7 +347,7 @@ class TTPolyglotServer {
     } catch (error, stackTrace) {
       healthStatus['status'] = 'unhealthy';
       healthStatus['error'] = error.toString();
-      log('健康检查异常', error: error, stackTrace: stackTrace, name: 'TTPolyglotServer');
+      _logger.error('健康检查异常', error: error, stackTrace: stackTrace);
     }
 
     return healthStatus;
@@ -467,7 +466,7 @@ class TTPolyglotServer {
         },
       );
     } catch (error, stackTrace) {
-      log('获取指标失败', error: error, stackTrace: stackTrace, name: 'TTPolyglotServer');
+      _logger.error('获取指标失败', error: error, stackTrace: stackTrace);
 
       return Response.internalServerError(
         body: '# 指标获取失败\n',

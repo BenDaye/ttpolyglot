@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:developer';
 
 import 'package:postgres/postgres.dart';
 
 import '../config/server_config.dart';
+import '../utils/structured_logger.dart';
 
 /// 数据库连接池
 class DatabaseConnectionPool {
@@ -37,7 +37,8 @@ class DatabaseConnectionPool {
   /// 初始化连接池
   Future<void> initialize() async {
     try {
-      log('初始化数据库连接池...', name: 'DatabaseConnectionPool');
+      final logger = LoggerFactory.getLogger('DatabaseConnectionPool');
+      logger.info('初始化数据库连接池...');
 
       // 创建最小连接数
       await _createInitialConnections();
@@ -48,9 +49,9 @@ class DatabaseConnectionPool {
       // 启动清理定时器
       _startCleanupTimer();
 
-      log('数据库连接池初始化完成: ${_availableConnections.length}/${_maxConnections}', name: 'DatabaseConnectionPool');
+      logger.info('数据库连接池初始化完成: ${_availableConnections.length}/${_maxConnections}');
     } catch (error, stackTrace) {
-      log('数据库连接池初始化失败', error: error, stackTrace: stackTrace, name: 'DatabaseConnectionPool');
+      logger.error('数据库连接池初始化失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -65,7 +66,7 @@ class DatabaseConnectionPool {
         _activeConnections++;
         _poolHits++;
 
-        log('从连接池获取连接: ${_activeConnections}/${_totalConnections}', name: 'DatabaseConnectionPool');
+        logger.debug('从连接池获取连接: ${_activeConnections}/${_totalConnections}');
         return connection;
       }
 
@@ -78,7 +79,7 @@ class DatabaseConnectionPool {
         _activeConnections++;
         _totalConnections++;
 
-        log('创建新连接: ${_activeConnections}/${_totalConnections}', name: 'DatabaseConnectionPool');
+        logger.debug('创建新连接: ${_activeConnections}/${_totalConnections}');
         return connection;
       }
 
@@ -86,7 +87,7 @@ class DatabaseConnectionPool {
       return await _waitForConnection();
     } catch (error, stackTrace) {
       _connectionErrors++;
-      log('获取连接失败', error: error, stackTrace: stackTrace, name: 'DatabaseConnectionPool');
+      logger.error('获取连接失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -101,17 +102,17 @@ class DatabaseConnectionPool {
         // 检查连接是否健康
         if (await _isConnectionHealthy(connection)) {
           _availableConnections.add(connection);
-          log('连接已释放到池中: ${_activeConnections}/${_totalConnections}', name: 'DatabaseConnectionPool');
+          logger.debug('连接已释放到池中: ${_activeConnections}/${_totalConnections}');
         } else {
           _totalConnections--;
-          log('连接不健康，已移除: ${_activeConnections}/${_totalConnections}', name: 'DatabaseConnectionPool');
+          logger.warn('连接不健康，已移除: ${_activeConnections}/${_totalConnections}');
         }
 
         // 处理等待队列
         _processWaitingQueue();
       }
     } catch (error, stackTrace) {
-      log('释放连接失败', error: error, stackTrace: stackTrace, name: 'DatabaseConnectionPool');
+      logger.error('释放连接失败', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -149,7 +150,7 @@ class DatabaseConnectionPool {
         await releaseConnection(connection);
       }
     } catch (error) {
-      log('连接池健康检查失败', error: error, name: 'DatabaseConnectionPool');
+      logger.error('连接池健康检查失败', error: error);
       return false;
     }
   }
@@ -174,7 +175,8 @@ class DatabaseConnectionPool {
   /// 关闭连接池
   Future<void> close() async {
     try {
-      log('开始关闭数据库连接池...', name: 'DatabaseConnectionPool');
+      final logger = LoggerFactory.getLogger('DatabaseConnectionPool');
+      logger.info('开始关闭数据库连接池...');
 
       // 停止定时器
       _healthCheckTimer?.cancel();
@@ -189,9 +191,9 @@ class DatabaseConnectionPool {
       _totalConnections = 0;
       _activeConnections = 0;
 
-      log('数据库连接池已关闭', name: 'DatabaseConnectionPool');
+      logger.info('数据库连接池已关闭');
     } catch (error, stackTrace) {
-      log('关闭连接池失败', error: error, stackTrace: stackTrace, name: 'DatabaseConnectionPool');
+      logger.error('关闭连接池失败', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -230,11 +232,11 @@ class DatabaseConnectionPool {
         settings: connectionSettings,
       );
 
-      log('创建数据库连接成功', name: 'DatabaseConnectionPool');
+      logger.debug('创建数据库连接成功');
       return connection;
     } catch (error, stackTrace) {
       _connectionErrors++;
-      log('创建数据库连接失败', error: error, stackTrace: stackTrace, name: 'DatabaseConnectionPool');
+      logger.error('创建数据库连接失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -244,7 +246,8 @@ class DatabaseConnectionPool {
     final completer = Completer<Connection>();
     _waitingQueue.add(completer);
 
-    log('等待可用连接: ${_waitingQueue.length}个请求', name: 'DatabaseConnectionPool');
+    final logger = LoggerFactory.getLogger('DatabaseConnectionPool');
+    logger.debug('等待可用连接: ${_waitingQueue.length}个请求');
 
     return completer.future.timeout(_connectionTimeout);
   }
@@ -269,7 +272,7 @@ class DatabaseConnectionPool {
       await connection.execute('SELECT 1');
       return true;
     } catch (error) {
-      log('连接健康检查失败', error: error, name: 'DatabaseConnectionPool');
+      logger.error('连接健康检查失败', error: error);
       return false;
     }
   }
@@ -280,7 +283,7 @@ class DatabaseConnectionPool {
       try {
         await _performHealthCheck();
       } catch (error) {
-        log('健康检查定时器错误', error: error, name: 'DatabaseConnectionPool');
+        logger.error('健康检查定时器错误', error: error);
       }
     });
   }
@@ -291,7 +294,7 @@ class DatabaseConnectionPool {
       try {
         await _performCleanup();
       } catch (error) {
-        log('清理定时器错误', error: error, name: 'DatabaseConnectionPool');
+        logger.error('清理定时器错误', error: error);
       }
     });
   }
@@ -318,7 +321,7 @@ class DatabaseConnectionPool {
     }
 
     if (unhealthyConnections.isNotEmpty) {
-      log('移除不健康连接: ${unhealthyConnections.length}个', name: 'DatabaseConnectionPool');
+      logger.warn('移除不健康连接: ${unhealthyConnections.length}个');
     }
   }
 
@@ -340,7 +343,7 @@ class DatabaseConnectionPool {
       }
 
       if (connectionsToRemove.isNotEmpty) {
-        log('清理多余连接: ${connectionsToRemove.length}个', name: 'DatabaseConnectionPool');
+        logger.info('清理多余连接: ${connectionsToRemove.length}个');
       }
     }
   }
