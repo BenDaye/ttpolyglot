@@ -111,14 +111,15 @@ class RetryUtils {
 
         // 检查是否应该重试
         if (config.retryIf != null && !config.retryIf!(error)) {
-          _logger.warn('错误不可重试: ${operationName ?? 'operation'} - $error');
+          _logger.warn('错误不可重试: ${operationName ?? 'operation'} - $error', error: error, stackTrace: stackTrace);
           rethrow;
         }
 
         // 如果是最后一次尝试，抛出错误
         if (attempt == config.maxAttempts) {
           final duration = DateTime.now().difference(startTime);
-          _logger.error('重试失败: ${operationName ?? 'operation'} (${attempt}次尝试, 耗时: ${duration.inMilliseconds}ms)', error: error);
+          _logger.error('重试失败: ${operationName ?? 'operation'} (${attempt}次尝试, 耗时: ${duration.inMilliseconds}ms)',
+              error: error, stackTrace: stackTrace);
           rethrow;
         }
 

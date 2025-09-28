@@ -51,7 +51,8 @@ class ConfigService {
 
       return value;
     } catch (error, stackTrace) {
-      _logger.error('获取配置值失败: $key', error: error, context: LogContext().field('config_key', key));
+      _logger.error('获取配置值失败: $key',
+          error: error, stackTrace: stackTrace, context: LogContext().field('config_key', key));
       rethrow;
     }
   }
@@ -82,7 +83,8 @@ class ConfigService {
 
       return SystemConfig.fromMap(result.first.toColumnMap());
     } catch (error, stackTrace) {
-      _logger.error('获取配置项失败: $key', error: error, context: LogContext().field('config_key', key));
+      _logger.error('获取配置项失败: $key',
+          error: error, stackTrace: stackTrace, context: LogContext().field('config_key', key));
       rethrow;
     }
   }
@@ -130,7 +132,7 @@ class ConfigService {
 
       return result.map((row) => SystemConfig.fromMap(row.toColumnMap())).toList();
     } catch (error, stackTrace) {
-      _logger.error('获取配置列表失败', error: error);
+      _logger.error('获取配置列表失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -161,7 +163,7 @@ class ConfigService {
 
       return publicConfigs;
     } catch (error, stackTrace) {
-      _logger.error('获取公开配置失败', error: error);
+      _logger.error('获取公开配置失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -214,7 +216,8 @@ class ConfigService {
 
       return updatedConfig!;
     } catch (error, stackTrace) {
-      _logger.error('更新配置失败: $key', error: error, context: LogContext().field('config_key', key).field('value', value));
+      _logger.error('更新配置失败: $key',
+          error: error, stackTrace: stackTrace, context: LogContext().field('config_key', key).field('value', value));
       rethrow;
     }
   }
@@ -274,7 +277,7 @@ class ConfigService {
 
       return updatedConfigs;
     } catch (error, stackTrace) {
-      _logger.error('批量更新配置失败', error: error);
+      _logger.error('批量更新配置失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -298,7 +301,8 @@ class ConfigService {
         reason: '重置为默认值',
       );
     } catch (error, stackTrace) {
-      _logger.error('重置配置失败: $key', error: error, context: LogContext().field('config_key', key));
+      _logger.error('重置配置失败: $key',
+          error: error, stackTrace: stackTrace, context: LogContext().field('config_key', key));
       rethrow;
     }
   }
@@ -327,7 +331,7 @@ class ConfigService {
 
       return categories;
     } catch (error, stackTrace) {
-      _logger.error('获取配置分类失败', error: error);
+      _logger.error('获取配置分类失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

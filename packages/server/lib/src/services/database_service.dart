@@ -39,7 +39,7 @@ class DatabaseService {
 
       _logger.info('数据库连接成功: ${uri.host}:${uri.port}/${endpoint.database}');
     } catch (error, stackTrace) {
-      _logger.error('数据库连接失败', error: error);
+      _logger.error('数据库连接失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -77,7 +77,7 @@ class DatabaseService {
         return await connection.execute(sql);
       }
     } catch (error, stackTrace) {
-      _logger.error('数据库查询失败: $sql', error: error, context: LogContext().field('sql', sql));
+      _logger.error('数据库查询失败: $sql', error: error, stackTrace: stackTrace, context: LogContext().field('sql', sql));
       rethrow;
     }
   }
@@ -119,7 +119,7 @@ class DatabaseService {
         _logger.info('数据库连接已关闭');
       }
     } catch (error, stackTrace) {
-      _logger.error('关闭数据库连接时出错', error: error);
+      _logger.error('关闭数据库连接时出错', error: error, stackTrace: stackTrace);
     }
   }
 }

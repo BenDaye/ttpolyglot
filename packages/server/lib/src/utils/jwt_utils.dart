@@ -27,7 +27,7 @@ class JwtUtils {
 
       return jwt.sign(SecretKey(_config.jwtSecret));
     } catch (error, stackTrace) {
-      _logger.error('生成访问令牌失败', error: error);
+      _logger.error('生成访问令牌失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -46,7 +46,7 @@ class JwtUtils {
 
       return jwt.sign(SecretKey(_config.jwtSecret));
     } catch (error, stackTrace) {
-      _logger.error('生成刷新令牌失败', error: error);
+      _logger.error('生成刷新令牌失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -81,7 +81,7 @@ class JwtUtils {
       _logger.warn('JWT验证失败', error: error);
       return null;
     } catch (error, stackTrace) {
-      _logger.error('JWT验证出错', error: error);
+      _logger.error('JWT验证出错', error: error, stackTrace: stackTrace);
       return null;
     }
   }
@@ -134,7 +134,7 @@ class JwtUtils {
 
       return jwt.sign(SecretKey(_config.jwtSecret));
     } catch (error, stackTrace) {
-      _logger.error('生成密码重置令牌失败', error: error);
+      _logger.error('生成密码重置令牌失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -156,7 +156,7 @@ class JwtUtils {
 
       return payload;
     } catch (error, stackTrace) {
-      _logger.error('验证密码重置令牌失败', error: error);
+      _logger.error('验证密码重置令牌失败', error: error, stackTrace: stackTrace);
       return null;
     }
   }
@@ -175,7 +175,7 @@ class JwtUtils {
 
       return jwt.sign(SecretKey(_config.jwtSecret));
     } catch (error, stackTrace) {
-      _logger.error('生成邮箱验证令牌失败', error: error);
+      _logger.error('生成邮箱验证令牌失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -197,7 +197,7 @@ class JwtUtils {
 
       return payload;
     } catch (error, stackTrace) {
-      _logger.error('验证邮箱验证令牌失败', error: error);
+      _logger.error('验证邮箱验证令牌失败', error: error, stackTrace: stackTrace);
       return null;
     }
   }
