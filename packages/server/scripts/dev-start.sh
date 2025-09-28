@@ -59,6 +59,12 @@ start() {
     
     # 运行数据库迁移
     echo "🔧 运行数据库迁移..."
+    
+    # 加载环境变量
+    if [ -f ".env.dev" ]; then
+        export $(cat .env.dev | grep -v '^#' | xargs)
+    fi
+    
     if dart run scripts/migrate.dart; then
         echo "✅ 数据库迁移完成"
     else
