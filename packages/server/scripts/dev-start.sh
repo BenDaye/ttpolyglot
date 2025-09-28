@@ -8,22 +8,6 @@ set -e
 echo "🚀 启动 TTPolyglot 开发环境"
 echo "============================="
 
-# 检查环境变量
-check_environment() {
-    echo "🔍 检查环境变量..."
-
-     # 生成开发环境配置
-    generate_env_dev
-    
-    if [ -z "$generate_env_dev" ]; then
-        echo "❌ generate_env_dev 环境变量未设置"
-        echo "💡 请设置环境变量: export generate_env_dev=true"
-        exit 1
-    fi
-    
-    echo "✅ generate_env_dev 环境变量已设置: $generate_env_dev"
-}
-
 # 检查依赖
 check_dependencies() {
     echo "🔍 检查依赖..."
@@ -166,8 +150,8 @@ main() {
     # 创建日志目录
     mkdir -p logs
     
-    # 检查环境变量
-    check_environment
+    # 生成开发环境配置
+    generate_env_dev
     
     # 检查依赖
     check_dependencies
