@@ -1645,11 +1645,6 @@ class ErrorHandler {
   }
   
   static void handleError(ApiException error, BuildContext context) {
-    // 记录错误日志
-    log('API Error: ${error.code}', 
-        error: error, 
-        name: 'ApiClient');
-    
     // 根据错误类型处理
     switch (error.code) {
       case 'AUTH_TOKEN_EXPIRED':

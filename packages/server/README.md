@@ -176,16 +176,6 @@ dart test --coverage=coverage
 genhtml coverage/lcov.info -o coverage/html
 ```
 
-### 日志规范
-项目使用 `dart:developer` 的 `log` 函数进行日志记录：
-
-```dart
-import 'dart:developer';
-
-log('操作成功', name: 'ServiceName');
-log('操作失败', error: error, stackTrace: stackTrace, name: 'ServiceName');
-```
-
 ## 配置说明
 
 ### 环境变量
