@@ -34,27 +34,12 @@ stop_application() {
 stop() {
     echo "🛑 停止基础设施服务..."
     
-    # 停止数据库和Redis容器
-    docker-compose -f docker-compose.dev.yml down
+    # 停止数据库和Redis容器（保留容器和数据）
+    docker-compose -f docker-compose.dev.yml stop
     
     echo "✅ 基础设施服务已停止"
 }
 
-# 清理资源（可选）
-cleanup() {
-    echo "🧹 清理资源..."
-    
-    # 询问是否清理数据卷
-    read -p "是否清理数据库和Redis数据？这将删除所有数据 (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        echo "🗑️  清理数据卷..."
-        docker-compose -f docker-compose.dev.yml down -v
-        echo "✅ 数据卷已清理"
-    else
-        echo "ℹ️  保留数据卷"
-    fi
-}
 
 # 显示停止信息
 show_stop_info() {
@@ -80,9 +65,6 @@ main() {
     
     # 停止基础设施
     stop
-    
-    # 清理资源
-    cleanup
     
     # 显示停止信息
     show_stop_info

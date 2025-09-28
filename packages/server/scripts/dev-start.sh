@@ -56,6 +56,15 @@ start() {
         echo "❌ Redis启动失败"
         exit 1
     fi
+    
+    # 运行数据库迁移
+    echo "🔧 运行数据库迁移..."
+    if dart run scripts/migrate.dart; then
+        echo "✅ 数据库迁移完成"
+    else
+        echo "❌ 数据库迁移失败"
+        exit 1
+    fi
 }
 
 # 生成开发环境配置文件
