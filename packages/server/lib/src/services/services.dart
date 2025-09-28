@@ -4,6 +4,7 @@ library services;
 // 业务服务
 export 'auth_service.dart';
 export 'config_service.dart';
+export 'database_connection_pool.dart';
 // 基础服务
 export 'database_service.dart';
 // 外部服务

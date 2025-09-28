@@ -7,6 +7,7 @@ import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart';
 
 import 'config/server_config.dart';
+import 'di/di.dart';
 import 'middleware/middleware.dart';
 import 'routes/api_routes.dart';
 import 'services/services.dart';
@@ -17,7 +18,6 @@ class TTPolyglotServer {
   late final DatabaseService _databaseService;
   late final RedisService _redisService;
   late final MultiLevelCacheService _cacheService;
-  late final MigrationService _migrationService;
   late final AuthService _authService;
   late final UserService _userService;
   late final ProjectService _projectService;
@@ -27,7 +27,20 @@ class TTPolyglotServer {
 
   /// 初始化服务器
   TTPolyglotServer() {
-    _config = ServerConfig();
+    // 使用依赖注入容器
+    _initializeFromDI();
+  }
+
+  /// 从依赖注入容器初始化服务
+  void _initializeFromDI() {
+    _config = serviceRegistry.get<ServerConfig>();
+    _databaseService = serviceRegistry.get<DatabaseService>();
+    _redisService = serviceRegistry.get<RedisService>();
+    _cacheService = serviceRegistry.get<MultiLevelCacheService>();
+    _authService = serviceRegistry.get<AuthService>();
+    _userService = serviceRegistry.get<UserService>();
+    _projectService = serviceRegistry.get<ProjectService>();
+    _permissionService = serviceRegistry.get<PermissionService>();
   }
 
   /// 启动服务器
@@ -36,14 +49,14 @@ class TTPolyglotServer {
       _startTime = DateTime.now();
       log('开始启动服务器...', name: 'TTPolyglotServer');
 
-      // 第一阶段：配置和基础设施初始化
-      await _initializeInfrastructure();
+      // 第一阶段：注册所有服务
+      await serviceRegistry.registerAllServices();
 
-      // 第二阶段：数据库迁移和种子数据
-      await _initializeDatabase();
+      // 第二阶段：初始化所有服务
+      await serviceRegistry.initializeAllServices();
 
-      // 第三阶段：业务服务并行初始化
-      await _initializeBusinessServices();
+      // 第三阶段：从DI容器获取服务实例
+      _initializeFromDI();
 
       // 第四阶段：启动HTTP服务器
       await _startHttpServer();
@@ -54,117 +67,6 @@ class TTPolyglotServer {
       log('服务器启动失败', error: error, stackTrace: stackTrace, name: 'TTPolyglotServer');
       rethrow;
     }
-  }
-
-  /// 初始化基础设施
-  Future<void> _initializeInfrastructure() async {
-    log('初始化基础设施...', name: 'TTPolyglotServer');
-
-    // 并行初始化配置和基础服务
-    await Future.wait([
-      _config.load(),
-      _initializeDatabaseService(),
-      _initializeRedisService(),
-    ]);
-
-    // 初始化多级缓存服务
-    _cacheService = MultiLevelCacheService(redisService: _redisService);
-    log('多级缓存服务初始化完成', name: 'TTPolyglotServer');
-
-    log('基础设施初始化完成', name: 'TTPolyglotServer');
-  }
-
-  /// 初始化数据库服务
-  Future<void> _initializeDatabaseService() async {
-    _databaseService = DatabaseService(_config);
-    await _databaseService.initialize();
-    log('数据库连接初始化完成', name: 'TTPolyglotServer');
-  }
-
-  /// 初始化Redis服务
-  Future<void> _initializeRedisService() async {
-    _redisService = RedisService(_config);
-    await _redisService.initialize();
-    log('Redis连接初始化完成', name: 'TTPolyglotServer');
-  }
-
-  /// 初始化数据库迁移和种子数据
-  Future<void> _initializeDatabase() async {
-    log('初始化数据库...', name: 'TTPolyglotServer');
-
-    _migrationService = MigrationService(_databaseService, _config);
-
-    // 并行运行迁移和种子数据
-    await Future.wait([
-      _migrationService.runMigrations(),
-      _migrationService.runSeeds(),
-    ]);
-
-    log('数据库初始化完成', name: 'TTPolyglotServer');
-  }
-
-  /// 并行初始化业务服务
-  Future<void> _initializeBusinessServices() async {
-    log('初始化业务服务...', name: 'TTPolyglotServer');
-
-    // 并行初始化所有业务服务
-    final results = await Future.wait([
-      _initializePermissionService(),
-      _initializeAuthService(),
-      _initializeUserService(),
-      _initializeProjectService(),
-    ]);
-
-    // 提取服务实例
-    _permissionService = results[0] as PermissionService;
-    _authService = results[1] as AuthService;
-    _userService = results[2] as UserService;
-    _projectService = results[3] as ProjectService;
-
-    log('业务服务初始化完成', name: 'TTPolyglotServer');
-  }
-
-  /// 初始化权限服务
-  Future<PermissionService> _initializePermissionService() async {
-    final service = PermissionService(
-      databaseService: _databaseService,
-      redisService: _redisService,
-    );
-    log('权限服务初始化完成', name: 'TTPolyglotServer');
-    return service;
-  }
-
-  /// 初始化认证服务
-  Future<AuthService> _initializeAuthService() async {
-    final service = AuthService(
-      databaseService: _databaseService,
-      redisService: _redisService,
-      config: _config,
-    );
-    log('认证服务初始化完成', name: 'TTPolyglotServer');
-    return service;
-  }
-
-  /// 初始化用户服务
-  Future<UserService> _initializeUserService() async {
-    final service = UserService(
-      databaseService: _databaseService,
-      redisService: _redisService,
-      config: _config,
-    );
-    log('用户服务初始化完成', name: 'TTPolyglotServer');
-    return service;
-  }
-
-  /// 初始化项目服务
-  Future<ProjectService> _initializeProjectService() async {
-    final service = ProjectService(
-      databaseService: _databaseService,
-      redisService: _redisService,
-      config: _config,
-    );
-    log('项目服务初始化完成', name: 'TTPolyglotServer');
-    return service;
   }
 
   /// 启动HTTP服务器
@@ -189,37 +91,19 @@ class TTPolyglotServer {
     try {
       log('开始关闭服务器...', name: 'TTPolyglotServer');
 
-      // 并行关闭所有服务
-      await Future.wait([
-        _stopHttpServer(),
-        _stopDatabaseService(),
-        _stopRedisService(),
-      ]);
+      // 关闭HTTP服务器
+      if (_server != null) {
+        await _server!.close();
+        log('HTTP服务器已关闭', name: 'TTPolyglotServer');
+      }
+
+      // 使用DI容器清理所有服务
+      await serviceRegistry.dispose();
 
       log('服务器已优雅关闭', name: 'TTPolyglotServer');
     } catch (error, stackTrace) {
       log('服务器关闭时出错', error: error, stackTrace: stackTrace, name: 'TTPolyglotServer');
     }
-  }
-
-  /// 关闭HTTP服务器
-  Future<void> _stopHttpServer() async {
-    if (_server != null) {
-      await _server!.close();
-      log('HTTP服务器已关闭', name: 'TTPolyglotServer');
-    }
-  }
-
-  /// 关闭数据库服务
-  Future<void> _stopDatabaseService() async {
-    await _databaseService.close();
-    log('数据库连接已关闭', name: 'TTPolyglotServer');
-  }
-
-  /// 关闭Redis服务
-  Future<void> _stopRedisService() async {
-    await _redisService.close();
-    log('Redis连接已关闭', name: 'TTPolyglotServer');
   }
 
   /// 创建请求处理器
