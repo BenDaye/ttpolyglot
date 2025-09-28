@@ -16,9 +16,6 @@ class Migration010TranslationEntriesTable extends BaseMigration {
   String get createdAt => '2024-12-26';
 
   @override
-  String get tablePrefix => 'tt_';
-
-  @override
   Future<void> up() async {
     try {
       log('开始执行迁移: $name', name: 'Migration010TranslationEntriesTable');

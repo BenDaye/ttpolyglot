@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:postgres/postgres.dart';
+import 'package:ttpolyglot_server/src/config/server_config.dart';
 
 /// 迁移基础类
 /// 创建时间: 2024-12-26
@@ -15,8 +16,21 @@ abstract class BaseMigration {
   /// 创建时间
   String get createdAt;
 
-  /// 表前缀
-  String get tablePrefix;
+  /// 服务器配置
+  ServerConfig? _config;
+
+  /// 设置服务器配置
+  void setConfig(ServerConfig config) {
+    _config = config;
+  }
+
+  /// 获取表前缀
+  String get tablePrefix {
+    if (_config == null) {
+      throw StateError('服务器配置未设置，请先调用 setConfig()');
+    }
+    return _config!.tablePrefix;
+  }
 
   /// 数据库连接
   Connection? _connection;
