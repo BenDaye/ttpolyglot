@@ -12,7 +12,6 @@ export 'http_utils.dart';
 // JWT工具
 export 'jwt_utils.dart';
 // 通用工具
-export 'logger.dart';
 export 'response_builder.dart';
 export 'retry_utils.dart';
 export 'string_utils.dart';
