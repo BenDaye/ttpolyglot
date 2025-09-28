@@ -149,6 +149,7 @@ class TTPolyglotServer {
       userService: _userService,
       projectService: _projectService,
       permissionService: _permissionService,
+      startTime: _startTime,
     );
     router.mount('/api/v1/', apiRoutes.handler);
 

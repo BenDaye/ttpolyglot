@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
@@ -15,6 +17,7 @@ class ApiRoutes {
   final UserService userService;
   final ProjectService projectService;
   final PermissionService permissionService;
+  final DateTime startTime;
 
   late final Router _router;
 
@@ -27,6 +30,7 @@ class ApiRoutes {
     required this.userService,
     required this.projectService,
     required this.permissionService,
+    required this.startTime,
   }) {
     _router = Router();
     _setupRoutes();
@@ -307,7 +311,7 @@ class ApiRoutes {
           'redis': redisHealthy ? 'healthy' : 'unhealthy',
         },
         'timestamp': DateTime.now().toIso8601String(),
-        'uptime': DateTime.now().difference(DateTime.now()).inSeconds, // TODO: 计算实际运行时间
+        'uptime': DateTime.now().difference(startTime).inSeconds,
       };
 
       final statusCode = dbHealthy && redisHealthy ? 200 : 503;
@@ -326,7 +330,10 @@ class ApiRoutes {
 
   /// JSON编码辅助方法
   String _encodeJson(dynamic object) {
-    // TODO: 实现JSON编码
-    return object.toString();
+    try {
+      return jsonEncode(object);
+    } catch (e) {
+      return jsonEncode({'error': 'Failed to encode JSON: $e'});
+    }
   }
 }
