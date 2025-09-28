@@ -19,15 +19,15 @@ abstract class BaseMigration {
   String get tablePrefix;
 
   /// 数据库连接
-  PostgreSQLConnection? _connection;
+  Connection? _connection;
 
   /// 设置数据库连接
-  void setConnection(PostgreSQLConnection connection) {
+  void setConnection(Connection connection) {
     _connection = connection;
   }
 
   /// 获取数据库连接
-  PostgreSQLConnection get connection {
+  Connection get connection {
     if (_connection == null) {
       throw StateError('数据库连接未设置，请先调用 setConnection()');
     }
