@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as path;
 
 import '../config/server_config.dart';
@@ -30,8 +31,33 @@ class MigrationService {
       final executedMigrations = await _getExecutedMigrations();
 
       // 筛选未执行的迁移
-      final pendingMigrations =
-          migrationFiles.where((file) => !executedMigrations.contains(_getFileNameWithoutExtension(file))).toList();
+      final pendingMigrations = <String>[];
+      for (final file in migrationFiles) {
+        final fileName = _getFileNameWithoutExtension(file);
+        final fileHash = await _calculateFileHash(file);
+
+        // 检查迁移是否已执行
+        if (!executedMigrations.containsKey(fileName)) {
+          // 新迁移文件
+          pendingMigrations.add(file);
+          _logger.info('发现新迁移文件: $fileName');
+        } else {
+          // 检查文件是否已更改
+          final executedMigration = executedMigrations[fileName]!;
+          final executedHash = executedMigration['file_hash'] as String;
+          final executedPath = executedMigration['file_path'] as String;
+
+          if (executedHash != fileHash || executedPath != file) {
+            // 文件内容或路径已更改，需要重新执行
+            pendingMigrations.add(file);
+            _logger.info('迁移文件已更改，需要重新执行: $fileName');
+            _logger.info('原路径: $executedPath, 新路径: $file');
+            _logger.info('原哈希: $executedHash, 新哈希: $fileHash');
+          } else {
+            _logger.info('迁移文件未更改，跳过: $fileName');
+          }
+        }
+      }
 
       if (pendingMigrations.isEmpty) {
         _logger.info('没有待执行的迁移');
@@ -98,6 +124,8 @@ class MigrationService {
       CREATE TABLE IF NOT EXISTS $tableName (
         id SERIAL PRIMARY KEY,
         migration_name VARCHAR(255) UNIQUE NOT NULL,
+        file_path VARCHAR(500) NOT NULL,
+        file_hash VARCHAR(64) NOT NULL,
         executed_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
       );
     ''';
@@ -145,22 +173,38 @@ class MigrationService {
   }
 
   /// 获取已执行的迁移
-  Future<Set<String>> _getExecutedMigrations() async {
+  Future<Map<String, Map<String, dynamic>>> _getExecutedMigrations() async {
     try {
       final tableName = '${_config.tablePrefix}schema_migrations';
-      final result = await _databaseService.query('SELECT migration_name FROM $tableName ORDER BY executed_at');
+      final result = await _databaseService.query('''
+        SELECT migration_name, file_path, file_hash, executed_at 
+        FROM $tableName 
+        ORDER BY executed_at
+      ''');
 
-      return result.map((row) => row[0] as String).toSet();
+      final executedMigrations = <String, Map<String, dynamic>>{};
+      for (final row in result) {
+        final migrationName = row[0] as String;
+        executedMigrations[migrationName] = {
+          'name': migrationName,
+          'file_path': row[1] as String,
+          'file_hash': row[2] as String,
+          'executed_at': row[3],
+        };
+      }
+
+      return executedMigrations;
     } catch (error) {
       // 如果表不存在，返回空集合
       _logger.info('获取已执行迁移失败，可能表不存在');
-      return <String>{};
+      return <String, Map<String, dynamic>>{};
     }
   }
 
   /// 执行单个迁移文件
   Future<void> _executeMigration(String filePath) async {
     final fileName = _getFileNameWithoutExtension(filePath);
+    final fileHash = await _calculateFileHash(filePath);
     _logger.info('执行迁移: $fileName');
 
     try {
@@ -184,8 +228,35 @@ class MigrationService {
 
         // 记录迁移执行（使用带前缀的表名）
         final migrationsTableName = '${_config.tablePrefix}schema_migrations';
-        await _databaseService
-            .query('INSERT INTO $migrationsTableName (migration_name) VALUES (@name)', {'name': fileName});
+
+        // 检查是否已存在记录，如果存在则更新，否则插入
+        final existingRecord = await _databaseService
+            .query('SELECT id FROM $migrationsTableName WHERE migration_name = @name', {'name': fileName});
+
+        if (existingRecord.isNotEmpty) {
+          // 更新现有记录
+          await _databaseService.query('''
+            UPDATE $migrationsTableName 
+            SET file_path = @path, file_hash = @hash, executed_at = CURRENT_TIMESTAMP 
+            WHERE migration_name = @name
+          ''', {
+            'name': fileName,
+            'path': filePath,
+            'hash': fileHash,
+          });
+          _logger.info('更新迁移记录: $fileName');
+        } else {
+          // 插入新记录
+          await _databaseService.query('''
+            INSERT INTO $migrationsTableName (migration_name, file_path, file_hash) 
+            VALUES (@name, @path, @hash)
+          ''', {
+            'name': fileName,
+            'path': filePath,
+            'hash': fileHash,
+          });
+          _logger.info('创建迁移记录: $fileName');
+        }
       });
 
       _logger.info('迁移执行成功: $fileName');
@@ -263,6 +334,19 @@ class MigrationService {
     return path.basenameWithoutExtension(filePath);
   }
 
+  /// 计算文件哈希值
+  Future<String> _calculateFileHash(String filePath) async {
+    try {
+      final file = File(filePath);
+      final bytes = await file.readAsBytes();
+      final digest = sha256.convert(bytes);
+      return digest.toString();
+    } catch (error, stackTrace) {
+      _logger.error('计算文件哈希失败: $filePath', error: error, stackTrace: stackTrace);
+      return '';
+    }
+  }
+
   /// 获取迁移状态
   Future<List<Map<String, dynamic>>> getMigrationStatus() async {
     try {
@@ -273,17 +357,41 @@ class MigrationService {
       // 获取已执行的迁移
       final executedMigrations = await _getExecutedMigrations();
 
-      final status = migrationFiles.map((file) {
+      final status = <Map<String, dynamic>>[];
+      for (final file in migrationFiles) {
         final fileName = _getFileNameWithoutExtension(file);
-        final isExecuted = executedMigrations.contains(fileName);
+        final fileHash = await _calculateFileHash(file);
+        final executedMigration = executedMigrations[fileName];
 
-        return {
+        bool isExecuted = false;
+        bool isChanged = false;
+        String statusText = 'pending';
+
+        if (executedMigration != null) {
+          isExecuted = true;
+          final executedHash = executedMigration['file_hash'] as String;
+          final executedPath = executedMigration['file_path'] as String;
+
+          if (executedHash != fileHash || executedPath != file) {
+            isChanged = true;
+            statusText = 'changed';
+          } else {
+            statusText = 'completed';
+          }
+        }
+
+        status.add({
           'name': fileName,
           'file_path': file,
+          'file_hash': fileHash,
           'executed': isExecuted,
-          'status': isExecuted ? 'completed' : 'pending',
-        };
-      }).toList();
+          'changed': isChanged,
+          'status': statusText,
+          'executed_at': executedMigration?['executed_at'],
+          'executed_hash': executedMigration?['file_hash'],
+          'executed_path': executedMigration?['file_path'],
+        });
+      }
 
       return status;
     } catch (error, stackTrace) {
@@ -303,9 +411,14 @@ class MigrationService {
 
       // 从记录中删除迁移（使用带前缀的表名）
       final tableName = '${_config.tablePrefix}schema_migrations';
-      await _databaseService.query('DELETE FROM $tableName WHERE migration_name = @name', {'name': migrationName});
+      final result =
+          await _databaseService.query('DELETE FROM $tableName WHERE migration_name = @name', {'name': migrationName});
 
-      _logger.info('迁移回滚成功: $migrationName');
+      if (result.isEmpty) {
+        _logger.warn('未找到迁移记录: $migrationName');
+      } else {
+        _logger.info('迁移回滚成功: $migrationName');
+      }
     } catch (error, stackTrace) {
       _logger.error('迁移回滚失败: $migrationName', error: error, stackTrace: stackTrace);
       rethrow;
@@ -457,20 +570,31 @@ class MigrationService {
 用法: dart migrate.dart [命令] [参数]
 
 命令:
-  migrate     运行所有未执行的迁移
+  migrate     运行所有未执行的迁移（包括已更改的迁移文件）
   seed        运行种子数据
-  status      显示迁移状态
+  status      显示详细的迁移状态（包括文件哈希和更改检测）
   rollback    回滚指定的迁移 (仅开发环境)
   check       检查表结构
   help        显示此帮助信息
 
+新功能:
+  - 文件内容哈希检测：自动检测迁移文件是否已更改
+  - 智能重新执行：已更改的迁移文件会自动重新执行
+  - 详细状态显示：显示文件哈希、执行时间、路径等信息
+  - 路径变更检测：支持迁移文件路径变更的检测
+
 示例:
   dart migrate.dart                    # 运行迁移和种子数据
-  dart migrate.dart migrate            # 仅运行迁移
+  dart migrate.dart migrate            # 仅运行迁移（包括已更改的文件）
   dart migrate.dart seed               # 仅运行种子数据
-  dart migrate.dart status             # 查看迁移状态
+  dart migrate.dart status             # 查看详细迁移状态
   dart migrate.dart rollback 001_create_core_tables  # 回滚指定迁移
   dart migrate.dart check users        # 检查用户表结构
+
+状态说明:
+  ✅ 已完成    - 迁移已执行且文件未更改
+  🔄 已更改    - 迁移已执行但文件内容已更改，需要重新执行
+  ⏳ 待执行    - 新迁移文件，尚未执行
 ''');
   }
 }
