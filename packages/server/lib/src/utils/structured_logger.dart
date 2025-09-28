@@ -181,14 +181,41 @@ class StructuredLogger {
     return entry;
   }
 
+  /// 获取日志级别的颜色代码
+  String _getLogLevelColor(String level) {
+    switch (level.toUpperCase()) {
+      case 'TRACE':
+        return '\x1B[37m'; // 白色
+      case 'DEBUG':
+        return '\x1B[36m'; // 青色
+      case 'INFO':
+        return '\x1B[32m'; // 绿色
+      case 'WARN':
+        return '\x1B[33m'; // 黄色
+      case 'ERROR':
+        return '\x1B[31m'; // 红色
+      case 'FATAL':
+        return '\x1B[35m'; // 紫色
+      default:
+        return '\x1B[0m'; // 默认颜色
+    }
+  }
+
+  /// 重置颜色代码
+  String get _resetColor => '\x1B[0m';
+
   /// 输出到控制台
   void _logToConsole(Map<String, dynamic> entry) {
     final level = entry['level'] as String;
     final message = entry['message'] as String;
     final logger = entry['logger'] as String;
 
-    // 构建控制台输出
-    final consoleMessage = '[$level] $logger: $message';
+    // 获取颜色代码
+    final colorCode = _getLogLevelColor(level);
+
+    // 构建带颜色的控制台输出
+    final coloredLevel = '${colorCode}[$level]$_resetColor';
+    final consoleMessage = '$coloredLevel $logger: $message';
 
     // 添加关键字段
     final keyFields = <String, dynamic>{};
