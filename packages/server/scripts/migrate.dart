@@ -9,11 +9,14 @@ import 'package:ttpolyglot_server/src/utils/structured_logger.dart';
 /// 数据库迁移脚本
 class DatabaseMigration {
   final DatabaseService _databaseService;
+  final String _tablePrefix;
   static final StructuredLogger _logger = LoggerFactory.getLogger('DatabaseMigration');
 
   DatabaseMigration({
     required DatabaseService databaseService,
-  }) : _databaseService = databaseService;
+    required String tablePrefix,
+  })  : _databaseService = databaseService,
+        _tablePrefix = tablePrefix;
 
   /// 运行所有迁移
   Future<void> runMigrations() async {
@@ -50,7 +53,7 @@ class DatabaseMigration {
   /// 创建迁移表
   Future<void> _createMigrationsTable() async {
     await _databaseService.query('''
-      CREATE TABLE IF NOT EXISTS migrations (
+      CREATE TABLE IF NOT EXISTS ${_tablePrefix}migrations (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL UNIQUE,
         executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -60,14 +63,14 @@ class DatabaseMigration {
 
   /// 获取已执行的迁移
   Future<List<String>> _getExecutedMigrations() async {
-    final result = await _databaseService.query('SELECT name FROM migrations');
+    final result = await _databaseService.query('SELECT name FROM ${_tablePrefix}migrations');
     return result.map((row) => row[0] as String).toList();
   }
 
   /// 记录迁移执行
   Future<void> _recordMigration(String name) async {
     await _databaseService.query(
-      'INSERT INTO migrations (name) VALUES (@name)',
+      'INSERT INTO ${_tablePrefix}migrations (name) VALUES (@name)',
       {'name': name},
     );
   }
@@ -81,7 +84,7 @@ class DatabaseMigration {
         execute: (db) async {
           // 创建用户表
           await db.query('''
-            CREATE TABLE IF NOT EXISTS users (
+            CREATE TABLE IF NOT EXISTS ${_tablePrefix}users (
               id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
               username VARCHAR(50) NOT NULL UNIQUE,
               email VARCHAR(255) NOT NULL UNIQUE,
@@ -105,9 +108,9 @@ class DatabaseMigration {
 
           // 创建用户会话表
           await db.query('''
-            CREATE TABLE IF NOT EXISTS user_sessions (
+            CREATE TABLE IF NOT EXISTS ${_tablePrefix}user_sessions (
               id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-              user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+              user_id UUID NOT NULL REFERENCES ${_tablePrefix}users(id) ON DELETE CASCADE,
               token_hash VARCHAR(255) NOT NULL,
               refresh_token_hash VARCHAR(255) NOT NULL,
               device_id VARCHAR(255),
@@ -124,11 +127,11 @@ class DatabaseMigration {
 
           // 创建项目表
           await db.query('''
-            CREATE TABLE IF NOT EXISTS projects (
+            CREATE TABLE IF NOT EXISTS ${_tablePrefix}projects (
               id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
               name VARCHAR(255) NOT NULL,
               description TEXT,
-              owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+              owner_id UUID NOT NULL REFERENCES ${_tablePrefix}users(id) ON DELETE CASCADE,
               is_active BOOLEAN DEFAULT true,
               created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
               updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -137,14 +140,14 @@ class DatabaseMigration {
 
           // 创建翻译表
           await db.query('''
-            CREATE TABLE IF NOT EXISTS translations (
+            CREATE TABLE IF NOT EXISTS ${_tablePrefix}translations (
               id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-              project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+              project_id UUID NOT NULL REFERENCES ${_tablePrefix}projects(id) ON DELETE CASCADE,
               key VARCHAR(500) NOT NULL,
               language VARCHAR(10) NOT NULL,
               value TEXT,
               is_active BOOLEAN DEFAULT true,
-              created_by UUID REFERENCES users(id),
+              created_by UUID REFERENCES ${_tablePrefix}users(id),
               created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
               updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
               UNIQUE(project_id, key, language)
@@ -152,13 +155,19 @@ class DatabaseMigration {
           ''');
 
           // 创建索引
-          await db.query('CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)');
-          await db.query('CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)');
-          await db.query('CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON user_sessions(user_id)');
-          await db.query('CREATE INDEX IF NOT EXISTS idx_user_sessions_token_hash ON user_sessions(token_hash)');
-          await db.query('CREATE INDEX IF NOT EXISTS idx_projects_owner_id ON projects(owner_id)');
-          await db.query('CREATE INDEX IF NOT EXISTS idx_translations_project_id ON translations(project_id)');
-          await db.query('CREATE INDEX IF NOT EXISTS idx_translations_language ON translations(language)');
+          await db.query('CREATE INDEX IF NOT EXISTS idx_${_tablePrefix}users_email ON ${_tablePrefix}users(email)');
+          await db
+              .query('CREATE INDEX IF NOT EXISTS idx_${_tablePrefix}users_username ON ${_tablePrefix}users(username)');
+          await db.query(
+              'CREATE INDEX IF NOT EXISTS idx_${_tablePrefix}user_sessions_user_id ON ${_tablePrefix}user_sessions(user_id)');
+          await db.query(
+              'CREATE INDEX IF NOT EXISTS idx_${_tablePrefix}user_sessions_token_hash ON ${_tablePrefix}user_sessions(token_hash)');
+          await db.query(
+              'CREATE INDEX IF NOT EXISTS idx_${_tablePrefix}projects_owner_id ON ${_tablePrefix}projects(owner_id)');
+          await db.query(
+              'CREATE INDEX IF NOT EXISTS idx_${_tablePrefix}translations_project_id ON ${_tablePrefix}translations(project_id)');
+          await db.query(
+              'CREATE INDEX IF NOT EXISTS idx_${_tablePrefix}translations_language ON ${_tablePrefix}translations(language)');
         },
       ),
 
@@ -167,9 +176,9 @@ class DatabaseMigration {
         name: '002_create_file_uploads_table',
         execute: (db) async {
           await db.query('''
-            CREATE TABLE IF NOT EXISTS file_uploads (
+            CREATE TABLE IF NOT EXISTS ${_tablePrefix}file_uploads (
               id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-              user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+              user_id UUID NOT NULL REFERENCES ${_tablePrefix}users(id) ON DELETE CASCADE,
               file_name VARCHAR(255) NOT NULL,
               original_name VARCHAR(255) NOT NULL,
               file_path TEXT NOT NULL,
@@ -182,8 +191,10 @@ class DatabaseMigration {
             )
           ''');
 
-          await db.query('CREATE INDEX IF NOT EXISTS idx_file_uploads_user_id ON file_uploads(user_id)');
-          await db.query('CREATE INDEX IF NOT EXISTS idx_file_uploads_file_type ON file_uploads(file_type)');
+          await db.query(
+              'CREATE INDEX IF NOT EXISTS idx_${_tablePrefix}file_uploads_user_id ON ${_tablePrefix}file_uploads(user_id)');
+          await db.query(
+              'CREATE INDEX IF NOT EXISTS idx_${_tablePrefix}file_uploads_file_type ON ${_tablePrefix}file_uploads(file_type)');
         },
       ),
 
@@ -192,9 +203,9 @@ class DatabaseMigration {
         name: '003_create_audit_logs_table',
         execute: (db) async {
           await db.query('''
-            CREATE TABLE IF NOT EXISTS audit_logs (
+            CREATE TABLE IF NOT EXISTS ${_tablePrefix}audit_logs (
               id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-              user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+              user_id UUID REFERENCES ${_tablePrefix}users(id) ON DELETE SET NULL,
               action VARCHAR(100) NOT NULL,
               resource_type VARCHAR(100) NOT NULL,
               resource_id UUID,
@@ -205,11 +216,14 @@ class DatabaseMigration {
             )
           ''');
 
-          await db.query('CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON audit_logs(user_id)');
-          await db.query('CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs(action)');
-          await db
-              .query('CREATE INDEX IF NOT EXISTS idx_audit_logs_resource ON audit_logs(resource_type, resource_id)');
-          await db.query('CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at)');
+          await db.query(
+              'CREATE INDEX IF NOT EXISTS idx_${_tablePrefix}audit_logs_user_id ON ${_tablePrefix}audit_logs(user_id)');
+          await db.query(
+              'CREATE INDEX IF NOT EXISTS idx_${_tablePrefix}audit_logs_action ON ${_tablePrefix}audit_logs(action)');
+          await db.query(
+              'CREATE INDEX IF NOT EXISTS idx_${_tablePrefix}audit_logs_resource ON ${_tablePrefix}audit_logs(resource_type, resource_id)');
+          await db.query(
+              'CREATE INDEX IF NOT EXISTS idx_${_tablePrefix}audit_logs_created_at ON ${_tablePrefix}audit_logs(created_at)');
         },
       ),
     ];
@@ -240,7 +254,10 @@ Future<void> main(List<String> args) async {
     await databaseService.initialize();
 
     // 运行迁移
-    final migration = DatabaseMigration(databaseService: databaseService);
+    final migration = DatabaseMigration(
+      databaseService: databaseService,
+      tablePrefix: config.tablePrefix,
+    );
     await migration.runMigrations();
 
     logger.info('数据库迁移脚本执行完成');
