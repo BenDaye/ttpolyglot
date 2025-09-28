@@ -110,6 +110,7 @@ class StructuredLogger {
   final bool enableConsole;
   final bool enableJson;
   final String? logFile;
+  final StackTrace? stackTrace;
 
   StructuredLogger({
     required this.name,
@@ -117,6 +118,7 @@ class StructuredLogger {
     this.enableConsole = true,
     this.enableJson = true,
     this.logFile,
+    this.stackTrace,
   });
 
   /// 创建子记录器
@@ -127,6 +129,7 @@ class StructuredLogger {
       enableConsole: enableConsole,
       enableJson: enableJson,
       logFile: logFile,
+      stackTrace: stackTrace,
     );
   }
 
@@ -227,16 +230,16 @@ class StructuredLogger {
 
     if (keyFields.isNotEmpty) {
       final fieldsStr = keyFields.entries.map((e) => '${e.key}=${e.value}').join(', ');
-      dev.log('$consoleMessage ($fieldsStr)', name: logger);
+      dev.log('$consoleMessage ($fieldsStr)', name: logger, stackTrace: stackTrace);
     } else {
-      dev.log(consoleMessage, name: logger);
+      dev.log(consoleMessage, name: logger, stackTrace: stackTrace);
     }
   }
 
   /// 输出JSON格式
   void _logToJson(Map<String, dynamic> entry) {
     final jsonStr = jsonEncode(entry);
-    dev.log(jsonStr, name: name);
+    dev.log(jsonStr, name: name, stackTrace: stackTrace);
   }
 
   /// 输出到文件
