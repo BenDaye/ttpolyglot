@@ -484,7 +484,7 @@ class Validator {
       );
     }
 
-    final list = value as List;
+    final list = value;
     final errors = <FieldError>[];
 
     // 检查长度

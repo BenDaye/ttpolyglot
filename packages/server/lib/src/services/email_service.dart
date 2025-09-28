@@ -102,10 +102,7 @@ class EmailService {
         message.attachments.addAll(attachments);
       }
 
-      final sendReport = await send(message, _smtpServer!);
-      log('邮件发送成功: $to, 主题: $subject', name: 'EmailService');
-
-      // 记录发送报告
+      await send(message, _smtpServer!);
       log('邮件发送成功: $to, 主题: $subject', name: 'EmailService');
     } catch (error, stackTrace) {
       log('邮件发送失败: $to', error: error, stackTrace: stackTrace, name: 'EmailService');

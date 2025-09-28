@@ -1,24 +1,16 @@
 import 'dart:developer';
 
-import '../config/server_config.dart';
 import '../models/api_error.dart';
 import '../models/translation_entry.dart';
 import 'database_service.dart';
-import 'redis_service.dart';
 
 /// 翻译服务
 class TranslationService {
   final DatabaseService _databaseService;
-  final RedisService _redisService;
-  final ServerConfig _config;
 
   TranslationService({
     required DatabaseService databaseService,
-    required RedisService redisService,
-    required ServerConfig config,
-  })  : _databaseService = databaseService,
-        _redisService = redisService,
-        _config = config;
+  }) : _databaseService = databaseService;
 
   /// 获取翻译条目
   Future<Map<String, dynamic>> getTranslationEntries({

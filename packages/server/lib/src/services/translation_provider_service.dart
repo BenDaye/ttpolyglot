@@ -4,21 +4,17 @@ import '../config/server_config.dart';
 import '../models/api_error.dart';
 import '../utils/crypto_utils.dart';
 import 'database_service.dart';
-import 'redis_service.dart';
 
 /// 翻译接口配置服务
 class TranslationProviderService {
   final DatabaseService _databaseService;
-  final RedisService _redisService;
   final ServerConfig _config;
   late final CryptoUtils _cryptoUtils;
 
   TranslationProviderService({
     required DatabaseService databaseService,
-    required RedisService redisService,
     required ServerConfig config,
   })  : _databaseService = databaseService,
-        _redisService = redisService,
         _config = config {
     _cryptoUtils = CryptoUtils(_config);
   }
@@ -532,7 +528,8 @@ class TranslationProviderService {
       }
     } finally {
       final responseTime = DateTime.now().difference(startTime).inMilliseconds;
-      // 可以记录响应时间统计
+      // 记录响应时间统计到日志
+      log('翻译API调用响应时间: $responseTime ms', name: 'TranslationProviderService');
     }
   }
 

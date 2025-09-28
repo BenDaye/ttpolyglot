@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-import '../config/server_config.dart';
 import 'database_service.dart';
 import 'redis_service.dart';
 
@@ -8,15 +7,12 @@ import 'redis_service.dart';
 class PermissionService {
   final DatabaseService _databaseService;
   final RedisService _redisService;
-  final ServerConfig _config;
 
   PermissionService({
     required DatabaseService databaseService,
     required RedisService redisService,
-    required ServerConfig config,
   })  : _databaseService = databaseService,
-        _redisService = redisService,
-        _config = config;
+        _redisService = redisService;
 
   /// 检查用户是否具有指定权限
   Future<bool> checkUserPermission({
@@ -148,7 +144,7 @@ class PermissionService {
       final cachedResult = await _redisService.get(cacheKey);
 
       if (cachedResult != null) {
-        return (cachedResult as String).split(',');
+        return cachedResult.split(',');
       }
 
       // 查询数据库
@@ -187,7 +183,7 @@ class PermissionService {
       final cachedResult = await _redisService.get(cacheKey);
 
       if (cachedResult != null) {
-        return (cachedResult as String).split(',');
+        return cachedResult.split(',');
       }
 
       // 查询数据库
@@ -223,7 +219,7 @@ class PermissionService {
       final cachedResult = await _redisService.get(cacheKey);
 
       if (cachedResult != null) {
-        return (cachedResult as String).split(',');
+        return cachedResult.split(',');
       }
 
       final permissions = <String>{};
@@ -354,7 +350,7 @@ class PermissionService {
     final cachedResult = await _redisService.get(cacheKey);
 
     if (cachedResult != null) {
-      return (cachedResult as String).split(',');
+      return cachedResult.split(',');
     }
 
     // 查询数据库

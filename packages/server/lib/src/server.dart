@@ -58,7 +58,6 @@ class TTPolyglotServer {
       _permissionService = PermissionService(
         databaseService: _databaseService,
         redisService: _redisService,
-        config: _config,
       );
       log('权限服务初始化完成', name: 'TTPolyglotServer');
 
