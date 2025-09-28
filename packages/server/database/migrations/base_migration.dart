@@ -16,31 +16,9 @@ abstract class BaseMigration {
   /// 创建时间
   String get createdAt;
 
-  /// 服务器配置
-  ServerConfig? _config;
-
-  /// 构造函数，自动加载服务器配置
-  BaseMigration() {
-    _initializeConfig();
-  }
-
-  /// 初始化服务器配置
-  void _initializeConfig() {
-    try {
-      _config = ServerConfig();
-      log('服务器配置实例已创建', name: runtimeType.toString());
-    } catch (error, stackTrace) {
-      log('创建服务器配置实例失败', error: error, stackTrace: stackTrace, name: runtimeType.toString());
-      rethrow;
-    }
-  }
-
   /// 获取表前缀
   String get tablePrefix {
-    if (_config == null) {
-      throw StateError('服务器配置未设置，请先调用 loadConfig() 或 setConfig()');
-    }
-    return _config!.tablePrefix;
+    return ServerConfig.tablePrefix;
   }
 
   /// 数据库连接
