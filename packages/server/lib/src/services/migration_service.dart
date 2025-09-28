@@ -330,6 +330,125 @@ class MigrationService {
     }
   }
 
+  /// 检查表结构差异
+  Future<Map<String, dynamic>> checkTableStructure(String tableName) async {
+    try {
+      final prefixedTableName = '${_config.tablePrefix}$tableName';
+
+      // 检查表是否存在
+      final tableExistsQuery = SqlParser.buildTableExistsQuery(tableName, '');
+      final tableExists = await _databaseService.query(tableExistsQuery);
+      final exists = (tableExists.first[0] as bool);
+
+      if (!exists) {
+        return {'exists': false, 'message': '表 $prefixedTableName 不存在'};
+      }
+
+      // 获取表结构信息
+      final structureQuery = '''
+        SELECT 
+          column_name,
+          data_type,
+          character_maximum_length,
+          is_nullable,
+          column_default
+        FROM information_schema.columns 
+        WHERE table_schema = 'public' 
+        AND table_name = '$prefixedTableName'
+        ORDER BY ordinal_position;
+      ''';
+
+      final columns = await _databaseService.query(structureQuery);
+
+      return {
+        'exists': true,
+        'table_name': prefixedTableName,
+        'columns': columns
+            .map((row) => {
+                  'name': row[0],
+                  'type': row[1],
+                  'max_length': row[2],
+                  'nullable': row[3] == 'YES',
+                  'default': row[4],
+                })
+            .toList()
+      };
+    } catch (error, stackTrace) {
+      _logger.error('检查表结构失败: $tableName', error: error, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 安全地添加列
+  Future<void> addColumnSafely(String tableName, String columnName, String columnDefinition) async {
+    try {
+      final prefixedTableName = '${_config.tablePrefix}$tableName';
+      final sql = 'ALTER TABLE $prefixedTableName ADD COLUMN IF NOT EXISTS $columnName $columnDefinition';
+
+      await _databaseService.query(sql);
+      _logger.info('成功添加列: $prefixedTableName.$columnName');
+    } catch (error, stackTrace) {
+      _logger.error('添加列失败: $tableName.$columnName', error: error, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 安全地删除列
+  Future<void> dropColumnSafely(String tableName, String columnName) async {
+    try {
+      final prefixedTableName = '${_config.tablePrefix}$tableName';
+      final sql = 'ALTER TABLE $prefixedTableName DROP COLUMN IF EXISTS $columnName';
+
+      await _databaseService.query(sql);
+      _logger.info('成功删除列: $prefixedTableName.$columnName');
+    } catch (error, stackTrace) {
+      _logger.error('删除列失败: $tableName.$columnName', error: error, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 安全地修改列类型
+  Future<void> alterColumnTypeSafely(String tableName, String columnName, String newType) async {
+    try {
+      final prefixedTableName = '${_config.tablePrefix}$tableName';
+      final sql = 'ALTER TABLE $prefixedTableName ALTER COLUMN $columnName TYPE $newType';
+
+      await _databaseService.query(sql);
+      _logger.info('成功修改列类型: $prefixedTableName.$columnName -> $newType');
+    } catch (error, stackTrace) {
+      _logger.error('修改列类型失败: $tableName.$columnName', error: error, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 安全地添加约束
+  Future<void> addConstraintSafely(String tableName, String constraintName, String constraintDefinition) async {
+    try {
+      final prefixedTableName = '${_config.tablePrefix}$tableName';
+      final sql = 'ALTER TABLE $prefixedTableName ADD CONSTRAINT IF NOT EXISTS $constraintName $constraintDefinition';
+
+      await _databaseService.query(sql);
+      _logger.info('成功添加约束: $prefixedTableName.$constraintName');
+    } catch (error, stackTrace) {
+      _logger.error('添加约束失败: $tableName.$constraintName', error: error, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 安全地删除约束
+  Future<void> dropConstraintSafely(String tableName, String constraintName) async {
+    try {
+      final prefixedTableName = '${_config.tablePrefix}$tableName';
+      final sql = 'ALTER TABLE $prefixedTableName DROP CONSTRAINT IF EXISTS $constraintName';
+
+      await _databaseService.query(sql);
+      _logger.info('成功删除约束: $prefixedTableName.$constraintName');
+    } catch (error, stackTrace) {
+      _logger.error('删除约束失败: $tableName.$constraintName', error: error, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
   /// 显示帮助信息
   void showHelpMigration() {
     _logger.info('''
@@ -342,6 +461,7 @@ class MigrationService {
   seed        运行种子数据
   status      显示迁移状态
   rollback    回滚指定的迁移 (仅开发环境)
+  check       检查表结构
   help        显示此帮助信息
 
 示例:
@@ -350,6 +470,7 @@ class MigrationService {
   dart migrate.dart seed               # 仅运行种子数据
   dart migrate.dart status             # 查看迁移状态
   dart migrate.dart rollback 001_create_core_tables  # 回滚指定迁移
+  dart migrate.dart check users        # 检查用户表结构
 ''');
   }
 }

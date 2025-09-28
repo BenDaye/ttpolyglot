@@ -46,6 +46,21 @@ Future<void> main(List<String> args) async {
           }
           await migrationService.rollbackMigration(args[1]);
           break;
+        case 'check':
+          if (args.length < 2) {
+            logger.error('检查表结构需要指定表名');
+            exit(1);
+          }
+          final tableInfo = await migrationService.checkTableStructure(args[1]);
+          if (tableInfo['exists']) {
+            logger.info('表 ${tableInfo['table_name']} 存在，包含以下列：');
+            for (final column in tableInfo['columns']) {
+              logger.info('  - ${column['name']}: ${column['type']} (${column['nullable'] ? '可空' : '非空'})');
+            }
+          } else {
+            logger.info(tableInfo['message']);
+          }
+          break;
         default:
           migrationService.showHelpMigration();
           break;
