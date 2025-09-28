@@ -1,9 +1,10 @@
-import 'dart:developer';
-
 import '../models/api_error.dart';
+import '../utils/structured_logger.dart';
 
 /// 数据验证工具类
 class Validator {
+  static final StructuredLogger _logger = LoggerFactory.getLogger('Validator');
+
   /// 验证字符串字段
   static String validateString(
     dynamic value,
@@ -536,11 +537,11 @@ class Validator {
     for (final validation in validations) {
       try {
         validation();
-      } catch (e) {
-        if (e is ValidationException) {
-          allErrors.addAll(e.fieldErrors);
+      } catch (error, stackTrace) {
+        if (error is ValidationException) {
+          allErrors.addAll(error.fieldErrors);
         } else {
-          log('验证过程中出现未知错误', error: e, name: 'Validator');
+          _logger.error('验证过程中出现未知错误', error: error, stackTrace: stackTrace);
         }
       }
     }

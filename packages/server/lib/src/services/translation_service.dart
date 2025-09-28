@@ -1,12 +1,12 @@
-import 'dart:developer';
-
 import '../models/api_error.dart';
 import '../models/translation_entry.dart';
+import '../utils/structured_logger.dart';
 import 'database_service.dart';
 
 /// 翻译服务
 class TranslationService {
   final DatabaseService _databaseService;
+  final StructuredLogger _logger = LoggerFactory.getLogger('TranslationService');
 
   TranslationService({
     required DatabaseService databaseService,
@@ -24,7 +24,7 @@ class TranslationService {
     String? search,
   }) async {
     try {
-      log('获取翻译条目: project=$projectId, language=$languageCode, page=$page', name: 'TranslationService');
+      _logger.info('获取翻译条目: project=$projectId, language=$languageCode, page=$page');
 
       // 构建查询条件
       final conditions = <String>['te.project_id = @project_id'];
@@ -102,7 +102,7 @@ class TranslationService {
         },
       };
     } catch (error, stackTrace) {
-      log('获取翻译条目失败', error: error, stackTrace: stackTrace, name: 'TranslationService');
+      _logger.error('获取翻译条目失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -110,7 +110,7 @@ class TranslationService {
   /// 根据ID获取翻译条目详情
   Future<TranslationEntry?> getTranslationEntryById(String entryId) async {
     try {
-      log('获取翻译条目详情: $entryId', name: 'TranslationService');
+      _logger.info('获取翻译条目详情: $entryId');
 
       const sql = '''
         SELECT
@@ -135,7 +135,7 @@ class TranslationService {
       final entryData = result.first.toColumnMap();
       return TranslationEntry.fromMap(entryData);
     } catch (error, stackTrace) {
-      log('获取翻译条目详情失败: $entryId', error: error, stackTrace: stackTrace, name: 'TranslationService');
+      _logger.error('获取翻译条目详情失败: $entryId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -151,7 +151,7 @@ class TranslationService {
     String? contextInfo,
   }) async {
     try {
-      log('创建翻译条目: $entryKey ($languageCode)', name: 'TranslationService');
+      _logger.info('创建翻译条目: $entryKey ($languageCode)');
 
       // 检查是否已存在相同的条目
       final existing = await _databaseService.query('''
@@ -191,11 +191,11 @@ class TranslationService {
       // 更新项目统计信息
       await _updateProjectStats(projectId);
 
-      log('翻译条目创建成功: ${entry.id}', name: 'TranslationService');
+      _logger.info('翻译条目创建成功: ${entry.id}');
 
       return entry;
     } catch (error, stackTrace) {
-      log('创建翻译条目失败: $entryKey', error: error, stackTrace: stackTrace, name: 'TranslationService');
+      _logger.error('创建翻译条目失败: $entryKey', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -213,7 +213,7 @@ class TranslationService {
     String? updatedBy,
   }) async {
     try {
-      log('更新翻译条目: $entryId', name: 'TranslationService');
+      _logger.info('更新翻译条目: $entryId');
 
       final existing = await getTranslationEntryById(entryId);
       if (existing == null) {
@@ -292,11 +292,11 @@ class TranslationService {
       // 更新项目统计信息
       await _updateProjectStats(updatedEntry.projectId);
 
-      log('翻译条目更新成功: $entryId', name: 'TranslationService');
+      _logger.info('翻译条目更新成功: $entryId');
 
       return updatedEntry;
     } catch (error, stackTrace) {
-      log('更新翻译条目失败: $entryId', error: error, stackTrace: stackTrace, name: 'TranslationService');
+      _logger.error('更新翻译条目失败: $entryId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -304,7 +304,7 @@ class TranslationService {
   /// 删除翻译条目
   Future<void> deleteTranslationEntry(String entryId, {String? deletedBy}) async {
     try {
-      log('删除翻译条目: $entryId', name: 'TranslationService');
+      _logger.info('删除翻译条目: $entryId');
 
       // 获取条目信息以便记录历史
       final entry = await getTranslationEntryById(entryId);
@@ -321,9 +321,9 @@ class TranslationService {
       // 更新项目统计信息
       await _updateProjectStats(entry.projectId);
 
-      log('翻译条目删除成功: $entryId', name: 'TranslationService');
+      _logger.info('翻译条目删除成功: $entryId');
     } catch (error, stackTrace) {
-      log('删除翻译条目失败: $entryId', error: error, stackTrace: stackTrace, name: 'TranslationService');
+      _logger.error('删除翻译条目失败: $entryId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -337,7 +337,7 @@ class TranslationService {
     String? updatedBy,
   }) async {
     try {
-      log('批量更新翻译条目: ${entryIds.length} 项', name: 'TranslationService');
+      _logger.info('批量更新翻译条目: ${entryIds.length} 项');
 
       final updatedEntries = <TranslationEntry>[];
 
@@ -375,11 +375,11 @@ class TranslationService {
         }
       });
 
-      log('批量更新完成: ${updatedEntries.length} 项', name: 'TranslationService');
+      _logger.info('批量更新完成: ${updatedEntries.length} 项');
 
       return updatedEntries;
     } catch (error, stackTrace) {
-      log('批量更新翻译条目失败', error: error, stackTrace: stackTrace, name: 'TranslationService');
+      _logger.error('批量更新翻译条目失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -390,7 +390,7 @@ class TranslationService {
     int limit = 50,
   }) async {
     try {
-      log('获取翻译历史: $entryId', name: 'TranslationService');
+      _logger.info('获取翻译历史: $entryId');
 
       const sql = '''
         SELECT
@@ -410,7 +410,7 @@ class TranslationService {
 
       return result.map((row) => row.toColumnMap()).toList();
     } catch (error, stackTrace) {
-      log('获取翻译历史失败: $entryId', error: error, stackTrace: stackTrace, name: 'TranslationService');
+      _logger.error('获取翻译历史失败: $entryId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -418,7 +418,7 @@ class TranslationService {
   /// 获取项目翻译统计
   Future<Map<String, dynamic>> getProjectTranslationStats(String projectId) async {
     try {
-      log('获取项目翻译统计: $projectId', name: 'TranslationService');
+      _logger.info('获取项目翻译统计: $projectId');
 
       const sql = '''
         SELECT
@@ -438,7 +438,7 @@ class TranslationService {
       final result = await _databaseService.query(sql, {'project_id': projectId});
       return result.first.toColumnMap();
     } catch (error, stackTrace) {
-      log('获取项目翻译统计失败: $projectId', error: error, stackTrace: stackTrace, name: 'TranslationService');
+      _logger.error('获取项目翻译统计失败: $projectId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -470,7 +470,7 @@ class TranslationService {
         'change_reason': changeReason,
       });
     } catch (error, stackTrace) {
-      log('记录翻译历史失败: ${entry.id}', error: error, stackTrace: stackTrace, name: 'TranslationService');
+      _logger.error('记录翻译历史失败: ${entry.id}', error: error, stackTrace: stackTrace);
       // 不抛出异常，避免影响主要操作
     }
   }
@@ -500,7 +500,7 @@ class TranslationService {
         WHERE id = @project_id
       ''', {'project_id': projectId});
     } catch (error, stackTrace) {
-      log('更新项目统计失败: $projectId', error: error, stackTrace: stackTrace, name: 'TranslationService');
+      _logger.error('更新项目统计失败: $projectId', error: error, stackTrace: stackTrace);
       // 不抛出异常，避免影响主要操作
     }
   }

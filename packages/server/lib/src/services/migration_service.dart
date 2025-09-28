@@ -1,22 +1,23 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
 import '../config/server_config.dart';
+import '../utils/structured_logger.dart';
 import 'database_service.dart';
 
 /// 数据库迁移服务
 class MigrationService {
   final DatabaseService _databaseService;
   final ServerConfig _config;
+  static final _logger = LoggerFactory.getLogger('MigrationService');
 
   MigrationService(this._databaseService, this._config);
 
   /// 运行所有未执行的迁移
   Future<void> runMigrations() async {
     try {
-      log('开始运行数据库迁移...', name: 'MigrationService');
+      _logger.info('开始运行数据库迁移...');
 
       // 确保迁移记录表存在
       await _ensureMigrationTableExists();
@@ -32,11 +33,11 @@ class MigrationService {
           migrationFiles.where((file) => !executedMigrations.contains(_getFileNameWithoutExtension(file))).toList();
 
       if (pendingMigrations.isEmpty) {
-        log('没有待执行的迁移', name: 'MigrationService');
+        _logger.info('没有待执行的迁移');
         return;
       }
 
-      log('发现 ${pendingMigrations.length} 个待执行的迁移', name: 'MigrationService');
+      _logger.info('发现 ${pendingMigrations.length} 个待执行的迁移');
 
       // 按文件名排序执行迁移
       pendingMigrations.sort((a, b) => path.basename(a).compareTo(path.basename(b)));
@@ -45,9 +46,9 @@ class MigrationService {
         await _executeMigration(migrationFile);
       }
 
-      log('所有迁移执行完成', name: 'MigrationService');
+      _logger.info('所有迁移执行完成');
     } catch (error, stackTrace) {
-      log('迁移执行失败', error: error, stackTrace: stackTrace, name: 'MigrationService');
+      _logger.error('迁移执行失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -55,12 +56,12 @@ class MigrationService {
   /// 运行种子数据
   Future<void> runSeeds() async {
     try {
-      log('开始运行种子数据...', name: 'MigrationService');
+      _logger.info('开始运行种子数据...');
 
       // 检查是否已经有数据（避免重复插入）
       final userCount = await _getUserCount();
       if (userCount > 0) {
-        log('检测到已有用户数据，跳过种子数据执行', name: 'MigrationService');
+        _logger.info('检测到已有用户数据，跳过种子数据执行');
         return;
       }
 
@@ -68,11 +69,11 @@ class MigrationService {
       final seedFiles = await _getSeedFiles();
 
       if (seedFiles.isEmpty) {
-        log('没有找到种子数据文件', name: 'MigrationService');
+        _logger.info('没有找到种子数据文件');
         return;
       }
 
-      log('发现 ${seedFiles.length} 个种子数据文件', name: 'MigrationService');
+      _logger.info('发现 ${seedFiles.length} 个种子数据文件');
 
       // 按文件名排序执行种子数据
       seedFiles.sort((a, b) => path.basename(a).compareTo(path.basename(b)));
@@ -81,9 +82,9 @@ class MigrationService {
         await _executeSeedFile(seedFile);
       }
 
-      log('所有种子数据执行完成', name: 'MigrationService');
+      _logger.info('所有种子数据执行完成');
     } catch (error, stackTrace) {
-      log('种子数据执行失败', error: error, stackTrace: stackTrace, name: 'MigrationService');
+      _logger.error('种子数据执行失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -106,7 +107,7 @@ class MigrationService {
     final migrationsDir = Directory('database/migrations');
 
     if (!await migrationsDir.exists()) {
-      log('迁移目录不存在: ${migrationsDir.path}', name: 'MigrationService');
+      _logger.info('迁移目录不存在: ${migrationsDir.path}');
       return [];
     }
 
@@ -125,7 +126,7 @@ class MigrationService {
     final seedsDir = Directory('database/seeds');
 
     if (!await seedsDir.exists()) {
-      log('种子数据目录不存在: ${seedsDir.path}', name: 'MigrationService');
+      _logger.info('种子数据目录不存在: ${seedsDir.path}');
       return [];
     }
 
@@ -154,7 +155,7 @@ class MigrationService {
   /// 执行单个迁移文件
   Future<void> _executeMigration(String filePath) async {
     final fileName = _getFileNameWithoutExtension(filePath);
-    log('执行迁移: $fileName', name: 'MigrationService');
+    _logger.info('执行迁移: $fileName');
 
     try {
       // 读取SQL文件
@@ -171,9 +172,9 @@ class MigrationService {
             .query('INSERT INTO schema_migrations (migration_name) VALUES (@name)', {'name': fileName});
       });
 
-      log('迁移执行成功: $fileName', name: 'MigrationService');
+      _logger.info('迁移执行成功: $fileName');
     } catch (error, stackTrace) {
-      log('迁移执行失败: $fileName', error: error, stackTrace: stackTrace, name: 'MigrationService');
+      _logger.error('迁移执行失败: $fileName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -181,7 +182,7 @@ class MigrationService {
   /// 执行种子数据文件
   Future<void> _executeSeedFile(String filePath) async {
     final fileName = path.basename(filePath);
-    log('执行种子数据: $fileName', name: 'MigrationService');
+    _logger.info('执行种子数据: $fileName');
 
     try {
       // 读取SQL文件
@@ -191,9 +192,9 @@ class MigrationService {
       // 执行种子数据SQL
       await _databaseService.query(sqlContent);
 
-      log('种子数据执行成功: $fileName', name: 'MigrationService');
+      _logger.info('种子数据执行成功: $fileName');
     } catch (error, stackTrace) {
-      log('种子数据执行失败: $fileName', error: error, stackTrace: stackTrace, name: 'MigrationService');
+      _logger.error('种子数据执行失败: $fileName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -238,7 +239,7 @@ class MigrationService {
 
       return status;
     } catch (error, stackTrace) {
-      log('获取迁移状态失败', error: error, stackTrace: stackTrace, name: 'MigrationService');
+      _logger.error('获取迁移状态失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -250,15 +251,15 @@ class MigrationService {
     }
 
     try {
-      log('回滚迁移: $migrationName', name: 'MigrationService');
+      _logger.info('回滚迁移: $migrationName');
 
       // 从记录中删除迁移
       await _databaseService
           .query('DELETE FROM schema_migrations WHERE migration_name = @name', {'name': migrationName});
 
-      log('迁移回滚成功: $migrationName', name: 'MigrationService');
+      _logger.info('迁移回滚成功: $migrationName');
     } catch (error, stackTrace) {
-      log('迁移回滚失败: $migrationName', error: error, stackTrace: stackTrace, name: 'MigrationService');
+      _logger.error('迁移回滚失败: $migrationName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

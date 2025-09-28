@@ -1,8 +1,7 @@
-import 'dart:developer';
-
 import '../config/server_config.dart';
 import '../models/api_error.dart';
 import '../utils/crypto_utils.dart';
+import '../utils/structured_logger.dart';
 import 'database_service.dart';
 
 /// 翻译接口配置服务
@@ -10,6 +9,7 @@ class TranslationProviderService {
   final DatabaseService _databaseService;
   final ServerConfig _config;
   late final CryptoUtils _cryptoUtils;
+  static final _logger = LoggerFactory.getLogger('TranslationProviderService');
 
   TranslationProviderService({
     required DatabaseService databaseService,
@@ -22,7 +22,7 @@ class TranslationProviderService {
   /// 获取用户翻译接口配置列表
   Future<List<Map<String, dynamic>>> getUserTranslationProviders(String userId) async {
     try {
-      log('获取用户翻译接口配置: $userId', name: 'TranslationProviderService');
+      _logger.info('获取用户翻译接口配置: $userId');
 
       const sql = '''
         SELECT
@@ -43,7 +43,7 @@ class TranslationProviderService {
         return provider;
       }).toList();
     } catch (error, stackTrace) {
-      log('获取用户翻译接口配置失败: $userId', error: error, stackTrace: stackTrace, name: 'TranslationProviderService');
+      _logger.error('获取用户翻译接口配置失败: $userId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -51,7 +51,7 @@ class TranslationProviderService {
   /// 根据ID获取翻译接口配置详情
   Future<Map<String, dynamic>?> getTranslationProviderById(String providerId, String userId) async {
     try {
-      log('获取翻译接口配置详情: $providerId', name: 'TranslationProviderService');
+      _logger.info('获取翻译接口配置详情: $providerId');
 
       const sql = '''
         SELECT * FROM user_translation_providers
@@ -72,7 +72,7 @@ class TranslationProviderService {
       provider.remove('app_key_encrypted');
       return provider;
     } catch (error, stackTrace) {
-      log('获取翻译接口配置详情失败: $providerId', error: error, stackTrace: stackTrace, name: 'TranslationProviderService');
+      _logger.error('获取翻译接口配置详情失败: $providerId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -88,7 +88,7 @@ class TranslationProviderService {
     Map<String, dynamic>? settings,
   }) async {
     try {
-      log('创建翻译接口配置: $providerType for user $userId', name: 'TranslationProviderService');
+      _logger.info('创建翻译接口配置: $providerType for user $userId');
 
       // 验证提供商类型
       if (!_isValidProviderType(providerType)) {
@@ -136,11 +136,11 @@ class TranslationProviderService {
 
       final provider = result.first.toColumnMap();
 
-      log('翻译接口配置创建成功: ${provider['id']}', name: 'TranslationProviderService');
+      _logger.info('翻译接口配置创建成功: ${provider['id']}');
 
       return provider;
     } catch (error, stackTrace) {
-      log('创建翻译接口配置失败', error: error, stackTrace: stackTrace, name: 'TranslationProviderService');
+      _logger.error('创建翻译接口配置失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -158,7 +158,7 @@ class TranslationProviderService {
     Map<String, dynamic>? settings,
   }) async {
     try {
-      log('更新翻译接口配置: $providerId', name: 'TranslationProviderService');
+      _logger.info('更新翻译接口配置: $providerId');
 
       // 检查配置是否存在
       final existing = await getTranslationProviderById(providerId, userId);
@@ -240,11 +240,11 @@ class TranslationProviderService {
       final result = await _databaseService.query(sql, parameters);
       final updatedProvider = result.first.toColumnMap();
 
-      log('翻译接口配置更新成功: $providerId', name: 'TranslationProviderService');
+      _logger.info('翻译接口配置更新成功: $providerId');
 
       return updatedProvider;
     } catch (error, stackTrace) {
-      log('更新翻译接口配置失败: $providerId', error: error, stackTrace: stackTrace, name: 'TranslationProviderService');
+      _logger.error('更新翻译接口配置失败: $providerId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -252,7 +252,7 @@ class TranslationProviderService {
   /// 删除翻译接口配置
   Future<void> deleteTranslationProvider(String providerId, String userId) async {
     try {
-      log('删除翻译接口配置: $providerId', name: 'TranslationProviderService');
+      _logger.info('删除翻译接口配置: $providerId');
 
       final result = await _databaseService.query('''
         DELETE FROM user_translation_providers
@@ -264,9 +264,9 @@ class TranslationProviderService {
         throw const NotFoundException('翻译接口配置不存在');
       }
 
-      log('翻译接口配置删除成功: $providerId', name: 'TranslationProviderService');
+      _logger.info('翻译接口配置删除成功: $providerId');
     } catch (error, stackTrace) {
-      log('删除翻译接口配置失败: $providerId', error: error, stackTrace: stackTrace, name: 'TranslationProviderService');
+      _logger.error('删除翻译接口配置失败: $providerId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -274,7 +274,7 @@ class TranslationProviderService {
   /// 测试翻译接口配置
   Future<Map<String, dynamic>> testTranslationProvider(String providerId, String userId) async {
     try {
-      log('测试翻译接口配置: $providerId', name: 'TranslationProviderService');
+      _logger.info('测试翻译接口配置: $providerId');
 
       // 获取配置详情（包含加密密钥）
       const sql = 'SELECT * FROM user_translation_providers WHERE id = @provider_id AND user_id = @user_id';
@@ -314,7 +314,7 @@ class TranslationProviderService {
         'response_time': testResult['response_time'],
       };
     } catch (error, stackTrace) {
-      log('测试翻译接口配置失败: $providerId', error: error, stackTrace: stackTrace, name: 'TranslationProviderService');
+      _logger.error('测试翻译接口配置失败: $providerId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -322,7 +322,7 @@ class TranslationProviderService {
   /// 设置默认翻译接口
   Future<void> setDefaultTranslationProvider(String providerId, String userId) async {
     try {
-      log('设置默认翻译接口: $providerId for user $userId', name: 'TranslationProviderService');
+      _logger.info('设置默认翻译接口: $providerId for user $userId');
 
       await _databaseService.transaction(() async {
         // 取消所有默认设置
@@ -340,9 +340,9 @@ class TranslationProviderService {
         ''', {'provider_id': providerId, 'user_id': userId});
       });
 
-      log('默认翻译接口设置成功', name: 'TranslationProviderService');
+      _logger.info('默认翻译接口设置成功');
     } catch (error, stackTrace) {
-      log('设置默认翻译接口失败: $providerId', error: error, stackTrace: stackTrace, name: 'TranslationProviderService');
+      _logger.error('设置默认翻译接口失败: $providerId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -356,7 +356,7 @@ class TranslationProviderService {
     required String toLanguage,
   }) async {
     try {
-      log('使用翻译接口翻译: $providerId, $fromLanguage -> $toLanguage', name: 'TranslationProviderService');
+      _logger.info('使用翻译接口翻译: $providerId, $fromLanguage -> $toLanguage');
 
       // 获取配置详情
       const sql = 'SELECT * FROM user_translation_providers WHERE id = @provider_id AND user_id = @user_id';
@@ -404,7 +404,7 @@ class TranslationProviderService {
         'response_time': translationResult['response_time'],
       };
     } catch (error, stackTrace) {
-      log('翻译接口调用失败: $providerId', error: error, stackTrace: stackTrace, name: 'TranslationProviderService');
+      _logger.error('翻译接口调用失败: $providerId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -529,7 +529,7 @@ class TranslationProviderService {
     } finally {
       final responseTime = DateTime.now().difference(startTime).inMilliseconds;
       // 记录响应时间统计到日志
-      log('翻译API调用响应时间: $responseTime ms', name: 'TranslationProviderService');
+      _logger.info('翻译API调用响应时间: $responseTime ms');
     }
   }
 
@@ -547,7 +547,7 @@ class TranslationProviderService {
         'character_count': characterCount,
       });
     } catch (error) {
-      log('更新提供商使用统计失败: $providerId', error: error, name: 'TranslationProviderService');
+      _logger.error('更新提供商使用统计失败: $providerId', error: error);
     }
   }
 

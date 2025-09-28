@@ -1,14 +1,15 @@
 #!/usr/bin/env dart
 
-import 'dart:developer';
 import 'dart:io';
 
-import '../lib/src/config/server_config.dart';
-import '../lib/src/services/database_service.dart';
+import 'package:ttpolyglot_server/src/config/server_config.dart';
+import 'package:ttpolyglot_server/src/services/database_service.dart';
+import 'package:ttpolyglot_server/src/utils/structured_logger.dart';
 
 /// 数据库迁移脚本
 class DatabaseMigration {
   final DatabaseService _databaseService;
+  static final StructuredLogger _logger = LoggerFactory.getLogger('DatabaseMigration');
 
   DatabaseMigration({
     required DatabaseService databaseService,
@@ -17,7 +18,7 @@ class DatabaseMigration {
   /// 运行所有迁移
   Future<void> runMigrations() async {
     try {
-      log('开始数据库迁移', name: 'DatabaseMigration');
+      _logger.info('开始数据库迁移');
 
       // 检查迁移表是否存在
       await _createMigrationsTable();
@@ -30,18 +31,18 @@ class DatabaseMigration {
 
       for (final migration in migrations) {
         if (!executedMigrations.contains(migration.name)) {
-          log('执行迁移: ${migration.name}', name: 'DatabaseMigration');
+          _logger.info('执行迁移: ${migration.name}');
           await migration.execute(_databaseService);
           await _recordMigration(migration.name);
-          log('迁移完成: ${migration.name}', name: 'DatabaseMigration');
+          _logger.info('迁移完成: ${migration.name}');
         } else {
-          log('跳过已执行的迁移: ${migration.name}', name: 'DatabaseMigration');
+          _logger.info('跳过已执行的迁移: ${migration.name}');
         }
       }
 
-      log('数据库迁移完成', name: 'DatabaseMigration');
+      _logger.info('数据库迁移完成');
     } catch (error, stackTrace) {
-      log('数据库迁移失败', error: error, stackTrace: stackTrace, name: 'DatabaseMigration');
+      _logger.error('数据库迁移失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -228,6 +229,7 @@ class Migration {
 
 /// 主函数
 Future<void> main(List<String> args) async {
+  final StructuredLogger logger = LoggerFactory.getLogger('DatabaseMigration');
   try {
     // 加载配置
     final config = ServerConfig();
@@ -241,10 +243,10 @@ Future<void> main(List<String> args) async {
     final migration = DatabaseMigration(databaseService: databaseService);
     await migration.runMigrations();
 
-    log('数据库迁移脚本执行完成', name: 'main');
+    logger.info('数据库迁移脚本执行完成');
     exit(0);
   } catch (error, stackTrace) {
-    log('数据库迁移脚本执行失败', error: error, stackTrace: stackTrace, name: 'main');
+    logger.error('数据库迁移脚本执行失败', error: error, stackTrace: stackTrace);
     exit(1);
   }
 }

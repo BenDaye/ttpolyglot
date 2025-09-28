@@ -1,5 +1,4 @@
-import 'dart:developer';
-
+import '../utils/structured_logger.dart';
 import 'database_service.dart';
 import 'redis_service.dart';
 
@@ -7,6 +6,7 @@ import 'redis_service.dart';
 class PermissionService {
   final DatabaseService _databaseService;
   final RedisService _redisService;
+  static final _logger = LoggerFactory.getLogger('PermissionService');
 
   PermissionService({
     required DatabaseService databaseService,
@@ -21,7 +21,7 @@ class PermissionService {
     String? projectId,
   }) async {
     try {
-      log('检查用户权限: $userId, $permission, 项目: $projectId', name: 'PermissionService');
+      _logger.info('检查用户权限: $userId, $permission, 项目: $projectId');
 
       // 先检查缓存
       final cacheKey = 'user_permission:$userId:$permission${projectId != null ? ':$projectId' : ''}';
@@ -61,7 +61,7 @@ class PermissionService {
 
       return hasGlobalPermission;
     } catch (error, stackTrace) {
-      log('权限检查失败', error: error, stackTrace: stackTrace, name: 'PermissionService');
+      _logger.error('权限检查失败', error: error, stackTrace: stackTrace);
       return false;
     }
   }
@@ -73,7 +73,7 @@ class PermissionService {
     String? projectId,
   }) async {
     try {
-      log('批量检查用户权限: $userId, 权限数量: ${permissions.length}, 项目: $projectId', name: 'PermissionService');
+      _logger.info('批量检查用户权限: $userId, 权限数量: ${permissions.length}, 项目: $projectId');
 
       final results = <String, bool>{};
       final uncachedPermissions = <String>[];
@@ -117,7 +117,7 @@ class PermissionService {
 
       return results;
     } catch (error, stackTrace) {
-      log('批量权限检查失败', error: error, stackTrace: stackTrace, name: 'PermissionService');
+      _logger.error('批量权限检查失败', error: error, stackTrace: stackTrace);
       // 返回默认的false结果
       return {for (final permission in permissions) permission: false};
     }
@@ -152,7 +152,7 @@ class PermissionService {
 
       return isSuperAdmin;
     } catch (error, stackTrace) {
-      log('超级管理员检查失败', error: error, stackTrace: stackTrace, name: 'PermissionService');
+      _logger.error('超级管理员检查失败', error: error, stackTrace: stackTrace);
       return false;
     }
   }
@@ -188,7 +188,7 @@ class PermissionService {
 
       return isOwner;
     } catch (error, stackTrace) {
-      log('项目所有者检查失败', error: error, stackTrace: stackTrace, name: 'PermissionService');
+      _logger.error('项目所有者检查失败', error: error, stackTrace: stackTrace);
       return false;
     }
   }
@@ -227,7 +227,7 @@ class PermissionService {
 
       return roles;
     } catch (error, stackTrace) {
-      log('获取用户项目角色失败', error: error, stackTrace: stackTrace, name: 'PermissionService');
+      _logger.error('获取用户项目角色失败', error: error, stackTrace: stackTrace);
       return [];
     }
   }
@@ -263,7 +263,7 @@ class PermissionService {
 
       return roles;
     } catch (error, stackTrace) {
-      log('获取用户全局角色失败', error: error, stackTrace: stackTrace, name: 'PermissionService');
+      _logger.error('获取用户全局角色失败', error: error, stackTrace: stackTrace);
       return [];
     }
   }
@@ -306,7 +306,7 @@ class PermissionService {
 
       return permissionList;
     } catch (error, stackTrace) {
-      log('获取用户权限失败', error: error, stackTrace: stackTrace, name: 'PermissionService');
+      _logger.error('获取用户权限失败', error: error, stackTrace: stackTrace);
       return [];
     }
   }
@@ -314,7 +314,7 @@ class PermissionService {
   /// 预热用户权限缓存（性能优化）
   Future<void> warmupUserPermissionCache(String userId, {String? projectId}) async {
     try {
-      log('预热用户权限缓存: $userId, 项目: $projectId', name: 'PermissionService');
+      _logger.info('预热用户权限缓存: $userId, 项目: $projectId');
 
       // 并行获取用户角色和权限
       final futures = <Future>[];
@@ -337,9 +337,9 @@ class PermissionService {
 
       await Future.wait(futures);
 
-      log('用户权限缓存预热完成: $userId', name: 'PermissionService');
+      _logger.info('用户权限缓存预热完成: $userId');
     } catch (error, stackTrace) {
-      log('预热用户权限缓存失败: $userId', error: error, stackTrace: stackTrace, name: 'PermissionService');
+      _logger.error('预热用户权限缓存失败: $userId', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -365,9 +365,9 @@ class PermissionService {
         await _redisService.deleteByPattern(pattern);
       }
 
-      log('用户权限缓存已清除: $userId', name: 'PermissionService');
+      _logger.info('用户权限缓存已清除: $userId');
     } catch (error, stackTrace) {
-      log('清除用户权限缓存失败', error: error, stackTrace: stackTrace, name: 'PermissionService');
+      _logger.error('清除用户权限缓存失败', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -375,9 +375,9 @@ class PermissionService {
   Future<void> clearRolePermissionCache(String roleName) async {
     try {
       await _redisService.deleteByPattern('role_permissions:$roleName');
-      log('角色权限缓存已清除: $roleName', name: 'PermissionService');
+      _logger.info('角色权限缓存已清除: $roleName');
     } catch (error, stackTrace) {
-      log('清除角色权限缓存失败', error: error, stackTrace: stackTrace, name: 'PermissionService');
+      _logger.error('清除角色权限缓存失败', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -521,7 +521,7 @@ class PermissionService {
 
       return results;
     } catch (error, stackTrace) {
-      log('批量权限检查失败', error: error, stackTrace: stackTrace, name: 'PermissionService');
+      _logger.error('批量权限检查失败', error: error, stackTrace: stackTrace);
       // 返回默认的false结果
       return {for (final permission in permissions) permission: false};
     }
@@ -558,7 +558,7 @@ class PermissionService {
 
       return stats;
     } catch (error, stackTrace) {
-      log('获取权限统计信息失败', error: error, stackTrace: stackTrace, name: 'PermissionService');
+      _logger.error('获取权限统计信息失败', error: error, stackTrace: stackTrace);
       return {};
     }
   }

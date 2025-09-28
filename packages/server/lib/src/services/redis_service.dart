@@ -1,15 +1,16 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:redis/redis.dart';
 
 import '../config/server_config.dart';
+import '../utils/structured_logger.dart';
 
 /// Redis服务类
 class RedisService {
   final ServerConfig _config;
   RedisConnection? _connection;
   Command? _command;
+  static final _logger = LoggerFactory.getLogger('RedisService');
 
   RedisService(this._config);
 
@@ -36,9 +37,9 @@ class RedisService {
         throw Exception('Redis连接测试失败');
       }
 
-      log('Redis连接成功: ${uri.host}:${uri.port}', name: 'RedisService');
+      _logger.info('Redis连接成功: ${uri.host}:${uri.port}');
     } catch (error, stackTrace) {
-      log('Redis连接失败', error: error, stackTrace: stackTrace, name: 'RedisService');
+      _logger.error('Redis连接失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -59,7 +60,7 @@ class RedisService {
       final result = await _command!.send_object(['PING']);
       return result == 'PONG';
     } catch (error) {
-      log('Redis健康检查失败', error: error, name: 'RedisService');
+      _logger.error('Redis健康检查失败', error: error);
       return false;
     }
   }
@@ -73,7 +74,7 @@ class RedisService {
         await command.send_object(['SET', key, value]);
       }
     } catch (error, stackTrace) {
-      log('Redis SET操作失败: $key', error: error, stackTrace: stackTrace, name: 'RedisService');
+      _logger.error('Redis SET操作失败: $key', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -84,7 +85,7 @@ class RedisService {
       final result = await command.send_object(['GET', key]);
       return result?.toString();
     } catch (error, stackTrace) {
-      log('Redis GET操作失败: $key', error: error, stackTrace: stackTrace, name: 'RedisService');
+      _logger.error('Redis GET操作失败: $key', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -102,7 +103,7 @@ class RedisService {
     try {
       return jsonDecode(result) as Map<String, dynamic>;
     } catch (error) {
-      log('JSON解析失败: $key', error: error, name: 'RedisService');
+      _logger.error('JSON解析失败: $key', error: error);
       return null;
     }
   }
@@ -113,7 +114,7 @@ class RedisService {
       final result = await command.send_object(['DEL', key]);
       return result as int;
     } catch (error, stackTrace) {
-      log('Redis DELETE操作失败: $key', error: error, stackTrace: stackTrace, name: 'RedisService');
+      _logger.error('Redis DELETE操作失败: $key', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -128,7 +129,7 @@ class RedisService {
       }
       return 0;
     } catch (error, stackTrace) {
-      log('Redis批量删除失败: $pattern', error: error, stackTrace: stackTrace, name: 'RedisService');
+      _logger.error('Redis批量删除失败: $pattern', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -139,7 +140,7 @@ class RedisService {
       final result = await command.send_object(['EXISTS', key]);
       return (result as int) > 0;
     } catch (error, stackTrace) {
-      log('Redis EXISTS操作失败: $key', error: error, stackTrace: stackTrace, name: 'RedisService');
+      _logger.error('Redis EXISTS操作失败: $key', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -150,7 +151,7 @@ class RedisService {
       final result = await command.send_object(['EXPIRE', key, seconds]);
       return (result as int) == 1;
     } catch (error, stackTrace) {
-      log('Redis EXPIRE操作失败: $key', error: error, stackTrace: stackTrace, name: 'RedisService');
+      _logger.error('Redis EXPIRE操作失败: $key', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -161,7 +162,7 @@ class RedisService {
       final result = await command.send_object(['TTL', key]);
       return result as int;
     } catch (error, stackTrace) {
-      log('Redis TTL操作失败: $key', error: error, stackTrace: stackTrace, name: 'RedisService');
+      _logger.error('Redis TTL操作失败: $key', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -173,7 +174,7 @@ class RedisService {
           by != null ? await command.send_object(['INCRBY', key, by]) : await command.send_object(['INCR', key]);
       return result as int;
     } catch (error, stackTrace) {
-      log('Redis INCREMENT操作失败: $key', error: error, stackTrace: stackTrace, name: 'RedisService');
+      _logger.error('Redis INCREMENT操作失败: $key', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -251,7 +252,7 @@ class RedisService {
     try {
       await deleteByPattern(pattern);
     } catch (error, stackTrace) {
-      log('删除匹配模式的键失败: $pattern', error: error, stackTrace: stackTrace, name: 'RedisService');
+      _logger.error('删除匹配模式的键失败: $pattern', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -262,10 +263,10 @@ class RedisService {
         await _connection!.close();
         _connection = null;
         _command = null;
-        log('Redis连接已关闭', name: 'RedisService');
+        _logger.info('Redis连接已关闭');
       }
     } catch (error, stackTrace) {
-      log('关闭Redis连接时出错', error: error, stackTrace: stackTrace, name: 'RedisService');
+      _logger.error('关闭Redis连接时出错', error: error, stackTrace: stackTrace);
     }
   }
 }

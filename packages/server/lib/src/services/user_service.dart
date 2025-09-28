@@ -1,8 +1,7 @@
-import 'dart:developer';
-
 import '../config/server_config.dart';
 import '../middleware/error_handler_middleware.dart';
 import '../utils/crypto_utils.dart';
+import '../utils/structured_logger.dart';
 import 'database_service.dart';
 import 'redis_service.dart';
 
@@ -12,6 +11,7 @@ class UserService {
   final RedisService _redisService;
   final ServerConfig _config;
   late final CryptoUtils _cryptoUtils;
+  static final _logger = LoggerFactory.getLogger('UserService');
 
   UserService({
     required DatabaseService databaseService,
@@ -32,7 +32,7 @@ class UserService {
     String? role,
   }) async {
     try {
-      log('获取用户列表: page=$page, limit=$limit', name: 'UserService');
+      _logger.info('获取用户列表: page=$page, limit=$limit');
 
       // 构建查询条件
       final conditions = <String>[];
@@ -115,7 +115,7 @@ class UserService {
         },
       };
     } catch (error, stackTrace) {
-      log('获取用户列表失败', error: error, stackTrace: stackTrace, name: 'UserService');
+      _logger.error('获取用户列表失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -123,7 +123,7 @@ class UserService {
   /// 根据ID获取用户详情
   Future<Map<String, dynamic>?> getUserById(String userId) async {
     try {
-      log('获取用户详情: $userId', name: 'UserService');
+      _logger.info('获取用户详情: $userId');
 
       // 先检查缓存
       final cacheKey = 'user:details:$userId';
@@ -181,7 +181,7 @@ class UserService {
 
       return userData;
     } catch (error, stackTrace) {
-      log('获取用户详情失败: $userId', error: error, stackTrace: stackTrace, name: 'UserService');
+      _logger.error('获取用户详情失败: $userId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -189,7 +189,7 @@ class UserService {
   /// 更新用户信息
   Future<Map<String, dynamic>> updateUser(String userId, Map<String, dynamic> updateData, {String? updatedBy}) async {
     try {
-      log('更新用户信息: $userId', name: 'UserService');
+      _logger.info('更新用户信息: $userId');
 
       // 验证用户是否存在
       final existingUser = await getUserById(userId);
@@ -259,11 +259,11 @@ class UserService {
       // 获取更新后的用户信息
       final updatedUser = await getUserById(userId);
 
-      log('用户信息更新成功: $userId', name: 'UserService');
+      _logger.info('用户信息更新成功: $userId');
 
       return updatedUser!;
     } catch (error, stackTrace) {
-      log('更新用户信息失败: $userId', error: error, stackTrace: stackTrace, name: 'UserService');
+      _logger.error('更新用户信息失败: $userId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -271,7 +271,7 @@ class UserService {
   /// 更改用户密码
   Future<void> changePassword(String userId, String currentPassword, String newPassword) async {
     try {
-      log('更改用户密码: $userId', name: 'UserService');
+      _logger.info('更改用户密码: $userId');
 
       // 获取当前密码哈希
       final sql = 'SELECT password_hash FROM users WHERE id = @user_id AND is_active = true';
@@ -312,9 +312,9 @@ class UserService {
       // 清除用户的所有会话（强制重新登录）
       await _revokeAllUserSessions(userId);
 
-      log('用户密码更改成功: $userId', name: 'UserService');
+      _logger.info('用户密码更改成功: $userId');
     } catch (error, stackTrace) {
-      log('更改用户密码失败: $userId', error: error, stackTrace: stackTrace, name: 'UserService');
+      _logger.error('更改用户密码失败: $userId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -322,7 +322,7 @@ class UserService {
   /// 禁用/启用用户
   Future<void> toggleUserStatus(String userId, bool isActive, {String? reason}) async {
     try {
-      log('切换用户状态: $userId -> $isActive', name: 'UserService');
+      _logger.info('切换用户状态: $userId -> $isActive');
 
       await _databaseService.query('''
         UPDATE users 
@@ -341,9 +341,9 @@ class UserService {
       // 清除缓存
       await _clearUserCache(userId);
 
-      log('用户状态切换成功: $userId', name: 'UserService');
+      _logger.info('用户状态切换成功: $userId');
     } catch (error, stackTrace) {
-      log('切换用户状态失败: $userId', error: error, stackTrace: stackTrace, name: 'UserService');
+      _logger.error('切换用户状态失败: $userId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -351,7 +351,7 @@ class UserService {
   /// 删除用户
   Future<void> deleteUser(String userId, {String? deletedBy}) async {
     try {
-      log('删除用户: $userId', name: 'UserService');
+      _logger.info('删除用户: $userId');
 
       // 检查用户是否存在
       final user = await getUserById(userId);
@@ -374,9 +374,9 @@ class UserService {
       // 清除缓存
       await _clearUserCache(userId);
 
-      log('用户删除成功: $userId', name: 'UserService');
+      _logger.info('用户删除成功: $userId');
     } catch (error, stackTrace) {
-      log('删除用户失败: $userId', error: error, stackTrace: stackTrace, name: 'UserService');
+      _logger.error('删除用户失败: $userId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -384,7 +384,7 @@ class UserService {
   /// 获取用户统计信息
   Future<Map<String, dynamic>> getUserStats() async {
     try {
-      log('获取用户统计信息', name: 'UserService');
+      _logger.info('获取用户统计信息');
 
       // 检查缓存
       const cacheKey = 'user:stats';
@@ -412,7 +412,7 @@ class UserService {
 
       return stats;
     } catch (error, stackTrace) {
-      log('获取用户统计信息失败', error: error, stackTrace: stackTrace, name: 'UserService');
+      _logger.error('获取用户统计信息失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -456,7 +456,7 @@ class UserService {
   /// 获取用户会话列表
   Future<List<Map<String, dynamic>>> getUserSessions(String userId) async {
     try {
-      log('获取用户会话: $userId', name: 'UserService');
+      _logger.info('获取用户会话: $userId');
 
       final result = await _databaseService.query('''
         SELECT
@@ -470,7 +470,7 @@ class UserService {
 
       return result.map((row) => row.toColumnMap()).toList();
     } catch (error, stackTrace) {
-      log('获取用户会话失败: $userId', error: error, stackTrace: stackTrace, name: 'UserService');
+      _logger.error('获取用户会话失败: $userId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -478,7 +478,7 @@ class UserService {
   /// 删除用户会话
   Future<void> deleteUserSession(String userId, String sessionId) async {
     try {
-      log('删除用户会话: user=$userId, session=$sessionId', name: 'UserService');
+      _logger.info('删除用户会话: user=$userId, session=$sessionId');
 
       await _databaseService.query('''
         UPDATE user_sessions
@@ -488,9 +488,9 @@ class UserService {
 
       await _redisService.deleteUserSession(userId);
 
-      log('用户会话删除成功', name: 'UserService');
+      _logger.info('用户会话删除成功');
     } catch (error, stackTrace) {
-      log('删除用户会话失败', error: error, stackTrace: stackTrace, name: 'UserService');
+      _logger.error('删除用户会话失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

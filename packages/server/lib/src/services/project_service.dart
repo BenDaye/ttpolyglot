@@ -1,8 +1,7 @@
-import 'dart:developer';
-
 import '../config/server_config.dart';
 import '../middleware/error_handler_middleware.dart';
 import '../utils/string_utils.dart';
+import '../utils/structured_logger.dart';
 import 'database_service.dart';
 import 'redis_service.dart';
 
@@ -11,6 +10,7 @@ class ProjectService {
   final DatabaseService _databaseService;
   final RedisService _redisService;
   final ServerConfig _config;
+  static final _logger = LoggerFactory.getLogger('ProjectService');
 
   ProjectService({
     required DatabaseService databaseService,
@@ -29,7 +29,7 @@ class ProjectService {
     String? userId,
   }) async {
     try {
-      log('获取项目列表: page=$page, limit=$limit, userId=$userId', name: 'ProjectService');
+      _logger.info('获取项目列表: page=$page, limit=$limit, userId=$userId');
 
       // 构建查询条件
       final conditions = <String>[];
@@ -117,7 +117,7 @@ class ProjectService {
         },
       };
     } catch (error, stackTrace) {
-      log('获取项目列表失败', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      _logger.error('获取项目列表失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -125,7 +125,7 @@ class ProjectService {
   /// 根据ID获取项目详情
   Future<Map<String, dynamic>?> getProjectById(String projectId, {String? userId}) async {
     try {
-      log('获取项目详情: $projectId', name: 'ProjectService');
+      _logger.info('获取项目详情: $projectId');
 
       // 先检查缓存
       final cacheKey = 'project:details:$projectId';
@@ -196,7 +196,7 @@ class ProjectService {
 
       return projectData;
     } catch (error, stackTrace) {
-      log('获取项目详情失败: $projectId', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      _logger.error('获取项目详情失败: $projectId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -212,7 +212,7 @@ class ProjectService {
     Map<String, dynamic>? settings,
   }) async {
     try {
-      log('创建项目: $name, owner: $ownerId', name: 'ProjectService');
+      _logger.info('创建项目: $name, owner: $ownerId');
 
       // 验证主语言是否存在
       final languageExists = await _isLanguageExists(primaryLanguageCode);
@@ -275,11 +275,11 @@ class ProjectService {
       // 获取创建的项目信息
       final project = await getProjectById(projectId);
 
-      log('项目创建成功: $projectId', name: 'ProjectService');
+      _logger.info('项目创建成功: $projectId');
 
       return project!;
     } catch (error, stackTrace) {
-      log('创建项目失败: $name', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      _logger.error('创建项目失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -288,7 +288,7 @@ class ProjectService {
   Future<Map<String, dynamic>> updateProject(String projectId, Map<String, dynamic> updateData,
       {String? updatedBy}) async {
     try {
-      log('更新项目信息: $projectId', name: 'ProjectService');
+      _logger.info('更新项目信息: $projectId');
 
       // 验证项目是否存在
       final existingProject = await getProjectById(projectId);
@@ -349,11 +349,11 @@ class ProjectService {
       // 获取更新后的项目信息
       final updatedProject = await getProjectById(projectId);
 
-      log('项目信息更新成功: $projectId', name: 'ProjectService');
+      _logger.info('项目信息更新成功: $projectId');
 
       return updatedProject!;
     } catch (error, stackTrace) {
-      log('更新项目信息失败: $projectId', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      _logger.error('更新项目信息失败: $projectId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -361,7 +361,7 @@ class ProjectService {
   /// 删除项目
   Future<void> deleteProject(String projectId, {String? deletedBy}) async {
     try {
-      log('删除项目: $projectId', name: 'ProjectService');
+      _logger.info('删除项目: $projectId');
 
       // 检查项目是否存在
       final project = await getProjectById(projectId);
@@ -390,9 +390,9 @@ class ProjectService {
       // 清除缓存
       await _clearProjectCache(projectId);
 
-      log('项目删除成功: $projectId', name: 'ProjectService');
+      _logger.info('项目删除成功: $projectId');
     } catch (error, stackTrace) {
-      log('删除项目失败: $projectId', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      _logger.error('删除项目失败: $projectId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -400,7 +400,7 @@ class ProjectService {
   /// 获取项目成员列表
   Future<List<Map<String, dynamic>>> getProjectMembers(String projectId) async {
     try {
-      log('获取项目成员: $projectId', name: 'ProjectService');
+      _logger.info('获取项目成员: $projectId');
 
       final sql = '''
         SELECT 
@@ -423,7 +423,7 @@ class ProjectService {
 
       return result.map((row) => row.toColumnMap()).toList();
     } catch (error, stackTrace) {
-      log('获取项目成员失败: $projectId', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      _logger.error('获取项目成员失败: $projectId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -437,7 +437,7 @@ class ProjectService {
     DateTime? expiresAt,
   }) async {
     try {
-      log('添加项目成员: $projectId, user: $userId, role: $roleId', name: 'ProjectService');
+      _logger.info('添加项目成员: $projectId, user: $userId, role: $roleId');
 
       // 检查用户是否已经是项目成员
       final existingRole = await _getUserRoleInProject(userId, projectId);
@@ -463,9 +463,9 @@ class ProjectService {
       // 更新项目成员数量
       await _updateProjectMemberCount(projectId);
 
-      log('项目成员添加成功: $projectId, user: $userId', name: 'ProjectService');
+      _logger.info('项目成员添加成功: $projectId, user: $userId');
     } catch (error, stackTrace) {
-      log('添加项目成员失败: $projectId, user: $userId', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      _logger.error('添加项目成员失败: $projectId, user: $userId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -473,7 +473,7 @@ class ProjectService {
   /// 移除项目成员
   Future<void> removeProjectMember(String projectId, String userId) async {
     try {
-      log('移除项目成员: $projectId, user: $userId', name: 'ProjectService');
+      _logger.info('移除项目成员: $projectId, user: $userId');
 
       // 移除角色关联
       await _databaseService.query('''
@@ -488,9 +488,9 @@ class ProjectService {
       // 更新项目成员数量
       await _updateProjectMemberCount(projectId);
 
-      log('项目成员移除成功: $projectId, user: $userId', name: 'ProjectService');
+      _logger.info('项目成员移除成功: $projectId, user: $userId');
     } catch (error, stackTrace) {
-      log('移除项目成员失败: $projectId, user: $userId', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      _logger.error('移除项目成员失败: $projectId, user: $userId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -498,7 +498,7 @@ class ProjectService {
   /// 获取项目统计信息
   Future<Map<String, dynamic>> getProjectStats() async {
     try {
-      log('获取项目统计信息', name: 'ProjectService');
+      _logger.info('获取项目统计信息');
 
       // 检查缓存
       const cacheKey = 'project:stats';
@@ -528,7 +528,7 @@ class ProjectService {
 
       return stats;
     } catch (error, stackTrace) {
-      log('获取项目统计信息失败', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      _logger.error('获取项目统计信息失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -631,7 +631,7 @@ class ProjectService {
   /// 归档项目
   Future<void> archiveProject(String projectId) async {
     try {
-      log('归档项目: $projectId', name: 'ProjectService');
+      _logger.info('归档项目: $projectId');
 
       await _databaseService.query('''
         UPDATE projects
@@ -641,9 +641,9 @@ class ProjectService {
 
       await _clearProjectCache(projectId);
 
-      log('项目归档成功: $projectId', name: 'ProjectService');
+      _logger.info('项目归档成功: $projectId');
     } catch (error, stackTrace) {
-      log('归档项目失败: $projectId', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      _logger.error('归档项目失败: $projectId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -651,7 +651,7 @@ class ProjectService {
   /// 恢复项目
   Future<void> restoreProject(String projectId) async {
     try {
-      log('恢复项目: $projectId', name: 'ProjectService');
+      _logger.info('恢复项目: $projectId');
 
       await _databaseService.query('''
         UPDATE projects
@@ -661,9 +661,9 @@ class ProjectService {
 
       await _clearProjectCache(projectId);
 
-      log('项目恢复成功: $projectId', name: 'ProjectService');
+      _logger.info('项目恢复成功: $projectId');
     } catch (error, stackTrace) {
-      log('恢复项目失败: $projectId', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      _logger.error('恢复项目失败: $projectId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -671,7 +671,7 @@ class ProjectService {
   /// 更新项目成员角色
   Future<void> updateProjectMemberRole(String projectId, String userId, String roleId) async {
     try {
-      log('更新项目成员角色: project=$projectId, user=$userId, role=$roleId', name: 'ProjectService');
+      _logger.info('更新项目成员角色: project=$projectId, user=$userId, role=$roleId');
 
       await _databaseService.query('''
         UPDATE project_members
@@ -685,9 +685,9 @@ class ProjectService {
 
       await _clearProjectCache(projectId);
 
-      log('项目成员角色更新成功', name: 'ProjectService');
+      _logger.info('项目成员角色更新成功');
     } catch (error, stackTrace) {
-      log('更新项目成员角色失败', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      _logger.error('更新项目成员角色失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -695,7 +695,7 @@ class ProjectService {
   /// 获取项目语言
   Future<List<Map<String, dynamic>>> getProjectLanguages(String projectId) async {
     try {
-      log('获取项目语言: $projectId', name: 'ProjectService');
+      _logger.info('获取项目语言: $projectId');
 
       final result = await _databaseService.query('''
         SELECT pl.*, l.name, l.native_name, l.direction, l.is_rtl
@@ -707,7 +707,7 @@ class ProjectService {
 
       return result.map((row) => row.toColumnMap()).toList();
     } catch (error, stackTrace) {
-      log('获取项目语言失败: $projectId', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      _logger.error('获取项目语言失败: $projectId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -715,7 +715,7 @@ class ProjectService {
   /// 添加项目语言
   Future<void> addProjectLanguage(String projectId, String languageCode) async {
     try {
-      log('添加项目语言: project=$projectId, language=$languageCode', name: 'ProjectService');
+      _logger.info('添加项目语言: project=$projectId, language=$languageCode');
 
       // 检查语言是否存在
       if (!await _isLanguageExists(languageCode)) {
@@ -742,9 +742,9 @@ class ProjectService {
 
       await _clearProjectCache(projectId);
 
-      log('项目语言添加成功', name: 'ProjectService');
+      _logger.info('项目语言添加成功');
     } catch (error, stackTrace) {
-      log('添加项目语言失败', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      _logger.error('添加项目语言失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -752,7 +752,7 @@ class ProjectService {
   /// 移除项目语言
   Future<void> removeProjectLanguage(String projectId, String languageCode) async {
     try {
-      log('移除项目语言: project=$projectId, language=$languageCode', name: 'ProjectService');
+      _logger.info('移除项目语言: project=$projectId, language=$languageCode');
 
       await _databaseService.query('''
         DELETE FROM project_languages
@@ -764,9 +764,9 @@ class ProjectService {
 
       await _clearProjectCache(projectId);
 
-      log('项目语言移除成功', name: 'ProjectService');
+      _logger.info('项目语言移除成功');
     } catch (error, stackTrace) {
-      log('移除项目语言失败', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      _logger.error('移除项目语言失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -774,7 +774,7 @@ class ProjectService {
   /// 更新语言设置
   Future<void> updateLanguageSettings(String projectId, String languageCode, Map<String, dynamic> settings) async {
     try {
-      log('更新语言设置: project=$projectId, language=$languageCode', name: 'ProjectService');
+      _logger.info('更新语言设置: project=$projectId, language=$languageCode');
 
       await _databaseService.query('''
         UPDATE project_languages
@@ -788,9 +788,9 @@ class ProjectService {
 
       await _clearProjectCache(projectId);
 
-      log('语言设置更新成功', name: 'ProjectService');
+      _logger.info('语言设置更新成功');
     } catch (error, stackTrace) {
-      log('更新语言设置失败', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      _logger.error('更新语言设置失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -798,7 +798,7 @@ class ProjectService {
   /// 获取项目统计信息
   Future<Map<String, dynamic>> getProjectStatistics(String projectId) async {
     try {
-      log('获取项目统计信息: $projectId', name: 'ProjectService');
+      _logger.info('获取项目统计信息: $projectId');
 
       // 获取基本统计信息
       final basicStats = await _databaseService.query('''
@@ -820,7 +820,7 @@ class ProjectService {
 
       return basicStats.isNotEmpty ? basicStats.first.toColumnMap() : {};
     } catch (error, stackTrace) {
-      log('获取项目统计信息失败: $projectId', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      _logger.error('获取项目统计信息失败: $projectId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -828,7 +828,7 @@ class ProjectService {
   /// 获取项目活动日志
   Future<List<Map<String, dynamic>>> getProjectActivity(String projectId, {int page = 1, int limit = 20}) async {
     try {
-      log('获取项目活动: $projectId, page=$page, limit=$limit', name: 'ProjectService');
+      _logger.info('获取项目活动: $projectId, page=$page, limit=$limit');
 
       final offset = (page - 1) * limit;
 
@@ -853,7 +853,7 @@ class ProjectService {
 
       return activities.map((row) => row.toColumnMap()).toList();
     } catch (error, stackTrace) {
-      log('获取项目活动失败: $projectId', error: error, stackTrace: stackTrace, name: 'ProjectService');
+      _logger.error('获取项目活动失败: $projectId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
