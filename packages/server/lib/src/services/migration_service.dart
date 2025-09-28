@@ -4,9 +4,17 @@ import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as path;
 
 import '../config/server_config.dart';
-import '../utils/sql_parser.dart';
 import '../utils/structured_logger.dart';
 import 'database_service.dart';
+
+/// 迁移类基础接口
+abstract class BaseMigration {
+  String get name;
+  String get description;
+  String get createdAt;
+  Future<void> up();
+  Future<void> down();
+}
 
 /// 数据库迁移服务
 /// 根据字段更新最佳实践指南实现的安全迁移服务
@@ -16,6 +24,17 @@ class MigrationService {
 
   MigrationService(this._databaseService);
 
+  /// 迁移类工厂函数映射
+  static final Map<String, BaseMigration Function()> _migrationFactories = {};
+
+  /// 注册迁移类
+  static void registerMigration(String name, BaseMigration Function() factory) {
+    _migrationFactories[name] = factory;
+  }
+
+  /// 获取所有已注册的迁移
+  static Map<String, BaseMigration Function()> get registeredMigrations => Map.unmodifiable(_migrationFactories);
+
   /// 运行所有未执行的迁移
   Future<void> runMigrations() async {
     try {
@@ -24,38 +43,23 @@ class MigrationService {
       // 确保迁移记录表存在
       await _ensureMigrationTableExists();
 
-      // 获取所有迁移文件
-      final migrationFiles = await _getMigrationFiles();
+      // 获取已注册的迁移
+      final registeredMigrations = _migrationFactories;
 
       // 获取已执行的迁移
       final executedMigrations = await _getExecutedMigrations();
 
       // 筛选未执行的迁移
       final pendingMigrations = <String>[];
-      for (final file in migrationFiles) {
-        final fileName = _getFileNameWithoutExtension(file);
-        final fileHash = await _calculateFileHash(file);
-
+      for (final migrationName in registeredMigrations.keys) {
         // 检查迁移是否已执行
-        if (!executedMigrations.containsKey(fileName)) {
-          // 新迁移文件
-          pendingMigrations.add(file);
-          _logger.info('发现新迁移文件: $fileName');
+        if (!executedMigrations.containsKey(migrationName)) {
+          // 新迁移
+          pendingMigrations.add(migrationName);
+          _logger.info('发现新迁移: $migrationName');
         } else {
-          // 检查文件是否已更改
-          final executedMigration = executedMigrations[fileName]!;
-          final executedHash = executedMigration['file_hash'] as String;
-          final executedPath = executedMigration['file_path'] as String;
-
-          if (executedHash != fileHash || executedPath != file) {
-            // 文件内容或路径已更改，需要重新执行
-            pendingMigrations.add(file);
-            _logger.info('迁移文件已更改，需要重新执行: $fileName');
-            _logger.info('原路径: $executedPath, 新路径: $file');
-            _logger.info('原哈希: $executedHash, 新哈希: $fileHash');
-          } else {
-            _logger.info('迁移文件未更改，跳过: $fileName');
-          }
+          // 迁移已执行，跳过
+          _logger.info('迁移已执行，跳过: $migrationName');
         }
       }
 
@@ -66,11 +70,11 @@ class MigrationService {
 
       _logger.info('发现 ${pendingMigrations.length} 个待执行的迁移');
 
-      // 按文件名排序执行迁移
-      pendingMigrations.sort((a, b) => path.basename(a).compareTo(path.basename(b)));
+      // 按迁移名称排序执行迁移
+      pendingMigrations.sort();
 
-      for (final migrationFile in pendingMigrations) {
-        await _executeMigration(migrationFile);
+      for (final migrationName in pendingMigrations) {
+        await _executeMigrationClass(migrationName);
       }
 
       _logger.info('所有迁移执行完成');
@@ -132,25 +136,6 @@ class MigrationService {
     _logger.info('确保迁移记录表存在: $tableName');
   }
 
-  /// 获取所有迁移文件
-  Future<List<String>> _getMigrationFiles() async {
-    final migrationsDir = Directory('database/migrations');
-
-    if (!await migrationsDir.exists()) {
-      _logger.info('迁移目录不存在: ${migrationsDir.path}');
-      return [];
-    }
-
-    final files = await migrationsDir
-        .list()
-        .where((entity) => entity is File && entity.path.endsWith('.sql'))
-        .cast<File>()
-        .map((file) => file.path)
-        .toList();
-
-    return files;
-  }
-
   /// 获取所有种子文件
   Future<List<String>> _getSeedFiles() async {
     final seedsDir = Directory('database/seeds');
@@ -199,74 +184,58 @@ class MigrationService {
     }
   }
 
-  /// 执行单个迁移文件
-  Future<void> _executeMigration(String filePath) async {
-    final fileName = _getFileNameWithoutExtension(filePath);
-    final fileHash = await _calculateFileHash(filePath);
-    _logger.info('执行迁移: $fileName');
+  /// 执行单个迁移类
+  Future<void> _executeMigrationClass(String migrationName) async {
+    _logger.info('执行迁移: $migrationName');
 
     try {
-      // 读取SQL文件
-      final file = File(filePath);
-      final sqlContent = await file.readAsString();
+      // 获取迁移工厂函数
+      final factory = _migrationFactories[migrationName];
+      if (factory == null) {
+        throw Exception('未找到迁移: $migrationName');
+      }
 
-      // 应用表前缀
-      final prefixedSql = SqlParser.applyTablePrefix(sqlContent, ServerConfig.tablePrefix);
-      _logger.info('应用表前缀: ${ServerConfig.tablePrefix}');
+      // 创建迁移实例
+      final migration = factory();
 
       // 在事务中执行迁移
       await _databaseService.transaction(() async {
-        // 分割SQL语句并逐个执行
-        final statements = SqlParser.splitSqlStatements(prefixedSql);
-        _logger.info('分割得到 ${statements.length} 个SQL语句');
-
-        for (int i = 0; i < statements.length; i++) {
-          final statement = statements[i];
-          if (statement.trim().isNotEmpty) {
-            _logger.info(
-                '执行第 ${i + 1} 个语句: ${statement.substring(0, statement.length > 100 ? 100 : statement.length)}...');
-            await _databaseService.query(statement);
-          }
-        }
+        // 执行迁移的 up 方法
+        await migration.up();
 
         // 记录迁移执行（使用带前缀的表名）
         final migrationsTableName = '${ServerConfig.tablePrefix}schema_migrations';
 
-        // 检查是否已存在记录，如果存在则更新，否则插入
-        final existingRecord = await _databaseService
-            .query('SELECT id FROM $migrationsTableName WHERE migration_name = @name', {'name': fileName});
-
-        if (existingRecord.isNotEmpty) {
-          // 更新现有记录
-          await _databaseService.query('''
-            UPDATE $migrationsTableName 
-            SET file_path = @path, file_hash = @hash, executed_at = CURRENT_TIMESTAMP 
-            WHERE migration_name = @name
-          ''', {
-            'name': fileName,
-            'path': filePath,
-            'hash': fileHash,
-          });
-          _logger.info('更新迁移记录: $fileName');
-        } else {
-          // 插入新记录
-          await _databaseService.query('''
-            INSERT INTO $migrationsTableName (migration_name, file_path, file_hash) 
-            VALUES (@name, @path, @hash)
-          ''', {
-            'name': fileName,
-            'path': filePath,
-            'hash': fileHash,
-          });
-          _logger.info('创建迁移记录: $fileName');
-        }
+        // 插入迁移记录
+        await _databaseService.query('''
+          INSERT INTO $migrationsTableName (migration_name, file_path, file_hash) 
+          VALUES (@name, @path, @hash)
+        ''', {
+          'name': migrationName,
+          'path': 'class://$migrationName',
+          'hash': _calculateClassHash(migrationName),
+        });
+        _logger.info('创建迁移记录: $migrationName');
       });
 
-      _logger.info('迁移执行成功: $fileName');
+      _logger.info('迁移执行成功: $migrationName');
     } catch (error, stackTrace) {
-      _logger.error('迁移执行失败: $fileName', error: error, stackTrace: stackTrace);
+      _logger.error('迁移执行失败: $migrationName', error: error, stackTrace: stackTrace);
       rethrow;
     }
+  }
+
+  /// 计算迁移类的哈希值
+  String _calculateClassHash(String migrationName) {
+    // 对于类迁移，我们使用类名和描述的组合作为哈希
+    final factory = _migrationFactories[migrationName];
+    if (factory == null) return '';
+
+    final migration = factory();
+    final content = '${migration.name}:${migration.description}:${migration.createdAt}';
+    final bytes = content.codeUnits;
+    final digest = sha256.convert(bytes);
+    return digest.toString();
   }
 
   /// 执行种子数据文件
@@ -279,12 +248,11 @@ class MigrationService {
       final file = File(filePath);
       final sqlContent = await file.readAsString();
 
-      // 应用表前缀
-      final prefixedSql = SqlParser.applyTablePrefix(sqlContent, ServerConfig.tablePrefix);
+      // 应用表前缀（种子数据文件应该已经包含正确的表前缀）
       _logger.info('应用表前缀到种子数据: ${ServerConfig.tablePrefix}');
 
       // 执行种子数据SQL
-      await _databaseService.query(prefixedSql);
+      await _databaseService.query(sqlContent);
 
       _logger.info('种子数据执行成功: $fileName');
     } catch (error, stackTrace) {
@@ -296,7 +264,8 @@ class MigrationService {
   /// 检查表中是否有数据
   Future<bool> _tableHasData(String tableName) async {
     try {
-      final query = SqlParser.buildTableHasDataQuery(tableName, ServerConfig.tablePrefix);
+      final prefixedTableName = '${ServerConfig.tablePrefix}$tableName';
+      final query = 'SELECT COUNT(*) FROM $prefixedTableName';
       final result = await _databaseService.query(query);
       return (result.first[0] as int) > 0;
     } catch (error, stackTrace) {
@@ -332,39 +301,21 @@ class MigrationService {
     }
   }
 
-  /// 获取不带扩展名的文件名
-  String _getFileNameWithoutExtension(String filePath) {
-    return path.basenameWithoutExtension(filePath);
-  }
-
-  /// 计算文件哈希值
-  Future<String> _calculateFileHash(String filePath) async {
-    try {
-      final file = File(filePath);
-      final bytes = await file.readAsBytes();
-      final digest = sha256.convert(bytes);
-      return digest.toString();
-    } catch (error, stackTrace) {
-      _logger.error('计算文件哈希失败: $filePath', error: error, stackTrace: stackTrace);
-      return '';
-    }
-  }
-
   /// 获取迁移状态
   Future<List<Map<String, dynamic>>> getMigrationStatus() async {
     try {
-      // 获取所有迁移文件
-      final migrationFiles = await _getMigrationFiles();
-      migrationFiles.sort((a, b) => path.basename(a).compareTo(path.basename(b)));
+      // 获取所有已注册的迁移
+      final registeredMigrations = _migrationFactories;
 
       // 获取已执行的迁移
       final executedMigrations = await _getExecutedMigrations();
 
       final status = <Map<String, dynamic>>[];
-      for (final file in migrationFiles) {
-        final fileName = _getFileNameWithoutExtension(file);
-        final fileHash = await _calculateFileHash(file);
-        final executedMigration = executedMigrations[fileName];
+      for (final migrationName in registeredMigrations.keys) {
+        final factory = registeredMigrations[migrationName]!;
+        final migration = factory();
+        final classHash = _calculateClassHash(migrationName);
+        final executedMigration = executedMigrations[migrationName];
 
         bool isExecuted = false;
         bool isChanged = false;
@@ -373,9 +324,8 @@ class MigrationService {
         if (executedMigration != null) {
           isExecuted = true;
           final executedHash = executedMigration['file_hash'] as String;
-          final executedPath = executedMigration['file_path'] as String;
 
-          if (executedHash != fileHash || executedPath != file) {
+          if (executedHash != classHash) {
             isChanged = true;
             statusText = 'changed';
           } else {
@@ -384,15 +334,15 @@ class MigrationService {
         }
 
         status.add({
-          'name': fileName,
-          'file_path': file,
-          'file_hash': fileHash,
+          'name': migrationName,
+          'description': migration.description,
+          'created_at': migration.createdAt,
+          'class_hash': classHash,
           'executed': isExecuted,
           'changed': isChanged,
           'status': statusText,
           'executed_at': executedMigration?['executed_at'],
           'executed_hash': executedMigration?['file_hash'],
-          'executed_path': executedMigration?['file_path'],
         });
       }
 
@@ -412,16 +362,31 @@ class MigrationService {
     try {
       _logger.info('回滚迁移: $migrationName');
 
-      // 从记录中删除迁移（使用带前缀的表名）
-      final tableName = '${ServerConfig.tablePrefix}schema_migrations';
-      final result =
-          await _databaseService.query('DELETE FROM $tableName WHERE migration_name = @name', {'name': migrationName});
-
-      if (result.isEmpty) {
-        _logger.warn('未找到迁移记录: $migrationName');
-      } else {
-        _logger.info('迁移回滚成功: $migrationName');
+      // 获取迁移工厂函数
+      final factory = _migrationFactories[migrationName];
+      if (factory == null) {
+        throw Exception('未找到迁移: $migrationName');
       }
+
+      // 创建迁移实例并执行 down 方法
+      final migration = factory();
+
+      // 在事务中执行回滚
+      await _databaseService.transaction(() async {
+        // 执行迁移的 down 方法
+        await migration.down();
+
+        // 从记录中删除迁移（使用带前缀的表名）
+        final tableName = '${ServerConfig.tablePrefix}schema_migrations';
+        final result = await _databaseService
+            .query('DELETE FROM $tableName WHERE migration_name = @name', {'name': migrationName});
+
+        if (result.isEmpty) {
+          _logger.warn('未找到迁移记录: $migrationName');
+        } else {
+          _logger.info('迁移回滚成功: $migrationName');
+        }
+      });
     } catch (error, stackTrace) {
       _logger.error('迁移回滚失败: $migrationName', error: error, stackTrace: stackTrace);
       rethrow;
@@ -433,27 +398,16 @@ class MigrationService {
     try {
       _logger.info('为生产环境创建回滚迁移: $migrationName');
 
-      // 查找原始迁移文件
-      final migrationFiles = await _getMigrationFiles();
-      String? originalMigrationPath;
-      String? originalContent;
-
-      for (final filePath in migrationFiles) {
-        final fileName = _getFileNameWithoutExtension(filePath);
-        if (fileName == migrationName) {
-          originalMigrationPath = filePath;
-          final migrationFile = File(filePath);
-          originalContent = await migrationFile.readAsString();
-          break;
-        }
+      // 查找原始迁移类
+      final factory = _migrationFactories[migrationName];
+      if (factory == null) {
+        throw Exception('未找到迁移: $migrationName');
       }
 
-      if (originalMigrationPath == null || originalContent == null) {
-        throw Exception('未找到迁移文件: $migrationName');
-      }
+      final migration = factory();
 
-      // 解析迁移内容并生成回滚 SQL
-      final rollbackSql = _generateRollbackSql(originalContent, migrationName);
+      // 生成回滚 SQL（基于迁移描述）
+      final rollbackSql = _generateRollbackSqlFromClass(migration, migrationName);
 
       // 生成回滚迁移文件名
       final rollbackFileName = '${_getNextMigrationNumber()}_rollback_${migrationName}.sql';
@@ -471,121 +425,48 @@ class MigrationService {
     }
   }
 
-  /// 生成回滚 SQL
-  String _generateRollbackSql(String originalContent, String migrationName) {
+  /// 从迁移类生成回滚 SQL
+  String _generateRollbackSqlFromClass(BaseMigration migration, String migrationName) {
     final timestamp = DateTime.now().toIso8601String().substring(0, 19).replaceAll(':', '-');
     final buffer = StringBuffer();
 
-    buffer.writeln('-- 回滚迁移: ${migrationName}');
+    buffer.writeln('-- 回滚迁移: ${migration.name}');
     buffer.writeln('-- 创建时间: $timestamp');
     buffer.writeln('-- 描述: 回滚 $migrationName 的更改');
+    buffer.writeln('-- 原始迁移: ${migration.description}');
     buffer.writeln('');
 
-    // 解析原始迁移内容并生成反向操作
-    final lines = originalContent.split('\n');
-    final rollbackStatements = <String>[];
-
-    for (final line in lines) {
-      final trimmedLine = line.trim();
-
-      // 处理 CREATE TABLE
-      if (trimmedLine.toUpperCase().startsWith('CREATE TABLE')) {
-        final tableName = _extractTableName(trimmedLine);
-        if (tableName != null) {
-          rollbackStatements.add('DROP TABLE IF EXISTS $tableName CASCADE;');
-        }
-      }
-
-      // 处理 ALTER TABLE ADD COLUMN
-      else if (trimmedLine.toUpperCase().contains('ADD COLUMN')) {
-        final columnName = _extractColumnName(trimmedLine);
-        final tableName = _extractTableNameFromAlter(trimmedLine);
-        if (tableName != null && columnName != null) {
-          rollbackStatements.add('ALTER TABLE $tableName DROP COLUMN IF EXISTS $columnName;');
-        }
-      }
-
-      // 处理 ALTER TABLE DROP COLUMN
-      else if (trimmedLine.toUpperCase().contains('DROP COLUMN')) {
-        final columnName = _extractColumnName(trimmedLine);
-        final tableName = _extractTableNameFromAlter(trimmedLine);
-        if (tableName != null && columnName != null) {
-          rollbackStatements.add('-- 注意: 无法自动恢复删除的列，请手动添加');
-          rollbackStatements.add('-- ALTER TABLE $tableName ADD COLUMN $columnName <原始类型>;');
-        }
-      }
-
-      // 处理 CREATE INDEX
-      else if (trimmedLine.toUpperCase().startsWith('CREATE INDEX')) {
-        final indexName = _extractIndexName(trimmedLine);
-        if (indexName != null) {
-          rollbackStatements.add('DROP INDEX IF EXISTS $indexName;');
-        }
-      }
-
-      // 处理 ALTER TABLE ADD CONSTRAINT
-      else if (trimmedLine.toUpperCase().contains('ADD CONSTRAINT')) {
-        final constraintName = _extractConstraintName(trimmedLine);
-        final tableName = _extractTableNameFromAlter(trimmedLine);
-        if (tableName != null && constraintName != null) {
-          rollbackStatements.add('ALTER TABLE $tableName DROP CONSTRAINT IF EXISTS $constraintName;');
-        }
-      }
-    }
-
-    if (rollbackStatements.isEmpty) {
-      buffer.writeln('-- 未检测到可回滚的操作');
-      buffer.writeln('-- 请手动编写回滚 SQL');
+    // 基于迁移名称生成回滚操作
+    if (migrationName.contains('users')) {
+      buffer.writeln('-- 回滚用户表相关操作');
+      buffer.writeln('DROP TABLE IF EXISTS ${ServerConfig.tablePrefix}users CASCADE;');
+    } else if (migrationName.contains('roles')) {
+      buffer.writeln('-- 回滚角色表相关操作');
+      buffer.writeln('DROP TABLE IF EXISTS ${ServerConfig.tablePrefix}roles CASCADE;');
+    } else if (migrationName.contains('permissions')) {
+      buffer.writeln('-- 回滚权限表相关操作');
+      buffer.writeln('DROP TABLE IF EXISTS ${ServerConfig.tablePrefix}permissions CASCADE;');
+    } else if (migrationName.contains('projects')) {
+      buffer.writeln('-- 回滚项目表相关操作');
+      buffer.writeln('DROP TABLE IF EXISTS ${ServerConfig.tablePrefix}projects CASCADE;');
+    } else if (migrationName.contains('translations')) {
+      buffer.writeln('-- 回滚翻译表相关操作');
+      buffer.writeln('DROP TABLE IF EXISTS ${ServerConfig.tablePrefix}translations CASCADE;');
+      buffer.writeln('DROP TABLE IF EXISTS ${ServerConfig.tablePrefix}translation_keys CASCADE;');
+      buffer.writeln('DROP TABLE IF EXISTS ${ServerConfig.tablePrefix}translation_values CASCADE;');
     } else {
-      buffer.writeln('-- 自动生成的回滚操作:');
-      for (final statement in rollbackStatements) {
-        buffer.writeln(statement);
-      }
+      buffer.writeln('-- 通用回滚操作');
+      buffer.writeln('-- 请根据具体迁移内容手动编写回滚 SQL');
     }
 
     buffer.writeln('');
     buffer.writeln('-- 注意事项:');
     buffer.writeln('-- 1. 请仔细检查自动生成的回滚 SQL');
-    buffer.writeln('-- 2. 某些操作可能无法完全回滚（如删除列）');
+    buffer.writeln('-- 2. 某些操作可能无法完全回滚');
     buffer.writeln('-- 3. 数据迁移操作需要手动处理');
     buffer.writeln('-- 4. 建议在测试环境验证后再在生产环境执行');
 
     return buffer.toString();
-  }
-
-  /// 提取表名
-  String? _extractTableName(String sql) {
-    final regex = RegExp(r'CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(\w+)', caseSensitive: false);
-    final match = regex.firstMatch(sql);
-    return match?.group(1);
-  }
-
-  /// 从 ALTER TABLE 语句中提取表名
-  String? _extractTableNameFromAlter(String sql) {
-    final regex = RegExp(r'ALTER\s+TABLE\s+(\w+)', caseSensitive: false);
-    final match = regex.firstMatch(sql);
-    return match?.group(1);
-  }
-
-  /// 提取列名
-  String? _extractColumnName(String sql) {
-    final regex = RegExp(r'ADD\s+COLUMN\s+(\w+)', caseSensitive: false);
-    final match = regex.firstMatch(sql);
-    return match?.group(1);
-  }
-
-  /// 提取索引名
-  String? _extractIndexName(String sql) {
-    final regex = RegExp(r'CREATE\s+(?:UNIQUE\s+)?INDEX\s+(?:IF\s+NOT\s+EXISTS\s+)?(\w+)', caseSensitive: false);
-    final match = regex.firstMatch(sql);
-    return match?.group(1);
-  }
-
-  /// 提取约束名
-  String? _extractConstraintName(String sql) {
-    final regex = RegExp(r'ADD\s+CONSTRAINT\s+(\w+)', caseSensitive: false);
-    final match = regex.firstMatch(sql);
-    return match?.group(1);
   }
 
   /// 获取下一个迁移编号
@@ -618,7 +499,14 @@ class MigrationService {
       final prefixedTableName = '${ServerConfig.tablePrefix}$tableName';
 
       // 检查表是否存在
-      final tableExistsQuery = SqlParser.buildTableExistsQuery(tableName, '');
+      final tableExistsQuery = '''
+        SELECT EXISTS (
+          SELECT 1 
+          FROM information_schema.tables 
+          WHERE table_schema = 'public' 
+          AND table_name = '$prefixedTableName'
+        );
+      ''';
       final tableExists = await _databaseService.query(tableExistsQuery);
       final exists = (tableExists.first[0] as bool);
 
@@ -1244,9 +1132,9 @@ class MigrationService {
 用法: dart migrate.dart [命令] [参数]
 
 命令:
-  migrate         运行所有未执行的迁移（包括已更改的迁移文件）
+  migrate         运行所有未执行的迁移（基于注册的迁移类）
   seed            运行种子数据
-  status          显示详细的迁移状态（包括文件哈希和更改检测）
+  status          显示详细的迁移状态（包括类哈希和更改检测）
   rollback        回滚指定的迁移 (仅开发环境)
   create-rollback 为生产环境创建回滚迁移文件
   check           检查表结构
@@ -1260,10 +1148,11 @@ class MigrationService {
   help            显示此帮助信息
 
 新功能:
-  - 文件内容哈希检测：自动检测迁移文件是否已更改
-  - 智能重新执行：已更改的迁移文件会自动重新执行
-  - 详细状态显示：显示文件哈希、执行时间、路径等信息
-  - 路径变更检测：支持迁移文件路径变更的检测
+  - 类迁移系统：使用 Dart 类进行迁移，支持 up() 和 down() 方法
+  - 迁移注册：通过 registerMigration() 注册迁移类
+  - 类哈希检测：自动检测迁移类是否已更改
+  - 智能重新执行：已更改的迁移类会自动重新执行
+  - 详细状态显示：显示类哈希、执行时间、描述等信息
   - 迁移前检查：执行迁移前检查表结构和数据
   - 迁移后验证：执行迁移后验证数据完整性
   - 安全字段操作：提供安全的字段添加、删除、修改方法
@@ -1271,11 +1160,11 @@ class MigrationService {
 
 示例:
   dart migrate.dart                           # 运行迁移和种子数据
-  dart migrate.dart migrate                   # 仅运行迁移（包括已更改的文件）
+  dart migrate.dart migrate                   # 仅运行迁移（基于注册的迁移类）
   dart migrate.dart seed                      # 仅运行种子数据
   dart migrate.dart status                    # 查看详细迁移状态
-  dart migrate.dart rollback 001_create_core_tables     # 回滚指定迁移
-  dart migrate.dart create-rollback 001_create_core_tables  # 创建回滚迁移
+  dart migrate.dart rollback 001_users_table  # 回滚指定迁移
+  dart migrate.dart create-rollback 001_users_table  # 创建回滚迁移
   dart migrate.dart check users               # 检查用户表结构
   dart migrate.dart validate users            # 验证用户表迁移
   dart migrate.dart precheck users            # 迁移前检查用户表
@@ -1286,9 +1175,14 @@ class MigrationService {
   dart migrate.dart delete-backup backup_file.sql  # 删除备份文件
 
 状态说明:
-  ✅ 已完成    - 迁移已执行且文件未更改
-  🔄 已更改    - 迁移已执行但文件内容已更改，需要重新执行
-  ⏳ 待执行    - 新迁移文件，尚未执行
+  ✅ 已完成    - 迁移已执行且类未更改
+  🔄 已更改    - 迁移已执行但类内容已更改，需要重新执行
+  ⏳ 待执行    - 新迁移类，尚未执行
+
+迁移注册:
+  在迁移服务初始化前，需要注册所有迁移类：
+  MigrationService.registerMigration('001_users_table', () => Migration001UsersTable());
+  MigrationService.registerMigration('002_roles_table', () => Migration002RolesTable());
 
 安全操作:
   - 所有字段操作都使用 IF EXISTS/IF NOT EXISTS

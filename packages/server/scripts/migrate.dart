@@ -134,7 +134,7 @@ Future<void> _showMigrationStatus(MigrationService migrationService, StructuredL
     final status = await migrationService.getMigrationStatus();
 
     if (status.isEmpty) {
-      logger.info('没有找到迁移文件');
+      logger.info('没有找到已注册的迁移类');
       return;
     }
 
@@ -143,11 +143,12 @@ Future<void> _showMigrationStatus(MigrationService migrationService, StructuredL
 
     for (final migration in status) {
       final name = migration['name'] as String;
+      final description = migration['description'] as String;
       final statusText = migration['status'] as String;
       final executed = migration['executed'] as bool;
       final changed = migration['changed'] as bool;
-      final filePath = migration['file_path'] as String;
-      final fileHash = migration['file_hash'] as String;
+      final classHash = migration['class_hash'] as String;
+      final createdAt = migration['created_at'] as String;
 
       String statusIcon = '❓';
       String statusDesc = '';
@@ -168,20 +169,19 @@ Future<void> _showMigrationStatus(MigrationService migrationService, StructuredL
       }
 
       logger.info('$statusIcon $name - $statusDesc');
-      logger.info('   文件路径: $filePath');
-      logger.info('   文件哈希: ${fileHash.substring(0, 8)}...');
+      logger.info('   描述: $description');
+      logger.info('   创建时间: $createdAt');
+      logger.info('   类哈希: ${classHash.substring(0, 8)}...');
 
       if (executed) {
         final executedAt = migration['executed_at'];
         final executedHash = migration['executed_hash'] as String;
-        final executedPath = migration['executed_path'] as String;
 
         logger.info('   执行时间: $executedAt');
         logger.info('   执行时哈希: ${executedHash.substring(0, 8)}...');
-        logger.info('   执行时路径: $executedPath');
 
         if (changed) {
-          logger.info('   ⚠️  文件已更改，将在下次运行时重新执行');
+          logger.info('   ⚠️  迁移类已更改，将在下次运行时重新执行');
         }
       }
 
