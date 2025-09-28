@@ -1,6 +1,8 @@
 import 'dart:convert';
-import 'dart:developer';
+import 'dart:developer' as dev;
 import 'dart:io';
+
+import 'package:shelf/shelf.dart';
 
 /// 日志级别
 enum LogLevel {
@@ -198,16 +200,16 @@ class StructuredLogger {
 
     if (keyFields.isNotEmpty) {
       final fieldsStr = keyFields.entries.map((e) => '${e.key}=${e.value}').join(', ');
-      log('$consoleMessage ($fieldsStr)', name: logger);
+      dev.log('$consoleMessage ($fieldsStr)', name: logger);
     } else {
-      log(consoleMessage, name: logger);
+      dev.log(consoleMessage, name: logger);
     }
   }
 
   /// 输出JSON格式
   void _logToJson(Map<String, dynamic> entry) {
     final jsonStr = jsonEncode(entry);
-    log(jsonStr, name: name);
+    dev.log(jsonStr, name: name);
   }
 
   /// 输出到文件

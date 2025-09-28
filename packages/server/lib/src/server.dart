@@ -11,6 +11,7 @@ import 'di/di.dart';
 import 'middleware/middleware.dart';
 import 'routes/api_routes.dart';
 import 'services/services.dart';
+import 'utils/structured_logger.dart';
 
 /// TTPolyglot 服务器主类
 class TTPolyglotServer {
@@ -24,6 +25,7 @@ class TTPolyglotServer {
   late final PermissionService _permissionService;
   HttpServer? _server;
   late final DateTime _startTime;
+  late final StructuredLogger _logger;
 
   /// 初始化服务器
   TTPolyglotServer() {
@@ -41,13 +43,14 @@ class TTPolyglotServer {
     _userService = serviceRegistry.get<UserService>();
     _projectService = serviceRegistry.get<ProjectService>();
     _permissionService = serviceRegistry.get<PermissionService>();
+    _logger = LoggerFactory.getLogger('TTPolyglotServer');
   }
 
   /// 启动服务器
   Future<void> start() async {
     try {
       _startTime = DateTime.now();
-      log('开始启动服务器...', name: 'TTPolyglotServer');
+      _logger.info('开始启动服务器');
 
       // 第一阶段：注册所有服务
       await serviceRegistry.registerAllServices();
@@ -62,16 +65,25 @@ class TTPolyglotServer {
       await _startHttpServer();
 
       final duration = DateTime.now().difference(_startTime);
-      log('服务器启动完成，耗时: ${duration.inMilliseconds}ms', name: 'TTPolyglotServer');
+      _logger.info(
+        '服务器启动完成',
+        context: LogContext()
+            .performance('startup_time', duration.inMilliseconds.toDouble(), unit: 'ms')
+            .field('host', _config.host)
+            .field('port', _config.port),
+      );
     } catch (error, stackTrace) {
-      log('服务器启动失败', error: error, stackTrace: stackTrace, name: 'TTPolyglotServer');
+      _logger.error(
+        '服务器启动失败',
+        context: LogContext().error(error, stackTrace: stackTrace),
+      );
       rethrow;
     }
   }
 
   /// 启动HTTP服务器
   Future<void> _startHttpServer() async {
-    log('启动HTTP服务器...', name: 'TTPolyglotServer');
+    _logger.info('启动HTTP服务器');
 
     // 创建中间件管道
     final handler = _createHandler();
@@ -83,26 +95,35 @@ class TTPolyglotServer {
       _config.port,
     );
 
-    log('HTTP服务器启动成功 - http://${_config.host}:${_config.port}', name: 'TTPolyglotServer');
+    _logger.info(
+      'HTTP服务器启动成功',
+      context: LogContext()
+          .field('url', 'http://${_config.host}:${_config.port}')
+          .field('host', _config.host)
+          .field('port', _config.port),
+    );
   }
 
   /// 停止服务器
   Future<void> stop() async {
     try {
-      log('开始关闭服务器...', name: 'TTPolyglotServer');
+      _logger.info('开始关闭服务器');
 
       // 关闭HTTP服务器
       if (_server != null) {
         await _server!.close();
-        log('HTTP服务器已关闭', name: 'TTPolyglotServer');
+        _logger.info('HTTP服务器已关闭');
       }
 
       // 使用DI容器清理所有服务
       await serviceRegistry.dispose();
 
-      log('服务器已优雅关闭', name: 'TTPolyglotServer');
+      _logger.info('服务器已优雅关闭');
     } catch (error, stackTrace) {
-      log('服务器关闭时出错', error: error, stackTrace: stackTrace, name: 'TTPolyglotServer');
+      _logger.error(
+        '服务器关闭时出错',
+        context: LogContext().error(error, stackTrace: stackTrace),
+      );
     }
   }
 
@@ -146,8 +167,8 @@ class TTPolyglotServer {
         .addMiddleware(RequestIdMiddleware().handler)
         // 2. 指标收集（记录所有请求指标）
         .addMiddleware(metricsMiddleware(metricsService: serviceRegistry.get<MetricsService>()))
-        // 3. 请求日志（记录原始请求）
-        .addMiddleware(_createLoggingMiddleware())
+        // 3. 结构化日志（记录详细请求信息）
+        .addMiddleware(structuredLoggingMiddleware(logger: _logger))
         // 4. CORS处理（处理跨域，避免后续中间件处理被拒绝的请求）
         .addMiddleware(corsMiddleware(allowedOrigins: _config.corsOrigins))
         // 5. 速率限制（早期拒绝，保护系统资源）
@@ -156,43 +177,10 @@ class TTPolyglotServer {
         .addMiddleware(_createRequestSizeLimitMiddleware())
         // 7. 安全头设置（增强安全性）
         .addMiddleware(_createSecurityHeadersMiddleware())
-        // 8. 错误处理（最后，捕获所有错误）
+        // 8. 重试机制（处理临时失败）
+        .addMiddleware(retryMiddleware())
+        // 9. 错误处理（最后，捕获所有错误）
         .addMiddleware(ErrorHandlerMiddleware().handler);
-  }
-
-  /// 创建优化的日志中间件
-  Middleware _createLoggingMiddleware() {
-    return (Handler handler) {
-      return (Request request) async {
-        final startTime = DateTime.now();
-        final requestId = request.context['request_id'] as String?;
-
-        log('请求开始: ${request.method} ${request.url.path} [ID: $requestId]', name: 'RequestLogger');
-
-        try {
-          final response = await handler(request);
-          final duration = DateTime.now().difference(startTime);
-
-          log(
-              '请求完成: ${request.method} ${request.url.path} '
-              '[ID: $requestId] [${response.statusCode}] [${duration.inMilliseconds}ms]',
-              name: 'RequestLogger');
-
-          return response;
-        } catch (error, stackTrace) {
-          final duration = DateTime.now().difference(startTime);
-
-          log(
-              '请求失败: ${request.method} ${request.url.path} '
-              '[ID: $requestId] [${duration.inMilliseconds}ms]',
-              error: error,
-              stackTrace: stackTrace,
-              name: 'RequestLogger');
-
-          rethrow;
-        }
-      };
-    };
   }
 
   /// 创建请求大小限制中间件
