@@ -5,6 +5,7 @@ import '../middleware/error_handler_middleware.dart';
 import '../utils/crypto_utils.dart';
 import '../utils/jwt_utils.dart';
 import 'database_service.dart';
+import 'email_service.dart';
 import 'redis_service.dart';
 
 /// 认证服务
@@ -14,16 +15,20 @@ class AuthService {
   final ServerConfig _config;
   late final JwtUtils _jwtUtils;
   late final CryptoUtils _cryptoUtils;
+  late final EmailService _emailService;
 
   AuthService({
     required DatabaseService databaseService,
     required RedisService redisService,
     required ServerConfig config,
-  })  : _databaseService = databaseService,
+    required EmailService emailService,
+  })  : _config = config,
+        _databaseService = databaseService,
         _redisService = redisService,
-        _config = config {
+        _emailService = emailService {
     _jwtUtils = JwtUtils(_config);
     _cryptoUtils = CryptoUtils(_config);
+    _emailService = EmailService(_config);
   }
 
   /// 用户注册
@@ -447,9 +452,21 @@ class AuthService {
       final token = _jwtUtils.generateEmailVerificationToken(user['id'] as String, email);
       final tokenHash = _cryptoUtils.hashToken(token);
 
-      // TODO: 发送邮件
-      // 这里应该调用邮件服务发送验证邮件
-      log('重发验证邮件: $email, token: $tokenHash', name: 'AuthService');
+      // 存储验证令牌到Redis
+      await _redisService.setTempData('email_verification:${user['id']}', tokenHash);
+
+      // 发送验证邮件
+      final emailSent = await _emailService.sendEmailVerification(
+        to: email,
+        username: user['username'] as String,
+        token: tokenHash,
+      );
+
+      if (emailSent) {
+        log('验证邮件发送成功: $email', name: 'AuthService');
+      } else {
+        log('验证邮件发送失败: $email', name: 'AuthService');
+      }
 
       return AuthResult.success(message: '验证邮件已发送到您的邮箱');
     } catch (error, stackTrace) {
@@ -515,13 +532,14 @@ class AuthService {
       SET login_attempts = login_attempts + 1,
           locked_until = CASE 
             WHEN login_attempts + 1 >= @max_attempts 
-            THEN CURRENT_TIMESTAMP + INTERVAL '30 minutes'
+            THEN CURRENT_TIMESTAMP + INTERVAL '@lockout_minutes minutes'
             ELSE locked_until
           END
       WHERE id = @user_id
     ''', {
       'user_id': userId,
-      'max_attempts': 5, // TODO: 从配置读取
+      'max_attempts': _config.maxLoginAttempts,
+      'lockout_minutes': _config.accountLockoutMinutes,
     });
   }
 

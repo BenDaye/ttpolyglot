@@ -55,6 +55,10 @@ class ServerConfig {
   late final int rateLimitRequests;
   late final int rateLimitWindowMinutes;
 
+  // 安全配置
+  late final int maxLoginAttempts;
+  late final int accountLockoutMinutes;
+
   // 监控配置
   late final bool healthCheckEnabled;
   late final bool metricsEnabled;
@@ -148,6 +152,10 @@ class ServerConfig {
     final originsString = _env['CORS_ORIGINS'] ?? 'http://localhost:3000';
     corsOrigins = originsString.split(',').map((e) => e.trim()).toList();
     corsAllowCredentials = _env['CORS_ALLOW_CREDENTIALS']?.toLowerCase() == 'true';
+
+    // 安全配置
+    maxLoginAttempts = int.parse(_env['MAX_LOGIN_ATTEMPTS'] ?? '5');
+    accountLockoutMinutes = int.parse(_env['ACCOUNT_LOCKOUT_MINUTES'] ?? '30');
   }
 
   void _loadRequestLimitConfig() {

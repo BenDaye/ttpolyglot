@@ -111,6 +111,7 @@ class ServiceRegistry {
     // 注册认证服务
     _container.register<AuthService>(
       () => AuthService(
+        emailService: _container.get<EmailService>(),
         databaseService: _container.get<DatabaseService>(),
         redisService: _container.get<RedisService>(),
         config: _container.get<ServerConfig>(),
