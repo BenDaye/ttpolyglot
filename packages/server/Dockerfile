@@ -2,7 +2,7 @@
 # 使用多阶段构建优化镜像大小
 
 # 构建阶段
-FROM dart:3.5.4-alpine AS build
+FROM dart:3.4.4-alpine AS build
 
 # 设置工作目录
 WORKDIR /app
