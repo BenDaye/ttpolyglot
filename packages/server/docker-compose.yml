@@ -91,7 +91,6 @@ services:
       timeout: 10s
       retries: 3
 
-  # Nginx反向代理（可选，用于生产环境）
   ttpolyglot-nginx:
     image: nginx:alpine
     ports:

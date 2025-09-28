@@ -31,18 +31,18 @@ check_dependencies() {
 }
 
 # 启动基础设施服务
-start_infrastructure() {
+start() {
     echo "🔧 启动基础设施服务..."
     
-    # 启动数据库和Redis
-    docker-compose up -d ttpolyglot-db ttpolyglot-redis
+    # 启动独立的数据库和Redis容器
+    docker-compose -f docker-compose.dev.yml up -d
     
     # 等待服务启动
     echo "⏳ 等待服务启动..."
     sleep 10
     
     # 验证数据库
-    if docker-compose exec ttpolyglot-db pg_isready -U ttpolyglot -d ttpolyglot > /dev/null 2>&1; then
+    if docker-compose -f docker-compose.dev.yml exec ttpolyglot-dev-db pg_isready -U ttpolyglot -d ttpolyglot > /dev/null 2>&1; then
         echo "✅ 数据库启动成功"
     else
         echo "❌ 数据库启动失败"
@@ -50,7 +50,7 @@ start_infrastructure() {
     fi
     
     # 验证Redis
-    if docker-compose exec ttpolyglot-redis redis-cli ping > /dev/null 2>&1; then
+    if docker-compose -f docker-compose.dev.yml exec ttpolyglot-dev-redis redis-cli ping > /dev/null 2>&1; then
         echo "✅ Redis启动成功"
     else
         echo "❌ Redis启动失败"
@@ -98,8 +98,8 @@ show_services() {
     echo "   健康检查: http://localhost:8080/health"
     echo ""
     echo "📊 服务状态:"
-    echo "   数据库: $(docker-compose ps ttpolyglot-db --format 'table {{.Status}}' | tail -n +2)"
-    echo "   Redis: $(docker-compose ps ttpolyglot-redis --format 'table {{.Status}}' | tail -n +2)"
+    echo "   数据库: $(docker-compose -f docker-compose.dev.yml ps ttpolyglot-dev-db --format 'table {{.Status}}' | tail -n +2)"
+    echo "   Redis: $(docker-compose -f docker-compose.dev.yml ps ttpolyglot-dev-redis --format 'table {{.Status}}' | tail -n +2)"
     echo "   应用服务器: $(ps aux | grep -c 'dart run bin/server.dart' || echo '未运行')"
     echo ""
     echo "🛠️  管理命令:"
@@ -118,7 +118,7 @@ main() {
     check_dependencies
     
     # 启动基础设施
-    start_infrastructure
+    start
     
     # 启动应用
     start_application

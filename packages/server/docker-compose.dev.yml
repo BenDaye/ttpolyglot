@@ -1,0 +1,64 @@
+networks:
+  ttpolyglot-dev-network:
+    driver: bridge
+
+volumes:
+  postgres_dev_data:
+    driver: local
+  redis_dev_data:
+    driver: local
+
+services:
+  ttpolyglot-dev-db:
+    image: postgres:15-alpine
+    container_name: ttpolyglot-dev-db
+    environment:
+      - POSTGRES_DB=${DB_NAME:-ttpolyglot}
+      - POSTGRES_USER=${DB_USER:-ttpolyglot}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-password}
+      - POSTGRES_INITDB_ARGS="--encoding=UTF8"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+      - ./logs/postgres:/var/log/postgresql
+    ports:
+      - "5432:5432"
+    networks:
+      - ttpolyglot-dev-network
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${DB_USER:-ttpolyglot} -d ${DB_NAME:-ttpolyglot}",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  ttpolyglot-dev-redis:
+    image: redis:7-alpine
+    container_name: ttpolyglot-dev-redis
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    volumes:
+      - redis_dev_data:/data
+      - ./logs/redis:/var/log/redis
+    ports:
+      - "6379:6379"
+    networks:
+      - ttpolyglot-dev-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    command: >
+      sh -c "
+        if [ -n \"$$REDIS_PASSWORD\" ]; then
+          redis-server --requirepass $$REDIS_PASSWORD --appendonly yes --dir /data
+        else
+          redis-server --appendonly yes --dir /data
+        fi
+      "
