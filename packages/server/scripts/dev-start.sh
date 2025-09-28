@@ -69,6 +69,14 @@ start_application() {
         sleep 2
     fi
     
+    # 加载环境变量（如果存在）
+    if [ -f ".env.dev" ]; then
+        echo "📋 加载开发环境配置..."
+        export $(cat .env.dev | grep -v '^#' | xargs)
+    else
+        echo "ℹ️  未找到 .env.dev 文件，使用默认配置"
+    fi
+    
     # 启动应用
     nohup dart run bin/server.dart > logs/server.log 2>&1 &
     
@@ -105,8 +113,10 @@ show_services() {
     echo "🛠️  管理命令:"
     echo "   停止服务: ./scripts/dev-stop.sh"
     echo "   查看日志: tail -f logs/server.log"
-    echo "   数据库控制台: ./scripts/db-utils.sh console"
+    echo "   数据库控制台: docker-compose -f docker-compose.dev.yml exec ttpolyglot-dev-db psql -U ttpolyglot -d ttpolyglot"
+    echo "   Redis控制台: docker-compose -f docker-compose.dev.yml exec ttpolyglot-dev-redis redis-cli"
     echo "   重启应用: pkill -f 'dart run bin/server.dart' && dart run bin/server.dart &"
+    echo "   清理数据: docker-compose -f docker-compose.dev.yml down -v"
 }
 
 # 主程序

@@ -6,185 +6,196 @@
 set -e
 
 echo "📊 TTPolyglot 开发环境状态"
-echo "============================"
+echo "=========================="
+
+# 检查Docker是否运行
+check_docker() {
+    if ! docker info > /dev/null 2>&1; then
+        echo "❌ Docker 未运行或无法访问"
+        return 1
+    fi
+    echo "✅ Docker 运行正常"
+    return 0
+}
+
+# 检查基础设施容器状态
+check_infrastructure() {
+    echo ""
+    echo "🔧 基础设施服务状态:"
+    echo "-------------------"
+    
+    # 检查数据库容器
+    if docker ps --filter name=ttpolyglot-dev-db --format "{{.Names}}" | grep -q ttpolyglot-dev-db; then
+        db_status=$(docker ps --filter name=ttpolyglot-dev-db --format "{{.Status}}")
+        echo "📊 数据库: $db_status"
+        
+        # 检查数据库连接
+        if docker-compose -f docker-compose.dev.yml exec ttpolyglot-dev-db pg_isready -U ttpolyglot -d ttpolyglot > /dev/null 2>&1; then
+            echo "   ✅ 数据库连接正常"
+        else
+            echo "   ❌ 数据库连接失败"
+        fi
+    else
+        echo "📊 数据库: 未运行"
+    fi
+    
+    # 检查Redis容器
+    if docker ps --filter name=ttpolyglot-dev-redis --format "{{.Names}}" | grep -q ttpolyglot-dev-redis; then
+        redis_status=$(docker ps --filter name=ttpolyglot-dev-redis --format "{{.Status}}")
+        echo "📊 Redis: $redis_status"
+        
+        # 检查Redis连接
+        if docker-compose -f docker-compose.dev.yml exec ttpolyglot-dev-redis redis-cli ping > /dev/null 2>&1; then
+            echo "   ✅ Redis连接正常"
+        else
+            echo "   ❌ Redis连接失败"
+        fi
+    else
+        echo "📊 Redis: 未运行"
+    fi
+}
 
 # 检查应用服务器状态
 check_application() {
+    echo ""
     echo "🚀 应用服务器状态:"
+    echo "-----------------"
     
     if pgrep -f "dart run bin/server.dart" > /dev/null; then
-        PID=$(pgrep -f "dart run bin/server.dart")
-        echo "✅ 运行中 (PID: $PID)"
+        app_pid=$(pgrep -f "dart run bin/server.dart")
+        echo "📊 应用服务器: 运行中 (PID: $app_pid)"
         
-        # 检查健康状态
+        # 检查应用健康状态
+        if curl -f http://localhost:8080/health > /dev/null 2>&1; then
+            echo "   ✅ 应用服务器健康检查通过"
+        else
+            echo "   ⚠️  应用服务器运行但健康检查失败"
+        fi
+        
+        # 检查API版本
         if curl -f http://localhost:8080/api/v1/version > /dev/null 2>&1; then
-            echo "✅ API响应正常"
-            
-            # 获取版本信息
-            VERSION=$(curl -s http://localhost:8080/api/v1/version | jq -r '.data.version' 2>/dev/null || echo "未知")
-            echo "📋 版本: $VERSION"
-        else
-            echo "⚠️  API响应异常"
-        fi
-        
-        # 检查健康检查端点
-        HEALTH_STATUS=$(curl -s http://localhost:8080/health | jq -r '.status' 2>/dev/null || echo "未知")
-        echo "🏥 健康状态: $HEALTH_STATUS"
-        
-    else
-        echo "❌ 未运行"
-    fi
-    echo ""
-}
-
-# 检查数据库状态
-check_database() {
-    echo "🗄️  数据库状态:"
-    
-    if docker-compose ps ttpolyglot-db | grep -q "Up"; then
-        echo "✅ 容器运行中"
-        
-        # 检查数据库连接
-        if docker-compose exec ttpolyglot-db pg_isready -U ttpolyglot -d ttpolyglot > /dev/null 2>&1; then
-            echo "✅ 数据库连接正常"
-            
-            # 获取数据库信息
-            DB_SIZE=$(docker-compose exec ttpolyglot-db psql -U ttpolyglot -d ttpolyglot -t -c "SELECT pg_size_pretty(pg_database_size('ttpolyglot'));" 2>/dev/null | xargs || echo "未知")
-            echo "📊 数据库大小: $DB_SIZE"
-            
-            # 获取表数量
-            TABLE_COUNT=$(docker-compose exec ttpolyglot-db psql -U ttpolyglot -d ttpolyglot -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" 2>/dev/null | xargs || echo "未知")
-            echo "📋 表数量: $TABLE_COUNT"
-            
-        else
-            echo "❌ 数据库连接失败"
+            version=$(curl -s http://localhost:8080/api/v1/version 2>/dev/null | jq -r '.version // "unknown"' 2>/dev/null || echo "unknown")
+            echo "   📋 API版本: $version"
         fi
     else
-        echo "❌ 容器未运行"
+        echo "📊 应用服务器: 未运行"
     fi
-    echo ""
 }
 
-# 检查Redis状态
-check_redis() {
-    echo "🔴 Redis状态:"
-    
-    if docker-compose ps ttpolyglot-redis | grep -q "Up"; then
-        echo "✅ 容器运行中"
-        
-        # 检查Redis连接
-        if docker-compose exec ttpolyglot-redis redis-cli ping > /dev/null 2>&1; then
-            echo "✅ Redis连接正常"
-            
-            # 获取Redis信息
-            REDIS_INFO=$(docker-compose exec ttpolyglot-redis redis-cli info server | grep "redis_version" | cut -d: -f2 | xargs 2>/dev/null || echo "未知")
-            echo "📋 Redis版本: $REDIS_INFO"
-            
-            # 获取内存使用
-            MEMORY_USAGE=$(docker-compose exec ttpolyglot-redis redis-cli info memory | grep "used_memory_human" | cut -d: -f2 | xargs 2>/dev/null || echo "未知")
-            echo "💾 内存使用: $MEMORY_USAGE"
-            
-        else
-            echo "❌ Redis连接失败"
-        fi
-    else
-        echo "❌ 容器未运行"
-    fi
-    echo ""
-}
-
-# 检查端口使用
+# 检查端口占用
 check_ports() {
-    echo "🔌 端口使用情况:"
-    
-    # 检查应用端口
-    if lsof -i :8080 > /dev/null 2>&1; then
-        echo "✅ 端口 8080: 应用服务器"
-    else
-        echo "❌ 端口 8080: 未使用"
-    fi
+    echo ""
+    echo "🔌 端口占用情况:"
+    echo "---------------"
     
     # 检查数据库端口
     if lsof -i :5432 > /dev/null 2>&1; then
-        echo "✅ 端口 5432: 数据库"
+        echo "📊 端口 5432 (数据库): 已占用"
     else
-        echo "❌ 端口 5432: 未使用"
+        echo "📊 端口 5432 (数据库): 空闲"
     fi
     
     # 检查Redis端口
     if lsof -i :6379 > /dev/null 2>&1; then
-        echo "✅ 端口 6379: Redis"
+        echo "📊 端口 6379 (Redis): 已占用"
     else
-        echo "❌ 端口 6379: 未使用"
+        echo "📊 端口 6379 (Redis): 空闲"
     fi
     
-    # 检查Nginx端口（如果运行）
-    if lsof -i :8081 > /dev/null 2>&1; then
-        echo "✅ 端口 8081: Nginx代理"
+    # 检查应用端口
+    if lsof -i :8080 > /dev/null 2>&1; then
+        echo "📊 端口 8080 (应用): 已占用"
+    else
+        echo "📊 端口 8080 (应用): 空闲"
     fi
-    echo ""
 }
 
 # 检查日志文件
 check_logs() {
-    echo "📋 日志文件:"
+    echo ""
+    echo "📋 日志文件状态:"
+    echo "---------------"
     
     if [ -f "logs/server.log" ]; then
-        LOG_SIZE=$(du -h logs/server.log | cut -f1)
-        echo "📄 应用日志: logs/server.log ($LOG_SIZE)"
+        log_size=$(du -h logs/server.log | cut -f1)
+        log_lines=$(wc -l < logs/server.log)
+        echo "📊 应用日志: 存在 (大小: $log_size, 行数: $log_lines)"
         
         # 显示最近的错误
-        ERROR_COUNT=$(grep -c "ERROR\|FATAL" logs/server.log 2>/dev/null || echo "0")
-        if [ "$ERROR_COUNT" -gt 0 ]; then
-            echo "⚠️  发现 $ERROR_COUNT 个错误"
+        if grep -q "ERROR\|FATAL" logs/server.log 2>/dev/null; then
+            error_count=$(grep -c "ERROR\|FATAL" logs/server.log)
+            echo "   ⚠️  发现 $error_count 个错误日志"
         else
-            echo "✅ 无错误日志"
+            echo "   ✅ 无错误日志"
         fi
     else
-        echo "❌ 应用日志文件不存在"
+        echo "📊 应用日志: 不存在"
     fi
-    echo ""
 }
 
-# 显示系统资源
-show_resources() {
-    echo "💻 系统资源:"
-    
-    # CPU使用率
-    CPU_USAGE=$(top -l 1 | grep "CPU usage" | awk '{print $3}' | sed 's/%//' 2>/dev/null || echo "未知")
-    echo "🖥️  CPU使用率: $CPU_USAGE%"
-    
-    # 内存使用
-    MEMORY_USAGE=$(top -l 1 | grep "PhysMem" | awk '{print $2}' 2>/dev/null || echo "未知")
-    echo "💾 内存使用: $MEMORY_USAGE"
-    
-    # 磁盘使用
-    DISK_USAGE=$(df -h . | tail -1 | awk '{print $5}' 2>/dev/null || echo "未知")
-    echo "💿 磁盘使用: $DISK_USAGE"
+# 显示资源使用情况
+check_resources() {
     echo ""
+    echo "💾 资源使用情况:"
+    echo "---------------"
+    
+    # Docker容器资源使用
+    if docker ps --filter name=ttpolyglot-dev --format "{{.Names}}" | grep -q ttpolyglot-dev; then
+        echo "📊 Docker容器资源:"
+        docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}" $(docker ps --filter name=ttpolyglot-dev --format "{{.Names}}") 2>/dev/null || echo "   无法获取容器资源信息"
+    fi
+    
+    # 应用进程资源使用
+    if pgrep -f "dart run bin/server.dart" > /dev/null; then
+        app_pid=$(pgrep -f "dart run bin/server.dart")
+        echo "📊 应用进程资源:"
+        ps -p $app_pid -o pid,ppid,pcpu,pmem,etime,command --no-headers 2>/dev/null || echo "   无法获取进程资源信息"
+    fi
 }
 
-# 显示快速操作
-show_quick_actions() {
-    echo "🛠️  快速操作:"
+# 显示快速操作命令
+show_quick_commands() {
+    echo ""
+    echo "🛠️  快速操作命令:"
+    echo "---------------"
     echo "   启动环境: ./scripts/dev-start.sh"
     echo "   停止环境: ./scripts/dev-stop.sh"
+    echo "   查看应用日志: tail -f logs/server.log"
     echo "   重启应用: pkill -f 'dart run bin/server.dart' && dart run bin/server.dart &"
-    echo "   查看日志: tail -f logs/server.log"
-    echo "   数据库控制台: ./scripts/db-utils.sh console"
-    echo "   备份数据库: ./scripts/db-utils.sh backup"
-    echo ""
+    echo "   数据库控制台: docker-compose -f docker-compose.dev.yml exec ttpolyglot-dev-db psql -U ttpolyglot -d ttpolyglot"
+    echo "   Redis控制台: docker-compose -f docker-compose.dev.yml exec ttpolyglot-dev-redis redis-cli"
+    echo "   清理数据: docker-compose -f docker-compose.dev.yml down -v"
 }
 
 # 主程序
 main() {
+    # 检查Docker
+    if ! check_docker; then
+        echo ""
+        echo "❌ 请先启动Docker"
+        exit 1
+    fi
+    
+    # 检查基础设施
+    check_infrastructure
+    
+    # 检查应用服务器
     check_application
-    check_database
-    check_redis
+    
+    # 检查端口占用
     check_ports
+    
+    # 检查日志文件
     check_logs
-    show_resources
-    show_quick_actions
+    
+    # 检查资源使用
+    check_resources
+    
+    # 显示快速操作命令
+    show_quick_commands
+    
+    echo ""
+    echo "✅ 状态检查完成"
 }
 
 # 运行主程序
