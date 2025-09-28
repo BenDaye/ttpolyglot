@@ -78,6 +78,11 @@ class ServiceRegistry {
       lifetime: ServiceLifetime.singleton,
     );
 
+    // 注册指标服务
+    _container.registerSingleton<MetricsService>(
+      MetricsService(),
+    );
+
     // 注册迁移服务
     _container.register<MigrationService>(
       () => MigrationService(

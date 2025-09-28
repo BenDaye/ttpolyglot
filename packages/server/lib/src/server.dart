@@ -115,6 +115,9 @@ class TTPolyglotServer {
     router.get('/health/db', _dbHealthCheck);
     router.get('/health/ready', _readyCheck);
 
+    // 指标端点
+    router.get('/metrics', _metricsEndpoint);
+
     // API路由
     final apiRoutes = ApiRoutes(
       databaseService: _databaseService,
@@ -141,17 +144,19 @@ class TTPolyglotServer {
     return Pipeline()
         // 1. 请求ID生成（最早，为后续中间件提供追踪）
         .addMiddleware(RequestIdMiddleware().handler)
-        // 2. 请求日志（记录原始请求）
+        // 2. 指标收集（记录所有请求指标）
+        .addMiddleware(metricsMiddleware(metricsService: serviceRegistry.get<MetricsService>()))
+        // 3. 请求日志（记录原始请求）
         .addMiddleware(_createLoggingMiddleware())
-        // 3. CORS处理（处理跨域，避免后续中间件处理被拒绝的请求）
+        // 4. CORS处理（处理跨域，避免后续中间件处理被拒绝的请求）
         .addMiddleware(corsMiddleware(allowedOrigins: _config.corsOrigins))
-        // 4. 速率限制（早期拒绝，保护系统资源）
+        // 5. 速率限制（早期拒绝，保护系统资源）
         .addMiddleware(RateLimitMiddleware(_redisService, _config).handler)
-        // 5. 请求大小限制（防止大请求消耗资源）
+        // 6. 请求大小限制（防止大请求消耗资源）
         .addMiddleware(_createRequestSizeLimitMiddleware())
-        // 6. 安全头设置（增强安全性）
+        // 7. 安全头设置（增强安全性）
         .addMiddleware(_createSecurityHeadersMiddleware())
-        // 7. 错误处理（最后，捕获所有错误）
+        // 8. 错误处理（最后，捕获所有错误）
         .addMiddleware(ErrorHandlerMiddleware().handler);
   }
 
@@ -443,6 +448,40 @@ class TTPolyglotServer {
       return {
         'error': '无法获取性能指标: ${error.toString()}',
       };
+    }
+  }
+
+  /// 指标端点（Prometheus格式）
+  Future<Response> _metricsEndpoint(Request request) async {
+    try {
+      final metricsService = serviceRegistry.get<MetricsService>();
+
+      // 更新系统指标
+      final uptime = DateTime.now().difference(_startTime).inSeconds.toDouble();
+      metricsService.recordSystemMetrics(
+        uptimeSeconds: uptime,
+        memoryUsageBytes: 0.0, // 这里可以添加实际内存使用量
+        cpuUsagePercent: 0.0, // 这里可以添加实际CPU使用率
+      );
+
+      // 获取Prometheus格式的指标
+      final prometheusMetrics = metricsService.getPrometheusMetrics();
+
+      return Response.ok(
+        prometheusMetrics,
+        headers: {
+          'Content-Type': 'text/plain; version=0.0.4; charset=utf-8',
+        },
+      );
+    } catch (error, stackTrace) {
+      log('获取指标失败', error: error, stackTrace: stackTrace, name: 'TTPolyglotServer');
+
+      return Response.internalServerError(
+        body: '# 指标获取失败\n',
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+        },
+      );
     }
   }
 }

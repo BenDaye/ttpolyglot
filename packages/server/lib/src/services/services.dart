@@ -9,6 +9,7 @@ export 'database_connection_pool.dart';
 export 'database_service.dart';
 // 外部服务
 export 'email_service.dart';
+export 'metrics_service.dart';
 export 'migration_service.dart';
 export 'multi_level_cache_service.dart';
 export 'permission_service.dart';
