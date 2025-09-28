@@ -178,7 +178,7 @@ genhtml coverage/lcov.info -o coverage/html
 
 ### 日志规范
 ```bash
-final logger = LoggerFactory.getLogger('TTPolyglotServer');
+static final _logger = LoggerFactory.getLogger('TTPolyglotServer');
 
 logger.info('一般信息');
 ```
