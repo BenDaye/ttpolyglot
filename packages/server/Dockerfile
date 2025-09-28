@@ -2,7 +2,7 @@
 # 使用多阶段构建优化镜像大小
 
 # 构建阶段
-FROM dart:stable AS build
+FROM dart:3.5.4-alpine AS build
 
 # 设置工作目录
 WORKDIR /app
@@ -18,16 +18,15 @@ COPY . .
 RUN dart compile exe bin/server.dart -o bin/server
 
 # 运行阶段
-FROM debian:bullseye-slim
+FROM alpine:3.20
 
 # 安装运行时依赖
-RUN apt-get update && apt-get install -y \
+RUN apk add --no-cache \
   ca-certificates \
-  curl \
-  && rm -rf /var/lib/apt/lists/*
+  curl
 
 # 创建应用用户
-RUN useradd -r -s /bin/false ttpolyglot
+RUN adduser -D -s /bin/false ttpolyglot
 
 # 创建应用目录
 RUN mkdir -p /app/data /app/logs && \
