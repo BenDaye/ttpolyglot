@@ -28,7 +28,6 @@ class AuthService {
         _emailService = emailService {
     _jwtUtils = JwtUtils(_config);
     _cryptoUtils = CryptoUtils(_config);
-    _emailService = EmailService(_config);
   }
 
   /// 用户注册
