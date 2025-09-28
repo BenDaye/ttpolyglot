@@ -164,8 +164,13 @@ class MigrationService {
 
       // 在事务中执行迁移
       await _databaseService.transaction(() async {
-        // 执行迁移SQL
-        await _databaseService.query(sqlContent);
+        // 分割SQL语句并逐个执行
+        final statements = _splitSqlStatements(sqlContent);
+        for (final statement in statements) {
+          if (statement.trim().isNotEmpty) {
+            await _databaseService.query(statement);
+          }
+        }
 
         // 记录迁移执行
         await _databaseService
@@ -213,6 +218,71 @@ class MigrationService {
   /// 获取不带扩展名的文件名
   String _getFileNameWithoutExtension(String filePath) {
     return path.basenameWithoutExtension(filePath);
+  }
+
+  /// 分割SQL语句
+  List<String> _splitSqlStatements(String sql) {
+    // 简化版本：按分号分割，但保留dollar-quoted字符串
+    final statements = <String>[];
+    final lines = sql.split('\n');
+    final buffer = StringBuffer();
+    bool inDollarQuote = false;
+    String? dollarTag;
+
+    for (final line in lines) {
+      final trimmedLine = line.trim();
+
+      // 跳过注释行
+      if (trimmedLine.startsWith('--') || trimmedLine.isEmpty) {
+        continue;
+      }
+
+      // 检查dollar-quoted字符串
+      if (!inDollarQuote && trimmedLine.contains('\$\$')) {
+        final parts = trimmedLine.split('\$\$');
+        if (parts.length >= 2) {
+          dollarTag = '\$\$';
+          inDollarQuote = true;
+          buffer.write(trimmedLine);
+          continue;
+        }
+      }
+
+      if (inDollarQuote && trimmedLine.contains(dollarTag ?? '\$\$')) {
+        buffer.write(' ');
+        buffer.write(trimmedLine);
+        inDollarQuote = false;
+        dollarTag = null;
+        continue;
+      }
+
+      if (inDollarQuote) {
+        buffer.write(' ');
+        buffer.write(trimmedLine);
+        continue;
+      }
+
+      // 普通SQL语句
+      if (trimmedLine.endsWith(';')) {
+        buffer.write(trimmedLine);
+        final statement = buffer.toString().trim();
+        if (statement.isNotEmpty) {
+          statements.add(statement);
+        }
+        buffer.clear();
+      } else {
+        buffer.write(trimmedLine);
+        buffer.write(' ');
+      }
+    }
+
+    // 添加最后一个语句（如果没有分号结尾）
+    final lastStatement = buffer.toString().trim();
+    if (lastStatement.isNotEmpty) {
+      statements.add(lastStatement);
+    }
+
+    return statements;
   }
 
   /// 获取迁移状态

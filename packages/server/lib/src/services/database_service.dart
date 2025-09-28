@@ -27,7 +27,7 @@ class DatabaseService {
       );
 
       final connectionSettings = ConnectionSettings(
-        sslMode: SslMode.require,
+        sslMode: _config.isDevelopment ? SslMode.disable : SslMode.require,
         connectTimeout: Duration(seconds: _config.dbConnectionTimeout),
         queryTimeout: Duration(seconds: 30),
       );

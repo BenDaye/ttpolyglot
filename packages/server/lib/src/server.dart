@@ -9,7 +9,6 @@ import 'config/server_config.dart';
 import 'di/di.dart';
 import 'middleware/middleware.dart';
 import 'routes/api_routes.dart';
-import 'services/file_upload_service.dart';
 import 'services/services.dart';
 import 'utils/structured_logger.dart';
 
@@ -45,7 +44,6 @@ class TTPolyglotServer {
     _projectService = serviceRegistry.get<ProjectService>();
     _permissionService = serviceRegistry.get<PermissionService>();
     _fileUploadService = serviceRegistry.get<FileUploadService>();
-    _logger = LoggerFactory.getLogger('TTPolyglotServer');
   }
 
   /// 启动服务器

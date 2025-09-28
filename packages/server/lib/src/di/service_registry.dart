@@ -107,6 +107,12 @@ class ServiceRegistry {
       lifetime: ServiceLifetime.singleton,
     );
 
+    // 注册文件上传服务
+    _container.register<FileUploadService>(
+      () => FileUploadService(config: _container.get<ServerConfig>()),
+      lifetime: ServiceLifetime.singleton,
+    );
+
     // 注册权限服务
     _container.register<PermissionService>(
       () => PermissionService(
@@ -209,9 +215,9 @@ class ServiceRegistry {
       _container.get<RedisService>().initialize(),
     ]);
 
-    // 运行数据库迁移
-    await _container.get<MigrationService>().runMigrations();
-    await _container.get<MigrationService>().runSeeds();
+    // 暂时跳过数据库迁移（开发阶段）
+    // await _container.get<MigrationService>().runMigrations();
+    // await _container.get<MigrationService>().runSeeds();
 
     logger.info('基础设施服务初始化完成');
   }
