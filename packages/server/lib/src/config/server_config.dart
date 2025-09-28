@@ -23,6 +23,7 @@ class ServerConfig {
   late final int dbPort;
   late final int dbPoolSize;
   late final int dbConnectionTimeout;
+  late final String tablePrefix;
 
   // Redis配置
   late final String redisUrl;
@@ -121,6 +122,7 @@ class ServerConfig {
     dbPort = int.parse(_env['DB_PORT'] ?? '5432');
     dbPoolSize = int.parse(_env['DB_POOL_SIZE'] ?? '20');
     dbConnectionTimeout = int.parse(_env['DB_CONNECTION_TIMEOUT'] ?? '30');
+    tablePrefix = _env['DB_TABLE_PREFIX'] ?? 'tt_';
   }
 
   void _loadRedisConfig() {
