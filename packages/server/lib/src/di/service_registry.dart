@@ -101,6 +101,12 @@ class ServiceRegistry {
     final logger = LoggerFactory.getLogger('ServiceRegistry');
     logger.info('注册业务服务...');
 
+    // 注册邮件服务
+    _container.register<EmailService>(
+      () => EmailService(_container.get<ServerConfig>()),
+      lifetime: ServiceLifetime.singleton,
+    );
+
     // 注册权限服务
     _container.register<PermissionService>(
       () => PermissionService(
@@ -155,12 +161,6 @@ class ServiceRegistry {
         databaseService: _container.get<DatabaseService>(),
         config: _container.get<ServerConfig>(),
       ),
-      lifetime: ServiceLifetime.singleton,
-    );
-
-    // 注册邮件服务
-    _container.register<EmailService>(
-      () => EmailService(_container.get<ServerConfig>()),
       lifetime: ServiceLifetime.singleton,
     );
 

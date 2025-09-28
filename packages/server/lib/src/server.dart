@@ -30,8 +30,8 @@ class TTPolyglotServer {
 
   /// 初始化服务器
   TTPolyglotServer() {
-    // 使用依赖注入容器
-    _initializeFromDI();
+    // 初始化日志记录器
+    _logger = LoggerFactory.getLogger('TTPolyglotServer');
   }
 
   /// 从依赖注入容器初始化服务
