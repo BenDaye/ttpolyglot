@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'dart:developer';
+
+import '../utils/structured_logger.dart';
 
 /// 指标类型
 enum MetricType {
@@ -62,6 +63,7 @@ class MetricValue {
 
 /// 指标收集器
 class MetricsCollector {
+  static final _logger = LoggerFactory.getLogger('MetricsCollector');
   final Map<String, List<MetricValue>> _metrics = {};
   final Map<String, String> _helpTexts = {};
   final Map<String, MetricType> _metricTypes = {};
@@ -71,7 +73,7 @@ class MetricsCollector {
     _helpTexts[name] = help;
     _metricTypes[name] = type;
     _metrics[name] = [];
-    log('注册指标: $name ($type)', name: 'MetricsCollector');
+    _logger.debug('注册指标: $name ($type)');
   }
 
   /// 记录指标值
@@ -89,7 +91,7 @@ class MetricsCollector {
     );
 
     _metrics[name]!.add(metricValue);
-    log('记录指标: $name = $value', name: 'MetricsCollector');
+    _logger.debug('记录指标: $name = $value');
   }
 
   /// 增加计数器
@@ -116,18 +118,19 @@ class MetricsCollector {
   /// 清空指标
   void clearMetrics() {
     _metrics.clear();
-    log('清空所有指标', name: 'MetricsCollector');
+    _logger.debug('清空所有指标');
   }
 
   /// 清空特定指标
   void clearMetric(String name) {
     _metrics.remove(name);
-    log('清空指标: $name', name: 'MetricsCollector');
+    _logger.debug('清空指标: $name');
   }
 }
 
 /// 指标服务
 class MetricsService {
+  static final _logger = LoggerFactory.getLogger('MetricsService');
   final MetricsCollector _collector = MetricsCollector();
   Timer? _cleanupTimer;
 
@@ -170,7 +173,7 @@ class MetricsService {
     _collector.registerMetric('translations_total', '翻译总数', MetricType.gauge);
     _collector.registerMetric('api_calls_total', 'API调用总数', MetricType.counter);
 
-    log('指标初始化完成', name: 'MetricsService');
+    _logger.info('指标初始化完成');
   }
 
   /// 启动清理定时器
@@ -196,7 +199,7 @@ class MetricsService {
       }
     }
 
-    log('清理旧指标完成', name: 'MetricsService');
+    _logger.debug('清理旧指标完成');
   }
 
   /// 记录HTTP请求指标
@@ -342,13 +345,13 @@ class MetricsService {
   /// 清理所有指标
   void clearAllMetrics() {
     _collector.clearMetrics();
-    log('清理所有指标', name: 'MetricsService');
+    _logger.debug('清理所有指标');
   }
 
   /// 关闭服务
   void dispose() {
     _cleanupTimer?.cancel();
-    log('指标服务已关闭', name: 'MetricsService');
+    _logger.info('指标服务已关闭');
   }
 }
 

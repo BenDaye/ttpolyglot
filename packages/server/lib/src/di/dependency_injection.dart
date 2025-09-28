@@ -1,7 +1,8 @@
-import 'dart:developer';
+import '../utils/structured_logger.dart';
 
 /// 依赖注入容器
 class DIContainer {
+  static final _logger = LoggerFactory.getLogger('DIContainer');
   static final DIContainer _instance = DIContainer._internal();
   factory DIContainer() => _instance;
   DIContainer._internal();
@@ -14,21 +15,21 @@ class DIContainer {
   void registerSingleton<T>(T instance) {
     _services[T] = instance;
     _lifetimes[T] = ServiceLifetime.singleton;
-    log('注册单例服务: ${T.toString()}', name: 'DIContainer');
+    _logger.info('注册单例服务: ${T.toString()}');
   }
 
   /// 注册瞬态服务工厂
   void registerTransient<T>(T Function() factory) {
     _factories[T] = ServiceFactory(factory);
     _lifetimes[T] = ServiceLifetime.transient;
-    log('注册瞬态服务: ${T.toString()}', name: 'DIContainer');
+    _logger.info('注册瞬态服务: ${T.toString()}');
   }
 
   /// 注册作用域服务工厂
   void registerScoped<T>(T Function() factory) {
     _factories[T] = ServiceFactory(factory);
     _lifetimes[T] = ServiceLifetime.scoped;
-    log('注册作用域服务: ${T.toString()}', name: 'DIContainer');
+    _logger.info('注册作用域服务: ${T.toString()}');
   }
 
   /// 注册服务（带生命周期）
@@ -104,7 +105,7 @@ class DIContainer {
     _services.clear();
     _factories.clear();
     _lifetimes.clear();
-    log('依赖注入容器已清空', name: 'DIContainer');
+    _logger.info('依赖注入容器已清空');
   }
 
   /// 移除特定服务
@@ -112,7 +113,7 @@ class DIContainer {
     _services.remove(T);
     _factories.remove(T);
     _lifetimes.remove(T);
-    log('移除服务: ${T.toString()}', name: 'DIContainer');
+    _logger.info('移除服务: ${T.toString()}');
   }
 
   /// 获取服务统计信息

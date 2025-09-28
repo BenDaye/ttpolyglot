@@ -1,6 +1,7 @@
 import 'dart:async';
-import 'dart:developer';
 import 'dart:math' hide log;
+
+import 'structured_logger.dart';
 
 /// 重试策略
 enum RetryStrategy {
@@ -83,6 +84,7 @@ class RetryResult<T> {
 
 /// 重试工具类
 class RetryUtils {
+  static final _logger = LoggerFactory.getLogger('RetryUtils');
   static final Random _random = Random();
 
   /// 执行带重试的操作
@@ -100,8 +102,7 @@ class RetryUtils {
 
         if (attempt > 1) {
           final duration = DateTime.now().difference(startTime);
-          log('重试成功: ${operationName ?? 'operation'} (第${attempt}次尝试, 耗时: ${duration.inMilliseconds}ms)',
-              name: 'RetryUtils');
+          _logger.info('重试成功: ${operationName ?? 'operation'} (第${attempt}次尝试, 耗时: ${duration.inMilliseconds}ms)');
         }
 
         return result;
@@ -110,23 +111,21 @@ class RetryUtils {
 
         // 检查是否应该重试
         if (config.retryIf != null && !config.retryIf!(error)) {
-          log('错误不可重试: ${operationName ?? 'operation'} - $error', name: 'RetryUtils');
+          _logger.warn('错误不可重试: ${operationName ?? 'operation'} - $error');
           rethrow;
         }
 
         // 如果是最后一次尝试，抛出错误
         if (attempt == config.maxAttempts) {
           final duration = DateTime.now().difference(startTime);
-          log('重试失败: ${operationName ?? 'operation'} (${attempt}次尝试, 耗时: ${duration.inMilliseconds}ms)',
-              error: error, stackTrace: stackTrace, name: 'RetryUtils');
+          _logger.error('重试失败: ${operationName ?? 'operation'} (${attempt}次尝试, 耗时: ${duration.inMilliseconds}ms)', error: error);
           rethrow;
         }
 
         // 计算延迟时间
         final delay = _calculateDelay(config, attempt);
 
-        log('重试中: ${operationName ?? 'operation'} (第${attempt}次失败, ${delay.inMilliseconds}ms后重试) - $error',
-            name: 'RetryUtils');
+        _logger.debug('重试中: ${operationName ?? 'operation'} (第${attempt}次失败, ${delay.inMilliseconds}ms后重试) - $error');
 
         // 等待后重试
         await Future.delayed(delay);

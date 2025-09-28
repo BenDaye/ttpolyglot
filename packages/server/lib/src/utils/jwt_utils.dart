@@ -1,13 +1,14 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:crypto/crypto.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 
 import '../config/server_config.dart';
+import 'structured_logger.dart';
 
 /// JWT 工具类
 class JwtUtils {
+  static final _logger = LoggerFactory.getLogger('JwtUtils');
   final ServerConfig _config;
 
   JwtUtils(this._config);
@@ -26,7 +27,7 @@ class JwtUtils {
 
       return jwt.sign(SecretKey(_config.jwtSecret));
     } catch (error, stackTrace) {
-      log('生成访问令牌失败', error: error, stackTrace: stackTrace, name: 'JwtUtils');
+      _logger.error('生成访问令牌失败', error: error);
       rethrow;
     }
   }
@@ -45,7 +46,7 @@ class JwtUtils {
 
       return jwt.sign(SecretKey(_config.jwtSecret));
     } catch (error, stackTrace) {
-      log('生成刷新令牌失败', error: error, stackTrace: stackTrace, name: 'JwtUtils');
+      _logger.error('生成刷新令牌失败', error: error);
       rethrow;
     }
   }
@@ -60,7 +61,7 @@ class JwtUtils {
 
       // 检查必要字段
       if (!payload.containsKey('user_id') || !payload.containsKey('exp')) {
-        log('JWT令牌缺少必要字段', name: 'JwtUtils');
+        _logger.warn('JWT令牌缺少必要字段');
         return null;
       }
 
@@ -68,19 +69,19 @@ class JwtUtils {
       final exp = payload['exp'] as int;
       final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       if (exp <= now) {
-        log('JWT令牌已过期', name: 'JwtUtils');
+        _logger.warn('JWT令牌已过期');
         return null;
       }
 
       return payload;
     } on JWTExpiredException {
-      log('JWT令牌已过期', name: 'JwtUtils');
+      _logger.warn('JWT令牌已过期');
       return null;
     } on JWTException catch (error) {
-      log('JWT验证失败', error: error, name: 'JwtUtils');
+      _logger.warn('JWT验证失败', error: error);
       return null;
     } catch (error, stackTrace) {
-      log('JWT验证出错', error: error, stackTrace: stackTrace, name: 'JwtUtils');
+      _logger.error('JWT验证出错', error: error);
       return null;
     }
   }
@@ -133,7 +134,7 @@ class JwtUtils {
 
       return jwt.sign(SecretKey(_config.jwtSecret));
     } catch (error, stackTrace) {
-      log('生成密码重置令牌失败', error: error, stackTrace: stackTrace, name: 'JwtUtils');
+      _logger.error('生成密码重置令牌失败', error: error);
       rethrow;
     }
   }
@@ -149,13 +150,13 @@ class JwtUtils {
 
       // 检查令牌用途
       if (payload['purpose'] != 'password_reset') {
-        log('无效的密码重置令牌用途', name: 'JwtUtils');
+        _logger.warn('无效的密码重置令牌用途');
         return null;
       }
 
       return payload;
     } catch (error, stackTrace) {
-      log('验证密码重置令牌失败', error: error, stackTrace: stackTrace, name: 'JwtUtils');
+      _logger.error('验证密码重置令牌失败', error: error);
       return null;
     }
   }
@@ -174,7 +175,7 @@ class JwtUtils {
 
       return jwt.sign(SecretKey(_config.jwtSecret));
     } catch (error, stackTrace) {
-      log('生成邮箱验证令牌失败', error: error, stackTrace: stackTrace, name: 'JwtUtils');
+      _logger.error('生成邮箱验证令牌失败', error: error);
       rethrow;
     }
   }
@@ -190,13 +191,13 @@ class JwtUtils {
 
       // 检查令牌用途
       if (payload['purpose'] != 'email_verification') {
-        log('无效的邮箱验证令牌用途', name: 'JwtUtils');
+        _logger.warn('无效的邮箱验证令牌用途');
         return null;
       }
 
       return payload;
     } catch (error, stackTrace) {
-      log('验证邮箱验证令牌失败', error: error, stackTrace: stackTrace, name: 'JwtUtils');
+      _logger.error('验证邮箱验证令牌失败', error: error);
       return null;
     }
   }

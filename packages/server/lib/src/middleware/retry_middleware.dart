@@ -1,11 +1,11 @@
-import 'dart:developer';
-
 import 'package:shelf/shelf.dart';
 
 import '../utils/retry_utils.dart';
+import '../utils/structured_logger.dart';
 
 /// 重试中间件
 class RetryMiddleware {
+  static final _logger = LoggerFactory.getLogger('RetryMiddleware');
   final RetryConfig _config;
 
   RetryMiddleware({
@@ -34,7 +34,8 @@ class RetryMiddleware {
             operationName: 'http_request_${request.method}_${request.url.path}',
           );
         } catch (error, stackTrace) {
-          log('重试中间件失败', error: error, stackTrace: stackTrace, name: 'RetryMiddleware');
+          _logger.error('重试中间件失败',
+              error: error, stackTrace: stackTrace, context: LogContext().request(request.method, request.url.path));
           rethrow;
         }
       };

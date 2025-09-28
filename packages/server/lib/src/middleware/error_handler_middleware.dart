@@ -1,12 +1,13 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:shelf/shelf.dart';
 
 import '../models/api_error.dart';
+import '../utils/structured_logger.dart';
 
 /// 错误处理中间件
 class ErrorHandlerMiddleware {
+  static final _logger = LoggerFactory.getLogger('ErrorHandler');
   /// 创建中间件处理器
   Middleware get handler => (Handler innerHandler) {
         return (Request request) async {
@@ -24,7 +25,7 @@ class ErrorHandlerMiddleware {
     final requestId = (request.context['request_id'] ?? 'unknown').toString();
 
     // 记录错误日志
-    log('未处理的异常', error: error, stackTrace: stackTrace, name: 'ErrorHandler');
+    _logger.error('未处理的异常', error: error, context: LogContext().field('request_id', requestId));
 
     // 根据错误类型返回不同的响应
     if (error is ValidationException) {

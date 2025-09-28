@@ -1,11 +1,11 @@
-import 'dart:developer';
-
 import 'package:postgres/postgres.dart';
 
 import '../config/server_config.dart';
+import '../utils/structured_logger.dart';
 
 /// 数据库服务类
 class DatabaseService {
+  static final _logger = LoggerFactory.getLogger('DatabaseService');
   final ServerConfig _config;
   Connection? _connection;
 
@@ -37,9 +37,9 @@ class DatabaseService {
         settings: connectionSettings,
       );
 
-      log('数据库连接成功: ${uri.host}:${uri.port}/${endpoint.database}', name: 'DatabaseService');
+      _logger.info('数据库连接成功: ${uri.host}:${uri.port}/${endpoint.database}');
     } catch (error, stackTrace) {
-      log('数据库连接失败', error: error, stackTrace: stackTrace, name: 'DatabaseService');
+      _logger.error('数据库连接失败', error: error);
       rethrow;
     }
   }
@@ -60,7 +60,7 @@ class DatabaseService {
       final result = await _connection!.execute('SELECT 1');
       return result.isNotEmpty;
     } catch (error) {
-      log('数据库健康检查失败', error: error, name: 'DatabaseService');
+      _logger.warn('数据库健康检查失败', error: error);
       return false;
     }
   }
@@ -77,7 +77,7 @@ class DatabaseService {
         return await connection.execute(sql);
       }
     } catch (error, stackTrace) {
-      log('数据库查询失败: $sql', error: error, stackTrace: stackTrace, name: 'DatabaseService');
+      _logger.error('数据库查询失败: $sql', error: error, context: LogContext().field('sql', sql));
       rethrow;
     }
   }
@@ -116,10 +116,10 @@ class DatabaseService {
       if (_connection != null) {
         await _connection!.close();
         _connection = null;
-        log('数据库连接已关闭', name: 'DatabaseService');
+        _logger.info('数据库连接已关闭');
       }
     } catch (error, stackTrace) {
-      log('关闭数据库连接时出错', error: error, stackTrace: stackTrace, name: 'DatabaseService');
+      _logger.error('关闭数据库连接时出错', error: error);
     }
   }
 }

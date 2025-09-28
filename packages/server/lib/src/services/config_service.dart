@@ -1,14 +1,14 @@
-import 'dart:developer';
-
 import '../config/server_config.dart';
 import '../models/api_error.dart';
 import '../models/system_config.dart';
 import '../utils/cache_utils.dart';
+import '../utils/structured_logger.dart';
 import 'database_service.dart';
 import 'redis_service.dart';
 
 /// 系统配置服务
 class ConfigService {
+  static final _logger = LoggerFactory.getLogger('ConfigService');
   final DatabaseService _databaseService;
   final RedisService _redisService;
   final ServerConfig _config;
@@ -51,7 +51,7 @@ class ConfigService {
 
       return value;
     } catch (error, stackTrace) {
-      log('获取配置值失败: $key', error: error, stackTrace: stackTrace, name: 'ConfigService');
+      _logger.error('获取配置值失败: $key', error: error, context: LogContext().field('config_key', key));
       rethrow;
     }
   }
@@ -82,7 +82,7 @@ class ConfigService {
 
       return SystemConfig.fromMap(result.first.toColumnMap());
     } catch (error, stackTrace) {
-      log('获取配置项失败: $key', error: error, stackTrace: stackTrace, name: 'ConfigService');
+      _logger.error('获取配置项失败: $key', error: error, context: LogContext().field('config_key', key));
       rethrow;
     }
   }
@@ -130,7 +130,7 @@ class ConfigService {
 
       return result.map((row) => SystemConfig.fromMap(row.toColumnMap())).toList();
     } catch (error, stackTrace) {
-      log('获取配置列表失败', error: error, stackTrace: stackTrace, name: 'ConfigService');
+      _logger.error('获取配置列表失败', error: error);
       rethrow;
     }
   }
@@ -161,7 +161,7 @@ class ConfigService {
 
       return publicConfigs;
     } catch (error, stackTrace) {
-      log('获取公开配置失败', error: error, stackTrace: stackTrace, name: 'ConfigService');
+      _logger.error('获取公开配置失败', error: error);
       rethrow;
     }
   }
@@ -210,11 +210,11 @@ class ConfigService {
       // 获取更新后的配置
       final updatedConfig = await getConfigByKey(key);
 
-      log('配置更新成功: $key = $value', name: 'ConfigService');
+      _logger.info('配置更新成功: $key = $value');
 
       return updatedConfig!;
     } catch (error, stackTrace) {
-      log('更新配置失败: $key', error: error, stackTrace: stackTrace, name: 'ConfigService');
+      _logger.error('更新配置失败: $key', error: error, context: LogContext().field('config_key', key).field('value', value));
       rethrow;
     }
   }
@@ -235,17 +235,17 @@ class ConfigService {
 
           final currentConfig = await getConfigByKey(key);
           if (currentConfig == null) {
-            log('配置项不存在，跳过: $key', name: 'ConfigService');
+            _logger.debug('配置项不存在，跳过: $key');
             continue;
           }
 
           if (!currentConfig.isEditable) {
-            log('配置项不可编辑，跳过: $key', name: 'ConfigService');
+            _logger.debug('配置项不可编辑，跳过: $key');
             continue;
           }
 
           if (!currentConfig.validateValue(value)) {
-            log('配置值无效，跳过: $key', name: 'ConfigService');
+            _logger.debug('配置值无效，跳过: $key');
             continue;
           }
 
@@ -270,11 +270,11 @@ class ConfigService {
       // 清除所有相关缓存
       await _clearAllConfigCache();
 
-      log('批量配置更新完成，共更新 ${updatedConfigs.length} 项', name: 'ConfigService');
+      _logger.info('批量配置更新完成，共更新 ${updatedConfigs.length} 项');
 
       return updatedConfigs;
     } catch (error, stackTrace) {
-      log('批量更新配置失败', error: error, stackTrace: stackTrace, name: 'ConfigService');
+      _logger.error('批量更新配置失败', error: error);
       rethrow;
     }
   }
@@ -298,7 +298,7 @@ class ConfigService {
         reason: '重置为默认值',
       );
     } catch (error, stackTrace) {
-      log('重置配置失败: $key', error: error, stackTrace: stackTrace, name: 'ConfigService');
+      _logger.error('重置配置失败: $key', error: error, context: LogContext().field('config_key', key));
       rethrow;
     }
   }
@@ -327,7 +327,7 @@ class ConfigService {
 
       return categories;
     } catch (error, stackTrace) {
-      log('获取配置分类失败', error: error, stackTrace: stackTrace, name: 'ConfigService');
+      _logger.error('获取配置分类失败', error: error);
       rethrow;
     }
   }

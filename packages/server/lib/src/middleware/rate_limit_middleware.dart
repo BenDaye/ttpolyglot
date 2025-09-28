@@ -1,14 +1,15 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:shelf/shelf.dart';
 
 import '../config/server_config.dart';
 import '../services/redis_service.dart';
+import '../utils/structured_logger.dart';
 
 /// 速率限制中间件
 class RateLimitMiddleware {
+  static final _logger = LoggerFactory.getLogger('RateLimitMiddleware');
   final RedisService _redisService;
   final ServerConfig _config;
 
@@ -39,7 +40,7 @@ class RateLimitMiddleware {
             // 在响应头中添加速率限制信息
             return _addRateLimitHeaders(response, clientId);
           } catch (error, stackTrace) {
-            log('速率限制检查失败', error: error, stackTrace: stackTrace, name: 'RateLimitMiddleware');
+            _logger.error('速率限制检查失败', error: error, stackTrace: stackTrace);
 
             // 如果速率限制检查失败，允许请求通过
             return await innerHandler(request);
@@ -91,7 +92,8 @@ class RateLimitMiddleware {
 
       return true;
     } catch (error) {
-      log('速率限制Redis操作失败', error: error, name: 'RateLimitMiddleware');
+      _logger.warn('速率限制Redis操作失败',
+          error: error, context: LogContext().field('client_id', clientId).field('window_key', windowKey));
       // 如果Redis操作失败，允许请求通过
       return true;
     }

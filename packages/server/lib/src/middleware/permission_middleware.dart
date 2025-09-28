@@ -1,13 +1,14 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:shelf/shelf.dart';
 
 import '../services/permission_service.dart';
+import '../utils/structured_logger.dart';
 import 'auth_middleware.dart';
 
 /// 权限中间件
 class PermissionMiddleware {
+  static final _logger = LoggerFactory.getLogger('PermissionMiddleware');
   final PermissionService _permissionService;
 
   PermissionMiddleware({required PermissionService permissionService}) : _permissionService = permissionService;
@@ -38,7 +39,9 @@ class PermissionMiddleware {
           );
 
           if (!hasPermission) {
-            log('权限检查失败: $userId 缺少权限 $permission (项目: $actualProjectId)', name: 'PermissionMiddleware');
+            _logger.warn('权限检查失败: $userId 缺少权限 $permission (项目: $actualProjectId)',
+                context:
+                    LogContext().user(userId).field('permission', permission).field('project_id', actualProjectId));
             return _forbidden('权限不足');
           }
 
@@ -51,7 +54,11 @@ class PermissionMiddleware {
 
           return await handler(updatedRequest);
         } catch (error, stackTrace) {
-          log('权限中间件错误', error: error, stackTrace: stackTrace, name: 'PermissionMiddleware');
+          _logger.error(
+            '权限中间件错误',
+            error: error,
+            stackTrace: stackTrace,
+          );
 
           return _forbidden('权限检查失败');
         }
@@ -86,7 +93,9 @@ class PermissionMiddleware {
             );
 
             if (!hasPermission) {
-              log('权限检查失败: $userId 缺少权限 $permission (项目: $actualProjectId)', name: 'PermissionMiddleware');
+              _logger.warn('权限检查失败: $userId 缺少权限 $permission (项目: $actualProjectId)',
+                  context:
+                      LogContext().user(userId).field('permission', permission).field('project_id', actualProjectId));
               return _forbidden('权限不足');
             }
           }
@@ -100,7 +109,11 @@ class PermissionMiddleware {
 
           return await handler(updatedRequest);
         } catch (error, stackTrace) {
-          log('权限中间件错误', error: error, stackTrace: stackTrace, name: 'PermissionMiddleware');
+          _logger.error(
+            '权限中间件错误',
+            error: error,
+            stackTrace: stackTrace,
+          );
 
           return _forbidden('权限检查失败');
         }
@@ -145,7 +158,9 @@ class PermissionMiddleware {
           }
 
           if (!hasAnyPermission) {
-            log('权限检查失败: $userId 缺少权限 ${permissions.join(' 或 ')} (项目: $actualProjectId)', name: 'PermissionMiddleware');
+            _logger.warn('权限检查失败: $userId 缺少权限 ${permissions.join(' 或 ')} (项目: $actualProjectId)',
+                context:
+                    LogContext().user(userId).field('permissions', permissions).field('project_id', actualProjectId));
             return _forbidden('权限不足');
           }
 
@@ -159,7 +174,11 @@ class PermissionMiddleware {
 
           return await handler(updatedRequest);
         } catch (error, stackTrace) {
-          log('权限中间件错误', error: error, stackTrace: stackTrace, name: 'PermissionMiddleware');
+          _logger.error(
+            '权限中间件错误',
+            error: error,
+            stackTrace: stackTrace,
+          );
 
           return _forbidden('权限检查失败');
         }
@@ -186,7 +205,11 @@ class PermissionMiddleware {
           // 此方法需要重新设计为接受projectId参数
           return _internalError('项目所有者检查需要projectId参数');
         } catch (error, stackTrace) {
-          log('项目所有者中间件错误', error: error, stackTrace: stackTrace, name: 'PermissionMiddleware');
+          _logger.error(
+            '项目所有者中间件错误',
+            error: error,
+            stackTrace: stackTrace,
+          );
 
           return _forbidden('权限检查失败');
         }
@@ -213,7 +236,7 @@ class PermissionMiddleware {
           final isSuperAdmin = await _permissionService.isSuperAdmin(userId);
 
           if (!isSuperAdmin) {
-            log('超级管理员检查失败: $userId 不是超级管理员', name: 'PermissionMiddleware');
+            _logger.warn('超级管理员检查失败: $userId 不是超级管理员', context: LogContext().user(userId));
             return _forbidden('只有超级管理员可以执行此操作');
           }
 
@@ -225,7 +248,11 @@ class PermissionMiddleware {
 
           return await handler(updatedRequest);
         } catch (error, stackTrace) {
-          log('超级管理员中间件错误', error: error, stackTrace: stackTrace, name: 'PermissionMiddleware');
+          _logger.error(
+            '超级管理员中间件错误',
+            error: error,
+            stackTrace: stackTrace,
+          );
 
           return _forbidden('权限检查失败');
         }
