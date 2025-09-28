@@ -311,4 +311,45 @@ class MigrationService {
       rethrow;
     }
   }
+
+  /// 运行迁移和种子数据
+  Future<void> runMigrationsAndSeeds() async {
+    try {
+      _logger.info('开始运行迁移和种子数据...');
+
+      // 先运行迁移
+      await runMigrations();
+
+      // 再运行种子数据
+      await runSeeds();
+
+      _logger.info('迁移和种子数据执行完成');
+    } catch (error, stackTrace) {
+      _logger.error('迁移和种子数据执行失败', error: error, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 显示帮助信息
+  void showHelpMigration() {
+    _logger.info('''
+数据库迁移工具使用说明:
+
+用法: dart migrate.dart [命令] [参数]
+
+命令:
+  migrate     运行所有未执行的迁移
+  seed        运行种子数据
+  status      显示迁移状态
+  rollback    回滚指定的迁移 (仅开发环境)
+  help        显示此帮助信息
+
+示例:
+  dart migrate.dart                    # 运行迁移和种子数据
+  dart migrate.dart migrate            # 仅运行迁移
+  dart migrate.dart seed               # 仅运行种子数据
+  dart migrate.dart status             # 查看迁移状态
+  dart migrate.dart rollback 001_create_core_tables  # 回滚指定迁移
+''');
+  }
 }
