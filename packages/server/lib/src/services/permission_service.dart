@@ -66,6 +66,63 @@ class PermissionService {
     }
   }
 
+  /// 批量检查用户权限（性能优化）
+  Future<Map<String, bool>> checkUserPermissionsBatch({
+    required String userId,
+    required List<String> permissions,
+    String? projectId,
+  }) async {
+    try {
+      log('批量检查用户权限: $userId, 权限数量: ${permissions.length}, 项目: $projectId', name: 'PermissionService');
+
+      final results = <String, bool>{};
+      final uncachedPermissions = <String>[];
+
+      // 批量检查缓存
+      for (final permission in permissions) {
+        final cacheKey = 'user_permission:$userId:$permission${projectId != null ? ':$projectId' : ''}';
+        final cachedResult = await _redisService.get(cacheKey);
+
+        if (cachedResult != null) {
+          results[permission] = cachedResult == 'true';
+        } else {
+          uncachedPermissions.add(permission);
+        }
+      }
+
+      // 如果有未缓存的权限，批量查询
+      if (uncachedPermissions.isNotEmpty) {
+        // 检查是否为超级管理员
+        final isSuperAdminUser = await isSuperAdmin(userId);
+        if (isSuperAdminUser) {
+          // 超级管理员拥有所有权限
+          for (final permission in uncachedPermissions) {
+            results[permission] = true;
+            final cacheKey = 'user_permission:$userId:$permission${projectId != null ? ':$projectId' : ''}';
+            await _redisService.setPermissionCache(cacheKey, true);
+          }
+          return results;
+        }
+
+        // 批量检查权限
+        final batchResults = await _checkPermissionsBatch(userId, uncachedPermissions, projectId);
+        results.addAll(batchResults);
+
+        // 批量缓存结果
+        for (final permission in uncachedPermissions) {
+          final cacheKey = 'user_permission:$userId:$permission${projectId != null ? ':$projectId' : ''}';
+          await _redisService.setPermissionCache(cacheKey, results[permission] ?? false);
+        }
+      }
+
+      return results;
+    } catch (error, stackTrace) {
+      log('批量权限检查失败', error: error, stackTrace: stackTrace, name: 'PermissionService');
+      // 返回默认的false结果
+      return {for (final permission in permissions) permission: false};
+    }
+  }
+
   /// 检查用户是否为超级管理员
   Future<bool> isSuperAdmin(String userId) async {
     try {
@@ -254,6 +311,38 @@ class PermissionService {
     }
   }
 
+  /// 预热用户权限缓存（性能优化）
+  Future<void> warmupUserPermissionCache(String userId, {String? projectId}) async {
+    try {
+      log('预热用户权限缓存: $userId, 项目: $projectId', name: 'PermissionService');
+
+      // 并行获取用户角色和权限
+      final futures = <Future>[];
+
+      // 获取全局角色
+      futures.add(getUserGlobalRoles(userId));
+
+      // 获取项目角色（如果指定了项目）
+      if (projectId != null) {
+        futures.add(getUserProjectRoles(userId, projectId));
+      }
+
+      // 检查是否为超级管理员
+      futures.add(isSuperAdmin(userId));
+
+      // 检查是否为项目所有者（如果指定了项目）
+      if (projectId != null) {
+        futures.add(isProjectOwner(userId: userId, projectId: projectId));
+      }
+
+      await Future.wait(futures);
+
+      log('用户权限缓存预热完成: $userId', name: 'PermissionService');
+    } catch (error, stackTrace) {
+      log('预热用户权限缓存失败: $userId', error: error, stackTrace: stackTrace, name: 'PermissionService');
+    }
+  }
+
   /// 清除用户权限缓存
   Future<void> clearUserPermissionCache(String userId, {String? projectId}) async {
     try {
@@ -372,5 +461,105 @@ class PermissionService {
     }
 
     return permissions;
+  }
+
+  /// 批量检查权限（性能优化）
+  Future<Map<String, bool>> _checkPermissionsBatch(
+    String userId,
+    List<String> permissions,
+    String? projectId,
+  ) async {
+    try {
+      final results = <String, bool>{};
+
+      // 检查项目所有者权限
+      bool isProjectOwnerUser = false;
+      if (projectId != null) {
+        isProjectOwnerUser = await isProjectOwner(userId: userId, projectId: projectId);
+        if (isProjectOwnerUser) {
+          // 项目所有者拥有所有权限
+          for (final permission in permissions) {
+            results[permission] = true;
+          }
+          return results;
+        }
+      }
+
+      // 批量查询权限
+      final permissionPlaceholders = permissions.map((_) => '@permission_${permissions.indexOf(_)}').join(',');
+      final parameters = <String, dynamic>{
+        'user_id': userId,
+        'project_id': projectId,
+      };
+
+      for (int i = 0; i < permissions.length; i++) {
+        parameters['permission_$i'] = permissions[i];
+      }
+
+      final sql = '''
+        SELECT p.name FROM user_roles ur
+        JOIN roles r ON ur.role_id = r.id
+        JOIN role_permissions rp ON r.id = rp.role_id
+        JOIN permissions p ON rp.permission_id = p.id
+        WHERE ur.user_id = @user_id 
+          AND p.name IN ($permissionPlaceholders)
+          AND ur.is_active = true
+          AND (ur.expires_at IS NULL OR ur.expires_at > CURRENT_TIMESTAMP)
+          AND r.is_active = true
+          AND p.is_active = true
+          AND rp.is_granted = true
+          ${projectId != null ? 'AND ur.project_id = @project_id' : 'AND ur.project_id IS NULL'}
+      ''';
+
+      final result = await _databaseService.query(sql, parameters);
+      final grantedPermissions = result.map((row) => row[0] as String).toSet();
+
+      // 设置结果
+      for (final permission in permissions) {
+        results[permission] = grantedPermissions.contains(permission);
+      }
+
+      return results;
+    } catch (error, stackTrace) {
+      log('批量权限检查失败', error: error, stackTrace: stackTrace, name: 'PermissionService');
+      // 返回默认的false结果
+      return {for (final permission in permissions) permission: false};
+    }
+  }
+
+  /// 获取权限检查统计信息（监控优化）
+  Future<Map<String, dynamic>> getPermissionStats() async {
+    try {
+      final stats = <String, dynamic>{};
+
+      // 获取数据库查询统计
+      final dbStats = await _databaseService.query('''
+        SELECT 
+          COUNT(*) as total_users,
+          COUNT(*) FILTER (WHERE is_active = true) as active_users,
+          COUNT(DISTINCT ur.user_id) as users_with_roles,
+          COUNT(DISTINCT ur.role_id) as active_roles,
+          COUNT(DISTINCT rp.permission_id) as active_permissions
+        FROM users u
+        LEFT JOIN user_roles ur ON u.id = ur.user_id AND ur.is_active = true
+        LEFT JOIN roles r ON ur.role_id = r.id AND r.is_active = true
+        LEFT JOIN role_permissions rp ON r.id = rp.role_id AND rp.is_granted = true
+      ''');
+
+      if (dbStats.isNotEmpty) {
+        stats['database'] = dbStats.first.toColumnMap();
+      }
+
+      // 添加缓存统计（简化版本）
+      stats['cache_info'] = {
+        'note': '缓存统计需要Redis服务支持getKeysByPattern方法',
+        'timestamp': DateTime.now().toIso8601String(),
+      };
+
+      return stats;
+    } catch (error, stackTrace) {
+      log('获取权限统计信息失败', error: error, stackTrace: stackTrace, name: 'PermissionService');
+      return {};
+    }
   }
 }
