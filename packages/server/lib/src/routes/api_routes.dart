@@ -5,6 +5,7 @@ import 'package:shelf_router/shelf_router.dart';
 
 import '../config/server_config.dart';
 import '../controllers/controllers.dart';
+import '../services/file_upload_service.dart';
 import '../services/services.dart';
 
 /// API路由配置
@@ -17,6 +18,7 @@ class ApiRoutes {
   final UserService userService;
   final ProjectService projectService;
   final PermissionService permissionService;
+  final FileUploadService fileUploadService;
   final DateTime startTime;
 
   late final Router _router;
@@ -30,6 +32,7 @@ class ApiRoutes {
     required this.userService,
     required this.projectService,
     required this.permissionService,
+    required this.fileUploadService,
     required this.startTime,
   }) {
     _router = Router();
@@ -93,6 +96,7 @@ class ApiRoutes {
   void _setupUserRoutes() {
     final userController = UserController(
       userService: userService,
+      fileUploadService: fileUploadService,
     );
 
     _router.get('/users', userController.getUsers);

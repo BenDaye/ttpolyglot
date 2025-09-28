@@ -54,7 +54,7 @@ TTPolyglot 多语言翻译管理系统的服务端实现，基于 Dart 和 Shelf
 
 4. **运行数据库迁移**
    ```bash
-   # TODO: 添加数据库迁移脚本
+   dart run scripts/migrate.dart
    ```
 
 5. **启动开发服务器**

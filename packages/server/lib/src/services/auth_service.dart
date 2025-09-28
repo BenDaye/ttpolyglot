@@ -426,6 +426,121 @@ class AuthService {
     }
   }
 
+  /// 忘记密码
+  Future<AuthResult> forgotPassword(String email) async {
+    try {
+      log('忘记密码请求: $email', name: 'AuthService');
+
+      if (!_cryptoUtils.isValidEmail(email)) {
+        return AuthResult.failure('VALIDATION_EMAIL_INVALID', '邮箱格式不正确');
+      }
+
+      // 查找用户
+      final userResult = await _databaseService.query(
+        'SELECT id, username, email FROM users WHERE email = @email AND is_active = true',
+        {'email': email},
+      );
+
+      if (userResult.isEmpty) {
+        // 为了安全，即使用户不存在也返回成功消息
+        return AuthResult.success(message: '如果该邮箱存在，重置密码邮件已发送');
+      }
+
+      final user = userResult.first.toColumnMap();
+      final userId = user['id'] as String;
+      final username = user['username'] as String;
+
+      // 生成密码重置令牌
+      final token = _jwtUtils.generatePasswordResetToken(userId, email);
+      final tokenHash = _cryptoUtils.hashToken(token);
+
+      // 存储重置令牌到Redis（1小时过期）
+      await _redisService.setTempData('password_reset:$userId', tokenHash);
+
+      // 发送重置密码邮件
+      final emailSent = await _emailService.sendForgotPassword(
+        to: email,
+        username: username,
+        token: tokenHash,
+      );
+
+      if (emailSent) {
+        log('密码重置邮件发送成功: $email', name: 'AuthService');
+      } else {
+        log('密码重置邮件发送失败: $email', name: 'AuthService');
+      }
+
+      return AuthResult.success(message: '如果该邮箱存在，重置密码邮件已发送');
+    } catch (error, stackTrace) {
+      log('忘记密码失败', error: error, stackTrace: stackTrace, name: 'AuthService');
+      return AuthResult.failure('FORGOT_PASSWORD_FAILED', '请求失败，请稍后重试');
+    }
+  }
+
+  /// 重置密码
+  Future<AuthResult> resetPassword(String token, String newPassword) async {
+    try {
+      log('重置密码', name: 'AuthService');
+
+      // 验证密码重置令牌
+      final payload = _jwtUtils.verifyPasswordResetToken(token);
+      if (payload == null) {
+        throw const BusinessException('AUTH_INVALID_RESET_TOKEN', '无效的重置令牌');
+      }
+
+      final userId = payload['user_id'] as String;
+      final email = payload['email'] as String;
+
+      // 检查Redis中的重置令牌
+      final storedToken = await _redisService.getTempData('password_reset:$userId');
+      if (storedToken != token) {
+        throw const BusinessException('AUTH_RESET_TOKEN_MISMATCH', '重置令牌不匹配或已过期');
+      }
+
+      // 验证新密码强度
+      final passwordStrength = _cryptoUtils.checkPasswordStrength(newPassword);
+      if (!passwordStrength.isAcceptable) {
+        throw BusinessException('VALIDATION_PASSWORD_WEAK', '密码强度不足：${passwordStrength.checks.join(', ')}');
+      }
+
+      // 加密新密码
+      final passwordHash = _cryptoUtils.hashPassword(newPassword);
+
+      // 更新密码
+      await _databaseService.query('''
+        UPDATE users 
+        SET password_hash = @password_hash, 
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = @user_id AND email = @email
+      ''', {
+        'user_id': userId,
+        'email': email,
+        'password_hash': passwordHash,
+      });
+
+      // 删除重置令牌
+      await _redisService.delete('temp:password_reset:$userId');
+
+      // 删除所有用户会话（强制重新登录）
+      await _deleteAllUserSessions(userId);
+
+      log('密码重置成功: $userId', name: 'AuthService');
+
+      return AuthResult.success(
+        userId: userId,
+        message: '密码重置成功，请重新登录',
+      );
+    } catch (error, stackTrace) {
+      log('重置密码失败', error: error, stackTrace: stackTrace, name: 'AuthService');
+
+      if (error is BusinessException) {
+        return AuthResult.failure(error.code, error.message);
+      }
+
+      return AuthResult.failure('RESET_PASSWORD_FAILED', '重置密码失败');
+    }
+  }
+
   /// 重发邮箱验证邮件
   Future<AuthResult> resendVerification(String email) async {
     try {
@@ -524,6 +639,38 @@ class AuthService {
     ''', {'user_id': userId});
 
     return result.isNotEmpty ? result.first.toColumnMap() : null;
+  }
+
+  /// 根据ID获取用户信息（公开方法）
+  Future<Map<String, dynamic>?> getUserById(String userId) async {
+    try {
+      log('获取用户信息: $userId', name: 'AuthService');
+
+      final result = await _databaseService.query('''
+        SELECT id, username, email, display_name, avatar_url,
+               timezone, locale, is_active, is_email_verified,
+               created_at, updated_at, last_login_at
+        FROM users 
+        WHERE id = @user_id
+        LIMIT 1
+      ''', {'user_id': userId});
+
+      if (result.isEmpty) {
+        return null;
+      }
+
+      final user = result.first.toColumnMap();
+
+      // 移除敏感信息
+      user.remove('password_hash');
+      user.remove('login_attempts');
+      user.remove('locked_until');
+
+      return user;
+    } catch (error, stackTrace) {
+      log('获取用户信息失败', error: error, stackTrace: stackTrace, name: 'AuthService');
+      return null;
+    }
   }
 
   Future<void> _incrementLoginAttempts(String userId) async {
@@ -629,6 +776,16 @@ class AuthService {
     ''', {
       'user_id': userId,
       'token_hash': accessTokenHash,
+    });
+  }
+
+  Future<void> _deleteAllUserSessions(String userId) async {
+    await _databaseService.query('''
+      UPDATE user_sessions 
+      SET is_active = false
+      WHERE user_id = @user_id
+    ''', {
+      'user_id': userId,
     });
   }
 }

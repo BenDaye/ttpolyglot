@@ -10,6 +10,7 @@ import 'config/server_config.dart';
 import 'di/di.dart';
 import 'middleware/middleware.dart';
 import 'routes/api_routes.dart';
+import 'services/file_upload_service.dart';
 import 'services/services.dart';
 import 'utils/structured_logger.dart';
 
@@ -23,6 +24,7 @@ class TTPolyglotServer {
   late final UserService _userService;
   late final ProjectService _projectService;
   late final PermissionService _permissionService;
+  late final FileUploadService _fileUploadService;
   HttpServer? _server;
   late final DateTime _startTime;
   late final StructuredLogger _logger;
@@ -43,6 +45,7 @@ class TTPolyglotServer {
     _userService = serviceRegistry.get<UserService>();
     _projectService = serviceRegistry.get<ProjectService>();
     _permissionService = serviceRegistry.get<PermissionService>();
+    _fileUploadService = serviceRegistry.get<FileUploadService>();
     _logger = LoggerFactory.getLogger('TTPolyglotServer');
   }
 
@@ -149,6 +152,7 @@ class TTPolyglotServer {
       userService: _userService,
       projectService: _projectService,
       permissionService: _permissionService,
+      fileUploadService: _fileUploadService,
       startTime: _startTime,
     );
     router.mount('/api/v1/', apiRoutes.handler);

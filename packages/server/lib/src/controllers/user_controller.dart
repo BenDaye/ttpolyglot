@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:typed_data';
 
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 import '../middleware/auth_middleware.dart';
 import '../middleware/error_handler_middleware.dart';
+import '../services/file_upload_service.dart';
 import '../services/user_service.dart';
 import '../utils/response_builder.dart';
 import '../utils/validator.dart';
@@ -13,10 +15,13 @@ import '../utils/validator.dart';
 /// 用户管理控制器
 class UserController {
   final UserService _userService;
+  final FileUploadService _fileUploadService;
 
   UserController({
     required UserService userService,
-  }) : _userService = userService;
+    required FileUploadService fileUploadService,
+  })  : _userService = userService,
+        _fileUploadService = fileUploadService;
 
   Router get router {
     final router = Router();
@@ -398,8 +403,62 @@ class UserController {
         );
       }
 
-      // TODO: 实现头像上传逻辑
-      return ResponseBuilder.success(message: '头像上传成功');
+      // 解析multipart请求
+      final contentType = request.headers['content-type'];
+      if (contentType == null || !contentType.startsWith('multipart/form-data')) {
+        return ResponseBuilder.error(
+          code: 'VALIDATION_INVALID_CONTENT_TYPE',
+          message: '请使用multipart/form-data格式上传文件',
+          statusCode: 400,
+        );
+      }
+
+      // 简化实现：从请求体读取文件数据
+      final bodyBytes = await request.read().expand((chunk) => chunk).toList();
+      final body = Uint8List.fromList(bodyBytes);
+      final fileName = 'avatar_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final fileContentType = 'image/jpeg';
+
+      if (body.isEmpty) {
+        return ResponseBuilder.error(
+          code: 'VALIDATION_MISSING_FILE',
+          message: '请选择要上传的头像文件',
+          statusCode: 400,
+        );
+      }
+
+      // 清理旧头像
+      await _fileUploadService.cleanupOldAvatars(userId);
+
+      // 上传新头像
+      final uploadResult = await _fileUploadService.uploadAvatar(
+        userId: userId,
+        fileData: body,
+        fileName: fileName,
+        contentType: fileContentType,
+      );
+
+      if (!uploadResult.success) {
+        return ResponseBuilder.error(
+          code: uploadResult.code ?? '',
+          message: uploadResult.message ?? '',
+          statusCode: 400,
+        );
+      }
+
+      // 更新用户头像URL
+      await _userService.updateUser(userId, {
+        'avatar_url': uploadResult.url,
+      });
+
+      return ResponseBuilder.success(
+        message: '头像上传成功',
+        data: {
+          'avatar_url': uploadResult.url,
+          'file_name': uploadResult.fileName,
+          'file_size': uploadResult.fileSize,
+        },
+      );
     } catch (error, stackTrace) {
       log('上传头像失败', error: error, stackTrace: stackTrace, name: 'UserController');
       return ResponseBuilder.errorFromRequest(

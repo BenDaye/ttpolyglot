@@ -247,10 +247,34 @@ class AuthController {
   /// 忘记密码
   Future<Response> _forgotPassword(Request request) async {
     try {
-      // TODO: 实现忘记密码逻辑
-      return ResponseBuilder.success(message: '忘记密码功能暂未实现');
+      // 解析请求体
+      final body = await request.readAsString();
+      final data = jsonDecode(body) as Map<String, dynamic>;
+
+      // 验证邮箱
+      final email = Validator.validateEmail(data['email'], 'email');
+
+      // 调用认证服务
+      final result = await _authService.forgotPassword(email);
+
+      if (result.success) {
+        return ResponseBuilder.success(message: result.message);
+      } else {
+        return ResponseBuilder.error(
+          code: result.code,
+          message: result.message,
+          statusCode: 400,
+        );
+      }
     } catch (error, stackTrace) {
       log('忘记密码失败', error: error, stackTrace: stackTrace, name: 'AuthController');
+
+      if (error is ValidationException) {
+        return ResponseBuilder.validationError(
+          message: '忘记密码参数验证失败',
+          fieldErrors: error.fieldErrors,
+        );
+      }
 
       return ResponseBuilder.error(
         code: 'FORGOT_PASSWORD_FAILED',
@@ -263,10 +287,35 @@ class AuthController {
   /// 重置密码
   Future<Response> _resetPassword(Request request) async {
     try {
-      // TODO: 实现重置密码逻辑
-      return ResponseBuilder.success(message: '重置密码功能暂未实现');
+      // 解析请求体
+      final body = await request.readAsString();
+      final data = jsonDecode(body) as Map<String, dynamic>;
+
+      // 验证参数
+      final token = Validator.validateString(data['token'], 'token');
+      final newPassword = Validator.validateString(data['new_password'], 'new_password', minLength: 8);
+
+      // 调用认证服务
+      final result = await _authService.resetPassword(token, newPassword);
+
+      if (result.success) {
+        return ResponseBuilder.success(message: result.message);
+      } else {
+        return ResponseBuilder.error(
+          code: result.code,
+          message: result.message,
+          statusCode: 400,
+        );
+      }
     } catch (error, stackTrace) {
       log('重置密码失败', error: error, stackTrace: stackTrace, name: 'AuthController');
+
+      if (error is ValidationException) {
+        return ResponseBuilder.validationError(
+          message: '重置密码参数验证失败',
+          fieldErrors: error.fieldErrors,
+        );
+      }
 
       return ResponseBuilder.error(
         code: 'RESET_PASSWORD_FAILED',
@@ -328,14 +377,20 @@ class AuthController {
         );
       }
 
-      // TODO: 从数据库获取完整的用户信息
+      // 从数据库获取完整的用户信息
+      final user = await _authService.getUserById(userId);
+
+      if (user == null) {
+        return ResponseBuilder.error(
+          code: 'AUTH_USER_NOT_FOUND',
+          message: '用户不存在',
+          statusCode: 404,
+        );
+      }
+
       return ResponseBuilder.success(
         message: '获取用户信息成功',
-        data: {
-          'user_id': userId,
-          'username': getCurrentUsername(request),
-          'email': getCurrentUserEmail(request),
-        },
+        data: user,
       );
     } catch (error, stackTrace) {
       log('获取当前用户信息失败', error: error, stackTrace: stackTrace, name: 'AuthController');
