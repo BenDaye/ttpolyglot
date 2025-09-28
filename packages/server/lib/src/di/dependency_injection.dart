@@ -158,7 +158,7 @@ extension DIExtensions on DIContainer {
   void registerBatch(Map<Type, dynamic> services) {
     services.forEach((type, service) {
       if (service is Function) {
-        registerTransient(() => (service as Function)());
+        registerTransient(() => service());
       } else {
         registerSingleton(service);
       }
