@@ -9,16 +9,13 @@ import 'redis_service.dart';
 class ProjectService {
   final DatabaseService _databaseService;
   final RedisService _redisService;
-  final ServerConfig _config;
   static final _logger = LoggerFactory.getLogger('ProjectService');
 
   ProjectService({
     required DatabaseService databaseService,
     required RedisService redisService,
-    required ServerConfig config,
   })  : _databaseService = databaseService,
-        _redisService = redisService,
-        _config = config;
+        _redisService = redisService;
 
   /// 获取项目列表
   Future<Map<String, dynamic>> getProjects({
@@ -192,7 +189,7 @@ class ProjectService {
       }
 
       // 缓存项目信息
-      await _redisService.setJson(cacheKey, projectData, _config.cacheApiResponseTtl);
+      await _redisService.setJson(cacheKey, projectData, ServerConfig.cacheApiResponseTtl);
 
       return projectData;
     } catch (error, stackTrace) {

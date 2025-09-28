@@ -9,9 +9,8 @@ import 'structured_logger.dart';
 /// JWT 工具类
 class JwtUtils {
   static final _logger = LoggerFactory.getLogger('JwtUtils');
-  final ServerConfig _config;
 
-  JwtUtils(this._config);
+  JwtUtils();
 
   /// 生成访问令牌
   String generateAccessToken(Map<String, dynamic> payload) {
@@ -19,13 +18,13 @@ class JwtUtils {
       final jwt = JWT({
         ...payload,
         'iat': DateTime.now().millisecondsSinceEpoch ~/ 1000,
-        'exp': DateTime.now().add(Duration(hours: _config.jwtExpireHours)).millisecondsSinceEpoch ~/ 1000,
+        'exp': DateTime.now().add(Duration(hours: ServerConfig.jwtExpireHours)).millisecondsSinceEpoch ~/ 1000,
         'iss': 'ttpolyglot-server',
         'aud': 'ttpolyglot-client',
         'type': 'access',
       });
 
-      return jwt.sign(SecretKey(_config.jwtSecret));
+      return jwt.sign(SecretKey(ServerConfig.jwtSecret));
     } catch (error, stackTrace) {
       _logger.error('生成访问令牌失败', error: error, stackTrace: stackTrace);
       rethrow;
@@ -38,13 +37,13 @@ class JwtUtils {
       final jwt = JWT({
         ...payload,
         'iat': DateTime.now().millisecondsSinceEpoch ~/ 1000,
-        'exp': DateTime.now().add(Duration(days: _config.jwtRefreshExpireDays)).millisecondsSinceEpoch ~/ 1000,
+        'exp': DateTime.now().add(Duration(days: ServerConfig.jwtRefreshExpireDays)).millisecondsSinceEpoch ~/ 1000,
         'iss': 'ttpolyglot-server',
         'aud': 'ttpolyglot-client',
         'type': 'refresh',
       });
 
-      return jwt.sign(SecretKey(_config.jwtSecret));
+      return jwt.sign(SecretKey(ServerConfig.jwtSecret));
     } catch (error, stackTrace) {
       _logger.error('生成刷新令牌失败', error: error, stackTrace: stackTrace);
       rethrow;
@@ -54,7 +53,7 @@ class JwtUtils {
   /// 验证JWT令牌
   Map<String, dynamic>? verifyToken(String token) {
     try {
-      final jwt = JWT.verify(token, SecretKey(_config.jwtSecret));
+      final jwt = JWT.verify(token, SecretKey(ServerConfig.jwtSecret));
 
       // 检查令牌类型
       final payload = jwt.payload as Map<String, dynamic>;
@@ -132,7 +131,7 @@ class JwtUtils {
         'iss': 'ttpolyglot-server',
       });
 
-      return jwt.sign(SecretKey(_config.jwtSecret));
+      return jwt.sign(SecretKey(ServerConfig.jwtSecret));
     } catch (error, stackTrace) {
       _logger.error('生成密码重置令牌失败', error: error, stackTrace: stackTrace);
       rethrow;
@@ -173,7 +172,7 @@ class JwtUtils {
         'iss': 'ttpolyglot-server',
       });
 
-      return jwt.sign(SecretKey(_config.jwtSecret));
+      return jwt.sign(SecretKey(ServerConfig.jwtSecret));
     } catch (error, stackTrace) {
       _logger.error('生成邮箱验证令牌失败', error: error, stackTrace: stackTrace);
       rethrow;

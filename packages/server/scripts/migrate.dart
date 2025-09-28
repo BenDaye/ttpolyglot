@@ -14,16 +14,15 @@ Future<void> main(List<String> args) async {
     logger.info('开始数据库迁移和种子数据执行');
 
     // 加载配置
-    final config = ServerConfig();
-    await config.load();
-    config.validate();
+    await ServerConfig.load();
+    ServerConfig.validate();
 
     // 初始化数据库服务
-    final databaseService = DatabaseService(config);
+    final databaseService = DatabaseService();
     await databaseService.initialize();
 
     // 创建迁移服务
-    final migrationService = MigrationService(databaseService, config);
+    final migrationService = MigrationService(databaseService);
 
     // 解析命令行参数
     if (args.isEmpty) {

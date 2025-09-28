@@ -6,9 +6,7 @@ import '../utils/structured_logger.dart';
 
 /// 邮件服务
 class EmailService {
-  final ServerConfig _config;
-
-  EmailService(this._config);
+  EmailService();
 
   /// 发送邮箱验证邮件
   Future<bool> sendEmailVerification({
@@ -25,7 +23,7 @@ class EmailService {
       }
 
       final subject = '验证您的邮箱地址';
-      final verificationUrl = '${_config.siteUrl}/verify-email?token=$token';
+      final verificationUrl = '${ServerConfig.siteUrl}/verify-email?token=$token';
 
       final htmlContent = _generateEmailVerificationHtml(
         username: username,
@@ -58,7 +56,7 @@ class EmailService {
       }
 
       final subject = '重置您的密码';
-      final resetUrl = '${_config.siteUrl}/reset-password?token=$token';
+      final resetUrl = '${ServerConfig.siteUrl}/reset-password?token=$token';
 
       final htmlContent = _generatePasswordResetHtml(
         username: username,
@@ -91,7 +89,7 @@ class EmailService {
       }
 
       final subject = '重置您的密码';
-      final resetUrl = '${_config.siteUrl}/reset-password?token=$token';
+      final resetUrl = '${ServerConfig.siteUrl}/reset-password?token=$token';
 
       final htmlContent = _generateForgotPasswordHtml(
         username: username,
@@ -111,11 +109,10 @@ class EmailService {
 
   /// 检查邮件服务是否已配置
   bool _isEmailConfigured() {
-    return _config.smtpHost != null &&
-        _config.smtpPort != null &&
-        _config.smtpUser != null &&
-        _config.smtpPassword != null &&
-        _config.smtpFromAddress != null;
+    return ServerConfig.smtpHost.isNotEmpty &&
+        ServerConfig.smtpUser.isNotEmpty &&
+        ServerConfig.smtpPassword.isNotEmpty &&
+        ServerConfig.smtpFromAddress.isNotEmpty;
   }
 
   /// 发送邮件
@@ -129,16 +126,16 @@ class EmailService {
     logger.info('主题: $subject');
     try {
       final message = Message()
-        ..from = Address(_config.smtpFromAddress!, 'TTPolyglot')
+        ..from = Address(ServerConfig.smtpFromAddress, 'TTPolyglot')
         ..recipients.add(to)
         ..subject = subject
         ..html = htmlContent;
 
       final smtpServer = SmtpServer(
-        _config.smtpHost!,
-        port: _config.smtpPort!,
-        username: _config.smtpUser,
-        password: _config.smtpPassword,
+        ServerConfig.smtpHost,
+        port: ServerConfig.smtpPort,
+        username: ServerConfig.smtpUser,
+        password: ServerConfig.smtpPassword,
       );
 
       final result = await send(message, smtpServer);

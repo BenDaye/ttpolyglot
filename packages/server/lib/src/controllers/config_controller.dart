@@ -1,18 +1,15 @@
 import 'package:shelf/shelf.dart';
 
-import '../config/server_config.dart';
 import '../services/database_service.dart';
 import '../services/redis_service.dart';
 
 class ConfigController {
   final DatabaseService databaseService;
   final RedisService redisService;
-  final ServerConfig config;
 
   ConfigController({
     required this.databaseService,
     required this.redisService,
-    required this.config,
   });
 
   Future<Response> getConfigs(Request request) async {

@@ -1,8 +1,48 @@
 import 'package:dotenv/dotenv.dart';
+import 'package:ttpolyglot_server/src/utils/structured_logger.dart';
 
 /// 服务器配置类
 class ServerConfig {
   static final DotEnv _env = DotEnv(includePlatformEnvironment: true);
+  static final StructuredLogger _logger = LoggerFactory.getLogger('ServerConfig');
+
+  /// 加载配置
+  static Future<void> load() async {
+    try {
+      _env.load();
+      _logger.info('配置加载完成', context: LogContext().field('config_name', 'ServerConfig'));
+    } catch (error, stackTrace) {
+      _logger.error('配置加载失败',
+          error: error, stackTrace: stackTrace, context: LogContext().field('config_name', 'ServerConfig'));
+      rethrow;
+    }
+  }
+
+  /// 验证配置
+  static bool validate() {
+    try {
+      // 验证必需的配置项
+      final requiredFields = [
+        'JWT_SECRET',
+        'ENCRYPTION_KEY',
+        'SESSION_SECRET',
+      ];
+
+      for (final field in requiredFields) {
+        if (_env[field] == null || _env[field]!.isEmpty) {
+          _logger.error('缺少必需的配置项: $field', context: LogContext().field('config_name', 'ServerConfig'));
+          return false;
+        }
+      }
+
+      _logger.info('配置验证通过', context: LogContext().field('config_name', 'ServerConfig'));
+      return true;
+    } catch (error, stackTrace) {
+      _logger.error('配置验证失败',
+          error: error, stackTrace: stackTrace, context: LogContext().field('config_name', 'ServerConfig'));
+      return false;
+    }
+  }
 
   // 服务器配置
   static String get host => _env['HOST'] ?? '0.0.0.0';

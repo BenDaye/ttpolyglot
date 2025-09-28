@@ -7,18 +7,15 @@ import '../utils/structured_logger.dart';
 
 /// Redis服务类
 class RedisService {
-  final ServerConfig _config;
   RedisConnection? _connection;
   Command? _command;
   static final _logger = LoggerFactory.getLogger('RedisService');
-
-  RedisService(this._config);
 
   /// 初始化Redis连接
   Future<void> initialize() async {
     try {
       // 解析Redis URL
-      final uri = Uri.parse(_config.redisUrl);
+      final uri = Uri.parse(ServerConfig.redisUrl);
 
       _connection = RedisConnection();
       _command = await _connection!.connect(
@@ -27,8 +24,8 @@ class RedisService {
       );
 
       // 如果有密码，进行认证
-      if (_config.redisPassword != null && _config.redisPassword!.isNotEmpty) {
-        await _command!.send_object(['AUTH', _config.redisPassword!]);
+      if (ServerConfig.redisPassword.isNotEmpty) {
+        await _command!.send_object(['AUTH', ServerConfig.redisPassword]);
       }
 
       // 测试连接
@@ -183,7 +180,7 @@ class RedisService {
 
   /// 设置用户会话
   Future<void> setUserSession(String userId, Map<String, dynamic> sessionData) async {
-    await setJson('user:session:$userId', sessionData, _config.cacheSessionTtl);
+    await setJson('user:session:$userId', sessionData, ServerConfig.cacheSessionTtl);
   }
 
   /// 获取用户会话
@@ -198,7 +195,7 @@ class RedisService {
 
   /// 缓存用户权限
   Future<void> setUserPermissions(String userId, List<String> permissions) async {
-    await setJson('user:permissions:$userId', {'permissions': permissions}, _config.cachePermissionTtl);
+    await setJson('user:permissions:$userId', {'permissions': permissions}, ServerConfig.cachePermissionTtl);
   }
 
   /// 获取用户权限
@@ -214,12 +211,12 @@ class RedisService {
   Future<void> setPermissionCache(String key, dynamic value) async {
     final fullKey = 'permission:$key';
     final valueStr = value is bool ? (value ? 'true' : 'false') : value.toString();
-    await set(fullKey, valueStr, _config.cachePermissionTtl);
+    await set(fullKey, valueStr, ServerConfig.cachePermissionTtl);
   }
 
   /// 设置API响应缓存
   Future<void> setApiResponseCache(String cacheKey, Map<String, dynamic> responseData) async {
-    await setJson('api:response:$cacheKey', responseData, _config.cacheApiResponseTtl);
+    await setJson('api:response:$cacheKey', responseData, ServerConfig.cacheApiResponseTtl);
   }
 
   /// 获取API响应缓存
@@ -229,7 +226,7 @@ class RedisService {
 
   /// 设置系统配置缓存
   Future<void> setSystemConfig(String configKey, dynamic configValue) async {
-    await set('config:system:$configKey', configValue.toString(), _config.cacheConfigTtl);
+    await set('config:system:$configKey', configValue.toString(), ServerConfig.cacheConfigTtl);
   }
 
   /// 获取系统配置缓存
@@ -239,7 +236,7 @@ class RedisService {
 
   /// 设置临时数据（如验证码、重置token等）
   Future<void> setTempData(String key, String value) async {
-    await set('temp:$key', value, _config.cacheTempDataTtl);
+    await set('temp:$key', value, ServerConfig.cacheTempDataTtl);
   }
 
   /// 获取临时数据

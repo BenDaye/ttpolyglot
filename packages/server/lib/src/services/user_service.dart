@@ -9,18 +9,15 @@ import 'redis_service.dart';
 class UserService {
   final DatabaseService _databaseService;
   final RedisService _redisService;
-  final ServerConfig _config;
   late final CryptoUtils _cryptoUtils;
   static final _logger = LoggerFactory.getLogger('UserService');
 
   UserService({
     required DatabaseService databaseService,
     required RedisService redisService,
-    required ServerConfig config,
   })  : _databaseService = databaseService,
-        _redisService = redisService,
-        _config = config {
-    _cryptoUtils = CryptoUtils(_config);
+        _redisService = redisService {
+    _cryptoUtils = CryptoUtils();
   }
 
   /// 获取用户列表
@@ -177,7 +174,7 @@ class UserService {
       userData.remove('password_hash');
 
       // 缓存用户信息
-      await _redisService.setJson(cacheKey, userData, _config.cacheApiResponseTtl);
+      await _redisService.setJson(cacheKey, userData, ServerConfig.cacheApiResponseTtl);
 
       return userData;
     } catch (error, stackTrace) {

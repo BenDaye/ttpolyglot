@@ -58,13 +58,9 @@ class FileUploadResult {
 
 /// 文件上传服务
 class FileUploadService {
-  final ServerConfig _config;
   final String _uploadDir;
 
-  FileUploadService({
-    required ServerConfig config,
-  })  : _config = config,
-        _uploadDir = 'uploads/avatars';
+  FileUploadService() : _uploadDir = 'uploads/avatars';
 
   /// 上传头像
   Future<FileUploadResult> uploadAvatar({
@@ -104,7 +100,7 @@ class FileUploadService {
       await file.writeAsBytes(fileData);
 
       // 生成访问URL
-      final avatarUrl = '${_config.siteUrl ?? 'http://localhost:8080'}/$filePath';
+      final avatarUrl = '${ServerConfig.siteUrl}/$filePath';
 
       logger.info('头像上传成功: $avatarUrl');
 

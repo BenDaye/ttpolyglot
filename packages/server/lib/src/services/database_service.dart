@@ -6,29 +6,27 @@ import '../utils/structured_logger.dart';
 /// 数据库服务类
 class DatabaseService {
   static final _logger = LoggerFactory.getLogger('DatabaseService');
-  final ServerConfig _config;
   Connection? _connection;
-
-  DatabaseService(this._config);
 
   /// 初始化数据库连接
   Future<void> initialize() async {
     try {
       // 解析数据库URL
-      final uri = Uri.parse(_config.databaseUrl);
+      final uri = Uri.parse(ServerConfig.databaseUrl);
 
       final endpoint = Endpoint(
         host: uri.host,
         port: uri.port,
-        database: uri.pathSegments.isNotEmpty ? uri.pathSegments.first : _config.dbName,
-        username: uri.userInfo.isNotEmpty ? uri.userInfo.split(':').first : _config.dbUser,
-        password:
-            uri.userInfo.isNotEmpty && uri.userInfo.contains(':') ? uri.userInfo.split(':').last : _config.dbPassword,
+        database: uri.pathSegments.isNotEmpty ? uri.pathSegments.first : ServerConfig.dbName,
+        username: uri.userInfo.isNotEmpty ? uri.userInfo.split(':').first : ServerConfig.dbUser,
+        password: uri.userInfo.isNotEmpty && uri.userInfo.contains(':')
+            ? uri.userInfo.split(':').last
+            : ServerConfig.dbPassword,
       );
 
       final connectionSettings = ConnectionSettings(
-        sslMode: _config.isDevelopment ? SslMode.disable : SslMode.require,
-        connectTimeout: Duration(seconds: _config.dbConnectionTimeout),
+        sslMode: ServerConfig.isDevelopment ? SslMode.disable : SslMode.require,
+        connectTimeout: Duration(seconds: ServerConfig.dbConnectionTimeout),
         queryTimeout: Duration(seconds: 30),
       );
 

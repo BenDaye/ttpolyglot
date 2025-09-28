@@ -12,10 +12,9 @@ import 'database_service.dart';
 /// 根据字段更新最佳实践指南实现的安全迁移服务
 class MigrationService {
   final DatabaseService _databaseService;
-  final ServerConfig _config;
   static final _logger = LoggerFactory.getLogger('MigrationService');
 
-  MigrationService(this._databaseService, this._config);
+  MigrationService(this._databaseService);
 
   /// 运行所有未执行的迁移
   Future<void> runMigrations() async {
@@ -120,7 +119,7 @@ class MigrationService {
 
   /// 确保迁移记录表存在
   Future<void> _ensureMigrationTableExists() async {
-    final tableName = '${_config.tablePrefix}schema_migrations';
+    final tableName = '${ServerConfig.tablePrefix}schema_migrations';
     final sql = '''CREATE TABLE IF NOT EXISTS $tableName (
         id SERIAL PRIMARY KEY,
         migration_name VARCHAR(255) UNIQUE NOT NULL,
@@ -174,7 +173,7 @@ class MigrationService {
   /// 获取已执行的迁移
   Future<Map<String, Map<String, dynamic>>> _getExecutedMigrations() async {
     try {
-      final tableName = '${_config.tablePrefix}schema_migrations';
+      final tableName = '${ServerConfig.tablePrefix}schema_migrations';
       final result = await _databaseService.query('''
         SELECT migration_name, file_path, file_hash, executed_at 
         FROM $tableName 
@@ -212,8 +211,8 @@ class MigrationService {
       final sqlContent = await file.readAsString();
 
       // 应用表前缀
-      final prefixedSql = SqlParser.applyTablePrefix(sqlContent, _config.tablePrefix);
-      _logger.info('应用表前缀: ${_config.tablePrefix}');
+      final prefixedSql = SqlParser.applyTablePrefix(sqlContent, ServerConfig.tablePrefix);
+      _logger.info('应用表前缀: ${ServerConfig.tablePrefix}');
 
       // 在事务中执行迁移
       await _databaseService.transaction(() async {
@@ -231,7 +230,7 @@ class MigrationService {
         }
 
         // 记录迁移执行（使用带前缀的表名）
-        final migrationsTableName = '${_config.tablePrefix}schema_migrations';
+        final migrationsTableName = '${ServerConfig.tablePrefix}schema_migrations';
 
         // 检查是否已存在记录，如果存在则更新，否则插入
         final existingRecord = await _databaseService
@@ -281,8 +280,8 @@ class MigrationService {
       final sqlContent = await file.readAsString();
 
       // 应用表前缀
-      final prefixedSql = SqlParser.applyTablePrefix(sqlContent, _config.tablePrefix);
-      _logger.info('应用表前缀到种子数据: ${_config.tablePrefix}');
+      final prefixedSql = SqlParser.applyTablePrefix(sqlContent, ServerConfig.tablePrefix);
+      _logger.info('应用表前缀到种子数据: ${ServerConfig.tablePrefix}');
 
       // 执行种子数据SQL
       await _databaseService.query(prefixedSql);
@@ -297,7 +296,7 @@ class MigrationService {
   /// 检查表中是否有数据
   Future<bool> _tableHasData(String tableName) async {
     try {
-      final query = SqlParser.buildTableHasDataQuery(tableName, _config.tablePrefix);
+      final query = SqlParser.buildTableHasDataQuery(tableName, ServerConfig.tablePrefix);
       final result = await _databaseService.query(query);
       return (result.first[0] as int) > 0;
     } catch (error, stackTrace) {
@@ -406,7 +405,7 @@ class MigrationService {
 
   /// 回滚迁移（仅用于开发环境）
   Future<void> rollbackMigration(String migrationName) async {
-    if (!_config.isDevelopment) {
+    if (!ServerConfig.isDevelopment) {
       throw Exception('迁移回滚仅在开发环境中可用');
     }
 
@@ -414,7 +413,7 @@ class MigrationService {
       _logger.info('回滚迁移: $migrationName');
 
       // 从记录中删除迁移（使用带前缀的表名）
-      final tableName = '${_config.tablePrefix}schema_migrations';
+      final tableName = '${ServerConfig.tablePrefix}schema_migrations';
       final result =
           await _databaseService.query('DELETE FROM $tableName WHERE migration_name = @name', {'name': migrationName});
 
@@ -616,7 +615,7 @@ class MigrationService {
   /// 检查表结构差异
   Future<Map<String, dynamic>> checkTableStructure(String tableName) async {
     try {
-      final prefixedTableName = '${_config.tablePrefix}$tableName';
+      final prefixedTableName = '${ServerConfig.tablePrefix}$tableName';
 
       // 检查表是否存在
       final tableExistsQuery = SqlParser.buildTableExistsQuery(tableName, '');
@@ -665,7 +664,7 @@ class MigrationService {
   /// 安全地添加列
   Future<void> addColumnSafely(String tableName, String columnName, String columnDefinition) async {
     try {
-      final prefixedTableName = '${_config.tablePrefix}$tableName';
+      final prefixedTableName = '${ServerConfig.tablePrefix}$tableName';
       final sql = 'ALTER TABLE $prefixedTableName ADD COLUMN IF NOT EXISTS $columnName $columnDefinition';
 
       await _databaseService.query(sql);
@@ -679,7 +678,7 @@ class MigrationService {
   /// 安全地删除列
   Future<void> dropColumnSafely(String tableName, String columnName) async {
     try {
-      final prefixedTableName = '${_config.tablePrefix}$tableName';
+      final prefixedTableName = '${ServerConfig.tablePrefix}$tableName';
       final sql = 'ALTER TABLE $prefixedTableName DROP COLUMN IF EXISTS $columnName';
 
       await _databaseService.query(sql);
@@ -693,7 +692,7 @@ class MigrationService {
   /// 安全地修改列类型
   Future<void> alterColumnTypeSafely(String tableName, String columnName, String newType) async {
     try {
-      final prefixedTableName = '${_config.tablePrefix}$tableName';
+      final prefixedTableName = '${ServerConfig.tablePrefix}$tableName';
       final sql = 'ALTER TABLE $prefixedTableName ALTER COLUMN $columnName TYPE $newType';
 
       await _databaseService.query(sql);
@@ -707,7 +706,7 @@ class MigrationService {
   /// 安全地添加约束
   Future<void> addConstraintSafely(String tableName, String constraintName, String constraintDefinition) async {
     try {
-      final prefixedTableName = '${_config.tablePrefix}$tableName';
+      final prefixedTableName = '${ServerConfig.tablePrefix}$tableName';
       final sql = 'ALTER TABLE $prefixedTableName ADD CONSTRAINT IF NOT EXISTS $constraintName $constraintDefinition';
 
       await _databaseService.query(sql);
@@ -721,7 +720,7 @@ class MigrationService {
   /// 安全地删除约束
   Future<void> dropConstraintSafely(String tableName, String constraintName) async {
     try {
-      final prefixedTableName = '${_config.tablePrefix}$tableName';
+      final prefixedTableName = '${ServerConfig.tablePrefix}$tableName';
       final sql = 'ALTER TABLE $prefixedTableName DROP CONSTRAINT IF EXISTS $constraintName';
 
       await _databaseService.query(sql);
@@ -735,7 +734,7 @@ class MigrationService {
   /// 安全地添加索引
   Future<void> addIndexSafely(String tableName, String indexName, String indexDefinition, {bool unique = false}) async {
     try {
-      final prefixedTableName = '${_config.tablePrefix}$tableName';
+      final prefixedTableName = '${ServerConfig.tablePrefix}$tableName';
       final uniqueKeyword = unique ? 'UNIQUE ' : '';
       final sql = 'CREATE ${uniqueKeyword}INDEX IF NOT EXISTS $indexName ON $prefixedTableName $indexDefinition';
 
@@ -763,7 +762,7 @@ class MigrationService {
   /// 安全地重命名列
   Future<void> renameColumnSafely(String tableName, String oldColumnName, String newColumnName) async {
     try {
-      final prefixedTableName = '${_config.tablePrefix}$tableName';
+      final prefixedTableName = '${ServerConfig.tablePrefix}$tableName';
       final sql = 'ALTER TABLE $prefixedTableName RENAME COLUMN $oldColumnName TO $newColumnName';
 
       await _databaseService.query(sql);
@@ -777,7 +776,7 @@ class MigrationService {
   /// 安全地设置列默认值
   Future<void> setColumnDefaultSafely(String tableName, String columnName, String defaultValue) async {
     try {
-      final prefixedTableName = '${_config.tablePrefix}$tableName';
+      final prefixedTableName = '${ServerConfig.tablePrefix}$tableName';
       final sql = 'ALTER TABLE $prefixedTableName ALTER COLUMN $columnName SET DEFAULT $defaultValue';
 
       await _databaseService.query(sql);
@@ -791,7 +790,7 @@ class MigrationService {
   /// 安全地删除列默认值
   Future<void> dropColumnDefaultSafely(String tableName, String columnName) async {
     try {
-      final prefixedTableName = '${_config.tablePrefix}$tableName';
+      final prefixedTableName = '${ServerConfig.tablePrefix}$tableName';
       final sql = 'ALTER TABLE $prefixedTableName ALTER COLUMN $columnName DROP DEFAULT';
 
       await _databaseService.query(sql);
@@ -805,7 +804,7 @@ class MigrationService {
   /// 安全地设置列为非空
   Future<void> setColumnNotNullSafely(String tableName, String columnName) async {
     try {
-      final prefixedTableName = '${_config.tablePrefix}$tableName';
+      final prefixedTableName = '${ServerConfig.tablePrefix}$tableName';
       final sql = 'ALTER TABLE $prefixedTableName ALTER COLUMN $columnName SET NOT NULL';
 
       await _databaseService.query(sql);
@@ -819,7 +818,7 @@ class MigrationService {
   /// 安全地设置列为可空
   Future<void> setColumnNullableSafely(String tableName, String columnName) async {
     try {
-      final prefixedTableName = '${_config.tablePrefix}$tableName';
+      final prefixedTableName = '${ServerConfig.tablePrefix}$tableName';
       final sql = 'ALTER TABLE $prefixedTableName ALTER COLUMN $columnName DROP NOT NULL';
 
       await _databaseService.query(sql);
@@ -835,7 +834,7 @@ class MigrationService {
     try {
       _logger.info('执行迁移前检查: $tableName');
 
-      final prefixedTableName = '${_config.tablePrefix}$tableName';
+      final prefixedTableName = '${ServerConfig.tablePrefix}$tableName';
       final results = <String, dynamic>{};
 
       // 检查表是否存在
@@ -928,7 +927,7 @@ class MigrationService {
     try {
       _logger.info('执行迁移后验证: $tableName');
 
-      final prefixedTableName = '${_config.tablePrefix}$tableName';
+      final prefixedTableName = '${ServerConfig.tablePrefix}$tableName';
       final validationResults = <String, dynamic>{};
       validationResults['passed'] = true;
       validationResults['errors'] = <String>[];
@@ -1003,7 +1002,7 @@ class MigrationService {
     try {
       _logger.info('执行数据库备份');
 
-      if (_config.isDevelopment) {
+      if (ServerConfig.isDevelopment) {
         _logger.warn('备份功能仅在生产环境中使用');
         return '';
       }
@@ -1021,10 +1020,10 @@ class MigrationService {
       // 构建 pg_dump 命令
       final pgDumpCommand = [
         'pg_dump',
-        '--host=${_config.dbHost}',
-        '--port=${_config.dbPort}',
-        '--username=${_config.dbUser}',
-        '--dbname=${_config.dbName}',
+        '--host=${ServerConfig.dbHost}',
+        '--port=${ServerConfig.dbPort}',
+        '--username=${ServerConfig.dbUser}',
+        '--dbname=${ServerConfig.dbName}',
         '--no-password',
         '--verbose',
         '--clean',
@@ -1037,7 +1036,7 @@ class MigrationService {
 
       // 设置环境变量
       final environment = <String, String>{
-        'PGPASSWORD': _config.dbPassword,
+        'PGPASSWORD': ServerConfig.dbPassword,
       };
 
       // 执行备份命令
@@ -1074,10 +1073,10 @@ class MigrationService {
       // 构建 psql 命令
       final psqlCommand = [
         'psql',
-        '--host=${_config.dbHost}',
-        '--port=${_config.dbPort}',
-        '--username=${_config.dbUser}',
-        '--dbname=${_config.dbName}',
+        '--host=${ServerConfig.dbHost}',
+        '--port=${ServerConfig.dbPort}',
+        '--username=${ServerConfig.dbUser}',
+        '--dbname=${ServerConfig.dbName}',
         '--no-password',
         '--file=$backupPath'
       ];
@@ -1086,7 +1085,7 @@ class MigrationService {
 
       // 设置环境变量
       final environment = <String, String>{
-        'PGPASSWORD': _config.dbPassword,
+        'PGPASSWORD': ServerConfig.dbPassword,
       };
 
       // 执行恢复命令
@@ -1181,7 +1180,7 @@ class MigrationService {
   /// 检查字段是否被引用
   Future<bool> isColumnReferenced(String tableName, String columnName) async {
     try {
-      final prefixedTableName = '${_config.tablePrefix}$tableName';
+      final prefixedTableName = '${ServerConfig.tablePrefix}$tableName';
       final query = '''
         SELECT COUNT(*) FROM information_schema.key_column_usage 
         WHERE table_schema = 'public' 
@@ -1202,7 +1201,7 @@ class MigrationService {
   /// 获取表的所有外键约束
   Future<List<Map<String, dynamic>>> getTableForeignKeys(String tableName) async {
     try {
-      final prefixedTableName = '${_config.tablePrefix}$tableName';
+      final prefixedTableName = '${ServerConfig.tablePrefix}$tableName';
       final query = '''
         SELECT 
           tc.constraint_name,

@@ -11,15 +11,11 @@ class ConfigService {
   static final _logger = LoggerFactory.getLogger('ConfigService');
   final DatabaseService _databaseService;
   final RedisService _redisService;
-  final ServerConfig _config;
-
   ConfigService({
     required DatabaseService databaseService,
     required RedisService redisService,
-    required ServerConfig config,
   })  : _databaseService = databaseService,
-        _redisService = redisService,
-        _config = config;
+        _redisService = redisService;
 
   /// 获取配置值
   Future<String?> getConfigValue(String key) async {
@@ -46,7 +42,7 @@ class ConfigService {
 
       // 缓存配置值
       if (value != null) {
-        await _redisService.set(cacheKey, value, _config.cacheConfigTtl);
+        await _redisService.set(cacheKey, value, ServerConfig.cacheConfigTtl);
       }
 
       return value;
@@ -159,7 +155,7 @@ class ConfigService {
       }
 
       // 缓存公开配置
-      await _redisService.setJson(cacheKey, publicConfigs, _config.cacheConfigTtl);
+      await _redisService.setJson(cacheKey, publicConfigs, ServerConfig.cacheConfigTtl);
 
       return publicConfigs;
     } catch (error, stackTrace) {
@@ -327,7 +323,7 @@ class ConfigService {
       final categories = result.map((row) => row[0] as String).toList();
 
       // 缓存分类列表
-      await _redisService.setJson(cacheKey, {'categories': categories}, _config.cacheConfigTtl);
+      await _redisService.setJson(cacheKey, {'categories': categories}, ServerConfig.cacheConfigTtl);
 
       return categories;
     } catch (error, stackTrace) {

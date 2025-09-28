@@ -10,14 +10,13 @@ import 'structured_logger.dart';
 /// 加密工具类
 class CryptoUtils {
   static final _logger = LoggerFactory.getLogger('CryptoUtils');
-  final ServerConfig _config;
 
-  CryptoUtils(this._config);
+  CryptoUtils();
 
   /// 生成密码哈希值
   String hashPassword(String password) {
     try {
-      return BCrypt.hashpw(password, BCrypt.gensalt(logRounds: _config.bcryptRounds));
+      return BCrypt.hashpw(password, BCrypt.gensalt(logRounds: ServerConfig.bcryptRounds));
     } catch (error, stackTrace) {
       _logger.error('密码哈希生成失败', error: error, stackTrace: stackTrace);
       rethrow;

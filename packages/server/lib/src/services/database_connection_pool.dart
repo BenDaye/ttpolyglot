@@ -8,7 +8,6 @@ import '../utils/structured_logger.dart';
 
 /// 数据库连接池
 class DatabaseConnectionPool {
-  final ServerConfig _config;
   final List<Connection> _availableConnections = [];
   final List<Connection> _usedConnections = [];
   final Queue<Completer<Connection>> _waitingQueue = Queue<Completer<Connection>>();
@@ -28,10 +27,10 @@ class DatabaseConnectionPool {
   int _poolHits = 0;
   int _poolMisses = 0;
 
-  DatabaseConnectionPool(this._config) {
-    _minConnections = _config.dbPoolSize;
-    _maxConnections = _config.dbPoolSize * 2;
-    _connectionTimeout = Duration(seconds: _config.dbConnectionTimeout);
+  DatabaseConnectionPool() {
+    _minConnections = ServerConfig.dbPoolSize;
+    _maxConnections = ServerConfig.dbPoolSize * 2;
+    _connectionTimeout = Duration(seconds: ServerConfig.dbConnectionTimeout);
   }
 
   /// 初始化连接池
@@ -210,19 +209,20 @@ class DatabaseConnectionPool {
   /// 创建新连接
   Future<Connection> _createConnection() async {
     try {
-      final uri = Uri.parse(_config.databaseUrl);
+      final uri = Uri.parse(ServerConfig.databaseUrl);
 
       final endpoint = Endpoint(
         host: uri.host,
         port: uri.port,
-        database: uri.pathSegments.isNotEmpty ? uri.pathSegments.first : _config.dbName,
-        username: uri.userInfo.isNotEmpty ? uri.userInfo.split(':').first : _config.dbUser,
-        password:
-            uri.userInfo.isNotEmpty && uri.userInfo.contains(':') ? uri.userInfo.split(':').last : _config.dbPassword,
+        database: uri.pathSegments.isNotEmpty ? uri.pathSegments.first : ServerConfig.dbName,
+        username: uri.userInfo.isNotEmpty ? uri.userInfo.split(':').first : ServerConfig.dbUser,
+        password: uri.userInfo.isNotEmpty && uri.userInfo.contains(':')
+            ? uri.userInfo.split(':').last
+            : ServerConfig.dbPassword,
       );
 
       final connectionSettings = ConnectionSettings(
-        sslMode: _config.isDevelopment ? SslMode.disable : SslMode.require,
+        sslMode: ServerConfig.isDevelopment ? SslMode.disable : SslMode.require,
         connectTimeout: _connectionTimeout,
         queryTimeout: Duration(seconds: 30),
       );

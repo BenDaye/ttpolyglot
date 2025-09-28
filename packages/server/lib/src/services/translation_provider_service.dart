@@ -7,16 +7,13 @@ import 'database_service.dart';
 /// 翻译接口配置服务
 class TranslationProviderService {
   final DatabaseService _databaseService;
-  final ServerConfig _config;
   late final CryptoUtils _cryptoUtils;
   static final _logger = LoggerFactory.getLogger('TranslationProviderService');
 
   TranslationProviderService({
     required DatabaseService databaseService,
-    required ServerConfig config,
-  })  : _databaseService = databaseService,
-        _config = config {
-    _cryptoUtils = CryptoUtils(_config);
+  }) : _databaseService = databaseService {
+    _cryptoUtils = CryptoUtils();
   }
 
   /// 获取用户翻译接口配置列表
@@ -98,7 +95,7 @@ class TranslationProviderService {
       // 加密API密钥
       String? encryptedAppKey;
       if (appKey != null && appKey.isNotEmpty) {
-        encryptedAppKey = _cryptoUtils.encryptString(appKey, _config.encryptionKey);
+        encryptedAppKey = _cryptoUtils.encryptString(appKey, ServerConfig.encryptionKey);
       }
 
       // 如果设置为默认，先取消其他默认设置
@@ -178,7 +175,7 @@ class TranslationProviderService {
       // 加密API密钥
       String? encryptedAppKey;
       if (appKey != null && appKey.isNotEmpty) {
-        encryptedAppKey = _cryptoUtils.encryptString(appKey, _config.encryptionKey);
+        encryptedAppKey = _cryptoUtils.encryptString(appKey, ServerConfig.encryptionKey);
       }
 
       // 构建更新字段
@@ -294,7 +291,7 @@ class TranslationProviderService {
       String? appKey;
       final encryptedKey = provider['app_key_encrypted'] as String?;
       if (encryptedKey != null && encryptedKey.isNotEmpty) {
-        appKey = _cryptoUtils.decryptString(encryptedKey, _config.encryptionKey);
+        appKey = _cryptoUtils.decryptString(encryptedKey, ServerConfig.encryptionKey);
       }
 
       // 根据提供商类型测试接口
@@ -380,7 +377,7 @@ class TranslationProviderService {
       String? appKey;
       final encryptedKey = provider['app_key_encrypted'] as String?;
       if (encryptedKey != null && encryptedKey.isNotEmpty) {
-        appKey = _cryptoUtils.decryptString(encryptedKey, _config.encryptionKey);
+        appKey = _cryptoUtils.decryptString(encryptedKey, ServerConfig.encryptionKey);
       }
 
       // 调用翻译接口

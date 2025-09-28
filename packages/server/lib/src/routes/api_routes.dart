@@ -5,7 +5,6 @@ import 'package:shelf_router/shelf_router.dart';
 
 import '../config/server_config.dart';
 import '../controllers/controllers.dart';
-import '../services/file_upload_service.dart';
 import '../services/services.dart';
 
 /// API路由配置
@@ -13,7 +12,6 @@ class ApiRoutes {
   final DatabaseService databaseService;
   final RedisService redisService;
   final MultiLevelCacheService cacheService;
-  final ServerConfig config;
   final AuthService authService;
   final UserService userService;
   final ProjectService projectService;
@@ -27,7 +25,6 @@ class ApiRoutes {
     required this.databaseService,
     required this.redisService,
     required this.cacheService,
-    required this.config,
     required this.authService,
     required this.userService,
     required this.projectService,
@@ -148,7 +145,6 @@ class ApiRoutes {
     final translationController = TranslationController(
       databaseService: databaseService,
       redisService: redisService,
-      config: config,
     );
 
     // 翻译条目 CRUD
@@ -187,7 +183,6 @@ class ApiRoutes {
     final languageController = LanguageController(
       databaseService: databaseService,
       redisService: redisService,
-      config: config,
     );
 
     _router.get('/languages', languageController.getLanguages);
@@ -202,13 +197,11 @@ class ApiRoutes {
     final roleController = RoleController(
       databaseService: databaseService,
       redisService: redisService,
-      config: config,
     );
 
     final permissionController = PermissionController(
       databaseService: databaseService,
       redisService: redisService,
-      config: config,
     );
 
     // 角色管理
@@ -238,7 +231,6 @@ class ApiRoutes {
     final configController = ConfigController(
       databaseService: databaseService,
       redisService: redisService,
-      config: config,
     );
 
     _router.get('/configs', configController.getConfigs);
@@ -257,7 +249,6 @@ class ApiRoutes {
     final fileController = FileController(
       databaseService: databaseService,
       redisService: redisService,
-      config: config,
     );
 
     _router.post('/files/upload', fileController.uploadFile);
@@ -276,7 +267,6 @@ class ApiRoutes {
     final notificationController = NotificationController(
       databaseService: databaseService,
       redisService: redisService,
-      config: config,
     );
 
     _router.get('/notifications', notificationController.getNotifications);
@@ -292,7 +282,7 @@ class ApiRoutes {
       'version': '1.0.0',
       'api_version': 'v1',
       'server': 'TTPolyglot Server',
-      'environment': config.isDevelopment ? 'development' : 'production',
+      'environment': ServerConfig.isDevelopment ? 'development' : 'production',
       'timestamp': DateTime.now().toIso8601String(),
     };
 

@@ -41,12 +41,13 @@ class ServiceRegistry {
     final logger = LoggerFactory.getLogger('ServiceRegistry');
     logger.info('注册配置服务...');
 
-    // 注册服务器配置
-    _container.registerSingleton<ServerConfig>(ServerConfig());
-
     // 加载配置
-    final config = _container.get<ServerConfig>();
-    await config.load();
+    await ServerConfig.load();
+
+    // 验证配置
+    if (!ServerConfig.validate()) {
+      throw Exception('配置验证失败');
+    }
 
     logger.info('配置服务注册完成');
   }
@@ -56,21 +57,19 @@ class ServiceRegistry {
     final logger = LoggerFactory.getLogger('ServiceRegistry');
     logger.info('注册基础设施服务...');
 
-    final config = _container.get<ServerConfig>();
-
     // 注册数据库连接池
     _container.registerSingleton<DatabaseConnectionPool>(
-      DatabaseConnectionPool(config),
+      DatabaseConnectionPool(),
     );
 
     // 注册数据库服务
     _container.registerSingleton<DatabaseService>(
-      DatabaseService(config),
+      DatabaseService(),
     );
 
     // 注册Redis服务
     _container.registerSingleton<RedisService>(
-      RedisService(config),
+      RedisService(),
     );
 
     // 注册多级缓存服务
@@ -88,7 +87,6 @@ class ServiceRegistry {
     _container.register<MigrationService>(
       () => MigrationService(
         _container.get<DatabaseService>(),
-        _container.get<ServerConfig>(),
       ),
       lifetime: ServiceLifetime.singleton,
     );
@@ -103,13 +101,13 @@ class ServiceRegistry {
 
     // 注册邮件服务
     _container.register<EmailService>(
-      () => EmailService(_container.get<ServerConfig>()),
+      () => EmailService(),
       lifetime: ServiceLifetime.singleton,
     );
 
     // 注册文件上传服务
     _container.register<FileUploadService>(
-      () => FileUploadService(config: _container.get<ServerConfig>()),
+      () => FileUploadService(),
       lifetime: ServiceLifetime.singleton,
     );
 
@@ -128,7 +126,6 @@ class ServiceRegistry {
         emailService: _container.get<EmailService>(),
         databaseService: _container.get<DatabaseService>(),
         redisService: _container.get<RedisService>(),
-        config: _container.get<ServerConfig>(),
       ),
       lifetime: ServiceLifetime.singleton,
     );
@@ -138,7 +135,6 @@ class ServiceRegistry {
       () => UserService(
         databaseService: _container.get<DatabaseService>(),
         redisService: _container.get<RedisService>(),
-        config: _container.get<ServerConfig>(),
       ),
       lifetime: ServiceLifetime.singleton,
     );
@@ -148,7 +144,6 @@ class ServiceRegistry {
       () => ProjectService(
         databaseService: _container.get<DatabaseService>(),
         redisService: _container.get<RedisService>(),
-        config: _container.get<ServerConfig>(),
       ),
       lifetime: ServiceLifetime.singleton,
     );
@@ -165,7 +160,6 @@ class ServiceRegistry {
     _container.register<TranslationProviderService>(
       () => TranslationProviderService(
         databaseService: _container.get<DatabaseService>(),
-        config: _container.get<ServerConfig>(),
       ),
       lifetime: ServiceLifetime.singleton,
     );

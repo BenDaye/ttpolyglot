@@ -11,9 +11,8 @@ import '../utils/structured_logger.dart';
 class RateLimitMiddleware {
   static final _logger = LoggerFactory.getLogger('RateLimitMiddleware');
   final RedisService _redisService;
-  final ServerConfig _config;
 
-  RateLimitMiddleware(this._redisService, this._config);
+  RateLimitMiddleware(this._redisService);
 
   /// 创建中间件处理器
   Middleware get handler => (Handler innerHandler) {
@@ -70,9 +69,9 @@ class RateLimitMiddleware {
   /// 检查速率限制
   Future<bool> _checkRateLimit(String clientId) async {
     final now = DateTime.now();
-    final windowStart = now.subtract(Duration(minutes: _config.rateLimitWindowMinutes));
+    final windowStart = now.subtract(Duration(minutes: ServerConfig.rateLimitWindowMinutes));
     final windowKey =
-        'rate_limit:$clientId:${windowStart.millisecondsSinceEpoch ~/ (1000 * 60 * _config.rateLimitWindowMinutes)}';
+        'rate_limit:$clientId:${windowStart.millisecondsSinceEpoch ~/ (1000 * 60 * ServerConfig.rateLimitWindowMinutes)}';
 
     try {
       // 获取当前窗口的请求计数
@@ -80,7 +79,7 @@ class RateLimitMiddleware {
       final count = int.tryParse(currentCount ?? '0') ?? 0;
 
       // 检查是否超出限制
-      if (count >= _config.rateLimitRequests) {
+      if (count >= ServerConfig.rateLimitRequests) {
         return false;
       }
 
@@ -88,7 +87,7 @@ class RateLimitMiddleware {
       await _redisService.increment(windowKey);
 
       // 设置过期时间
-      await _redisService.expire(windowKey, _config.rateLimitWindowMinutes * 60);
+      await _redisService.expire(windowKey, ServerConfig.rateLimitWindowMinutes * 60);
 
       return true;
     } catch (error) {
@@ -102,26 +101,26 @@ class RateLimitMiddleware {
   /// 获取速率限制信息
   Future<Map<String, int>> _getRateLimitInfo(String clientId) async {
     final now = DateTime.now();
-    final windowStart = now.subtract(Duration(minutes: _config.rateLimitWindowMinutes));
+    final windowStart = now.subtract(Duration(minutes: ServerConfig.rateLimitWindowMinutes));
     final windowKey =
-        'rate_limit:$clientId:${windowStart.millisecondsSinceEpoch ~/ (1000 * 60 * _config.rateLimitWindowMinutes)}';
+        'rate_limit:$clientId:${windowStart.millisecondsSinceEpoch ~/ (1000 * 60 * ServerConfig.rateLimitWindowMinutes)}';
 
     try {
       final currentCount = await _redisService.get(windowKey);
       final count = int.tryParse(currentCount ?? '0') ?? 0;
-      final remaining = (_config.rateLimitRequests - count).clamp(0, _config.rateLimitRequests);
-      final resetTime = windowStart.add(Duration(minutes: _config.rateLimitWindowMinutes));
+      final remaining = (ServerConfig.rateLimitRequests - count).clamp(0, ServerConfig.rateLimitRequests);
+      final resetTime = windowStart.add(Duration(minutes: ServerConfig.rateLimitWindowMinutes));
 
       return {
-        'limit': _config.rateLimitRequests,
+        'limit': ServerConfig.rateLimitRequests,
         'remaining': remaining,
         'resetTime': resetTime.millisecondsSinceEpoch ~/ 1000,
       };
     } catch (error) {
       return {
-        'limit': _config.rateLimitRequests,
-        'remaining': _config.rateLimitRequests,
-        'resetTime': now.add(Duration(minutes: _config.rateLimitWindowMinutes)).millisecondsSinceEpoch ~/ 1000,
+        'limit': ServerConfig.rateLimitRequests,
+        'remaining': ServerConfig.rateLimitRequests,
+        'resetTime': now.add(Duration(minutes: ServerConfig.rateLimitWindowMinutes)).millisecondsSinceEpoch ~/ 1000,
       };
     }
   }
@@ -150,12 +149,12 @@ class RateLimitMiddleware {
       'error': {
         'code': 'SYSTEM_RATE_LIMIT_EXCEEDED',
         'message': '请求频率过高',
-        'details': '您在${_config.rateLimitWindowMinutes}分钟内的请求次数已达上限，请稍后重试',
+        'details': '您在${ServerConfig.rateLimitWindowMinutes}分钟内的请求次数已达上限，请稍后重试',
         'metadata': {
           'request_id': requestId,
           'timestamp': DateTime.now().toUtc().toIso8601String(),
-          'limit': _config.rateLimitRequests,
-          'window_minutes': _config.rateLimitWindowMinutes,
+          'limit': ServerConfig.rateLimitRequests,
+          'window_minutes': ServerConfig.rateLimitWindowMinutes,
         }
       }
     };
@@ -165,7 +164,7 @@ class RateLimitMiddleware {
       headers: {
         'Content-Type': 'application/json',
         'X-Request-ID': requestId,
-        'Retry-After': (_config.rateLimitWindowMinutes * 60).toString(),
+        'Retry-After': (ServerConfig.rateLimitWindowMinutes * 60).toString(),
       },
       body: jsonEncode(errorResponse),
     );

@@ -11,7 +11,6 @@ import 'redis_service.dart';
 class AuthService {
   final DatabaseService _databaseService;
   final RedisService _redisService;
-  final ServerConfig _config;
   late final JwtUtils _jwtUtils;
   late final CryptoUtils _cryptoUtils;
   late final EmailService _emailService;
@@ -19,14 +18,12 @@ class AuthService {
   AuthService({
     required DatabaseService databaseService,
     required RedisService redisService,
-    required ServerConfig config,
     required EmailService emailService,
-  })  : _config = config,
-        _databaseService = databaseService,
+  })  : _databaseService = databaseService,
         _redisService = redisService,
         _emailService = emailService {
-    _jwtUtils = JwtUtils(_config);
-    _cryptoUtils = CryptoUtils(_config);
+    _jwtUtils = JwtUtils();
+    _cryptoUtils = CryptoUtils();
   }
 
   /// 用户注册
@@ -221,7 +218,7 @@ class AuthService {
             'access_token': accessToken,
             'refresh_token': refreshToken,
             'token_type': 'Bearer',
-            'expires_in': _config.jwtExpireHours * 3600,
+            'expires_in': ServerConfig.jwtExpireHours * 3600,
           },
         },
       );
@@ -294,7 +291,7 @@ class AuthService {
         data: {
           'access_token': newAccessToken,
           'token_type': 'Bearer',
-          'expires_in': _config.jwtExpireHours * 3600,
+          'expires_in': ServerConfig.jwtExpireHours * 3600,
         },
       );
     } catch (error, stackTrace) {
@@ -692,8 +689,8 @@ class AuthService {
       WHERE id = @user_id
     ''', {
       'user_id': userId,
-      'max_attempts': _config.maxLoginAttempts,
-      'lockout_minutes': _config.accountLockoutMinutes,
+      'max_attempts': ServerConfig.maxLoginAttempts,
+      'lockout_minutes': ServerConfig.accountLockoutMinutes,
     });
   }
 
@@ -743,7 +740,7 @@ class AuthService {
       'device_type': deviceType,
       'ip_address': ipAddress,
       'user_agent': userAgent,
-      'expires_at': DateTime.now().add(Duration(days: _config.jwtRefreshExpireDays)).toIso8601String(),
+      'expires_at': DateTime.now().add(Duration(days: ServerConfig.jwtRefreshExpireDays)).toIso8601String(),
     });
   }
 

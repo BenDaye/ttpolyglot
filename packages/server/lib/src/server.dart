@@ -14,7 +14,6 @@ import 'utils/structured_logger.dart';
 
 /// TTPolyglot 服务器主类
 class TTPolyglotServer {
-  late final ServerConfig _config;
   late final DatabaseService _databaseService;
   late final RedisService _redisService;
   late final MultiLevelCacheService _cacheService;
@@ -35,7 +34,6 @@ class TTPolyglotServer {
 
   /// 从依赖注入容器初始化服务
   void _initializeFromDI() {
-    _config = serviceRegistry.get<ServerConfig>();
     _databaseService = serviceRegistry.get<DatabaseService>();
     _redisService = serviceRegistry.get<RedisService>();
     _cacheService = serviceRegistry.get<MultiLevelCacheService>();
@@ -69,8 +67,8 @@ class TTPolyglotServer {
         '服务器启动完成',
         context: LogContext()
             .performance('startup_time', duration.inMilliseconds.toDouble(), unit: 'ms')
-            .field('host', _config.host)
-            .field('port', _config.port),
+            .field('host', ServerConfig.host)
+            .field('port', ServerConfig.port),
       );
     } catch (error, stackTrace) {
       _logger.error(
@@ -91,16 +89,16 @@ class TTPolyglotServer {
     // 启动HTTP服务器
     _server = await shelf_io.serve(
       handler,
-      _config.host,
-      _config.port,
+      ServerConfig.host,
+      ServerConfig.port,
     );
 
     _logger.info(
       'HTTP服务器启动成功',
       context: LogContext()
-          .field('url', 'http://${_config.host}:${_config.port}')
-          .field('host', _config.host)
-          .field('port', _config.port),
+          .field('url', 'http://${ServerConfig.host}:${ServerConfig.port}')
+          .field('host', ServerConfig.host)
+          .field('port', ServerConfig.port),
     );
   }
 
@@ -144,7 +142,6 @@ class TTPolyglotServer {
       databaseService: _databaseService,
       redisService: _redisService,
       cacheService: _cacheService,
-      config: _config,
       authService: _authService,
       userService: _userService,
       projectService: _projectService,
@@ -172,9 +169,9 @@ class TTPolyglotServer {
         // 3. 结构化日志（记录详细请求信息）
         .addMiddleware(structuredLoggingMiddleware(logger: _logger))
         // 4. CORS处理（处理跨域，避免后续中间件处理被拒绝的请求）
-        .addMiddleware(corsMiddleware(allowedOrigins: _config.corsOrigins))
+        .addMiddleware(corsMiddleware(allowedOrigins: ServerConfig.corsOrigins))
         // 5. 速率限制（早期拒绝，保护系统资源）
-        .addMiddleware(RateLimitMiddleware(_redisService, _config).handler)
+        .addMiddleware(RateLimitMiddleware(_redisService).handler)
         // 6. 请求大小限制（防止大请求消耗资源）
         .addMiddleware(_createRequestSizeLimitMiddleware())
         // 7. 安全头设置（增强安全性）
@@ -419,8 +416,8 @@ class TTPolyglotServer {
   Future<Map<String, dynamic>> _checkHttpServerHealth() async {
     return {
       'status': _server != null ? 'healthy' : 'unhealthy',
-      'port': _config.port,
-      'host': _config.host,
+      'port': ServerConfig.port,
+      'host': ServerConfig.host,
       'uptime_seconds': DateTime.now().difference(_startTime).inSeconds,
     };
   }
