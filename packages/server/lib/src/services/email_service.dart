@@ -142,11 +142,11 @@ class EmailService {
       );
 
       final result = await send(message, smtpServer);
-      if (result.success) {
+      if (result.toString().isEmpty) {
         logger.info('邮件发送成功');
         return true;
       }
-      logger.error('邮件发送失败', error: result.error, stackTrace: result.stackTrace);
+      logger.error('邮件发送失败: ${result.toString()}');
       return false;
     } catch (error, stackTrace) {
       logger.error('_sendEmail', error: error, stackTrace: stackTrace);
