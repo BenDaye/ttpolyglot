@@ -78,12 +78,12 @@ class ServerConfig {
   Future<void> load() async {
     try {
       _env = DotEnv(includePlatformEnvironment: true);
+      final logger = LoggerFactory.getLogger('ServerConfig');
 
       // 尝试加载.env文件
       final envFile = File('.env');
       if (await envFile.exists()) {
         _env.load(['.env']);
-        final logger = LoggerFactory.getLogger('ServerConfig');
         logger.info('已加载.env文件');
       } else {
         logger.info('未找到.env文件，使用环境变量');
