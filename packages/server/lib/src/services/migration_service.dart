@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import '../config/server_config.dart';
+import '../utils/sql_parser.dart';
 import '../utils/structured_logger.dart';
 import 'database_service.dart';
 
@@ -57,13 +58,7 @@ class MigrationService {
   Future<void> runSeeds() async {
     try {
       _logger.info('开始运行种子数据...');
-
-      // 检查是否已经有数据（避免重复插入）
-      final userCount = await _getUserCount();
-      if (userCount > 0) {
-        _logger.info('检测到已有用户数据，跳过种子数据执行');
-        return;
-      }
+      _logger.info('开始运行种子数据');
 
       // 获取所有种子文件
       final seedFiles = await _getSeedFiles();
@@ -79,7 +74,14 @@ class MigrationService {
       seedFiles.sort((a, b) => path.basename(a).compareTo(path.basename(b)));
 
       for (final seedFile in seedFiles) {
-        await _executeSeedFile(seedFile);
+        // 检查种子数据是否需要执行
+        if (await _shouldExecuteSeedFile(seedFile)) {
+          await _executeSeedFile(seedFile);
+        } else {
+          final fileName = path.basename(seedFile);
+          _logger.info('跳过种子数据执行: $fileName (数据已存在)');
+          _logger.info('跳过种子数据执行: $fileName');
+        }
       }
 
       _logger.info('所有种子数据执行完成');
@@ -91,8 +93,9 @@ class MigrationService {
 
   /// 确保迁移记录表存在
   Future<void> _ensureMigrationTableExists() async {
+    final tableName = '${_config.tablePrefix}schema_migrations';
     final sql = '''
-      CREATE TABLE IF NOT EXISTS schema_migrations (
+      CREATE TABLE IF NOT EXISTS $tableName (
         id SERIAL PRIMARY KEY,
         migration_name VARCHAR(255) UNIQUE NOT NULL,
         executed_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
@@ -100,6 +103,7 @@ class MigrationService {
     ''';
 
     await _databaseService.query(sql);
+    _logger.info('确保迁移记录表存在: $tableName');
   }
 
   /// 获取所有迁移文件
@@ -143,11 +147,13 @@ class MigrationService {
   /// 获取已执行的迁移
   Future<Set<String>> _getExecutedMigrations() async {
     try {
-      final result = await _databaseService.query('SELECT migration_name FROM schema_migrations ORDER BY executed_at');
+      final tableName = '${_config.tablePrefix}schema_migrations';
+      final result = await _databaseService.query('SELECT migration_name FROM $tableName ORDER BY executed_at');
 
       return result.map((row) => row[0] as String).toSet();
     } catch (error) {
       // 如果表不存在，返回空集合
+      _logger.info('获取已执行迁移失败，可能表不存在');
       return <String>{};
     }
   }
@@ -162,19 +168,24 @@ class MigrationService {
       final file = File(filePath);
       final sqlContent = await file.readAsString();
 
+      // 应用表前缀
+      final prefixedSql = SqlParser.applyTablePrefix(sqlContent, _config.tablePrefix);
+      _logger.info('应用表前缀: ${_config.tablePrefix}');
+
       // 在事务中执行迁移
       await _databaseService.transaction(() async {
         // 分割SQL语句并逐个执行
-        final statements = _splitSqlStatements(sqlContent);
+        final statements = SqlParser.splitSqlStatements(prefixedSql);
         for (final statement in statements) {
           if (statement.trim().isNotEmpty) {
             await _databaseService.query(statement);
           }
         }
 
-        // 记录迁移执行
+        // 记录迁移执行（使用带前缀的表名）
+        final migrationsTableName = '${_config.tablePrefix}schema_migrations';
         await _databaseService
-            .query('INSERT INTO schema_migrations (migration_name) VALUES (@name)', {'name': fileName});
+            .query('INSERT INTO $migrationsTableName (migration_name) VALUES (@name)', {'name': fileName});
       });
 
       _logger.info('迁移执行成功: $fileName');
@@ -194,8 +205,12 @@ class MigrationService {
       final file = File(filePath);
       final sqlContent = await file.readAsString();
 
+      // 应用表前缀
+      final prefixedSql = SqlParser.applyTablePrefix(sqlContent, _config.tablePrefix);
+      _logger.info('应用表前缀到种子数据: ${_config.tablePrefix}');
+
       // 执行种子数据SQL
-      await _databaseService.query(sqlContent);
+      await _databaseService.query(prefixedSql);
 
       _logger.info('种子数据执行成功: $fileName');
     } catch (error, stackTrace) {
@@ -204,85 +219,48 @@ class MigrationService {
     }
   }
 
-  /// 获取用户数量（用于判断是否需要执行种子数据）
-  Future<int> _getUserCount() async {
+  /// 检查表中是否有数据
+  Future<bool> _tableHasData(String tableName) async {
     try {
-      final result = await _databaseService.query('SELECT COUNT(*) FROM users');
-      return result.first[0] as int;
-    } catch (error) {
-      // 如果表不存在，返回0
-      return 0;
+      final query = SqlParser.buildTableHasDataQuery(tableName, _config.tablePrefix);
+      final result = await _databaseService.query(query);
+      return (result.first[0] as int) > 0;
+    } catch (error, stackTrace) {
+      _logger.error('检查表数据失败: $tableName', error: error, stackTrace: stackTrace);
+      return false;
+    }
+  }
+
+  /// 判断种子数据文件是否需要执行
+  Future<bool> _shouldExecuteSeedFile(String filePath) async {
+    try {
+      final fileName = path.basename(filePath);
+
+      // 根据文件名判断需要检查的表
+      if (fileName.contains('roles')) {
+        return !await _tableHasData('roles');
+      } else if (fileName.contains('permissions')) {
+        return !await _tableHasData('permissions');
+      } else if (fileName.contains('languages')) {
+        return !await _tableHasData('languages');
+      } else if (fileName.contains('system_configs')) {
+        return !await _tableHasData('system_configs');
+      } else if (fileName.contains('users')) {
+        return !await _tableHasData('users');
+      }
+
+      // 默认检查用户表（作为通用判断）
+      return !await _tableHasData('users');
+    } catch (error, stackTrace) {
+      _logger.error('判断种子数据执行失败: $filePath', error: error, stackTrace: stackTrace);
+      // 如果判断失败，默认执行
+      return true;
     }
   }
 
   /// 获取不带扩展名的文件名
   String _getFileNameWithoutExtension(String filePath) {
     return path.basenameWithoutExtension(filePath);
-  }
-
-  /// 分割SQL语句
-  List<String> _splitSqlStatements(String sql) {
-    // 简化版本：按分号分割，但保留dollar-quoted字符串
-    final statements = <String>[];
-    final lines = sql.split('\n');
-    final buffer = StringBuffer();
-    bool inDollarQuote = false;
-    String? dollarTag;
-
-    for (final line in lines) {
-      final trimmedLine = line.trim();
-
-      // 跳过注释行
-      if (trimmedLine.startsWith('--') || trimmedLine.isEmpty) {
-        continue;
-      }
-
-      // 检查dollar-quoted字符串
-      if (!inDollarQuote && trimmedLine.contains('\$\$')) {
-        final parts = trimmedLine.split('\$\$');
-        if (parts.length >= 2) {
-          dollarTag = '\$\$';
-          inDollarQuote = true;
-          buffer.write(trimmedLine);
-          continue;
-        }
-      }
-
-      if (inDollarQuote && trimmedLine.contains(dollarTag ?? '\$\$')) {
-        buffer.write(' ');
-        buffer.write(trimmedLine);
-        inDollarQuote = false;
-        dollarTag = null;
-        continue;
-      }
-
-      if (inDollarQuote) {
-        buffer.write(' ');
-        buffer.write(trimmedLine);
-        continue;
-      }
-
-      // 普通SQL语句
-      if (trimmedLine.endsWith(';')) {
-        buffer.write(trimmedLine);
-        final statement = buffer.toString().trim();
-        if (statement.isNotEmpty) {
-          statements.add(statement);
-        }
-        buffer.clear();
-      } else {
-        buffer.write(trimmedLine);
-        buffer.write(' ');
-      }
-    }
-
-    // 添加最后一个语句（如果没有分号结尾）
-    final lastStatement = buffer.toString().trim();
-    if (lastStatement.isNotEmpty) {
-      statements.add(lastStatement);
-    }
-
-    return statements;
   }
 
   /// 获取迁移状态
@@ -323,9 +301,9 @@ class MigrationService {
     try {
       _logger.info('回滚迁移: $migrationName');
 
-      // 从记录中删除迁移
-      await _databaseService
-          .query('DELETE FROM schema_migrations WHERE migration_name = @name', {'name': migrationName});
+      // 从记录中删除迁移（使用带前缀的表名）
+      final tableName = '${_config.tablePrefix}schema_migrations';
+      await _databaseService.query('DELETE FROM $tableName WHERE migration_name = @name', {'name': migrationName});
 
       _logger.info('迁移回滚成功: $migrationName');
     } catch (error, stackTrace) {
