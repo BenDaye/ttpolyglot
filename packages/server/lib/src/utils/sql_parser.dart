@@ -116,7 +116,7 @@ class SqlParser {
     return 'SELECT COUNT(*) FROM $prefixedTableName;';
   }
 
-  /// 分割SQL语句，支持dollar-quoted字符串
+  /// 分割SQL语句，支持dollar-quoted字符串和多行语句
   static List<String> splitSqlStatements(String sql) {
     try {
       final statements = <String>[];
@@ -124,12 +124,21 @@ class SqlParser {
       final buffer = StringBuffer();
       bool inDollarQuote = false;
       String? dollarTag;
+      bool inStatement = false;
 
       for (final line in lines) {
         final trimmedLine = line.trim();
 
         // 跳过注释行
-        if (trimmedLine.startsWith('--') || trimmedLine.isEmpty) {
+        if (trimmedLine.startsWith('--')) {
+          continue;
+        }
+
+        // 跳过空行
+        if (trimmedLine.isEmpty) {
+          if (inStatement) {
+            buffer.write(' ');
+          }
           continue;
         }
 
@@ -139,6 +148,7 @@ class SqlParser {
           if (parts.length >= 2) {
             dollarTag = '\$\$';
             inDollarQuote = true;
+            inStatement = true;
             buffer.write(trimmedLine);
             continue;
           }
@@ -158,26 +168,49 @@ class SqlParser {
           continue;
         }
 
-        // 普通SQL语句
-        if (trimmedLine.endsWith(';')) {
+        // 检查是否是SQL语句的开始
+        final upperLine = trimmedLine.toUpperCase();
+        if (!inStatement &&
+            (upperLine.startsWith('CREATE') ||
+                upperLine.startsWith('ALTER') ||
+                upperLine.startsWith('DROP') ||
+                upperLine.startsWith('INSERT') ||
+                upperLine.startsWith('UPDATE') ||
+                upperLine.startsWith('DELETE') ||
+                upperLine.startsWith('SELECT') ||
+                upperLine.startsWith('GRANT') ||
+                upperLine.startsWith('REVOKE') ||
+                upperLine.startsWith('COMMENT') ||
+                upperLine.startsWith('BEGIN') ||
+                upperLine.startsWith('COMMIT') ||
+                upperLine.startsWith('ROLLBACK'))) {
+          inStatement = true;
+        }
+
+        if (inStatement) {
           buffer.write(trimmedLine);
-          final statement = buffer.toString().trim();
-          if (statement.isNotEmpty) {
-            statements.add(statement);
+
+          // 检查语句是否结束
+          if (trimmedLine.endsWith(';')) {
+            final statement = buffer.toString().trim();
+            if (statement.isNotEmpty) {
+              statements.add(statement);
+            }
+            buffer.clear();
+            inStatement = false;
+          } else {
+            buffer.write(' ');
           }
-          buffer.clear();
-        } else {
-          buffer.write(trimmedLine);
-          buffer.write(' ');
         }
       }
 
       // 添加最后一个语句（如果没有分号结尾）
       final lastStatement = buffer.toString().trim();
-      if (lastStatement.isNotEmpty) {
+      if (lastStatement.isNotEmpty && !lastStatement.endsWith(';')) {
         statements.add(lastStatement);
       }
 
+      _logger.info('分割SQL语句完成，共 ${statements.length} 个语句');
       return statements;
     } catch (error, stackTrace) {
       _logger.error('分割SQL语句失败', error: error, stackTrace: stackTrace);

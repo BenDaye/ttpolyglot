@@ -121,15 +121,13 @@ class MigrationService {
   /// 确保迁移记录表存在
   Future<void> _ensureMigrationTableExists() async {
     final tableName = '${_config.tablePrefix}schema_migrations';
-    final sql = '''
-      CREATE TABLE IF NOT EXISTS $tableName (
+    final sql = '''CREATE TABLE IF NOT EXISTS $tableName (
         id SERIAL PRIMARY KEY,
         migration_name VARCHAR(255) UNIQUE NOT NULL,
         file_path VARCHAR(500) NOT NULL,
         file_hash VARCHAR(64) NOT NULL,
         executed_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-      );
-    ''';
+      )''';
 
     await _databaseService.query(sql);
     _logger.info('确保迁移记录表存在: $tableName');
@@ -221,8 +219,13 @@ class MigrationService {
       await _databaseService.transaction(() async {
         // 分割SQL语句并逐个执行
         final statements = SqlParser.splitSqlStatements(prefixedSql);
-        for (final statement in statements) {
+        _logger.info('分割得到 ${statements.length} 个SQL语句');
+
+        for (int i = 0; i < statements.length; i++) {
+          final statement = statements[i];
           if (statement.trim().isNotEmpty) {
+            _logger.info(
+                '执行第 ${i + 1} 个语句: ${statement.substring(0, statement.length > 100 ? 100 : statement.length)}...');
             await _databaseService.query(statement);
           }
         }
