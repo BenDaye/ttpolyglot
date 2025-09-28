@@ -176,6 +176,13 @@ dart test --coverage=coverage
 genhtml coverage/lcov.info -o coverage/html
 ```
 
+### 日志规范
+```bash
+final logger = LoggerFactory.getLogger('TTPolyglotServer');
+
+logger.info('一般信息');
+```
+
 ## 配置说明
 
 ### 环境变量
