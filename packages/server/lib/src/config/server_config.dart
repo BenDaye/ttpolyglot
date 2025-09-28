@@ -107,8 +107,8 @@ class ServerConfig {
   }
 
   void _loadServerConfig() {
-    host = _env['SERVER_HOST'] ?? '0.0.0.0';
-    port = int.parse(_env['SERVER_PORT'] ?? '8080');
+    host = _env['HOST'] ?? '0.0.0.0';
+    port = int.parse(_env['PORT'] ?? '8080');
     logLevel = _env['LOG_LEVEL'] ?? 'info';
     isDevelopment = _env['ENVIRONMENT'] == 'dev';
   }
@@ -163,23 +163,23 @@ class ServerConfig {
   }
 
   void _loadRequestLimitConfig() {
-    maxRequestSize = _env['MAX_REQUEST_SIZE'] ?? '10MB';
-    rateLimitRequests = int.parse(_env['RATE_LIMIT_REQUESTS'] ?? '1000');
-    rateLimitWindowMinutes = int.parse(_env['RATE_LIMIT_WINDOW_MINUTES'] ?? '15');
+    maxRequestSize = _env['MAX_FILE_SIZE'] ?? '10485760';
+    rateLimitRequests = int.parse(_env['RATE_LIMIT_REQUESTS_PER_MINUTE'] ?? '100');
+    rateLimitWindowMinutes = 1; // 固定为1分钟
   }
 
   void _loadMonitoringConfig() {
     healthCheckEnabled = _env['HEALTH_CHECK_ENABLED']?.toLowerCase() != 'false';
-    metricsEnabled = _env['METRICS_ENABLED']?.toLowerCase() == 'true';
+    metricsEnabled = _env['ENABLE_METRICS']?.toLowerCase() == 'true';
     metricsPort = int.parse(_env['METRICS_PORT'] ?? '9090');
   }
 
   void _loadEmailConfig() {
     smtpHost = _env['SMTP_HOST'];
     smtpPort = int.tryParse(_env['SMTP_PORT'] ?? '');
-    smtpUser = _env['SMTP_USER'];
+    smtpUser = _env['SMTP_USERNAME'];
     smtpPassword = _env['SMTP_PASSWORD'];
-    smtpFromAddress = _env['SMTP_FROM_ADDRESS'];
+    smtpFromAddress = _env['SMTP_FROM_EMAIL'];
     siteUrl = _env['SITE_URL'];
   }
 
