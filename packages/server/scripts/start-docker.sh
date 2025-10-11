@@ -103,7 +103,7 @@ check_config_files() {
         
         if [[ " ${missing_files[@]} " =~ " .env " ]]; then
             print_info "创建 .env 文件示例："
-            echo "  echo 'ENVIRONMENT=production' > .env"
+            echo "  echo 'ENVIRONMENT=develop' > .env"
         fi
         
         exit 1
@@ -119,14 +119,11 @@ load_environment() {
         export $(cat .env | grep -v '^#' | grep -v '^$' | xargs)
     fi
     
-    # 获取 ENVIRONMENT 变量，默认为 production
-    ENVIRONMENT=${ENVIRONMENT:-production}
-    
-    # 转换为小写（兼容 bash 3.x）
-    ENVIRONMENT_LOWER=$(echo "$ENVIRONMENT" | tr '[:upper:]' '[:lower:]')
+    # 获取 ENVIRONMENT 变量，默认为 develop
+    ENVIRONMENT=${ENVIRONMENT:-develop}
     
     # 判断环境类型
-    case "$ENVIRONMENT_LOWER" in
+    case "${ENVIRONMENT,,}" in
         production|prod)
             ENV_MODE="production"
             COMPOSE_PROFILE="--profile production"
