@@ -122,8 +122,11 @@ load_environment() {
     # 获取 ENVIRONMENT 变量，默认为 develop
     ENVIRONMENT=${ENVIRONMENT:-develop}
     
+    # 转换为小写（兼容 bash 3.x）
+    ENVIRONMENT_LOWER=$(echo "$ENVIRONMENT" | tr '[:upper:]' '[:lower:]')
+    
     # 判断环境类型
-    case "${ENVIRONMENT,,}" in
+    case "$ENVIRONMENT_LOWER" in
         production|prod)
             ENV_MODE="production"
             COMPOSE_PROFILE="--profile production"
