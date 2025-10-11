@@ -103,7 +103,7 @@ check_config_files() {
         
         if [[ " ${missing_files[@]} " =~ " .env " ]]; then
             print_info "创建 .env 文件示例："
-            echo "  echo 'ENVIRONMENT=develop' > .env"
+            echo "  echo 'ENVIRONMENT=production' > .env"
         fi
         
         exit 1
@@ -119,8 +119,8 @@ load_environment() {
         export $(cat .env | grep -v '^#' | grep -v '^$' | xargs)
     fi
     
-    # 获取 ENVIRONMENT 变量，默认为 develop
-    ENVIRONMENT=${ENVIRONMENT:-develop}
+    # 获取 ENVIRONMENT 变量，默认为 production
+    ENVIRONMENT=${ENVIRONMENT:-production}
     
     # 判断环境类型
     case "${ENVIRONMENT,,}" in
