@@ -222,7 +222,6 @@ class DatabaseConnectionPool {
       );
 
       final connectionSettings = ConnectionSettings(
-        sslMode: ServerConfig.isDevelopment ? SslMode.disable : SslMode.require,
         connectTimeout: _connectionTimeout,
         queryTimeout: Duration(seconds: 30),
       );
