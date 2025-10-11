@@ -58,8 +58,8 @@ services:
 
   ttpolyglot-server:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ../..
+      dockerfile: packages/server/Dockerfile
     environment:
       - DATABASE_URL=postgresql://${DB_USER:-ttpolyglot}:${DB_PASSWORD:-password}@ttpolyglot-db:5432/${DB_NAME:-ttpolyglot}
       - REDIS_URL=redis://ttpolyglot-redis:6379

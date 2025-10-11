@@ -9,7 +9,15 @@ class ServerConfig {
   /// 加载配置
   static Future<void> load() async {
     try {
-      _env.load();
+      // 尝试加载 .env 文件，如果文件不存在则只使用环境变量
+      try {
+        _env.load();
+        _logger.info('从 .env 文件加载配置完成', context: LogContext().field('config_name', 'ServerConfig'));
+      } catch (error) {
+        // .env 文件不存在，使用系统环境变量（Docker 容器场景）
+        _logger.info('未找到 .env 文件，使用系统环境变量', context: LogContext().field('config_name', 'ServerConfig'));
+      }
+
       _logger.info('配置加载完成', context: LogContext().field('config_name', 'ServerConfig'));
     } catch (error, stackTrace) {
       _logger.error('配置加载失败',
