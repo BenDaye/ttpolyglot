@@ -6,16 +6,8 @@ import 'package:ttpolyglot_server/src/config/server_config.dart';
 import 'package:ttpolyglot_server/src/services/database_service.dart';
 import 'package:ttpolyglot_server/src/utils/structured_logger.dart';
 
+import 'migrations/base_migration.dart';
 import 'seeds/base_seed.dart';
-
-/// 迁移类基础接口
-abstract class BaseMigration {
-  String get name;
-  String get description;
-  String get createdAt;
-  Future<void> up();
-  Future<void> down();
-}
 
 /// 数据库迁移服务
 /// 根据字段更新最佳实践指南实现的安全迁移服务
@@ -101,6 +93,9 @@ class MigrationService {
     try {
       _logger.info('开始运行种子数据...');
 
+      // 确保种子数据记录表存在
+      await _ensureSeedTableExists();
+
       // 获取已注册的种子数据
       final registeredSeeds = _seedFactories;
 
@@ -109,12 +104,34 @@ class MigrationService {
         return;
       }
 
-      _logger.info('发现 ${registeredSeeds.length} 个种子数据');
+      // 获取已执行的种子数据
+      final executedSeeds = await _getExecutedSeeds();
+
+      // 筛选未执行的种子数据
+      final pendingSeeds = <String>[];
+      for (final seedName in registeredSeeds.keys) {
+        // 检查种子数据是否已执行
+        if (!executedSeeds.containsKey(seedName)) {
+          // 新种子数据
+          pendingSeeds.add(seedName);
+          _logger.info('发现新种子数据: $seedName');
+        } else {
+          // 种子数据已执行，跳过
+          _logger.info('种子数据已执行，跳过: $seedName');
+        }
+      }
+
+      if (pendingSeeds.isEmpty) {
+        _logger.info('没有待执行的种子数据');
+        return;
+      }
+
+      _logger.info('发现 ${pendingSeeds.length} 个待执行的种子数据');
 
       // 按种子名称排序执行种子数据
-      final seedNames = registeredSeeds.keys.toList()..sort();
+      pendingSeeds.sort();
 
-      for (final seedName in seedNames) {
+      for (final seedName in pendingSeeds) {
         await _executeSeedClass(seedName);
       }
 
@@ -138,6 +155,21 @@ class MigrationService {
 
     await _databaseService.query(sql);
     _logger.info('确保迁移记录表存在: $tableName');
+  }
+
+  /// 确保种子数据记录表存在
+  Future<void> _ensureSeedTableExists() async {
+    final tableName = '${ServerConfig.tablePrefix}schema_seeds';
+    final sql = '''CREATE TABLE IF NOT EXISTS $tableName (
+        id SERIAL PRIMARY KEY,
+        seed_name VARCHAR(255) UNIQUE NOT NULL,
+        file_path VARCHAR(500) NOT NULL,
+        file_hash VARCHAR(64) NOT NULL,
+        executed_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+      )''';
+
+    await _databaseService.query(sql);
+    _logger.info('确保种子数据记录表存在: $tableName');
   }
 
   /// 获取已执行的迁移
@@ -165,6 +197,35 @@ class MigrationService {
     } catch (error) {
       // 如果表不存在，返回空集合
       _logger.info('获取已执行迁移失败，可能表不存在');
+      return <String, Map<String, dynamic>>{};
+    }
+  }
+
+  /// 获取已执行的种子数据
+  Future<Map<String, Map<String, dynamic>>> _getExecutedSeeds() async {
+    try {
+      final tableName = '${ServerConfig.tablePrefix}schema_seeds';
+      final result = await _databaseService.query('''
+        SELECT seed_name, file_path, file_hash, executed_at 
+        FROM $tableName 
+        ORDER BY executed_at
+      ''');
+
+      final executedSeeds = <String, Map<String, dynamic>>{};
+      for (final row in result) {
+        final seedName = row[0] as String;
+        executedSeeds[seedName] = {
+          'name': seedName,
+          'file_path': row[1] as String,
+          'file_hash': row[2] as String,
+          'executed_at': row[3],
+        };
+      }
+
+      return executedSeeds;
+    } catch (error) {
+      // 如果表不存在，返回空集合
+      _logger.info('获取已执行种子数据失败，可能表不存在');
       return <String, Map<String, dynamic>>{};
     }
   }
@@ -223,6 +284,19 @@ class MigrationService {
     return digest.toString();
   }
 
+  /// 计算种子数据类的哈希值
+  String _calculateSeedHash(String seedName) {
+    // 对于类种子数据，我们使用类名和描述的组合作为哈希
+    final factory = _seedFactories[seedName];
+    if (factory == null) return '';
+
+    final seed = factory();
+    final content = '${seed.name}:${seed.description}:${seed.createdAt}';
+    final bytes = content.codeUnits;
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
   /// 执行单个种子数据类
   Future<void> _executeSeedClass(String seedName) async {
     _logger.info('执行种子数据: $seedName');
@@ -240,17 +314,24 @@ class MigrationService {
       // 设置数据库连接
       seed.setConnection(_databaseService.connection);
 
-      // 检查数据是否已存在
-      final dataExists = await seed.checkDataExists();
-
-      if (dataExists) {
-        _logger.info('种子数据已存在，跳过: $seedName');
-        return;
-      }
-
       // 在事务中执行种子数据
       await _databaseService.transaction(() async {
+        // 执行种子数据的 run 方法
         await seed.run();
+
+        // 记录种子数据执行（使用带前缀的表名）
+        final seedsTableName = '${ServerConfig.tablePrefix}schema_seeds';
+
+        // 插入种子数据记录
+        await _databaseService.query('''
+          INSERT INTO $seedsTableName (seed_name, file_path, file_hash) 
+          VALUES (@name, @path, @hash)
+        ''', {
+          'name': seedName,
+          'path': 'class://$seedName',
+          'hash': _calculateSeedHash(seedName),
+        });
+        _logger.info('创建种子数据记录: $seedName');
       });
 
       _logger.info('种子数据执行成功: $seedName');
@@ -308,6 +389,61 @@ class MigrationService {
       return status;
     } catch (error, stackTrace) {
       _logger.error('获取迁移状态失败', error: error, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 获取种子数据状态
+  Future<List<Map<String, dynamic>>> getSeedStatus() async {
+    try {
+      // 确保种子数据记录表存在
+      await _ensureSeedTableExists();
+
+      // 获取所有已注册的种子数据
+      final registeredSeeds = _seedFactories;
+
+      // 获取已执行的种子数据
+      final executedSeeds = await _getExecutedSeeds();
+
+      final status = <Map<String, dynamic>>[];
+      for (final seedName in registeredSeeds.keys) {
+        final factory = registeredSeeds[seedName]!;
+        final seed = factory();
+        final seedHash = _calculateSeedHash(seedName);
+        final executedSeed = executedSeeds[seedName];
+
+        bool isExecuted = false;
+        bool isChanged = false;
+        String statusText = 'pending';
+
+        if (executedSeed != null) {
+          isExecuted = true;
+          final executedHash = executedSeed['file_hash'] as String;
+
+          if (executedHash != seedHash) {
+            isChanged = true;
+            statusText = 'changed';
+          } else {
+            statusText = 'completed';
+          }
+        }
+
+        status.add({
+          'name': seedName,
+          'description': seed.description,
+          'created_at': seed.createdAt,
+          'seed_hash': seedHash,
+          'executed': isExecuted,
+          'changed': isChanged,
+          'status': statusText,
+          'executed_at': executedSeed?['executed_at'],
+          'executed_hash': executedSeed?['file_hash'],
+        });
+      }
+
+      return status;
+    } catch (error, stackTrace) {
+      _logger.error('获取种子数据状态失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -1092,7 +1228,8 @@ class MigrationService {
 
 命令:
   migrate         运行所有未执行的迁移（基于注册的迁移类）
-  seed            运行种子数据
+  seed            运行种子数据（基于数据库记录判断是否已执行）
+  seed-status     显示种子数据执行状态
   status          显示详细的迁移状态（包括类哈希和更改检测）
   rollback        回滚指定的迁移 (仅开发环境)
   create-rollback 为生产环境创建回滚迁移文件
@@ -1112,6 +1249,8 @@ class MigrationService {
   - 类哈希检测：自动检测迁移类是否已更改
   - 智能重新执行：已更改的迁移类会自动重新执行
   - 详细状态显示：显示类哈希、执行时间、描述等信息
+  - 种子数据记录：种子数据执行记录到数据库，避免重复执行
+  - 种子数据状态：查看种子数据执行状态和哈希值
   - 迁移前检查：执行迁移前检查表结构和数据
   - 迁移后验证：执行迁移后验证数据完整性
   - 安全字段操作：提供安全的字段添加、删除、修改方法
@@ -1120,7 +1259,8 @@ class MigrationService {
 示例:
   dart migrate.dart                           # 运行迁移和种子数据
   dart migrate.dart migrate                   # 仅运行迁移（基于注册的迁移类）
-  dart migrate.dart seed                      # 仅运行种子数据
+  dart migrate.dart seed                      # 仅运行种子数据（自动跳过已执行的）
+  dart migrate.dart seed-status               # 查看种子数据执行状态
   dart migrate.dart status                    # 查看详细迁移状态
   dart migrate.dart rollback 001_users_table  # 回滚指定迁移
   dart migrate.dart create-rollback 001_users_table  # 创建回滚迁移
@@ -1134,20 +1274,26 @@ class MigrationService {
   dart migrate.dart delete-backup backup_file.sql  # 删除备份文件
 
 状态说明:
-  ✅ 已完成    - 迁移已执行且类未更改
-  🔄 已更改    - 迁移已执行但类内容已更改，需要重新执行
-  ⏳ 待执行    - 新迁移类，尚未执行
+  ✅ 已完成    - 迁移/种子已执行且类未更改
+  🔄 已更改    - 迁移/种子已执行但类内容已更改
+  ⏳ 待执行    - 新迁移/种子类，尚未执行
 
 迁移注册:
   在迁移服务初始化前，需要注册所有迁移类：
   MigrationService.registerMigration('001_users_table', () => Migration001UsersTable());
   MigrationService.registerMigration('002_roles_table', () => Migration002RolesTable());
 
+种子数据注册:
+  在迁移服务初始化前，需要注册所有种子数据类：
+  MigrationService.registerSeed('001_default_users', () => Seed001DefaultUsers());
+  MigrationService.registerSeed('002_language_data', () => Seed002LanguageData());
+
 安全操作:
   - 所有字段操作都使用 IF EXISTS/IF NOT EXISTS
   - 支持事务回滚
   - 迁移前后验证
   - 生产环境备份保护
+  - 种子数据自动去重，避免重复执行
 ''');
   }
 }

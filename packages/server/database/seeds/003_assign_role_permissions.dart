@@ -13,6 +13,9 @@ class Seed003AssignRolePermissions extends BaseSeed {
   String get description => '分配角色权限';
 
   @override
+  String get createdAt => '2024-12-26';
+
+  @override
   Future<void> run() async {
     try {
       log('开始分配角色权限', name: 'Seed003AssignRolePermissions');
@@ -195,17 +198,6 @@ class Seed003AssignRolePermissions extends BaseSeed {
     } catch (error, stackTrace) {
       log('分配角色权限失败', error: error, stackTrace: stackTrace, name: 'Seed003AssignRolePermissions');
       rethrow;
-    }
-  }
-
-  @override
-  Future<bool> checkDataExists() async {
-    try {
-      // 检查 role_permissions 表是否有数据
-      return await tableHasData('role_permissions');
-    } catch (error, stackTrace) {
-      log('检查角色权限数据失败', error: error, stackTrace: stackTrace, name: 'Seed003AssignRolePermissions');
-      return false;
     }
   }
 }

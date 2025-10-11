@@ -36,6 +36,9 @@ Future<void> main(List<String> args) async {
         case 'seed':
           await migrationService.runSeeds();
           break;
+        case 'seed-status':
+          await _showSeedStatus(migrationService, logger);
+          break;
         case 'status':
           await _showMigrationStatus(migrationService, logger);
           break;
@@ -201,6 +204,82 @@ Future<void> _showMigrationStatus(MigrationService migrationService, StructuredL
     logger.info('  待执行: $pending');
   } catch (error, stackTrace) {
     logger.error('获取迁移状态失败', error: error, stackTrace: stackTrace);
+    rethrow;
+  }
+}
+
+/// 显示种子数据状态
+Future<void> _showSeedStatus(MigrationService migrationService, StructuredLogger logger) async {
+  try {
+    final status = await migrationService.getSeedStatus();
+
+    if (status.isEmpty) {
+      logger.info('没有找到已注册的种子数据类');
+      return;
+    }
+
+    logger.info('种子数据状态:');
+    logger.info('=' * 80);
+
+    for (final seed in status) {
+      final name = seed['name'] as String;
+      final description = seed['description'] as String;
+      final statusText = seed['status'] as String;
+      final executed = seed['executed'] as bool;
+      final changed = seed['changed'] as bool;
+      final seedHash = seed['seed_hash'] as String;
+      final createdAt = seed['created_at'] as String;
+
+      String statusIcon = '❓';
+      String statusDesc = '';
+
+      switch (statusText) {
+        case 'completed':
+          statusIcon = '✅';
+          statusDesc = '已完成';
+          break;
+        case 'changed':
+          statusIcon = '🔄';
+          statusDesc = '已更改';
+          break;
+        case 'pending':
+          statusIcon = '⏳';
+          statusDesc = '待执行';
+          break;
+      }
+
+      logger.info('$statusIcon $name - $statusDesc');
+      logger.info('   描述: $description');
+      logger.info('   创建时间: $createdAt');
+      logger.info('   种子哈希: ${seedHash.substring(0, 8)}...');
+
+      if (executed) {
+        final executedAt = seed['executed_at'];
+        final executedHash = seed['executed_hash'] as String;
+
+        logger.info('   执行时间: $executedAt');
+        logger.info('   执行时哈希: ${executedHash.substring(0, 8)}...');
+
+        if (changed) {
+          logger.info('   ⚠️  种子数据类已更改');
+        }
+      }
+
+      logger.info('');
+    }
+
+    // 统计信息
+    final completed = status.where((s) => s['status'] == 'completed').length;
+    final changed = status.where((s) => s['status'] == 'changed').length;
+    final pending = status.where((s) => s['status'] == 'pending').length;
+
+    logger.info('统计信息:');
+    logger.info('  总种子数: ${status.length}');
+    logger.info('  已完成: $completed');
+    logger.info('  已更改: $changed');
+    logger.info('  待执行: $pending');
+  } catch (error, stackTrace) {
+    logger.error('获取种子数据状态失败', error: error, stackTrace: stackTrace);
     rethrow;
   }
 }

@@ -13,6 +13,9 @@ class Seed004InsertLanguages extends BaseSeed {
   String get description => '插入默认语言';
 
   @override
+  String get createdAt => '2024-12-26';
+
+  @override
   Future<void> run() async {
     try {
       log('开始插入默认语言数据', name: 'Seed004InsertLanguages');
@@ -305,17 +308,6 @@ class Seed004InsertLanguages extends BaseSeed {
     } catch (error, stackTrace) {
       log('插入默认语言数据失败', error: error, stackTrace: stackTrace, name: 'Seed004InsertLanguages');
       rethrow;
-    }
-  }
-
-  @override
-  Future<bool> checkDataExists() async {
-    try {
-      // 检查 languages 表是否有数据
-      return await tableHasData('languages');
-    } catch (error, stackTrace) {
-      log('检查语言数据失败', error: error, stackTrace: stackTrace, name: 'Seed004InsertLanguages');
-      return false;
     }
   }
 }

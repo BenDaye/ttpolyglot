@@ -13,6 +13,9 @@ class Seed002InsertPermissions extends BaseSeed {
   String get description => '插入默认权限';
 
   @override
+  String get createdAt => '2024-12-26';
+
+  @override
   Future<void> run() async {
     try {
       log('开始插入默认权限数据', name: 'Seed002InsertPermissions');
@@ -349,17 +352,6 @@ class Seed002InsertPermissions extends BaseSeed {
     } catch (error, stackTrace) {
       log('插入默认权限数据失败', error: error, stackTrace: stackTrace, name: 'Seed002InsertPermissions');
       rethrow;
-    }
-  }
-
-  @override
-  Future<bool> checkDataExists() async {
-    try {
-      // 检查 permissions 表是否有数据
-      return await tableHasData('permissions');
-    } catch (error, stackTrace) {
-      log('检查权限数据失败', error: error, stackTrace: stackTrace, name: 'Seed002InsertPermissions');
-      return false;
     }
   }
 }

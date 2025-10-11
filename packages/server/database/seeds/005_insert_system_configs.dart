@@ -13,6 +13,9 @@ class Seed005InsertSystemConfigs extends BaseSeed {
   String get description => '插入系统配置';
 
   @override
+  String get createdAt => '2024-12-26';
+
+  @override
   Future<void> run() async {
     try {
       log('开始插入系统配置数据', name: 'Seed005InsertSystemConfigs');
@@ -373,17 +376,6 @@ class Seed005InsertSystemConfigs extends BaseSeed {
     } catch (error, stackTrace) {
       log('插入系统配置数据失败', error: error, stackTrace: stackTrace, name: 'Seed005InsertSystemConfigs');
       rethrow;
-    }
-  }
-
-  @override
-  Future<bool> checkDataExists() async {
-    try {
-      // 检查 system_configs 表是否有数据
-      return await tableHasData('system_configs');
-    } catch (error, stackTrace) {
-      log('检查系统配置数据失败', error: error, stackTrace: stackTrace, name: 'Seed005InsertSystemConfigs');
-      return false;
     }
   }
 }

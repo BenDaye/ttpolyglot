@@ -13,6 +13,9 @@ abstract class BaseSeed {
   /// 种子描述
   String get description;
 
+  /// 创建时间
+  String get createdAt;
+
   /// 获取表前缀
   String get tablePrefix {
     return ServerConfig.tablePrefix;
@@ -36,9 +39,6 @@ abstract class BaseSeed {
 
   /// 执行种子数据
   Future<void> run();
-
-  /// 检查数据是否已存在
-  Future<bool> checkDataExists();
 
   /// 执行插入操作的辅助方法
   Future<void> insertData(
