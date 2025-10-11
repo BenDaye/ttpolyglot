@@ -11,7 +11,6 @@ export 'database_service.dart';
 export 'email_service.dart';
 export 'file_upload_service.dart';
 export 'metrics_service.dart';
-export 'migration_service.dart';
 export 'multi_level_cache_service.dart';
 export 'permission_service.dart';
 export 'project_service.dart';

@@ -2,10 +2,11 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as path;
+import 'package:ttpolyglot_server/src/config/server_config.dart';
+import 'package:ttpolyglot_server/src/services/database_service.dart';
+import 'package:ttpolyglot_server/src/utils/structured_logger.dart';
 
-import '../config/server_config.dart';
-import '../utils/structured_logger.dart';
-import 'database_service.dart';
+import 'seeds/base_seed.dart';
 
 /// 迁移类基础接口
 abstract class BaseMigration {
@@ -27,13 +28,24 @@ class MigrationService {
   /// 迁移类工厂函数映射
   static final Map<String, BaseMigration Function()> _migrationFactories = {};
 
+  /// 种子数据类工厂函数映射
+  static final Map<String, BaseSeed Function()> _seedFactories = {};
+
   /// 注册迁移类
   static void registerMigration(String name, BaseMigration Function() factory) {
     _migrationFactories[name] = factory;
   }
 
+  /// 注册种子数据类
+  static void registerSeed(String name, BaseSeed Function() factory) {
+    _seedFactories[name] = factory;
+  }
+
   /// 获取所有已注册的迁移
   static Map<String, BaseMigration Function()> get registeredMigrations => Map.unmodifiable(_migrationFactories);
+
+  /// 获取所有已注册的种子数据
+  static Map<String, BaseSeed Function()> get registeredSeeds => Map.unmodifiable(_seedFactories);
 
   /// 运行所有未执行的迁移
   Future<void> runMigrations() async {
@@ -88,30 +100,22 @@ class MigrationService {
   Future<void> runSeeds() async {
     try {
       _logger.info('开始运行种子数据...');
-      _logger.info('开始运行种子数据');
 
-      // 获取所有种子文件
-      final seedFiles = await _getSeedFiles();
+      // 获取已注册的种子数据
+      final registeredSeeds = _seedFactories;
 
-      if (seedFiles.isEmpty) {
-        _logger.info('没有找到种子数据文件');
+      if (registeredSeeds.isEmpty) {
+        _logger.info('没有找到已注册的种子数据');
         return;
       }
 
-      _logger.info('发现 ${seedFiles.length} 个种子数据文件');
+      _logger.info('发现 ${registeredSeeds.length} 个种子数据');
 
-      // 按文件名排序执行种子数据
-      seedFiles.sort((a, b) => path.basename(a).compareTo(path.basename(b)));
+      // 按种子名称排序执行种子数据
+      final seedNames = registeredSeeds.keys.toList()..sort();
 
-      for (final seedFile in seedFiles) {
-        // 检查种子数据是否需要执行
-        if (await _shouldExecuteSeedFile(seedFile)) {
-          await _executeSeedFile(seedFile);
-        } else {
-          final fileName = path.basename(seedFile);
-          _logger.info('跳过种子数据执行: $fileName (数据已存在)');
-          _logger.info('跳过种子数据执行: $fileName');
-        }
+      for (final seedName in seedNames) {
+        await _executeSeedClass(seedName);
       }
 
       _logger.info('所有种子数据执行完成');
@@ -134,25 +138,6 @@ class MigrationService {
 
     await _databaseService.query(sql);
     _logger.info('确保迁移记录表存在: $tableName');
-  }
-
-  /// 获取所有种子文件
-  Future<List<String>> _getSeedFiles() async {
-    final seedsDir = Directory('database/seeds');
-
-    if (!await seedsDir.exists()) {
-      _logger.info('种子数据目录不存在: ${seedsDir.path}');
-      return [];
-    }
-
-    final files = await seedsDir
-        .list()
-        .where((entity) => entity is File && entity.path.endsWith('.sql'))
-        .cast<File>()
-        .map((file) => file.path)
-        .toList();
-
-    return files;
   }
 
   /// 获取已执行的迁移
@@ -238,66 +223,40 @@ class MigrationService {
     return digest.toString();
   }
 
-  /// 执行种子数据文件
-  Future<void> _executeSeedFile(String filePath) async {
-    final fileName = path.basename(filePath);
-    _logger.info('执行种子数据: $fileName');
+  /// 执行单个种子数据类
+  Future<void> _executeSeedClass(String seedName) async {
+    _logger.info('执行种子数据: $seedName');
 
     try {
-      // 读取SQL文件
-      final file = File(filePath);
-      final sqlContent = await file.readAsString();
-
-      // 应用表前缀（种子数据文件应该已经包含正确的表前缀）
-      _logger.info('应用表前缀到种子数据: ${ServerConfig.tablePrefix}');
-
-      // 执行种子数据SQL
-      await _databaseService.query(sqlContent);
-
-      _logger.info('种子数据执行成功: $fileName');
-    } catch (error, stackTrace) {
-      _logger.error('种子数据执行失败: $fileName', error: error, stackTrace: stackTrace);
-      rethrow;
-    }
-  }
-
-  /// 检查表中是否有数据
-  Future<bool> _tableHasData(String tableName) async {
-    try {
-      final prefixedTableName = '${ServerConfig.tablePrefix}$tableName';
-      final query = 'SELECT COUNT(*) FROM $prefixedTableName';
-      final result = await _databaseService.query(query);
-      return (result.first[0] as int) > 0;
-    } catch (error, stackTrace) {
-      _logger.error('检查表数据失败: $tableName', error: error, stackTrace: stackTrace);
-      return false;
-    }
-  }
-
-  /// 判断种子数据文件是否需要执行
-  Future<bool> _shouldExecuteSeedFile(String filePath) async {
-    try {
-      final fileName = path.basename(filePath);
-
-      // 根据文件名判断需要检查的表
-      if (fileName.contains('roles')) {
-        return !await _tableHasData('roles');
-      } else if (fileName.contains('permissions')) {
-        return !await _tableHasData('permissions');
-      } else if (fileName.contains('languages')) {
-        return !await _tableHasData('languages');
-      } else if (fileName.contains('system_configs')) {
-        return !await _tableHasData('system_configs');
-      } else if (fileName.contains('users')) {
-        return !await _tableHasData('users');
+      // 获取种子工厂函数
+      final factory = _seedFactories[seedName];
+      if (factory == null) {
+        throw Exception('未找到种子数据: $seedName');
       }
 
-      // 默认检查用户表（作为通用判断）
-      return !await _tableHasData('users');
+      // 创建种子实例
+      final seed = factory();
+
+      // 设置数据库连接
+      seed.setConnection(_databaseService.connection);
+
+      // 检查数据是否已存在
+      final dataExists = await seed.checkDataExists();
+
+      if (dataExists) {
+        _logger.info('种子数据已存在，跳过: $seedName');
+        return;
+      }
+
+      // 在事务中执行种子数据
+      await _databaseService.transaction(() async {
+        await seed.run();
+      });
+
+      _logger.info('种子数据执行成功: $seedName');
     } catch (error, stackTrace) {
-      _logger.error('判断种子数据执行失败: $filePath', error: error, stackTrace: stackTrace);
-      // 如果判断失败，默认执行
-      return true;
+      _logger.error('种子数据执行失败: $seedName', error: error, stackTrace: stackTrace);
+      rethrow;
     }
   }
 

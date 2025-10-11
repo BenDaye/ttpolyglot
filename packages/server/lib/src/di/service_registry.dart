@@ -83,14 +83,6 @@ class ServiceRegistry {
       MetricsService(),
     );
 
-    // 注册迁移服务
-    _container.register<MigrationService>(
-      () => MigrationService(
-        _container.get<DatabaseService>(),
-      ),
-      lifetime: ServiceLifetime.singleton,
-    );
-
     logger.info('基础设施服务注册完成');
   }
 

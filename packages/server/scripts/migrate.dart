@@ -4,8 +4,9 @@ import 'dart:io';
 
 import 'package:ttpolyglot_server/src/config/server_config.dart';
 import 'package:ttpolyglot_server/src/services/database_service.dart';
-import 'package:ttpolyglot_server/src/services/migration_service.dart';
 import 'package:ttpolyglot_server/src/utils/structured_logger.dart';
+
+import '../database/migration_service.dart';
 
 /// 主函数
 Future<void> main(List<String> args) async {
