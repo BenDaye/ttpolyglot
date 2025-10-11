@@ -63,7 +63,7 @@ services:
       "
 
   ttpolyglot-dev-server:
-    build: .
+    build: Dockerfile.dev
     environment:
       - DATABASE_URL=postgresql://${DB_USER:-ttpolyglot}:${DB_PASSWORD:-password}@ttpolyglot-dev-db:5432/${DB_NAME:-ttpolyglot}
       - REDIS_URL=redis://ttpolyglot-dev-redis:6379
