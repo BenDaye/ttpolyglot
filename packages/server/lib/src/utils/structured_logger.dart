@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer' as dev;
 import 'dart:io';
 
 import 'package:shelf/shelf.dart';
@@ -212,7 +211,7 @@ class StructuredLogger {
     final level = entry['level'] as String;
     final message = entry['message'] as String;
     final logger = entry['logger'] as String;
-    final stackTrace = entry['stack_trace'] != null ? StackTrace.fromString(entry['stack_trace'] as String) : null;
+    final stackTrace = entry['stack_trace'] as String?;
 
     // 获取颜色代码
     final colorCode = _getLogLevelColor(level);
@@ -229,19 +228,38 @@ class StructuredLogger {
       }
     }
 
+    // 使用 stdout/stderr 输出，这样在 AOT 编译后也能看到日志
+    final timestamp = entry['timestamp'] as String;
     if (keyFields.isNotEmpty) {
       final fieldsStr = keyFields.entries.map((e) => '${e.key}=${e.value}').join(', ');
-      dev.log('$consoleMessage ($fieldsStr)', name: logger, stackTrace: stackTrace);
+      final output = '$timestamp $consoleMessage ($fieldsStr)';
+      if (level == 'ERROR' || level == 'FATAL') {
+        stderr.writeln(output);
+        if (stackTrace != null) stderr.writeln(stackTrace);
+      } else {
+        stdout.writeln(output);
+      }
     } else {
-      dev.log(consoleMessage, name: logger, stackTrace: stackTrace);
+      final output = '$timestamp $consoleMessage';
+      if (level == 'ERROR' || level == 'FATAL') {
+        stderr.writeln(output);
+        if (stackTrace != null) stderr.writeln(stackTrace);
+      } else {
+        stdout.writeln(output);
+      }
     }
   }
 
   /// 输出JSON格式
   void _logToJson(Map<String, dynamic> entry) {
     final jsonStr = jsonEncode(entry);
-    final stackTrace = entry['stack_trace'] != null ? StackTrace.fromString(entry['stack_trace'] as String) : null;
-    dev.log(jsonStr, name: name, stackTrace: stackTrace);
+    final level = entry['level'] as String;
+    // 使用 stdout/stderr 输出，这样在 AOT 编译后也能看到日志
+    if (level == 'ERROR' || level == 'FATAL') {
+      stderr.writeln(jsonStr);
+    } else {
+      stdout.writeln(jsonStr);
+    }
   }
 
   /// 输出到文件

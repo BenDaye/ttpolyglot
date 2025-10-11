@@ -58,13 +58,15 @@ services:
 
   ttpolyglot-server:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ../..
+      dockerfile: packages/server/Dockerfile
     environment:
-      - DATABASE_URL=postgresql://${DB_USER:-ttpolyglot}:${DB_PASSWORD:-password}@ttpolyglot-db:5432/${DB_NAME:-ttpolyglot}
+      - DATABASE_URL=postgresql://${DB_USER:-ttpolyglot}:${DB_PASSWORD:-password}@ttpolyglot-db:5432/${DB_NAME:-ttpolyglot}?sslmode=disable
       - REDIS_URL=redis://ttpolyglot-redis:6379
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - JWT_SECRET=${JWT_SECRET:-dev-jwt-secret-change-in-production}
+      - SESSION_SECRET=${SESSION_SECRET:-dev-session-secret-change-in-production}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-dev-encryption-key-change-in-production}
       - LOG_LEVEL=${LOG_LEVEL:-info}
       - SERVER_HOST=0.0.0.0
       - SERVER_PORT=8080

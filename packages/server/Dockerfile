@@ -26,9 +26,6 @@ RUN dart pub get
 # 使用 AOT 编译以获得最佳性能
 RUN dart compile exe bin/server.dart -o server
 
-# 处理 .env 文件：如果不存在则创建空文件，避免复制时出错
-RUN touch .env
-
 # ============================================
 # 运行阶段
 # ============================================
@@ -40,7 +37,7 @@ FROM debian:bookworm-slim AS runtime
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
   ca-certificates \
-  curl \
+  curl && \
   rm -rf /var/lib/apt/lists/*
 
 # 创建非 root 用户运行应用
@@ -53,8 +50,9 @@ WORKDIR /app
 # 从构建阶段复制编译好的可执行文件
 COPY --from=build --chown=ttpolyglot:ttpolyglot /app/packages/server/server ./server
 
-# 复制环境变量配置文件
-COPY --from=build --chown=ttpolyglot:ttpolyglot /app/packages/server/.env* ./
+# 复制数据库迁移脚本目录（如果需要在容器内运行迁移）
+COPY --from=build --chown=ttpolyglot:ttpolyglot /app/packages/server/database ./database
+COPY --from=build --chown=ttpolyglot:ttpolyglot /app/packages/server/scripts ./scripts
 
 # 创建必要的目录并设置权限
 RUN mkdir -p /app/data /app/logs /app/uploads && \
