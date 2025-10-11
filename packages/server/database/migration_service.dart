@@ -40,9 +40,34 @@ class MigrationService {
   static Map<String, BaseSeed Function()> get registeredSeeds => Map.unmodifiable(_seedFactories);
 
   /// 运行所有未执行的迁移
-  Future<void> runMigrations() async {
+  Future<void> runMigrations({bool autoBackup = true}) async {
+    // 确保锁表存在
+    await _ensureLockTableExists();
+
+    // 尝试获取迁移锁
+    final lockAcquired = await _acquireMigrationLock();
+    if (!lockAcquired) {
+      throw Exception('无法获取迁移锁：另一个迁移进程正在运行，或锁被占用。请稍后再试。');
+    }
+
+    String? backupPath;
+
     try {
       _logger.info('开始运行数据库迁移...');
+
+      // 生产环境自动备份
+      if (!ServerConfig.isDevelopment && autoBackup) {
+        _logger.info('⚠️  生产环境：开始自动备份数据库...');
+        try {
+          backupPath = await backupDatabase();
+          _logger.info('✅ 数据库备份完成: $backupPath');
+          _logger.info('备份大小: ${await _getFileSize(backupPath)}');
+        } catch (backupError, backupStackTrace) {
+          _logger.error('数据库备份失败，但将继续执行迁移', error: backupError, stackTrace: backupStackTrace);
+          // 备份失败不应该阻止迁移，但要警告用户
+          _logger.warn('⚠️  警告：备份失败，如果迁移失败可能无法恢复数据！');
+        }
+      }
 
       // 确保迁移记录表存在
       await _ensureMigrationTableExists();
@@ -52,6 +77,34 @@ class MigrationService {
 
       // 获取已执行的迁移
       final executedMigrations = await _getExecutedMigrations();
+
+      // 检查已执行的迁移是否被修改（哈希变更检测）
+      for (final migrationName in registeredMigrations.keys) {
+        final executedMigration = executedMigrations[migrationName];
+        if (executedMigration != null) {
+          final currentHash = _calculateClassHash(migrationName);
+          final executedHash = executedMigration['file_hash'] as String;
+
+          if (currentHash != executedHash) {
+            final executedAt = executedMigration['executed_at'];
+            throw Exception('\n'
+                '🚨 严重错误：迁移 "$migrationName" 已执行但内容被修改！\n'
+                '\n'
+                '详细信息:\n'
+                '  - 迁移名称: $migrationName\n'
+                '  - 执行时间: $executedAt\n'
+                '  - 执行时哈希: ${executedHash.substring(0, 16)}...\n'
+                '  - 当前哈希: ${currentHash.substring(0, 16)}...\n'
+                '\n'
+                '⚠️  禁止修改已执行的迁移！这会导致数据库状态不一致。\n'
+                '\n'
+                '正确的做法:\n'
+                '  1. 不要修改已执行的迁移\n'
+                '  2. 创建新的迁移来实现更改\n'
+                '  3. 如果是开发环境，可以回滚后修改: dart migrate.dart rollback $migrationName\n');
+          }
+        }
+      }
 
       // 筛选未执行的迁移
       final pendingMigrations = <String>[];
@@ -82,14 +135,44 @@ class MigrationService {
       }
 
       _logger.info('所有迁移执行完成');
+
+      // 如果有备份且迁移成功，可以考虑清理旧备份（可选）
+      if (backupPath != null && !ServerConfig.isDevelopment) {
+        _logger.info('✅ 迁移成功完成，备份文件保留于: $backupPath');
+      }
     } catch (error, stackTrace) {
-      _logger.error('迁移执行失败', error: error, stackTrace: stackTrace);
+      _logger.error('❌ 迁移执行失败', error: error, stackTrace: stackTrace);
+
+      // 如果有备份文件，提示用户如何恢复
+      if (backupPath != null && backupPath.isNotEmpty) {
+        _logger.error('');
+        _logger.error('=' * 80);
+        _logger.error('🚨 迁移失败！数据库备份文件位于:');
+        _logger.error('   $backupPath');
+        _logger.error('');
+        _logger.error('如需恢复数据库，请执行以下命令:');
+        _logger.error('   dart packages/server/scripts/migrate.dart restore $backupPath');
+        _logger.error('=' * 80);
+      }
+
       rethrow;
+    } finally {
+      // 无论成功还是失败，都要释放锁
+      await _releaseMigrationLock();
     }
   }
 
   /// 运行种子数据
   Future<void> runSeeds() async {
+    // 确保锁表存在
+    await _ensureLockTableExists();
+
+    // 尝试获取迁移锁（种子数据也使用同一个锁）
+    final lockAcquired = await _acquireMigrationLock();
+    if (!lockAcquired) {
+      throw Exception('无法获取迁移锁：另一个迁移/种子进程正在运行，或锁被占用。请稍后再试。');
+    }
+
     try {
       _logger.info('开始运行种子数据...');
 
@@ -139,6 +222,9 @@ class MigrationService {
     } catch (error, stackTrace) {
       _logger.error('种子数据执行失败', error: error, stackTrace: stackTrace);
       rethrow;
+    } finally {
+      // 无论成功还是失败，都要释放锁
+      await _releaseMigrationLock();
     }
   }
 
@@ -172,6 +258,91 @@ class MigrationService {
     _logger.info('确保种子数据记录表存在: $tableName');
   }
 
+  /// 确保迁移锁表存在
+  Future<void> _ensureLockTableExists() async {
+    final tableName = '${ServerConfig.tablePrefix}migration_lock';
+    final sql = '''CREATE TABLE IF NOT EXISTS $tableName (
+        lock_key VARCHAR(50) PRIMARY KEY,
+        locked_at TIMESTAMPTZ NOT NULL,
+        locked_by VARCHAR(255) NOT NULL,
+        expires_at TIMESTAMPTZ NOT NULL,
+        process_id VARCHAR(100)
+      )''';
+
+    await _databaseService.query(sql);
+    _logger.info('确保迁移锁表存在: $tableName');
+  }
+
+  /// 获取迁移锁
+  Future<bool> _acquireMigrationLock({Duration timeout = const Duration(minutes: 30)}) async {
+    try {
+      final tableName = '${ServerConfig.tablePrefix}migration_lock';
+      final lockKey = 'migration';
+      final lockedBy = '${Platform.localHostname}_${pid}';
+      final expiresAt = DateTime.now().add(timeout);
+
+      // 首先清理过期的锁
+      await _databaseService.query('''
+        DELETE FROM $tableName 
+        WHERE lock_key = @key AND expires_at < NOW()
+      ''', {'key': lockKey});
+
+      // 尝试获取锁
+      final result = await _databaseService.query('''
+        INSERT INTO $tableName (lock_key, locked_at, locked_by, expires_at, process_id)
+        VALUES (@key, NOW(), @by, @expires, @pid)
+        ON CONFLICT (lock_key) DO NOTHING
+        RETURNING lock_key
+      ''', {
+        'key': lockKey,
+        'by': lockedBy,
+        'expires': expiresAt.toIso8601String(),
+        'pid': pid.toString(),
+      });
+
+      if (result.isNotEmpty) {
+        _logger.info('成功获取迁移锁: $lockedBy');
+        return true;
+      } else {
+        // 获取当前锁的持有者信息
+        final lockInfo = await _databaseService.query('''
+          SELECT locked_by, locked_at, expires_at 
+          FROM $tableName 
+          WHERE lock_key = @key
+        ''', {'key': lockKey});
+
+        if (lockInfo.isNotEmpty) {
+          final owner = lockInfo.first[0];
+          final lockedAt = lockInfo.first[1];
+          final expiresAtTime = lockInfo.first[2];
+          _logger.warn('迁移锁已被占用: $owner (锁定于: $lockedAt, 过期时间: $expiresAtTime)');
+        }
+        return false;
+      }
+    } catch (error, stackTrace) {
+      _logger.error('获取迁移锁失败', error: error, stackTrace: stackTrace);
+      return false;
+    }
+  }
+
+  /// 释放迁移锁
+  Future<void> _releaseMigrationLock() async {
+    try {
+      final tableName = '${ServerConfig.tablePrefix}migration_lock';
+      final lockKey = 'migration';
+
+      await _databaseService.query('''
+        DELETE FROM $tableName 
+        WHERE lock_key = @key
+      ''', {'key': lockKey});
+
+      _logger.info('迁移锁已释放');
+    } catch (error, stackTrace) {
+      _logger.error('释放迁移锁失败', error: error, stackTrace: stackTrace);
+      // 不抛出异常，避免影响主流程
+    }
+  }
+
   /// 获取已执行的迁移
   Future<Map<String, Map<String, dynamic>>> _getExecutedMigrations() async {
     try {
@@ -194,10 +365,18 @@ class MigrationService {
       }
 
       return executedMigrations;
-    } catch (error) {
-      // 如果表不存在，返回空集合
-      _logger.info('获取已执行迁移失败，可能表不存在');
-      return <String, Map<String, dynamic>>{};
+    } catch (error, stackTrace) {
+      // 只有表不存在的情况才返回空集合
+      final errorMessage = error.toString().toLowerCase();
+      if (errorMessage.contains('does not exist') ||
+          errorMessage.contains('relation') && errorMessage.contains('not found')) {
+        _logger.info('迁移记录表不存在，将在首次运行时创建');
+        return <String, Map<String, dynamic>>{};
+      }
+
+      // 其他错误（如数据库连接失败、权限问题等）需要抛出
+      _logger.error('获取已执行迁移失败', error: error, stackTrace: stackTrace);
+      rethrow;
     }
   }
 
@@ -223,10 +402,18 @@ class MigrationService {
       }
 
       return executedSeeds;
-    } catch (error) {
-      // 如果表不存在，返回空集合
-      _logger.info('获取已执行种子数据失败，可能表不存在');
-      return <String, Map<String, dynamic>>{};
+    } catch (error, stackTrace) {
+      // 只有表不存在的情况才返回空集合
+      final errorMessage = error.toString().toLowerCase();
+      if (errorMessage.contains('does not exist') ||
+          errorMessage.contains('relation') && errorMessage.contains('not found')) {
+        _logger.info('种子数据记录表不存在，将在首次运行时创建');
+        return <String, Map<String, dynamic>>{};
+      }
+
+      // 其他错误（如数据库连接失败、权限问题等）需要抛出
+      _logger.error('获取已执行种子数据失败', error: error, stackTrace: stackTrace);
+      rethrow;
     }
   }
 
@@ -243,6 +430,9 @@ class MigrationService {
 
       // 创建迁移实例
       final migration = factory();
+
+      // 设置数据库连接（必须！）
+      migration.setConnection(_databaseService.connection);
 
       // 在事务中执行迁移
       await _databaseService.transaction(() async {
@@ -465,6 +655,9 @@ class MigrationService {
 
       // 创建迁移实例并执行 down 方法
       final migration = factory();
+
+      // 设置数据库连接（必须！）
+      migration.setConnection(_databaseService.connection);
 
       // 在事务中执行回滚
       await _databaseService.transaction(() async {
