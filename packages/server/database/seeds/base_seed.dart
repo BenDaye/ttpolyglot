@@ -41,6 +41,15 @@ abstract class BaseSeed {
   Future<void> run();
 
   /// 执行插入操作的辅助方法
+  ///
+  /// ⚠️  重要提示：此方法使用 ON CONFLICT DO NOTHING 来避免重复插入
+  ///
+  /// 要求：目标表必须有主键或唯一约束，否则数据可能会重复插入！
+  ///
+  /// 最佳实践：
+  /// 1. 确保表有 PRIMARY KEY 或 UNIQUE 约束
+  /// 2. 如果表没有唯一约束，建议在迁移中添加
+  /// 3. 或者使用自定义的 checkDataExists 逻辑
   Future<void> insertData(
     String tableName,
     List<Map<String, dynamic>> dataList,
@@ -48,25 +57,56 @@ abstract class BaseSeed {
     try {
       final fullTableName = '$tablePrefix$tableName';
 
+      int insertedCount = 0;
+      int skippedCount = 0;
+
       for (final data in dataList) {
         final columns = data.keys.join(', ');
         final placeholders = data.keys.map((key) => '@$key').join(', ');
 
+        // 使用 ON CONFLICT DO NOTHING 需要表有唯一约束
         final sql = '''
           INSERT INTO $fullTableName ($columns)
           VALUES ($placeholders)
           ON CONFLICT DO NOTHING
+          RETURNING *
         ''';
 
-        await connection.execute(
+        final result = await connection.execute(
           Sql.named(sql),
           parameters: data,
         );
+
+        if (result.isNotEmpty) {
+          insertedCount++;
+        } else {
+          skippedCount++;
+        }
       }
 
-      log('插入数据完成: $fullTableName, ${dataList.length} 条记录', name: runtimeType.toString());
+      if (skippedCount > 0) {
+        log('插入数据完成: $fullTableName, 新插入: $insertedCount 条, 跳过(已存在): $skippedCount 条', name: runtimeType.toString());
+      } else {
+        log('插入数据完成: $fullTableName, ${dataList.length} 条记录', name: runtimeType.toString());
+      }
+
+      // 如果所有数据都被跳过，可能是表没有唯一约束
+      if (insertedCount == 0 && skippedCount == dataList.length) {
+        log('⚠️  警告：所有数据都被跳过，请确认表 $fullTableName 是否有正确的唯一约束', name: runtimeType.toString());
+      }
     } catch (error, stackTrace) {
-      log('插入数据失败: $tableName', error: error, stackTrace: stackTrace, name: runtimeType.toString());
+      // 检查是否是缺少唯一约束导致的错误
+      final errorMessage = error.toString().toLowerCase();
+      if (errorMessage.contains('conflict') || errorMessage.contains('constraint')) {
+        log(
+            '插入数据失败: $tableName\n'
+            '⚠️  提示：请确保表有主键或唯一约束，否则 ON CONFLICT DO NOTHING 无法正常工作',
+            error: error,
+            stackTrace: stackTrace,
+            name: runtimeType.toString());
+      } else {
+        log('插入数据失败: $tableName', error: error, stackTrace: stackTrace, name: runtimeType.toString());
+      }
       rethrow;
     }
   }

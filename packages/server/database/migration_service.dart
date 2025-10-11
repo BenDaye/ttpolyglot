@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
@@ -49,6 +50,12 @@ class MigrationService {
     if (!lockAcquired) {
       throw Exception('无法获取迁移锁：另一个迁移进程正在运行，或锁被占用。请稍后再试。');
     }
+
+    // 启动心跳定时器，每10分钟续期一次锁
+    Timer? heartbeatTimer;
+    heartbeatTimer = Timer.periodic(const Duration(minutes: 10), (_) async {
+      await _renewMigrationLock();
+    });
 
     String? backupPath;
 
@@ -157,6 +164,9 @@ class MigrationService {
 
       rethrow;
     } finally {
+      // 停止心跳定时器
+      heartbeatTimer.cancel();
+
       // 无论成功还是失败，都要释放锁
       await _releaseMigrationLock();
     }
@@ -172,6 +182,12 @@ class MigrationService {
     if (!lockAcquired) {
       throw Exception('无法获取迁移锁：另一个迁移/种子进程正在运行，或锁被占用。请稍后再试。');
     }
+
+    // 启动心跳定时器，每10分钟续期一次锁
+    Timer? heartbeatTimer;
+    heartbeatTimer = Timer.periodic(const Duration(minutes: 10), (_) async {
+      await _renewMigrationLock();
+    });
 
     try {
       _logger.info('开始运行种子数据...');
@@ -223,6 +239,9 @@ class MigrationService {
       _logger.error('种子数据执行失败', error: error, stackTrace: stackTrace);
       rethrow;
     } finally {
+      // 停止心跳定时器
+      heartbeatTimer.cancel();
+
       // 无论成功还是失败，都要释放锁
       await _releaseMigrationLock();
     }
@@ -343,6 +362,34 @@ class MigrationService {
     }
   }
 
+  /// 续期迁移锁（心跳机制）
+  Future<void> _renewMigrationLock({Duration extension = const Duration(minutes: 30)}) async {
+    try {
+      final tableName = '${ServerConfig.tablePrefix}migration_lock';
+      final lockKey = 'migration';
+      final newExpiresAt = DateTime.now().add(extension);
+
+      final result = await _databaseService.query('''
+        UPDATE $tableName 
+        SET expires_at = @expires, locked_at = NOW()
+        WHERE lock_key = @key
+        RETURNING lock_key
+      ''', {
+        'key': lockKey,
+        'expires': newExpiresAt.toIso8601String(),
+      });
+
+      if (result.isNotEmpty) {
+        _logger.debug('迁移锁已续期至: $newExpiresAt');
+      } else {
+        _logger.warn('续期失败：锁可能已被其他进程获取');
+      }
+    } catch (error, stackTrace) {
+      _logger.error('续期迁移锁失败', error: error, stackTrace: stackTrace);
+      // 不抛出异常，让主流程继续
+    }
+  }
+
   /// 获取已执行的迁移
   Future<Map<String, Map<String, dynamic>>> _getExecutedMigrations() async {
     try {
@@ -434,24 +481,56 @@ class MigrationService {
       // 设置数据库连接（必须！）
       migration.setConnection(_databaseService.connection);
 
+      // 先检查迁移记录是否已存在（避免重复执行）
+      final migrationsTableName = '${ServerConfig.tablePrefix}schema_migrations';
+      final existingRecord = await _databaseService.query('''
+        SELECT migration_name FROM $migrationsTableName 
+        WHERE migration_name = @name
+      ''', {'name': migrationName});
+
+      if (existingRecord.isNotEmpty) {
+        _logger.warn('迁移记录已存在，跳过执行: $migrationName');
+        return;
+      }
+
       // 在事务中执行迁移
       await _databaseService.transaction(() async {
         // 执行迁移的 up 方法
         await migration.up();
 
         // 记录迁移执行（使用带前缀的表名）
-        final migrationsTableName = '${ServerConfig.tablePrefix}schema_migrations';
-
-        // 插入迁移记录
-        await _databaseService.query('''
-          INSERT INTO $migrationsTableName (migration_name, file_path, file_hash) 
-          VALUES (@name, @path, @hash)
-        ''', {
-          'name': migrationName,
-          'path': 'class://$migrationName',
-          'hash': _calculateClassHash(migrationName),
-        });
-        _logger.info('创建迁移记录: $migrationName');
+        // 注意：如果这里插入失败，DDL操作（如CREATE TABLE）已经执行，无法回滚
+        try {
+          await _databaseService.query('''
+            INSERT INTO $migrationsTableName (migration_name, file_path, file_hash) 
+            VALUES (@name, @path, @hash)
+          ''', {
+            'name': migrationName,
+            'path': 'class://$migrationName',
+            'hash': _calculateClassHash(migrationName),
+          });
+          _logger.info('创建迁移记录: $migrationName');
+        } catch (recordError, recordStackTrace) {
+          _logger.error(
+            '\n'
+            '🚨 严重错误：迁移已执行但无法记录到数据库！\n'
+            '\n'
+            '迁移名称: $migrationName\n'
+            '错误原因: $recordError\n'
+            '\n'
+            '⚠️  警告：DDL操作（如CREATE TABLE）已经执行且无法回滚！\n'
+            '\n'
+            '请立即手动处理：\n'
+            '1. 检查数据库中的表/索引是否已创建\n'
+            '2. 如果已创建，手动插入迁移记录：\n'
+            '   INSERT INTO $migrationsTableName (migration_name, file_path, file_hash)\n'
+            '   VALUES (\'$migrationName\', \'class://$migrationName\', \'${_calculateClassHash(migrationName)}\');\n'
+            '3. 或者在开发环境中回滚：dart migrate.dart rollback $migrationName\n',
+            error: recordError,
+            stackTrace: recordStackTrace,
+          );
+          rethrow;
+        }
       });
 
       _logger.info('迁移执行成功: $migrationName');
@@ -763,22 +842,189 @@ class MigrationService {
     return '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}_${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}';
   }
 
-  /// 运行迁移和种子数据
-  Future<void> runMigrationsAndSeeds() async {
+  /// 运行迁移和种子数据（使用同一个锁，避免间隙）
+  Future<void> runMigrationsAndSeeds({bool autoBackup = true}) async {
+    // 确保锁表存在
+    await _ensureLockTableExists();
+
+    // 尝试获取迁移锁
+    final lockAcquired = await _acquireMigrationLock();
+    if (!lockAcquired) {
+      throw Exception('无法获取迁移锁：另一个迁移进程正在运行，或锁被占用。请稍后再试。');
+    }
+
+    // 启动心跳定时器，每10分钟续期一次锁
+    Timer? heartbeatTimer;
+    heartbeatTimer = Timer.periodic(const Duration(minutes: 10), (_) async {
+      await _renewMigrationLock();
+    });
+
+    String? backupPath;
+
     try {
       _logger.info('开始运行迁移和种子数据...');
 
-      // 先运行迁移
-      await runMigrations();
+      // 生产环境自动备份（只备份一次）
+      if (!ServerConfig.isDevelopment && autoBackup) {
+        _logger.info('⚠️  生产环境：开始自动备份数据库...');
+        try {
+          backupPath = await backupDatabase();
+          _logger.info('✅ 数据库备份完成: $backupPath');
+          _logger.info('备份大小: ${await _getFileSize(backupPath)}');
+        } catch (backupError, backupStackTrace) {
+          _logger.error('数据库备份失败，但将继续执行迁移', error: backupError, stackTrace: backupStackTrace);
+          _logger.warn('⚠️  警告：备份失败，如果迁移失败可能无法恢复数据！');
+        }
+      }
 
-      // 再运行种子数据
-      await runSeeds();
+      // 确保记录表存在
+      await _ensureMigrationTableExists();
+      await _ensureSeedTableExists();
+
+      // 先运行迁移（不单独获取锁，使用当前锁）
+      await _runMigrationsInternal();
+
+      // 再运行种子数据（不单独获取锁，使用当前锁）
+      await _runSeedsInternal();
 
       _logger.info('迁移和种子数据执行完成');
+
+      // 如果有备份且执行成功
+      if (backupPath != null && !ServerConfig.isDevelopment) {
+        _logger.info('✅ 迁移和种子数据成功完成，备份文件保留于: $backupPath');
+      }
     } catch (error, stackTrace) {
-      _logger.error('迁移和种子数据执行失败', error: error, stackTrace: stackTrace);
+      _logger.error('❌ 迁移和种子数据执行失败', error: error, stackTrace: stackTrace);
+
+      // 如果有备份文件，提示用户如何恢复
+      if (backupPath != null && backupPath.isNotEmpty) {
+        _logger.error('');
+        _logger.error('=' * 80);
+        _logger.error('🚨 迁移失败！数据库备份文件位于:');
+        _logger.error('   $backupPath');
+        _logger.error('');
+        _logger.error('如需恢复数据库，请执行以下命令:');
+        _logger.error('   dart packages/server/scripts/migrate.dart restore $backupPath');
+        _logger.error('=' * 80);
+      }
+
       rethrow;
+    } finally {
+      // 停止心跳定时器
+      heartbeatTimer.cancel();
+
+      // 无论成功还是失败，都要释放锁
+      await _releaseMigrationLock();
     }
+  }
+
+  /// 内部方法：运行迁移（不获取锁）
+  Future<void> _runMigrationsInternal() async {
+    _logger.info('开始运行数据库迁移...');
+
+    // 获取已注册的迁移
+    final registeredMigrations = _migrationFactories;
+
+    // 获取已执行的迁移
+    final executedMigrations = await _getExecutedMigrations();
+
+    // 检查已执行的迁移是否被修改（哈希变更检测）
+    for (final migrationName in registeredMigrations.keys) {
+      final executedMigration = executedMigrations[migrationName];
+      if (executedMigration != null) {
+        final currentHash = _calculateClassHash(migrationName);
+        final executedHash = executedMigration['file_hash'] as String;
+
+        if (currentHash != executedHash) {
+          final executedAt = executedMigration['executed_at'];
+          throw Exception('\n'
+              '🚨 严重错误：迁移 "$migrationName" 已执行但内容被修改！\n'
+              '\n'
+              '详细信息:\n'
+              '  - 迁移名称: $migrationName\n'
+              '  - 执行时间: $executedAt\n'
+              '  - 执行时哈希: ${executedHash.substring(0, 16)}...\n'
+              '  - 当前哈希: ${currentHash.substring(0, 16)}...\n'
+              '\n'
+              '⚠️  禁止修改已执行的迁移！这会导致数据库状态不一致。\n'
+              '\n'
+              '正确的做法:\n'
+              '  1. 不要修改已执行的迁移\n'
+              '  2. 创建新的迁移来实现更改\n'
+              '  3. 如果是开发环境，可以回滚后修改: dart migrate.dart rollback $migrationName\n');
+        }
+      }
+    }
+
+    // 筛选未执行的迁移
+    final pendingMigrations = <String>[];
+    for (final migrationName in registeredMigrations.keys) {
+      if (!executedMigrations.containsKey(migrationName)) {
+        pendingMigrations.add(migrationName);
+        _logger.info('发现新迁移: $migrationName');
+      } else {
+        _logger.info('迁移已执行，跳过: $migrationName');
+      }
+    }
+
+    if (pendingMigrations.isEmpty) {
+      _logger.info('没有待执行的迁移');
+      return;
+    }
+
+    _logger.info('发现 ${pendingMigrations.length} 个待执行的迁移');
+
+    // 按迁移名称排序执行迁移
+    pendingMigrations.sort();
+
+    for (final migrationName in pendingMigrations) {
+      await _executeMigrationClass(migrationName);
+    }
+
+    _logger.info('所有迁移执行完成');
+  }
+
+  /// 内部方法：运行种子数据（不获取锁）
+  Future<void> _runSeedsInternal() async {
+    _logger.info('开始运行种子数据...');
+
+    // 获取已注册的种子数据
+    final registeredSeeds = _seedFactories;
+
+    if (registeredSeeds.isEmpty) {
+      _logger.info('没有找到已注册的种子数据');
+      return;
+    }
+
+    // 获取已执行的种子数据
+    final executedSeeds = await _getExecutedSeeds();
+
+    // 筛选未执行的种子数据
+    final pendingSeeds = <String>[];
+    for (final seedName in registeredSeeds.keys) {
+      if (!executedSeeds.containsKey(seedName)) {
+        pendingSeeds.add(seedName);
+        _logger.info('发现新种子数据: $seedName');
+      } else {
+        _logger.info('种子数据已执行，跳过: $seedName');
+      }
+    }
+
+    if (pendingSeeds.isEmpty) {
+      _logger.info('没有待执行的种子数据');
+      return;
+    }
+
+    _logger.info('发现 ${pendingSeeds.length} 个待执行的种子数据');
+
+    // 按种子名称排序执行种子数据
+    pendingSeeds.sort();
+
+    for (final seedName in pendingSeeds) {
+      await _executeSeedClass(seedName);
+    }
+
+    _logger.info('所有种子数据执行完成');
   }
 
   /// 检查表结构差异
