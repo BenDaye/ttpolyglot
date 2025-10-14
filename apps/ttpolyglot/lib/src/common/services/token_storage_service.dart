@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ttpolyglot/src/common/config/config.dart';
 import 'package:ttpolyglot/src/common/models/models.dart';
+import 'package:ttpolyglot_core/core.dart';
 
 /// Token 存储服务
 class TokenStorageService {
@@ -19,9 +19,9 @@ class TokenStorageService {
     try {
       await _prefs.setString(AppConfig.accessTokenKey, accessToken);
       await _prefs.setString(AppConfig.refreshTokenKey, refreshToken);
-      log('Token 保存成功', name: 'TokenStorageService');
+      Logger.info('Token 保存成功');
     } catch (error, stackTrace) {
-      log('Token 保存失败', error: error, stackTrace: stackTrace, name: 'TokenStorageService');
+      Logger.error('Token 保存失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -31,7 +31,7 @@ class TokenStorageService {
     try {
       return _prefs.getString(AppConfig.accessTokenKey);
     } catch (error, stackTrace) {
-      log('获取 Access Token 失败', error: error, stackTrace: stackTrace, name: 'TokenStorageService');
+      Logger.error('获取 Access Token 失败', error: error, stackTrace: stackTrace);
       return null;
     }
   }
@@ -41,7 +41,7 @@ class TokenStorageService {
     try {
       return _prefs.getString(AppConfig.refreshTokenKey);
     } catch (error, stackTrace) {
-      log('获取 Refresh Token 失败', error: error, stackTrace: stackTrace, name: 'TokenStorageService');
+      Logger.error('获取 Refresh Token 失败', error: error, stackTrace: stackTrace);
       return null;
     }
   }
@@ -51,9 +51,9 @@ class TokenStorageService {
     try {
       await _prefs.remove(AppConfig.accessTokenKey);
       await _prefs.remove(AppConfig.refreshTokenKey);
-      log('Token 清除成功', name: 'TokenStorageService');
+      Logger.info('Token 清除成功');
     } catch (error, stackTrace) {
-      log('Token 清除失败', error: error, stackTrace: stackTrace, name: 'TokenStorageService');
+      Logger.error('Token 清除失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -63,9 +63,9 @@ class TokenStorageService {
     try {
       final jsonString = jsonEncode(userInfo.toJson());
       await _prefs.setString(AppConfig.userInfoKey, jsonString);
-      log('用户信息保存成功', name: 'TokenStorageService');
+      Logger.info('用户信息保存成功');
     } catch (error, stackTrace) {
-      log('用户信息保存失败', error: error, stackTrace: stackTrace, name: 'TokenStorageService');
+      Logger.error('用户信息保存失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -79,7 +79,7 @@ class TokenStorageService {
       final json = jsonDecode(jsonString) as Map<String, dynamic>;
       return UserInfo.fromJson(json);
     } catch (error, stackTrace) {
-      log('获取用户信息失败', error: error, stackTrace: stackTrace, name: 'TokenStorageService');
+      Logger.error('获取用户信息失败', error: error, stackTrace: stackTrace);
       return null;
     }
   }
@@ -88,9 +88,9 @@ class TokenStorageService {
   Future<void> clearUserInfo() async {
     try {
       await _prefs.remove(AppConfig.userInfoKey);
-      log('用户信息清除成功', name: 'TokenStorageService');
+      Logger.info('用户信息清除成功');
     } catch (error, stackTrace) {
-      log('用户信息清除失败', error: error, stackTrace: stackTrace, name: 'TokenStorageService');
+      Logger.error('用户信息清除失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

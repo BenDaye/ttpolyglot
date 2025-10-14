@@ -1,9 +1,8 @@
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Response, FormData, MultipartFile;
 import 'package:ttpolyglot/src/common/network/models/network_models.dart';
+import 'package:ttpolyglot_core/core.dart';
 
 /// 错误统一处理拦截器
 class ErrorInterceptor extends Interceptor {
@@ -42,16 +41,15 @@ class ErrorInterceptor extends Interceptor {
       }
 
       // 记录错误日志
-      log(
+      Logger.error(
         '网络请求错误: ${err.requestOptions.method} ${err.requestOptions.path}',
         error: err,
         stackTrace: err.stackTrace,
-        name: 'ErrorInterceptor',
       );
 
       handler.next(err);
     } catch (error, stackTrace) {
-      log('错误拦截器异常', error: error, stackTrace: stackTrace, name: 'ErrorInterceptor');
+      Logger.error('错误拦截器异常', error: error, stackTrace: stackTrace);
       handler.next(err);
     }
   }
@@ -70,7 +68,7 @@ class ErrorInterceptor extends Interceptor {
         borderRadius: 8.0,
       );
     } catch (error, stackTrace) {
-      log('显示错误提示失败', error: error, stackTrace: stackTrace, name: 'ErrorInterceptor');
+      Logger.error('显示错误提示失败', error: error, stackTrace: stackTrace);
     }
   }
 }

@@ -1,8 +1,7 @@
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
 import 'package:ttpolyglot/src/common/models/models.dart';
 import 'package:ttpolyglot/src/common/network/network.dart';
+import 'package:ttpolyglot_core/core.dart';
 
 /// 认证 API
 class AuthApi {
@@ -25,7 +24,7 @@ class AuthApi {
       final data = response['data'] as Map<String, dynamic>;
       return LoginResponse.fromJson(data);
     } catch (error, stackTrace) {
-      log('登录请求失败', error: error, stackTrace: stackTrace, name: 'AuthApi');
+      Logger.error('登录请求失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -42,7 +41,7 @@ class AuthApi {
         ),
       );
     } catch (error, stackTrace) {
-      log('登出请求失败', error: error, stackTrace: stackTrace, name: 'AuthApi');
+      Logger.error('登出请求失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -58,7 +57,7 @@ class AuthApi {
       final data = response['data'] as Map<String, dynamic>;
       return TokenInfo.fromJson(data);
     } catch (error, stackTrace) {
-      log('刷新 Token 失败', error: error, stackTrace: stackTrace, name: 'AuthApi');
+      Logger.error('刷新 Token 失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -71,7 +70,7 @@ class AuthApi {
       final data = response['data'] as Map<String, dynamic>;
       return UserInfo.fromJson(data);
     } catch (error, stackTrace) {
-      log('获取当前用户失败', error: error, stackTrace: stackTrace, name: 'AuthApi');
+      Logger.error('获取当前用户失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

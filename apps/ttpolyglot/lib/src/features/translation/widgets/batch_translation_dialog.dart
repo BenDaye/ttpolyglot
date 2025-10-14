@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -602,7 +601,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
           setState(() {
             _selectedProvider = value;
           });
-          log('选择翻译提供商: ${value.displayName}', name: 'BatchTranslationDialog');
+          Logger.info('选择翻译提供商: ${value.displayName}');
         }
       },
     );
@@ -681,7 +680,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
           setState(() {
             _selectedSourceEntry = value;
           });
-          log('选择源语言: ${value.targetLanguage.code} - ${value.targetLanguage.nativeName}',
+          Logger.info('选择源语言: ${value.targetLanguage.code} - ${value.targetLanguage.nativeName}',
               name: 'BatchTranslationDialog');
         }
       },
@@ -915,7 +914,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
       _startTranslationProcess();
     } catch (error, stackTrace) {
-      log('批量翻译异常', error: error, stackTrace: stackTrace, name: 'BatchTranslationDialog');
+      Logger.error('批量翻译异常', error: error, stackTrace: stackTrace);
       _showErrorSnackBar('翻译处理异常: $error');
     }
   }
@@ -1020,7 +1019,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
     try {
       final translationManager = Get.find<TranslationServiceManager>();
 
-      log('开始翻译Key: "$translationKey" (${targetEntries.length}个目标语言)', name: 'BatchTranslationDialog');
+      Logger.info('开始翻译Key: "$translationKey" (${targetEntries.length}个目标语言)');
 
       // 按key分组批量翻译，一次性翻译这个key的所有目标语言
       final results = await translationManager.batchTranslateEntries(
@@ -1032,7 +1031,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
       // 检查弹窗是否已关闭，如果已关闭则停止处理
       if (_isDisposed) {
-        log('弹窗已关闭，停止处理翻译结果', name: 'BatchTranslationDialog');
+        Logger.info('弹窗已关闭，停止处理翻译结果');
         return;
       }
 
@@ -1043,7 +1042,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
       for (int i = 0; i < results.length; i++) {
         // 再次检查弹窗状态
         if (_isDisposed) {
-          log('弹窗已关闭，停止处理翻译结果', name: 'BatchTranslationDialog');
+          Logger.info('弹窗已关闭，停止处理翻译结果');
           return;
         }
 
@@ -1066,18 +1065,18 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
         } else {
           keyFailCount++;
           final errorMessage = result.error ?? '翻译失败';
-          log('翻译失败: ${entry.key} (${entry.targetLanguage.code}) - $errorMessage', name: 'BatchTranslationDialog');
+          Logger.info('翻译失败: ${entry.key} (${entry.targetLanguage.code}) - $errorMessage');
         }
       }
 
       _successCount += keySuccessCount;
       _failCount += keyFailCount;
 
-      log('Key "$translationKey" 翻译完成: 成功 $keySuccessCount 个，失败 $keyFailCount 个', name: 'BatchTranslationDialog');
+      Logger.info('Key "$translationKey" 翻译完成: 成功 $keySuccessCount 个，失败 $keyFailCount 个');
     } catch (error, stackTrace) {
       // 如果是取消异常，更新状态为取消
       if (error is CancelException) {
-        log('翻译被取消: $error', name: 'BatchTranslationDialog');
+        Logger.info('翻译被取消: $error');
         _shouldStop = true;
         if (!_isDisposed && mounted) {
           setState(() {
@@ -1088,7 +1087,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
       }
 
       _failCount += targetEntries.length;
-      log('翻译Key异常', error: error, stackTrace: stackTrace, name: 'BatchTranslationDialog');
+      Logger.error('翻译Key异常', error: error, stackTrace: stackTrace);
     } finally {
       // 确保无论成功还是失败都重置翻译状态
       _isTranslating = false;
@@ -1154,7 +1153,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
       _showInfoSnackBar('当前进度已保存');
     } catch (error, stackTrace) {
-      log('保存进度失败', error: error, stackTrace: stackTrace, name: 'BatchTranslationDialog');
+      Logger.error('保存进度失败', error: error, stackTrace: stackTrace);
       _showErrorSnackBar('保存进度失败: $error');
     }
   }

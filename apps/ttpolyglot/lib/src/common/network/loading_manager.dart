@@ -1,7 +1,6 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Response, FormData, MultipartFile;
+import 'package:ttpolyglot_core/core.dart';
 
 /// Loading 管理器（全局单例）
 class LoadingManager {
@@ -14,7 +13,7 @@ class LoadingManager {
 
   /// 显示 Loading
   void show() {
-    log('显示 Loading，当前计数: $_loadingCount', name: 'LoadingManager');
+    Logger.info('显示 Loading，当前计数: $_loadingCount');
 
     if (_loadingCount == 0) {
       try {
@@ -28,9 +27,9 @@ class LoadingManager {
           barrierDismissible: false,
           name: 'loading_dialog',
         );
-        log('Loading 对话框已显示', name: 'LoadingManager');
+        Logger.info('Loading 对话框已显示');
       } catch (error, stackTrace) {
-        log('显示 Loading 失败', error: error, stackTrace: stackTrace, name: 'LoadingManager');
+        Logger.error('显示 Loading 失败', error: error, stackTrace: stackTrace);
       }
     }
     _loadingCount++;
@@ -40,17 +39,17 @@ class LoadingManager {
   void hide() {
     _loadingCount--;
 
-    log('隐藏 Loading，当前计数: $_loadingCount', name: 'LoadingManager');
+    Logger.info('隐藏 Loading，当前计数: $_loadingCount');
 
     if (_loadingCount <= 0) {
       _loadingCount = 0; // 确保不会变成负数
       try {
         if (Get.isDialogOpen ?? false) {
           Get.back();
-          log('Loading 对话框已关闭', name: 'LoadingManager');
+          Logger.info('Loading 对话框已关闭');
         }
       } catch (error, stackTrace) {
-        log('隐藏 Loading 失败', error: error, stackTrace: stackTrace, name: 'LoadingManager');
+        Logger.error('隐藏 Loading 失败', error: error, stackTrace: stackTrace);
         // 强制重置计数
         _loadingCount = 0;
       }
@@ -59,22 +58,22 @@ class LoadingManager {
 
   /// 强制关闭所有 Loading
   void forceHideAll() {
-    log('强制关闭所有 Loading，当前计数: $_loadingCount', name: 'LoadingManager');
+    Logger.info('强制关闭所有 Loading，当前计数: $_loadingCount');
     _loadingCount = 0;
     try {
       while (Get.isDialogOpen ?? false) {
         Get.back();
       }
-      log('所有 Loading 已强制关闭', name: 'LoadingManager');
+      Logger.info('所有 Loading 已强制关闭');
     } catch (error, stackTrace) {
-      log('强制关闭 Loading 失败', error: error, stackTrace: stackTrace, name: 'LoadingManager');
+      Logger.error('强制关闭 Loading 失败', error: error, stackTrace: stackTrace);
     }
   }
 
   /// 重置计数器
   void reset() {
     _loadingCount = 0;
-    log('Loading 计数器已重置', name: 'LoadingManager');
+    Logger.info('Loading 计数器已重置');
   }
 
   /// 获取当前计数

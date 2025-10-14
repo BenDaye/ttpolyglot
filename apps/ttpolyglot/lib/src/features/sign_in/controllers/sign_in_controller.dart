@@ -1,8 +1,7 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/common/common.dart';
+import 'package:ttpolyglot_core/core.dart';
 
 /// 登录控制器
 class SignInController extends GetxController {
@@ -28,7 +27,7 @@ class SignInController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    log('SignInController 初始化', name: 'SignInController');
+    Logger.info('SignInController 初始化');
   }
 
   /// 切换密码显示/隐藏
@@ -62,7 +61,7 @@ class SignInController extends GetxController {
   Future<void> login() async {
     // 防止重复提交
     if (_isLoading.value) {
-      log('登录请求进行中，忽略重复提交', name: 'SignInController');
+      Logger.error('登录请求进行中，忽略重复提交');
       return;
     }
 
@@ -73,14 +72,14 @@ class SignInController extends GetxController {
     if (formKey.currentState?.validate() != true) {
       // 启用自动验证，让用户看到错误提示
       _autoValidate.value = true;
-      log('表单验证失败', name: 'SignInController');
+      Logger.error('表单验证失败');
       return;
     }
 
     try {
       _isLoading.value = true;
 
-      log('开始登录请求', name: 'SignInController');
+      Logger.error('开始登录请求');
 
       // 调用认证服务登录
       await _authService.login(
@@ -91,7 +90,7 @@ class SignInController extends GetxController {
       );
 
       // 登录成功
-      log('登录成功，准备跳转', name: 'SignInController');
+      Logger.error('登录成功，准备跳转');
 
       // 显示成功提示
       Get.snackbar(
@@ -108,7 +107,7 @@ class SignInController extends GetxController {
       // 跳转到主页（使用 offAllNamed 清除登录页面）
       Get.offAllNamed('/projects');
     } catch (error, stackTrace) {
-      log('登录失败', error: error, stackTrace: stackTrace, name: 'SignInController');
+      Logger.error('登录失败', error: error, stackTrace: stackTrace);
 
       // 提取错误信息
       String message = '登录失败，请稍后重试';
@@ -126,7 +125,7 @@ class SignInController extends GetxController {
     } finally {
       // 确保 loading 状态一定会被重置
       _isLoading.value = false;
-      log('登录流程结束，loading 状态已重置', name: 'SignInController');
+      Logger.error('登录流程结束，loading 状态已重置');
     }
   }
 
@@ -142,6 +141,6 @@ class SignInController extends GetxController {
     emailController.dispose();
     passwordController.dispose();
     super.onClose();
-    log('SignInController 销毁', name: 'SignInController');
+    Logger.info('SignInController 销毁');
   }
 }

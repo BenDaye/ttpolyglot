@@ -1,8 +1,7 @@
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response, FormData, MultipartFile;
 import 'package:ttpolyglot/src/common/services/services.dart';
+import 'package:ttpolyglot_core/core.dart';
 
 /// Token 自动注入拦截器
 class TokenInterceptor extends Interceptor {
@@ -24,7 +23,7 @@ class TokenInterceptor extends Interceptor {
 
       handler.next(options);
     } catch (error, stackTrace) {
-      log('Token 拦截器异常', error: error, stackTrace: stackTrace, name: 'TokenInterceptor');
+      Logger.error('Token 拦截器异常', error: error, stackTrace: stackTrace);
       handler.next(options);
     }
   }

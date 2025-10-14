@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -51,7 +50,7 @@ class FileSystemStorageServiceImpl extends FileSystemStorageService {
     try {
       return await file.readAsString(encoding: utf8);
     } catch (error, stackTrace) {
-      log('Error reading file for key $key: $error', error: error, stackTrace: stackTrace);
+      Logger.error('Error reading file for key $key', error: error, stackTrace: stackTrace);
       return null;
     }
   }

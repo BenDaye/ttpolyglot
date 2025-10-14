@@ -1,9 +1,8 @@
-import 'dart:developer';
-
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/common/api/api.dart';
 import 'package:ttpolyglot/src/common/models/models.dart';
 import 'package:ttpolyglot/src/common/services/token_storage_service.dart';
+import 'package:ttpolyglot_core/core.dart';
 
 /// 认证服务
 class AuthService extends GetxService {
@@ -32,7 +31,7 @@ class AuthService extends GetxService {
         final savedUser = _tokenStorage.getUserInfo();
         if (savedUser != null) {
           _currentUser.value = savedUser;
-          log('从本地加载用户信息: ${savedUser.username}', name: 'AuthService');
+          Logger.info('从本地加载用户信息: ${savedUser.username}');
 
           // 后台刷新用户信息
           _refreshUserInfo();
@@ -42,7 +41,7 @@ class AuthService extends GetxService {
         }
       }
     } catch (error, stackTrace) {
-      log('初始化认证服务失败', error: error, stackTrace: stackTrace, name: 'AuthService');
+      Logger.error('初始化认证服务失败', error: error, stackTrace: stackTrace);
       // 初始化失败，清除登录状态
       await logout();
     }
@@ -77,9 +76,9 @@ class AuthService extends GetxService {
       await _tokenStorage.saveUserInfo(response.user);
       _currentUser.value = response.user;
 
-      log('登录成功: ${response.user.username}', name: 'AuthService');
+      Logger.info('登录成功: ${response.user.username}');
     } catch (error, stackTrace) {
-      log('登录失败', error: error, stackTrace: stackTrace, name: 'AuthService');
+      Logger.error('登录失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -91,14 +90,14 @@ class AuthService extends GetxService {
       try {
         await _authApi.logout();
       } catch (error, stackTrace) {
-        log('服务端登出失败（忽略）', error: error, stackTrace: stackTrace, name: 'AuthService');
+        Logger.error('服务端登出失败（忽略）', error: error, stackTrace: stackTrace);
       }
     } finally {
       // 无论如何都清除本地数据
       await _tokenStorage.clearTokens();
       await _tokenStorage.clearUserInfo();
       _currentUser.value = null;
-      log('登出成功', name: 'AuthService');
+      Logger.info('登出成功');
     }
   }
 
@@ -117,9 +116,9 @@ class AuthService extends GetxService {
         refreshToken: newTokens.refreshToken,
       );
 
-      log('Token 刷新成功', name: 'AuthService');
+      Logger.info('Token 刷新成功');
     } catch (error, stackTrace) {
-      log('Token 刷新失败', error: error, stackTrace: stackTrace, name: 'AuthService');
+      Logger.error('Token 刷新失败', error: error, stackTrace: stackTrace);
       // Token 刷新失败，清除登录状态
       await logout();
       rethrow;
@@ -132,10 +131,9 @@ class AuthService extends GetxService {
       final user = await _authApi.getCurrentUser();
       _currentUser.value = user;
       await _tokenStorage.saveUserInfo(user);
-      log('用户信息刷新成功: ${user.username}', name: 'AuthService');
+      Logger.info('用户信息刷新成功: ${user.username}');
     } catch (error, stackTrace) {
-      log('用户信息刷新失败', error: error, stackTrace: stackTrace, name: 'AuthService');
-      throw error;
+      Logger.error('用户信息刷新失败', error: error, stackTrace: stackTrace);
     }
   }
 

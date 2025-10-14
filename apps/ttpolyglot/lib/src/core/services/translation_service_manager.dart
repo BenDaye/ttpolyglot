@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/routing/app_pages.dart';
@@ -106,7 +104,7 @@ class TranslationServiceManager extends GetxService {
             .toList();
       }
 
-      log('开始批量翻译 ${entries.length} 个条目，使用 ${selectedProvider.displayName}', name: 'TranslationServiceManager');
+      Logger.info('开始批量翻译 ${entries.length} 个条目，使用 ${selectedProvider.displayName}');
 
       // 使用批量翻译API
       final result = await TranslationApiService.translateBatchTexts(
@@ -127,7 +125,7 @@ class TranslationServiceManager extends GetxService {
               ))
           .toList();
     } catch (error, stackTrace) {
-      log('批量翻译条目异常', error: error, stackTrace: stackTrace, name: 'TranslationServiceManager');
+      Logger.error('批量翻译条目异常', error: error, stackTrace: stackTrace);
 
       // 返回所有条目的失败结果
       return entries

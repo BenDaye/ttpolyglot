@@ -1,13 +1,11 @@
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
 import 'package:ttpolyglot/src/common/config/config.dart';
 import 'package:ttpolyglot/src/common/network/interceptors/error_interceptor.dart';
 import 'package:ttpolyglot/src/common/network/interceptors/loading_interceptor.dart';
-import 'package:ttpolyglot/src/common/network/interceptors/log_interceptor.dart' as custom;
 import 'package:ttpolyglot/src/common/network/interceptors/response_interceptor.dart';
 import 'package:ttpolyglot/src/common/network/interceptors/token_interceptor.dart';
 import 'package:ttpolyglot/src/common/network/models/network_models.dart';
+import 'package:ttpolyglot_core/core.dart';
 
 /// HTTP 客户端（单例）
 class HttpClient {
@@ -36,7 +34,7 @@ class HttpClient {
     // 注册拦截器（顺序很重要！）
     _dio.interceptors.add(LoadingInterceptor()); // Loading 状态
     _dio.interceptors.add(TokenInterceptor()); // Token 注入
-    _dio.interceptors.add(custom.LogInterceptor()); // 日志记录
+    _dio.interceptors.add(Logger.talkerDioLogger); // 日志记录
     _dio.interceptors.add(ResponseInterceptor()); // 响应处理
     _dio.interceptors.add(ErrorInterceptor()); // 错误处理
   }
@@ -170,11 +168,10 @@ class HttpClient {
 
       return response.data as T;
     }).catchError((err) {
-      log(
+      Logger.error(
         '请求失败',
         error: err,
         stackTrace: err is DioException ? err.stackTrace : StackTrace.current,
-        name: 'HttpClient',
       );
       throw err;
     });

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:ttpolyglot_core/core.dart';
 
 /// 冲突类型
@@ -138,7 +136,7 @@ class ConflictDetectionService {
     List<TranslationEntry> importedEntries,
   ) async {
     try {
-      log('开始检测翻译冲突，现有条目: ${existingEntries.length}，导入条目: ${importedEntries.length}', name: 'ConflictDetectionService');
+      Logger.info('开始检测翻译冲突，现有条目: ${existingEntries.length}，导入条目: ${importedEntries.length}');
 
       final conflicts = <TranslationConflict>[];
       final newEntries = <TranslationEntry>[];
@@ -169,7 +167,7 @@ class ConflictDetectionService {
           );
 
           conflicts.add(conflict);
-          log('检测到冲突: ${conflict.key} - ${conflict.conflictTypeDisplayName}', name: 'ConflictDetectionService');
+          Logger.info('检测到冲突: ${conflict.key} - ${conflict.conflictTypeDisplayName}');
         }
       }
 
@@ -179,10 +177,10 @@ class ConflictDetectionService {
         summary: _generateSummary(conflicts.length, newEntries.length),
       );
 
-      log('冲突检测完成: ${result.toString()}', name: 'ConflictDetectionService');
+      Logger.info('冲突检测完成: ${result.toString()}');
       return result;
     } catch (error, stackTrace) {
-      log('冲突检测失败', error: error, stackTrace: stackTrace, name: 'ConflictDetectionService');
+      Logger.error('冲突检测失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -205,7 +203,7 @@ class ConflictDetectionService {
         final resolution = resolutionMap[conflict.key];
         if (resolution == null) {
           // 没有解决方案，跳过
-          log('跳过未解决的冲突: ${conflict.key}', name: 'ConflictDetectionService');
+          Logger.info('跳过未解决的冲突: ${conflict.key}');
           continue;
         }
 
@@ -231,13 +229,13 @@ class ConflictDetectionService {
         }
 
         resolvedEntries.add(resolvedEntry.copyWith(updatedAt: DateTime.now()));
-        log('解决冲突: ${conflict.key} 使用策略 ${resolution.strategy}', name: 'ConflictDetectionService');
+        Logger.info('解决冲突: ${conflict.key} 使用策略 ${resolution.strategy}');
       }
 
-      log('冲突解决完成，共解决 ${resolvedEntries.length} 个冲突', name: 'ConflictDetectionService');
+      Logger.info('冲突解决完成，共解决 ${resolvedEntries.length} 个冲突');
       return resolvedEntries;
     } catch (error, stackTrace) {
-      log('冲突解决失败', error: error, stackTrace: stackTrace, name: 'ConflictDetectionService');
+      Logger.error('冲突解决失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

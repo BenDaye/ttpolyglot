@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -95,7 +94,7 @@ class TranslationConfigController extends GetxController {
       final configJson = jsonEncode(configMap);
       await prefs.setString('translation_config', configJson);
     } catch (error, stackTrace) {
-      log('保存翻译配置失败', error: error, stackTrace: stackTrace, name: 'TranslationConfigController');
+      Logger.error('保存翻译配置失败', error: error, stackTrace: stackTrace);
     } finally {
       _isLoading.value = false;
     }
@@ -116,7 +115,7 @@ class TranslationConfigController extends GetxController {
         // 不需要重新赋值，因为 _config 已经初始化为默认值
       }
     } catch (error, stackTrace) {
-      log('加载翻译配置失败', error: error, stackTrace: stackTrace, name: 'TranslationConfigController');
+      Logger.error('加载翻译配置失败', error: error, stackTrace: stackTrace);
       // 加载失败时使用默认配置
       // 不需要重新赋值，因为 _config 已经初始化为默认值
     } finally {

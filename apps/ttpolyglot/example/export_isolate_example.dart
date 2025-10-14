@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:ttpolyglot/src/core/services/export_service_impl.dart';
 import 'package:ttpolyglot/src/core/services/export_service_impl_desktop.dart';
 import 'package:ttpolyglot_core/core.dart';
@@ -7,7 +5,7 @@ import 'package:ttpolyglot_core/core.dart';
 /// Isolate 导出功能使用示例
 class ExportIsolateExample {
   static Future<void> runExample() async {
-    log('开始 Isolate 导出示例', name: 'ExportIsolateExample');
+    Logger.info('开始 Isolate 导出示例');
 
     try {
       // 创建示例项目
@@ -88,7 +86,7 @@ class ExportIsolateExample {
       final exportService = await ExportServiceImpl.create();
 
       // 使用 isolate 导出（包含文件选择）
-      log('开始导出翻译文件...', name: 'ExportIsolateExample');
+      Logger.info('开始导出翻译文件...');
 
       final success = await exportService.exportTranslationsJson(
         project: project,
@@ -96,18 +94,18 @@ class ExportIsolateExample {
       );
 
       if (success) {
-        log('导出成功！', name: 'ExportIsolateExample');
+        Logger.info('导出成功！');
       } else {
-        log('导出失败', name: 'ExportIsolateExample');
+        Logger.info('导出失败');
       }
     } catch (error, stackTrace) {
-      log('导出示例执行失败', error: error, stackTrace: stackTrace, name: 'ExportIsolateExample');
+      Logger.error('导出示例执行失败', error: error, stackTrace: stackTrace);
     }
   }
 
   /// 演示 isolate 导出功能
   static Future<void> runIsolateExample() async {
-    log('开始 Isolate 导出示例', name: 'ExportIsolateExample');
+    Logger.info('开始 Isolate 导出示例');
 
     try {
       // 创建示例项目
@@ -154,12 +152,12 @@ class ExportIsolateExample {
       );
 
       if (success != null) {
-        log('Isolate 导出成功！', name: 'ExportIsolateExample');
+        Logger.info('Isolate 导出成功！');
       } else {
-        log('Isolate 导出失败', name: 'ExportIsolateExample');
+        Logger.info('Isolate 导出失败');
       }
     } catch (error, stackTrace) {
-      log('Isolate 导出示例执行失败', error: error, stackTrace: stackTrace, name: 'ExportIsolateExample');
+      Logger.error('Isolate 导出示例执行失败', error: error, stackTrace: stackTrace);
     }
   }
 }

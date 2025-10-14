@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/storage/storage_provider.dart';
@@ -18,7 +17,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
       await storageProvider.initialize();
       return ProjectServiceImpl(storageProvider.storageService);
     } catch (error, stackTrace) {
-      log('创建项目服务失败', error: error, stackTrace: stackTrace, name: 'ProjectServiceImpl');
+      Logger.error('创建项目服务失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -49,19 +48,19 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
   @override
   Future<Project?> getProject(String projectId) async {
     try {
-      log('从存储读取项目: $projectId', name: 'ProjectServiceImpl');
+      Logger.info('从存储读取项目: $projectId');
       final projectJson = await _storageService.read(StorageKeys.projectConfig(projectId));
       if (projectJson == null) {
-        log('项目数据不存在: $projectId', name: 'ProjectServiceImpl');
+        Logger.info('项目数据不存在: $projectId');
         return null;
       }
 
       final projectData = jsonDecode(projectJson) as Map<String, dynamic>;
       final project = Project.fromJson(projectData);
-      log('项目读取成功: ID=${project.id}, 名称="${project.name}"', name: 'ProjectServiceImpl');
+      Logger.info('项目读取成功: ID=${project.id}, 名称="${project.name}"');
       return project;
     } catch (error, stackTrace) {
-      log('获取项目失败', error: error, stackTrace: stackTrace, name: 'ProjectServiceImpl');
+      Logger.error('获取项目失败', error: error, stackTrace: stackTrace);
       return null;
     }
   }
@@ -84,7 +83,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
 
       return projects;
     } catch (error, stackTrace) {
-      log('获取用户项目失败', error: error, stackTrace: stackTrace, name: 'ProjectServiceImpl');
+      Logger.error('获取用户项目失败', error: error, stackTrace: stackTrace);
       return [];
     }
   }
@@ -135,7 +134,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
 
       return projects;
     } catch (error, stackTrace) {
-      log('获取所有项目失败', error: error, stackTrace: stackTrace, name: 'ProjectServiceImpl');
+      Logger.error('获取所有项目失败', error: error, stackTrace: stackTrace);
       return [];
     }
   }
@@ -215,7 +214,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
         return ProjectStats.fromJson(statsData);
       }
     } catch (error, stackTrace) {
-      log('获取项目统计失败', error: error, stackTrace: stackTrace, name: 'ProjectServiceImpl');
+      Logger.error('获取项目统计失败', error: error, stackTrace: stackTrace);
     }
 
     // 返回默认统计
@@ -274,10 +273,10 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
 
   /// 保存项目到存储
   Future<void> _saveProject(Project project) async {
-    log('保存项目到存储: ID=${project.id}, 名称="${project.name}"', name: 'ProjectServiceImpl');
+    Logger.info('保存项目到存储: ID=${project.id}, 名称="${project.name}"');
     final projectJson = jsonEncode(project.toJson());
     await _storageService.write(StorageKeys.projectConfig(project.id), projectJson);
-    log('项目保存完成: ${project.id}', name: 'ProjectServiceImpl');
+    Logger.info('项目保存完成: ${project.id}');
   }
 
   /// 更新项目列表索引
@@ -294,7 +293,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
 
       await _storageService.write(StorageKeys.projectList, projectIds.join(','));
     } catch (error, stackTrace) {
-      log('更新项目列表失败', error: error, stackTrace: stackTrace);
+      Logger.error('更新项目列表失败', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -358,7 +357,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
     try {
       return Language.supportedLanguages;
     } catch (error, stackTrace) {
-      log('获取支持的语言列表失败', error: error, stackTrace: stackTrace, name: 'ProjectServiceImpl');
+      Logger.error('获取支持的语言列表失败', error: error, stackTrace: stackTrace);
       return [];
     }
   }
@@ -368,7 +367,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
     try {
       return Language.searchSupportedLanguages(query);
     } catch (error, stackTrace) {
-      log('搜索支持的语言失败', error: error, stackTrace: stackTrace, name: 'ProjectServiceImpl');
+      Logger.error('搜索支持的语言失败', error: error, stackTrace: stackTrace);
       return [];
     }
   }
@@ -378,7 +377,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
     try {
       return Language.supportedLanguagesByGroup;
     } catch (error, stackTrace) {
-      log('获取分组语言列表失败', error: error, stackTrace: stackTrace, name: 'ProjectServiceImpl');
+      Logger.error('获取分组语言列表失败', error: error, stackTrace: stackTrace);
       return {};
     }
   }
@@ -388,7 +387,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
     try {
       return Language.isLanguageSupported(languageCode);
     } catch (error, stackTrace) {
-      log('验证语言支持失败', error: error, stackTrace: stackTrace, name: 'ProjectServiceImpl');
+      Logger.error('验证语言支持失败', error: error, stackTrace: stackTrace);
       return false;
     }
   }
@@ -402,7 +401,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
       }
       return results;
     } catch (error, stackTrace) {
-      log('验证多个语言支持失败', error: error, stackTrace: stackTrace, name: 'ProjectServiceImpl');
+      Logger.error('验证多个语言支持失败', error: error, stackTrace: stackTrace);
       return {};
     }
   }
@@ -412,20 +411,17 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
     try {
       // 这里应该获取项目的翻译条目进行验证
       // 暂时只记录日志，具体实现需要根据实际的数据结构调整
-      log(
-        '验证项目源语言一致性',
-        error: '项目ID: ${project.id}, 主语言: ${project.primaryLanguage.code}',
-        name: 'ProjectServiceImpl',
+      Logger.info(
+        '验证项目源语言一致性，项目ID: ${project.id}, 主语言: ${project.primaryLanguage.code}',
       );
 
       // TODO: 实现具体的翻译条目验证逻辑
       // 可以使用 SourceLanguageValidator 来验证翻译条目
     } catch (error, stackTrace) {
-      log(
+      Logger.error(
         '验证项目源语言一致性失败',
         error: error,
         stackTrace: stackTrace,
-        name: 'ProjectServiceImpl',
       );
     }
   }

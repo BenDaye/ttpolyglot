@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
@@ -57,7 +56,7 @@ class ExportServiceImplDesktop {
       );
 
       if (savePath == null) {
-        log('用户取消了文件保存', name: 'ExportServiceImplDesktop');
+        Logger.info('用户取消了文件保存');
         return null;
       }
 
@@ -71,7 +70,7 @@ class ExportServiceImplDesktop {
       final result = await compute(_executeExportTask, taskParams);
 
       if (!result.success) {
-        log('导出任务失败: ${result.error}', name: 'ExportServiceImplDesktop');
+        Logger.error('导出任务失败: ${result.error}');
         return null;
       }
 
@@ -79,10 +78,10 @@ class ExportServiceImplDesktop {
       final zipFile = File(savePath);
       await zipFile.writeAsBytes(result.archiveData!);
 
-      log('导出完成: $savePath', name: 'ExportServiceImplDesktop');
+      Logger.info('导出完成: $savePath');
       return savePath; // 返回保存路径
     } catch (error, stackTrace) {
-      log('导出翻译文件失败', error: error, stackTrace: stackTrace, name: 'ExportServiceImplDesktop');
+      Logger.error('导出翻译文件失败', error: error, stackTrace: stackTrace);
       throw Exception('导出翻译文件失败: $error');
     }
   }
@@ -117,7 +116,7 @@ class ExportServiceImplDesktop {
         final file = ArchiveFile(fileName, contentBytes.length, contentBytes);
         archive.addFile(file);
 
-        log('导出翻译文件: $fileName', name: 'ExportServiceImplDesktop');
+        Logger.info('导出翻译文件: $fileName');
       }
 
       // 编码为 ZIP 数据
@@ -128,7 +127,7 @@ class ExportServiceImplDesktop {
         archiveData: zipData,
       );
     } catch (error, stackTrace) {
-      log('导出任务执行失败', error: error, stackTrace: stackTrace, name: 'ExportServiceImplDesktop');
+      Logger.error('导出任务执行失败', error: error, stackTrace: stackTrace);
       return ExportTaskResult(
         success: false,
         error: error.toString(),
@@ -154,7 +153,7 @@ class ExportServiceImplDesktop {
       );
 
       if (savePath == null) {
-        log('用户取消了文件保存', name: 'ExportServiceImplDesktop');
+        Logger.info('用户取消了文件保存');
         return null;
       }
 
@@ -168,7 +167,7 @@ class ExportServiceImplDesktop {
       final result = await compute(_executeExportTaskCsv, taskParams);
 
       if (!result.success) {
-        log('导出任务失败: ${result.error}', name: 'ExportServiceImplDesktop');
+        Logger.error('导出任务失败: ${result.error}');
         return null;
       }
 
@@ -176,10 +175,10 @@ class ExportServiceImplDesktop {
       final zipFile = File(savePath);
       await zipFile.writeAsBytes(result.archiveData!);
 
-      log('导出完成: $savePath', name: 'ExportServiceImplDesktop');
+      Logger.info('导出完成: $savePath');
       return savePath; // 返回保存路径
     } catch (error, stackTrace) {
-      log('导出CSV翻译文件失败', error: error, stackTrace: stackTrace, name: 'ExportServiceImplDesktop');
+      Logger.error('导出CSV翻译文件失败', error: error, stackTrace: stackTrace);
       throw Exception('导出CSV翻译文件失败: $error');
     }
   }
@@ -202,7 +201,7 @@ class ExportServiceImplDesktop {
       );
 
       if (savePath == null) {
-        log('用户取消了文件保存', name: 'ExportServiceImplDesktop');
+        Logger.info('用户取消了文件保存');
         return null;
       }
 
@@ -216,7 +215,7 @@ class ExportServiceImplDesktop {
       final result = await compute(_executeExportTaskExcel, taskParams);
 
       if (!result.success) {
-        log('导出任务失败: ${result.error}', name: 'ExportServiceImplDesktop');
+        Logger.error('导出任务失败: ${result.error}');
         return null;
       }
 
@@ -224,10 +223,10 @@ class ExportServiceImplDesktop {
       final zipFile = File(savePath);
       await zipFile.writeAsBytes(result.archiveData!);
 
-      log('导出完成: $savePath', name: 'ExportServiceImplDesktop');
+      Logger.info('导出完成: $savePath');
       return savePath; // 返回保存路径
     } catch (error, stackTrace) {
-      log('导出Excel翻译文件失败', error: error, stackTrace: stackTrace, name: 'ExportServiceImplDesktop');
+      Logger.error('导出Excel翻译文件失败', error: error, stackTrace: stackTrace);
       throw Exception('导出Excel翻译文件失败: $error');
     }
   }
@@ -250,7 +249,7 @@ class ExportServiceImplDesktop {
       );
 
       if (savePath == null) {
-        log('用户取消了文件保存', name: 'ExportServiceImplDesktop');
+        Logger.info('用户取消了文件保存');
         return null;
       }
 
@@ -264,7 +263,7 @@ class ExportServiceImplDesktop {
       final result = await compute(_executeExportTaskArb, taskParams);
 
       if (!result.success) {
-        log('导出任务失败: ${result.error}', name: 'ExportServiceImplDesktop');
+        Logger.error('导出任务失败: ${result.error}');
         return null;
       }
 
@@ -272,10 +271,10 @@ class ExportServiceImplDesktop {
       final zipFile = File(savePath);
       await zipFile.writeAsBytes(result.archiveData!);
 
-      log('导出完成: $savePath', name: 'ExportServiceImplDesktop');
+      Logger.info('导出完成: $savePath');
       return savePath; // 返回保存路径
     } catch (error, stackTrace) {
-      log('导出ARB翻译文件失败', error: error, stackTrace: stackTrace, name: 'ExportServiceImplDesktop');
+      Logger.error('导出ARB翻译文件失败', error: error, stackTrace: stackTrace);
       throw Exception('导出ARB翻译文件失败: $error');
     }
   }
@@ -298,7 +297,7 @@ class ExportServiceImplDesktop {
       );
 
       if (savePath == null) {
-        log('用户取消了文件保存', name: 'ExportServiceImplDesktop');
+        Logger.info('用户取消了文件保存');
         return null;
       }
 
@@ -312,7 +311,7 @@ class ExportServiceImplDesktop {
       final result = await compute(_executeExportTaskPo, taskParams);
 
       if (!result.success) {
-        log('导出任务失败: ${result.error}', name: 'ExportServiceImplDesktop');
+        Logger.error('导出任务失败: ${result.error}');
         return null;
       }
 
@@ -320,10 +319,10 @@ class ExportServiceImplDesktop {
       final zipFile = File(savePath);
       await zipFile.writeAsBytes(result.archiveData!);
 
-      log('导出完成: $savePath', name: 'ExportServiceImplDesktop');
+      Logger.info('导出完成: $savePath');
       return savePath; // 返回保存路径
     } catch (error, stackTrace) {
-      log('导出PO翻译文件失败', error: error, stackTrace: stackTrace, name: 'ExportServiceImplDesktop');
+      Logger.error('导出PO翻译文件失败', error: error, stackTrace: stackTrace);
       throw Exception('导出PO翻译文件失败: $error');
     }
   }
@@ -356,7 +355,7 @@ class ExportServiceImplDesktop {
         final file = ArchiveFile(fileName, contentBytes.length, contentBytes);
         archive.addFile(file);
 
-        log('导出CSV翻译文件: $fileName', name: 'ExportServiceImplDesktop');
+        Logger.info('导出CSV翻译文件: $fileName');
       }
 
       // 编码为 ZIP 数据
@@ -367,7 +366,7 @@ class ExportServiceImplDesktop {
         archiveData: zipData,
       );
     } catch (error, stackTrace) {
-      log('CSV导出任务执行失败', error: error, stackTrace: stackTrace, name: 'ExportServiceImplDesktop');
+      Logger.error('CSV导出任务执行失败', error: error, stackTrace: stackTrace);
       return ExportTaskResult(
         success: false,
         error: error.toString(),
@@ -403,7 +402,7 @@ class ExportServiceImplDesktop {
         final file = ArchiveFile(fileName, excelBytes.length, excelBytes);
         archive.addFile(file);
 
-        log('导出Excel翻译文件: $fileName', name: 'ExportServiceImplDesktop');
+        Logger.info('导出Excel翻译文件: $fileName');
       }
 
       // 编码为 ZIP 数据
@@ -414,7 +413,7 @@ class ExportServiceImplDesktop {
         archiveData: zipData,
       );
     } catch (error, stackTrace) {
-      log('Excel导出任务执行失败', error: error, stackTrace: stackTrace, name: 'ExportServiceImplDesktop');
+      Logger.error('Excel导出任务执行失败', error: error, stackTrace: stackTrace);
       return ExportTaskResult(
         success: false,
         error: error.toString(),
@@ -450,7 +449,7 @@ class ExportServiceImplDesktop {
         final file = ArchiveFile(fileName, contentBytes.length, contentBytes);
         archive.addFile(file);
 
-        log('导出ARB翻译文件: $fileName', name: 'ExportServiceImplDesktop');
+        Logger.info('导出ARB翻译文件: $fileName');
       }
 
       // 编码为 ZIP 数据
@@ -461,7 +460,7 @@ class ExportServiceImplDesktop {
         archiveData: zipData,
       );
     } catch (error, stackTrace) {
-      log('ARB导出任务执行失败', error: error, stackTrace: stackTrace, name: 'ExportServiceImplDesktop');
+      Logger.error('ARB导出任务执行失败', error: error, stackTrace: stackTrace);
       return ExportTaskResult(
         success: false,
         error: error.toString(),
@@ -497,7 +496,7 @@ class ExportServiceImplDesktop {
         final file = ArchiveFile(fileName, contentBytes.length, contentBytes);
         archive.addFile(file);
 
-        log('导出PO翻译文件: $fileName', name: 'ExportServiceImplDesktop');
+        Logger.info('导出PO翻译文件: $fileName');
       }
 
       // 编码为 ZIP 数据
@@ -508,7 +507,7 @@ class ExportServiceImplDesktop {
         archiveData: zipData,
       );
     } catch (error, stackTrace) {
-      log('PO导出任务执行失败', error: error, stackTrace: stackTrace, name: 'ExportServiceImplDesktop');
+      Logger.error('PO导出任务执行失败', error: error, stackTrace: stackTrace);
       return ExportTaskResult(
         success: false,
         error: error.toString(),

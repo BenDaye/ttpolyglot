@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -7,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ttpolyglot/src/common/common.dart';
 import 'package:ttpolyglot/src/core/services/service.dart';
 import 'package:ttpolyglot/src/features/settings/controllers/translation_config_controller.dart';
+import 'package:ttpolyglot_core/core.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -64,20 +64,20 @@ Future<void> _initializeDesktop() async {
 /// Web端初始化
 Future<void> _initializeWeb() async {
   // Web端特定初始化
-  log('🌐 Web platform initialized');
+  Logger.info('🌐 Web platform initialized');
 }
 
 /// 移动端初始化
 Future<void> _initializeMobile() async {
   // 移动端特定初始化
-  log('📱 Mobile platform initialized');
+  Logger.info('📱 Mobile platform initialized');
 }
 
 /// 初始化存储服务
 Future<void> _initializeStorage() async {
   final storageProvider = StorageProvider();
   await storageProvider.initialize();
-  log('💾 Storage service initialized for ${storageProvider.currentPlatform}');
+  Logger.info('💾 Storage service initialized for ${storageProvider.currentPlatform}');
 }
 
 /// 初始化服务
@@ -112,5 +112,5 @@ Future<void> _initializeService() async {
   Get.lazyPut(() => TranslationServiceManager(), fenix: true);
   Get.lazyPut(() => TranslationConfigController(), fenix: true);
 
-  log('⚙️ Services initialized');
+  Logger.info('⚙️ Services initialized');
 }

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:excel/excel.dart' as excel;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -111,8 +109,7 @@ class _ProjectImportViewState extends State<ProjectImportView> {
                                           mimeType: 'application/json',
                                         );
                                       } catch (error, stackTrace) {
-                                        log('下载 JSON Demo 失败',
-                                            error: error, stackTrace: stackTrace, name: 'ProjectImportView');
+                                        Logger.error('下载 JSON Demo 失败', error: error, stackTrace: stackTrace);
                                       }
                                     },
                                     style: TextButton.styleFrom(
@@ -144,8 +141,7 @@ class _ProjectImportViewState extends State<ProjectImportView> {
                                           mimeType: 'text/csv',
                                         );
                                       } catch (error, stackTrace) {
-                                        log('下载 CSV Demo 失败',
-                                            error: error, stackTrace: stackTrace, name: 'ProjectImportView');
+                                        Logger.error('下载 CSV Demo 失败', error: error, stackTrace: stackTrace);
                                       }
                                     },
                                     style: TextButton.styleFrom(
@@ -184,8 +180,7 @@ class _ProjectImportViewState extends State<ProjectImportView> {
                                           );
                                         }
                                       } catch (error, stackTrace) {
-                                        log('下载 Excel Demo 失败',
-                                            error: error, stackTrace: stackTrace, name: 'ProjectImportView');
+                                        Logger.error('下载 Excel Demo 失败', error: error, stackTrace: stackTrace);
                                       }
                                     },
                                     style: TextButton.styleFrom(
@@ -216,8 +211,7 @@ class _ProjectImportViewState extends State<ProjectImportView> {
                                           mimeType: 'application/json',
                                         );
                                       } catch (error, stackTrace) {
-                                        log('下载 ARB Demo 失败',
-                                            error: error, stackTrace: stackTrace, name: 'ProjectImportView');
+                                        Logger.error('下载 ARB Demo 失败', error: error, stackTrace: stackTrace);
                                       }
                                     },
                                     style: TextButton.styleFrom(
@@ -248,8 +242,7 @@ class _ProjectImportViewState extends State<ProjectImportView> {
                                           mimeType: 'text/plain',
                                         );
                                       } catch (error, stackTrace) {
-                                        log('下载 PO Demo 失败',
-                                            error: error, stackTrace: stackTrace, name: 'ProjectImportView');
+                                        Logger.error('下载 PO Demo 失败', error: error, stackTrace: stackTrace);
                                       }
                                     },
                                     style: TextButton.styleFrom(

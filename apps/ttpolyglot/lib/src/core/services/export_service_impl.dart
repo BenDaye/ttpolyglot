@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/platform/platform_adapter.dart';
 import 'package:ttpolyglot/src/core/services/service.dart';
@@ -15,7 +13,7 @@ class ExportServiceImpl extends GetxService implements ExportService {
       final platformAdapter = PlatformAdapter();
       return ExportServiceImpl(platformAdapter);
     } catch (error, stackTrace) {
-      log('创建导出服务失败', error: error, stackTrace: stackTrace, name: 'ExportServiceImpl');
+      Logger.error('创建导出服务失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

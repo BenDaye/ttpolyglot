@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:excel/excel.dart' as excel;
 import 'package:file_picker/file_picker.dart';
@@ -379,13 +378,13 @@ class _UploadFileListState extends State<UploadFileList> {
 
     final fileNameLower = fileName.toLowerCase();
 
-    log('开始智能匹配语言，文件名: $fileName', name: 'UploadFileList');
+    Logger.info('开始智能匹配语言，文件名: $fileName');
 
     // 1. 精确匹配完整语言代码 (如 zh-CN, en-US)
     for (final language in widget.languages) {
       final code = language.code.toLowerCase();
       if (fileNameLower.contains(code)) {
-        log('精确匹配语言代码: ${language.nativeName} (${language.code})', name: 'UploadFileList');
+        Logger.info('精确匹配语言代码: ${language.nativeName} (${language.code})');
         return language;
       }
     }
@@ -408,7 +407,7 @@ class _UploadFileListState extends State<UploadFileList> {
       for (final pattern in patterns) {
         final regex = RegExp(pattern);
         if (regex.hasMatch(fileNameLower)) {
-          log('模式匹配语言代码: ${language.nativeName} (${language.code}) 使用模式: $pattern', name: 'UploadFileList');
+          Logger.info('模式匹配语言代码: ${language.nativeName} (${language.code}) 使用模式: $pattern');
           return language;
         }
       }
@@ -446,7 +445,7 @@ class _UploadFileListState extends State<UploadFileList> {
             lang.code.toLowerCase() == targetCode.toLowerCase() ||
             lang.code.toLowerCase().startsWith('${targetCode.toLowerCase()}-'));
         if (matchedLanguage != null) {
-          log('语言名称匹配: ${matchedLanguage.nativeName} (${matchedLanguage.code}) 通过关键词: ${entry.key}',
+          Logger.info('语言名称匹配: ${matchedLanguage.nativeName} (${matchedLanguage.code}) 通过关键词: ${entry.key}',
               name: 'UploadFileList');
           return matchedLanguage;
         }
@@ -479,7 +478,7 @@ class _UploadFileListState extends State<UploadFileList> {
             lang.code.toLowerCase() == extractedCode.toLowerCase() ||
             lang.code.toLowerCase().startsWith('${extractedCode.toLowerCase()}-'));
         if (matchedLanguage != null) {
-          log('特殊模式匹配: ${matchedLanguage.nativeName} (${matchedLanguage.code}) 提取代码: $extractedCode',
+          Logger.info('特殊模式匹配: ${matchedLanguage.nativeName} (${matchedLanguage.code}) 提取代码: $extractedCode',
               name: 'UploadFileList');
           return matchedLanguage;
         }
@@ -491,12 +490,12 @@ class _UploadFileListState extends State<UploadFileList> {
         .firstWhereOrNull((lang) => lang.code.toLowerCase() == 'en' || lang.code.toLowerCase().startsWith('en-'));
 
     if (defaultLanguage != null) {
-      log('使用默认英语: ${defaultLanguage.nativeName} (${defaultLanguage.code})', name: 'UploadFileList');
+      Logger.info('使用默认英语: ${defaultLanguage.nativeName} (${defaultLanguage.code})');
       return defaultLanguage;
     }
 
     // 6. 最后使用第一个可用语言
-    log('使用第一个可用语言: ${widget.languages.first.nativeName} (${widget.languages.first.code})', name: 'UploadFileList');
+    Logger.info('使用第一个可用语言: ${widget.languages.first.nativeName} (${widget.languages.first.code})');
     return widget.languages.first;
   }
 
@@ -556,7 +555,7 @@ class _UploadFileListState extends State<UploadFileList> {
           // 验证翻译内容
           final validationWarnings = _validateTranslations(translations);
           if (validationWarnings.isNotEmpty) {
-            log('文件 ${file.name} 验证警告: ${validationWarnings.length} 个', name: 'UploadFileList');
+            Logger.info('文件 ${file.name} 验证警告: ${validationWarnings.length} 个');
             // 显示前3个警告
             final displayWarnings = validationWarnings.take(3).join('; ');
             final moreCount = validationWarnings.length > 3 ? ' 等${validationWarnings.length}个问题' : '';
@@ -570,14 +569,14 @@ class _UploadFileListState extends State<UploadFileList> {
           // 进行冲突检测预览
           await _detectFileConflicts(file.name, translations, selectedLanguage);
 
-          log('成功解析文件 ${file.name}，共 ${translations.length} 个翻译条目', name: 'UploadFileList');
+          Logger.info('成功解析文件 ${file.name}，共 ${translations.length} 个翻译条目');
         } else {
           Get.snackbar('警告', '文件 ${file.name} 没有解析到有效的翻译内容');
         }
 
         setState(() {});
       } catch (error, stackTrace) {
-        log('解析文件失败', error: error, stackTrace: stackTrace, name: 'UploadFileList');
+        Logger.error('解析文件失败', error: error, stackTrace: stackTrace);
         Get.snackbar('错误', '解析文件 ${file.name} 失败: $error');
       }
     }
@@ -697,9 +696,9 @@ class _UploadFileListState extends State<UploadFileList> {
       );
 
       _fileConflictMap[fileName] = conflictResult;
-      log('文件 $fileName 冲突检测完成: ${conflictResult.conflictCount} 个冲突', name: 'UploadFileList');
+      Logger.info('文件 $fileName 冲突检测完成: ${conflictResult.conflictCount} 个冲突');
     } catch (error, stackTrace) {
-      log('文件冲突检测失败', error: error, stackTrace: stackTrace, name: 'UploadFileList');
+      Logger.error('文件冲突检测失败', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -718,7 +717,7 @@ class _UploadFileListState extends State<UploadFileList> {
 
       return translations;
     } catch (error, stackTrace) {
-      log('解析 JSON 文件失败', error: error, stackTrace: stackTrace, name: 'UploadFileList');
+      Logger.error('解析 JSON 文件失败', error: error, stackTrace: stackTrace);
       return {};
     }
   }
@@ -737,7 +736,7 @@ class _UploadFileListState extends State<UploadFileList> {
 
       return translations;
     } catch (error, stackTrace) {
-      log('解析 CSV 文件失败', error: error, stackTrace: stackTrace, name: 'UploadFileList');
+      Logger.error('解析 CSV 文件失败', error: error, stackTrace: stackTrace);
       return {};
     }
   }
@@ -769,7 +768,7 @@ class _UploadFileListState extends State<UploadFileList> {
 
       return translations;
     } catch (error, stackTrace) {
-      log('解析 Excel 文件失败', error: error, stackTrace: stackTrace, name: 'UploadFileList');
+      Logger.error('解析 Excel 文件失败', error: error, stackTrace: stackTrace);
       return {};
     }
   }
@@ -788,7 +787,7 @@ class _UploadFileListState extends State<UploadFileList> {
 
       return translations;
     } catch (error, stackTrace) {
-      log('解析 ARB 文件失败', error: error, stackTrace: stackTrace, name: 'UploadFileList');
+      Logger.error('解析 ARB 文件失败', error: error, stackTrace: stackTrace);
       return {};
     }
   }
@@ -807,7 +806,7 @@ class _UploadFileListState extends State<UploadFileList> {
 
       return translations;
     } catch (error, stackTrace) {
-      log('解析 PO 文件失败', error: error, stackTrace: stackTrace, name: 'UploadFileList');
+      Logger.error('解析 PO 文件失败', error: error, stackTrace: stackTrace);
       return {};
     }
   }

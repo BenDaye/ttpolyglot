@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_parsers/parsers.dart';
@@ -33,14 +31,14 @@ void main() {
         final helloEntry = result.entries.firstWhere((e) => e.key == 'hello');
         expect(helloEntry.targetText, '你好');
 
-        log('✅ JSON格式demo文件解析成功！解析了 ${result.entries.length} 个翻译条目');
+        Logger.info('✅ JSON格式demo文件解析成功！解析了 ${result.entries.length} 个翻译条目');
 
         // 打印解析结果
         for (final entry in result.entries) {
-          log('  ${entry.key}: ${entry.targetText}');
+          Logger.info('  ${entry.key}: ${entry.targetText}');
         }
       } catch (error, stackTrace) {
-        log('❌ JSON格式demo文件解析失败', error: error, stackTrace: stackTrace);
+        Logger.error('❌ JSON格式demo文件解析失败', error: error, stackTrace: stackTrace);
         fail('JSON解析失败: $error');
       }
     });
@@ -68,9 +66,9 @@ thank_you,谢谢''';
         final result = await parser.parseString(csvContent, language);
 
         // 调试输出
-        log('CSV解析结果: ${result.entries.length} 个条目');
+        Logger.info('CSV解析结果: ${result.entries.length} 个条目');
         if (result.warnings.isNotEmpty) {
-          log('CSV解析警告: ${result.warnings.join(', ')}');
+          Logger.info('CSV解析警告: ${result.warnings.join(', ')}');
         }
 
         // 验证解析结果
@@ -82,14 +80,14 @@ thank_you,谢谢''';
         final welcomeEntry = result.entries.firstWhere((e) => e.key == 'welcome');
         expect(welcomeEntry.targetText, '欢迎');
 
-        log('✅ CSV格式demo文件解析成功！解析了 ${result.entries.length} 个翻译条目');
+        Logger.info('✅ CSV格式demo文件解析成功！解析了 ${result.entries.length} 个翻译条目');
 
         // 打印解析结果
         for (final entry in result.entries) {
-          log('  ${entry.key}: ${entry.targetText}');
+          Logger.info('  ${entry.key}: ${entry.targetText}');
         }
       } catch (error, stackTrace) {
-        log('❌ CSV格式demo文件解析失败', error: error, stackTrace: stackTrace, name: 'CSVTest');
+        Logger.error('❌ CSV格式demo文件解析失败', error: error, stackTrace: stackTrace);
         fail('CSV解析失败: $error');
       }
     });
@@ -121,14 +119,14 @@ thank_you,谢谢''';
         final goodbyeEntry = result.entries.firstWhere((e) => e.key == 'goodbye');
         expect(goodbyeEntry.targetText, '再见');
 
-        log('✅ ARB格式demo文件解析成功！解析了 ${result.entries.length} 个翻译条目');
+        Logger.info('✅ ARB格式demo文件解析成功！解析了 ${result.entries.length} 个翻译条目');
 
         // 打印解析结果
         for (final entry in result.entries) {
-          log('  ${entry.key}: ${entry.targetText}');
+          Logger.info('  ${entry.key}: ${entry.targetText}');
         }
       } catch (error, stackTrace) {
-        log('❌ ARB格式demo文件解析失败', error: error, stackTrace: stackTrace);
+        Logger.error('❌ ARB格式demo文件解析失败', error: error, stackTrace: stackTrace);
         fail('ARB解析失败: $error');
       }
     });
@@ -163,9 +161,9 @@ msgstr "谢谢"''';
         final result = await parser.parseString(poContent, language);
 
         // 调试输出
-        log('PO解析结果: ${result.entries.length} 个条目');
+        Logger.info('PO解析结果: ${result.entries.length} 个条目');
         if (result.warnings.isNotEmpty) {
-          log('PO解析警告: ${result.warnings.join(', ')}');
+          Logger.info('PO解析警告: ${result.warnings.join(', ')}');
         }
 
         // 验证解析结果
@@ -177,14 +175,14 @@ msgstr "谢谢"''';
         final thankYouEntry = result.entries.firstWhere((e) => e.key == 'thank_you');
         expect(thankYouEntry.targetText, '谢谢');
 
-        log('✅ PO格式demo文件解析成功！解析了 ${result.entries.length} 个翻译条目');
+        Logger.info('✅ PO格式demo文件解析成功！解析了 ${result.entries.length} 个翻译条目');
 
         // 打印解析结果
         for (final entry in result.entries) {
-          log('  ${entry.key}: ${entry.targetText}');
+          Logger.info('  ${entry.key}: ${entry.targetText}');
         }
       } catch (error, stackTrace) {
-        log('❌ PO格式demo文件解析失败', error: error, stackTrace: stackTrace, name: 'POTest');
+        Logger.error('❌ PO格式demo文件解析失败', error: error, stackTrace: stackTrace);
         fail('PO解析失败: $error');
       }
     });
@@ -192,10 +190,10 @@ msgstr "谢谢"''';
     testWidgets('测试支持的文件格式', (WidgetTester tester) async {
       final supportedFormats = ParserFactory.getSupportedFormats();
 
-      log('📋 支持的文件格式:');
+      Logger.info('📋 支持的文件格式:');
       for (final format in supportedFormats) {
         final parser = ParserFactory.getParser(format);
-        log('  - $format (${parser.displayName}): ${parser.supportedExtensions.join(', ')}');
+        Logger.info('  - $format (${parser.displayName}): ${parser.supportedExtensions.join(', ')}');
       }
 
       // 验证必要的格式都被支持
@@ -204,7 +202,7 @@ msgstr "谢谢"''';
       expect(supportedFormats.contains('arb'), true);
       expect(supportedFormats.contains('po'), true);
 
-      log('✅ 所有期望的文件格式都被支持！');
+      Logger.info('✅ 所有期望的文件格式都被支持！');
     });
   });
 }

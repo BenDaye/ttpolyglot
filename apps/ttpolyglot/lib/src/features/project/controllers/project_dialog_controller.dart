@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/features/features.dart';
@@ -306,8 +304,7 @@ class ProjectDialogController extends GetxController {
         Get.snackbar('成功', '项目创建成功');
       }
     } catch (error, stackTrace) {
-      log(_isEditMode.value ? '更新项目失败' : '创建项目失败',
-          error: error, stackTrace: stackTrace, name: 'ProjectDialogController');
+      Logger.error(_isEditMode.value ? '更新项目失败' : '创建项目失败', error: error, stackTrace: stackTrace);
       Get.snackbar('错误', '${_isEditMode.value ? '更新' : '创建'}项目失败: $error');
     } finally {
       _isLoading.value = false;

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -430,7 +428,7 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
         } else {
           failCount++;
           failedEntries.add(entry);
-          log('翻译失败: ${entry.key} - ${result.error}', name: 'TranslationsCardByKey');
+          Logger.error('翻译失败: ${entry.key} - ${result.error}');
         }
       }
 
@@ -455,7 +453,7 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
         });
       }
     } catch (error, stackTrace) {
-      log('翻译处理异常', error: error, stackTrace: stackTrace, name: 'TranslationsCardByKey');
+      Logger.error('翻译处理异常', error: error, stackTrace: stackTrace);
       if (context.mounted) {
         _showErrorSnackBar(context, '翻译处理异常: $error');
       }

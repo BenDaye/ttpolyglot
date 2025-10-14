@@ -1,8 +1,7 @@
-import 'dart:developer';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:ttpolyglot/src/features/project/widgets/upload_drop.dart';
+import 'package:ttpolyglot_core/core.dart';
 
 class UploadFile extends StatefulWidget {
   final double height;
@@ -73,7 +72,7 @@ class _UploadFileState extends State<UploadFile> {
       //
       _filterFiles(result.files);
     } catch (error, stackTrace) {
-      log('_pickFiles', error: error, stackTrace: stackTrace);
+      Logger.error('_pickFiles', error: error, stackTrace: stackTrace);
       _showErrorSnackBar('选择文件失败: $error');
     }
   }
@@ -142,7 +141,7 @@ class _UploadFileState extends State<UploadFile> {
                         )
                     : Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
-                    ),
+                        ),
               ),
               const SizedBox(height: 16.0),
               ElevatedButton.icon(

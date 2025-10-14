@@ -1,6 +1,5 @@
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
+import 'package:ttpolyglot_core/core.dart';
 
 /// 响应统一处理拦截器
 class ResponseInterceptor extends Interceptor {
@@ -40,7 +39,7 @@ class ResponseInterceptor extends Interceptor {
       // 其他情况，直接返回
       handler.resolve(response);
     } catch (error, stackTrace) {
-      log('响应拦截器异常', error: error, stackTrace: stackTrace, name: 'ResponseInterceptor');
+      Logger.error('响应拦截器异常', error: error, stackTrace: stackTrace);
       handler.reject(
         DioException(
           requestOptions: response.requestOptions,

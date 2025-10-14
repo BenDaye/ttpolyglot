@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:ttpolyglot/src/core/platform/platform_adapter.dart';
 import 'package:ttpolyglot_core/core.dart';
 
@@ -51,7 +49,7 @@ class StorageProvider {
       _isInitialized = true;
     } catch (error, stackTrace) {
       _isInitialized = false;
-      log('initialize', error: error, stackTrace: stackTrace);
+      Logger.error('initialize', error: error, stackTrace: stackTrace);
       rethrow;
     } finally {
       _isInitializing = false;

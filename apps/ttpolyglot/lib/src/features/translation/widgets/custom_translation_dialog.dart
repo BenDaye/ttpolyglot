@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -279,7 +277,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
           setState(() {
             _selectedProvider = value;
           });
-          log('选择翻译提供商: ${value.displayName}', name: 'CustomTranslationDialog');
+          Logger.info('选择翻译提供商: ${value.displayName}');
         }
       },
     );
@@ -355,7 +353,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
           setState(() {
             _selectedSourceEntry = value;
           });
-          log('选择源语言: ${value.targetLanguage.code} - ${value.targetText}', name: 'CustomTranslationDialog');
+          Logger.info('选择源语言: ${value.targetLanguage.code} - ${value.targetText}');
         }
       },
     );
@@ -409,7 +407,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
       // 开始自定义翻译
       await _performCustomTranslation(translationManager);
     } catch (error, stackTrace) {
-      log('自定义翻译异常', error: error, stackTrace: stackTrace, name: 'CustomTranslationDialog');
+      Logger.error('自定义翻译异常', error: error, stackTrace: stackTrace);
       _showErrorSnackBar('翻译处理异常: $error');
       _resetTranslatingState();
     }
@@ -456,11 +454,11 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
     } catch (error, stackTrace) {
       // 如果是取消异常，直接返回
       if (error is CancelException) {
-        log('翻译被取消: $error', name: 'CustomTranslationDialog');
+        Logger.info('翻译被取消: $error');
         return;
       }
 
-      log('自定义翻译异常', error: error, stackTrace: stackTrace, name: 'CustomTranslationDialog');
+      Logger.error('自定义翻译异常', error: error, stackTrace: stackTrace);
       _showErrorSnackBar('翻译处理异常: $error');
       _resetTranslatingState();
     }
@@ -491,7 +489,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
         ));
       } else {
         failCount++;
-        log('翻译失败: ${entry.key} - ${result.error}', name: 'CustomTranslationDialog');
+        Logger.info('翻译失败: ${entry.key} - ${result.error}');
       }
     }
 
