@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:excel/excel.dart' as excel;
 import 'package:flutter/material.dart';
@@ -291,7 +290,7 @@ class _ProjectImportViewState extends State<ProjectImportView> {
                       UploadFile(
                         height: 200.0,
                         multiple: true,
-                        title: Platform.isWindows ? '拖拽文件到此处或点击选择' : '点击选择',
+                        title: '拖拽文件到此处或点击选择',
                         subtitle: '支持 JSON、CSV、Excel、ARB、PO 格式',
                         allowedExtensions: controller.allowedExtensions,
                         maxFileSize: 10 * 1024 * 1024, // 10MB
