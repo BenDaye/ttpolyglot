@@ -1,0 +1,17 @@
+name: ttpolyglot_model
+description: TTPolyglot 模型包，提供翻译管理平台的数据模型
+version: 1.0.0
+publish_to: none 
+
+environment:
+  sdk: ^3.6.1
+
+dependencies:
+  ttpolyglot_core: ^1.0.0
+
+dev_dependencies:
+  # 代码质量检查
+  lints: ^5.0.0
+
+  # 单元测试
+  test: ^1.24.0 
