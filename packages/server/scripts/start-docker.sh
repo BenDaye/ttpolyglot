@@ -152,13 +152,18 @@ load_environment() {
 check_ports() {
     local ports=()
     
+    # Nginx端口（所有环境都需要检查）
+    local nginx_http_port=${NGINX_HTTP_PORT:-8080}
+    local nginx_https_port=${NGINX_HTTPS_PORT:-4433}
+    
+    # 生产环境使用默认的80/443，开发环境使用8080/4433
     if [ "$ENV_MODE" = "production" ]; then
-        ports=(80 443)
-        print_info "检查生产环境端口: 80, 443"
-    else
-        ports=(8080)
-        print_info "检查开发环境端口: 8080"
+        nginx_http_port=${NGINX_HTTP_PORT:-80}
+        nginx_https_port=${NGINX_HTTPS_PORT:-443}
     fi
+    
+    ports=($nginx_http_port $nginx_https_port)
+    print_info "检查 Nginx 端口: ${nginx_http_port}, ${nginx_https_port}"
     
     local occupied_ports=()
     
@@ -278,17 +283,11 @@ start_services() {
     print_success "服务启动成功！"
     print_separator
     
-    if [ "$ENV_MODE" = "production" ]; then
-        echo -e "${BOLD}访问地址:${NC}"
-        echo "  HTTP:  http://localhost"
-        echo "  HTTPS: https://localhost"
-        echo ""
-    else
-        echo -e "${BOLD}访问地址:${NC}"
-        echo "  API:   http://localhost:8080"
-        echo "  健康检查: http://localhost:8080/health"
-        echo ""
-    fi
+    echo -e "${BOLD}访问地址:${NC}"
+    echo "  HTTP:  http://localhost:${NGINX_HTTP_PORT:-8080}"
+    echo "  HTTPS: https://localhost:${NGINX_HTTPS_PORT:-4433}"
+    echo "  健康检查: http://localhost:${NGINX_HTTP_PORT:-8080}/health"
+    echo ""
     
     echo -e "${BOLD}管理命令:${NC}"
     echo "  查看状态: ./scripts/start-docker.sh status"
@@ -442,17 +441,23 @@ show_info() {
     echo "  Docker Compose 版本: $(docker-compose --version | cut -d' ' -f4 | tr -d ',')"
     echo ""
     
+    echo -e "${BOLD}通用特性:${NC}"
+    echo "  ✅ Nginx 反向代理（所有环境）"
+    echo "  ✅ SSL/TLS 支持"
+    echo "  ✅ 自动重启"
+    echo "  ✅ 健康检查"
+    echo ""
+    
     if [ "$ENV_MODE" = "production" ]; then
-        echo -e "${BOLD}生产环境特性:${NC}"
-        echo "  ✅ Nginx 反向代理"
-        echo "  ✅ SSL/TLS 支持"
-        echo "  ✅ 自动重启"
-        echo "  ✅ 健康检查"
+        echo -e "${BOLD}生产环境配置:${NC}"
+        echo "  HTTP端口: ${NGINX_HTTP_PORT:-80}"
+        echo "  HTTPS端口: ${NGINX_HTTPS_PORT:-443}"
     else
-        echo -e "${BOLD}开发环境特性:${NC}"
-        echo "  ✅ 直接访问端口 8080"
-        echo "  ✅ 详细日志输出"
-        echo "  ✅ 调试模式"
+        echo -e "${BOLD}开发环境配置:${NC}"
+        echo "  HTTP端口: ${NGINX_HTTP_PORT:-8080}"
+        echo "  HTTPS端口: ${NGINX_HTTPS_PORT:-4433}"
+        echo "  详细日志输出"
+        echo "  调试模式"
     fi
     
     echo ""
@@ -520,9 +525,17 @@ ${BOLD}环境配置:${NC}
   
   开发环境:
     ENVIRONMENT=develop
+    NGINX_HTTP_PORT=8080    # Nginx HTTP端口（默认8080）
+    NGINX_HTTPS_PORT=4433   # Nginx HTTPS端口（默认4433）
 
   生产环境:
     ENVIRONMENT=production
+    NGINX_HTTP_PORT=80      # Nginx HTTP端口（默认80）
+    NGINX_HTTPS_PORT=443    # Nginx HTTPS端口（默认443）
+
+${BOLD}注意:${NC}
+  • Nginx 在所有环境下都会启动
+  • 可通过 .env 文件配置 Nginx 端口
 
 ${BOLD}更多信息:${NC}
   查看详细文档: ./scripts/START_DOCKER_README.md
