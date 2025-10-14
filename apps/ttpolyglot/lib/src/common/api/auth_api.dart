@@ -7,6 +7,7 @@ import 'package:ttpolyglot/src/common/network/network.dart';
 /// 认证 API
 class AuthApi {
   /// 登录
+  /// 注意：登录不使用拦截器的 loading，由 Controller 控制
   Future<LoginResponse> login(LoginRequest request) async {
     try {
       final response = await HttpClient.post<Map<String, dynamic>>(
@@ -14,7 +15,7 @@ class AuthApi {
         data: request.toJson(),
         options: Options(
           extra: const RequestExtra(
-            showLoading: true,
+            showLoading: false, // 关键：登录不使用拦截器 loading
             showErrorToast: true,
           ).toJson(),
         ),

@@ -3,12 +3,13 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Response, FormData, MultipartFile;
+import 'package:ttpolyglot/src/common/network/loading_manager.dart';
 import 'package:ttpolyglot/src/common/network/models/network_models.dart';
 
 /// Loading 状态管理拦截器
 class LoadingInterceptor extends Interceptor {
-  // Loading 引用计数
-  int _loadingCount = 0;
+  // 使用全局单例管理 Loading
+  final LoadingManager _loadingManager = LoadingManager();
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
@@ -16,7 +17,7 @@ class LoadingInterceptor extends Interceptor {
       final extra = RequestExtra.fromJson(options.extra);
 
       if (extra.showLoading) {
-        _showLoading();
+        _loadingManager.show();
       }
 
       handler.next(options);
@@ -28,72 +29,44 @@ class LoadingInterceptor extends Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    try {
-      final extra = RequestExtra.fromJson(response.requestOptions.extra);
+    RequestExtra? extra;
+    bool shouldHideLoading = false;
 
-      if (extra.showLoading) {
-        _hideLoading();
-      }
+    try {
+      extra = RequestExtra.fromJson(response.requestOptions.extra);
+      shouldHideLoading = extra.showLoading;
 
       // 显示成功提示
       if (extra.showSuccessToast) {
         final message = (response.data as Map<String, dynamic>?)?['message'] as String? ?? '操作成功';
         _showSuccessToast(message);
       }
-
-      handler.next(response);
     } catch (error, stackTrace) {
       log('Loading 拦截器响应异常', error: error, stackTrace: stackTrace, name: 'LoadingInterceptor');
+    } finally {
+      // 确保在 finally 中关闭 loading
+      if (shouldHideLoading) {
+        _loadingManager.hide();
+      }
       handler.next(response);
     }
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
+    bool shouldHideLoading = false;
+
     try {
       final extra = RequestExtra.fromJson(err.requestOptions.extra);
-
-      if (extra.showLoading) {
-        _hideLoading();
-      }
-
-      handler.next(err);
+      shouldHideLoading = extra.showLoading;
     } catch (error, stackTrace) {
       log('Loading 拦截器错误异常', error: error, stackTrace: stackTrace, name: 'LoadingInterceptor');
+    } finally {
+      // 确保在 finally 中关闭 loading
+      if (shouldHideLoading) {
+        _loadingManager.hide();
+      }
       handler.next(err);
-    }
-  }
-
-  /// 显示 Loading
-  void _showLoading() {
-    if (_loadingCount == 0) {
-      try {
-        Get.dialog(
-          const Center(
-            child: CircularProgressIndicator(),
-          ),
-          barrierDismissible: false,
-          name: 'loading_dialog',
-        );
-      } catch (error, stackTrace) {
-        log('显示 Loading 失败', error: error, stackTrace: stackTrace, name: 'LoadingInterceptor');
-      }
-    }
-    _loadingCount++;
-  }
-
-  /// 隐藏 Loading
-  void _hideLoading() {
-    _loadingCount--;
-    if (_loadingCount <= 0) {
-      _loadingCount = 0;
-      try {
-        if (Get.isDialogOpen ?? false) {
-          Get.back();
-        }
-      } catch (error, stackTrace) {
-        log('隐藏 Loading 失败', error: error, stackTrace: stackTrace, name: 'LoadingInterceptor');
-      }
     }
   }
 

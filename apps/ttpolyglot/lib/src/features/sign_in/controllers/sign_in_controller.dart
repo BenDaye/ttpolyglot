@@ -17,11 +17,13 @@ class SignInController extends GetxController {
   final _isLoading = false.obs;
   final _errorMessage = ''.obs;
   final _showPassword = false.obs;
+  final _autoValidate = false.obs; // 自动验证模式
 
   // Getters
   bool get isLoading => _isLoading.value;
   String get errorMessage => _errorMessage.value;
   bool get showPassword => _showPassword.value;
+  AutovalidateMode get autoValidateMode => _autoValidate.value ? AutovalidateMode.always : AutovalidateMode.disabled;
 
   @override
   void onInit() {
@@ -58,16 +60,27 @@ class SignInController extends GetxController {
 
   /// 登录
   Future<void> login() async {
+    // 防止重复提交
+    if (_isLoading.value) {
+      log('登录请求进行中，忽略重复提交', name: 'SignInController');
+      return;
+    }
+
     // 清除之前的错误
     _errorMessage.value = '';
 
     // 验证表单
     if (formKey.currentState?.validate() != true) {
+      // 启用自动验证，让用户看到错误提示
+      _autoValidate.value = true;
+      log('表单验证失败', name: 'SignInController');
       return;
     }
 
     try {
       _isLoading.value = true;
+
+      log('开始登录请求', name: 'SignInController');
 
       // 调用认证服务登录
       await _authService.login(
@@ -111,7 +124,9 @@ class SignInController extends GetxController {
 
       _errorMessage.value = message;
     } finally {
+      // 确保 loading 状态一定会被重置
       _isLoading.value = false;
+      log('登录流程结束，loading 状态已重置', name: 'SignInController');
     }
   }
 
