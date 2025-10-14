@@ -82,6 +82,19 @@ Future<void> _initializeStorage() async {
 
 /// 初始化服务
 Future<void> _initializeService() async {
+  // 配置日志
+  Get.config(
+    enableLog: false, // 关闭日志
+    logWriterCallback: (text, {isError = false}) {
+      // 自定义日志处理逻辑
+      if (isError) {
+        Logger.warning('Getx: $text');
+      } else {
+        Logger.debug('Getx: $text');
+      }
+    },
+  );
+
   // 初始化 SharedPreferences
   final prefs = await SharedPreferences.getInstance();
 
