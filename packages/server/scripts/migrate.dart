@@ -10,12 +10,17 @@ import '../database/migration_service.dart';
 
 /// 主函数
 Future<void> main(List<String> args) async {
+  // 配置日志级别：只显示错误和警告
+  LoggerFactory.configure(
+    minLevel: LogLevel.error,
+    enableConsole: true,
+    enableJson: false, // 禁用 JSON 格式输出，只保留控制台输出
+  );
+
   final logger = LoggerFactory.getLogger('MigrationScript');
   DatabaseService? databaseService;
 
   try {
-    logger.info('开始数据库迁移和种子数据执行');
-
     // 加载配置
     await ServerConfig.load();
     ServerConfig.validate();
@@ -127,7 +132,7 @@ Future<void> main(List<String> args) async {
       }
     }
 
-    logger.info('数据库迁移和种子数据执行完成');
+    // 不再打印成功消息（只在出错时打印）
   } catch (error, stackTrace) {
     logger.error('迁移执行失败', error: error, stackTrace: stackTrace);
     exit(1);
