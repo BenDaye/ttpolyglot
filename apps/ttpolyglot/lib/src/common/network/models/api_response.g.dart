@@ -11,7 +11,7 @@ _$ApiResponseImpl<T> _$$ApiResponseImplFromJson<T>(
   T Function(Object? json) fromJsonT,
 ) =>
     _$ApiResponseImpl<T>(
-      code: _codeFromJson((json['code'] as num).toInt()),
+      code: apiResponseCodeFromJson((json['code'] as num).toInt()),
       message: json['message'] as String,
       data: _$nullableGenericFromJson(json['data'], fromJsonT),
     );
@@ -21,7 +21,7 @@ Map<String, dynamic> _$$ApiResponseImplToJson<T>(
   Object? Function(T value) toJsonT,
 ) =>
     <String, dynamic>{
-      'code': _codeToJson(instance.code),
+      'code': apiResponseCodeToJson(instance.code),
       'message': instance.message,
       'data': _$nullableGenericToJson(instance.data, toJsonT),
     };
