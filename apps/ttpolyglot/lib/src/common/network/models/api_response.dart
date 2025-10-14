@@ -3,12 +3,22 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'api_response.freezed.dart';
 part 'api_response.g.dart';
 
+/// 将 int 转换为 ApiResponseCode
+ApiResponseCode _codeFromJson(int value) => ApiResponseCode.fromValue(value);
+
+/// 将 ApiResponseCode 转换为 int
+int _codeToJson(ApiResponseCode code) => code.value;
+
 /// 统一 API 响应模型
 @Freezed(genericArgumentFactories: true)
 class ApiResponse<T> with _$ApiResponse<T> {
   const ApiResponse._();
 
   const factory ApiResponse({
+    @JsonKey(
+      fromJson: _codeFromJson,
+      toJson: _codeToJson,
+    )
     required ApiResponseCode code,
     required String message,
     T? data,

@@ -11,7 +11,7 @@ _$ApiResponseImpl<T> _$$ApiResponseImplFromJson<T>(
   T Function(Object? json) fromJsonT,
 ) =>
     _$ApiResponseImpl<T>(
-      code: $enumDecode(_$ApiResponseCodeEnumMap, json['code']),
+      code: _codeFromJson((json['code'] as num).toInt()),
       message: json['message'] as String,
       data: _$nullableGenericFromJson(json['data'], fromJsonT),
     );
@@ -21,33 +21,10 @@ Map<String, dynamic> _$$ApiResponseImplToJson<T>(
   Object? Function(T value) toJsonT,
 ) =>
     <String, dynamic>{
-      'code': _$ApiResponseCodeEnumMap[instance.code]!,
+      'code': _codeToJson(instance.code),
       'message': instance.message,
       'data': _$nullableGenericToJson(instance.data, toJsonT),
     };
-
-const _$ApiResponseCodeEnumMap = {
-  ApiResponseCode.created: 'created',
-  ApiResponseCode.noContent: 'noContent',
-  ApiResponseCode.badRequest: 'badRequest',
-  ApiResponseCode.unauthorized: 'unauthorized',
-  ApiResponseCode.forbidden: 'forbidden',
-  ApiResponseCode.notFound: 'notFound',
-  ApiResponseCode.methodNotAllowed: 'methodNotAllowed',
-  ApiResponseCode.conflict: 'conflict',
-  ApiResponseCode.unprocessableEntity: 'unprocessableEntity',
-  ApiResponseCode.tooManyRequests: 'tooManyRequests',
-  ApiResponseCode.internalServerError: 'internalServerError',
-  ApiResponseCode.badGateway: 'badGateway',
-  ApiResponseCode.serviceUnavailable: 'serviceUnavailable',
-  ApiResponseCode.gatewayTimeout: 'gatewayTimeout',
-  ApiResponseCode.businessError: 'businessError',
-  ApiResponseCode.validationError: 'validationError',
-  ApiResponseCode.dataNotFound: 'dataNotFound',
-  ApiResponseCode.duplicateData: 'duplicateData',
-  ApiResponseCode.unknown: 'unknown',
-  ApiResponseCode.success: 'success',
-};
 
 T? _$nullableGenericFromJson<T>(
   Object? input,

@@ -21,6 +21,7 @@ ApiResponse<T> _$ApiResponseFromJson<T>(
 
 /// @nodoc
 mixin _$ApiResponse<T> {
+  @JsonKey(fromJson: _codeFromJson, toJson: _codeToJson)
   ApiResponseCode get code => throw _privateConstructorUsedError;
   String get message => throw _privateConstructorUsedError;
   T? get data => throw _privateConstructorUsedError;
@@ -42,7 +43,11 @@ abstract class $ApiResponseCopyWith<T, $Res> {
           ApiResponse<T> value, $Res Function(ApiResponse<T>) then) =
       _$ApiResponseCopyWithImpl<T, $Res, ApiResponse<T>>;
   @useResult
-  $Res call({ApiResponseCode code, String message, T? data});
+  $Res call(
+      {@JsonKey(fromJson: _codeFromJson, toJson: _codeToJson)
+      ApiResponseCode code,
+      String message,
+      T? data});
 }
 
 /// @nodoc
@@ -89,7 +94,11 @@ abstract class _$$ApiResponseImplCopyWith<T, $Res>
       __$$ApiResponseImplCopyWithImpl<T, $Res>;
   @override
   @useResult
-  $Res call({ApiResponseCode code, String message, T? data});
+  $Res call(
+      {@JsonKey(fromJson: _codeFromJson, toJson: _codeToJson)
+      ApiResponseCode code,
+      String message,
+      T? data});
 }
 
 /// @nodoc
@@ -130,7 +139,10 @@ class __$$ApiResponseImplCopyWithImpl<T, $Res>
 @JsonSerializable(genericArgumentFactories: true)
 class _$ApiResponseImpl<T> extends _ApiResponse<T> {
   const _$ApiResponseImpl(
-      {required this.code, required this.message, this.data})
+      {@JsonKey(fromJson: _codeFromJson, toJson: _codeToJson)
+      required this.code,
+      required this.message,
+      this.data})
       : super._();
 
   factory _$ApiResponseImpl.fromJson(
@@ -138,6 +150,7 @@ class _$ApiResponseImpl<T> extends _ApiResponse<T> {
       _$$ApiResponseImplFromJson(json, fromJsonT);
 
   @override
+  @JsonKey(fromJson: _codeFromJson, toJson: _codeToJson)
   final ApiResponseCode code;
   @override
   final String message;
@@ -181,7 +194,8 @@ class _$ApiResponseImpl<T> extends _ApiResponse<T> {
 
 abstract class _ApiResponse<T> extends ApiResponse<T> {
   const factory _ApiResponse(
-      {required final ApiResponseCode code,
+      {@JsonKey(fromJson: _codeFromJson, toJson: _codeToJson)
+      required final ApiResponseCode code,
       required final String message,
       final T? data}) = _$ApiResponseImpl<T>;
   const _ApiResponse._() : super._();
@@ -191,6 +205,7 @@ abstract class _ApiResponse<T> extends ApiResponse<T> {
       _$ApiResponseImpl<T>.fromJson;
 
   @override
+  @JsonKey(fromJson: _codeFromJson, toJson: _codeToJson)
   ApiResponseCode get code;
   @override
   String get message;
