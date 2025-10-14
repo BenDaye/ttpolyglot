@@ -303,14 +303,25 @@ start_services() {
     print_separator
 }
 
-# 停止服务
+# 停止服务（不删除容器）
 stop_services() {
     print_header "停止 TTPolyglot 服务"
     print_separator
     
+    docker-compose stop
+    
+    print_success "服务已停止（容器保留）"
+    print_info "如需删除容器，请使用: ./scripts/start-docker.sh down"
+}
+
+# 停止并删除服务
+down_services() {
+    print_header "停止并删除 TTPolyglot 服务"
+    print_separator
+    
     docker-compose down
     
-    print_success "服务已停止"
+    print_success "服务已停止并删除"
 }
 
 # 重启服务
@@ -318,7 +329,7 @@ restart_services() {
     print_header "重启 TTPolyglot 服务"
     print_separator
     
-    stop_services
+    down_services
     echo ""
     start_services "$@"
 }
@@ -467,7 +478,8 @@ ${BOLD}用法:${NC}
 
 ${BOLD}操作:${NC}
   start          启动服务（默认，根据 .env 自动判断环境）
-  stop           停止服务
+  stop           停止服务（保留容器）
+  down           停止并删除服务容器
   restart        重启服务
   status         查看服务状态
   logs           查看服务日志
@@ -555,6 +567,9 @@ main() {
             ;;
         stop)
             stop_services
+            ;;
+        down)
+            down_services
             ;;
         restart)
             restart_services "$@"
