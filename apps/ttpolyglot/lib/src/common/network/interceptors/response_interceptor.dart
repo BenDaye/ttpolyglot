@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import 'package:ttpolyglot/src/common/config/config.dart';
 
 /// 响应统一处理拦截器
 class ResponseInterceptor extends Interceptor {
@@ -18,7 +17,7 @@ class ResponseInterceptor extends Interceptor {
 
         if (code != null) {
           // 成功响应
-          if (code == AppConfig.codeSuccess) {
+          if (code == 200) {
             // 直接传递原始数据，让上层自行解析
             handler.resolve(response);
             return;
