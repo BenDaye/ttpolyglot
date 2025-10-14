@@ -1,8 +1,8 @@
 import 'package:ttpolyglot_core/core.dart';
 
 void main() {
-  print('TTPolyglot Core 多项目管理示例');
-  print('=' * 40);
+  Logger.info('TTPolyglot Core 多项目管理示例');
+  Logger.info('=' * 40);
 
   // 创建语言实例
   final english = Language(
@@ -17,55 +17,55 @@ void main() {
     nativeName: '中文（简体）',
   );
 
-  print('\n1. 语言管理:');
-  print('- $english');
-  print('- $chinese');
+  Logger.info('\n1. 语言管理:');
+  Logger.info('- $english');
+  Logger.info('- $chinese');
 
   // 展示支持的语言列表功能
-  print('\n2. 支持的语言列表:');
-  print('总共支持 ${Language.supportedLanguages.length} 种语言');
+  Logger.info('\n2. 支持的语言列表:');
+  Logger.info('总共支持 ${Language.supportedLanguages.length} 种语言');
 
   // 显示前 10 种支持的语言
-  print('前 10 种支持的语言:');
+  Logger.info('前 10 种支持的语言:');
   for (int i = 0; i < 10 && i < Language.supportedLanguages.length; i++) {
     final lang = Language.supportedLanguages[i];
-    print('  ${i + 1}. ${lang.code} - ${lang.name} (${lang.nativeName})');
+    Logger.info('  ${i + 1}. ${lang.code} - ${lang.name} (${lang.nativeName})');
   }
 
   // 测试语言代码验证
-  print('\n3. 语言代码验证:');
+  Logger.info('\n3. 语言代码验证:');
   final testCodes = ['en-US', 'zh-CN', 'en', 'zh', 'fr-FR', 'invalid'];
   for (final code in testCodes) {
     final isValid = Language.isValidLanguageCode(code);
     final isSupported = Language.isLanguageSupported(code);
-    print('  $code: 格式${isValid ? '正确' : '错误'}, ${isSupported ? '支持' : '不支持'}');
+    Logger.info('  $code: 格式${isValid ? '正确' : '错误'}, ${isSupported ? '支持' : '不支持'}');
   }
 
   // 测试语言搜索
-  print('\n4. 语言搜索:');
+  Logger.info('\n4. 语言搜索:');
   final searchResults = Language.searchSupportedLanguages('Chinese');
-  print('搜索 "Chinese" 的结果:');
+  Logger.info('搜索 "Chinese" 的结果:');
   for (final lang in searchResults) {
-    print('  - ${lang.code}: ${lang.name}');
+    Logger.info('  - ${lang.code}: ${lang.name}');
   }
 
   // 测试按语言分组
-  print('\n5. 按语言分组:');
+  Logger.info('\n5. 按语言分组:');
   final groupedLanguages = Language.supportedLanguagesByGroup;
-  print('支持的语言组数量: ${groupedLanguages.length}');
+  Logger.info('支持的语言组数量: ${groupedLanguages.length}');
 
   // 显示中文和英文的变体
   if (groupedLanguages.containsKey('zh')) {
-    print('中文变体:');
+    Logger.info('中文变体:');
     for (final lang in groupedLanguages['zh']!) {
-      print('  - ${lang.code}: ${lang.nativeName}');
+      Logger.info('  - ${lang.code}: ${lang.nativeName}');
     }
   }
 
   if (groupedLanguages.containsKey('en')) {
-    print('英文变体:');
+    Logger.info('英文变体:');
     for (final lang in groupedLanguages['en']!) {
-      print('  - ${lang.code}: ${lang.name}');
+      Logger.info('  - ${lang.code}: ${lang.name}');
     }
   }
 
@@ -79,10 +79,10 @@ void main() {
     updatedAt: DateTime.now(),
   );
 
-  print('\n6. 用户管理:');
-  print('User: $user');
-  print('Can manage project: ${user.role.canManageProject}');
-  print('Can translate: ${user.role.canTranslate}');
+  Logger.info('\n6. 用户管理:');
+  Logger.info('User: $user');
+  Logger.info('Can manage project: ${user.role.canManageProject}');
+  Logger.info('Can translate: ${user.role.canTranslate}');
 
   // 创建项目设置
   final projectSettings = ProjectSettings(
@@ -106,10 +106,10 @@ void main() {
     settings: projectSettings,
   );
 
-  print('\n7. 项目管理:');
-  print('Project: ${project.name}');
-  print('Languages: ${project.allLanguages.map((l) => l.code).join(', ')}');
-  print('Settings: Auto-sync: ${project.settings?.autoSync}, Max key length: ${project.settings?.maxKeyLength}');
+  Logger.info('\n7. 项目管理:');
+  Logger.info('Project: ${project.name}');
+  Logger.info('Languages: ${project.allLanguages.map((l) => l.code).join(', ')}');
+  Logger.info('Settings: Auto-sync: ${project.settings?.autoSync}, Max key length: ${project.settings?.maxKeyLength}');
 
   // 创建项目成员
   final projectMember = ProjectMember(
@@ -118,9 +118,9 @@ void main() {
     joinedAt: DateTime.now(),
   );
 
-  print('\n8. 项目成员管理:');
-  print('Member: ${projectMember.user.name} (${projectMember.role.displayName})');
-  print('Permissions: Read: ${projectMember.role.canRead}, Write: ${projectMember.role.canWrite}');
+  Logger.info('\n8. 项目成员管理:');
+  Logger.info('Member: ${projectMember.user.name} (${projectMember.role.displayName})');
+  Logger.info('Permissions: Read: ${projectMember.role.canRead}, Write: ${projectMember.role.canWrite}');
 
   // 创建工作空间配置
   final workspacePreferences = WorkspacePreferences(
@@ -140,11 +140,12 @@ void main() {
     updatedAt: DateTime.now(),
   );
 
-  print('\n9. 工作空间管理:');
-  print('Version: ${workspaceConfig.version}');
-  print('Current project: ${workspaceConfig.currentProjectId}');
-  print('Recent projects: ${workspaceConfig.recentProjects.length}');
-  print('Preferences: Theme: ${workspaceConfig.preferences.theme}, Auto-sync: ${workspaceConfig.preferences.autoSync}');
+  Logger.info('\n9. 工作空间管理:');
+  Logger.info('Version: ${workspaceConfig.version}');
+  Logger.info('Current project: ${workspaceConfig.currentProjectId}');
+  Logger.info('Recent projects: ${workspaceConfig.recentProjects.length}');
+  Logger.info(
+      'Preferences: Theme: ${workspaceConfig.preferences.theme}, Auto-sync: ${workspaceConfig.preferences.autoSync}');
 
   // 创建项目引用
   final projectReference = ProjectReference(
@@ -154,8 +155,8 @@ void main() {
     lastAccessed: DateTime.now(),
   );
 
-  print('\n10. 项目引用:');
-  print('Reference: ${projectReference.name} at ${projectReference.path}');
+  Logger.info('\n10. 项目引用:');
+  Logger.info('Reference: ${projectReference.name} at ${projectReference.path}');
 
   // 创建翻译条目
   final entry = TranslationEntry(
@@ -171,25 +172,25 @@ void main() {
     updatedAt: DateTime.now(),
   );
 
-  print('\n11. 翻译条目管理:');
-  print('Entry: ${entry.key}');
-  print('Status: ${entry.status.displayName}');
-  print('Is editable: ${entry.status.isEditable}');
+  Logger.info('\n11. 翻译条目管理:');
+  Logger.info('Entry: ${entry.key}');
+  Logger.info('Status: ${entry.status.displayName}');
+  Logger.info('Is editable: ${entry.status.isEditable}');
 
   // 使用工具类
   final (namespace, key) = TranslationUtils.parseKey('hello.world');
-  print('\n12. 工具类功能:');
-  print('Parsed key:');
-  print('- Namespace: $namespace');
-  print('- Key: $key');
+  Logger.info('\n12. 工具类功能:');
+  Logger.info('Parsed key:');
+  Logger.info('- Namespace: $namespace');
+  Logger.info('- Key: $key');
 
   final placeholders = TranslationUtils.extractPlaceholders('Hello, {name}!');
-  print('- Placeholders: $placeholders');
+  Logger.info('- Placeholders: $placeholders');
 
   // 项目统计示例
-  print('\n13. 项目统计:');
+  Logger.info('\n13. 项目统计:');
   final stats = TranslationUtils.generateStatistics([entry]);
-  print('Total entries: ${stats['total']}');
-  print('Completed: ${stats['completed']}');
-  print('Completion rate: ${(stats['completionRate'] * 100).toStringAsFixed(1)}%');
+  Logger.info('Total entries: ${stats['total']}');
+  Logger.info('Completed: ${stats['completed']}');
+  Logger.info('Completion rate: ${(stats['completionRate'] * 100).toStringAsFixed(1)}%');
 }

@@ -1,25 +1,25 @@
 import 'package:ttpolyglot_core/core.dart';
 
 void main() {
-  print('TTPolyglot 翻译键创建示例');
-  print('=' * 50);
+  Logger.info('TTPolyglot 翻译键创建示例');
+  Logger.info('=' * 50);
 
   // 1. 创建项目和语言
-  print('\n1. 创建项目和语言设置:');
+  Logger.info('\n1. 创建项目和语言设置:');
 
   final english = Language.getLanguageByCode('en-US')!;
   final chinese = Language.getLanguageByCode('zh-CN')!;
   final japanese = Language.getLanguageByCode('ja-JP')!;
   final korean = Language.getLanguageByCode('ko-KR')!;
 
-  print('默认语言: ${english.code} (${english.name})');
-  print('目标语言:');
-  print('  - ${chinese.code}: ${chinese.name}');
-  print('  - ${japanese.code}: ${japanese.name}');
-  print('  - ${korean.code}: ${korean.name}');
+  Logger.info('默认语言: ${english.code} (${english.name})');
+  Logger.info('目标语言:');
+  Logger.info('  - ${chinese.code}: ${chinese.name}');
+  Logger.info('  - ${japanese.code}: ${japanese.name}');
+  Logger.info('  - ${korean.code}: ${korean.name}');
 
   // 2. 创建翻译键请求
-  print('\n2. 创建翻译键请求:');
+  Logger.info('\n2. 创建翻译键请求:');
 
   final request = CreateTranslationKeyRequest(
     projectId: 'project-1',
@@ -33,69 +33,69 @@ void main() {
     generateForDefaultLanguage: true,
   );
 
-  print('项目 ID: ${request.projectId}');
-  print('翻译键: ${request.key}');
-  print('源语言: ${request.sourceLanguage.code}');
-  print('源文本: ${request.sourceText}');
-  print('目标语言: ${request.targetLanguages.map((l) => l.code).join(', ')}');
-  print('上下文: ${request.context}');
-  print('备注: ${request.comment}');
-  print('最大长度: ${request.maxLength}');
-  print('为默认语言生成条目: ${request.generateForDefaultLanguage}');
+  Logger.info('项目 ID: ${request.projectId}');
+  Logger.info('翻译键: ${request.key}');
+  Logger.info('源语言: ${request.sourceLanguage.code}');
+  Logger.info('源文本: ${request.sourceText}');
+  Logger.info('目标语言: ${request.targetLanguages.map((l) => l.code).join(', ')}');
+  Logger.info('上下文: ${request.context}');
+  Logger.info('备注: ${request.comment}');
+  Logger.info('最大长度: ${request.maxLength}');
+  Logger.info('为默认语言生成条目: ${request.generateForDefaultLanguage}');
 
   // 3. 验证请求
-  print('\n3. 验证翻译键请求:');
+  Logger.info('\n3. 验证翻译键请求:');
 
   final validationErrors = request.validate();
   if (validationErrors.isEmpty) {
-    print('✅ 请求验证通过');
+    Logger.info('✅ 请求验证通过');
   } else {
-    print('❌ 请求验证失败:');
+    Logger.info('❌ 请求验证失败:');
     for (final error in validationErrors) {
-      print('  - $error');
+      Logger.info('  - $error');
     }
   }
 
   // 4. 生成翻译条目
-  print('\n4. 生成翻译条目:');
+  Logger.info('\n4. 生成翻译条目:');
 
   final entries = TranslationUtils.generateTranslationEntries(request);
-  print('生成了 ${entries.length} 个翻译条目:');
+  Logger.info('生成了 ${entries.length} 个翻译条目:');
 
   for (final entry in entries) {
-    print('  - ${entry.id}');
-    print('    键: ${entry.key}');
-    print('    源语言: ${entry.sourceLanguage.code}');
-    print('    目标语言: ${entry.targetLanguage.code}');
-    print('    源文本: ${entry.sourceText}');
-    print('    目标文本: ${entry.targetText}');
-    print('    状态: ${entry.status.displayName}');
-    print('    上下文: ${entry.context}');
-    print('    备注: ${entry.comment}');
-    print('');
+    Logger.info('  - ${entry.id}');
+    Logger.info('    键: ${entry.key}');
+    Logger.info('    源语言: ${entry.sourceLanguage.code}');
+    Logger.info('    目标语言: ${entry.targetLanguage.code}');
+    Logger.info('    源文本: ${entry.sourceText}');
+    Logger.info('    目标文本: ${entry.targetText}');
+    Logger.info('    状态: ${entry.status.displayName}');
+    Logger.info('    上下文: ${entry.context}');
+    Logger.info('    备注: ${entry.comment}');
+    Logger.info('');
   }
 
   // 5. 批量验证翻译条目
-  print('5. 批量验证翻译条目:');
+  Logger.info('5. 批量验证翻译条目:');
 
   final validationResults = TranslationUtils.batchValidateTranslationEntries(entries);
   if (validationResults.isEmpty) {
-    print('✅ 所有翻译条目验证通过');
+    Logger.info('✅ 所有翻译条目验证通过');
   } else {
-    print('❌ 发现验证错误:');
+    Logger.info('❌ 发现验证错误:');
     for (final entryId in validationResults.keys) {
-      print('  条目 $entryId:');
+      Logger.info('  条目 $entryId:');
       for (final error in validationResults[entryId]!) {
-        print('    - $error');
+        Logger.info('    - $error');
       }
     }
   }
 
   // 6. 演示不同场景的翻译键创建
-  print('\n6. 不同场景的翻译键创建:');
+  Logger.info('\n6. 不同场景的翻译键创建:');
 
   // 场景1: 复数形式的翻译
-  print('\n场景1: 复数形式的翻译');
+  Logger.info('\n场景1: 复数形式的翻译');
   final pluralRequest = CreateTranslationKeyRequest(
     projectId: 'project-1',
     key: 'item.count',
@@ -111,10 +111,10 @@ void main() {
   );
 
   final pluralEntries = TranslationUtils.generateTranslationEntries(pluralRequest);
-  print('复数形式翻译条目数量: ${pluralEntries.length}');
+  Logger.info('复数形式翻译条目数量: ${pluralEntries.length}');
 
   // 场景2: 长度限制的翻译
-  print('\n场景2: 长度限制的翻译');
+  Logger.info('\n场景2: 长度限制的翻译');
   final limitedRequest = CreateTranslationKeyRequest(
     projectId: 'project-1',
     key: 'button.submit',
@@ -127,10 +127,10 @@ void main() {
   );
 
   final limitedEntries = TranslationUtils.generateTranslationEntries(limitedRequest);
-  print('长度限制翻译条目数量: ${limitedEntries.length}');
+  Logger.info('长度限制翻译条目数量: ${limitedEntries.length}');
 
   // 场景3: 带占位符的翻译
-  print('\n场景3: 带占位符的翻译');
+  Logger.info('\n场景3: 带占位符的翻译');
   final placeholderRequest = CreateTranslationKeyRequest(
     projectId: 'project-1',
     key: 'user.welcome',
@@ -142,14 +142,14 @@ void main() {
   );
 
   final placeholderEntries = TranslationUtils.generateTranslationEntries(placeholderRequest);
-  print('带占位符翻译条目数量: ${placeholderEntries.length}');
+  Logger.info('带占位符翻译条目数量: ${placeholderEntries.length}');
 
   // 提取占位符
   final placeholders = TranslationUtils.extractPlaceholders(placeholderRequest.sourceText);
-  print('检测到的占位符: ${placeholders.join(', ')}');
+  Logger.info('检测到的占位符: ${placeholders.join(', ')}');
 
   // 7. 从项目信息创建翻译键请求
-  print('\n7. 从项目信息创建翻译键请求:');
+  Logger.info('\n7. 从项目信息创建翻译键请求:');
 
   final projectRequest = TranslationUtils.createTranslationKeyRequestFromProject(
     projectId: 'project-1',
@@ -164,14 +164,14 @@ void main() {
     generateForDefaultLanguage: true,
   );
 
-  print('从项目信息创建的请求:');
-  print('  键: ${projectRequest.key}');
-  print('  源文本: ${projectRequest.sourceText}');
-  print('  目标语言数量: ${projectRequest.targetLanguages.length}');
-  print('  验证结果: ${projectRequest.isValid ? '✅ 有效' : '❌ 无效'}');
+  Logger.info('从项目信息创建的请求:');
+  Logger.info('  键: ${projectRequest.key}');
+  Logger.info('  源文本: ${projectRequest.sourceText}');
+  Logger.info('  目标语言数量: ${projectRequest.targetLanguages.length}');
+  Logger.info('  验证结果: ${projectRequest.isValid ? '✅ 有效' : '❌ 无效'}');
 
   // 8. 演示无效的翻译键请求
-  print('\n8. 演示无效的翻译键请求:');
+  Logger.info('\n8. 演示无效的翻译键请求:');
 
   final invalidRequest = CreateTranslationKeyRequest(
     projectId: '', // 空的项目 ID
@@ -182,13 +182,13 @@ void main() {
   );
 
   final invalidErrors = invalidRequest.validate();
-  print('无效请求的验证错误:');
+  Logger.info('无效请求的验证错误:');
   for (final error in invalidErrors) {
-    print('  - $error');
+    Logger.info('  - $error');
   }
 
   // 9. 翻译键验证
-  print('\n9. 翻译键验证:');
+  Logger.info('\n9. 翻译键验证:');
 
   final testKeys = [
     'common.greeting', // 有效
@@ -204,11 +204,11 @@ void main() {
   for (final key in testKeys) {
     final isValid = TranslationUtils.isValidTranslationKey(key);
     final status = isValid ? '✅' : '❌';
-    print('  $status "$key": ${isValid ? '有效' : '无效'}');
+    Logger.info('  $status "$key": ${isValid ? '有效' : '无效'}');
   }
 
   // 10. 统计信息
-  print('\n10. 翻译条目统计:');
+  Logger.info('\n10. 翻译条目统计:');
 
   final allEntries = [
     ...entries,
@@ -218,29 +218,29 @@ void main() {
   ];
 
   final stats = TranslationUtils.generateStatistics(allEntries);
-  print('总条目数: ${stats['total']}');
-  print('已完成: ${stats['completed']}');
-  print('待翻译: ${stats['pending']}');
-  print('完成率: ${(stats['completionRate'] * 100).toStringAsFixed(1)}%');
-  print('涉及语言数: ${stats['languageCount']}');
+  Logger.info('总条目数: ${stats['total']}');
+  Logger.info('已完成: ${stats['completed']}');
+  Logger.info('待翻译: ${stats['pending']}');
+  Logger.info('完成率: ${(stats['completionRate'] * 100).toStringAsFixed(1)}%');
+  Logger.info('涉及语言数: ${stats['languageCount']}');
 
   final statusBreakdown = stats['statusBreakdown'] as Map<String, int>;
-  print('状态分布:');
+  Logger.info('状态分布:');
   for (final status in statusBreakdown.keys) {
-    print('  $status: ${statusBreakdown[status]}');
+    Logger.info('  $status: ${statusBreakdown[status]}');
   }
 
   final languageBreakdown = stats['languageBreakdown'] as Map<String, int>;
-  print('语言分布:');
+  Logger.info('语言分布:');
   for (final language in languageBreakdown.keys) {
-    print('  $language: ${languageBreakdown[language]}');
+    Logger.info('  $language: ${languageBreakdown[language]}');
   }
 
-  print('\n✅ 翻译键创建示例完成！');
-  print('\n总结:');
-  print('- 支持为多个语言批量创建翻译条目');
-  print('- 支持复数形式、长度限制、占位符等高级功能');
-  print('- 提供完整的验证机制');
-  print('- 支持从项目信息快速创建翻译键请求');
-  print('- 提供详细的统计信息');
+  Logger.info('\n✅ 翻译键创建示例完成！');
+  Logger.info('\n总结:');
+  Logger.info('- 支持为多个语言批量创建翻译条目');
+  Logger.info('- 支持复数形式、长度限制、占位符等高级功能');
+  Logger.info('- 提供完整的验证机制');
+  Logger.info('- 支持从项目信息快速创建翻译键请求');
+  Logger.info('- 提供详细的统计信息');
 }
