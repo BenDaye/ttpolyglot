@@ -8,21 +8,30 @@
       "name": "ttpolyglot",
       "cwd": "apps/ttpolyglot",
       "request": "launch",
-      "type": "dart"
+      "type": "dart",
+      "args": [
+        "--dart-define-from-file=.env.development.local"
+      ]
     },
     {
       "name": "ttpolyglot (profile mode)",
       "cwd": "apps/ttpolyglot",
       "request": "launch",
       "type": "dart",
-      "flutterMode": "profile"
+      "flutterMode": "profile",
+      "args": [
+        "--dart-define-from-file=.env.development.local"
+      ]
     },
     {
       "name": "ttpolyglot (release mode)",
       "cwd": "apps/ttpolyglot",
       "request": "launch",
       "type": "dart",
-      "flutterMode": "release"
+      "flutterMode": "release",
+      "args": [
+        "--dart-define-from-file=.env.development"
+      ]
     },
     {
       "name": "cli",
