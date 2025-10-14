@@ -62,6 +62,11 @@ services:
       dockerfile: packages/server/Dockerfile
     environment:
       - DATABASE_URL=postgresql://${DB_USER:-ttpolyglot}:${DB_PASSWORD:-password}@ttpolyglot-db:5432/${DB_NAME:-ttpolyglot}?sslmode=disable
+      - DB_HOST=ttpolyglot-db
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-ttpolyglot}
+      - DB_USER=${DB_USER:-ttpolyglot}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
       - REDIS_URL=redis://ttpolyglot-redis:6379
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - JWT_SECRET=${JWT_SECRET:-dev-jwt-secret-change-in-production}
