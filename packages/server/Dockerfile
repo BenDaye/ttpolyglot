@@ -26,6 +26,9 @@ RUN dart pub get
 # 使用 AOT 编译以获得最佳性能
 RUN dart compile exe bin/server.dart -o server
 
+# 编译迁移脚本为独立可执行文件
+RUN dart compile exe scripts/migrate.dart -o migrate
+
 # ============================================
 # 运行阶段
 # ============================================
@@ -49,6 +52,7 @@ WORKDIR /app
 
 # 从构建阶段复制编译好的可执行文件
 COPY --from=build --chown=ttpolyglot:ttpolyglot /app/packages/server/server ./server
+COPY --from=build --chown=ttpolyglot:ttpolyglot /app/packages/server/migrate ./migrate
 
 # 复制数据库迁移脚本目录（如果需要在容器内运行迁移）
 COPY --from=build --chown=ttpolyglot:ttpolyglot /app/packages/server/database ./database

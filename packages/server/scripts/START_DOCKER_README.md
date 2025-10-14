@@ -242,7 +242,7 @@ SERVER_HOST=0.0.0.0
    └─ 应用服务健康检查
 
 6. 自动运行数据库迁移
-   └─ docker-compose exec server dart run scripts/migrate.dart
+   └─ docker-compose exec ttpolyglot-server ./migrate
 
 7. 显示服务信息
    ├─ 服务 URL
@@ -316,10 +316,10 @@ kill -9 <PID>
 **解决方案**:
 ```bash
 # 手动运行迁移
-docker-compose exec ttpolyglot-server dart run scripts/migrate.dart
+docker-compose exec ttpolyglot-server ./migrate
 
 # 查看迁移状态
-docker-compose exec ttpolyglot-server dart run scripts/migrate.dart status
+docker-compose exec ttpolyglot-server ./migrate status
 ```
 
 ## 📊 服务管理

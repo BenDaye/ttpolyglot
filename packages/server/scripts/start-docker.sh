@@ -265,11 +265,11 @@ start_services() {
         print_info "运行数据库迁移和种子数据..."
         sleep 3  # 等待应用完全启动
         
-        if docker-compose exec -T ttpolyglot-server dart run scripts/migrate.dart; then
+        if docker-compose exec -T ttpolyglot-server ./migrate; then
             print_success "数据库迁移完成"
         else
             print_warning "数据库迁移失败，请手动执行："
-            echo "  docker-compose exec ttpolyglot-server dart run scripts/migrate.dart"
+            echo "  docker-compose exec ttpolyglot-server ./migrate"
         fi
     fi
     
@@ -296,8 +296,10 @@ start_services() {
     echo "  停止服务: ./scripts/start-docker.sh stop"
     echo ""
     
-    echo -e "${BOLD}数据库连接:${NC}"
-    echo "  docker-compose exec ttpolyglot-db psql -U ${DB_USER:-ttpolyglot} -d ${DB_NAME:-ttpolyglot}"
+    echo -e "${BOLD}数据库管理:${NC}"
+    echo "  数据库连接: docker-compose exec ttpolyglot-db psql -U ${DB_USER:-ttpolyglot} -d ${DB_NAME:-ttpolyglot}"
+    echo "  运行迁移: docker-compose exec ttpolyglot-server ./migrate"
+    echo "  迁移状态: docker-compose exec ttpolyglot-server ./migrate status"
     print_separator
 }
 
