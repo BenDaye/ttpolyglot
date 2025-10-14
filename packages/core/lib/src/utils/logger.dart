@@ -109,8 +109,8 @@ class Logger {
         talker: talker,
         settings: const TalkerDioLoggerSettings(
           printRequestHeaders: true,
-          printResponseHeaders: false,
           printRequestData: true,
+          printResponseHeaders: false,
           printResponseData: false,
         ),
       );
