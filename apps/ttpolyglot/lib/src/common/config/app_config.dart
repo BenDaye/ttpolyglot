@@ -7,10 +7,9 @@ class AppConfig {
   /// 从 .env 文件读取 API_BASE_URL
   /// 开发环境：.env.development.local
   /// 生产环境：.env.production.local
-  static String get apiBaseUrl => String.fromEnvironment(
-        'API_BASE_URL',
-        defaultValue: 'http://localhost:3000/api/v1',
-      );
+  static String get apiBaseUrl {
+    return const String.fromEnvironment('API_BASE_URL', defaultValue: 'http://localhost:3000/api/v1');
+  }
 
   static const Duration connectTimeout = Duration(seconds: 30);
   static const Duration receiveTimeout = Duration(seconds: 30);
