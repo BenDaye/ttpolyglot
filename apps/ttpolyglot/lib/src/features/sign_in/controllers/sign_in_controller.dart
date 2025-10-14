@@ -79,8 +79,6 @@ class SignInController extends GetxController {
     try {
       _isLoading.value = true;
 
-      Logger.error('开始登录请求');
-
       // 调用认证服务登录
       await _authService.login(
         emailOrUsername: emailController.text.trim(),
@@ -88,9 +86,6 @@ class SignInController extends GetxController {
         deviceName: 'Web Browser',
         deviceType: 'web',
       );
-
-      // 登录成功
-      Logger.error('登录成功，准备跳转');
 
       // 显示成功提示
       Get.snackbar(
@@ -106,9 +101,7 @@ class SignInController extends GetxController {
 
       // 跳转到主页（使用 offAllNamed 清除登录页面）
       Get.offAllNamed('/projects');
-    } catch (error, stackTrace) {
-      Logger.error('登录失败', error: error, stackTrace: stackTrace);
-
+    } catch (error) {
       // 提取错误信息
       String message = '登录失败，请稍后重试';
       if (error.toString().contains('用户名或密码错误')) {
@@ -125,7 +118,6 @@ class SignInController extends GetxController {
     } finally {
       // 确保 loading 状态一定会被重置
       _isLoading.value = false;
-      Logger.error('登录流程结束，loading 状态已重置');
     }
   }
 

@@ -168,11 +168,6 @@ class HttpClient {
 
       return response.data as T;
     }).catchError((err) {
-      Logger.error(
-        '请求失败',
-        error: err,
-        stackTrace: err is DioException ? err.stackTrace : StackTrace.current,
-      );
       throw err;
     });
   }

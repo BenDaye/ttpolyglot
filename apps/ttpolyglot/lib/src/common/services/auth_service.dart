@@ -75,10 +75,7 @@ class AuthService extends GetxService {
       // 保存用户信息
       await _tokenStorage.saveUserInfo(response.user);
       _currentUser.value = response.user;
-
-      Logger.info('登录成功: ${response.user.username}');
-    } catch (error, stackTrace) {
-      Logger.error('登录失败', error: error, stackTrace: stackTrace);
+    } catch (error) {
       rethrow;
     }
   }

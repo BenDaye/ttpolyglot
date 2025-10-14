@@ -40,13 +40,6 @@ class ErrorInterceptor extends Interceptor {
         _showErrorToast(errorMessage);
       }
 
-      // 记录错误日志
-      Logger.error(
-        '网络请求错误: ${err.requestOptions.method} ${err.requestOptions.path}',
-        error: err,
-        stackTrace: err.stackTrace,
-      );
-
       handler.next(err);
     } catch (error, stackTrace) {
       Logger.error('错误拦截器异常', error: error, stackTrace: stackTrace);
