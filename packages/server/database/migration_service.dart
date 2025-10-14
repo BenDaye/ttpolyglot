@@ -57,24 +57,8 @@ class MigrationService {
       await _renewMigrationLock();
     });
 
-    String? backupPath;
-
     try {
       _logger.info('开始运行数据库迁移...');
-
-      // 生产环境自动备份
-      if (!ServerConfig.isDevelopment && autoBackup) {
-        _logger.info('⚠️  生产环境：开始自动备份数据库...');
-        try {
-          backupPath = await backupDatabase();
-          _logger.info('✅ 数据库备份完成: $backupPath');
-          _logger.info('备份大小: ${await _getFileSize(backupPath)}');
-        } catch (backupError, backupStackTrace) {
-          _logger.error('数据库备份失败，但将继续执行迁移', error: backupError, stackTrace: backupStackTrace);
-          // 备份失败不应该阻止迁移，但要警告用户
-          _logger.warn('⚠️  警告：备份失败，如果迁移失败可能无法恢复数据！');
-        }
-      }
 
       // 确保迁移记录表存在
       await _ensureMigrationTableExists();
@@ -142,26 +126,8 @@ class MigrationService {
       }
 
       _logger.info('所有迁移执行完成');
-
-      // 如果有备份且迁移成功，可以考虑清理旧备份（可选）
-      if (backupPath != null && !ServerConfig.isDevelopment) {
-        _logger.info('✅ 迁移成功完成，备份文件保留于: $backupPath');
-      }
     } catch (error, stackTrace) {
       _logger.error('❌ 迁移执行失败', error: error, stackTrace: stackTrace);
-
-      // 如果有备份文件，提示用户如何恢复
-      if (backupPath != null && backupPath.isNotEmpty) {
-        _logger.error('');
-        _logger.error('=' * 80);
-        _logger.error('🚨 迁移失败！数据库备份文件位于:');
-        _logger.error('   $backupPath');
-        _logger.error('');
-        _logger.error('如需恢复数据库，请执行以下命令:');
-        _logger.error('   dart packages/server/scripts/migrate.dart restore $backupPath');
-        _logger.error('=' * 80);
-      }
-
       rethrow;
     } finally {
       // 停止心跳定时器
@@ -859,23 +825,8 @@ class MigrationService {
       await _renewMigrationLock();
     });
 
-    String? backupPath;
-
     try {
       _logger.info('开始运行迁移和种子数据...');
-
-      // 生产环境自动备份（只备份一次）
-      if (!ServerConfig.isDevelopment && autoBackup) {
-        _logger.info('⚠️  生产环境：开始自动备份数据库...');
-        try {
-          backupPath = await backupDatabase();
-          _logger.info('✅ 数据库备份完成: $backupPath');
-          _logger.info('备份大小: ${await _getFileSize(backupPath)}');
-        } catch (backupError, backupStackTrace) {
-          _logger.error('数据库备份失败，但将继续执行迁移', error: backupError, stackTrace: backupStackTrace);
-          _logger.warn('⚠️  警告：备份失败，如果迁移失败可能无法恢复数据！');
-        }
-      }
 
       // 确保记录表存在
       await _ensureMigrationTableExists();
@@ -888,26 +839,8 @@ class MigrationService {
       await _runSeedsInternal();
 
       _logger.info('迁移和种子数据执行完成');
-
-      // 如果有备份且执行成功
-      if (backupPath != null && !ServerConfig.isDevelopment) {
-        _logger.info('✅ 迁移和种子数据成功完成，备份文件保留于: $backupPath');
-      }
     } catch (error, stackTrace) {
       _logger.error('❌ 迁移和种子数据执行失败', error: error, stackTrace: stackTrace);
-
-      // 如果有备份文件，提示用户如何恢复
-      if (backupPath != null && backupPath.isNotEmpty) {
-        _logger.error('');
-        _logger.error('=' * 80);
-        _logger.error('🚨 迁移失败！数据库备份文件位于:');
-        _logger.error('   $backupPath');
-        _logger.error('');
-        _logger.error('如需恢复数据库，请执行以下命令:');
-        _logger.error('   dart packages/server/scripts/migrate.dart restore $backupPath');
-        _logger.error('=' * 80);
-      }
-
       rethrow;
     } finally {
       // 停止心跳定时器
