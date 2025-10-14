@@ -37,10 +37,12 @@ FROM debian:bookworm-slim AS runtime
 # 安装运行时依赖
 # - ca-certificates: HTTPS 连接所需
 # - curl: 健康检查所需
+# - postgresql-client: 数据库备份和管理工具
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
   ca-certificates \
-  curl && \
+  curl \
+  postgresql-client && \
   rm -rf /var/lib/apt/lists/*
 
 # 创建非 root 用户运行应用
