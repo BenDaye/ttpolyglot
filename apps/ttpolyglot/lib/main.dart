@@ -3,6 +3,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ttpolyglot/src/common/common.dart';
 import 'package:ttpolyglot/src/core/services/service.dart';
 import 'package:ttpolyglot/src/features/settings/controllers/translation_config_controller.dart';
 import 'package:universal_platform/universal_platform.dart';
@@ -80,6 +82,30 @@ Future<void> _initializeStorage() async {
 
 /// 初始化服务
 Future<void> _initializeService() async {
+  // 初始化 SharedPreferences
+  final prefs = await SharedPreferences.getInstance();
+
+  // 注册认证相关服务
+  Get.put<TokenStorageService>(
+    TokenStorageService(prefs),
+    permanent: true,
+  );
+  Get.put<AuthApi>(
+    AuthApi(),
+    permanent: true,
+  );
+  Get.put<AuthService>(
+    AuthService(
+      authApi: Get.find<AuthApi>(),
+      tokenStorage: Get.find<TokenStorageService>(),
+    ),
+    permanent: true,
+  );
+
+  // 初始化认证服务（检查登录状态）
+  await Get.find<AuthService>().init();
+
+  // 注册其他业务服务
   await Get.putAsync(() => ProjectServiceImpl.create());
   await Get.putAsync(() => TranslationServiceImpl.create());
   await Get.putAsync(() => ExportServiceImpl.create());
