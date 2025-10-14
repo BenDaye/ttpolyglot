@@ -21,7 +21,7 @@ ApiResponse<T> _$ApiResponseFromJson<T>(
 
 /// @nodoc
 mixin _$ApiResponse<T> {
-  int get code => throw _privateConstructorUsedError;
+  ApiResponseCode get code => throw _privateConstructorUsedError;
   String get message => throw _privateConstructorUsedError;
   T? get data => throw _privateConstructorUsedError;
 
@@ -42,7 +42,7 @@ abstract class $ApiResponseCopyWith<T, $Res> {
           ApiResponse<T> value, $Res Function(ApiResponse<T>) then) =
       _$ApiResponseCopyWithImpl<T, $Res, ApiResponse<T>>;
   @useResult
-  $Res call({int code, String message, T? data});
+  $Res call({ApiResponseCode code, String message, T? data});
 }
 
 /// @nodoc
@@ -68,7 +68,7 @@ class _$ApiResponseCopyWithImpl<T, $Res, $Val extends ApiResponse<T>>
       code: null == code
           ? _value.code
           : code // ignore: cast_nullable_to_non_nullable
-              as int,
+              as ApiResponseCode,
       message: null == message
           ? _value.message
           : message // ignore: cast_nullable_to_non_nullable
@@ -89,7 +89,7 @@ abstract class _$$ApiResponseImplCopyWith<T, $Res>
       __$$ApiResponseImplCopyWithImpl<T, $Res>;
   @override
   @useResult
-  $Res call({int code, String message, T? data});
+  $Res call({ApiResponseCode code, String message, T? data});
 }
 
 /// @nodoc
@@ -113,7 +113,7 @@ class __$$ApiResponseImplCopyWithImpl<T, $Res>
       code: null == code
           ? _value.code
           : code // ignore: cast_nullable_to_non_nullable
-              as int,
+              as ApiResponseCode,
       message: null == message
           ? _value.message
           : message // ignore: cast_nullable_to_non_nullable
@@ -128,16 +128,17 @@ class __$$ApiResponseImplCopyWithImpl<T, $Res>
 
 /// @nodoc
 @JsonSerializable(genericArgumentFactories: true)
-class _$ApiResponseImpl<T> implements _ApiResponse<T> {
+class _$ApiResponseImpl<T> extends _ApiResponse<T> {
   const _$ApiResponseImpl(
-      {required this.code, required this.message, this.data});
+      {required this.code, required this.message, this.data})
+      : super._();
 
   factory _$ApiResponseImpl.fromJson(
           Map<String, dynamic> json, T Function(Object?) fromJsonT) =>
       _$$ApiResponseImplFromJson(json, fromJsonT);
 
   @override
-  final int code;
+  final ApiResponseCode code;
   @override
   final String message;
   @override
@@ -178,18 +179,19 @@ class _$ApiResponseImpl<T> implements _ApiResponse<T> {
   }
 }
 
-abstract class _ApiResponse<T> implements ApiResponse<T> {
+abstract class _ApiResponse<T> extends ApiResponse<T> {
   const factory _ApiResponse(
-      {required final int code,
+      {required final ApiResponseCode code,
       required final String message,
       final T? data}) = _$ApiResponseImpl<T>;
+  const _ApiResponse._() : super._();
 
   factory _ApiResponse.fromJson(
           Map<String, dynamic> json, T Function(Object?) fromJsonT) =
       _$ApiResponseImpl<T>.fromJson;
 
   @override
-  int get code;
+  ApiResponseCode get code;
   @override
   String get message;
   @override
