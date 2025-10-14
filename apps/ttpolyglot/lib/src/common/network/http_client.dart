@@ -64,7 +64,7 @@ class HttpClient {
     return _fetch<T>(
       delay,
       RequestExtra.fromJson(options?.extra ?? {}),
-      dio.get<Map<String, dynamic>>(
+      dio.get<dynamic>(
         path,
         queryParameters: query,
         options: options,
@@ -88,7 +88,7 @@ class HttpClient {
     return _fetch<T>(
       delay,
       RequestExtra.fromJson(options?.extra ?? {}),
-      dio.post<Map<String, dynamic>>(
+      dio.post<dynamic>(
         path,
         data: data,
         queryParameters: query,
@@ -114,7 +114,7 @@ class HttpClient {
     return _fetch<T>(
       delay,
       RequestExtra.fromJson(options?.extra ?? {}),
-      dio.put<Map<String, dynamic>>(
+      dio.put<dynamic>(
         path,
         data: data,
         queryParameters: query,
@@ -138,7 +138,7 @@ class HttpClient {
     return _fetch<T>(
       delay,
       RequestExtra.fromJson(options?.extra ?? {}),
-      dio.delete<Map<String, dynamic>>(
+      dio.delete<dynamic>(
         path,
         data: data,
         queryParameters: query,
@@ -152,7 +152,7 @@ class HttpClient {
   static Future<ApiResponse<T>> _fetch<T>(
     Duration? delay,
     RequestExtra extra,
-    Future<Response<Map<String, dynamic>>> future,
+    Future<Response<dynamic>> future,
   ) {
     final start = DateTime.now().millisecondsSinceEpoch;
 
