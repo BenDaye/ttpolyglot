@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:ttpolyglot/src/common/enums/enums.dart';
+import 'package:ttpolyglot_model/src/enums/enums.dart';
 
 part 'api_response.freezed.dart';
 part 'api_response.g.dart';

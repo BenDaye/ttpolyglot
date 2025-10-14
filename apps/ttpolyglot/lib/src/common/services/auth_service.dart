@@ -1,8 +1,8 @@
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/common/api/api.dart';
-import 'package:ttpolyglot/src/common/models/models.dart';
 import 'package:ttpolyglot/src/common/services/token_storage_service.dart';
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// 认证服务
 class AuthService extends GetxService {

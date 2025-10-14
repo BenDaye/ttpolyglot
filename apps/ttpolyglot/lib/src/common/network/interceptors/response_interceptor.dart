@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:ttpolyglot/src/common/network/models/network_models.dart';
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// 响应统一处理拦截器
 class ResponseInterceptor extends Interceptor {

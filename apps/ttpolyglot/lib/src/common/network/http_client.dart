@@ -4,8 +4,8 @@ import 'package:ttpolyglot/src/common/network/interceptors/error_interceptor.dar
 import 'package:ttpolyglot/src/common/network/interceptors/loading_interceptor.dart';
 import 'package:ttpolyglot/src/common/network/interceptors/response_interceptor.dart';
 import 'package:ttpolyglot/src/common/network/interceptors/token_interceptor.dart';
-import 'package:ttpolyglot/src/common/network/models/network_models.dart';
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// HTTP 客户端（单例）
 class HttpClient {

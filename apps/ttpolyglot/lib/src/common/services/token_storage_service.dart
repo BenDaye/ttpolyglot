@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ttpolyglot/src/common/config/config.dart';
-import 'package:ttpolyglot/src/common/models/models.dart';
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// Token 存储服务
 class TokenStorageService {

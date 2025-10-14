@@ -2,8 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Response, FormData, MultipartFile;
 import 'package:ttpolyglot/src/common/network/loading_manager.dart';
-import 'package:ttpolyglot/src/common/network/models/network_models.dart';
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// Loading 状态管理拦截器
 class LoadingInterceptor extends Interceptor {

@@ -7,6 +7,7 @@ import 'package:ttpolyglot/src/features/project/project.dart';
 import 'package:ttpolyglot/src/features/project/widgets/upload_file.dart';
 import 'package:ttpolyglot/src/features/project/widgets/upload_file_list.dart';
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// 项目导入页面
 class ProjectImportView extends StatefulWidget {

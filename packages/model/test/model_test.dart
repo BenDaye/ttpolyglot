@@ -1,12 +1,22 @@
-import 'package:flutter_test/flutter_test.dart';
-
-import 'package:model/model.dart';
+import 'package:test/test.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 void main() {
-  test('adds one to input values', () {
-    final calculator = Calculator();
-    expect(calculator.addOne(2), 3);
-    expect(calculator.addOne(-7), -6);
-    expect(calculator.addOne(0), 1);
+  test('model package exports are available', () {
+    // 验证认证模型可以导入
+    expect(LoginRequest, isNotNull);
+    expect(LoginResponse, isNotNull);
+    expect(TokenInfo, isNotNull);
+    expect(UserInfo, isNotNull);
+
+    // 验证网络模型可以导入
+    expect(ApiResponse, isNotNull);
+    expect(RequestExtra, isNotNull);
+
+    // 验证枚举可以导入
+    expect(ApiResponseCode, isNotNull);
+
+    // 验证项目模型可以导入
+    expect(ImportRecord, isNotNull);
   });
 }

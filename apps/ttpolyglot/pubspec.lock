@@ -1088,6 +1088,13 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
+  ttpolyglot_model:
+    dependency: "direct main"
+    description:
+      path: "../../packages/model"
+      relative: true
+    source: path
+    version: "1.0.0"
   ttpolyglot_parsers:
     dependency: "direct main"
     description:

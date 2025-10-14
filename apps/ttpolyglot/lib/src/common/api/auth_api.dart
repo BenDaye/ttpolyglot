@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:ttpolyglot/src/common/models/models.dart';
 import 'package:ttpolyglot/src/common/network/network.dart';
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// 认证 API
 class AuthApi {

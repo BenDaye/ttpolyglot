@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:ttpolyglot/src/common/models/auth/token_info.dart';
-import 'package:ttpolyglot/src/common/models/auth/user_info.dart';
+import 'package:ttpolyglot_model/src/auth/token_info.dart';
+import 'package:ttpolyglot_model/src/auth/user_info.dart';
 
 part 'login_response.freezed.dart';
 part 'login_response.g.dart';
