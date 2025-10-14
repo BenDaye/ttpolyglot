@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dotenv/dotenv.dart';
 import 'package:ttpolyglot_server/src/utils/structured_logger.dart';
 
@@ -9,11 +11,12 @@ class ServerConfig {
   /// 加载配置
   static Future<void> load() async {
     try {
-      // 尝试加载 .env 文件，如果文件不存在则只使用环境变量
-      try {
+      // 检查 .env 文件是否存在，如果存在则加载，否则只使用环境变量
+      final envFile = File('.env');
+      if (await envFile.exists()) {
         _env.load();
         _logger.info('从 .env 文件加载配置完成', context: LogContext().field('config_name', 'ServerConfig'));
-      } catch (error) {
+      } else {
         // .env 文件不存在，使用系统环境变量（Docker 容器场景）
         _logger.info('未找到 .env 文件，使用系统环境变量', context: LogContext().field('config_name', 'ServerConfig'));
       }
