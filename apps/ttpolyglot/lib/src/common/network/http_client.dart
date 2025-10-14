@@ -53,7 +53,7 @@ class HttpClient {
   }
 
   /// GET 请求
-  static Future<T> get<T>(
+  static Future<ApiResponse<T>> get<T>(
     String path, {
     Map<String, dynamic>? query,
     Options? options,
@@ -61,10 +61,10 @@ class HttpClient {
     ProgressCallback? onReceiveProgress,
     Duration? delay,
   }) {
-    return _fetch(
+    return _fetch<T>(
       delay,
       RequestExtra.fromJson(options?.extra ?? {}),
-      dio.get<T>(
+      dio.get<Map<String, dynamic>>(
         path,
         queryParameters: query,
         options: options,
@@ -75,7 +75,7 @@ class HttpClient {
   }
 
   /// POST 请求
-  static Future<T> post<T>(
+  static Future<ApiResponse<T>> post<T>(
     String path, {
     Object? data,
     Map<String, dynamic>? query,
@@ -85,10 +85,10 @@ class HttpClient {
     ProgressCallback? onReceiveProgress,
     Duration? delay,
   }) {
-    return _fetch(
+    return _fetch<T>(
       delay,
       RequestExtra.fromJson(options?.extra ?? {}),
-      dio.post<T>(
+      dio.post<Map<String, dynamic>>(
         path,
         data: data,
         queryParameters: query,
@@ -101,7 +101,7 @@ class HttpClient {
   }
 
   /// PUT 请求
-  static Future<T> put<T>(
+  static Future<ApiResponse<T>> put<T>(
     String path, {
     Object? data,
     Map<String, dynamic>? query,
@@ -111,10 +111,10 @@ class HttpClient {
     ProgressCallback? onReceiveProgress,
     Duration? delay,
   }) {
-    return _fetch(
+    return _fetch<T>(
       delay,
       RequestExtra.fromJson(options?.extra ?? {}),
-      dio.put<T>(
+      dio.put<Map<String, dynamic>>(
         path,
         data: data,
         queryParameters: query,
@@ -127,7 +127,7 @@ class HttpClient {
   }
 
   /// DELETE 请求
-  static Future<T> delete<T>(
+  static Future<ApiResponse<T>> delete<T>(
     String path, {
     Object? data,
     Map<String, dynamic>? query,
@@ -135,10 +135,10 @@ class HttpClient {
     CancelToken? cancelToken,
     Duration? delay,
   }) {
-    return _fetch(
+    return _fetch<T>(
       delay,
       RequestExtra.fromJson(options?.extra ?? {}),
-      dio.delete<T>(
+      dio.delete<Map<String, dynamic>>(
         path,
         data: data,
         queryParameters: query,
@@ -149,14 +149,14 @@ class HttpClient {
   }
 
   /// 统一请求处理
-  static Future<T> _fetch<T>(
+  static Future<ApiResponse<T>> _fetch<T>(
     Duration? delay,
     RequestExtra extra,
-    Future<Response<T>> future,
+    Future<Response<Map<String, dynamic>>> future,
   ) {
     final start = DateTime.now().millisecondsSinceEpoch;
 
-    return future.then<T>((response) async {
+    return future.then<ApiResponse<T>>((response) async {
       final current = DateTime.now().millisecondsSinceEpoch - start;
 
       // 如果设置了延时，并且当前请求时间小于阈值，则等待剩余时间
@@ -166,7 +166,7 @@ class HttpClient {
         );
       }
 
-      return response.data as T;
+      return response.data as ApiResponse<T>;
     }).catchError((err) {
       throw err;
     });

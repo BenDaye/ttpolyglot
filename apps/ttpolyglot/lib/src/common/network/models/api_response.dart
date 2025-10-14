@@ -24,4 +24,12 @@ class ApiResponse<T> with _$ApiResponse<T> {
     T Function(Object?) fromJsonT,
   ) =>
       _$ApiResponseFromJson(json, fromJsonT);
+
+  factory ApiResponse.of(ApiResponseCode code, {String? message}) {
+    return ApiResponse(
+      code: code,
+      message: message ?? code.message,
+      data: null,
+    );
+  }
 }

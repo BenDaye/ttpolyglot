@@ -1,54 +1,44 @@
 import 'package:dio/dio.dart';
+import 'package:ttpolyglot/src/common/network/models/network_models.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 /// 响应统一处理拦截器
 class ResponseInterceptor extends Interceptor {
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    try {
-      final data = response.data;
-
-      // 只处理 JSON 数据
-      if (data is Map<String, dynamic>) {
-        // 检查业务状态码
-        final code = data['code'] as int?;
-        final message = data['message'] as String?;
-
-        if (code != null) {
-          // 成功响应
-          if (code == 200) {
-            // 直接传递原始数据，让上层自行解析
-            handler.resolve(response);
-            return;
-          }
-
-          // 业务错误，转换为 DioException
-          handler.reject(
-            DioException(
-              requestOptions: response.requestOptions,
-              response: response,
-              error: data,
-              message: message ?? '请求失败',
-              type: DioExceptionType.badResponse,
-            ),
-          );
-          return;
+    // 请求响应成功
+    if (response.statusCode == 200) {
+      try {
+        final result = ApiResponse.fromJson(response.data, (json) => json);
+        if (result.code.isSuccess) {
+          response.data = result;
+          response.statusMessage = result.message;
+          // 业务正常 & 请求正常
+          return handler.resolve(response);
         }
-      }
 
-      // 其他情况，直接返回
-      handler.resolve(response);
-    } catch (error, stackTrace) {
-      Logger.error('响应拦截器异常', error: error, stackTrace: stackTrace);
-      handler.reject(
-        DioException(
-          requestOptions: response.requestOptions,
-          response: response,
-          error: error,
-          message: '响应数据解析失败',
-          type: DioExceptionType.unknown,
-        ),
-      );
+        // 业务异常（请求是正常的）
+        return handler.reject(
+          DioException(
+            requestOptions: response.requestOptions,
+            response: response,
+            error: result,
+            message: result.message,
+          ),
+        );
+      } catch (error, stackTrace) {
+        Logger.error('基础数据解析异常', error: error, stackTrace: stackTrace);
+        // 基础数据解析异常
+        return handler.reject(
+          DioException(
+            requestOptions: response.requestOptions,
+            response: response,
+            error: error,
+            message: '基础数据解析异常',
+          ),
+        );
+      }
     }
+    super.onResponse(response, handler);
   }
 }

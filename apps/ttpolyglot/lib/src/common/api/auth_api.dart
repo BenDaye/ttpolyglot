@@ -21,7 +21,7 @@ class AuthApi {
       );
 
       // response 已经被 ResponseInterceptor 处理，直接获取 data 字段
-      final data = response['data'] as Map<String, dynamic>;
+      final data = response.data as Map<String, dynamic>;
       return LoginResponse.fromJson(data);
     } catch (error, stackTrace) {
       Logger.error('登录请求失败', error: error, stackTrace: stackTrace);
@@ -54,7 +54,7 @@ class AuthApi {
         data: {'refresh_token': refreshToken},
       );
 
-      final data = response['data'] as Map<String, dynamic>;
+      final data = response.data as Map<String, dynamic>;
       return TokenInfo.fromJson(data);
     } catch (error, stackTrace) {
       Logger.error('刷新 Token 失败', error: error, stackTrace: stackTrace);
@@ -67,7 +67,7 @@ class AuthApi {
     try {
       final response = await HttpClient.get<Map<String, dynamic>>('/auth/me');
 
-      final data = response['data'] as Map<String, dynamic>;
+      final data = response.data as Map<String, dynamic>;
       return UserInfo.fromJson(data);
     } catch (error, stackTrace) {
       Logger.error('获取当前用户失败', error: error, stackTrace: stackTrace);

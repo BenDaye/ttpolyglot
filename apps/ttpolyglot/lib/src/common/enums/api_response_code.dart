@@ -19,6 +19,15 @@ enum ApiResponseCode {
   serviceUnavailable(503, '服务不可用'),
   gatewayTimeout(504, '网关超时'),
 
+  // dio默认错误码
+  cancelRequest(3, '取消请求'),
+  domainError(4, '域名错误'),
+  networkError(5, '网络错误'),
+  sendTimeout(6, '发送超时'),
+  connectionTimeout(7, '连接超时'),
+  receiveTimeout(8, '证书过期'),
+  badCertificate(9, '接收超时'),
+
   // 业务自定义错误码
   businessError(-1000, '业务错误'),
   validationError(-1001, '验证失败'),
