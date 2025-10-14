@@ -15,6 +15,10 @@ dependencies:
   shared_preferences: ^2.3.5
 
 dev_dependencies:
+  # Flutter 依赖
+  flutter:
+    sdk: flutter
+  
   # 代码生成
   build_runner: ^2.4.0
   freezed: ^2.5.0
@@ -24,4 +28,5 @@ dev_dependencies:
   flutter_lints: ^5.0.0
 
   # 单元测试
-  test: ^1.24.0
+  flutter_test:
+    sdk: flutter
