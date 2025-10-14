@@ -11,6 +11,8 @@ import '../database/migration_service.dart';
 /// 主函数
 Future<void> main(List<String> args) async {
   final logger = LoggerFactory.getLogger('MigrationScript');
+  DatabaseService? databaseService;
+
   try {
     logger.info('开始数据库迁移和种子数据执行');
 
@@ -19,7 +21,7 @@ Future<void> main(List<String> args) async {
     ServerConfig.validate();
 
     // 初始化数据库服务
-    final databaseService = DatabaseService();
+    databaseService = DatabaseService();
     await databaseService.initialize();
 
     // 创建迁移服务
@@ -129,6 +131,17 @@ Future<void> main(List<String> args) async {
   } catch (error, stackTrace) {
     logger.error('迁移执行失败', error: error, stackTrace: stackTrace);
     exit(1);
+  } finally {
+    // 关闭数据库连接
+    if (databaseService != null) {
+      try {
+        await databaseService.close();
+      } catch (e) {
+        // 忽略关闭错误
+      }
+    }
+    // 强制退出进程
+    exit(0);
   }
 }
 
