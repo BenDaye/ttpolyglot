@@ -1,3 +1,4 @@
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -34,6 +35,7 @@ class TTPolyglotApp extends StatelessWidget {
         Locale('zh', 'CN'),
       ],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      navigatorObservers: [BotToastNavigatorObserver()],
       builder: (context, child) {
         child ??= SizedBox.shrink();
         // 初始化 Toast
