@@ -12,10 +12,6 @@ WORKDIR /app/packages/server
 # 先复制 model 包（server 的依赖）
 COPY packages/model /app/packages/model
 
-# 临时移除 model 包中的 Flutter 依赖（服务器不需要）
-RUN cd /app/packages/model && \
-  sed -i '/shared_preferences/d' pubspec.yaml
-
 # 复制 server 包的配置文件
 COPY packages/server/pubspec.yaml packages/server/pubspec_overrides.yaml ./
 
