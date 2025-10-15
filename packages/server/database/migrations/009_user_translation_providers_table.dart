@@ -24,7 +24,7 @@ class Migration009UserTranslationProvidersTable extends BaseMigration {
       await createTable('user_translation_providers', '''
         CREATE TABLE IF NOT EXISTS {table_name} (
           id SERIAL PRIMARY KEY,
-          user_id INTEGER NOT NULL,
+          user_id UUID NOT NULL,
           provider_name VARCHAR(50) NOT NULL,
           api_key VARCHAR(500),
           api_secret VARCHAR(500),

@@ -24,7 +24,7 @@ class Migration013UserSessionsTable extends BaseMigration {
       await createTable('user_sessions', '''
         CREATE TABLE IF NOT EXISTS {table_name} (
           id SERIAL PRIMARY KEY,
-          user_id INTEGER NOT NULL,
+          user_id UUID NOT NULL,
           session_token VARCHAR(255) UNIQUE NOT NULL,
           refresh_token VARCHAR(255) UNIQUE,
           ip_address INET,

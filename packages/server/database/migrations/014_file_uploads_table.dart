@@ -24,7 +24,7 @@ class Migration014FileUploadsTable extends BaseMigration {
       await createTable('file_uploads', '''
         CREATE TABLE IF NOT EXISTS {table_name} (
           id SERIAL PRIMARY KEY,
-          user_id INTEGER NOT NULL,
+          user_id UUID NOT NULL,
           original_filename VARCHAR(255) NOT NULL,
           stored_filename VARCHAR(255) NOT NULL,
           file_path TEXT NOT NULL,

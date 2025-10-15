@@ -24,7 +24,7 @@ class Migration016AuditLogsTable extends BaseMigration {
       await createTable('audit_logs', '''
         CREATE TABLE IF NOT EXISTS {table_name} (
           id SERIAL PRIMARY KEY,
-          user_id INTEGER,
+          user_id UUID,
           action VARCHAR(100) NOT NULL,
           resource_type VARCHAR(50) NOT NULL,
           resource_id INTEGER,

@@ -24,7 +24,7 @@ class Migration015NotificationsTable extends BaseMigration {
       await createTable('notifications', '''
         CREATE TABLE IF NOT EXISTS {table_name} (
           id SERIAL PRIMARY KEY,
-          user_id INTEGER NOT NULL,
+          user_id UUID NOT NULL,
           title VARCHAR(200) NOT NULL,
           message TEXT NOT NULL,
           type VARCHAR(50) NOT NULL,

@@ -24,7 +24,7 @@ class Migration007UserRolesTable extends BaseMigration {
       await createTable('user_roles', '''
         CREATE TABLE IF NOT EXISTS {table_name} (
           id SERIAL PRIMARY KEY,
-          user_id INTEGER NOT NULL,
+          user_id UUID NOT NULL,
           role_id INTEGER NOT NULL,
           assigned_by INTEGER,
           assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
