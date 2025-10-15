@@ -23,12 +23,6 @@ mixin _$LoginRequest {
   @JsonKey(name: 'email_or_username')
   String get emailOrUsername => throw _privateConstructorUsedError;
   String get password => throw _privateConstructorUsedError;
-  @JsonKey(name: 'device_id')
-  String? get deviceId => throw _privateConstructorUsedError;
-  @JsonKey(name: 'device_name')
-  String? get deviceName => throw _privateConstructorUsedError;
-  @JsonKey(name: 'device_type')
-  String? get deviceType => throw _privateConstructorUsedError;
 
   /// Serializes this LoginRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -48,10 +42,7 @@ abstract class $LoginRequestCopyWith<$Res> {
   @useResult
   $Res call(
       {@JsonKey(name: 'email_or_username') String emailOrUsername,
-      String password,
-      @JsonKey(name: 'device_id') String? deviceId,
-      @JsonKey(name: 'device_name') String? deviceName,
-      @JsonKey(name: 'device_type') String? deviceType});
+      String password});
 }
 
 /// @nodoc
@@ -71,9 +62,6 @@ class _$LoginRequestCopyWithImpl<$Res, $Val extends LoginRequest>
   $Res call({
     Object? emailOrUsername = null,
     Object? password = null,
-    Object? deviceId = freezed,
-    Object? deviceName = freezed,
-    Object? deviceType = freezed,
   }) {
     return _then(_value.copyWith(
       emailOrUsername: null == emailOrUsername
@@ -84,18 +72,6 @@ class _$LoginRequestCopyWithImpl<$Res, $Val extends LoginRequest>
           ? _value.password
           : password // ignore: cast_nullable_to_non_nullable
               as String,
-      deviceId: freezed == deviceId
-          ? _value.deviceId
-          : deviceId // ignore: cast_nullable_to_non_nullable
-              as String?,
-      deviceName: freezed == deviceName
-          ? _value.deviceName
-          : deviceName // ignore: cast_nullable_to_non_nullable
-              as String?,
-      deviceType: freezed == deviceType
-          ? _value.deviceType
-          : deviceType // ignore: cast_nullable_to_non_nullable
-              as String?,
     ) as $Val);
   }
 }
@@ -110,10 +86,7 @@ abstract class _$$LoginRequestImplCopyWith<$Res>
   @useResult
   $Res call(
       {@JsonKey(name: 'email_or_username') String emailOrUsername,
-      String password,
-      @JsonKey(name: 'device_id') String? deviceId,
-      @JsonKey(name: 'device_name') String? deviceName,
-      @JsonKey(name: 'device_type') String? deviceType});
+      String password});
 }
 
 /// @nodoc
@@ -131,9 +104,6 @@ class __$$LoginRequestImplCopyWithImpl<$Res>
   $Res call({
     Object? emailOrUsername = null,
     Object? password = null,
-    Object? deviceId = freezed,
-    Object? deviceName = freezed,
-    Object? deviceType = freezed,
   }) {
     return _then(_$LoginRequestImpl(
       emailOrUsername: null == emailOrUsername
@@ -144,18 +114,6 @@ class __$$LoginRequestImplCopyWithImpl<$Res>
           ? _value.password
           : password // ignore: cast_nullable_to_non_nullable
               as String,
-      deviceId: freezed == deviceId
-          ? _value.deviceId
-          : deviceId // ignore: cast_nullable_to_non_nullable
-              as String?,
-      deviceName: freezed == deviceName
-          ? _value.deviceName
-          : deviceName // ignore: cast_nullable_to_non_nullable
-              as String?,
-      deviceType: freezed == deviceType
-          ? _value.deviceType
-          : deviceType // ignore: cast_nullable_to_non_nullable
-              as String?,
     ));
   }
 }
@@ -165,10 +123,7 @@ class __$$LoginRequestImplCopyWithImpl<$Res>
 class _$LoginRequestImpl implements _LoginRequest {
   const _$LoginRequestImpl(
       {@JsonKey(name: 'email_or_username') required this.emailOrUsername,
-      required this.password,
-      @JsonKey(name: 'device_id') this.deviceId,
-      @JsonKey(name: 'device_name') this.deviceName,
-      @JsonKey(name: 'device_type') this.deviceType});
+      required this.password});
 
   factory _$LoginRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$LoginRequestImplFromJson(json);
@@ -178,19 +133,10 @@ class _$LoginRequestImpl implements _LoginRequest {
   final String emailOrUsername;
   @override
   final String password;
-  @override
-  @JsonKey(name: 'device_id')
-  final String? deviceId;
-  @override
-  @JsonKey(name: 'device_name')
-  final String? deviceName;
-  @override
-  @JsonKey(name: 'device_type')
-  final String? deviceType;
 
   @override
   String toString() {
-    return 'LoginRequest(emailOrUsername: $emailOrUsername, password: $password, deviceId: $deviceId, deviceName: $deviceName, deviceType: $deviceType)';
+    return 'LoginRequest(emailOrUsername: $emailOrUsername, password: $password)';
   }
 
   @override
@@ -201,19 +147,12 @@ class _$LoginRequestImpl implements _LoginRequest {
             (identical(other.emailOrUsername, emailOrUsername) ||
                 other.emailOrUsername == emailOrUsername) &&
             (identical(other.password, password) ||
-                other.password == password) &&
-            (identical(other.deviceId, deviceId) ||
-                other.deviceId == deviceId) &&
-            (identical(other.deviceName, deviceName) ||
-                other.deviceName == deviceName) &&
-            (identical(other.deviceType, deviceType) ||
-                other.deviceType == deviceType));
+                other.password == password));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType, emailOrUsername, password, deviceId, deviceName, deviceType);
+  int get hashCode => Object.hash(runtimeType, emailOrUsername, password);
 
   /// Create a copy of LoginRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -233,13 +172,9 @@ class _$LoginRequestImpl implements _LoginRequest {
 
 abstract class _LoginRequest implements LoginRequest {
   const factory _LoginRequest(
-          {@JsonKey(name: 'email_or_username')
-          required final String emailOrUsername,
-          required final String password,
-          @JsonKey(name: 'device_id') final String? deviceId,
-          @JsonKey(name: 'device_name') final String? deviceName,
-          @JsonKey(name: 'device_type') final String? deviceType}) =
-      _$LoginRequestImpl;
+      {@JsonKey(name: 'email_or_username')
+      required final String emailOrUsername,
+      required final String password}) = _$LoginRequestImpl;
 
   factory _LoginRequest.fromJson(Map<String, dynamic> json) =
       _$LoginRequestImpl.fromJson;
@@ -249,15 +184,6 @@ abstract class _LoginRequest implements LoginRequest {
   String get emailOrUsername;
   @override
   String get password;
-  @override
-  @JsonKey(name: 'device_id')
-  String? get deviceId;
-  @override
-  @JsonKey(name: 'device_name')
-  String? get deviceName;
-  @override
-  @JsonKey(name: 'device_type')
-  String? get deviceType;
 
   /// Create a copy of LoginRequest
   /// with the given fields replaced by the non-null parameter values.
