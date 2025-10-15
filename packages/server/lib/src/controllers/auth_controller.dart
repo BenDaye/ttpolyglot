@@ -83,7 +83,7 @@ class AuthController {
         );
       } else {
         return ResponseBuilder.error(
-          code: ApiResponseCode.businessError,
+          code: result.code,
           message: result.message,
         );
       }
@@ -136,7 +136,7 @@ class AuthController {
         );
       } else {
         return ResponseBuilder.error(
-          code: ApiResponseCode.businessError,
+          code: result.code,
           message: result.message,
         );
       }
@@ -171,7 +171,7 @@ class AuthController {
         return ResponseBuilder.success(message: result.message);
       } else {
         return ResponseBuilder.error(
-          code: ApiResponseCode.businessError,
+          code: result.code,
           message: result.message,
         );
       }
@@ -241,7 +241,7 @@ class AuthController {
         return ResponseBuilder.success(message: result.message);
       } else {
         return ResponseBuilder.error(
-          code: ApiResponseCode.businessError,
+          code: result.code,
           message: result.message,
         );
       }
@@ -280,7 +280,7 @@ class AuthController {
         return ResponseBuilder.success(message: result.message);
       } else {
         return ResponseBuilder.error(
-          code: ApiResponseCode.businessError,
+          code: result.code,
           message: result.message,
         );
       }
@@ -318,7 +318,7 @@ class AuthController {
         return ResponseBuilder.success(message: result.message);
       } else {
         return ResponseBuilder.error(
-          code: ApiResponseCode.businessError,
+          code: result.code,
           message: result.message,
         );
       }
@@ -417,7 +417,7 @@ class AuthController {
         return ResponseBuilder.success(message: result.message);
       } else {
         return ResponseBuilder.error(
-          code: ApiResponseCode.businessError,
+          code: result.code,
           message: result.message,
         );
       }
