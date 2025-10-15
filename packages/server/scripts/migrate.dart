@@ -7,6 +7,28 @@ import 'package:ttpolyglot_server/src/services/database_service.dart';
 import 'package:ttpolyglot_server/src/utils/structured_logger.dart';
 
 import '../database/migration_service.dart';
+import '../database/migrations/001_users_table.dart';
+import '../database/migrations/002_roles_table.dart';
+import '../database/migrations/003_permissions_table.dart';
+import '../database/migrations/004_role_permissions_table.dart';
+import '../database/migrations/005_languages_table.dart';
+import '../database/migrations/006_projects_table.dart';
+import '../database/migrations/007_user_roles_table.dart';
+import '../database/migrations/008_project_languages_table.dart';
+import '../database/migrations/009_user_translation_providers_table.dart';
+import '../database/migrations/010_translation_entries_table.dart';
+import '../database/migrations/011_translation_history_table.dart';
+import '../database/migrations/012_system_configs_table.dart';
+import '../database/migrations/013_user_sessions_table.dart';
+import '../database/migrations/014_file_uploads_table.dart';
+import '../database/migrations/015_notifications_table.dart';
+import '../database/migrations/016_audit_logs_table.dart';
+import '../database/seeds/001_insert_default_roles.dart';
+import '../database/seeds/002_insert_permissions.dart';
+import '../database/seeds/003_assign_role_permissions.dart';
+import '../database/seeds/004_insert_languages.dart';
+import '../database/seeds/005_insert_system_configs.dart';
+import '../database/seeds/006_insert_default_admin_user.dart';
 
 /// 主函数
 Future<void> main(List<String> args) async {
@@ -21,6 +43,12 @@ Future<void> main(List<String> args) async {
   DatabaseService? databaseService;
 
   try {
+    // 注册所有迁移
+    _registerMigrations();
+
+    // 注册所有种子数据
+    _registerSeeds();
+
     // 加载配置
     await ServerConfig.load();
     ServerConfig.validate();
@@ -432,4 +460,35 @@ Future<void> _listBackups(MigrationService migrationService, StructuredLogger lo
     logger.error('获取备份列表失败', error: error, stackTrace: stackTrace);
     rethrow;
   }
+}
+
+/// 注册所有迁移
+void _registerMigrations() {
+  MigrationService.registerMigration('001_users_table', () => Migration001UsersTable());
+  MigrationService.registerMigration('002_roles_table', () => Migration002RolesTable());
+  MigrationService.registerMigration('003_permissions_table', () => Migration003PermissionsTable());
+  MigrationService.registerMigration('004_role_permissions_table', () => Migration004RolePermissionsTable());
+  MigrationService.registerMigration('005_languages_table', () => Migration005LanguagesTable());
+  MigrationService.registerMigration('006_projects_table', () => Migration006ProjectsTable());
+  MigrationService.registerMigration('007_user_roles_table', () => Migration007UserRolesTable());
+  MigrationService.registerMigration('008_project_languages_table', () => Migration008ProjectLanguagesTable());
+  MigrationService.registerMigration(
+      '009_user_translation_providers_table', () => Migration009UserTranslationProvidersTable());
+  MigrationService.registerMigration('010_translation_entries_table', () => Migration010TranslationEntriesTable());
+  MigrationService.registerMigration('011_translation_history_table', () => Migration011TranslationHistoryTable());
+  MigrationService.registerMigration('012_system_configs_table', () => Migration012SystemConfigsTable());
+  MigrationService.registerMigration('013_user_sessions_table', () => Migration013UserSessionsTable());
+  MigrationService.registerMigration('014_file_uploads_table', () => Migration014FileUploadsTable());
+  MigrationService.registerMigration('015_notifications_table', () => Migration015NotificationsTable());
+  MigrationService.registerMigration('016_audit_logs_table', () => Migration016AuditLogsTable());
+}
+
+/// 注册所有种子数据
+void _registerSeeds() {
+  MigrationService.registerSeed('001_insert_default_roles', () => Seed001InsertDefaultRoles());
+  MigrationService.registerSeed('002_insert_permissions', () => Seed002InsertPermissions());
+  MigrationService.registerSeed('003_assign_role_permissions', () => Seed003AssignRolePermissions());
+  MigrationService.registerSeed('004_insert_languages', () => Seed004InsertLanguages());
+  MigrationService.registerSeed('005_insert_system_configs', () => Seed005InsertSystemConfigs());
+  MigrationService.registerSeed('006_insert_default_admin_user', () => Seed006InsertDefaultAdminUser());
 }
