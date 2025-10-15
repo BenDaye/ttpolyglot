@@ -26,7 +26,7 @@ class Migration007UserRolesTable extends BaseMigration {
           id SERIAL PRIMARY KEY,
           user_id UUID NOT NULL,
           role_id INTEGER NOT NULL,
-          assigned_by INTEGER,
+          assigned_by UUID,
           assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           expires_at TIMESTAMP,
           is_active BOOLEAN DEFAULT true,
