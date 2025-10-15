@@ -167,7 +167,14 @@ class HttpClient {
         );
       }
       // 成功处理
-      return _successCallback(response.data as ApiResponse<T>, extra);
+      final apiResponse = response.data as ApiResponse;
+      final typedResponse = ApiResponse<T>(
+        code: apiResponse.code,
+        message: apiResponse.message,
+        type: apiResponse.type,
+        data: apiResponse.data as T?,
+      );
+      return _successCallback(typedResponse, extra);
     }).catchError((err) {
       // 定义错误类型
       ApiResponse<T> response;
