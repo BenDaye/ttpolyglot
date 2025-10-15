@@ -25,14 +25,19 @@ class Migration013UserSessionsTable extends BaseMigration {
         CREATE TABLE IF NOT EXISTS {table_name} (
           id SERIAL PRIMARY KEY,
           user_id UUID NOT NULL,
-          session_token VARCHAR(255) UNIQUE NOT NULL,
-          refresh_token VARCHAR(255) UNIQUE,
+          token_hash VARCHAR(255) NOT NULL,
+          refresh_token_hash VARCHAR(255) UNIQUE,
+          device_id VARCHAR(255),
+          device_name VARCHAR(100),
+          device_type VARCHAR(50),
           ip_address INET,
           user_agent TEXT,
-          expires_at TIMESTAMP NOT NULL,
+          location_info JSONB,
+          last_activity_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+          expires_at TIMESTAMPTZ NOT NULL,
           is_active BOOLEAN DEFAULT true,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          last_accessed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
         );
       ''');
 
@@ -41,24 +46,38 @@ class Migration013UserSessionsTable extends BaseMigration {
 
       // 创建索引
       await createIndex('user_sessions_user_id', 'user_sessions', 'user_id');
-      await createIndex('user_sessions_session_token', 'user_sessions', 'session_token');
-      await createIndex('user_sessions_refresh_token', 'user_sessions', 'refresh_token');
+      await createIndex('user_sessions_token_hash', 'user_sessions', 'token_hash');
+      await createIndex('user_sessions_refresh_token_hash', 'user_sessions', 'refresh_token_hash');
+      await createIndex('user_sessions_device_id', 'user_sessions', 'device_id');
       await createIndex('user_sessions_expires_at', 'user_sessions', 'expires_at');
       await createIndex('user_sessions_is_active', 'user_sessions', 'is_active');
-      await createIndex('user_sessions_last_accessed_at', 'user_sessions', 'last_accessed_at');
+      await createIndex('user_sessions_last_activity_at', 'user_sessions', 'last_activity_at');
+
+      // 创建触发器
+      await connection.execute('''
+        CREATE TRIGGER update_${tablePrefix}user_sessions_updated_at 
+          BEFORE UPDATE ON ${tablePrefix}user_sessions 
+          FOR EACH ROW 
+          EXECUTE FUNCTION update_updated_at_column();
+      ''');
 
       // 添加表注释
       await addTableComment('user_sessions', '用户会话表，存储用户会话信息');
       await addColumnComment('user_sessions', 'id', '会话ID，主键');
       await addColumnComment('user_sessions', 'user_id', '用户ID，外键关联users表');
-      await addColumnComment('user_sessions', 'session_token', '会话令牌，唯一标识');
-      await addColumnComment('user_sessions', 'refresh_token', '刷新令牌，唯一标识');
+      await addColumnComment('user_sessions', 'token_hash', '访问令牌哈希值');
+      await addColumnComment('user_sessions', 'refresh_token_hash', '刷新令牌哈希值');
+      await addColumnComment('user_sessions', 'device_id', '设备ID');
+      await addColumnComment('user_sessions', 'device_name', '设备名称');
+      await addColumnComment('user_sessions', 'device_type', '设备类型');
       await addColumnComment('user_sessions', 'ip_address', 'IP地址');
       await addColumnComment('user_sessions', 'user_agent', '用户代理');
+      await addColumnComment('user_sessions', 'location_info', '位置信息（JSON）');
+      await addColumnComment('user_sessions', 'last_activity_at', '最后活动时间');
       await addColumnComment('user_sessions', 'expires_at', '过期时间');
       await addColumnComment('user_sessions', 'is_active', '是否激活');
       await addColumnComment('user_sessions', 'created_at', '创建时间');
-      await addColumnComment('user_sessions', 'last_accessed_at', '最后访问时间');
+      await addColumnComment('user_sessions', 'updated_at', '更新时间');
 
       log('迁移完成: $name', name: 'Migration013UserSessionsTable');
     } catch (error, stackTrace) {
