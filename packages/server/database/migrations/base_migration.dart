@@ -96,10 +96,19 @@ abstract class BaseMigration {
       final fullConstraintName = '${tablePrefix}fk_$constraintName';
 
       log('添加外键约束: $fullConstraintName', name: runtimeType.toString());
+
+      // PostgreSQL 不支持 ADD CONSTRAINT IF NOT EXISTS，使用 DO 块来处理
       await connection.execute('''
-        ALTER TABLE $fullTableName 
-        ADD CONSTRAINT IF NOT EXISTS $fullConstraintName 
-        FOREIGN KEY ($column) REFERENCES $fullRefTable($refColumn) ON DELETE $onDelete;
+        DO \$\$
+        BEGIN
+          IF NOT EXISTS (
+            SELECT 1 FROM pg_constraint WHERE conname = '$fullConstraintName'
+          ) THEN
+            ALTER TABLE $fullTableName 
+            ADD CONSTRAINT $fullConstraintName 
+            FOREIGN KEY ($column) REFERENCES $fullRefTable($refColumn) ON DELETE $onDelete;
+          END IF;
+        END \$\$;
       ''');
       log('外键约束添加完成: $fullConstraintName', name: runtimeType.toString());
     } catch (error, stackTrace) {
