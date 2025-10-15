@@ -28,7 +28,7 @@ class Migration011TranslationHistoryTable extends BaseMigration {
           old_target_text TEXT,
           new_target_text TEXT NOT NULL,
           action VARCHAR(20) NOT NULL,
-          changed_by INTEGER NOT NULL,
+          changed_by UUID NOT NULL,
           changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           reason TEXT,
           metadata JSONB
