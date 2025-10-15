@@ -2,6 +2,16 @@
 # 此文件会覆盖 docker-compose.yml 中的配置，用于开发环境的代码热重载
 
 services:
+  ttpolyglot-db:
+    ports:
+      # 暴露 PostgreSQL 端口，方便本地开发工具连接
+      - "${DB_PORT:-5432}:5432"
+
+  ttpolyglot-redis:
+    ports:
+      # 暴露 Redis 端口，方便本地开发工具连接
+      - "${REDIS_PORT:-6379}:6379"
+
   ttpolyglot-server:
     build:
       context: ../..
