@@ -23,20 +23,38 @@ mixin _$UserInfo {
   String get id => throw _privateConstructorUsedError;
   String get username => throw _privateConstructorUsedError;
   String get email => throw _privateConstructorUsedError;
-  @JsonKey(name: 'first_name')
-  String? get firstName => throw _privateConstructorUsedError;
-  @JsonKey(name: 'last_name')
-  String? get lastName => throw _privateConstructorUsedError;
+  @JsonKey(name: 'email_encrypted')
+  String? get emailEncrypted => throw _privateConstructorUsedError;
+  @JsonKey(name: 'display_name')
+  String? get displayName => throw _privateConstructorUsedError;
   @JsonKey(name: 'avatar_url')
   String? get avatarUrl => throw _privateConstructorUsedError;
-  @JsonKey(name: 'is_verified')
-  bool? get isVerified => throw _privateConstructorUsedError;
+  @JsonKey(name: 'phone')
+  String? get phone => throw _privateConstructorUsedError;
+  @JsonKey(name: 'timezone')
+  String? get timezone => throw _privateConstructorUsedError;
+  @JsonKey(name: 'locale')
+  String? get locale => throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_active')
+  bool? get isActive => throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_email_verified')
+  bool? get isEmailVerified => throw _privateConstructorUsedError;
+  @JsonKey(name: 'email_verified_at')
+  DateTime? get emailVerifiedAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'last_login_at')
+  DateTime? get lastLoginAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'last_login_ip')
+  String? get lastLoginIp => throw _privateConstructorUsedError;
+  @JsonKey(name: 'login_attempts')
+  int? get loginAttempts => throw _privateConstructorUsedError;
+  @JsonKey(name: 'locked_until')
+  DateTime? get lockedUntil => throw _privateConstructorUsedError;
+  @JsonKey(name: 'password_changed_at')
+  DateTime? get passwordChangedAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
   DateTime? get createdAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'updated_at')
   DateTime? get updatedAt => throw _privateConstructorUsedError;
-  @JsonKey(name: 'last_login_at')
-  DateTime? get lastLoginAt => throw _privateConstructorUsedError;
 
   /// Serializes this UserInfo to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -57,13 +75,22 @@ abstract class $UserInfoCopyWith<$Res> {
       {String id,
       String username,
       String email,
-      @JsonKey(name: 'first_name') String? firstName,
-      @JsonKey(name: 'last_name') String? lastName,
+      @JsonKey(name: 'email_encrypted') String? emailEncrypted,
+      @JsonKey(name: 'display_name') String? displayName,
       @JsonKey(name: 'avatar_url') String? avatarUrl,
-      @JsonKey(name: 'is_verified') bool? isVerified,
+      @JsonKey(name: 'phone') String? phone,
+      @JsonKey(name: 'timezone') String? timezone,
+      @JsonKey(name: 'locale') String? locale,
+      @JsonKey(name: 'is_active') bool? isActive,
+      @JsonKey(name: 'is_email_verified') bool? isEmailVerified,
+      @JsonKey(name: 'email_verified_at') DateTime? emailVerifiedAt,
+      @JsonKey(name: 'last_login_at') DateTime? lastLoginAt,
+      @JsonKey(name: 'last_login_ip') String? lastLoginIp,
+      @JsonKey(name: 'login_attempts') int? loginAttempts,
+      @JsonKey(name: 'locked_until') DateTime? lockedUntil,
+      @JsonKey(name: 'password_changed_at') DateTime? passwordChangedAt,
       @JsonKey(name: 'created_at') DateTime? createdAt,
-      @JsonKey(name: 'updated_at') DateTime? updatedAt,
-      @JsonKey(name: 'last_login_at') DateTime? lastLoginAt});
+      @JsonKey(name: 'updated_at') DateTime? updatedAt});
 }
 
 /// @nodoc
@@ -84,13 +111,22 @@ class _$UserInfoCopyWithImpl<$Res, $Val extends UserInfo>
     Object? id = null,
     Object? username = null,
     Object? email = null,
-    Object? firstName = freezed,
-    Object? lastName = freezed,
+    Object? emailEncrypted = freezed,
+    Object? displayName = freezed,
     Object? avatarUrl = freezed,
-    Object? isVerified = freezed,
+    Object? phone = freezed,
+    Object? timezone = freezed,
+    Object? locale = freezed,
+    Object? isActive = freezed,
+    Object? isEmailVerified = freezed,
+    Object? emailVerifiedAt = freezed,
+    Object? lastLoginAt = freezed,
+    Object? lastLoginIp = freezed,
+    Object? loginAttempts = freezed,
+    Object? lockedUntil = freezed,
+    Object? passwordChangedAt = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
-    Object? lastLoginAt = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -105,22 +141,62 @@ class _$UserInfoCopyWithImpl<$Res, $Val extends UserInfo>
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
               as String,
-      firstName: freezed == firstName
-          ? _value.firstName
-          : firstName // ignore: cast_nullable_to_non_nullable
+      emailEncrypted: freezed == emailEncrypted
+          ? _value.emailEncrypted
+          : emailEncrypted // ignore: cast_nullable_to_non_nullable
               as String?,
-      lastName: freezed == lastName
-          ? _value.lastName
-          : lastName // ignore: cast_nullable_to_non_nullable
+      displayName: freezed == displayName
+          ? _value.displayName
+          : displayName // ignore: cast_nullable_to_non_nullable
               as String?,
       avatarUrl: freezed == avatarUrl
           ? _value.avatarUrl
           : avatarUrl // ignore: cast_nullable_to_non_nullable
               as String?,
-      isVerified: freezed == isVerified
-          ? _value.isVerified
-          : isVerified // ignore: cast_nullable_to_non_nullable
+      phone: freezed == phone
+          ? _value.phone
+          : phone // ignore: cast_nullable_to_non_nullable
+              as String?,
+      timezone: freezed == timezone
+          ? _value.timezone
+          : timezone // ignore: cast_nullable_to_non_nullable
+              as String?,
+      locale: freezed == locale
+          ? _value.locale
+          : locale // ignore: cast_nullable_to_non_nullable
+              as String?,
+      isActive: freezed == isActive
+          ? _value.isActive
+          : isActive // ignore: cast_nullable_to_non_nullable
               as bool?,
+      isEmailVerified: freezed == isEmailVerified
+          ? _value.isEmailVerified
+          : isEmailVerified // ignore: cast_nullable_to_non_nullable
+              as bool?,
+      emailVerifiedAt: freezed == emailVerifiedAt
+          ? _value.emailVerifiedAt
+          : emailVerifiedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      lastLoginAt: freezed == lastLoginAt
+          ? _value.lastLoginAt
+          : lastLoginAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      lastLoginIp: freezed == lastLoginIp
+          ? _value.lastLoginIp
+          : lastLoginIp // ignore: cast_nullable_to_non_nullable
+              as String?,
+      loginAttempts: freezed == loginAttempts
+          ? _value.loginAttempts
+          : loginAttempts // ignore: cast_nullable_to_non_nullable
+              as int?,
+      lockedUntil: freezed == lockedUntil
+          ? _value.lockedUntil
+          : lockedUntil // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      passwordChangedAt: freezed == passwordChangedAt
+          ? _value.passwordChangedAt
+          : passwordChangedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -128,10 +204,6 @@ class _$UserInfoCopyWithImpl<$Res, $Val extends UserInfo>
       updatedAt: freezed == updatedAt
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      lastLoginAt: freezed == lastLoginAt
-          ? _value.lastLoginAt
-          : lastLoginAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
     ) as $Val);
   }
@@ -149,13 +221,22 @@ abstract class _$$UserInfoImplCopyWith<$Res>
       {String id,
       String username,
       String email,
-      @JsonKey(name: 'first_name') String? firstName,
-      @JsonKey(name: 'last_name') String? lastName,
+      @JsonKey(name: 'email_encrypted') String? emailEncrypted,
+      @JsonKey(name: 'display_name') String? displayName,
       @JsonKey(name: 'avatar_url') String? avatarUrl,
-      @JsonKey(name: 'is_verified') bool? isVerified,
+      @JsonKey(name: 'phone') String? phone,
+      @JsonKey(name: 'timezone') String? timezone,
+      @JsonKey(name: 'locale') String? locale,
+      @JsonKey(name: 'is_active') bool? isActive,
+      @JsonKey(name: 'is_email_verified') bool? isEmailVerified,
+      @JsonKey(name: 'email_verified_at') DateTime? emailVerifiedAt,
+      @JsonKey(name: 'last_login_at') DateTime? lastLoginAt,
+      @JsonKey(name: 'last_login_ip') String? lastLoginIp,
+      @JsonKey(name: 'login_attempts') int? loginAttempts,
+      @JsonKey(name: 'locked_until') DateTime? lockedUntil,
+      @JsonKey(name: 'password_changed_at') DateTime? passwordChangedAt,
       @JsonKey(name: 'created_at') DateTime? createdAt,
-      @JsonKey(name: 'updated_at') DateTime? updatedAt,
-      @JsonKey(name: 'last_login_at') DateTime? lastLoginAt});
+      @JsonKey(name: 'updated_at') DateTime? updatedAt});
 }
 
 /// @nodoc
@@ -174,13 +255,22 @@ class __$$UserInfoImplCopyWithImpl<$Res>
     Object? id = null,
     Object? username = null,
     Object? email = null,
-    Object? firstName = freezed,
-    Object? lastName = freezed,
+    Object? emailEncrypted = freezed,
+    Object? displayName = freezed,
     Object? avatarUrl = freezed,
-    Object? isVerified = freezed,
+    Object? phone = freezed,
+    Object? timezone = freezed,
+    Object? locale = freezed,
+    Object? isActive = freezed,
+    Object? isEmailVerified = freezed,
+    Object? emailVerifiedAt = freezed,
+    Object? lastLoginAt = freezed,
+    Object? lastLoginIp = freezed,
+    Object? loginAttempts = freezed,
+    Object? lockedUntil = freezed,
+    Object? passwordChangedAt = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
-    Object? lastLoginAt = freezed,
   }) {
     return _then(_$UserInfoImpl(
       id: null == id
@@ -195,22 +285,62 @@ class __$$UserInfoImplCopyWithImpl<$Res>
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
               as String,
-      firstName: freezed == firstName
-          ? _value.firstName
-          : firstName // ignore: cast_nullable_to_non_nullable
+      emailEncrypted: freezed == emailEncrypted
+          ? _value.emailEncrypted
+          : emailEncrypted // ignore: cast_nullable_to_non_nullable
               as String?,
-      lastName: freezed == lastName
-          ? _value.lastName
-          : lastName // ignore: cast_nullable_to_non_nullable
+      displayName: freezed == displayName
+          ? _value.displayName
+          : displayName // ignore: cast_nullable_to_non_nullable
               as String?,
       avatarUrl: freezed == avatarUrl
           ? _value.avatarUrl
           : avatarUrl // ignore: cast_nullable_to_non_nullable
               as String?,
-      isVerified: freezed == isVerified
-          ? _value.isVerified
-          : isVerified // ignore: cast_nullable_to_non_nullable
+      phone: freezed == phone
+          ? _value.phone
+          : phone // ignore: cast_nullable_to_non_nullable
+              as String?,
+      timezone: freezed == timezone
+          ? _value.timezone
+          : timezone // ignore: cast_nullable_to_non_nullable
+              as String?,
+      locale: freezed == locale
+          ? _value.locale
+          : locale // ignore: cast_nullable_to_non_nullable
+              as String?,
+      isActive: freezed == isActive
+          ? _value.isActive
+          : isActive // ignore: cast_nullable_to_non_nullable
               as bool?,
+      isEmailVerified: freezed == isEmailVerified
+          ? _value.isEmailVerified
+          : isEmailVerified // ignore: cast_nullable_to_non_nullable
+              as bool?,
+      emailVerifiedAt: freezed == emailVerifiedAt
+          ? _value.emailVerifiedAt
+          : emailVerifiedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      lastLoginAt: freezed == lastLoginAt
+          ? _value.lastLoginAt
+          : lastLoginAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      lastLoginIp: freezed == lastLoginIp
+          ? _value.lastLoginIp
+          : lastLoginIp // ignore: cast_nullable_to_non_nullable
+              as String?,
+      loginAttempts: freezed == loginAttempts
+          ? _value.loginAttempts
+          : loginAttempts // ignore: cast_nullable_to_non_nullable
+              as int?,
+      lockedUntil: freezed == lockedUntil
+          ? _value.lockedUntil
+          : lockedUntil // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      passwordChangedAt: freezed == passwordChangedAt
+          ? _value.passwordChangedAt
+          : passwordChangedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -218,10 +348,6 @@ class __$$UserInfoImplCopyWithImpl<$Res>
       updatedAt: freezed == updatedAt
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-      lastLoginAt: freezed == lastLoginAt
-          ? _value.lastLoginAt
-          : lastLoginAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
     ));
   }
@@ -234,13 +360,22 @@ class _$UserInfoImpl implements _UserInfo {
       {required this.id,
       required this.username,
       required this.email,
-      @JsonKey(name: 'first_name') this.firstName,
-      @JsonKey(name: 'last_name') this.lastName,
+      @JsonKey(name: 'email_encrypted') this.emailEncrypted,
+      @JsonKey(name: 'display_name') this.displayName,
       @JsonKey(name: 'avatar_url') this.avatarUrl,
-      @JsonKey(name: 'is_verified') this.isVerified,
+      @JsonKey(name: 'phone') this.phone,
+      @JsonKey(name: 'timezone') this.timezone,
+      @JsonKey(name: 'locale') this.locale,
+      @JsonKey(name: 'is_active') this.isActive,
+      @JsonKey(name: 'is_email_verified') this.isEmailVerified,
+      @JsonKey(name: 'email_verified_at') this.emailVerifiedAt,
+      @JsonKey(name: 'last_login_at') this.lastLoginAt,
+      @JsonKey(name: 'last_login_ip') this.lastLoginIp,
+      @JsonKey(name: 'login_attempts') this.loginAttempts,
+      @JsonKey(name: 'locked_until') this.lockedUntil,
+      @JsonKey(name: 'password_changed_at') this.passwordChangedAt,
       @JsonKey(name: 'created_at') this.createdAt,
-      @JsonKey(name: 'updated_at') this.updatedAt,
-      @JsonKey(name: 'last_login_at') this.lastLoginAt});
+      @JsonKey(name: 'updated_at') this.updatedAt});
 
   factory _$UserInfoImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserInfoImplFromJson(json);
@@ -252,30 +387,57 @@ class _$UserInfoImpl implements _UserInfo {
   @override
   final String email;
   @override
-  @JsonKey(name: 'first_name')
-  final String? firstName;
+  @JsonKey(name: 'email_encrypted')
+  final String? emailEncrypted;
   @override
-  @JsonKey(name: 'last_name')
-  final String? lastName;
+  @JsonKey(name: 'display_name')
+  final String? displayName;
   @override
   @JsonKey(name: 'avatar_url')
   final String? avatarUrl;
   @override
-  @JsonKey(name: 'is_verified')
-  final bool? isVerified;
+  @JsonKey(name: 'phone')
+  final String? phone;
+  @override
+  @JsonKey(name: 'timezone')
+  final String? timezone;
+  @override
+  @JsonKey(name: 'locale')
+  final String? locale;
+  @override
+  @JsonKey(name: 'is_active')
+  final bool? isActive;
+  @override
+  @JsonKey(name: 'is_email_verified')
+  final bool? isEmailVerified;
+  @override
+  @JsonKey(name: 'email_verified_at')
+  final DateTime? emailVerifiedAt;
+  @override
+  @JsonKey(name: 'last_login_at')
+  final DateTime? lastLoginAt;
+  @override
+  @JsonKey(name: 'last_login_ip')
+  final String? lastLoginIp;
+  @override
+  @JsonKey(name: 'login_attempts')
+  final int? loginAttempts;
+  @override
+  @JsonKey(name: 'locked_until')
+  final DateTime? lockedUntil;
+  @override
+  @JsonKey(name: 'password_changed_at')
+  final DateTime? passwordChangedAt;
   @override
   @JsonKey(name: 'created_at')
   final DateTime? createdAt;
   @override
   @JsonKey(name: 'updated_at')
   final DateTime? updatedAt;
-  @override
-  @JsonKey(name: 'last_login_at')
-  final DateTime? lastLoginAt;
 
   @override
   String toString() {
-    return 'UserInfo(id: $id, username: $username, email: $email, firstName: $firstName, lastName: $lastName, avatarUrl: $avatarUrl, isVerified: $isVerified, createdAt: $createdAt, updatedAt: $updatedAt, lastLoginAt: $lastLoginAt)';
+    return 'UserInfo(id: $id, username: $username, email: $email, emailEncrypted: $emailEncrypted, displayName: $displayName, avatarUrl: $avatarUrl, phone: $phone, timezone: $timezone, locale: $locale, isActive: $isActive, isEmailVerified: $isEmailVerified, emailVerifiedAt: $emailVerifiedAt, lastLoginAt: $lastLoginAt, lastLoginIp: $lastLoginIp, loginAttempts: $loginAttempts, lockedUntil: $lockedUntil, passwordChangedAt: $passwordChangedAt, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -287,26 +449,62 @@ class _$UserInfoImpl implements _UserInfo {
             (identical(other.username, username) ||
                 other.username == username) &&
             (identical(other.email, email) || other.email == email) &&
-            (identical(other.firstName, firstName) ||
-                other.firstName == firstName) &&
-            (identical(other.lastName, lastName) ||
-                other.lastName == lastName) &&
+            (identical(other.emailEncrypted, emailEncrypted) ||
+                other.emailEncrypted == emailEncrypted) &&
+            (identical(other.displayName, displayName) ||
+                other.displayName == displayName) &&
             (identical(other.avatarUrl, avatarUrl) ||
                 other.avatarUrl == avatarUrl) &&
-            (identical(other.isVerified, isVerified) ||
-                other.isVerified == isVerified) &&
+            (identical(other.phone, phone) || other.phone == phone) &&
+            (identical(other.timezone, timezone) ||
+                other.timezone == timezone) &&
+            (identical(other.locale, locale) || other.locale == locale) &&
+            (identical(other.isActive, isActive) ||
+                other.isActive == isActive) &&
+            (identical(other.isEmailVerified, isEmailVerified) ||
+                other.isEmailVerified == isEmailVerified) &&
+            (identical(other.emailVerifiedAt, emailVerifiedAt) ||
+                other.emailVerifiedAt == emailVerifiedAt) &&
+            (identical(other.lastLoginAt, lastLoginAt) ||
+                other.lastLoginAt == lastLoginAt) &&
+            (identical(other.lastLoginIp, lastLoginIp) ||
+                other.lastLoginIp == lastLoginIp) &&
+            (identical(other.loginAttempts, loginAttempts) ||
+                other.loginAttempts == loginAttempts) &&
+            (identical(other.lockedUntil, lockedUntil) ||
+                other.lockedUntil == lockedUntil) &&
+            (identical(other.passwordChangedAt, passwordChangedAt) ||
+                other.passwordChangedAt == passwordChangedAt) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
-            (identical(other.lastLoginAt, lastLoginAt) ||
-                other.lastLoginAt == lastLoginAt));
+                other.updatedAt == updatedAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, username, email, firstName,
-      lastName, avatarUrl, isVerified, createdAt, updatedAt, lastLoginAt);
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        id,
+        username,
+        email,
+        emailEncrypted,
+        displayName,
+        avatarUrl,
+        phone,
+        timezone,
+        locale,
+        isActive,
+        isEmailVerified,
+        emailVerifiedAt,
+        lastLoginAt,
+        lastLoginIp,
+        loginAttempts,
+        lockedUntil,
+        passwordChangedAt,
+        createdAt,
+        updatedAt
+      ]);
 
   /// Create a copy of UserInfo
   /// with the given fields replaced by the non-null parameter values.
@@ -326,17 +524,25 @@ class _$UserInfoImpl implements _UserInfo {
 
 abstract class _UserInfo implements UserInfo {
   const factory _UserInfo(
-          {required final String id,
-          required final String username,
-          required final String email,
-          @JsonKey(name: 'first_name') final String? firstName,
-          @JsonKey(name: 'last_name') final String? lastName,
-          @JsonKey(name: 'avatar_url') final String? avatarUrl,
-          @JsonKey(name: 'is_verified') final bool? isVerified,
-          @JsonKey(name: 'created_at') final DateTime? createdAt,
-          @JsonKey(name: 'updated_at') final DateTime? updatedAt,
-          @JsonKey(name: 'last_login_at') final DateTime? lastLoginAt}) =
-      _$UserInfoImpl;
+      {required final String id,
+      required final String username,
+      required final String email,
+      @JsonKey(name: 'email_encrypted') final String? emailEncrypted,
+      @JsonKey(name: 'display_name') final String? displayName,
+      @JsonKey(name: 'avatar_url') final String? avatarUrl,
+      @JsonKey(name: 'phone') final String? phone,
+      @JsonKey(name: 'timezone') final String? timezone,
+      @JsonKey(name: 'locale') final String? locale,
+      @JsonKey(name: 'is_active') final bool? isActive,
+      @JsonKey(name: 'is_email_verified') final bool? isEmailVerified,
+      @JsonKey(name: 'email_verified_at') final DateTime? emailVerifiedAt,
+      @JsonKey(name: 'last_login_at') final DateTime? lastLoginAt,
+      @JsonKey(name: 'last_login_ip') final String? lastLoginIp,
+      @JsonKey(name: 'login_attempts') final int? loginAttempts,
+      @JsonKey(name: 'locked_until') final DateTime? lockedUntil,
+      @JsonKey(name: 'password_changed_at') final DateTime? passwordChangedAt,
+      @JsonKey(name: 'created_at') final DateTime? createdAt,
+      @JsonKey(name: 'updated_at') final DateTime? updatedAt}) = _$UserInfoImpl;
 
   factory _UserInfo.fromJson(Map<String, dynamic> json) =
       _$UserInfoImpl.fromJson;
@@ -348,26 +554,53 @@ abstract class _UserInfo implements UserInfo {
   @override
   String get email;
   @override
-  @JsonKey(name: 'first_name')
-  String? get firstName;
+  @JsonKey(name: 'email_encrypted')
+  String? get emailEncrypted;
   @override
-  @JsonKey(name: 'last_name')
-  String? get lastName;
+  @JsonKey(name: 'display_name')
+  String? get displayName;
   @override
   @JsonKey(name: 'avatar_url')
   String? get avatarUrl;
   @override
-  @JsonKey(name: 'is_verified')
-  bool? get isVerified;
+  @JsonKey(name: 'phone')
+  String? get phone;
+  @override
+  @JsonKey(name: 'timezone')
+  String? get timezone;
+  @override
+  @JsonKey(name: 'locale')
+  String? get locale;
+  @override
+  @JsonKey(name: 'is_active')
+  bool? get isActive;
+  @override
+  @JsonKey(name: 'is_email_verified')
+  bool? get isEmailVerified;
+  @override
+  @JsonKey(name: 'email_verified_at')
+  DateTime? get emailVerifiedAt;
+  @override
+  @JsonKey(name: 'last_login_at')
+  DateTime? get lastLoginAt;
+  @override
+  @JsonKey(name: 'last_login_ip')
+  String? get lastLoginIp;
+  @override
+  @JsonKey(name: 'login_attempts')
+  int? get loginAttempts;
+  @override
+  @JsonKey(name: 'locked_until')
+  DateTime? get lockedUntil;
+  @override
+  @JsonKey(name: 'password_changed_at')
+  DateTime? get passwordChangedAt;
   @override
   @JsonKey(name: 'created_at')
   DateTime? get createdAt;
   @override
   @JsonKey(name: 'updated_at')
   DateTime? get updatedAt;
-  @override
-  @JsonKey(name: 'last_login_at')
-  DateTime? get lastLoginAt;
 
   /// Create a copy of UserInfo
   /// with the given fields replaced by the non-null parameter values.

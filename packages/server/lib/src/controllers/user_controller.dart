@@ -136,14 +136,9 @@ class UserController {
 
       final updateData = <String, dynamic>{};
 
-      if (data.containsKey('first_name')) {
-        updateData['first_name'] =
-            Validator.validateString(data['first_name'], 'first_name', maxLength: 100, required: false);
-      }
-
-      if (data.containsKey('last_name')) {
-        updateData['last_name'] =
-            Validator.validateString(data['last_name'], 'last_name', maxLength: 100, required: false);
+      if (data.containsKey('display_name')) {
+        updateData['display_name'] =
+            Validator.validateString(data['display_name'], 'display_name', maxLength: 100, required: false);
       }
 
       if (data.containsKey('phone')) {
@@ -152,6 +147,14 @@ class UserController {
 
       if (data.containsKey('avatar_url')) {
         updateData['avatar_url'] = Validator.validateUrl(data['avatar_url'], 'avatar_url', required: false);
+      }
+
+      if (data.containsKey('timezone')) {
+        updateData['timezone'] = Validator.validateString(data['timezone'], 'timezone', maxLength: 50, required: false);
+      }
+
+      if (data.containsKey('locale')) {
+        updateData['locale'] = Validator.validateString(data['locale'], 'locale', maxLength: 10, required: false);
       }
 
       if (data.containsKey('is_active')) {
@@ -248,14 +251,9 @@ class UserController {
 
       final updateData = <String, dynamic>{};
 
-      if (data.containsKey('first_name')) {
-        updateData['first_name'] =
-            Validator.validateString(data['first_name'], 'first_name', maxLength: 100, required: false);
-      }
-
-      if (data.containsKey('last_name')) {
-        updateData['last_name'] =
-            Validator.validateString(data['last_name'], 'last_name', maxLength: 100, required: false);
+      if (data.containsKey('display_name')) {
+        updateData['display_name'] =
+            Validator.validateString(data['display_name'], 'display_name', maxLength: 100, required: false);
       }
 
       if (data.containsKey('phone')) {
@@ -264,6 +262,14 @@ class UserController {
 
       if (data.containsKey('avatar_url')) {
         updateData['avatar_url'] = Validator.validateUrl(data['avatar_url'], 'avatar_url', required: false);
+      }
+
+      if (data.containsKey('timezone')) {
+        updateData['timezone'] = Validator.validateString(data['timezone'], 'timezone', maxLength: 50, required: false);
+      }
+
+      if (data.containsKey('locale')) {
+        updateData['locale'] = Validator.validateString(data['locale'], 'locale', maxLength: 10, required: false);
       }
 
       final updatedUser = await _userService.updateUser(userId, updateData, updatedBy: userId);

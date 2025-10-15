@@ -38,8 +38,7 @@ class UserService {
       final parameters = <String, dynamic>{};
 
       if (search != null && search.isNotEmpty) {
-        conditions.add(
-            '(u.username ILIKE @search OR u.email ILIKE @search OR u.first_name ILIKE @search OR u.last_name ILIKE @search)');
+        conditions.add('(u.username ILIKE @search OR u.email ILIKE @search OR u.display_name ILIKE @search)');
         parameters['search'] = '%$search%';
       }
 
@@ -67,9 +66,10 @@ class UserService {
 
       final usersSql = '''
         SELECT 
-          u.id, u.username, u.email, u.first_name, u.last_name, u.avatar_url,
-          u.is_active, u.is_verified,
-          u.last_login_at, u.created_at, u.updated_at,
+          u.id, u.username, u.email, u.display_name, u.avatar_url,
+          u.phone, u.timezone, u.locale,
+          u.is_active, u.is_email_verified,
+          u.last_login_at, u.last_login_ip, u.created_at, u.updated_at,
           COALESCE(
             json_agg(
               json_build_object(
@@ -134,10 +134,12 @@ class UserService {
 
       final sql = '''
         SELECT 
-          u.id, u.username, u.email, u.first_name, u.last_name, u.avatar_url,
-          u.phone, u.two_factor_enabled,
-          u.is_active, u.is_verified, u.email_verified_at,
-          u.last_login_at, u.last_login_ip, u.created_at, u.updated_at,
+          u.id, u.username, u.email, u.display_name, u.avatar_url,
+          u.phone, u.timezone, u.locale,
+          u.is_active, u.is_email_verified, u.email_verified_at,
+          u.last_login_at, u.last_login_ip, 
+          u.login_attempts, u.locked_until, u.password_changed_at,
+          u.created_at, u.updated_at,
           COALESCE(
             json_agg(
               json_build_object(
@@ -203,10 +205,11 @@ class UserService {
 
       // 允许更新的字段
       final allowedFields = {
-        'first_name': 'first_name',
-        'last_name': 'last_name',
+        'display_name': 'display_name',
         'phone': 'phone',
         'avatar_url': 'avatar_url',
+        'timezone': 'timezone',
+        'locale': 'locale',
         'is_active': 'is_active',
       };
 
@@ -237,7 +240,8 @@ class UserService {
           throw const BusinessException(ApiResponseCode.validationError, '邮箱已被使用');
         }
         updates.add('email = @email');
-        updates.add('is_verified = false'); // 更改邮箱后需要重新验证
+        updates.add('is_email_verified = false'); // 更改邮箱后需要重新验证
+        updates.add('email_verified_at = NULL');
         parameters['email'] = updateData['email'];
       }
 
@@ -397,7 +401,7 @@ class UserService {
           COUNT(*) as total_users,
           COUNT(*) FILTER (WHERE is_active = true) as active_users,
           COUNT(*) FILTER (WHERE is_active = false) as inactive_users,
-          COUNT(*) FILTER (WHERE is_verified = true) as verified_users,
+          COUNT(*) FILTER (WHERE is_email_verified = true) as verified_users,
           COUNT(*) FILTER (WHERE last_login_at > CURRENT_TIMESTAMP - INTERVAL '30 days') as active_last_month,
           COUNT(*) FILTER (WHERE created_at > CURRENT_TIMESTAMP - INTERVAL '30 days') as new_last_month
         FROM users
