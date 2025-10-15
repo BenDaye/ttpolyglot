@@ -60,9 +60,8 @@ class AuthService {
     required String username,
     required String email,
     required String password,
-    String? displayName,
-    String? timezone,
-    String? locale,
+    String? firstName,
+    String? lastName,
   }) async {
     try {
       final logger = LoggerFactory.getLogger('AuthService');
@@ -95,19 +94,18 @@ class AuthService {
         // 插入用户
         final result = await _databaseService.query('''
           INSERT INTO users (
-            username, email, password_hash, display_name, 
-            timezone, locale, is_active, is_email_verified
+            username, email, password_hash, first_name, 
+            last_name, is_active, is_verified
           ) VALUES (
-            @username, @email, @password_hash, @display_name,
-            @timezone, @locale, true, false
+            @username, @email, @password_hash, @first_name,
+            @last_name, true, false
           ) RETURNING id
         ''', {
           'username': username,
           'email': email,
           'password_hash': passwordHash,
-          'display_name': displayName ?? username,
-          'timezone': timezone ?? 'UTC',
-          'locale': locale ?? 'en-US',
+          'first_name': firstName,
+          'last_name': lastName,
         });
 
         return result.first[0] as String;
@@ -219,7 +217,8 @@ class AuthService {
         'user_id': userId,
         'username': user['username'],
         'email': user['email'],
-        'display_name': user['display_name'],
+        'first_name': user['first_name'],
+        'last_name': user['last_name'],
         'access_token_hash': accessTokenHash,
         'login_at': DateTime.now().toIso8601String(),
       });
@@ -237,11 +236,10 @@ class AuthService {
             'id': userId,
             'username': user['username'],
             'email': user['email'],
-            'display_name': user['display_name'],
+            'first_name': user['first_name'],
+            'last_name': user['last_name'],
             'avatar_url': user['avatar_url'],
-            'timezone': user['timezone'],
-            'locale': user['locale'],
-            'is_email_verified': user['is_email_verified'],
+            'is_verified': user['is_verified'],
           },
           'tokens': {
             'access_token': accessToken,
@@ -307,7 +305,8 @@ class AuthService {
         'user_id': userId,
         'username': user['username'],
         'email': user['email'],
-        'display_name': user['display_name'],
+        'first_name': user['first_name'],
+        'last_name': user['last_name'],
         'access_token_hash': newAccessTokenHash,
         'refreshed_at': DateTime.now().toIso8601String(),
       });
@@ -429,7 +428,7 @@ class AuthService {
       // 更新用户邮箱验证状态
       await _databaseService.query('''
         UPDATE users 
-        SET is_email_verified = true, email_verified_at = CURRENT_TIMESTAMP
+        SET is_verified = true, email_verified_at = CURRENT_TIMESTAMP
         WHERE id = @user_id AND email = @email
       ''', {
         'user_id': userId,
@@ -582,7 +581,7 @@ class AuthService {
 
       // 查找用户
       final userResult = await _databaseService.query(
-        'SELECT id, username, is_email_verified FROM users WHERE email = @email',
+        'SELECT id, username, is_verified FROM users WHERE email = @email',
         {'email': email},
       );
 
@@ -591,7 +590,7 @@ class AuthService {
       }
 
       final user = userResult.first.toColumnMap();
-      if (user['is_email_verified'] as bool) {
+      if (user['is_verified'] as bool) {
         return AuthResult.failure(code: ApiResponseCode.businessError, message: '邮箱已验证');
       }
 
@@ -651,8 +650,8 @@ class AuthService {
 
   Future<Map<String, dynamic>?> _findUserByEmailOrUsername(String emailOrUsername) async {
     final result = await _databaseService.query('''
-      SELECT id, username, email, password_hash, display_name, avatar_url,
-             timezone, locale, is_active, is_email_verified, locked_until
+      SELECT id, username, email, password_hash, first_name, last_name, avatar_url,
+             is_active, is_verified, locked_until
       FROM users 
       WHERE (email = @identifier OR username = @identifier) AND is_active = true
       LIMIT 1
@@ -663,8 +662,8 @@ class AuthService {
 
   Future<Map<String, dynamic>?> _findUserById(String userId) async {
     final result = await _databaseService.query('''
-      SELECT id, username, email, display_name, avatar_url,
-             timezone, locale, is_active, is_email_verified
+      SELECT id, username, email, first_name, last_name, avatar_url,
+             is_active, is_verified
       FROM users 
       WHERE id = @user_id AND is_active = true
       LIMIT 1
@@ -680,8 +679,8 @@ class AuthService {
       logger.info('获取用户信息: $userId');
 
       final result = await _databaseService.query('''
-        SELECT id, username, email, display_name, avatar_url,
-               timezone, locale, is_active, is_email_verified,
+        SELECT id, username, email, first_name, last_name, avatar_url,
+               is_active, is_verified,
                created_at, updated_at, last_login_at
         FROM users 
         WHERE id = @user_id
@@ -822,4 +821,3 @@ class AuthService {
     });
   }
 }
-

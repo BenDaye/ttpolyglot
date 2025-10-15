@@ -62,18 +62,16 @@ class AuthController {
       final password = Validator.validateString(data['password'], 'password', minLength: 8);
 
       // 可选字段
-      final displayName = data['display_name'] as String?;
-      final timezone = data['timezone'] as String?;
-      final locale = data['locale'] as String?;
+      final firstName = data['first_name'] as String?;
+      final lastName = data['last_name'] as String?;
 
       // 调用认证服务
       final result = await _authService.register(
         username: username,
         email: email,
         password: password,
-        displayName: displayName,
-        timezone: timezone,
-        locale: locale,
+        firstName: firstName,
+        lastName: lastName,
       );
 
       if (result.success) {
