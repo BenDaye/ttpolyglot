@@ -130,8 +130,6 @@ CREATE TABLE users (
   phone VARCHAR(20),  -- 新增：电话号码
   timezone VARCHAR(50) DEFAULT 'UTC',  -- 新增：用户时区
   locale VARCHAR(10) DEFAULT 'en-US',  -- 新增：用户语言偏好
-  two_factor_enabled BOOLEAN DEFAULT FALSE,  -- 新增：双因子认证
-  two_factor_secret TEXT,  -- 新增：2FA密钥
   is_active BOOLEAN DEFAULT TRUE,
   is_email_verified BOOLEAN DEFAULT FALSE,
   email_verified_at TIMESTAMPTZ,  -- 新增：邮箱验证时间
