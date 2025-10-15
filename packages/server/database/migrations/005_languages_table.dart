@@ -44,8 +44,8 @@ class Migration005LanguagesTable extends BaseMigration {
 
       // 为语言表创建触发器
       await connection.execute('''
-        CREATE TRIGGER update_tt_languages_updated_at 
-          BEFORE UPDATE ON tt_languages 
+        CREATE TRIGGER update_${tablePrefix}languages_updated_at 
+          BEFORE UPDATE ON ${tablePrefix}languages 
           FOR EACH ROW 
           EXECUTE FUNCTION update_updated_at_column();
       ''');

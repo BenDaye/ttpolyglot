@@ -46,8 +46,8 @@ class Migration006ProjectsTable extends BaseMigration {
 
       // 为项目表创建触发器
       await connection.execute('''
-        CREATE TRIGGER update_tt_projects_updated_at 
-          BEFORE UPDATE ON tt_projects 
+        CREATE TRIGGER update_${tablePrefix}projects_updated_at 
+          BEFORE UPDATE ON ${tablePrefix}projects 
           FOR EACH ROW 
           EXECUTE FUNCTION update_updated_at_column();
       ''');

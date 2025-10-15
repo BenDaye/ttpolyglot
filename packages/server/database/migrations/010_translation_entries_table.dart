@@ -64,8 +64,8 @@ class Migration010TranslationEntriesTable extends BaseMigration {
 
       // 为翻译条目表创建触发器
       await connection.execute('''
-        CREATE TRIGGER update_tt_translation_entries_updated_at 
-          BEFORE UPDATE ON tt_translation_entries 
+        CREATE TRIGGER update_${tablePrefix}translation_entries_updated_at 
+          BEFORE UPDATE ON ${tablePrefix}translation_entries 
           FOR EACH ROW 
           EXECUTE FUNCTION update_updated_at_column();
       ''');

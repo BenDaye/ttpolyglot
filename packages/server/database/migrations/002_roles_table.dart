@@ -41,8 +41,8 @@ class Migration002RolesTable extends BaseMigration {
 
       // 为角色表创建触发器
       await connection.execute('''
-        CREATE TRIGGER update_tt_roles_updated_at 
-          BEFORE UPDATE ON tt_roles 
+        CREATE TRIGGER update_${tablePrefix}roles_updated_at 
+          BEFORE UPDATE ON ${tablePrefix}roles 
           FOR EACH ROW 
           EXECUTE FUNCTION update_updated_at_column();
       ''');

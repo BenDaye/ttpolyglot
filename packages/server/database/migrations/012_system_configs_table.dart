@@ -43,8 +43,8 @@ class Migration012SystemConfigsTable extends BaseMigration {
 
       // 为系统配置表创建触发器
       await connection.execute('''
-        CREATE TRIGGER update_tt_system_configs_updated_at 
-          BEFORE UPDATE ON tt_system_configs 
+        CREATE TRIGGER update_${tablePrefix}system_configs_updated_at 
+          BEFORE UPDATE ON ${tablePrefix}system_configs 
           FOR EACH ROW 
           EXECUTE FUNCTION update_updated_at_column();
       ''');

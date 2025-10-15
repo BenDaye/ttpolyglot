@@ -48,8 +48,8 @@ class Migration009UserTranslationProvidersTable extends BaseMigration {
 
       // 为用户翻译接口配置表创建触发器
       await connection.execute('''
-        CREATE TRIGGER update_tt_user_translation_providers_updated_at 
-          BEFORE UPDATE ON tt_user_translation_providers 
+        CREATE TRIGGER update_${tablePrefix}user_translation_providers_updated_at 
+          BEFORE UPDATE ON ${tablePrefix}user_translation_providers 
           FOR EACH ROW 
           EXECUTE FUNCTION update_updated_at_column();
       ''');
