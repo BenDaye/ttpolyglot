@@ -167,7 +167,7 @@ class HttpClient {
         );
       }
       // 成功处理
-      return _successCallback(response as ApiResponse<T>, extra);
+      return _successCallback(response.data as ApiResponse<T>, extra);
     }).catchError((err) {
       // 定义错误类型
       ApiResponse<T> response;
