@@ -65,7 +65,7 @@ class AuthApi {
   /// 获取当前用户
   Future<UserInfo> getCurrentUser() async {
     try {
-      final response = await HttpClient.get<Map<String, dynamic>>('/auth/me');
+      final response = await HttpClient.get<Map<String, dynamic>>('/users/me');
 
       final data = response.data as Map<String, dynamic>;
       return UserInfo.fromJson(data);

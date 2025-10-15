@@ -456,7 +456,7 @@ class ResponsiveSidebar extends StatelessWidget {
         ),
       ),
       child: PopupMenuButton<String>(
-        offset: const Offset(60.0, -60.0),
+        offset: const Offset(60.0, -0.0),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8.0),
         ),
