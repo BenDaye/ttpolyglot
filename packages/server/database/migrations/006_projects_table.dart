@@ -26,12 +26,12 @@ class Migration006ProjectsTable extends BaseMigration {
           id SERIAL PRIMARY KEY,
           name VARCHAR(200) NOT NULL,
           description TEXT,
-          owner_id INTEGER NOT NULL,
+          owner_id UUID NOT NULL,
           is_public BOOLEAN DEFAULT false,
           is_active BOOLEAN DEFAULT true,
           settings JSONB,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
         );
       ''');
 
