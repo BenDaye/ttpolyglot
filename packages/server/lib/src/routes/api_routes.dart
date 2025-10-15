@@ -111,11 +111,10 @@ class ApiRoutes {
     );
 
     // 创建用户子路由器
+    // ⚠️ 重要：更具体的路由必须先注册！
     final userRouter = Router();
     userRouter.get('/', userController.getUsers);
-    userRouter.get('/<id>', userController.getUser);
-    userRouter.put('/<id>', userController.updateUser);
-    userRouter.delete('/<id>', userController.deleteUser);
+    // 先注册 /me 相关路由（更具体）
     userRouter.get('/me', userController.getCurrentUser);
     userRouter.put('/me', userController.updateCurrentUser);
     userRouter.post('/me/avatar', userController.uploadAvatar);
@@ -123,6 +122,10 @@ class ApiRoutes {
     userRouter.get('/me/sessions', userController.getUserSessions);
     userRouter.delete('/me/sessions/<sessionId>', userController.deleteSession);
     userRouter.post('/me/change-password', userController.changePassword);
+    // 后注册 /<id> 路由（更通用）
+    userRouter.get('/<id>', userController.getUser);
+    userRouter.put('/<id>', userController.updateUser);
+    userRouter.delete('/<id>', userController.deleteUser);
 
     // 挂载用户路由并应用认证中间件
     _router.mount('/users', _withAuth(userRouter));
