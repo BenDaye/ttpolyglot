@@ -5,7 +5,9 @@ import 'package:shelf_router/shelf_router.dart';
 
 import '../config/server_config.dart';
 import '../controllers/controllers.dart';
+import '../middleware/auth_middleware.dart';
 import '../services/services.dart';
+import '../utils/jwt_utils.dart';
 
 /// API路由配置
 class ApiRoutes {
@@ -20,6 +22,7 @@ class ApiRoutes {
   final DateTime startTime;
 
   late final Router _router;
+  late final Middleware _authMiddleware;
 
   ApiRoutes({
     required this.databaseService,
@@ -33,11 +36,22 @@ class ApiRoutes {
     required this.startTime,
   }) {
     _router = Router();
+    final jwtUtils = JwtUtils();
+    _authMiddleware = AuthMiddleware(
+      authService: authService,
+      jwtUtils: jwtUtils,
+      redisService: redisService,
+    )();
     _setupRoutes();
   }
 
   /// 获取路由处理器
   Handler get handler => _router;
+
+  /// 应用认证中间件到处理器
+  Handler _withAuth(Handler handler) {
+    return Pipeline().addMiddleware(_authMiddleware).addHandler(handler);
+  }
 
   /// 设置所有路由
   void _setupRoutes() {
@@ -96,17 +110,22 @@ class ApiRoutes {
       fileUploadService: fileUploadService,
     );
 
-    _router.get('/users', userController.getUsers);
-    _router.get('/users/<id>', userController.getUser);
-    _router.put('/users/<id>', userController.updateUser);
-    _router.delete('/users/<id>', userController.deleteUser);
-    _router.get('/users/me', userController.getCurrentUser);
-    _router.put('/users/me', userController.updateCurrentUser);
-    _router.post('/users/me/avatar', userController.uploadAvatar);
-    _router.delete('/users/me/avatar', userController.deleteAvatar);
-    _router.get('/users/me/sessions', userController.getUserSessions);
-    _router.delete('/users/me/sessions/<sessionId>', userController.deleteSession);
-    _router.post('/users/me/change-password', userController.changePassword);
+    // 创建用户子路由器
+    final userRouter = Router();
+    userRouter.get('/', userController.getUsers);
+    userRouter.get('/<id>', userController.getUser);
+    userRouter.put('/<id>', userController.updateUser);
+    userRouter.delete('/<id>', userController.deleteUser);
+    userRouter.get('/me', userController.getCurrentUser);
+    userRouter.put('/me', userController.updateCurrentUser);
+    userRouter.post('/me/avatar', userController.uploadAvatar);
+    userRouter.delete('/me/avatar', userController.deleteAvatar);
+    userRouter.get('/me/sessions', userController.getUserSessions);
+    userRouter.delete('/me/sessions/<sessionId>', userController.deleteSession);
+    userRouter.post('/me/change-password', userController.changePassword);
+
+    // 挂载用户路由并应用认证中间件
+    _router.mount('/users', _withAuth(userRouter));
   }
 
   /// 设置项目路由
