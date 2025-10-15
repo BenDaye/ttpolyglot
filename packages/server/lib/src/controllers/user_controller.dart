@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 import '../middleware/auth_middleware.dart';
 import '../middleware/error_handler_middleware.dart';
@@ -63,9 +64,8 @@ class UserController {
 
       if (page < 1 || limit < 1 || limit > 100) {
         return ResponseBuilder.error(
-          code: 'VALIDATION_INVALID_PAGINATION',
+          code: ApiResponseCode.validationError,
           message: '分页参数无效',
-          statusCode: 400,
         );
       }
 
@@ -90,9 +90,8 @@ class UserController {
 
       return ResponseBuilder.errorFromRequest(
         request: request,
-        code: 'GET_USERS_FAILED',
+        code: ApiResponseCode.internalServerError,
         message: '获取用户列表失败',
-        statusCode: 500,
       );
     }
   }
@@ -124,9 +123,8 @@ class UserController {
 
       return ResponseBuilder.errorFromRequest(
         request: request,
-        code: 'GET_USER_FAILED',
+        code: ApiResponseCode.internalServerError,
         message: '获取用户详情失败',
-        statusCode: 500,
       );
     }
   }
@@ -181,14 +179,13 @@ class UserController {
 
       if (error is BusinessException) {
         return ResponseBuilder.errorFromRequest(
-            request: request, code: error.code, message: error.message, statusCode: 400);
+            request: request, code: ApiResponseCode.businessError, message: error.message);
       }
 
       return ResponseBuilder.errorFromRequest(
         request: request,
-        code: 'UPDATE_USER_FAILED',
+        code: ApiResponseCode.internalServerError,
         message: '更新用户信息失败',
-        statusCode: 500,
       );
     }
   }
@@ -201,9 +198,8 @@ class UserController {
       final currentUserId = getCurrentUserId(request);
       if (id == currentUserId) {
         return ResponseBuilder.error(
-          code: 'BUSINESS_CANNOT_DELETE_SELF',
+          code: ApiResponseCode.businessError,
           message: '不能删除自己的账户',
-          statusCode: 400,
         );
       }
 
@@ -223,9 +219,8 @@ class UserController {
 
       return ResponseBuilder.errorFromRequest(
         request: request,
-        code: 'DELETE_USER_FAILED',
+        code: ApiResponseCode.internalServerError,
         message: '删除用户失败',
-        statusCode: 500,
       );
     }
   }
@@ -236,7 +231,6 @@ class UserController {
       final userId = getCurrentUserId(request);
       if (userId == null) {
         return ResponseBuilder.authError(
-          code: 'AUTH_USER_NOT_FOUND',
           message: '用户信息不存在',
         );
       }
@@ -245,7 +239,6 @@ class UserController {
 
       if (user == null) {
         return ResponseBuilder.authError(
-          code: 'AUTH_USER_NOT_FOUND',
           message: '用户不存在',
         );
       }
@@ -259,9 +252,8 @@ class UserController {
 
       return ResponseBuilder.errorFromRequest(
         request: request,
-        code: 'GET_CURRENT_USER_FAILED',
+        code: ApiResponseCode.internalServerError,
         message: '获取用户信息失败',
-        statusCode: 500,
       );
     }
   }
@@ -272,7 +264,6 @@ class UserController {
       final userId = getCurrentUserId(request);
       if (userId == null) {
         return ResponseBuilder.authError(
-          code: 'AUTH_USER_NOT_FOUND',
           message: '用户信息不存在',
         );
       }
@@ -318,14 +309,13 @@ class UserController {
 
       if (error is BusinessException) {
         return ResponseBuilder.errorFromRequest(
-            request: request, code: error.code, message: error.message, statusCode: 400);
+            request: request, code: ApiResponseCode.businessError, message: error.message);
       }
 
       return ResponseBuilder.errorFromRequest(
         request: request,
-        code: 'UPDATE_CURRENT_USER_FAILED',
+        code: ApiResponseCode.internalServerError,
         message: '更新个人信息失败',
-        statusCode: 500,
       );
     }
   }
@@ -336,7 +326,6 @@ class UserController {
       final userId = getCurrentUserId(request);
       if (userId == null) {
         return ResponseBuilder.authError(
-          code: 'AUTH_USER_NOT_FOUND',
           message: '用户信息不存在',
         );
       }
@@ -359,14 +348,13 @@ class UserController {
 
       if (error is BusinessException) {
         return ResponseBuilder.errorFromRequest(
-            request: request, code: error.code, message: error.message, statusCode: 400);
+            request: request, code: ApiResponseCode.businessError, message: error.message);
       }
 
       return ResponseBuilder.errorFromRequest(
         request: request,
-        code: 'CHANGE_PASSWORD_FAILED',
+        code: ApiResponseCode.internalServerError,
         message: '修改密码失败',
-        statusCode: 500,
       );
     }
   }
@@ -385,9 +373,8 @@ class UserController {
 
       return ResponseBuilder.errorFromRequest(
         request: request,
-        code: 'GET_USER_STATS_FAILED',
+        code: ApiResponseCode.internalServerError,
         message: '获取统计信息失败',
-        statusCode: 500,
       );
     }
   }
@@ -397,10 +384,8 @@ class UserController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseBuilder.error(
-          code: 'AUTH_USER_NOT_FOUND',
+        return ResponseBuilder.authError(
           message: '用户信息不存在',
-          statusCode: 401,
         );
       }
 
@@ -408,9 +393,8 @@ class UserController {
       final contentType = request.headers['content-type'];
       if (contentType == null || !contentType.startsWith('multipart/form-data')) {
         return ResponseBuilder.error(
-          code: 'VALIDATION_INVALID_CONTENT_TYPE',
+          code: ApiResponseCode.validationError,
           message: '请使用multipart/form-data格式上传文件',
-          statusCode: 400,
         );
       }
 
@@ -422,9 +406,8 @@ class UserController {
 
       if (body.isEmpty) {
         return ResponseBuilder.error(
-          code: 'VALIDATION_MISSING_FILE',
+          code: ApiResponseCode.validationError,
           message: '请选择要上传的头像文件',
-          statusCode: 400,
         );
       }
 
@@ -441,9 +424,8 @@ class UserController {
 
       if (!uploadResult.success) {
         return ResponseBuilder.error(
-          code: uploadResult.code ?? '',
-          message: uploadResult.message ?? '',
-          statusCode: 400,
+          code: ApiResponseCode.businessError,
+          message: uploadResult.message ?? '上传头像失败',
         );
       }
 
@@ -464,9 +446,8 @@ class UserController {
       logger.error('上传头像失败', error: error, stackTrace: stackTrace);
       return ResponseBuilder.errorFromRequest(
         request: request,
-        code: 'UPLOAD_AVATAR_FAILED',
+        code: ApiResponseCode.internalServerError,
         message: '上传头像失败',
-        statusCode: 500,
       );
     }
   }
@@ -476,10 +457,8 @@ class UserController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseBuilder.error(
-          code: 'AUTH_USER_NOT_FOUND',
+        return ResponseBuilder.authError(
           message: '用户信息不存在',
-          statusCode: 401,
         );
       }
 
@@ -489,9 +468,8 @@ class UserController {
       logger.error('删除头像失败', error: error, stackTrace: stackTrace);
       return ResponseBuilder.errorFromRequest(
         request: request,
-        code: 'DELETE_AVATAR_FAILED',
+        code: ApiResponseCode.internalServerError,
         message: '删除头像失败',
-        statusCode: 500,
       );
     }
   }
@@ -501,10 +479,8 @@ class UserController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseBuilder.error(
-          code: 'AUTH_USER_NOT_FOUND',
+        return ResponseBuilder.authError(
           message: '用户信息不存在',
-          statusCode: 401,
         );
       }
 
@@ -514,9 +490,8 @@ class UserController {
       logger.error('获取用户会话失败', error: error, stackTrace: stackTrace);
       return ResponseBuilder.errorFromRequest(
         request: request,
-        code: 'GET_USER_SESSIONS_FAILED',
+        code: ApiResponseCode.internalServerError,
         message: '获取用户会话失败',
-        statusCode: 500,
       );
     }
   }
@@ -526,10 +501,8 @@ class UserController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseBuilder.error(
-          code: 'AUTH_USER_NOT_FOUND',
+        return ResponseBuilder.authError(
           message: '用户信息不存在',
-          statusCode: 401,
         );
       }
 
@@ -539,9 +512,8 @@ class UserController {
       logger.error('删除用户会话失败', error: error, stackTrace: stackTrace);
       return ResponseBuilder.errorFromRequest(
         request: request,
-        code: 'DELETE_SESSION_FAILED',
+        code: ApiResponseCode.internalServerError,
         message: '删除会话失败',
-        statusCode: 500,
       );
     }
   }

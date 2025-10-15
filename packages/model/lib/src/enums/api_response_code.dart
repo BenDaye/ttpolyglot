@@ -33,7 +33,8 @@ enum ApiResponseCode {
   validationError(-1001, '验证失败'),
   dataNotFound(-1002, '数据不存在'),
   duplicateData(-1003, '数据重复'),
-  unknown(-1, '未知错误'),
+  unknown(-100000, '未知错误'),
+  error(-1, '错误'),
   success(0, '成功');
 
   final int value;

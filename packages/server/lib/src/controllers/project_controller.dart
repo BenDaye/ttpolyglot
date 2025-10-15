@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 import '../middleware/auth_middleware.dart';
 import '../models/api_error.dart';
@@ -59,7 +60,7 @@ class ProjectController {
       final limit = int.tryParse(params['limit'] ?? '20') ?? 20;
 
       if (page < 1 || limit < 1 || limit > 100) {
-        return ResponseBuilder.error(code: 'VALIDATION_INVALID_PAGINATION', message: '分页参数无效', statusCode: 400);
+        return ResponseBuilder.error(code: ApiResponseCode.validationError, message: '分页参数无效');
       }
 
       final result = await _projectService.getProjects(
@@ -79,7 +80,7 @@ class ProjectController {
       final logger = LoggerFactory.getLogger('ProjectController');
       logger.error('获取项目列表失败', error: error, stackTrace: stackTrace);
       return ResponseBuilder.errorFromRequest(
-          request: request, code: 'GET_PROJECTS_FAILED', message: '获取项目列表失败', statusCode: 500);
+          request: request, code: ApiResponseCode.internalServerError, message: '获取项目列表失败');
     }
   }
 
@@ -93,7 +94,7 @@ class ProjectController {
       final ownerId = getCurrentUserId(request);
 
       if (ownerId == null) {
-        return ResponseBuilder.authError(code: 'AUTH_USER_NOT_FOUND', message: '用户信息不存在');
+        return ResponseBuilder.authError(message: '用户信息不存在');
       }
 
       final project = await _projectService.createProject(
@@ -117,11 +118,11 @@ class ProjectController {
       }
       if (error is BusinessException) {
         return ResponseBuilder.errorFromRequest(
-            request: request, code: error.code, message: error.message, statusCode: 400);
+            request: request, code: ApiResponseCode.businessError, message: error.message);
       }
 
       return ResponseBuilder.errorFromRequest(
-          request: request, code: 'CREATE_PROJECT_FAILED', message: '创建项目失败', statusCode: 500);
+          request: request, code: ApiResponseCode.internalServerError, message: '创建项目失败');
     }
   }
 
@@ -143,7 +144,7 @@ class ProjectController {
       }
 
       return ResponseBuilder.errorFromRequest(
-          request: request, code: 'GET_PROJECT_FAILED', message: '获取项目详情失败', statusCode: 500);
+          request: request, code: ApiResponseCode.internalServerError, message: '获取项目详情失败');
     }
   }
 
@@ -183,11 +184,11 @@ class ProjectController {
       }
       if (error is BusinessException) {
         return ResponseBuilder.errorFromRequest(
-            request: request, code: error.code, message: error.message, statusCode: 400);
+            request: request, code: ApiResponseCode.businessError, message: error.message);
       }
 
       return ResponseBuilder.errorFromRequest(
-          request: request, code: 'UPDATE_PROJECT_FAILED', message: '更新项目信息失败', statusCode: 500);
+          request: request, code: ApiResponseCode.internalServerError, message: '更新项目信息失败');
     }
   }
 
@@ -207,7 +208,7 @@ class ProjectController {
       }
 
       return ResponseBuilder.errorFromRequest(
-          request: request, code: 'DELETE_PROJECT_FAILED', message: '删除项目失败', statusCode: 500);
+          request: request, code: ApiResponseCode.internalServerError, message: '删除项目失败');
     }
   }
 
@@ -219,7 +220,7 @@ class ProjectController {
     } catch (error, stackTrace) {
       logger.error('获取项目成员失败: $id', error: error, stackTrace: stackTrace);
       return ResponseBuilder.errorFromRequest(
-          request: request, code: 'GET_PROJECT_MEMBERS_FAILED', message: '获取项目成员失败', statusCode: 500);
+          request: request, code: ApiResponseCode.internalServerError, message: '获取项目成员失败');
     }
   }
 
@@ -234,7 +235,7 @@ class ProjectController {
       final grantedBy = getCurrentUserId(request);
 
       if (grantedBy == null) {
-        return ResponseBuilder.authError(code: 'AUTH_USER_NOT_FOUND', message: '用户信息不存在');
+        return ResponseBuilder.authError(message: '用户信息不存在');
       }
 
       DateTime? expiresAt;
@@ -254,11 +255,11 @@ class ProjectController {
       }
       if (error is BusinessException) {
         return ResponseBuilder.errorFromRequest(
-            request: request, code: error.code, message: error.message, statusCode: 400);
+            request: request, code: ApiResponseCode.businessError, message: error.message);
       }
 
       return ResponseBuilder.errorFromRequest(
-          request: request, code: 'ADD_PROJECT_MEMBER_FAILED', message: '添加项目成员失败', statusCode: 500);
+          request: request, code: ApiResponseCode.internalServerError, message: '添加项目成员失败');
     }
   }
 
@@ -271,7 +272,7 @@ class ProjectController {
     } catch (error, stackTrace) {
       logger.error('移除项目成员失败: $id, user: $userId', error: error, stackTrace: stackTrace);
       return ResponseBuilder.errorFromRequest(
-          request: request, code: 'REMOVE_PROJECT_MEMBER_FAILED', message: '移除项目成员失败', statusCode: 500);
+          request: request, code: ApiResponseCode.internalServerError, message: '移除项目成员失败');
     }
   }
 
@@ -282,7 +283,7 @@ class ProjectController {
     } catch (error, stackTrace) {
       logger.error('获取项目统计信息失败', error: error, stackTrace: stackTrace);
       return ResponseBuilder.errorFromRequest(
-          request: request, code: 'GET_PROJECT_STATS_FAILED', message: '获取统计信息失败', statusCode: 500);
+          request: request, code: ApiResponseCode.internalServerError, message: '获取统计信息失败');
     }
   }
 
@@ -295,7 +296,7 @@ class ProjectController {
     } catch (error, stackTrace) {
       logger.error('归档项目失败: $id', error: error, stackTrace: stackTrace);
       return ResponseBuilder.errorFromRequest(
-          request: request, code: 'ARCHIVE_PROJECT_FAILED', message: '归档项目失败', statusCode: 500);
+          request: request, code: ApiResponseCode.internalServerError, message: '归档项目失败');
     }
   }
 
@@ -308,7 +309,7 @@ class ProjectController {
     } catch (error, stackTrace) {
       logger.error('恢复项目失败: $id', error: error, stackTrace: stackTrace);
       return ResponseBuilder.errorFromRequest(
-          request: request, code: 'RESTORE_PROJECT_FAILED', message: '恢复项目失败', statusCode: 500);
+          request: request, code: ApiResponseCode.internalServerError, message: '恢复项目失败');
     }
   }
 
@@ -335,7 +336,7 @@ class ProjectController {
         return ResponseBuilder.validationErrorFromRequest(request: request, fieldErrors: error.fieldErrors);
       }
       return ResponseBuilder.errorFromRequest(
-          request: request, code: 'UPDATE_MEMBER_ROLE_FAILED', message: '更新成员角色失败', statusCode: 500);
+          request: request, code: ApiResponseCode.internalServerError, message: '更新成员角色失败');
     }
   }
 
@@ -348,7 +349,7 @@ class ProjectController {
     } catch (error, stackTrace) {
       logger.error('获取项目语言失败: $id', error: error, stackTrace: stackTrace);
       return ResponseBuilder.errorFromRequest(
-          request: request, code: 'GET_PROJECT_LANGUAGES_FAILED', message: '获取项目语言失败', statusCode: 500);
+          request: request, code: ApiResponseCode.internalServerError, message: '获取项目语言失败');
     }
   }
 
@@ -374,7 +375,7 @@ class ProjectController {
         return ResponseBuilder.validationErrorFromRequest(request: request, fieldErrors: error.fieldErrors);
       }
       return ResponseBuilder.errorFromRequest(
-          request: request, code: 'ADD_PROJECT_LANGUAGE_FAILED', message: '添加项目语言失败', statusCode: 500);
+          request: request, code: ApiResponseCode.internalServerError, message: '添加项目语言失败');
     }
   }
 
@@ -387,7 +388,7 @@ class ProjectController {
     } catch (error, stackTrace) {
       logger.error('移除项目语言失败: $id, language: $languageCode', error: error, stackTrace: stackTrace);
       return ResponseBuilder.errorFromRequest(
-          request: request, code: 'REMOVE_PROJECT_LANGUAGE_FAILED', message: '移除项目语言失败', statusCode: 500);
+          request: request, code: ApiResponseCode.internalServerError, message: '移除项目语言失败');
     }
   }
 
@@ -414,7 +415,7 @@ class ProjectController {
         return ResponseBuilder.validationErrorFromRequest(request: request, fieldErrors: error.fieldErrors);
       }
       return ResponseBuilder.errorFromRequest(
-          request: request, code: 'UPDATE_LANGUAGE_SETTINGS_FAILED', message: '更新语言设置失败', statusCode: 500);
+          request: request, code: ApiResponseCode.internalServerError, message: '更新语言设置失败');
     }
   }
 
@@ -427,7 +428,7 @@ class ProjectController {
     } catch (error, stackTrace) {
       logger.error('获取项目统计信息失败: $id', error: error, stackTrace: stackTrace);
       return ResponseBuilder.errorFromRequest(
-          request: request, code: 'GET_PROJECT_STATISTICS_FAILED', message: '获取项目统计信息失败', statusCode: 500);
+          request: request, code: ApiResponseCode.internalServerError, message: '获取项目统计信息失败');
     }
   }
 
@@ -450,7 +451,7 @@ class ProjectController {
     } catch (error, stackTrace) {
       logger.error('获取项目活动失败: $id', error: error, stackTrace: stackTrace);
       return ResponseBuilder.errorFromRequest(
-          request: request, code: 'GET_PROJECT_ACTIVITY_FAILED', message: '获取项目活动失败', statusCode: 500);
+          request: request, code: ApiResponseCode.internalServerError, message: '获取项目活动失败');
     }
   }
 }

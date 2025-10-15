@@ -2,7 +2,6 @@
 library models;
 
 export 'api_error.dart';
-export 'api_response.dart';
 export 'audit_logs.dart';
 export 'file_uploads.dart';
 export 'language.dart';

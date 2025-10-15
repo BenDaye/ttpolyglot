@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 import '../middleware/auth_middleware.dart';
 import '../middleware/error_handler_middleware.dart';
@@ -81,9 +82,8 @@ class AuthController {
         );
       } else {
         return ResponseBuilder.error(
-          code: result.code,
+          code: ApiResponseCode.businessError,
           message: result.message,
-          statusCode: 400,
         );
       }
     } catch (error, stackTrace) {
@@ -97,10 +97,8 @@ class AuthController {
         );
       }
 
-      return ResponseBuilder.error(
-        code: 'REGISTRATION_FAILED',
+      return ResponseBuilder.internalServerError(
         message: '注册失败，请稍后重试',
-        statusCode: 500,
       );
     }
   }
@@ -142,10 +140,8 @@ class AuthController {
           data: result.data,
         );
       } else {
-        return ResponseBuilder.error(
-          code: result.code,
+        return ResponseBuilder.authError(
           message: result.message,
-          statusCode: 401,
         );
       }
     } catch (error, stackTrace) {
@@ -158,10 +154,8 @@ class AuthController {
         );
       }
 
-      return ResponseBuilder.error(
-        code: 'LOGIN_FAILED',
+      return ResponseBuilder.internalServerError(
         message: '登录失败，请稍后重试',
-        statusCode: 500,
       );
     }
   }
@@ -172,10 +166,8 @@ class AuthController {
       // 获取访问令牌
       final token = getAuthToken(request);
       if (token == null) {
-        return ResponseBuilder.error(
-          code: 'AUTH_TOKEN_MISSING',
+        return ResponseBuilder.authError(
           message: '认证令牌缺失',
-          statusCode: 401,
         );
       }
 
@@ -186,18 +178,15 @@ class AuthController {
         return ResponseBuilder.success(message: result.message);
       } else {
         return ResponseBuilder.error(
-          code: result.code,
+          code: ApiResponseCode.businessError,
           message: result.message,
-          statusCode: 400,
         );
       }
     } catch (error, stackTrace) {
       logger.error('用户登出失败', error: error, stackTrace: stackTrace);
 
-      return ResponseBuilder.error(
-        code: 'LOGOUT_FAILED',
+      return ResponseBuilder.internalServerError(
         message: '登出失败，请稍后重试',
-        statusCode: 500,
       );
     }
   }
@@ -221,10 +210,8 @@ class AuthController {
           data: result.data,
         );
       } else {
-        return ResponseBuilder.error(
-          code: result.code,
+        return ResponseBuilder.authError(
           message: result.message,
-          statusCode: 401,
         );
       }
     } catch (error, stackTrace) {
@@ -237,10 +224,8 @@ class AuthController {
         );
       }
 
-      return ResponseBuilder.error(
-        code: 'REFRESH_FAILED',
+      return ResponseBuilder.internalServerError(
         message: '令牌刷新失败',
-        statusCode: 500,
       );
     }
   }
@@ -262,9 +247,8 @@ class AuthController {
         return ResponseBuilder.success(message: result.message);
       } else {
         return ResponseBuilder.error(
-          code: result.code,
+          code: ApiResponseCode.businessError,
           message: result.message,
-          statusCode: 400,
         );
       }
     } catch (error, stackTrace) {
@@ -277,10 +261,8 @@ class AuthController {
         );
       }
 
-      return ResponseBuilder.error(
-        code: 'FORGOT_PASSWORD_FAILED',
+      return ResponseBuilder.internalServerError(
         message: '请求失败，请稍后重试',
-        statusCode: 500,
       );
     }
   }
@@ -303,9 +285,8 @@ class AuthController {
         return ResponseBuilder.success(message: result.message);
       } else {
         return ResponseBuilder.error(
-          code: result.code,
+          code: ApiResponseCode.businessError,
           message: result.message,
-          statusCode: 400,
         );
       }
     } catch (error, stackTrace) {
@@ -318,10 +299,8 @@ class AuthController {
         );
       }
 
-      return ResponseBuilder.error(
-        code: 'RESET_PASSWORD_FAILED',
+      return ResponseBuilder.internalServerError(
         message: '重置失败，请稍后重试',
-        statusCode: 500,
       );
     }
   }
@@ -343,9 +322,8 @@ class AuthController {
         return ResponseBuilder.success(message: result.message);
       } else {
         return ResponseBuilder.error(
-          code: result.code,
+          code: ApiResponseCode.businessError,
           message: result.message,
-          statusCode: 400,
         );
       }
     } catch (error, stackTrace) {
@@ -358,10 +336,8 @@ class AuthController {
         );
       }
 
-      return ResponseBuilder.error(
-        code: 'EMAIL_VERIFICATION_FAILED',
+      return ResponseBuilder.internalServerError(
         message: '验证失败，请稍后重试',
-        statusCode: 500,
       );
     }
   }
@@ -371,10 +347,8 @@ class AuthController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseBuilder.error(
-          code: 'AUTH_USER_NOT_FOUND',
+        return ResponseBuilder.authError(
           message: '用户信息不存在',
-          statusCode: 401,
         );
       }
 
@@ -382,10 +356,8 @@ class AuthController {
       final user = await _authService.getUserById(userId);
 
       if (user == null) {
-        return ResponseBuilder.error(
-          code: 'AUTH_USER_NOT_FOUND',
+        return ResponseBuilder.notFound(
           message: '用户不存在',
-          statusCode: 404,
         );
       }
 
@@ -396,10 +368,8 @@ class AuthController {
     } catch (error, stackTrace) {
       logger.error('获取当前用户信息失败', error: error, stackTrace: stackTrace);
 
-      return ResponseBuilder.error(
-        code: 'GET_USER_INFO_FAILED',
+      return ResponseBuilder.internalServerError(
         message: '获取用户信息失败',
-        statusCode: 500,
       );
     }
   }
@@ -436,9 +406,8 @@ class AuthController {
       final email = data['email'] as String?;
       if (email == null || email.isEmpty) {
         return ResponseBuilder.error(
-          code: 'VALIDATION_MISSING_EMAIL',
+          code: ApiResponseCode.validationError,
           message: '邮箱地址不能为空',
-          statusCode: 400,
         );
       }
 
@@ -448,18 +417,15 @@ class AuthController {
         return ResponseBuilder.success(message: result.message);
       } else {
         return ResponseBuilder.error(
-          code: result.code,
+          code: ApiResponseCode.businessError,
           message: result.message,
-          statusCode: 400,
         );
       }
     } catch (error, stackTrace) {
       logger.error('重发验证邮件失败', error: error, stackTrace: stackTrace);
 
-      return ResponseBuilder.error(
-        code: 'RESEND_VERIFICATION_FAILED',
+      return ResponseBuilder.internalServerError(
         message: '重发验证邮件失败，请稍后重试',
-        statusCode: 500,
       );
     }
   }
