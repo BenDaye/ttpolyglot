@@ -1,9 +1,6 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 
-// 重新导出 CancelFunc，方便其他地方使用
-export 'package:bot_toast/bot_toast.dart' show CancelFunc;
-
 final class Toast {
   Toast._();
 
@@ -91,62 +88,71 @@ final class Toast {
       duration: duration ?? const Duration(seconds: 3),
       onClose: onClose,
       toastBuilder: (cancel) {
-        final List<Widget> items = <Widget>[];
+        return Builder(
+          builder: (context) {
+            final bool isDark = Theme.of(context).brightness == Brightness.dark;
+            final Color backgroundColor = isDark ? const Color(0xFF2C2C2C) : Colors.white;
+            final Color defaultTextColor = isDark ? Colors.white : Colors.black87;
+            final Color shadowColor = isDark ? Colors.black45 : Colors.black12;
 
-        if (icon != null) {
-          items.add(
-            Container(
-              padding: const EdgeInsets.all(3.0),
-              decoration: BoxDecoration(
-                color: iconBackgroundColor ?? Colors.black12,
-                borderRadius: BorderRadius.circular(50.0),
-              ),
-              child: IconTheme(
-                  data: IconThemeData(
-                    size: 14.0,
-                    color: iconColor,
+            final List<Widget> items = <Widget>[];
+
+            if (icon != null) {
+              items.add(
+                Container(
+                  padding: const EdgeInsets.all(3.0),
+                  decoration: BoxDecoration(
+                    color: iconBackgroundColor ?? Colors.black12,
+                    borderRadius: BorderRadius.circular(50.0),
                   ),
-                  child: icon),
-            ),
-          );
-        }
+                  child: IconTheme(
+                      data: IconThemeData(
+                        size: 14.0,
+                        color: iconColor,
+                      ),
+                      child: icon),
+                ),
+              );
+            }
 
-        items.add(Flexible(
-          child: Text(
-            message,
-            overflow: TextOverflow.ellipsis,
-            strutStyle: const StrutStyle(
-              leading: 0,
-              forceStrutHeight: true,
-            ),
-            style: TextStyle(
-              fontSize: 14.0,
-              color: textColor,
-            ),
-          ),
-        ));
-
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
-          margin: const EdgeInsets.symmetric(horizontal: 10.0),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(50.0),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black12,
-                offset: Offset(0.0, 3.0),
-                blurRadius: 5.0,
+            items.add(Flexible(
+              child: Text(
+                message,
+                overflow: TextOverflow.ellipsis,
+                strutStyle: const StrutStyle(
+                  leading: 0,
+                  forceStrutHeight: true,
+                ),
+                style: TextStyle(
+                  fontSize: 14.0,
+                  color: textColor ?? defaultTextColor,
+                ),
               ),
-            ],
-          ),
-          child: Row(
-            spacing: 5.0,
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: items,
-          ),
+            ));
+
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+              margin: const EdgeInsets.symmetric(horizontal: 10.0),
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                borderRadius: BorderRadius.circular(50.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: shadowColor,
+                    offset: const Offset(0.0, 3.0),
+                    blurRadius: 5.0,
+                  ),
+                ],
+              ),
+              child: Row(
+                spacing: 5.0,
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: items,
+              ),
+            );
+          },
         );
       },
     );
@@ -165,45 +171,55 @@ final class Toast {
       clickClose: false,
       ignoreContentClick: false,
       duration: duration ?? const Duration(seconds: 3),
-      backgroundColor: Colors.white54,
+      backgroundColor: Colors.black26,
       onClose: onClose,
       toastBuilder: (cancel) {
-        return Container(
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(6.0),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 10.0,
+        return Builder(
+          builder: (context) {
+            final bool isDark = Theme.of(context).brightness == Brightness.dark;
+            final Color backgroundColor = isDark ? const Color(0xFF2C2C2C) : Colors.white;
+            final Color defaultTextColor = isDark ? Colors.white : Colors.black87;
+            final Color defaultLoadingColor = isDark ? Colors.white : Colors.blueAccent;
+            final Color shadowColor = isDark ? Colors.black45 : Colors.black12;
+
+            return Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                borderRadius: BorderRadius.circular(6.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: shadowColor,
+                    blurRadius: 10.0,
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Column(
-            spacing: 6.0,
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              loadingWidget ??
-                  SizedBox(
-                    width: 20.0,
-                    height: 20.0,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3.0,
-                      color: loadingColor ?? Colors.blueAccent,
+              child: Column(
+                spacing: 6.0,
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  loadingWidget ??
+                      SizedBox(
+                        width: 20.0,
+                        height: 20.0,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3.0,
+                          color: loadingColor ?? defaultLoadingColor,
+                        ),
+                      ),
+                  Text(
+                    placeholder ?? '加载中...',
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      color: textColor ?? defaultTextColor,
                     ),
                   ),
-              Text(
-                placeholder ?? '加载中...',
-                style: TextStyle(
-                  fontSize: 14.0,
-                  color: textColor ?? Colors.black,
-                ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
