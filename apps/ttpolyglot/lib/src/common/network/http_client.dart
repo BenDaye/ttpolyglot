@@ -171,8 +171,15 @@ class HttpClient {
     }).catchError((err) {
       // 定义错误类型
       ApiResponse<T> response;
-      if (err is DioException && err.error is ApiResponse<T>) {
-        response = err.error as ApiResponse<T>;
+      if (err is DioException && err.error is ApiResponse) {
+        // 从原始 ApiResponse 中提取信息，重新构造为 ApiResponse<T>
+        final original = err.error as ApiResponse;
+        response = ApiResponse<T>(
+          code: original.code,
+          message: original.message,
+          type: original.type,
+          data: original.data as T?,
+        );
       } else {
         response = ApiResponse.of(ApiResponseCode.unknown, message: err.toString());
       }
@@ -190,7 +197,7 @@ class HttpClient {
   // 错误方法
   static ApiResponse<T> _failCallback<T>(ApiResponse<T> response, RequestExtra extra) {
     MessageTips.showFailTips(
-      message: response.code == ApiResponseCode.unknown ? '未知错误' : response.message,
+      message: response.message,
       type: response.type,
       status: response.code,
       extra: extra,
