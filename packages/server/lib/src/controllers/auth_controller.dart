@@ -14,6 +14,7 @@ import '../utils/validator.dart';
 /// 认证控制器
 class AuthController {
   final AuthService _authService;
+  static final logger = LoggerFactory.getLogger('AuthController');
 
   AuthController({
     required AuthService authService,
@@ -87,7 +88,6 @@ class AuthController {
         );
       }
     } catch (error, stackTrace) {
-      final logger = LoggerFactory.getLogger('AuthController');
       logger.error('用户注册失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {

@@ -17,6 +17,7 @@ import '../utils/validator.dart';
 class UserController {
   final UserService _userService;
   final FileUploadService _fileUploadService;
+  static final logger = LoggerFactory.getLogger('UserController');
 
   UserController({
     required UserService userService,
@@ -85,7 +86,6 @@ class UserController {
         message: '获取用户列表成功',
       );
     } catch (error, stackTrace) {
-      final logger = LoggerFactory.getLogger('UserController');
       logger.error('获取用户列表失败', error: error, stackTrace: stackTrace);
 
       return ResponseBuilder.error(

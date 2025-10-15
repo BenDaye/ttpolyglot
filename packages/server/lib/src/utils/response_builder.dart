@@ -89,7 +89,7 @@ class ResponseBuilder {
   }) {
     code ??= ApiResponseCode.error;
     final requestId = _uuid.v4();
-    final apiResponse = ApiResponse<dynamic>(
+    final apiResponse = ApiResponse<T>(
       code: code,
       message: message ?? code.message,
       type: type,

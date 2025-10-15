@@ -14,6 +14,7 @@ import '../utils/validator.dart';
 /// 项目管理控制器
 class ProjectController {
   final ProjectService _projectService;
+  static final logger = LoggerFactory.getLogger('ProjectController');
 
   ProjectController({
     required ProjectService projectService,
@@ -77,7 +78,6 @@ class ProjectController {
           total: result['pagination']['total'],
           message: '获取项目列表成功');
     } catch (error, stackTrace) {
-      final logger = LoggerFactory.getLogger('ProjectController');
       logger.error('获取项目列表失败', error: error, stackTrace: stackTrace);
       return ResponseBuilder.error(code: ApiResponseCode.internalServerError, message: '获取项目列表失败');
     }
