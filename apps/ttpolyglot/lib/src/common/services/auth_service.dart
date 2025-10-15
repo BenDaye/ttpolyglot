@@ -59,9 +59,6 @@ class AuthService extends GetxService {
       final request = LoginRequest(
         emailOrUsername: emailOrUsername,
         password: password,
-        deviceId: deviceId,
-        deviceName: deviceName,
-        deviceType: deviceType ?? 'web',
       );
 
       final response = await _authApi.login(request);

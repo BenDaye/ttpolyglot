@@ -83,8 +83,6 @@ class SignInController extends GetxController {
       await _authService.login(
         emailOrUsername: emailController.text.trim(),
         password: passwordController.text,
-        deviceName: 'Web Browser',
-        deviceType: 'web',
       );
 
       // 显示成功提示

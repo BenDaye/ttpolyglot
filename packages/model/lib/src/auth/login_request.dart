@@ -9,9 +9,6 @@ class LoginRequest with _$LoginRequest {
   const factory LoginRequest({
     @JsonKey(name: 'email_or_username') required String emailOrUsername,
     required String password,
-    @JsonKey(name: 'device_id') String? deviceId,
-    @JsonKey(name: 'device_name') String? deviceName,
-    @JsonKey(name: 'device_type') String? deviceType,
   }) = _LoginRequest;
 
   factory LoginRequest.fromJson(Map<String, dynamic> json) => _$LoginRequestFromJson(json);
