@@ -93,14 +93,17 @@ class ApiRoutes {
       authService: authService,
     );
 
+    // 公开路由（无需认证）
     _router.post('/auth/login', authController.login);
-    _router.post('/auth/logout', authController.logout);
     _router.post('/auth/refresh', authController.refresh);
     _router.post('/auth/register', authController.register);
     _router.post('/auth/forgot-password', authController.forgotPassword);
     _router.post('/auth/reset-password', authController.resetPassword);
     _router.get('/auth/verify-email', authController.verifyEmail);
     _router.post('/auth/resend-verification', authController.resendVerification);
+
+    // 需要认证的路由
+    _router.post('/auth/logout', _withAuth(authController.logout));
   }
 
   /// 设置用户路由
