@@ -148,7 +148,6 @@ class AuthController {
       }
 
       return ResponseBuilder.error(
-        code: ApiResponseCode.internalServerError,
         message: '登录失败，请稍后重试',
       );
     }
