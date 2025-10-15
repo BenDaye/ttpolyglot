@@ -75,17 +75,20 @@ class ProjectsSidebar extends StatelessWidget {
             Expanded(
               child: SizedBox(
                 height: 36.0,
-                child: TextField(
-                  onChanged: ProjectsController.searchProjectsWithService,
-                  style: TextStyle(
-                    fontSize: 14.0,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: '搜索项目...',
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                child: Material(
+                  color: Colors.transparent,
+                  child: TextField(
+                    onChanged: ProjectsController.searchProjectsWithService,
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: '搜索项目...',
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                      ),
                     ),
                   ),
                 ),
