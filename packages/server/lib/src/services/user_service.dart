@@ -146,9 +146,8 @@ class UserService {
                 'role_id', r.id,
                 'role_name', r.name,
                 'role_display_name', r.display_name,
-                'project_id', ur.project_id,
-                'is_global', ur.project_id IS NULL,
-                'granted_at', ur.granted_at,
+                'is_system_role', r.is_system_role,
+                'assigned_at', ur.assigned_at,
                 'expires_at', ur.expires_at
               )
             ) FILTER (WHERE r.id IS NOT NULL), 
