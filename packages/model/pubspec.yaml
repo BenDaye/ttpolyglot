@@ -10,9 +10,6 @@ dependencies:
   # Freezed 数据类
   freezed_annotation: ^2.4.0
   json_annotation: ^4.9.0
-  
-  # SharedPreferences
-  shared_preferences: ^2.3.5
 
 dev_dependencies:
   # Flutter 依赖

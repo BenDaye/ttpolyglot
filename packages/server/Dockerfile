@@ -7,20 +7,29 @@
 FROM dart:stable AS build
 
 # 设置工作目录
-WORKDIR /app
-
-# 复制工作区根目录的配置文件
-COPY pubspec.yaml pubspec.lock ./
-COPY melos.yaml ./
-
-# 复制所有 packages
-COPY packages/ ./packages/
-
-# 进入 server 包目录
 WORKDIR /app/packages/server
+
+# 先复制 model 包（server 的依赖）
+COPY packages/model /app/packages/model
+
+# 临时移除 model 包中的 Flutter 依赖（服务器不需要）
+RUN cd /app/packages/model && \
+  sed -i '/shared_preferences/d' pubspec.yaml
+
+# 复制 server 包的配置文件
+COPY packages/server/pubspec.yaml packages/server/pubspec_overrides.yaml ./
+
+# 临时移除 workspace resolution 设置以便在 Docker 中构建
+RUN sed -i '/^resolution: workspace$/d' pubspec.yaml
 
 # 安装依赖
 RUN dart pub get
+
+# 复制 server 包的源代码
+COPY packages/server/lib ./lib
+COPY packages/server/bin ./bin
+COPY packages/server/database ./database
+COPY packages/server/scripts ./scripts
 
 # 编译 Dart 应用为原生可执行文件
 # 使用 AOT 编译以获得最佳性能
