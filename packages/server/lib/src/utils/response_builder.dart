@@ -19,6 +19,38 @@ class ResponseBuilder {
     return code.value;
   }
 
+  /// 将数据转换为可 JSON 序列化的格式
+  static dynamic _toJsonValue(dynamic data) {
+    if (data == null) {
+      return null;
+    }
+
+    // 如果是基本类型，直接返回
+    if (data is String || data is num || data is bool) {
+      return data;
+    }
+
+    // 如果是 Map，直接返回
+    if (data is Map) {
+      return data;
+    }
+
+    // 如果是 List，递归处理每个元素
+    if (data is List) {
+      return data.map((item) => _toJsonValue(item)).toList();
+    }
+
+    // 如果对象有 toJson 方法，调用它
+    try {
+      final dynamic obj = data;
+      // 尝试调用 toJson 方法
+      return obj.toJson();
+    } catch (error) {
+      // 如果没有 toJson 方法或调用失败，直接返回原数据
+      return data;
+    }
+  }
+
   /// 构建成功响应
   static Response success<T>({
     String? message,
@@ -43,7 +75,7 @@ class ResponseBuilder {
     return Response(
       200,
       headers: responseHeaders,
-      body: jsonEncode(apiResponse.toJson((data) => data)),
+      body: jsonEncode(apiResponse.toJson((data) => _toJsonValue(data))),
     );
   }
 
@@ -72,7 +104,7 @@ class ResponseBuilder {
     return Response(
       _getHttpStatusCode(code),
       headers: responseHeaders,
-      body: jsonEncode(apiResponse.toJson((data) => data)),
+      body: jsonEncode(apiResponse.toJson((data) => _toJsonValue(data))),
     );
   }
 
@@ -113,7 +145,9 @@ class ResponseBuilder {
     return Response(
       200,
       headers: responseHeaders,
-      body: jsonEncode(apiResponse.toJson((data) => data.toJson((item) => item))),
+      body: jsonEncode(
+        apiResponse.toJson((data) => data.toJson((item) => _toJsonValue(item))),
+      ),
     );
   }
 }
