@@ -24,6 +24,7 @@ export 'src/services/sync_service.dart';
 export 'src/services/translation_service.dart';
 export 'src/services/workspace_service.dart';
 export 'src/utils/data_migration_validator.dart';
+export 'src/utils/dialog_manager.dart';
 export 'src/utils/logger.dart';
 export 'src/utils/source_language_validator.dart';
 export 'src/utils/toast.dart';

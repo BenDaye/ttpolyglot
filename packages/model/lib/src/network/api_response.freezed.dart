@@ -24,6 +24,9 @@ mixin _$ApiResponse<T> {
   @JsonKey(fromJson: apiResponseCodeFromJson, toJson: apiResponseCodeToJson)
   ApiResponseCode get code => throw _privateConstructorUsedError;
   String get message => throw _privateConstructorUsedError;
+  @JsonKey(
+      fromJson: apiResponseTipsTypeFromJson, toJson: apiResponseTipsTypeToJson)
+  ApiResponseTipsType get type => throw _privateConstructorUsedError;
   T? get data => throw _privateConstructorUsedError;
 
   /// Serializes this ApiResponse to a JSON map.
@@ -48,6 +51,10 @@ abstract class $ApiResponseCopyWith<T, $Res> {
           fromJson: apiResponseCodeFromJson, toJson: apiResponseCodeToJson)
       ApiResponseCode code,
       String message,
+      @JsonKey(
+          fromJson: apiResponseTipsTypeFromJson,
+          toJson: apiResponseTipsTypeToJson)
+      ApiResponseTipsType type,
       T? data});
 }
 
@@ -68,6 +75,7 @@ class _$ApiResponseCopyWithImpl<T, $Res, $Val extends ApiResponse<T>>
   $Res call({
     Object? code = null,
     Object? message = null,
+    Object? type = null,
     Object? data = freezed,
   }) {
     return _then(_value.copyWith(
@@ -79,6 +87,10 @@ class _$ApiResponseCopyWithImpl<T, $Res, $Val extends ApiResponse<T>>
           ? _value.message
           : message // ignore: cast_nullable_to_non_nullable
               as String,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as ApiResponseTipsType,
       data: freezed == data
           ? _value.data
           : data // ignore: cast_nullable_to_non_nullable
@@ -100,6 +112,10 @@ abstract class _$$ApiResponseImplCopyWith<T, $Res>
           fromJson: apiResponseCodeFromJson, toJson: apiResponseCodeToJson)
       ApiResponseCode code,
       String message,
+      @JsonKey(
+          fromJson: apiResponseTipsTypeFromJson,
+          toJson: apiResponseTipsTypeToJson)
+      ApiResponseTipsType type,
       T? data});
 }
 
@@ -118,6 +134,7 @@ class __$$ApiResponseImplCopyWithImpl<T, $Res>
   $Res call({
     Object? code = null,
     Object? message = null,
+    Object? type = null,
     Object? data = freezed,
   }) {
     return _then(_$ApiResponseImpl<T>(
@@ -129,6 +146,10 @@ class __$$ApiResponseImplCopyWithImpl<T, $Res>
           ? _value.message
           : message // ignore: cast_nullable_to_non_nullable
               as String,
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as ApiResponseTipsType,
       data: freezed == data
           ? _value.data
           : data // ignore: cast_nullable_to_non_nullable
@@ -144,7 +165,11 @@ class _$ApiResponseImpl<T> extends _ApiResponse<T> {
       {@JsonKey(
           fromJson: apiResponseCodeFromJson, toJson: apiResponseCodeToJson)
       required this.code,
-      required this.message,
+      this.message = "",
+      @JsonKey(
+          fromJson: apiResponseTipsTypeFromJson,
+          toJson: apiResponseTipsTypeToJson)
+      this.type = ApiResponseTipsType.showToast,
       this.data})
       : super._();
 
@@ -156,13 +181,18 @@ class _$ApiResponseImpl<T> extends _ApiResponse<T> {
   @JsonKey(fromJson: apiResponseCodeFromJson, toJson: apiResponseCodeToJson)
   final ApiResponseCode code;
   @override
+  @JsonKey()
   final String message;
+  @override
+  @JsonKey(
+      fromJson: apiResponseTipsTypeFromJson, toJson: apiResponseTipsTypeToJson)
+  final ApiResponseTipsType type;
   @override
   final T? data;
 
   @override
   String toString() {
-    return 'ApiResponse<$T>(code: $code, message: $message, data: $data)';
+    return 'ApiResponse<$T>(code: $code, message: $message, type: $type, data: $data)';
   }
 
   @override
@@ -172,13 +202,14 @@ class _$ApiResponseImpl<T> extends _ApiResponse<T> {
             other is _$ApiResponseImpl<T> &&
             (identical(other.code, code) || other.code == code) &&
             (identical(other.message, message) || other.message == message) &&
+            (identical(other.type, type) || other.type == type) &&
             const DeepCollectionEquality().equals(other.data, data));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType, code, message, const DeepCollectionEquality().hash(data));
+  int get hashCode => Object.hash(runtimeType, code, message, type,
+      const DeepCollectionEquality().hash(data));
 
   /// Create a copy of ApiResponse
   /// with the given fields replaced by the non-null parameter values.
@@ -200,7 +231,11 @@ abstract class _ApiResponse<T> extends ApiResponse<T> {
       {@JsonKey(
           fromJson: apiResponseCodeFromJson, toJson: apiResponseCodeToJson)
       required final ApiResponseCode code,
-      required final String message,
+      final String message,
+      @JsonKey(
+          fromJson: apiResponseTipsTypeFromJson,
+          toJson: apiResponseTipsTypeToJson)
+      final ApiResponseTipsType type,
       final T? data}) = _$ApiResponseImpl<T>;
   const _ApiResponse._() : super._();
 
@@ -213,6 +248,10 @@ abstract class _ApiResponse<T> extends ApiResponse<T> {
   ApiResponseCode get code;
   @override
   String get message;
+  @override
+  @JsonKey(
+      fromJson: apiResponseTipsTypeFromJson, toJson: apiResponseTipsTypeToJson)
+  ApiResponseTipsType get type;
   @override
   T? get data;
 

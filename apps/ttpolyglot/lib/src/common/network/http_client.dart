@@ -4,6 +4,7 @@ import 'package:ttpolyglot/src/common/network/interceptors/error_interceptor.dar
 import 'package:ttpolyglot/src/common/network/interceptors/loading_interceptor.dart';
 import 'package:ttpolyglot/src/common/network/interceptors/response_interceptor.dart';
 import 'package:ttpolyglot/src/common/network/interceptors/token_interceptor.dart';
+import 'package:ttpolyglot/src/common/network/message_tips.dart';
 import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_model/model.dart';
 
@@ -165,10 +166,35 @@ class HttpClient {
           Duration(milliseconds: AppConfig.requestTimeThreshold - current),
         );
       }
-
-      return response.data as ApiResponse<T>;
+      // 成功处理
+      return _successCallback(response as ApiResponse<T>, extra);
     }).catchError((err) {
-      throw err;
+      // 定义错误类型
+      ApiResponse<T> response;
+      if (err is DioException && err.error is ApiResponse<T>) {
+        response = err.error as ApiResponse<T>;
+      } else {
+        response = ApiResponse.of(ApiResponseCode.unknown, message: err.toString());
+      }
+      // 错误处理
+      throw _failCallback(response, extra);
     });
+  }
+
+  // 成功方法
+  static ApiResponse<T> _successCallback<T>(ApiResponse<T> response, RequestExtra extra) {
+    MessageTips.showSuccessTips(message: response.message, type: response.type, extra: extra);
+    return response;
+  }
+
+  // 错误方法
+  static ApiResponse<T> _failCallback<T>(ApiResponse<T> response, RequestExtra extra) {
+    MessageTips.showFailTips(
+      message: response.code == ApiResponseCode.unknown ? '未知错误' : response.message,
+      type: response.type,
+      status: response.code,
+      extra: extra,
+    );
+    return response;
   }
 }

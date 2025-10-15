@@ -3,7 +3,7 @@ class RequestExtra {
   /// 是否显示 loading
   final bool showLoading;
 
-  /// 是否延迟显示 loading（避免闪烁）
+  /// 是否显示懒加载 loading
   final bool showLazyLoading;
 
   /// 是否显示成功提示

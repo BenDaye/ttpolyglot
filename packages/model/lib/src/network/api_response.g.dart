@@ -12,7 +12,10 @@ _$ApiResponseImpl<T> _$$ApiResponseImplFromJson<T>(
 ) =>
     _$ApiResponseImpl<T>(
       code: apiResponseCodeFromJson((json['code'] as num).toInt()),
-      message: json['message'] as String,
+      message: json['message'] as String? ?? "",
+      type: json['type'] == null
+          ? ApiResponseTipsType.showToast
+          : apiResponseTipsTypeFromJson(json['type'] as String),
       data: _$nullableGenericFromJson(json['data'], fromJsonT),
     );
 
@@ -23,6 +26,7 @@ Map<String, dynamic> _$$ApiResponseImplToJson<T>(
     <String, dynamic>{
       'code': apiResponseCodeToJson(instance.code),
       'message': instance.message,
+      'type': apiResponseTipsTypeToJson(instance.type),
       'data': _$nullableGenericToJson(instance.data, toJsonT),
     };
 

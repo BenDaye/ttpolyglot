@@ -15,7 +15,13 @@ class ApiResponse<T> with _$ApiResponse<T> {
       toJson: apiResponseCodeToJson,
     )
     required ApiResponseCode code,
-    required String message,
+    @Default("") String message,
+    @JsonKey(
+      fromJson: apiResponseTipsTypeFromJson,
+      toJson: apiResponseTipsTypeToJson,
+    )
+    @Default(ApiResponseTipsType.showToast)
+    ApiResponseTipsType type,
     T? data,
   }) = _ApiResponse<T>;
 
@@ -25,9 +31,10 @@ class ApiResponse<T> with _$ApiResponse<T> {
   ) =>
       _$ApiResponseFromJson(json, fromJsonT);
 
-  factory ApiResponse.of(ApiResponseCode code, {String? message}) {
+  factory ApiResponse.of(ApiResponseCode code, {ApiResponseTipsType? type, String? message}) {
     return ApiResponse(
       code: code,
+      type: type ?? ApiResponseTipsType.showToast,
       message: message ?? code.message,
       data: null,
     );
