@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/common/common.dart';
+import 'package:ttpolyglot/src/core/routing/app_pages.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 /// 登录控制器
@@ -98,7 +99,7 @@ class SignInController extends GetxController {
       );
 
       // 跳转到主页（使用 offAllNamed 清除登录页面）
-      Get.offAllNamed('/projects');
+      Get.offAllNamed(Routes.projects);
     } catch (error) {
       // 提取错误信息
       String message = '登录失败，请稍后重试';
