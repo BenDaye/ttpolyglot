@@ -182,13 +182,23 @@ class UserService {
       // 移除敏感信息
       userData.remove('password_hash');
 
-      // 转换DateTime对象为ISO8601字符串，以便JSON序列化
+      // 转换特殊类型对象为可序列化格式
       final serializedData = <String, dynamic>{};
       userData.forEach((key, value) {
-        if (value is DateTime) {
+        if (value == null) {
+          serializedData[key] = null;
+        } else if (value is DateTime) {
+          // DateTime转换为ISO8601字符串
           serializedData[key] = value.toIso8601String();
-        } else {
+        } else if (value.runtimeType.toString().contains('UndecodedBytes')) {
+          // UndecodedBytes（二进制数据）转换为字符串
+          serializedData[key] = value.toString();
+        } else if (value is List || value is Map || value is String || value is num || value is bool) {
+          // 基本类型直接使用
           serializedData[key] = value;
+        } else {
+          // 其他类型转换为字符串
+          serializedData[key] = value.toString();
         }
       });
 
