@@ -171,16 +171,31 @@ class UserService {
       final userData = result.first.toColumnMap();
 
       // 解析角色信息
-      final rolesJson = userData['roles'] as String;
-      userData['roles'] = rolesJson.isNotEmpty ? rolesJson : [];
+      // PostgreSQL的json_agg返回的可能是List或String，需要处理两种情况
+      final roles = userData['roles'];
+      if (roles is String) {
+        userData['roles'] = roles.isNotEmpty ? roles : [];
+      } else if (roles is! List) {
+        userData['roles'] = [];
+      }
 
       // 移除敏感信息
       userData.remove('password_hash');
 
-      // 缓存用户信息
-      await _redisService.setJson(cacheKey, userData, ServerConfig.cacheApiResponseTtl);
+      // 转换DateTime对象为ISO8601字符串，以便JSON序列化
+      final serializedData = <String, dynamic>{};
+      userData.forEach((key, value) {
+        if (value is DateTime) {
+          serializedData[key] = value.toIso8601String();
+        } else {
+          serializedData[key] = value;
+        }
+      });
 
-      return userData;
+      // 缓存用户信息
+      await _redisService.setJson(cacheKey, serializedData, ServerConfig.cacheApiResponseTtl);
+
+      return serializedData;
     } catch (error, stackTrace) {
       _logger.error('获取用户详情失败: $userId', error: error, stackTrace: stackTrace);
       rethrow;
