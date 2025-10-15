@@ -8,8 +8,14 @@ environment:
   sdk: ^3.6.1
 
 dependencies:
+  flutter:
+    sdk: flutter
+
   # 用于数据模型的相等性比较
   equatable: ^2.0.5
+  
+  # Toast 提示组件
+  bot_toast: ^4.1.3
 
   # 用于 JSON 序列化
   json_annotation: ^4.8.1

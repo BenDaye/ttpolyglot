@@ -23,4 +23,5 @@ class AppConfig {
   /// 请求配置
   static const int requestTimeThreshold = 1000; // 最小请求时间（毫秒）
   static const int pageSize = 20; // 分页大小
+  static const Duration requestLazyTimeout = Duration(seconds: 5); // 延迟显示 Loading 的时间
 }

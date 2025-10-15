@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/features/root/root.dart';
+import 'package:ttpolyglot_core/core.dart';
 
 import 'core/layout/layout_controller.dart';
 import 'core/routing/app_pages.dart';
@@ -33,6 +34,13 @@ class TTPolyglotApp extends StatelessWidget {
         Locale('zh', 'CN'),
       ],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      builder: (context, child) {
+        child ??= SizedBox.shrink();
+        // 初始化 Toast
+        child = Toast.botToastInit(context, child);
+        //
+        return child;
+      },
     );
   }
 }
