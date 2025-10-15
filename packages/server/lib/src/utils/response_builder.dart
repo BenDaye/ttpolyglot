@@ -13,7 +13,7 @@ class ResponseBuilder {
   static int _getHttpStatusCode(ApiResponseCode code) {
     // 对于自定义业务错误码，统一返回 400
     if (code.value <= 0) {
-      return 400;
+      return 200;
     }
 
     return code.value;
