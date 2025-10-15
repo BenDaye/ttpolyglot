@@ -131,21 +131,30 @@ load_environment() {
             ENV_MODE="production"
             COMPOSE_PROFILE="--profile production"
             ENV_DISPLAY="生产环境 (Production)"
+            # 生产环境只使用基础 docker-compose.yml
+            COMPOSE_FILES="-f docker-compose.yml"
             ;;
         development|develop|dev)
             ENV_MODE="development"
             COMPOSE_PROFILE=""
-            ENV_DISPLAY="开发环境 (Development)"
+            ENV_DISPLAY="开发环境 (Development) - 代码热重载"
+            # 开发环境使用 docker-compose.yml + docker-compose.dev.yml
+            COMPOSE_FILES="-f docker-compose.yml -f docker-compose.dev.yml"
             ;;
         *)
             ENV_MODE="development"
             COMPOSE_PROFILE=""
-            ENV_DISPLAY="开发环境 (Development) - 默认"
+            ENV_DISPLAY="开发环境 (Development) - 代码热重载 - 默认"
             print_warning "ENVIRONMENT 值 '$ENVIRONMENT' 未识别，使用开发环境"
+            # 默认使用开发环境配置
+            COMPOSE_FILES="-f docker-compose.yml -f docker-compose.dev.yml"
             ;;
     esac
     
     print_info "当前环境: ${BOLD}${ENV_DISPLAY}${NC}"
+    if [ "$ENV_MODE" = "development" ]; then
+        print_info "开发模式: 已启用代码热重载，修改代码后会自动重启"
+    fi
 }
 
 # 检查端口占用
@@ -201,7 +210,7 @@ start_services() {
                 ;;
             --clean)
                 print_info "清理旧容器..."
-                docker-compose down
+                docker-compose $COMPOSE_FILES down
                 ;;
             --no-migrate)
                 RUN_MIGRATE=false
@@ -223,10 +232,10 @@ start_services() {
     fi
     
     if [ -n "$DETACH_FLAG" ]; then
-        docker-compose $COMPOSE_PROFILE up $DETACH_FLAG $BUILD_FLAG
+        docker-compose $COMPOSE_FILES $COMPOSE_PROFILE up $DETACH_FLAG $BUILD_FLAG
     else
         print_warning "前台模式：按 Ctrl+C 停止服务"
-        docker-compose $COMPOSE_PROFILE up $BUILD_FLAG
+        docker-compose $COMPOSE_FILES $COMPOSE_PROFILE up $BUILD_FLAG
         return 0
     fi
     
@@ -239,7 +248,7 @@ start_services() {
     local count=0
     local max_wait=60
     while [ $count -lt $max_wait ]; do
-        if docker-compose exec -T ttpolyglot-db pg_isready -U ${DB_USER:-ttpolyglot} &> /dev/null; then
+        if docker-compose $COMPOSE_FILES exec -T ttpolyglot-db pg_isready -U ${DB_USER:-ttpolyglot} &> /dev/null; then
             print_success "PostgreSQL 已就绪"
             break
         fi
@@ -250,14 +259,14 @@ start_services() {
     if [ $count -ge $max_wait ]; then
         print_error "PostgreSQL 健康检查超时"
         print_info "请使用以下命令查看日志："
-        echo "  docker-compose logs ttpolyglot-db"
+        echo "  docker-compose $COMPOSE_FILES logs ttpolyglot-db"
     fi
     
     # 等待 Redis 健康检查
     print_info "等待 Redis 健康检查..."
     count=0
     while [ $count -lt $max_wait ]; do
-        if docker-compose exec -T ttpolyglot-redis redis-cli ping &> /dev/null; then
+        if docker-compose $COMPOSE_FILES exec -T ttpolyglot-redis redis-cli ping &> /dev/null; then
             print_success "Redis 已就绪"
             break
         fi
@@ -270,11 +279,11 @@ start_services() {
         print_info "运行数据库迁移和种子数据..."
         sleep 3  # 等待应用完全启动
         
-        if docker-compose exec -T ttpolyglot-server ./migrate; then
+        if docker-compose $COMPOSE_FILES exec -T ttpolyglot-server ./migrate; then
             print_success "数据库迁移完成"
         else
             print_warning "数据库迁移失败，请手动执行："
-            echo "  docker-compose exec ttpolyglot-server ./migrate"
+            echo "  docker-compose $COMPOSE_FILES exec ttpolyglot-server ./migrate"
         fi
     fi
     
@@ -296,9 +305,9 @@ start_services() {
     echo ""
     
     echo -e "${BOLD}数据库管理:${NC}"
-    echo "  数据库连接: docker-compose exec ttpolyglot-db psql -U ${DB_USER:-ttpolyglot} -d ${DB_NAME:-ttpolyglot}"
-    echo "  运行迁移: docker-compose exec ttpolyglot-server ./migrate"
-    echo "  迁移状态: docker-compose exec ttpolyglot-server ./migrate status"
+    echo "  数据库连接: docker-compose $COMPOSE_FILES exec ttpolyglot-db psql -U ${DB_USER:-ttpolyglot} -d ${DB_NAME:-ttpolyglot}"
+    echo "  运行迁移: docker-compose $COMPOSE_FILES exec ttpolyglot-server ./migrate"
+    echo "  迁移状态: docker-compose $COMPOSE_FILES exec ttpolyglot-server ./migrate status"
     print_separator
 }
 
@@ -307,7 +316,7 @@ stop_services() {
     print_header "停止 TTPolyglot 服务"
     print_separator
     
-    docker-compose stop
+    docker-compose $COMPOSE_FILES stop
     
     print_success "服务已停止（容器保留）"
     print_info "如需删除容器，请使用: ./scripts/start-docker.sh down"
@@ -318,7 +327,7 @@ down_services() {
     print_header "停止并删除 TTPolyglot 服务"
     print_separator
     
-    docker-compose down
+    docker-compose $COMPOSE_FILES down
     
     print_success "服务已停止并删除"
 }
@@ -338,11 +347,11 @@ show_status() {
     print_header "TTPolyglot 服务状态 - ${ENV_DISPLAY}"
     print_separator
     
-    docker-compose ps
+    docker-compose $COMPOSE_FILES ps
     
     echo ""
     print_info "容器详细状态："
-    docker-compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
+    docker-compose $COMPOSE_FILES ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
 }
 
 # 查看日志
@@ -367,7 +376,7 @@ show_logs() {
         esac
     done
     
-    docker-compose logs $LOG_ARGS
+    docker-compose $COMPOSE_FILES logs $LOG_ARGS
 }
 
 # 清理环境
@@ -392,7 +401,7 @@ clean_environment() {
     done
     
     # 停止并删除容器
-    docker-compose down $VOLUMES_FLAG
+    docker-compose $COMPOSE_FILES down $VOLUMES_FLAG
     
     if [ -n "$VOLUMES_FLAG" ]; then
         print_success "容器和数据卷已清理"
@@ -415,10 +424,10 @@ rebuild_services() {
     print_separator
     
     print_info "停止现有服务..."
-    docker-compose down
+    docker-compose $COMPOSE_FILES down
     
     print_info "重新构建镜像..."
-    docker-compose $COMPOSE_PROFILE build --no-cache
+    docker-compose $COMPOSE_FILES $COMPOSE_PROFILE build --no-cache
     
     print_info "启动服务..."
     start_services --build
@@ -463,9 +472,9 @@ show_info() {
     echo ""
     
     # 显示运行中的容器
-    if docker-compose ps | grep -q "Up"; then
+    if docker-compose $COMPOSE_FILES ps | grep -q "Up"; then
         echo -e "${BOLD}运行中的服务:${NC}"
-        docker-compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
+        docker-compose $COMPOSE_FILES ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
     else
         print_info "当前没有运行中的服务"
     fi

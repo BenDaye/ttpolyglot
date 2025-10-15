@@ -1,0 +1,26 @@
+# Docker Compose 开发环境配置
+# 此文件会覆盖 docker-compose.yml 中的配置，用于开发环境的代码热重载
+
+version: "3.8"
+
+services:
+  ttpolyglot-server:
+    build:
+      context: ../..
+      dockerfile: packages/server/Dockerfile.dev
+    volumes:
+      # 数据目录（与基础配置相同）
+      - ./data:/app/data
+      - ./logs:/app/logs
+      # 挂载源代码以支持热重载
+      - ./lib:/app/packages/server/lib
+      - ./bin:/app/packages/server/bin
+      - ./database:/app/packages/server/database
+      - ./scripts:/app/packages/server/scripts
+      - ./pubspec.yaml:/app/packages/server/pubspec.yaml
+      - ./pubspec_overrides.yaml:/app/packages/server/pubspec_overrides.yaml
+      # 挂载依赖的 model 包
+      - ../model:/app/packages/model
+    environment:
+      # 开发环境特定的环境变量
+      - LOG_LEVEL=debug

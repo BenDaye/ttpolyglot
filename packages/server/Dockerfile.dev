@@ -1,0 +1,35 @@
+# TTPolyglot 开发环境 Dockerfile
+# 用于开发时的热重载和代码监听
+
+FROM dart:stable
+
+# 安装额外的开发工具
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends \
+  ca-certificates \
+  curl \
+  postgresql-client \
+  git \
+  vim && \
+  rm -rf /var/lib/apt/lists/*
+
+# 设置工作目录
+WORKDIR /app/packages/server
+
+# 创建必要的目录
+RUN mkdir -p /app/data /app/logs /app/uploads
+
+# 创建 migrate 脚本的符号链接
+RUN echo '#!/bin/sh\ncd /app/packages/server && dart run scripts/migrate.dart "$@"' > /app/migrate && \
+  chmod +x /app/migrate
+
+# 暴露端口
+EXPOSE 8080
+
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8080/health || exit 1
+
+# 开发环境使用脚本启动，支持热重载
+CMD ["sh", "-c", "dart pub get && dart run bin/server.dart"]
+
