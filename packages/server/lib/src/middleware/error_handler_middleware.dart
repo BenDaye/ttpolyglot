@@ -1,13 +1,14 @@
-import 'dart:convert';
-
 import 'package:shelf/shelf.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 import '../models/api_error.dart';
+import '../utils/response_builder.dart';
 import '../utils/structured_logger.dart';
 
 /// 错误处理中间件
 class ErrorHandlerMiddleware {
   static final _logger = LoggerFactory.getLogger('ErrorHandler');
+
   /// 创建中间件处理器
   Middleware get handler => (Handler innerHandler) {
         return (Request request) async {
@@ -30,9 +31,8 @@ class ErrorHandlerMiddleware {
     // 根据错误类型返回不同的响应
     if (error is ValidationException) {
       return _buildErrorResponse(
-        statusCode: 422,
-        code: 'VALIDATION_FAILED',
-        message: '请求参数验证失败',
+        code: ApiResponseCode.unprocessableEntity,
+        message: error.message,
         fieldErrors: error.fieldErrors,
         request: request,
         requestId: requestId,
@@ -41,8 +41,7 @@ class ErrorHandlerMiddleware {
 
     if (error is AuthenticationException) {
       return _buildErrorResponse(
-        statusCode: 401,
-        code: error.code,
+        code: ApiResponseCode.unauthorized,
         message: error.message,
         request: request,
         requestId: requestId,
@@ -51,9 +50,8 @@ class ErrorHandlerMiddleware {
 
     if (error is AuthorizationException) {
       return _buildErrorResponse(
-        statusCode: 403,
-        code: 'AUTH_PERMISSION_DENIED',
-        message: '权限不足',
+        code: ApiResponseCode.forbidden,
+        message: error.message,
         request: request,
         requestId: requestId,
       );
@@ -61,10 +59,8 @@ class ErrorHandlerMiddleware {
 
     if (error is NotFoundException) {
       return _buildErrorResponse(
-        statusCode: 404,
-        code: 'RESOURCE_NOT_FOUND',
-        message: '请求的资源不存在',
-        details: error.message,
+        code: ApiResponseCode.notFound,
+        message: error.message,
         request: request,
         requestId: requestId,
       );
@@ -72,8 +68,7 @@ class ErrorHandlerMiddleware {
 
     if (error is BusinessException) {
       return _buildErrorResponse(
-        statusCode: 400,
-        code: error.code,
+        code: ApiResponseCode.badRequest,
         message: error.message,
         details: error.details,
         request: request,
@@ -83,8 +78,7 @@ class ErrorHandlerMiddleware {
 
     // 其他未处理的异常
     return _buildErrorResponse(
-      statusCode: 500,
-      code: 'SYSTEM_INTERNAL_ERROR',
+      code: ApiResponseCode.internalServerError,
       message: '服务器内部错误',
       details: 'An unexpected error occurred',
       request: request,
@@ -94,37 +88,28 @@ class ErrorHandlerMiddleware {
 
   /// 构建错误响应
   Response _buildErrorResponse({
-    required int statusCode,
-    required String code,
+    required ApiResponseCode code,
     required String message,
     String? details,
     List<FieldError>? fieldErrors,
     required Request request,
     required String requestId,
   }) {
-    final errorResponse = {
-      'error': {
-        'code': code,
-        'message': message,
-        if (details != null) 'details': details,
-        if (fieldErrors != null) 'field_errors': fieldErrors.map((e) => e.toJson()).toList(),
-        'metadata': {
-          'request_id': requestId,
-          'timestamp': DateTime.now().toUtc().toIso8601String(),
-          'path': request.requestedUri.path,
-          'method': request.method,
-          if (request.context['user_id'] != null) 'user_id': request.context['user_id'],
-        }
+    // 构建错误详情数据
+    final Map<String, dynamic> errorData = {
+      if (details != null) 'details': details,
+      if (fieldErrors != null && fieldErrors.isNotEmpty) 'field_errors': fieldErrors.map((e) => e.toJson()).toList(),
+      'metadata': {
+        'request_id': requestId,
+        'timestamp': DateTime.now().toUtc().toIso8601String(),
       }
     };
 
-    return Response(
-      statusCode,
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Request-ID': requestId,
-      },
-      body: jsonEncode(errorResponse),
+    return ResponseBuilder.error(
+      code: code,
+      message: message,
+      data: errorData,
+      headers: {'X-Request-ID': requestId},
     );
   }
 }
