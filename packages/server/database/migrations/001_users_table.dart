@@ -57,8 +57,8 @@ class Migration001UsersTable extends BaseMigration {
 
       // 为用户表创建触发器
       await connection.execute('''
-        CREATE TRIGGER update_tt_users_updated_at 
-          BEFORE UPDATE ON tt_users 
+        CREATE TRIGGER update_${tablePrefix}users_updated_at 
+          BEFORE UPDATE ON ${tablePrefix}users 
           FOR EACH ROW 
           EXECUTE FUNCTION update_updated_at_column();
       ''');
