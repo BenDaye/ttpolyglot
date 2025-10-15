@@ -15,8 +15,6 @@ services:
       - ./bin:/app/packages/server/bin
       - ./database:/app/packages/server/database
       - ./scripts:/app/packages/server/scripts
-      - ./pubspec.yaml:/app/packages/server/pubspec.yaml
-      - ./pubspec_overrides.yaml:/app/packages/server/pubspec_overrides.yaml
       # 挂载依赖的 model 包
       - ../model:/app/packages/model
     environment:

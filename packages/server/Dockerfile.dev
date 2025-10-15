@@ -19,6 +19,18 @@ WORKDIR /app/packages/server
 # 创建必要的目录
 RUN mkdir -p /app/data /app/logs /app/uploads
 
+# 先复制 model 包（server 的依赖）
+COPY packages/model /app/packages/model
+
+# 复制 pubspec 文件
+COPY packages/server/pubspec.yaml packages/server/pubspec_overrides.yaml ./
+
+# 移除 workspace resolution 配置
+RUN sed -i '/^resolution: workspace$/d' pubspec.yaml
+
+# 预先安装依赖（加速后续启动）
+RUN dart pub get
+
 # 创建 migrate 脚本的符号链接
 RUN echo '#!/bin/sh\ncd /app/packages/server && dart run scripts/migrate.dart "$@"' > /app/migrate && \
   chmod +x /app/migrate
@@ -31,6 +43,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:8080/health || exit 1
 
 # 开发环境使用脚本启动，支持热重载
-# 启动前移除 workspace resolution 配置
-CMD ["sh", "-c", "sed -i '/^resolution: workspace$/d' pubspec.yaml && dart pub get && dart run bin/server.dart"]
+CMD ["dart", "run", "bin/server.dart"]
 
