@@ -10,7 +10,8 @@ RUN apt-get update && \
   curl \
   postgresql-client \
   git \
-  vim && \
+  vim \
+  inotify-tools && \
   rm -rf /var/lib/apt/lists/*
 
 # 设置工作目录
@@ -35,6 +36,42 @@ RUN dart pub get
 RUN echo '#!/bin/sh\ncd /app/packages/server && dart run scripts/migrate.dart "$@"' > /app/migrate && \
   chmod +x /app/migrate
 
+# 创建热重载启动脚本
+RUN echo '#!/bin/bash\n\
+  set -e\n\
+  \n\
+  echo "🔥 开发模式：启用代码热重载"\n\
+  echo "📁 监听目录：lib/ bin/ database/ scripts/"\n\
+  echo ""\n\
+  \n\
+  # 启动 Dart 服务\n\
+  dart run bin/server.dart &\n\
+  SERVER_PID=$!\n\
+  echo "✅ 服务已启动 (PID: $SERVER_PID)"\n\
+  \n\
+  # 监听文件变化\n\
+  while true; do\n\
+  # 使用 inotifywait 监听文件变化\n\
+  inotifywait -e modify,create,delete,move -r lib/ bin/ database/ scripts/ 2>/dev/null\n\
+  \n\
+  echo ""\n\
+  echo "🔄 检测到代码变化，重启服务..."\n\
+  \n\
+  # 杀掉旧进程\n\
+  kill $SERVER_PID 2>/dev/null || true\n\
+  wait $SERVER_PID 2>/dev/null || true\n\
+  \n\
+  # 等待一小段时间，避免频繁重启\n\
+  sleep 1\n\
+  \n\
+  # 重新启动服务\n\
+  dart run bin/server.dart &\n\
+  SERVER_PID=$!\n\
+  echo "✅ 服务已重启 (PID: $SERVER_PID)"\n\
+  echo ""\n\
+  done' > /app/hot-reload.sh && \
+  chmod +x /app/hot-reload.sh
+
 # 暴露端口
 EXPOSE 8080
 
@@ -42,6 +79,6 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:8080/health || exit 1
 
-# 开发环境使用脚本启动，支持热重载
-CMD ["dart", "run", "bin/server.dart"]
+# 开发环境使用热重载脚本启动
+CMD ["/app/hot-reload.sh"]
 
