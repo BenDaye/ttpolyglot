@@ -20,14 +20,14 @@ class ResponseBuilder {
   }
 
   /// 构建成功响应
-  static Response success({
+  static Response success<T>({
     String? message,
-    dynamic data,
+    T? data,
     ApiResponseTipsType type = ApiResponseTipsType.showToast,
     Map<String, String>? headers,
   }) {
     final requestId = _uuid.v4();
-    final apiResponse = ApiResponse<dynamic>(
+    final apiResponse = ApiResponse<T>(
       code: ApiResponseCode.success,
       message: message ?? ApiResponseCode.success.message,
       type: type,
@@ -77,8 +77,8 @@ class ResponseBuilder {
   }
 
   /// 构建分页成功响应
-  static Response paginated({
-    required dynamic data,
+  static Response paginated<T>({
+    required List<T> data,
     required int page,
     required int limit,
     required int total,
@@ -88,20 +88,16 @@ class ResponseBuilder {
   }) {
     final requestId = _uuid.v4();
 
-    // 构建包含分页信息的数据
-    final paginatedData = {
-      'items': data,
-      'pagination': {
-        'page': page,
-        'limit': limit,
-        'total': total,
-        'pages': (total / limit).ceil(),
-        'has_next': page * limit < total,
-        'has_prev': page > 1,
-      },
-    };
+    // 使用 ApiResponsePager 模型构建分页数据
+    final paginatedData = ApiResponsePager<T>(
+      page: page,
+      pageSize: limit,
+      totalSize: total,
+      totalPage: (total / limit).ceil(),
+      items: data,
+    );
 
-    final apiResponse = ApiResponse<dynamic>(
+    final apiResponse = ApiResponse<ApiResponsePager<T>>(
       code: ApiResponseCode.success,
       message: message ?? ApiResponseCode.success.message,
       type: type,
@@ -117,7 +113,7 @@ class ResponseBuilder {
     return Response(
       200,
       headers: responseHeaders,
-      body: jsonEncode(apiResponse.toJson((data) => data)),
+      body: jsonEncode(apiResponse.toJson((data) => data.toJson((item) => item))),
     );
   }
 }
