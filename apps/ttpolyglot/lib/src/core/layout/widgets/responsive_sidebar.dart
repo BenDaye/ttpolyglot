@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/common/services/auth_service.dart';
 import 'package:ttpolyglot/src/core/layout/layout_controller.dart';
 import 'package:ttpolyglot/src/core/layout/utils/layout_breakpoints.dart';
 import 'package:ttpolyglot/src/core/routing/app_pages.dart';
@@ -452,14 +455,120 @@ class ResponsiveSidebar extends StatelessWidget {
           ),
         ),
       ),
-      child: SizedBox(
-        width: 48,
-        height: 48,
-        child: Icon(
-          Icons.person_outline_rounded,
-          color: Theme.of(context).colorScheme.primary,
-          size: 24,
+      child: PopupMenuButton<String>(
+        offset: const Offset(60.0, -60.0),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
         ),
+        itemBuilder: (context) => [
+          PopupMenuItem<String>(
+            value: 'logout',
+            child: Row(
+              children: [
+                Icon(
+                  Icons.logout_rounded,
+                  size: 20.0,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+                const SizedBox(width: 12.0),
+                Text(
+                  '退出登录',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+        onSelected: (value) {
+          if (value == 'logout') {
+            _handleLogout(context);
+          }
+        },
+        child: SizedBox(
+          width: 48.0,
+          height: 48.0,
+          child: Icon(
+            Icons.person_outline_rounded,
+            color: Theme.of(context).colorScheme.primary,
+            size: 24.0,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 处理退出登录
+  void _handleLogout(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        title: const Text('确认退出'),
+        content: const Text('确定要退出登录吗？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              '取消',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+
+              try {
+                // 获取认证服务
+                final authService = Get.find<AuthService>();
+
+                // 执行退出
+                await authService.logout();
+
+                // 跳转到登录页面
+                Get.offAllNamed(Routes.signIn);
+
+                // 显示退出成功提示
+                Get.snackbar(
+                  '提示',
+                  '已退出登录',
+                  snackPosition: SnackPosition.TOP,
+                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                  colorText: Theme.of(context).colorScheme.onPrimaryContainer,
+                  duration: const Duration(seconds: 2),
+                  margin: const EdgeInsets.all(16.0),
+                  borderRadius: 8.0,
+                );
+              } catch (error, stackTrace) {
+                log('_handleLogout', error: error, stackTrace: stackTrace, name: 'ResponsiveSidebar');
+
+                // 显示错误提示
+                Get.snackbar(
+                  '错误',
+                  '退出登录失败，请重试',
+                  snackPosition: SnackPosition.TOP,
+                  backgroundColor: Theme.of(context).colorScheme.errorContainer,
+                  colorText: Theme.of(context).colorScheme.onErrorContainer,
+                  duration: const Duration(seconds: 3),
+                  margin: const EdgeInsets.all(16.0),
+                  borderRadius: 8.0,
+                );
+              }
+            },
+            child: Text(
+              '确定',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.error,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
