@@ -44,15 +44,32 @@ RUN echo '#!/bin/bash\n\
   echo "📁 监听目录：lib/ bin/ database/ scripts/"\n\
   echo ""\n\
   \n\
-  # 启动 Dart 服务\n\
+  # 信号处理函数\n\
+  cleanup() {\n\
+  echo ""\n\
+  echo "🛑 收到停止信号，正在关闭服务..."\n\
+  kill $SERVER_PID 2>/dev/null || true\n\
+  wait $SERVER_PID 2>/dev/null || true\n\
+  exit 0\n\
+  }\n\
+  \n\
+  trap cleanup SIGTERM SIGINT\n\
+  \n\
+  # 启动服务的函数\n\
+  start_server() {\n\
   dart run bin/server.dart &\n\
   SERVER_PID=$!\n\
   echo "✅ 服务已启动 (PID: $SERVER_PID)"\n\
+  }\n\
+  \n\
+  # 首次启动服务\n\
+  start_server\n\
   \n\
   # 监听文件变化\n\
   while true; do\n\
-  # 使用 inotifywait 监听文件变化\n\
-  inotifywait -e modify,create,delete,move -r lib/ bin/ database/ scripts/ 2>/dev/null\n\
+  # 使用 inotifywait 监听文件变化（阻塞直到有变化）\n\
+  if inotifywait -q -r -e modify,create,delete,move --exclude ".*\\.swp|.*~" \\\n\
+  lib/ bin/ database/ scripts/ 2>/dev/null; then\n\
   \n\
   echo ""\n\
   echo "🔄 检测到代码变化，重启服务..."\n\
@@ -65,10 +82,11 @@ RUN echo '#!/bin/bash\n\
   sleep 1\n\
   \n\
   # 重新启动服务\n\
-  dart run bin/server.dart &\n\
-  SERVER_PID=$!\n\
-  echo "✅ 服务已重启 (PID: $SERVER_PID)"\n\
-  echo ""\n\
+  start_server\n\
+  else\n\
+  # 如果 inotifywait 失败，等待后重试\n\
+  sleep 2\n\
+  fi\n\
   done' > /app/hot-reload.sh && \
   chmod +x /app/hot-reload.sh
 
