@@ -79,8 +79,7 @@ class ProjectController {
     } catch (error, stackTrace) {
       final logger = LoggerFactory.getLogger('ProjectController');
       logger.error('获取项目列表失败', error: error, stackTrace: stackTrace);
-      return ResponseBuilder.errorFromRequest(
-          request: request, code: ApiResponseCode.internalServerError, message: '获取项目列表失败');
+      return ResponseBuilder.error(code: ApiResponseCode.internalServerError, message: '获取项目列表失败');
     }
   }
 
@@ -94,7 +93,7 @@ class ProjectController {
       final ownerId = getCurrentUserId(request);
 
       if (ownerId == null) {
-        return ResponseBuilder.authError(message: '用户信息不存在');
+        return ResponseBuilder.error(message: '用户信息不存在');
       }
 
       final project = await _projectService.createProject(
@@ -109,20 +108,18 @@ class ProjectController {
               ? Validator.validateJson(data['settings'], 'settings', required: false)
               : null);
 
-      return ResponseBuilder.created(message: '项目创建成功', data: project);
+      return ResponseBuilder.success(message: '项目创建成功', data: project);
     } catch (error, stackTrace) {
       logger.error('创建项目失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
-        return ResponseBuilder.validationErrorFromRequest(request: request, fieldErrors: error.fieldErrors);
+        return ResponseBuilder.error(code: ApiResponseCode.validationError, message: error.message);
       }
       if (error is BusinessException) {
-        return ResponseBuilder.errorFromRequest(
-            request: request, code: ApiResponseCode.businessError, message: error.message);
+        return ResponseBuilder.error(code: ApiResponseCode.businessError, message: error.message);
       }
 
-      return ResponseBuilder.errorFromRequest(
-          request: request, code: ApiResponseCode.internalServerError, message: '创建项目失败');
+      return ResponseBuilder.error(code: ApiResponseCode.internalServerError, message: '创建项目失败');
     }
   }
 
@@ -132,7 +129,7 @@ class ProjectController {
       final project = await _projectService.getProjectById(id, userId: getCurrentUserId(request));
 
       if (project == null) {
-        return ResponseBuilder.notFound(message: '项目不存在');
+        return ResponseBuilder.error(code: ApiResponseCode.notFound, message: '项目不存在');
       }
 
       return ResponseBuilder.success(message: '获取项目详情成功', data: project);
@@ -140,11 +137,10 @@ class ProjectController {
       logger.error('获取项目详情失败: $id', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
-        return ResponseBuilder.validationErrorFromRequest(request: request, fieldErrors: error.fieldErrors);
+        return ResponseBuilder.error(code: ApiResponseCode.validationError, message: error.message);
       }
 
-      return ResponseBuilder.errorFromRequest(
-          request: request, code: ApiResponseCode.internalServerError, message: '获取项目详情失败');
+      return ResponseBuilder.error(code: ApiResponseCode.internalServerError, message: '获取项目详情失败');
     }
   }
 
@@ -180,15 +176,13 @@ class ProjectController {
       logger.error('更新项目信息失败: $id', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
-        return ResponseBuilder.validationErrorFromRequest(request: request, fieldErrors: error.fieldErrors);
+        return ResponseBuilder.error(code: ApiResponseCode.validationError, message: error.message);
       }
       if (error is BusinessException) {
-        return ResponseBuilder.errorFromRequest(
-            request: request, code: ApiResponseCode.businessError, message: error.message);
+        return ResponseBuilder.error(code: ApiResponseCode.businessError, message: error.message);
       }
 
-      return ResponseBuilder.errorFromRequest(
-          request: request, code: ApiResponseCode.internalServerError, message: '更新项目信息失败');
+      return ResponseBuilder.error(code: ApiResponseCode.internalServerError, message: '更新项目信息失败');
     }
   }
 
@@ -196,19 +190,18 @@ class ProjectController {
     try {
       Validator.validateUuid(id, 'project_id');
       await _projectService.deleteProject(id, deletedBy: getCurrentUserId(request));
-      return ResponseBuilder.noContent();
+      return ResponseBuilder.success(message: '项目删除成功');
     } catch (error, stackTrace) {
       logger.error('删除项目失败: $id', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
-        return ResponseBuilder.validationErrorFromRequest(request: request, fieldErrors: error.fieldErrors);
+        return ResponseBuilder.error(code: ApiResponseCode.validationError, message: error.message);
       }
       if (error is NotFoundException) {
-        return ResponseBuilder.notFound(message: '项目不存在');
+        return ResponseBuilder.error(code: ApiResponseCode.notFound, message: '项目不存在');
       }
 
-      return ResponseBuilder.errorFromRequest(
-          request: request, code: ApiResponseCode.internalServerError, message: '删除项目失败');
+      return ResponseBuilder.error(code: ApiResponseCode.internalServerError, message: '删除项目失败');
     }
   }
 
@@ -219,8 +212,7 @@ class ProjectController {
       return ResponseBuilder.success(message: '获取项目成员成功', data: {'members': members});
     } catch (error, stackTrace) {
       logger.error('获取项目成员失败: $id', error: error, stackTrace: stackTrace);
-      return ResponseBuilder.errorFromRequest(
-          request: request, code: ApiResponseCode.internalServerError, message: '获取项目成员失败');
+      return ResponseBuilder.error(code: ApiResponseCode.internalServerError, message: '获取项目成员失败');
     }
   }
 
@@ -235,7 +227,7 @@ class ProjectController {
       final grantedBy = getCurrentUserId(request);
 
       if (grantedBy == null) {
-        return ResponseBuilder.authError(message: '用户信息不存在');
+        return ResponseBuilder.error(code: ApiResponseCode.unauthorized, message: '用户信息不存在');
       }
 
       DateTime? expiresAt;
@@ -246,20 +238,18 @@ class ProjectController {
       await _projectService.addProjectMember(
           projectId: id, userId: userId, roleId: roleId, grantedBy: grantedBy, expiresAt: expiresAt);
 
-      return ResponseBuilder.created(message: '项目成员添加成功');
+      return ResponseBuilder.success(message: '项目成员添加成功');
     } catch (error, stackTrace) {
       logger.error('添加项目成员失败: $id', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
-        return ResponseBuilder.validationErrorFromRequest(request: request, fieldErrors: error.fieldErrors);
+        return ResponseBuilder.error(code: ApiResponseCode.validationError, message: error.message);
       }
       if (error is BusinessException) {
-        return ResponseBuilder.errorFromRequest(
-            request: request, code: ApiResponseCode.businessError, message: error.message);
+        return ResponseBuilder.error(code: ApiResponseCode.businessError, message: error.message);
       }
 
-      return ResponseBuilder.errorFromRequest(
-          request: request, code: ApiResponseCode.internalServerError, message: '添加项目成员失败');
+      return ResponseBuilder.error(code: ApiResponseCode.internalServerError, message: '添加项目成员失败');
     }
   }
 
@@ -268,11 +258,10 @@ class ProjectController {
       Validator.validateUuid(id, 'project_id');
       Validator.validateUuid(userId, 'user_id');
       await _projectService.removeProjectMember(id, userId);
-      return ResponseBuilder.noContent();
+      return ResponseBuilder.success(message: '项目成员删除成功');
     } catch (error, stackTrace) {
       logger.error('移除项目成员失败: $id, user: $userId', error: error, stackTrace: stackTrace);
-      return ResponseBuilder.errorFromRequest(
-          request: request, code: ApiResponseCode.internalServerError, message: '移除项目成员失败');
+      return ResponseBuilder.error(code: ApiResponseCode.internalServerError, message: '移除项目成员失败');
     }
   }
 
@@ -282,8 +271,7 @@ class ProjectController {
       return ResponseBuilder.success(message: '获取项目统计信息成功', data: stats);
     } catch (error, stackTrace) {
       logger.error('获取项目统计信息失败', error: error, stackTrace: stackTrace);
-      return ResponseBuilder.errorFromRequest(
-          request: request, code: ApiResponseCode.internalServerError, message: '获取统计信息失败');
+      return ResponseBuilder.error(code: ApiResponseCode.internalServerError, message: '获取统计信息失败');
     }
   }
 
@@ -295,8 +283,7 @@ class ProjectController {
       return ResponseBuilder.success(message: '项目已归档');
     } catch (error, stackTrace) {
       logger.error('归档项目失败: $id', error: error, stackTrace: stackTrace);
-      return ResponseBuilder.errorFromRequest(
-          request: request, code: ApiResponseCode.internalServerError, message: '归档项目失败');
+      return ResponseBuilder.error(code: ApiResponseCode.internalServerError, message: '归档项目失败');
     }
   }
 
@@ -308,8 +295,7 @@ class ProjectController {
       return ResponseBuilder.success(message: '项目已恢复');
     } catch (error, stackTrace) {
       logger.error('恢复项目失败: $id', error: error, stackTrace: stackTrace);
-      return ResponseBuilder.errorFromRequest(
-          request: request, code: ApiResponseCode.internalServerError, message: '恢复项目失败');
+      return ResponseBuilder.error(code: ApiResponseCode.internalServerError, message: '恢复项目失败');
     }
   }
 
@@ -324,8 +310,7 @@ class ProjectController {
       final roleId = data['role_id'] as String?;
 
       if (roleId == null) {
-        return ResponseBuilder.validationErrorFromRequest(
-            request: request, fieldErrors: [FieldError(field: 'role_id', code: 'REQUIRED', message: '角色ID不能为空')]);
+        return ResponseBuilder.error(code: ApiResponseCode.validationError, message: '角色ID不能为空');
       }
 
       await _projectService.updateProjectMemberRole(id, userId, roleId);
@@ -333,10 +318,9 @@ class ProjectController {
     } catch (error, stackTrace) {
       logger.error('更新成员角色失败: $id, user: $userId', error: error, stackTrace: stackTrace);
       if (error is ValidationException) {
-        return ResponseBuilder.validationErrorFromRequest(request: request, fieldErrors: error.fieldErrors);
+        return ResponseBuilder.error(code: ApiResponseCode.validationError, message: error.message);
       }
-      return ResponseBuilder.errorFromRequest(
-          request: request, code: ApiResponseCode.internalServerError, message: '更新成员角色失败');
+      return ResponseBuilder.error(code: ApiResponseCode.internalServerError, message: '更新成员角色失败');
     }
   }
 
@@ -348,8 +332,7 @@ class ProjectController {
       return ResponseBuilder.success(message: '获取项目语言成功', data: languages);
     } catch (error, stackTrace) {
       logger.error('获取项目语言失败: $id', error: error, stackTrace: stackTrace);
-      return ResponseBuilder.errorFromRequest(
-          request: request, code: ApiResponseCode.internalServerError, message: '获取项目语言失败');
+      return ResponseBuilder.error(code: ApiResponseCode.internalServerError, message: '获取项目语言失败');
     }
   }
 
@@ -363,19 +346,17 @@ class ProjectController {
       final languageCode = data['language_code'] as String?;
 
       if (languageCode == null) {
-        return ResponseBuilder.validationErrorFromRequest(
-            request: request, fieldErrors: [FieldError(field: 'language_code', code: 'REQUIRED', message: '语言代码不能为空')]);
+        return ResponseBuilder.error(code: ApiResponseCode.validationError, message: '语言代码不能为空');
       }
 
       await _projectService.addProjectLanguage(id, languageCode);
-      return ResponseBuilder.created(message: '语言已添加到项目');
+      return ResponseBuilder.success(message: '语言已添加到项目');
     } catch (error, stackTrace) {
       logger.error('添加项目语言失败: $id', error: error, stackTrace: stackTrace);
       if (error is ValidationException) {
-        return ResponseBuilder.validationErrorFromRequest(request: request, fieldErrors: error.fieldErrors);
+        return ResponseBuilder.error(code: ApiResponseCode.validationError, message: error.message);
       }
-      return ResponseBuilder.errorFromRequest(
-          request: request, code: ApiResponseCode.internalServerError, message: '添加项目语言失败');
+      return ResponseBuilder.error(code: ApiResponseCode.internalServerError, message: '添加项目语言失败');
     }
   }
 
@@ -387,8 +368,7 @@ class ProjectController {
       return ResponseBuilder.success(message: '语言已从项目中移除');
     } catch (error, stackTrace) {
       logger.error('移除项目语言失败: $id, language: $languageCode', error: error, stackTrace: stackTrace);
-      return ResponseBuilder.errorFromRequest(
-          request: request, code: ApiResponseCode.internalServerError, message: '移除项目语言失败');
+      return ResponseBuilder.error(code: ApiResponseCode.internalServerError, message: '移除项目语言失败');
     }
   }
 
@@ -403,8 +383,7 @@ class ProjectController {
       final settings = data['settings'] as Map<String, dynamic>?;
 
       if (languageCode == null) {
-        return ResponseBuilder.validationErrorFromRequest(
-            request: request, fieldErrors: [FieldError(field: 'language_code', code: 'REQUIRED', message: '语言代码不能为空')]);
+        return ResponseBuilder.error(code: ApiResponseCode.validationError, message: '语言代码不能为空');
       }
 
       await _projectService.updateLanguageSettings(id, languageCode, settings ?? {});
@@ -412,10 +391,9 @@ class ProjectController {
     } catch (error, stackTrace) {
       logger.error('更新语言设置失败: $id', error: error, stackTrace: stackTrace);
       if (error is ValidationException) {
-        return ResponseBuilder.validationErrorFromRequest(request: request, fieldErrors: error.fieldErrors);
+        return ResponseBuilder.error(code: ApiResponseCode.validationError, message: error.message);
       }
-      return ResponseBuilder.errorFromRequest(
-          request: request, code: ApiResponseCode.internalServerError, message: '更新语言设置失败');
+      return ResponseBuilder.error(code: ApiResponseCode.internalServerError, message: '更新语言设置失败');
     }
   }
 
@@ -427,8 +405,7 @@ class ProjectController {
       return ResponseBuilder.success(message: '获取项目统计信息成功', data: stats);
     } catch (error, stackTrace) {
       logger.error('获取项目统计信息失败: $id', error: error, stackTrace: stackTrace);
-      return ResponseBuilder.errorFromRequest(
-          request: request, code: ApiResponseCode.internalServerError, message: '获取项目统计信息失败');
+      return ResponseBuilder.error(code: ApiResponseCode.internalServerError, message: '获取项目统计信息失败');
     }
   }
 
@@ -450,8 +427,7 @@ class ProjectController {
       );
     } catch (error, stackTrace) {
       logger.error('获取项目活动失败: $id', error: error, stackTrace: stackTrace);
-      return ResponseBuilder.errorFromRequest(
-          request: request, code: ApiResponseCode.internalServerError, message: '获取项目活动失败');
+      return ResponseBuilder.error(code: ApiResponseCode.internalServerError, message: '获取项目活动失败');
     }
   }
 }
