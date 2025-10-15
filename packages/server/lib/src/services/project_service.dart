@@ -1,3 +1,5 @@
+import 'package:ttpolyglot_model/model.dart';
+
 import '../config/server_config.dart';
 import '../middleware/error_handler_middleware.dart';
 import '../utils/string_utils.dart';
@@ -214,7 +216,7 @@ class ProjectService {
       // 验证主语言是否存在
       final languageExists = await _isLanguageExists(primaryLanguageCode);
       if (!languageExists) {
-        throw const BusinessException('VALIDATION_LANGUAGE_NOT_FOUND', '指定的主语言不存在');
+        throw const BusinessException(ApiResponseCode.validationError, '指定的主语言不存在');
       }
 
       // 生成或验证slug
@@ -314,14 +316,14 @@ class ProjectService {
       }
 
       if (updates.isEmpty) {
-        throw const BusinessException('VALIDATION_NO_UPDATES', '没有可更新的字段');
+        throw const BusinessException(ApiResponseCode.validationError, '没有可更新的字段');
       }
 
       // 检查slug唯一性
       if (updateData.containsKey('slug')) {
         final newSlug = updateData['slug'] as String;
         if (await _isSlugExists(newSlug, projectId)) {
-          throw const BusinessException('VALIDATION_SLUG_EXISTS', '项目标识已存在');
+          throw const BusinessException(ApiResponseCode.validationError, '项目标识已存在');
         }
         updates.add('slug = @slug');
         parameters['slug'] = newSlug;
@@ -439,7 +441,7 @@ class ProjectService {
       // 检查用户是否已经是项目成员
       final existingRole = await _getUserRoleInProject(userId, projectId);
       if (existingRole != null) {
-        throw const BusinessException('BUSINESS_USER_ALREADY_MEMBER', '用户已经是项目成员');
+        throw const BusinessException(ApiResponseCode.businessError, '用户已经是项目成员');
       }
 
       // 添加角色关联
@@ -569,7 +571,7 @@ class ProjectService {
         await _databaseService.query('SELECT id FROM roles WHERE name = @name LIMIT 1', {'name': 'project_owner'});
 
     if (roleResult.isEmpty) {
-      throw const BusinessException('SYSTEM_ROLE_NOT_FOUND', '项目所有者角色不存在');
+      throw const BusinessException(ApiResponseCode.businessError, '项目所有者角色不存在');
     }
 
     final roleId = roleResult.first[0] as String;
@@ -716,7 +718,7 @@ class ProjectService {
 
       // 检查语言是否存在
       if (!await _isLanguageExists(languageCode)) {
-        throw const BusinessException('LANGUAGE_NOT_FOUND', '语言不存在');
+        throw const BusinessException(ApiResponseCode.businessError, '语言不存在');
       }
 
       // 检查是否已存在
@@ -726,7 +728,7 @@ class ProjectService {
       ''', {'project_id': projectId, 'language_code': languageCode});
 
       if (existing.isNotEmpty) {
-        throw const BusinessException('LANGUAGE_ALREADY_EXISTS', '语言已存在于项目中');
+        throw const BusinessException(ApiResponseCode.businessError, '语言已存在于项目中');
       }
 
       await _databaseService.query('''

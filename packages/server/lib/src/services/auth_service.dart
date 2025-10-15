@@ -73,18 +73,18 @@ class AuthService {
 
       // 检查用户名是否已存在
       if (await _isUsernameExists(username)) {
-        throw const BusinessException('VALIDATION_USERNAME_EXISTS', '用户名已存在');
+        throw const BusinessException(ApiResponseCode.validationError, '用户名已存在');
       }
 
       // 检查邮箱是否已存在
       if (await _isEmailExists(email)) {
-        throw const BusinessException('VALIDATION_EMAIL_EXISTS', '邮箱已被使用');
+        throw const BusinessException(ApiResponseCode.validationError, '邮箱已被使用');
       }
 
       // 验证密码强度
       final passwordStrength = _cryptoUtils.checkPasswordStrength(password);
       if (!passwordStrength.isAcceptable) {
-        throw BusinessException('VALIDATION_PASSWORD_WEAK', '密码强度不足：${passwordStrength.checks.join(', ')}');
+        throw BusinessException(ApiResponseCode.validationError, '密码强度不足：${passwordStrength.checks.join(', ')}');
       }
 
       // 加密密码
@@ -160,19 +160,19 @@ class AuthService {
       // 查找用户
       final user = await _findUserByEmailOrUsername(emailOrUsername);
       if (user == null) {
-        throw const BusinessException('AUTH_INVALID_CREDENTIALS', '用户名或密码错误');
+        throw const BusinessException(ApiResponseCode.validationError, '用户名或密码错误');
       }
 
       // 检查账户状态
       if (!user['is_active']) {
-        throw const BusinessException('AUTH_ACCOUNT_DISABLED', '账户已被禁用');
+        throw const BusinessException(ApiResponseCode.validationError, '账户已被禁用');
       }
 
       // 检查账户锁定
       if (user['locked_until'] != null) {
         final lockedUntil = DateTime.parse(user['locked_until']);
         if (lockedUntil.isAfter(DateTime.now())) {
-          throw const BusinessException('AUTH_ACCOUNT_LOCKED', '账户已被锁定，请稍后重试');
+          throw const BusinessException(ApiResponseCode.validationError, '账户已被锁定，请稍后重试');
         }
       }
 
@@ -181,7 +181,7 @@ class AuthService {
       if (!_cryptoUtils.verifyPassword(password, passwordHash)) {
         // 增加登录失败次数
         await _incrementLoginAttempts(user['id']);
-        throw const BusinessException('AUTH_INVALID_CREDENTIALS', '用户名或密码错误');
+        throw const BusinessException(ApiResponseCode.validationError, '用户名或密码错误');
       }
 
       // 重置登录失败次数
@@ -271,7 +271,7 @@ class AuthService {
       // 验证刷新令牌
       final payload = _jwtUtils.verifyToken(refreshToken);
       if (payload == null || !_jwtUtils.isRefreshToken(refreshToken)) {
-        throw const BusinessException('AUTH_INVALID_REFRESH_TOKEN', '无效的刷新令牌');
+        throw const BusinessException(ApiResponseCode.validationError, '无效的刷新令牌');
       }
 
       final userId = payload['user_id'] as String;
@@ -280,13 +280,13 @@ class AuthService {
       final refreshTokenHash = _jwtUtils.generateTokenHash(refreshToken);
       final sessionExists = await _isSessionExists(userId, refreshTokenHash);
       if (!sessionExists) {
-        throw const BusinessException('AUTH_SESSION_NOT_FOUND', '会话不存在或已过期');
+        throw const BusinessException(ApiResponseCode.validationError, '会话不存在或已过期');
       }
 
       // 获取最新用户信息
       final user = await _findUserById(userId);
       if (user == null || !user['is_active']) {
-        throw const BusinessException('AUTH_USER_NOT_FOUND', '用户不存在或已被禁用');
+        throw const BusinessException(ApiResponseCode.validationError, '用户不存在或已被禁用');
       }
 
       // 生成新的访问令牌
@@ -343,7 +343,7 @@ class AuthService {
       // 验证访问令牌
       final payload = _jwtUtils.verifyToken(accessToken);
       if (payload == null) {
-        throw const BusinessException('AUTH_INVALID_TOKEN', '无效的访问令牌');
+        throw const BusinessException(ApiResponseCode.validationError, '无效的访问令牌');
       }
 
       final userId = payload['user_id'] as String;
@@ -414,7 +414,7 @@ class AuthService {
       // 验证邮箱验证令牌
       final payload = _jwtUtils.verifyEmailVerificationToken(token);
       if (payload == null) {
-        throw const BusinessException('AUTH_INVALID_VERIFICATION_TOKEN', '无效的验证令牌');
+        throw const BusinessException(ApiResponseCode.validationError, '无效的验证令牌');
       }
 
       final userId = payload['user_id'] as String;
@@ -423,7 +423,7 @@ class AuthService {
       // 检查Redis中的验证令牌
       final storedToken = await _redisService.getTempData('email_verification:$userId');
       if (storedToken != token) {
-        throw const BusinessException('AUTH_VERIFICATION_TOKEN_MISMATCH', '验证令牌不匹配');
+        throw const BusinessException(ApiResponseCode.validationError, '验证令牌不匹配');
       }
 
       // 更新用户邮箱验证状态
@@ -517,7 +517,7 @@ class AuthService {
       // 验证密码重置令牌
       final payload = _jwtUtils.verifyPasswordResetToken(token);
       if (payload == null) {
-        throw const BusinessException('AUTH_INVALID_RESET_TOKEN', '无效的重置令牌');
+        throw const BusinessException(ApiResponseCode.validationError, '无效的重置令牌');
       }
 
       final userId = payload['user_id'] as String;
@@ -526,13 +526,13 @@ class AuthService {
       // 检查Redis中的重置令牌
       final storedToken = await _redisService.getTempData('password_reset:$userId');
       if (storedToken != token) {
-        throw const BusinessException('AUTH_RESET_TOKEN_MISMATCH', '重置令牌不匹配或已过期');
+        throw const BusinessException(ApiResponseCode.validationError, '重置令牌不匹配或已过期');
       }
 
       // 验证新密码强度
       final passwordStrength = _cryptoUtils.checkPasswordStrength(newPassword);
       if (!passwordStrength.isAcceptable) {
-        throw BusinessException('VALIDATION_PASSWORD_WEAK', '密码强度不足：${passwordStrength.checks.join(', ')}');
+        throw BusinessException(ApiResponseCode.validationError, '密码强度不足：${passwordStrength.checks.join(', ')}');
       }
 
       // 加密新密码
@@ -626,15 +626,15 @@ class AuthService {
 
   void _validateRegistrationInput(String username, String email, String password) {
     if (username.isEmpty || username.length < 3) {
-      throw const BusinessException('VALIDATION_USERNAME_INVALID', '用户名至少3个字符');
+      throw const BusinessException(ApiResponseCode.validationError, '用户名至少3个字符');
     }
 
     if (!_cryptoUtils.isValidEmail(email)) {
-      throw const BusinessException('VALIDATION_EMAIL_INVALID', '邮箱格式不正确');
+      throw const BusinessException(ApiResponseCode.validationError, '邮箱格式不正确');
     }
 
     if (password.isEmpty || password.length < 8) {
-      throw const BusinessException('VALIDATION_PASSWORD_TOO_SHORT', '密码至少8个字符');
+      throw const BusinessException(ApiResponseCode.validationError, '密码至少8个字符');
     }
   }
 

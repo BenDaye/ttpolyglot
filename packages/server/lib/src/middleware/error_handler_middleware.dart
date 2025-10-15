@@ -129,7 +129,7 @@ class ValidationException implements Exception {
 
 /// 认证异常
 class AuthenticationException implements Exception {
-  final String code;
+  final ApiResponseCode code;
   final String message;
 
   const AuthenticationException(this.code, this.message);
@@ -160,7 +160,7 @@ class NotFoundException implements Exception {
 
 /// 业务逻辑异常
 class BusinessException implements Exception {
-  final String code;
+  final ApiResponseCode code;
   final String message;
   final String? details;
 

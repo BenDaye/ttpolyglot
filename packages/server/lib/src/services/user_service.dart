@@ -1,3 +1,5 @@
+import 'package:ttpolyglot_model/model.dart';
+
 import '../config/server_config.dart';
 import '../middleware/error_handler_middleware.dart';
 import '../utils/crypto_utils.dart';
@@ -216,14 +218,14 @@ class UserService {
       }
 
       if (updates.isEmpty) {
-        throw const BusinessException('VALIDATION_NO_UPDATES', '没有可更新的字段');
+        throw const BusinessException(ApiResponseCode.validationError, '没有可更新的字段');
       }
 
       // 检查用户名和邮箱唯一性
       if (updateData.containsKey('username')) {
         final usernameExists = await _isUsernameExists(updateData['username'], userId);
         if (usernameExists) {
-          throw const BusinessException('VALIDATION_USERNAME_EXISTS', '用户名已存在');
+          throw const BusinessException(ApiResponseCode.validationError, '用户名已存在');
         }
         updates.add('username = @username');
         parameters['username'] = updateData['username'];
@@ -232,7 +234,7 @@ class UserService {
       if (updateData.containsKey('email')) {
         final emailExists = await _isEmailExists(updateData['email'], userId);
         if (emailExists) {
-          throw const BusinessException('VALIDATION_EMAIL_EXISTS', '邮箱已被使用');
+          throw const BusinessException(ApiResponseCode.validationError, '邮箱已被使用');
         }
         updates.add('email = @email');
         updates.add('is_email_verified = false'); // 更改邮箱后需要重新验证
@@ -282,13 +284,13 @@ class UserService {
 
       // 验证当前密码
       if (!_cryptoUtils.verifyPassword(currentPassword, currentPasswordHash)) {
-        throw const BusinessException('AUTH_INVALID_PASSWORD', '当前密码不正确');
+        throw const BusinessException(ApiResponseCode.validationError, '当前密码不正确');
       }
 
       // 验证新密码强度
       final passwordStrength = _cryptoUtils.checkPasswordStrength(newPassword);
       if (!passwordStrength.isAcceptable) {
-        throw BusinessException('VALIDATION_PASSWORD_WEAK', '新密码强度不足：${passwordStrength.checks.join(', ')}');
+        throw BusinessException(ApiResponseCode.validationError, '新密码强度不足：${passwordStrength.checks.join(', ')}');
       }
 
       // 生成新密码哈希
