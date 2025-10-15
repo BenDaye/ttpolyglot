@@ -80,8 +80,9 @@ class ResponseBuilder {
   }
 
   /// 构建错误响应
-  static Response error({
+  static Response error<T>({
     ApiResponseCode? code,
+    T? data,
     String? message,
     ApiResponseTipsType type = ApiResponseTipsType.showToast,
     Map<String, String>? headers,
@@ -92,7 +93,7 @@ class ResponseBuilder {
       code: code,
       message: message ?? code.message,
       type: type,
-      data: null,
+      data: data,
     );
 
     final responseHeaders = <String, String>{
