@@ -11,7 +11,7 @@ class ResponseBuilder {
 
   /// 根据 ApiResponseCode 获取 HTTP 状态码
   static int _getHttpStatusCode(ApiResponseCode code) {
-    // 对于自定义业务错误码，统一返回 400
+    // 对于自定义业务错误码，统一返回 200
     if (code.value <= 0) {
       return 200;
     }
