@@ -99,7 +99,7 @@ class SignInController extends GetxController {
       );
 
       // 跳转到主页（使用 offAllNamed 清除登录页面）
-      Get.offAllNamed(Routes.projects);
+      Get.offAllNamed(Routes.home);
     } catch (error) {
       // 提取错误信息
       String message = '登录失败，请稍后重试';
