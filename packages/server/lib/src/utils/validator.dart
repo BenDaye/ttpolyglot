@@ -1,4 +1,5 @@
-import '../models/api_error.dart';
+import 'package:ttpolyglot_server/src/middleware/error_handler_middleware.dart';
+
 import '../utils/structured_logger.dart';
 
 /// 数据验证工具类
@@ -21,7 +22,6 @@ class Validator {
       if (required) {
         errors.add(FieldError(
           field: fieldName,
-          code: 'VALIDATION_REQUIRED',
           message: '$fieldName是必填项',
         ));
       } else {
@@ -32,7 +32,6 @@ class Validator {
     if (value is! String) {
       errors.add(FieldError(
         field: fieldName,
-        code: 'VALIDATION_TYPE_INVALID',
         message: '$fieldName必须是字符串',
       ));
     } else {
@@ -40,7 +39,6 @@ class Validator {
       if (minLength != null && value.length < minLength) {
         errors.add(FieldError(
           field: fieldName,
-          code: 'VALIDATION_TOO_SHORT',
           message: '$fieldName至少需要$minLength个字符',
         ));
       }
@@ -48,7 +46,6 @@ class Validator {
       if (maxLength != null && value.length > maxLength) {
         errors.add(FieldError(
           field: fieldName,
-          code: 'VALIDATION_TOO_LONG',
           message: '$fieldName不能超过$maxLength个字符',
         ));
       }
@@ -57,7 +54,6 @@ class Validator {
       if (pattern != null && !RegExp(pattern).hasMatch(value)) {
         errors.add(FieldError(
           field: fieldName,
-          code: 'VALIDATION_PATTERN_MISMATCH',
           message: '$fieldName格式不正确',
         ));
       }
@@ -65,9 +61,8 @@ class Validator {
 
     if (errors.isNotEmpty) {
       throw ValidationException(
-        code: 'VALIDATION_FAILED',
         message: '输入验证失败',
-        fieldErrors: errors,
+        errors: errors,
       );
     }
 
@@ -88,22 +83,9 @@ class Validator {
       );
     } catch (e) {
       if (e is ValidationException) {
-        // 替换错误消息为更友好的邮箱格式错误
-        final emailErrors = e.fieldErrors.map((error) {
-          if (error.code == 'VALIDATION_PATTERN_MISMATCH') {
-            return FieldError(
-              field: error.field,
-              code: 'VALIDATION_EMAIL_INVALID',
-              message: '邮箱地址格式不正确',
-            );
-          }
-          return error;
-        }).toList();
-
         throw ValidationException(
-          code: 'VALIDATION_FAILED',
           message: '输入验证失败',
-          fieldErrors: emailErrors,
+          errors: e.errors,
         );
       }
       rethrow;
@@ -124,13 +106,11 @@ class Validator {
       if (required) {
         errors.add(FieldError(
           field: fieldName,
-          code: 'VALIDATION_REQUIRED',
           message: '$fieldName是必填项',
         ));
         throw ValidationException(
-          code: 'VALIDATION_FAILED',
           message: '输入验证失败',
-          fieldErrors: errors,
+          errors: errors,
         );
       } else {
         return 0;
@@ -150,7 +130,6 @@ class Validator {
     if (intValue == null) {
       errors.add(FieldError(
         field: fieldName,
-        code: 'VALIDATION_TYPE_INVALID',
         message: '$fieldName必须是整数',
       ));
     } else {
@@ -158,7 +137,6 @@ class Validator {
       if (min != null && intValue < min) {
         errors.add(FieldError(
           field: fieldName,
-          code: 'VALIDATION_TOO_SMALL',
           message: '$fieldName不能小于$min',
         ));
       }
@@ -166,7 +144,6 @@ class Validator {
       if (max != null && intValue > max) {
         errors.add(FieldError(
           field: fieldName,
-          code: 'VALIDATION_TOO_LARGE',
           message: '$fieldName不能大于$max',
         ));
       }
@@ -174,9 +151,8 @@ class Validator {
 
     if (errors.isNotEmpty) {
       throw ValidationException(
-        code: 'VALIDATION_FAILED',
         message: '输入验证失败',
-        fieldErrors: errors,
+        errors: errors,
       );
     }
 
@@ -192,10 +168,9 @@ class Validator {
   }) {
     if (value == null) {
       if (required) {
-        throw ValidationException(code: 'VALIDATION_FAILED', message: '输入验证失败', fieldErrors: [
+        throw ValidationException(message: '输入验证失败', errors: [
           FieldError(
             field: fieldName,
-            code: 'VALIDATION_REQUIRED',
             message: '$fieldName是必填项',
           ),
         ]);
@@ -222,12 +197,10 @@ class Validator {
     }
 
     throw ValidationException(
-      code: 'VALIDATION_FAILED',
       message: '输入验证失败',
-      fieldErrors: [
+      errors: [
         FieldError(
           field: fieldName,
-          code: 'VALIDATION_TYPE_INVALID',
           message: '$fieldName必须是布尔值',
         ),
       ],
@@ -243,10 +216,9 @@ class Validator {
   }) {
     if (value == null) {
       if (required) {
-        throw ValidationException(code: 'VALIDATION_FAILED', message: '输入验证失败', fieldErrors: [
+        throw ValidationException(message: '输入验证失败', errors: [
           FieldError(
             field: fieldName,
-            code: 'VALIDATION_REQUIRED',
             message: '$fieldName是必填项',
           ),
         ]);
@@ -257,12 +229,10 @@ class Validator {
 
     if (value is! String) {
       throw ValidationException(
-        code: 'VALIDATION_FAILED',
         message: '输入验证失败',
-        fieldErrors: [
+        errors: [
           FieldError(
             field: fieldName,
-            code: 'VALIDATION_TYPE_INVALID',
             message: '$fieldName必须是字符串',
           ),
         ],
@@ -271,12 +241,10 @@ class Validator {
 
     if (!allowedValues.contains(value)) {
       throw ValidationException(
-        code: 'VALIDATION_FAILED',
         message: '输入验证失败',
-        fieldErrors: [
+        errors: [
           FieldError(
             field: fieldName,
-            code: 'VALIDATION_ENUM_INVALID',
             message: '$fieldName必须是以下值之一: ${allowedValues.join(', ')}',
           ),
         ],
@@ -299,22 +267,9 @@ class Validator {
       );
     } catch (e) {
       if (e is ValidationException) {
-        // 替换错误消息为更友好的UUID格式错误
-        final uuidErrors = e.fieldErrors.map((error) {
-          if (error.code == 'VALIDATION_PATTERN_MISMATCH') {
-            return FieldError(
-              field: error.field,
-              code: 'VALIDATION_UUID_INVALID',
-              message: '$fieldName必须是有效的UUID格式',
-            );
-          }
-          return error;
-        }).toList();
-
         throw ValidationException(
-          code: 'VALIDATION_FAILED',
           message: '输入验证失败',
-          fieldErrors: uuidErrors,
+          errors: e.errors,
         );
       }
       rethrow;
@@ -329,10 +284,9 @@ class Validator {
   }) {
     if (value == null) {
       if (required) {
-        throw ValidationException(code: 'VALIDATION_FAILED', message: '输入验证失败', fieldErrors: [
+        throw ValidationException(message: '输入验证失败', errors: [
           FieldError(
             field: fieldName,
-            code: 'VALIDATION_REQUIRED',
             message: '$fieldName是必填项',
           ),
         ]);
@@ -347,12 +301,10 @@ class Validator {
 
     if (value is! String) {
       throw ValidationException(
-        code: 'VALIDATION_FAILED',
         message: '输入验证失败',
-        fieldErrors: [
+        errors: [
           FieldError(
             field: fieldName,
-            code: 'VALIDATION_TYPE_INVALID',
             message: '$fieldName必须是日期时间字符串',
           ),
         ],
@@ -363,12 +315,10 @@ class Validator {
       return DateTime.parse(value);
     } catch (e) {
       throw ValidationException(
-        code: 'VALIDATION_FAILED',
         message: '输入验证失败',
-        fieldErrors: [
+        errors: [
           FieldError(
             field: fieldName,
-            code: 'VALIDATION_DATETIME_INVALID',
             message: '$fieldName必须是有效的日期时间格式',
           ),
         ],
@@ -390,22 +340,9 @@ class Validator {
       );
     } catch (e) {
       if (e is ValidationException) {
-        // 替换错误消息为更友好的URL格式错误
-        final urlErrors = e.fieldErrors.map((error) {
-          if (error.code == 'VALIDATION_PATTERN_MISMATCH') {
-            return FieldError(
-              field: error.field,
-              code: 'VALIDATION_URL_INVALID',
-              message: '$fieldName必须是有效的URL格式',
-            );
-          }
-          return error;
-        }).toList();
-
         throw ValidationException(
-          code: 'VALIDATION_FAILED',
           message: '输入验证失败',
-          fieldErrors: urlErrors,
+          errors: e.errors,
         );
       }
       rethrow;
@@ -420,10 +357,9 @@ class Validator {
   }) {
     if (value == null) {
       if (required) {
-        throw ValidationException(code: 'VALIDATION_FAILED', message: '输入验证失败', fieldErrors: [
+        throw ValidationException(message: '输入验证失败', errors: [
           FieldError(
             field: fieldName,
-            code: 'VALIDATION_REQUIRED',
             message: '$fieldName是必填项',
           ),
         ]);
@@ -437,12 +373,10 @@ class Validator {
     }
 
     throw ValidationException(
-      code: 'VALIDATION_FAILED',
       message: '输入验证失败',
-      fieldErrors: [
+      errors: [
         FieldError(
           field: fieldName,
-          code: 'VALIDATION_TYPE_INVALID',
           message: '$fieldName必须是JSON对象',
         ),
       ],
@@ -459,10 +393,9 @@ class Validator {
   }) {
     if (value == null) {
       if (required) {
-        throw ValidationException(code: 'VALIDATION_FAILED', message: '输入验证失败', fieldErrors: [
+        throw ValidationException(message: '输入验证失败', errors: [
           FieldError(
             field: fieldName,
-            code: 'VALIDATION_REQUIRED',
             message: '$fieldName是必填项',
           ),
         ]);
@@ -473,12 +406,10 @@ class Validator {
 
     if (value is! List) {
       throw ValidationException(
-        code: 'VALIDATION_FAILED',
         message: '输入验证失败',
-        fieldErrors: [
+        errors: [
           FieldError(
             field: fieldName,
-            code: 'VALIDATION_TYPE_INVALID',
             message: '$fieldName必须是数组',
           ),
         ],
@@ -492,7 +423,6 @@ class Validator {
     if (minLength != null && list.length < minLength) {
       errors.add(FieldError(
         field: fieldName,
-        code: 'VALIDATION_TOO_SHORT',
         message: '$fieldName至少需要$minLength个元素',
       ));
     }
@@ -500,16 +430,14 @@ class Validator {
     if (maxLength != null && list.length > maxLength) {
       errors.add(FieldError(
         field: fieldName,
-        code: 'VALIDATION_TOO_LONG',
         message: '$fieldName不能超过$maxLength个元素',
       ));
     }
 
     if (errors.isNotEmpty) {
       throw ValidationException(
-        code: 'VALIDATION_FAILED',
         message: '输入验证失败',
-        fieldErrors: errors,
+        errors: errors,
       );
     }
 
@@ -517,12 +445,10 @@ class Validator {
       return list.cast<T>();
     } catch (e) {
       throw ValidationException(
-        code: 'VALIDATION_FAILED',
         message: '输入验证失败',
-        fieldErrors: [
+        errors: [
           FieldError(
             field: fieldName,
-            code: 'VALIDATION_TYPE_INVALID',
             message: '$fieldName数组元素类型不正确',
           ),
         ],
@@ -539,7 +465,7 @@ class Validator {
         validation();
       } catch (error, stackTrace) {
         if (error is ValidationException) {
-          allErrors.addAll(error.fieldErrors);
+          allErrors.addAll(error.errors);
         } else {
           _logger.error('验证过程中出现未知错误', error: error, stackTrace: stackTrace);
         }
@@ -548,9 +474,8 @@ class Validator {
 
     if (allErrors.isNotEmpty) {
       throw ValidationException(
-        code: 'VALIDATION_FAILED',
         message: '输入验证失败',
-        fieldErrors: allErrors,
+        errors: allErrors,
       );
     }
   }

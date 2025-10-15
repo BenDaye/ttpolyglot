@@ -216,7 +216,7 @@ class ProjectService {
       // 验证主语言是否存在
       final languageExists = await _isLanguageExists(primaryLanguageCode);
       if (!languageExists) {
-        throw const BusinessException(ApiResponseCode.validationError, '指定的主语言不存在');
+        throw const BusinessException(code: ApiResponseCode.validationError, message: '指定的主语言不存在');
       }
 
       // 生成或验证slug
@@ -292,7 +292,7 @@ class ProjectService {
       // 验证项目是否存在
       final existingProject = await getProjectById(projectId);
       if (existingProject == null) {
-        throw const NotFoundException('项目不存在');
+        throw const NotFoundException(message: '项目不存在');
       }
 
       // 构建更新字段
@@ -316,14 +316,14 @@ class ProjectService {
       }
 
       if (updates.isEmpty) {
-        throw const BusinessException(ApiResponseCode.validationError, '没有可更新的字段');
+        throw const BusinessException(code: ApiResponseCode.validationError, message: '没有可更新的字段');
       }
 
       // 检查slug唯一性
       if (updateData.containsKey('slug')) {
         final newSlug = updateData['slug'] as String;
         if (await _isSlugExists(newSlug, projectId)) {
-          throw const BusinessException(ApiResponseCode.validationError, '项目标识已存在');
+          throw const BusinessException(code: ApiResponseCode.validationError, message: '项目标识已存在');
         }
         updates.add('slug = @slug');
         parameters['slug'] = newSlug;
@@ -365,7 +365,7 @@ class ProjectService {
       // 检查项目是否存在
       final project = await getProjectById(projectId);
       if (project == null) {
-        throw const NotFoundException('项目不存在');
+        throw const NotFoundException(message: '项目不存在');
       }
 
       // 在事务中删除项目相关数据
@@ -441,7 +441,7 @@ class ProjectService {
       // 检查用户是否已经是项目成员
       final existingRole = await _getUserRoleInProject(userId, projectId);
       if (existingRole != null) {
-        throw const BusinessException(ApiResponseCode.businessError, '用户已经是项目成员');
+        throw const BusinessException(code: ApiResponseCode.businessError, message: '用户已经是项目成员');
       }
 
       // 添加角色关联
@@ -571,7 +571,7 @@ class ProjectService {
         await _databaseService.query('SELECT id FROM roles WHERE name = @name LIMIT 1', {'name': 'project_owner'});
 
     if (roleResult.isEmpty) {
-      throw const BusinessException(ApiResponseCode.businessError, '项目所有者角色不存在');
+      throw const BusinessException(code: ApiResponseCode.businessError, message: '项目所有者角色不存在');
     }
 
     final roleId = roleResult.first[0] as String;
@@ -718,7 +718,7 @@ class ProjectService {
 
       // 检查语言是否存在
       if (!await _isLanguageExists(languageCode)) {
-        throw const BusinessException(ApiResponseCode.businessError, '语言不存在');
+        throw const BusinessException(code: ApiResponseCode.businessError, message: '语言不存在');
       }
 
       // 检查是否已存在
@@ -728,7 +728,7 @@ class ProjectService {
       ''', {'project_id': projectId, 'language_code': languageCode});
 
       if (existing.isNotEmpty) {
-        throw const BusinessException(ApiResponseCode.businessError, '语言已存在于项目中');
+        throw const BusinessException(code: ApiResponseCode.businessError, message: '语言已存在于项目中');
       }
 
       await _databaseService.query('''

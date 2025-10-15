@@ -1,7 +1,6 @@
 import 'package:shelf/shelf.dart';
 import 'package:ttpolyglot_model/model.dart';
 
-import '../models/api_error.dart';
 import '../utils/response_builder.dart';
 import '../utils/structured_logger.dart';
 
@@ -33,7 +32,6 @@ class ErrorHandlerMiddleware {
       return _buildErrorResponse(
         code: ApiResponseCode.unprocessableEntity,
         message: error.message,
-        fieldErrors: error.fieldErrors,
         request: request,
         requestId: requestId,
       );
@@ -91,14 +89,12 @@ class ErrorHandlerMiddleware {
     required ApiResponseCode code,
     required String message,
     String? details,
-    List<FieldError>? fieldErrors,
     required Request request,
     required String requestId,
   }) {
     // 构建错误详情数据
     final Map<String, dynamic> errorData = {
       if (details != null) 'details': details,
-      if (fieldErrors != null && fieldErrors.isNotEmpty) 'field_errors': fieldErrors.map((e) => e.toJson()).toList(),
       'metadata': {
         'request_id': requestId,
         'timestamp': DateTime.now().toUtc().toIso8601String(),
@@ -114,25 +110,48 @@ class ErrorHandlerMiddleware {
   }
 }
 
+/// 字段验证错误
+class FieldError {
+  final String field;
+  final String message;
+
+  const FieldError({
+    required this.field,
+    required this.message,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'field': field,
+      'message': message,
+    };
+  }
+}
+
 /// 验证异常
 class ValidationException implements Exception {
   final String message;
-  final List<FieldError> fieldErrors;
+  final List<FieldError> errors;
 
-  const ValidationException(this.message, this.fieldErrors);
+  const ValidationException({
+    required this.message,
+    this.errors = const [],
+  });
 
   @override
-  String toString() => 'ValidationException: $message';
+  String toString() =>
+      'ValidationException: $message\nErrors:\n${errors.map((e) => '  - ${e.field}: ${e.message}').join('\n')}';
 }
-
-/// 字段错误
 
 /// 认证异常
 class AuthenticationException implements Exception {
   final ApiResponseCode code;
   final String message;
 
-  const AuthenticationException(this.code, this.message);
+  const AuthenticationException({
+    required this.code,
+    required this.message,
+  });
 
   @override
   String toString() => 'AuthenticationException: $message';
@@ -142,7 +161,9 @@ class AuthenticationException implements Exception {
 class AuthorizationException implements Exception {
   final String message;
 
-  const AuthorizationException(this.message);
+  const AuthorizationException({
+    required this.message,
+  });
 
   @override
   String toString() => 'AuthorizationException: $message';
@@ -152,7 +173,9 @@ class AuthorizationException implements Exception {
 class NotFoundException implements Exception {
   final String message;
 
-  const NotFoundException(this.message);
+  const NotFoundException({
+    required this.message,
+  });
 
   @override
   String toString() => 'NotFoundException: $message';
@@ -164,7 +187,11 @@ class BusinessException implements Exception {
   final String message;
   final String? details;
 
-  const BusinessException(this.code, this.message, [this.details]);
+  const BusinessException({
+    required this.code,
+    required this.message,
+    this.details,
+  });
 
   @override
   String toString() => 'BusinessException: $message';

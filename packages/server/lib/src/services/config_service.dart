@@ -1,5 +1,7 @@
+import 'package:ttpolyglot_model/model.dart';
+import 'package:ttpolyglot_server/src/middleware/error_handler_middleware.dart';
+
 import '../config/server_config.dart';
-import '../models/api_error.dart';
 import '../models/system_config.dart';
 import '../utils/cache_utils.dart';
 import '../utils/structured_logger.dart';
@@ -175,16 +177,16 @@ class ConfigService {
       // 获取当前配置
       final currentConfig = await getConfigByKey(key);
       if (currentConfig == null) {
-        throw const BusinessException('CONFIG_NOT_FOUND', '配置项不存在');
+        throw const BusinessException(code: ApiResponseCode.dataNotFound, message: '配置项不存在');
       }
 
       if (!currentConfig.isEditable) {
-        throw const BusinessException('CONFIG_NOT_EDITABLE', '配置项不可编辑');
+        throw const BusinessException(code: ApiResponseCode.businessError, message: '配置项不可编辑');
       }
 
       // 验证值
       if (!currentConfig.validateValue(value)) {
-        throw const BusinessException('CONFIG_INVALID_VALUE', '配置值无效');
+        throw const BusinessException(code: ApiResponseCode.businessError, message: '配置值无效');
       }
 
       // 更新数据库
@@ -283,11 +285,11 @@ class ConfigService {
     try {
       final config = await getConfigByKey(key);
       if (config == null) {
-        throw const BusinessException('CONFIG_NOT_FOUND', '配置项不存在');
+        throw const BusinessException(code: ApiResponseCode.dataNotFound, message: '配置项不存在');
       }
 
       if (config.defaultValue == null) {
-        throw const BusinessException('CONFIG_NO_DEFAULT', '配置项没有默认值');
+        throw const BusinessException(code: ApiResponseCode.businessError, message: '配置项没有默认值');
       }
 
       return await updateConfig(

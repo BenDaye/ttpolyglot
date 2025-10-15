@@ -1,4 +1,6 @@
-import '../models/api_error.dart';
+import 'package:ttpolyglot_model/model.dart';
+import 'package:ttpolyglot_server/src/middleware/error_handler_middleware.dart';
+
 import '../models/translation_entry.dart';
 import '../utils/structured_logger.dart';
 import 'database_service.dart';
@@ -164,7 +166,7 @@ class TranslationService {
       });
 
       if (existing.isNotEmpty) {
-        throw const BusinessException('TRANSLATION_ENTRY_EXISTS', '翻译条目已存在');
+        throw const BusinessException(code: ApiResponseCode.businessError, message: '翻译条目已存在');
       }
 
       // 创建翻译条目
@@ -217,7 +219,7 @@ class TranslationService {
 
       final existing = await getTranslationEntryById(entryId);
       if (existing == null) {
-        throw const NotFoundException('翻译条目不存在');
+        throw const NotFoundException(message: '翻译条目不存在');
       }
 
       // 构建更新字段
@@ -272,7 +274,7 @@ class TranslationService {
       }
 
       if (updates.isEmpty) {
-        throw const BusinessException('VALIDATION_NO_UPDATES', '没有可更新的字段');
+        throw const BusinessException(code: ApiResponseCode.businessError, message: '没有可更新的字段');
       }
 
       // 更新数据库
@@ -309,7 +311,7 @@ class TranslationService {
       // 获取条目信息以便记录历史
       final entry = await getTranslationEntryById(entryId);
       if (entry == null) {
-        throw const NotFoundException('翻译条目不存在');
+        throw const NotFoundException(message: '翻译条目不存在');
       }
 
       // 记录删除历史

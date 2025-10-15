@@ -196,7 +196,7 @@ class UserService {
       // 验证用户是否存在
       final existingUser = await getUserById(userId);
       if (existingUser == null) {
-        throw const NotFoundException('用户不存在');
+        throw const NotFoundException(message: '用户不存在');
       }
 
       // 构建更新字段
@@ -221,14 +221,14 @@ class UserService {
       }
 
       if (updates.isEmpty) {
-        throw const BusinessException(ApiResponseCode.validationError, '没有可更新的字段');
+        throw const BusinessException(code: ApiResponseCode.validationError, message: '没有可更新的字段');
       }
 
       // 检查用户名和邮箱唯一性
       if (updateData.containsKey('username')) {
         final usernameExists = await _isUsernameExists(updateData['username'], userId);
         if (usernameExists) {
-          throw const BusinessException(ApiResponseCode.validationError, '用户名已存在');
+          throw const BusinessException(code: ApiResponseCode.validationError, message: '用户名已存在');
         }
         updates.add('username = @username');
         parameters['username'] = updateData['username'];
@@ -237,7 +237,7 @@ class UserService {
       if (updateData.containsKey('email')) {
         final emailExists = await _isEmailExists(updateData['email'], userId);
         if (emailExists) {
-          throw const BusinessException(ApiResponseCode.validationError, '邮箱已被使用');
+          throw const BusinessException(code: ApiResponseCode.validationError, message: '邮箱已被使用');
         }
         updates.add('email = @email');
         updates.add('is_email_verified = false'); // 更改邮箱后需要重新验证
@@ -281,20 +281,21 @@ class UserService {
       final result = await _databaseService.query(sql, {'user_id': userId});
 
       if (result.isEmpty) {
-        throw const NotFoundException('用户不存在');
+        throw const NotFoundException(message: '用户不存在');
       }
 
       final currentPasswordHash = result.first[0] as String;
 
       // 验证当前密码
       if (!_cryptoUtils.verifyPassword(currentPassword, currentPasswordHash)) {
-        throw const BusinessException(ApiResponseCode.validationError, '当前密码不正确');
+        throw const BusinessException(code: ApiResponseCode.validationError, message: '当前密码不正确');
       }
 
       // 验证新密码强度
       final passwordStrength = _cryptoUtils.checkPasswordStrength(newPassword);
       if (!passwordStrength.isAcceptable) {
-        throw BusinessException(ApiResponseCode.validationError, '新密码强度不足：${passwordStrength.checks.join(', ')}');
+        throw BusinessException(
+            code: ApiResponseCode.validationError, message: '新密码强度不足：${passwordStrength.checks.join(', ')}');
       }
 
       // 生成新密码哈希
@@ -359,7 +360,7 @@ class UserService {
       // 检查用户是否存在
       final user = await getUserById(userId);
       if (user == null) {
-        throw const NotFoundException('用户不存在');
+        throw const NotFoundException(message: '用户不存在');
       }
 
       // 在事务中删除用户相关数据

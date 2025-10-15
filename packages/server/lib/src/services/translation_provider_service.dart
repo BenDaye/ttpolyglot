@@ -1,5 +1,7 @@
+import 'package:ttpolyglot_model/model.dart';
+import 'package:ttpolyglot_server/src/middleware/error_handler_middleware.dart';
+
 import '../config/server_config.dart';
-import '../models/api_error.dart';
 import '../utils/crypto_utils.dart';
 import '../utils/structured_logger.dart';
 import 'database_service.dart';
@@ -89,7 +91,7 @@ class TranslationProviderService {
 
       // 验证提供商类型
       if (!_isValidProviderType(providerType)) {
-        throw const BusinessException('INVALID_PROVIDER_TYPE', '不支持的翻译提供商类型');
+        throw const BusinessException(code: ApiResponseCode.businessError, message: '不支持的翻译提供商类型');
       }
 
       // 加密API密钥
@@ -160,7 +162,7 @@ class TranslationProviderService {
       // 检查配置是否存在
       final existing = await getTranslationProviderById(providerId, userId);
       if (existing == null) {
-        throw const NotFoundException('翻译接口配置不存在');
+        throw const NotFoundException(message: '翻译接口配置不存在');
       }
 
       // 如果设置为默认，先取消其他默认设置
@@ -221,7 +223,7 @@ class TranslationProviderService {
       }
 
       if (updates.isEmpty) {
-        throw const BusinessException('VALIDATION_NO_UPDATES', '没有可更新的字段');
+        throw const BusinessException(code: ApiResponseCode.businessError, message: '没有可更新的字段');
       }
 
       // 更新数据库
@@ -258,7 +260,7 @@ class TranslationProviderService {
       ''', {'provider_id': providerId, 'user_id': userId});
 
       if (result.isEmpty) {
-        throw const NotFoundException('翻译接口配置不存在');
+        throw const NotFoundException(message: '翻译接口配置不存在');
       }
 
       _logger.info('翻译接口配置删除成功: $providerId');
@@ -281,7 +283,7 @@ class TranslationProviderService {
       });
 
       if (result.isEmpty) {
-        throw const NotFoundException('翻译接口配置不存在');
+        throw const NotFoundException(message: '翻译接口配置不存在');
       }
 
       final provider = result.first.toColumnMap();
@@ -363,12 +365,12 @@ class TranslationProviderService {
       });
 
       if (result.isEmpty) {
-        throw const NotFoundException('翻译接口配置不存在');
+        throw const NotFoundException(message: '翻译接口配置不存在');
       }
 
       final provider = result.first.toColumnMap();
       if (!(provider['is_enabled'] as bool)) {
-        throw const BusinessException('PROVIDER_DISABLED', '翻译接口已被禁用');
+        throw const BusinessException(code: ApiResponseCode.businessError, message: '翻译接口已被禁用');
       }
 
       final providerType = provider['provider_type'] as String;
@@ -483,7 +485,7 @@ class TranslationProviderService {
         case 'custom':
           return await _testCustomConnection(apiUrl!);
         default:
-          throw const BusinessException('UNSUPPORTED_PROVIDER', '不支持的翻译提供商');
+          throw const BusinessException(code: ApiResponseCode.businessError, message: '不支持的翻译提供商');
       }
     } catch (error) {
       final responseTime = DateTime.now().difference(startTime).inMilliseconds;
@@ -521,7 +523,7 @@ class TranslationProviderService {
         case 'custom':
           return await _translateWithCustom(apiUrl!, text, fromLanguage, toLanguage);
         default:
-          throw const BusinessException('UNSUPPORTED_PROVIDER', '不支持的翻译提供商');
+          throw const BusinessException(code: ApiResponseCode.businessError, message: '不支持的翻译提供商');
       }
     } finally {
       final responseTime = DateTime.now().difference(startTime).inMilliseconds;
