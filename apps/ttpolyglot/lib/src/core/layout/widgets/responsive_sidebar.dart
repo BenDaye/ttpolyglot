@@ -521,6 +521,13 @@ class ResponsiveSidebar extends StatelessWidget {
           ),
           TextButton(
             onPressed: () async {
+              // 在异步操作前保存主题颜色，避免 context 失效
+              final theme = Theme.of(context);
+              final primaryContainer = theme.colorScheme.primaryContainer;
+              final onPrimaryContainer = theme.colorScheme.onPrimaryContainer;
+              final errorContainer = theme.colorScheme.errorContainer;
+              final onErrorContainer = theme.colorScheme.onErrorContainer;
+
               Navigator.of(context).pop();
 
               try {
@@ -538,8 +545,8 @@ class ResponsiveSidebar extends StatelessWidget {
                   '提示',
                   '已退出登录',
                   snackPosition: SnackPosition.TOP,
-                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                  colorText: Theme.of(context).colorScheme.onPrimaryContainer,
+                  backgroundColor: primaryContainer,
+                  colorText: onPrimaryContainer,
                   duration: const Duration(seconds: 2),
                   margin: const EdgeInsets.all(16.0),
                   borderRadius: 8.0,
@@ -552,8 +559,8 @@ class ResponsiveSidebar extends StatelessWidget {
                   '错误',
                   '退出登录失败，请重试',
                   snackPosition: SnackPosition.TOP,
-                  backgroundColor: Theme.of(context).colorScheme.errorContainer,
-                  colorText: Theme.of(context).colorScheme.onErrorContainer,
+                  backgroundColor: errorContainer,
+                  colorText: onErrorContainer,
                   duration: const Duration(seconds: 3),
                   margin: const EdgeInsets.all(16.0),
                   borderRadius: 8.0,
