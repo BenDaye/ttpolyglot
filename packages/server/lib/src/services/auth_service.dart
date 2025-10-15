@@ -1,3 +1,5 @@
+import 'package:ttpolyglot_model/model.dart';
+
 import '../config/server_config.dart';
 import '../middleware/error_handler_middleware.dart';
 import '../utils/crypto_utils.dart';
@@ -6,6 +8,33 @@ import '../utils/structured_logger.dart';
 import 'database_service.dart';
 import 'email_service.dart';
 import 'redis_service.dart';
+
+/// 认证服务结果辅助类
+class AuthResult {
+  static ApiResponse<Map<String, dynamic>> success({
+    String? userId,
+    String? message,
+    Map<String, dynamic>? data,
+  }) {
+    return ApiResponse(
+      code: ApiResponseCode.success,
+      message: message ?? ApiResponseCode.success.message,
+      data: data,
+    );
+  }
+
+  static ApiResponse<Map<String, dynamic>> failure({
+    ApiResponseCode code = ApiResponseCode.error,
+    String? message,
+    Map<String, dynamic>? data,
+  }) {
+    return ApiResponse(
+      code: code,
+      message: message ?? code.message,
+      data: data,
+    );
+  }
+}
 
 /// 认证服务
 class AuthService {
@@ -27,7 +56,7 @@ class AuthService {
   }
 
   /// 用户注册
-  Future<AuthResult> register({
+  Future<ApiResponse<Map<String, dynamic>>> register({
     required String username,
     required String email,
     required String password,
@@ -107,15 +136,15 @@ class AuthService {
       logger.error('用户注册失败', error: error, stackTrace: stackTrace);
 
       if (error is BusinessException) {
-        return AuthResult.failure(error.code, error.message);
+        return AuthResult.failure(message: error.message);
       }
 
-      return AuthResult.failure('REGISTRATION_FAILED', '注册失败，请稍后重试');
+      return AuthResult.failure(message: '注册失败，请稍后重试');
     }
   }
 
   /// 用户登录
-  Future<AuthResult> login({
+  Future<ApiResponse> login({
     required String emailOrUsername,
     required String password,
     String? deviceId,
@@ -226,15 +255,15 @@ class AuthService {
       logger.error('用户登录失败: $emailOrUsername', error: error, stackTrace: stackTrace);
 
       if (error is BusinessException) {
-        return AuthResult.failure(error.code, error.message);
+        return AuthResult.failure(message: error.message);
       }
 
-      return AuthResult.failure('LOGIN_FAILED', '登录失败，请稍后重试');
+      return AuthResult.failure(message: '登录失败，请稍后重试');
     }
   }
 
   /// 刷新令牌
-  Future<AuthResult> refreshToken(String refreshToken) async {
+  Future<ApiResponse> refreshToken(String refreshToken) async {
     try {
       final logger = LoggerFactory.getLogger('AuthService');
       logger.info('刷新令牌');
@@ -298,15 +327,15 @@ class AuthService {
       logger.error('令牌刷新失败', error: error, stackTrace: stackTrace);
 
       if (error is BusinessException) {
-        return AuthResult.failure(error.code, error.message);
+        return AuthResult.failure(message: error.message);
       }
 
-      return AuthResult.failure('REFRESH_FAILED', '令牌刷新失败');
+      return AuthResult.failure(message: '令牌刷新失败');
     }
   }
 
   /// 用户登出
-  Future<AuthResult> logout(String accessToken) async {
+  Future<ApiResponse> logout(String accessToken) async {
     try {
       final logger = LoggerFactory.getLogger('AuthService');
       logger.info('用户登出');
@@ -336,10 +365,10 @@ class AuthService {
       logger.error('用户登出失败', error: error, stackTrace: stackTrace);
 
       if (error is BusinessException) {
-        return AuthResult.failure(error.code, error.message);
+        return AuthResult.failure(message: error.message);
       }
 
-      return AuthResult.failure('LOGOUT_FAILED', '登出失败');
+      return AuthResult.failure(message: '登出失败');
     }
   }
 
@@ -377,7 +406,7 @@ class AuthService {
   }
 
   /// 邮箱验证
-  Future<AuthResult> verifyEmail(String token) async {
+  Future<ApiResponse> verifyEmail(String token) async {
     try {
       final logger = LoggerFactory.getLogger('AuthService');
       logger.info('邮箱验证');
@@ -420,21 +449,21 @@ class AuthService {
       logger.error('邮箱验证失败', error: error, stackTrace: stackTrace);
 
       if (error is BusinessException) {
-        return AuthResult.failure(error.code, error.message);
+        return AuthResult.failure(message: error.message);
       }
 
-      return AuthResult.failure('EMAIL_VERIFICATION_FAILED', '邮箱验证失败');
+      return AuthResult.failure(message: '邮箱验证失败');
     }
   }
 
   /// 忘记密码
-  Future<AuthResult> forgotPassword(String email) async {
+  Future<ApiResponse> forgotPassword(String email) async {
     try {
       final logger = LoggerFactory.getLogger('AuthService');
       logger.info('忘记密码请求: $email');
 
       if (!_cryptoUtils.isValidEmail(email)) {
-        return AuthResult.failure('VALIDATION_EMAIL_INVALID', '邮箱格式不正确');
+        return AuthResult.failure(code: ApiResponseCode.validationError, message: '邮箱格式不正确');
       }
 
       // 查找用户
@@ -475,12 +504,12 @@ class AuthService {
       return AuthResult.success(message: '如果该邮箱存在，重置密码邮件已发送');
     } catch (error, stackTrace) {
       logger.error('忘记密码失败', error: error, stackTrace: stackTrace);
-      return AuthResult.failure('FORGOT_PASSWORD_FAILED', '请求失败，请稍后重试');
+      return AuthResult.failure(message: '请求失败，请稍后重试');
     }
   }
 
   /// 重置密码
-  Future<AuthResult> resetPassword(String token, String newPassword) async {
+  Future<ApiResponse> resetPassword(String token, String newPassword) async {
     try {
       final logger = LoggerFactory.getLogger('AuthService');
       logger.info('重置密码');
@@ -537,18 +566,18 @@ class AuthService {
       logger.error('重置密码失败', error: error, stackTrace: stackTrace);
 
       if (error is BusinessException) {
-        return AuthResult.failure(error.code, error.message);
+        return AuthResult.failure(message: error.message);
       }
 
-      return AuthResult.failure('RESET_PASSWORD_FAILED', '重置密码失败');
+      return AuthResult.failure(message: '重置密码失败');
     }
   }
 
   /// 重发邮箱验证邮件
-  Future<AuthResult> resendVerification(String email) async {
+  Future<ApiResponse> resendVerification(String email) async {
     try {
       if (!_cryptoUtils.isValidEmail(email)) {
-        return AuthResult.failure('VALIDATION_EMAIL_INVALID', '邮箱格式不正确');
+        return AuthResult.failure(code: ApiResponseCode.validationError, message: '邮箱格式不正确');
       }
 
       // 查找用户
@@ -558,12 +587,12 @@ class AuthService {
       );
 
       if (userResult.isEmpty) {
-        return AuthResult.failure('USER_NOT_FOUND', '用户不存在');
+        return AuthResult.failure(code: ApiResponseCode.notFound, message: '用户不存在');
       }
 
       final user = userResult.first.toColumnMap();
       if (user['is_email_verified'] as bool) {
-        return AuthResult.failure('EMAIL_ALREADY_VERIFIED', '邮箱已验证');
+        return AuthResult.failure(code: ApiResponseCode.businessError, message: '邮箱已验证');
       }
 
       // 生成新的验证令牌
@@ -589,7 +618,7 @@ class AuthService {
       return AuthResult.success(message: '验证邮件已发送到您的邮箱');
     } catch (error, stackTrace) {
       logger.error('重发验证邮件失败', error: error, stackTrace: stackTrace);
-      return AuthResult.failure('RESEND_VERIFICATION_FAILED', '重发验证邮件失败，请稍后重试');
+      return AuthResult.failure(message: '重发验证邮件失败，请稍后重试');
     }
   }
 
@@ -791,44 +820,5 @@ class AuthService {
     ''', {
       'user_id': userId,
     });
-  }
-}
-
-/// 认证结果
-class AuthResult {
-  final bool success;
-  final String? userId;
-  final String code;
-  final String message;
-  final Map<String, dynamic>? data;
-
-  const AuthResult._({
-    required this.success,
-    this.userId,
-    required this.code,
-    required this.message,
-    this.data,
-  });
-
-  factory AuthResult.success({
-    String? userId,
-    required String message,
-    Map<String, dynamic>? data,
-  }) {
-    return AuthResult._(
-      success: true,
-      userId: userId,
-      code: 'SUCCESS',
-      message: message,
-      data: data,
-    );
-  }
-
-  factory AuthResult.failure(String code, String message) {
-    return AuthResult._(
-      success: false,
-      code: code,
-      message: message,
-    );
   }
 }
