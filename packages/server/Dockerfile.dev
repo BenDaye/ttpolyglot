@@ -31,5 +31,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:8080/health || exit 1
 
 # 开发环境使用脚本启动，支持热重载
-CMD ["sh", "-c", "dart pub get && dart run bin/server.dart"]
+# 启动前移除 workspace resolution 配置
+CMD ["sh", "-c", "sed -i '/^resolution: workspace$/d' pubspec.yaml && dart pub get && dart run bin/server.dart"]
 

@@ -1,8 +1,6 @@
 # Docker Compose 开发环境配置
 # 此文件会覆盖 docker-compose.yml 中的配置，用于开发环境的代码热重载
 
-version: "3.8"
-
 services:
   ttpolyglot-server:
     build:
