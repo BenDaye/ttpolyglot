@@ -86,7 +86,7 @@ class EnsureNotAuthenticatedMiddleware extends GetMiddleware {
     // 如果已登录，重定向到主页
     final authService = Get.find<AuthService>();
     if (authService.isLoggedIn) {
-      return const RouteSettings(name: Routes.projects);
+      return const RouteSettings(name: Routes.home);
     }
     return null;
   }
