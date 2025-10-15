@@ -44,10 +44,11 @@ class Seed006InsertDefaultAdminUser extends BaseSeed {
           'username': 'admin',
           'email': 'admin@ttpolyglot.com',
           'password_hash': passwordHash,
-          'first_name': 'Admin',
-          'last_name': 'User',
+          'display_name': 'Admin User',
+          'timezone': 'UTC',
+          'locale': 'en-US',
           'is_active': true,
-          'is_verified': true,
+          'is_email_verified': true,
         },
       ];
 
