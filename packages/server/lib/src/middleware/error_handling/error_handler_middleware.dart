@@ -24,9 +24,6 @@ class ErrorHandlerMiddleware {
 
   /// 处理错误
   Response _handleError(dynamic error, StackTrace stackTrace, Request request) {
-    // 生成或获取请求ID用于追踪
-    final requestId = (request.context['request_id'] ?? 'unknown').toString();
-
     // 如果是 ServerException，直接使用 ResponseUtils 构建响应
     if (error is ServerException) {
       LoggerUtils.error(
@@ -37,7 +34,6 @@ class ErrorHandlerMiddleware {
 
       return ResponseUtils.fromException(
         error,
-        requestId: requestId,
       );
     }
 
@@ -58,7 +54,6 @@ class ErrorHandlerMiddleware {
 
     return ResponseUtils.fromException(
       wrappedException,
-      requestId: requestId,
     );
   }
 }

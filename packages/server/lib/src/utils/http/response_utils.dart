@@ -148,11 +148,8 @@ class ResponseUtils {
   /// 从异常构建错误响应
   static Response fromException(
     ServerException exception, {
-    String? requestId,
     Map<String, String>? headers,
   }) {
-    requestId ??= _uuid.v4();
-
     final apiResponse = ApiResponse<Map<String, dynamic>>(
       code: exception.code,
       message: exception.message,
@@ -160,15 +157,8 @@ class ResponseUtils {
       data: exception.toMap(),
     );
 
-    final responseHeaders = <String, String>{
-      'Content-Type': _contentTypeJson,
-      'X-Request-ID': requestId,
-      ...?headers,
-    };
-
     return Response(
       exception.httpStatusCode,
-      headers: responseHeaders,
       body: jsonEncode(apiResponse.toJson((data) => data)),
     );
   }
@@ -177,8 +167,15 @@ class ResponseUtils {
   static Response noContent({
     Map<String, String>? headers,
   }) {
+    final apiResponse = ApiResponse<Map<String, dynamic>>(
+      code: ApiResponseCode.noContent,
+      message: ApiResponseCode.noContent.message,
+      type: ApiResponseTipsType.showToast,
+      data: {},
+    );
     return error(
       code: ApiResponseCode.noContent,
+      data: apiResponse.toJson((data) => _toJsonValue(data)),
     );
   }
 
@@ -227,16 +224,21 @@ class ResponseUtils {
     String? apiVersion,
     String? serverName,
   }) {
-    final versionData = {
-      'version': version ?? '1.0.0',
-      'api_version': apiVersion ?? 'v1',
-      'server': serverName ?? 'TTPolyglot Server',
-      'environment': ServerConfig.isDevelopment ? 'development' : 'production',
-      'timestamp': DateTime.now().toIso8601String(),
-    };
+    final apiResponse = ApiResponse<Map<String, dynamic>>(
+      code: ApiResponseCode.success,
+      message: ApiResponseCode.success.message,
+      type: ApiResponseTipsType.showToast,
+      data: {
+        'version': version ?? '1.0.0',
+        'api_version': apiVersion ?? 'v1',
+        'server': serverName ?? 'TTPolyglot Server',
+        'environment': ServerConfig.isDevelopment ? 'development' : 'production',
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
 
     return success(
-      data: versionData,
+      data: apiResponse.toJson((data) => _toJsonValue(data)),
     );
   }
 
@@ -250,24 +252,31 @@ class ResponseUtils {
       final dbHealthy = await databaseService.isHealthy();
       final redisHealthy = await redisService.isHealthy();
 
-      final statusData = {
-        'status': dbHealthy && redisHealthy ? 'healthy' : 'degraded',
-        'services': {
-          'database': dbHealthy ? 'healthy' : 'unhealthy',
-          'redis': redisHealthy ? 'healthy' : 'unhealthy',
+      final apiResponse = ApiResponse<Map<String, dynamic>>(
+        code: ApiResponseCode.success,
+        message: ApiResponseCode.success.message,
+        type: ApiResponseTipsType.showToast,
+        data: {
+          'status': dbHealthy && redisHealthy ? 'healthy' : 'degraded',
+          'services': {
+            'database': dbHealthy ? 'healthy' : 'unhealthy',
+            'redis': redisHealthy ? 'healthy' : 'unhealthy',
+          },
+          'timestamp': DateTime.now().toIso8601String(),
+          'uptime': DateTime.now().difference(startTime).inSeconds,
         },
-        'timestamp': DateTime.now().toIso8601String(),
-        'uptime': DateTime.now().difference(startTime).inSeconds,
-      };
+      );
 
       return success(
-        data: statusData,
-        headers: {'Content-Type': 'application/json'},
+        data: apiResponse.toJson((data) => _toJsonValue(data)),
       );
     } catch (err) {
       return error(
         code: ApiResponseCode.internalServerError,
-        message: '状态检查失败: $err',
+        message: '状态检查失败',
+        data: {
+          'error': err.toString(),
+        },
       );
     }
   }
