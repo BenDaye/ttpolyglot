@@ -2,10 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:shelf/shelf.dart';
-
-import '../config/server_config.dart';
-import '../services/redis_service.dart';
-import '../utils/structured_logger.dart';
+import 'package:ttpolyglot_server/server.dart';
 
 /// 速率限制中间件
 class RateLimitMiddleware {

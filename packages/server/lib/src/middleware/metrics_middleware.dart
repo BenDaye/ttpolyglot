@@ -1,7 +1,5 @@
 import 'package:shelf/shelf.dart';
-
-import '../services/metrics_service.dart';
-import '../utils/structured_logger.dart';
+import 'package:ttpolyglot_server/server.dart';
 
 /// 指标中间件
 class MetricsMiddleware {

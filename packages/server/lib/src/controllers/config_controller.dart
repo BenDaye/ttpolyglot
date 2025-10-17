@@ -1,8 +1,5 @@
 import 'package:shelf/shelf.dart';
-
-import '../services/database_service.dart';
-import '../services/redis_service.dart';
-import '../utils/response_builder.dart';
+import 'package:ttpolyglot_server/server.dart';
 
 class ConfigController {
   final DatabaseService databaseService;

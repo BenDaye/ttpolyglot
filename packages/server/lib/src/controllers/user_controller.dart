@@ -4,14 +4,9 @@ import 'dart:typed_data';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:ttpolyglot_model/model.dart';
+import 'package:ttpolyglot_server/server.dart';
 
 import '../middleware/auth_middleware.dart';
-import '../middleware/error_handler_middleware.dart';
-import '../services/file_upload_service.dart';
-import '../services/user_service.dart';
-import '../utils/response_builder.dart';
-import '../utils/structured_logger.dart';
-import '../utils/validator.dart';
 
 /// 用户管理控制器
 class UserController {

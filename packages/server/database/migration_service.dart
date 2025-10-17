@@ -3,9 +3,7 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as path;
-import 'package:ttpolyglot_server/src/config/server_config.dart';
-import 'package:ttpolyglot_server/src/services/database_service.dart';
-import 'package:ttpolyglot_server/src/utils/structured_logger.dart';
+import 'package:ttpolyglot_server/server.dart';
 
 import 'migrations/base_migration.dart';
 import 'seeds/base_seed.dart';

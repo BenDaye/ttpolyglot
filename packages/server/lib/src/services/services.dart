@@ -1,20 +1,11 @@
 /// 服务层导出文件
 library services;
 
-// 业务服务
-export 'auth_service.dart';
-export 'config_service.dart';
-export 'database_connection_pool.dart';
 // 基础服务
-export 'database_service.dart';
-// 外部服务
-export 'email_service.dart';
-export 'file_upload_service.dart';
-export 'metrics_service.dart';
-export 'multi_level_cache_service.dart';
-export 'permission_service.dart';
-export 'project_service.dart';
-export 'redis_service.dart';
-export 'translation_provider_service.dart';
-export 'translation_service.dart';
-export 'user_service.dart';
+export 'base_service.dart';
+// 业务服务
+export 'business/business_services.dart';
+// 功能服务
+export 'feature/feature_services.dart';
+// 基础设施服务
+export 'infrastructure/infrastructure_services.dart';

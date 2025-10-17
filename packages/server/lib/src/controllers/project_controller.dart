@@ -3,13 +3,9 @@ import 'dart:convert';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:ttpolyglot_model/model.dart';
-import 'package:ttpolyglot_server/src/middleware/error_handler_middleware.dart';
+import 'package:ttpolyglot_server/server.dart';
 
 import '../middleware/auth_middleware.dart';
-import '../services/project_service.dart';
-import '../utils/response_builder.dart';
-import '../utils/structured_logger.dart';
-import '../utils/validator.dart';
 
 /// 项目管理控制器
 class ProjectController {

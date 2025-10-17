@@ -62,7 +62,7 @@ class Validator {
     if (errors.isNotEmpty) {
       throw ValidationException(
         message: '输入验证失败',
-        errors: errors,
+        fieldErrors: errors,
       );
     }
 
@@ -85,7 +85,7 @@ class Validator {
       if (e is ValidationException) {
         throw ValidationException(
           message: '输入验证失败',
-          errors: e.errors,
+          fieldErrors: e.fieldErrors,
         );
       }
       rethrow;
@@ -110,7 +110,7 @@ class Validator {
         ));
         throw ValidationException(
           message: '输入验证失败',
-          errors: errors,
+          fieldErrors: errors,
         );
       } else {
         return 0;
@@ -152,7 +152,7 @@ class Validator {
     if (errors.isNotEmpty) {
       throw ValidationException(
         message: '输入验证失败',
-        errors: errors,
+        fieldErrors: errors,
       );
     }
 
@@ -168,7 +168,7 @@ class Validator {
   }) {
     if (value == null) {
       if (required) {
-        throw ValidationException(message: '输入验证失败', errors: [
+        throw ValidationException(message: '输入验证失败', fieldErrors: [
           FieldError(
             field: fieldName,
             message: '$fieldName是必填项',
@@ -198,7 +198,7 @@ class Validator {
 
     throw ValidationException(
       message: '输入验证失败',
-      errors: [
+      fieldErrors: [
         FieldError(
           field: fieldName,
           message: '$fieldName必须是布尔值',
@@ -216,7 +216,7 @@ class Validator {
   }) {
     if (value == null) {
       if (required) {
-        throw ValidationException(message: '输入验证失败', errors: [
+        throw ValidationException(message: '输入验证失败', fieldErrors: [
           FieldError(
             field: fieldName,
             message: '$fieldName是必填项',
@@ -230,7 +230,7 @@ class Validator {
     if (value is! String) {
       throw ValidationException(
         message: '输入验证失败',
-        errors: [
+        fieldErrors: [
           FieldError(
             field: fieldName,
             message: '$fieldName必须是字符串',
@@ -242,7 +242,7 @@ class Validator {
     if (!allowedValues.contains(value)) {
       throw ValidationException(
         message: '输入验证失败',
-        errors: [
+        fieldErrors: [
           FieldError(
             field: fieldName,
             message: '$fieldName必须是以下值之一: ${allowedValues.join(', ')}',
@@ -269,7 +269,7 @@ class Validator {
       if (e is ValidationException) {
         throw ValidationException(
           message: '输入验证失败',
-          errors: e.errors,
+          fieldErrors: e.fieldErrors,
         );
       }
       rethrow;
@@ -284,7 +284,7 @@ class Validator {
   }) {
     if (value == null) {
       if (required) {
-        throw ValidationException(message: '输入验证失败', errors: [
+        throw ValidationException(message: '输入验证失败', fieldErrors: [
           FieldError(
             field: fieldName,
             message: '$fieldName是必填项',
@@ -302,7 +302,7 @@ class Validator {
     if (value is! String) {
       throw ValidationException(
         message: '输入验证失败',
-        errors: [
+        fieldErrors: [
           FieldError(
             field: fieldName,
             message: '$fieldName必须是日期时间字符串',
@@ -316,7 +316,7 @@ class Validator {
     } catch (e) {
       throw ValidationException(
         message: '输入验证失败',
-        errors: [
+        fieldErrors: [
           FieldError(
             field: fieldName,
             message: '$fieldName必须是有效的日期时间格式',
@@ -342,7 +342,7 @@ class Validator {
       if (e is ValidationException) {
         throw ValidationException(
           message: '输入验证失败',
-          errors: e.errors,
+          fieldErrors: e.fieldErrors,
         );
       }
       rethrow;
@@ -357,7 +357,7 @@ class Validator {
   }) {
     if (value == null) {
       if (required) {
-        throw ValidationException(message: '输入验证失败', errors: [
+        throw ValidationException(message: '输入验证失败', fieldErrors: [
           FieldError(
             field: fieldName,
             message: '$fieldName是必填项',
@@ -374,7 +374,7 @@ class Validator {
 
     throw ValidationException(
       message: '输入验证失败',
-      errors: [
+      fieldErrors: [
         FieldError(
           field: fieldName,
           message: '$fieldName必须是JSON对象',
@@ -393,7 +393,7 @@ class Validator {
   }) {
     if (value == null) {
       if (required) {
-        throw ValidationException(message: '输入验证失败', errors: [
+        throw ValidationException(message: '输入验证失败', fieldErrors: [
           FieldError(
             field: fieldName,
             message: '$fieldName是必填项',
@@ -407,7 +407,7 @@ class Validator {
     if (value is! List) {
       throw ValidationException(
         message: '输入验证失败',
-        errors: [
+        fieldErrors: [
           FieldError(
             field: fieldName,
             message: '$fieldName必须是数组',
@@ -437,7 +437,7 @@ class Validator {
     if (errors.isNotEmpty) {
       throw ValidationException(
         message: '输入验证失败',
-        errors: errors,
+        fieldErrors: errors,
       );
     }
 
@@ -446,7 +446,7 @@ class Validator {
     } catch (e) {
       throw ValidationException(
         message: '输入验证失败',
-        errors: [
+        fieldErrors: [
           FieldError(
             field: fieldName,
             message: '$fieldName数组元素类型不正确',
@@ -465,7 +465,7 @@ class Validator {
         validation();
       } catch (error, stackTrace) {
         if (error is ValidationException) {
-          allErrors.addAll(error.errors);
+          allErrors.addAll(error.fieldErrors);
         } else {
           _logger.error('验证过程中出现未知错误', error: error, stackTrace: stackTrace);
         }
@@ -475,7 +475,7 @@ class Validator {
     if (allErrors.isNotEmpty) {
       throw ValidationException(
         message: '输入验证失败',
-        errors: allErrors,
+        fieldErrors: allErrors,
       );
     }
   }

@@ -2,9 +2,7 @@
 
 import 'dart:io';
 
-import 'package:ttpolyglot_server/src/config/server_config.dart';
-import 'package:ttpolyglot_server/src/services/database_service.dart';
-import 'package:ttpolyglot_server/src/utils/structured_logger.dart';
+import 'package:ttpolyglot_server/server.dart';
 
 import '../database/migration_service.dart';
 import '../database/migrations/001_users_table.dart';

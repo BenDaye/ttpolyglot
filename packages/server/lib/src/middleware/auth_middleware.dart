@@ -1,11 +1,7 @@
 import 'dart:convert';
 
 import 'package:shelf/shelf.dart';
-
-import '../services/auth_service.dart';
-import '../services/redis_service.dart';
-import '../utils/jwt_utils.dart';
-import '../utils/structured_logger.dart';
+import 'package:ttpolyglot_server/server.dart';
 
 /// 认证中间件
 class AuthMiddleware {

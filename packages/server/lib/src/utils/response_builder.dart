@@ -4,7 +4,10 @@ import 'package:shelf/shelf.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:uuid/uuid.dart';
 
+import '../middleware/error_handler_middleware.dart';
+
 /// API响应构建器
+/// 提供统一的响应格式构建方法
 class ResponseBuilder {
   static const String _contentTypeJson = 'application/json; charset=utf-8';
   static const _uuid = Uuid();
@@ -149,6 +152,106 @@ class ResponseBuilder {
       body: jsonEncode(
         apiResponse.toJson((data) => data.toJson((item) => _toJsonValue(item))),
       ),
+    );
+  }
+
+  /// 从异常构建错误响应
+  static Response fromException(
+    ServerException exception, {
+    String? requestId,
+    Map<String, String>? headers,
+  }) {
+    requestId ??= _uuid.v4();
+
+    final apiResponse = ApiResponse<Map<String, dynamic>>(
+      code: exception.code,
+      message: exception.message,
+      type: ApiResponseTipsType.showToast,
+      data: exception.toMap(),
+    );
+
+    final responseHeaders = <String, String>{
+      'Content-Type': _contentTypeJson,
+      'X-Request-ID': requestId,
+      ...?headers,
+    };
+
+    return Response(
+      exception.httpStatusCode,
+      headers: responseHeaders,
+      body: jsonEncode(apiResponse.toJson((data) => data)),
+    );
+  }
+
+  /// 构建无内容响应（204）
+  static Response noContent({
+    Map<String, String>? headers,
+  }) {
+    final requestId = _uuid.v4();
+    final responseHeaders = <String, String>{
+      'X-Request-ID': requestId,
+      ...?headers,
+    };
+
+    return Response(
+      204,
+      headers: responseHeaders,
+    );
+  }
+
+  /// 构建创建成功响应（201）
+  static Response created<T>({
+    String? message,
+    T? data,
+    String? location,
+    Map<String, String>? headers,
+  }) {
+    final requestId = _uuid.v4();
+    final apiResponse = ApiResponse<T>(
+      code: ApiResponseCode.created,
+      message: message ?? '创建成功',
+      type: ApiResponseTipsType.showToast,
+      data: data,
+    );
+
+    final responseHeaders = <String, String>{
+      'Content-Type': _contentTypeJson,
+      'X-Request-ID': requestId,
+      if (location != null) 'Location': location,
+      ...?headers,
+    };
+
+    return Response(
+      201,
+      headers: responseHeaders,
+      body: jsonEncode(apiResponse.toJson((data) => _toJsonValue(data))),
+    );
+  }
+
+  /// 构建接受响应（202）
+  static Response accepted<T>({
+    String? message,
+    T? data,
+    Map<String, String>? headers,
+  }) {
+    final requestId = _uuid.v4();
+    final apiResponse = ApiResponse<T>(
+      code: ApiResponseCode.success,
+      message: message ?? '请求已接受',
+      type: ApiResponseTipsType.showToast,
+      data: data,
+    );
+
+    final responseHeaders = <String, String>{
+      'Content-Type': _contentTypeJson,
+      'X-Request-ID': requestId,
+      ...?headers,
+    };
+
+    return Response(
+      202,
+      headers: responseHeaders,
+      body: jsonEncode(apiResponse.toJson((data) => _toJsonValue(data))),
     );
   }
 }

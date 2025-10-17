@@ -1,9 +1,8 @@
 import 'dart:convert';
 
 import 'package:shelf/shelf.dart';
+import 'package:ttpolyglot_server/server.dart';
 
-import '../services/permission_service.dart';
-import '../utils/structured_logger.dart';
 import 'auth_middleware.dart';
 
 /// 权限中间件
