@@ -2,7 +2,7 @@
 import '../base_service.dart';
 import '../../config/server_config.dart';
 import '../infrastructure/database_service.dart';
-import '../../utils/crypto_utils.dart';
+import '../../utils/security/crypto_utils.dart';
 
 /// 翻译接口配置服务
 class TranslationProviderService extends BaseService {

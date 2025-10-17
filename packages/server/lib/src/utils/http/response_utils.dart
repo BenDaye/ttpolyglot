@@ -4,7 +4,7 @@ import 'package:shelf/shelf.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:uuid/uuid.dart';
 
-import '../middleware/error_handler_middleware.dart';
+import '../../middleware/error_handler_middleware.dart';
 
 /// API响应构建器
 /// 提供统一的响应格式构建方法

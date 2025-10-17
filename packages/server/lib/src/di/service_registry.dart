@@ -1,6 +1,6 @@
 import '../config/server_config.dart';
 import '../services/services.dart';
-import '../utils/structured_logger.dart';
+import '../utils/logging/logger_utils.dart';
 import 'dependency_injection.dart';
 
 /// 服务注册器

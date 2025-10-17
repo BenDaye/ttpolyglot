@@ -2,8 +2,8 @@ import 'package:ttpolyglot_model/model.dart';
 
 import '../../config/server_config.dart';
 import '../../exceptions/exceptions.dart';
-import '../../utils/crypto_utils.dart';
-import '../../utils/jwt_utils.dart';
+import '../../utils/security/crypto_utils.dart';
+import '../../utils/security/jwt_utils.dart';
 import '../base_service.dart';
 import '../feature/email_service.dart';
 import '../infrastructure/database_service.dart';

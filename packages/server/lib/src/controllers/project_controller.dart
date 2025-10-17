@@ -84,8 +84,8 @@ class ProjectController {
       final body = await request.readAsString();
       final data = jsonDecode(body) as Map<String, dynamic>;
 
-      final name = Validator.validateString(data['name'], 'name', minLength: 2, maxLength: 100);
-      final primaryLanguageCode = Validator.validateString(data['primary_language_code'], 'primary_language_code');
+      final name = ValidatorUtils.validateString(data['name'], 'name', minLength: 2, maxLength: 100);
+      final primaryLanguageCode = ValidatorUtils.validateString(data['primary_language_code'], 'primary_language_code');
       final ownerId = getCurrentUserId(request);
 
       if (ownerId == null) {
@@ -98,10 +98,10 @@ class ProjectController {
           primaryLanguageCode: primaryLanguageCode,
           description: data['description'] as String?,
           slug: data['slug'] as String?,
-          visibility: Validator.validateEnum(data['visibility'], 'visibility', ['public', 'private', 'internal'],
+          visibility: ValidatorUtils.validateEnum(data['visibility'], 'visibility', ['public', 'private', 'internal'],
               required: false),
           settings: data.containsKey('settings')
-              ? Validator.validateJson(data['settings'], 'settings', required: false)
+              ? ValidatorUtils.validateJson(data['settings'], 'settings', required: false)
               : null);
 
       return ResponseBuilder.success(message: '项目创建成功', data: project);
@@ -121,7 +121,7 @@ class ProjectController {
 
   Future<Response> _getProjectById(Request request, String id) async {
     try {
-      Validator.validateUuid(id, 'project_id');
+      ValidatorUtils.validateUuid(id, 'project_id');
       final project = await _projectService.getProjectById(id, userId: getCurrentUserId(request));
 
       if (project == null) {
@@ -142,25 +142,25 @@ class ProjectController {
 
   Future<Response> _updateProject(Request request, String id) async {
     try {
-      Validator.validateUuid(id, 'project_id');
+      ValidatorUtils.validateUuid(id, 'project_id');
       final body = await request.readAsString();
       final data = jsonDecode(body) as Map<String, dynamic>;
       final updateData = <String, dynamic>{};
 
       if (data.containsKey('name')) {
         updateData['name'] =
-            Validator.validateString(data['name'], 'name', minLength: 2, maxLength: 100, required: false);
+            ValidatorUtils.validateString(data['name'], 'name', minLength: 2, maxLength: 100, required: false);
       }
       if (data.containsKey('description')) {
         updateData['description'] =
-            Validator.validateString(data['description'], 'description', maxLength: 1000, required: false);
+            ValidatorUtils.validateString(data['description'], 'description', maxLength: 1000, required: false);
       }
       if (data.containsKey('status')) {
         updateData['status'] =
-            Validator.validateEnum(data['status'], 'status', ['active', 'archived', 'suspended'], required: false);
+            ValidatorUtils.validateEnum(data['status'], 'status', ['active', 'archived', 'suspended'], required: false);
       }
       if (data.containsKey('visibility')) {
-        updateData['visibility'] = Validator.validateEnum(
+        updateData['visibility'] = ValidatorUtils.validateEnum(
             data['visibility'], 'visibility', ['public', 'private', 'internal'],
             required: false);
       }
@@ -184,7 +184,7 @@ class ProjectController {
 
   Future<Response> _deleteProject(Request request, String id) async {
     try {
-      Validator.validateUuid(id, 'project_id');
+      ValidatorUtils.validateUuid(id, 'project_id');
       await _projectService.deleteProject(id, deletedBy: getCurrentUserId(request));
       return ResponseBuilder.success(message: '项目删除成功');
     } catch (error, stackTrace) {
@@ -203,7 +203,7 @@ class ProjectController {
 
   Future<Response> _getProjectMembers(Request request, String id) async {
     try {
-      Validator.validateUuid(id, 'project_id');
+      ValidatorUtils.validateUuid(id, 'project_id');
       final members = await _projectService.getProjectMembers(id);
       return ResponseBuilder.success(message: '获取项目成员成功', data: {'members': members});
     } catch (error, stackTrace) {
@@ -214,12 +214,12 @@ class ProjectController {
 
   Future<Response> _addProjectMember(Request request, String id) async {
     try {
-      Validator.validateUuid(id, 'project_id');
+      ValidatorUtils.validateUuid(id, 'project_id');
       final body = await request.readAsString();
       final data = jsonDecode(body) as Map<String, dynamic>;
 
-      final userId = Validator.validateUuid(data['user_id'], 'user_id');
-      final roleId = Validator.validateUuid(data['role_id'], 'role_id');
+      final userId = ValidatorUtils.validateUuid(data['user_id'], 'user_id');
+      final roleId = ValidatorUtils.validateUuid(data['role_id'], 'role_id');
       final grantedBy = getCurrentUserId(request);
 
       if (grantedBy == null) {
@@ -228,7 +228,7 @@ class ProjectController {
 
       DateTime? expiresAt;
       if (data.containsKey('expires_at') && data['expires_at'] != null) {
-        expiresAt = Validator.validateDateTime(data['expires_at'], 'expires_at', required: false);
+        expiresAt = ValidatorUtils.validateDateTime(data['expires_at'], 'expires_at', required: false);
       }
 
       await _projectService.addProjectMember(
@@ -251,8 +251,8 @@ class ProjectController {
 
   Future<Response> _removeProjectMember(Request request, String id, String userId) async {
     try {
-      Validator.validateUuid(id, 'project_id');
-      Validator.validateUuid(userId, 'user_id');
+      ValidatorUtils.validateUuid(id, 'project_id');
+      ValidatorUtils.validateUuid(userId, 'user_id');
       await _projectService.removeProjectMember(id, userId);
       return ResponseBuilder.success(message: '项目成员删除成功');
     } catch (error, stackTrace) {
@@ -274,7 +274,7 @@ class ProjectController {
   /// 归档项目
   Future<Response> _archiveProject(Request request, String id) async {
     try {
-      Validator.validateUuid(id, 'project_id');
+      ValidatorUtils.validateUuid(id, 'project_id');
       await _projectService.archiveProject(id);
       return ResponseBuilder.success(message: '项目已归档');
     } catch (error, stackTrace) {
@@ -286,7 +286,7 @@ class ProjectController {
   /// 恢复项目
   Future<Response> _restoreProject(Request request, String id) async {
     try {
-      Validator.validateUuid(id, 'project_id');
+      ValidatorUtils.validateUuid(id, 'project_id');
       await _projectService.restoreProject(id);
       return ResponseBuilder.success(message: '项目已恢复');
     } catch (error, stackTrace) {
@@ -298,8 +298,8 @@ class ProjectController {
   /// 更新项目成员角色
   Future<Response> _updateMemberRole(Request request, String id, String userId) async {
     try {
-      Validator.validateUuid(id, 'project_id');
-      Validator.validateUuid(userId, 'user_id');
+      ValidatorUtils.validateUuid(id, 'project_id');
+      ValidatorUtils.validateUuid(userId, 'user_id');
 
       final body = await request.readAsString();
       final data = jsonDecode(body) as Map<String, dynamic>;
@@ -323,7 +323,7 @@ class ProjectController {
   /// 获取项目语言
   Future<Response> _getProjectLanguages(Request request, String id) async {
     try {
-      Validator.validateUuid(id, 'project_id');
+      ValidatorUtils.validateUuid(id, 'project_id');
       final languages = await _projectService.getProjectLanguages(id);
       return ResponseBuilder.success(message: '获取项目语言成功', data: languages);
     } catch (error, stackTrace) {
@@ -335,7 +335,7 @@ class ProjectController {
   /// 添加项目语言
   Future<Response> _addProjectLanguage(Request request, String id) async {
     try {
-      Validator.validateUuid(id, 'project_id');
+      ValidatorUtils.validateUuid(id, 'project_id');
 
       final body = await request.readAsString();
       final data = jsonDecode(body) as Map<String, dynamic>;
@@ -359,7 +359,7 @@ class ProjectController {
   /// 移除项目语言
   Future<Response> _removeProjectLanguage(Request request, String id, String languageCode) async {
     try {
-      Validator.validateUuid(id, 'project_id');
+      ValidatorUtils.validateUuid(id, 'project_id');
       await _projectService.removeProjectLanguage(id, languageCode);
       return ResponseBuilder.success(message: '语言已从项目中移除');
     } catch (error, stackTrace) {
@@ -371,7 +371,7 @@ class ProjectController {
   /// 更新语言设置
   Future<Response> _updateLanguageSettings(Request request, String id) async {
     try {
-      Validator.validateUuid(id, 'project_id');
+      ValidatorUtils.validateUuid(id, 'project_id');
 
       final body = await request.readAsString();
       final data = jsonDecode(body) as Map<String, dynamic>;
@@ -396,7 +396,7 @@ class ProjectController {
   /// 获取项目统计信息
   Future<Response> _getProjectStatistics(Request request, String id) async {
     try {
-      Validator.validateUuid(id, 'project_id');
+      ValidatorUtils.validateUuid(id, 'project_id');
       final stats = await _projectService.getProjectStatistics(id);
       return ResponseBuilder.success(message: '获取项目统计信息成功', data: stats);
     } catch (error, stackTrace) {
@@ -408,7 +408,7 @@ class ProjectController {
   /// 获取项目活动日志
   Future<Response> _getProjectActivity(Request request, String id) async {
     try {
-      Validator.validateUuid(id, 'project_id');
+      ValidatorUtils.validateUuid(id, 'project_id');
       final params = request.url.queryParameters;
       final page = int.tryParse(params['page'] ?? '1') ?? 1;
       final limit = int.tryParse(params['limit'] ?? '20') ?? 20;

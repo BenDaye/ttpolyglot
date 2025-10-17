@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 
-import '../config/server_config.dart';
-import 'structured_logger.dart';
+import '../../config/server_config.dart';
+import '../logging/logger_utils.dart';
 
 /// JWT 工具类
 class JwtUtils {

@@ -4,7 +4,7 @@ import '../base_service.dart';
 import '../../config/server_config.dart';
 import '../infrastructure/database_service.dart';
 import '../infrastructure/redis_service.dart';
-import '../../utils/cache_utils.dart';
+import '../../utils/infrastructure/cache_utils.dart';
 
 /// 系统配置服务
 class ConfigService extends BaseService {

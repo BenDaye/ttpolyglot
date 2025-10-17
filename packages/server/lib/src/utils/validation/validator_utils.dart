@@ -1,10 +1,10 @@
 import 'package:ttpolyglot_server/src/middleware/error_handler_middleware.dart';
 
-import '../utils/structured_logger.dart';
+import '../logging/logger_utils.dart';
 
 /// 数据验证工具类
-class Validator {
-  static final StructuredLogger _logger = LoggerFactory.getLogger('Validator');
+class ValidatorUtils {
+  static final StructuredLogger _logger = LoggerFactory.getLogger('ValidatorUtils');
 
   /// 验证字符串字段
   static String validateString(

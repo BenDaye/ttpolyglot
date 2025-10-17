@@ -1,5 +1,5 @@
 import '../../config/server_config.dart';
-import '../../utils/crypto_utils.dart';
+import '../../utils/security/crypto_utils.dart';
 import '../base_service.dart';
 import '../infrastructure/database_service.dart';
 import '../infrastructure/redis_service.dart';

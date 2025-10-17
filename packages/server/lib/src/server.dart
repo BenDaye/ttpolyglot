@@ -10,7 +10,7 @@ import 'di/di.dart';
 import 'middleware/middleware.dart';
 import 'routes/api_routes.dart';
 import 'services/services.dart';
-import 'utils/structured_logger.dart';
+import 'utils/logging/logger_utils.dart';
 
 /// TTPolyglot 服务器主类
 class TTPolyglotServer {

@@ -4,7 +4,7 @@ import 'dart:collection';
 import 'package:postgres/postgres.dart';
 
 import '../../config/server_config.dart';
-import '../../utils/structured_logger.dart';
+import '../../utils/logging/logger_utils.dart';
 
 /// 数据库连接池
 class DatabaseConnectionPool {

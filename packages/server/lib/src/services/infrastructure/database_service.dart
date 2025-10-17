@@ -1,7 +1,7 @@
 import 'package:postgres/postgres.dart';
 
 import '../../config/server_config.dart';
-import '../../utils/structured_logger.dart';
+import '../../utils/logging/logger_utils.dart';
 
 /// 数据库服务类
 class DatabaseService {

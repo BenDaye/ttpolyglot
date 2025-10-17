@@ -93,7 +93,7 @@ class UserController {
   /// 根据ID获取用户详情
   Future<Response> _getUserById(Request request, String id) async {
     try {
-      Validator.validateUuid(id, 'user_id');
+      ValidatorUtils.validateUuid(id, 'user_id');
 
       final user = await _userService.getUserById(id);
 
@@ -124,7 +124,7 @@ class UserController {
   /// 更新用户信息
   Future<Response> _updateUser(Request request, String id) async {
     try {
-      Validator.validateUuid(id, 'user_id');
+      ValidatorUtils.validateUuid(id, 'user_id');
 
       final body = await request.readAsString();
       final data = jsonDecode(body) as Map<String, dynamic>;
@@ -133,27 +133,28 @@ class UserController {
 
       if (data.containsKey('display_name')) {
         updateData['display_name'] =
-            Validator.validateString(data['display_name'], 'display_name', maxLength: 100, required: false);
+            ValidatorUtils.validateString(data['display_name'], 'display_name', maxLength: 100, required: false);
       }
 
       if (data.containsKey('phone')) {
-        updateData['phone'] = Validator.validateString(data['phone'], 'phone', maxLength: 20, required: false);
+        updateData['phone'] = ValidatorUtils.validateString(data['phone'], 'phone', maxLength: 20, required: false);
       }
 
       if (data.containsKey('avatar_url')) {
-        updateData['avatar_url'] = Validator.validateUrl(data['avatar_url'], 'avatar_url', required: false);
+        updateData['avatar_url'] = ValidatorUtils.validateUrl(data['avatar_url'], 'avatar_url', required: false);
       }
 
       if (data.containsKey('timezone')) {
-        updateData['timezone'] = Validator.validateString(data['timezone'], 'timezone', maxLength: 50, required: false);
+        updateData['timezone'] =
+            ValidatorUtils.validateString(data['timezone'], 'timezone', maxLength: 50, required: false);
       }
 
       if (data.containsKey('locale')) {
-        updateData['locale'] = Validator.validateString(data['locale'], 'locale', maxLength: 10, required: false);
+        updateData['locale'] = ValidatorUtils.validateString(data['locale'], 'locale', maxLength: 10, required: false);
       }
 
       if (data.containsKey('is_active')) {
-        updateData['is_active'] = Validator.validateBool(data['is_active'], 'is_active', required: false);
+        updateData['is_active'] = ValidatorUtils.validateBool(data['is_active'], 'is_active', required: false);
       }
 
       final updatedUser = await _userService.updateUser(id, updateData, updatedBy: getCurrentUserId(request));
@@ -180,7 +181,7 @@ class UserController {
   /// 删除用户
   Future<Response> _deleteUser(Request request, String id) async {
     try {
-      Validator.validateUuid(id, 'user_id');
+      ValidatorUtils.validateUuid(id, 'user_id');
 
       final currentUserId = getCurrentUserId(request);
       if (id == currentUserId) {
@@ -248,23 +249,24 @@ class UserController {
 
       if (data.containsKey('display_name')) {
         updateData['display_name'] =
-            Validator.validateString(data['display_name'], 'display_name', maxLength: 100, required: false);
+            ValidatorUtils.validateString(data['display_name'], 'display_name', maxLength: 100, required: false);
       }
 
       if (data.containsKey('phone')) {
-        updateData['phone'] = Validator.validateString(data['phone'], 'phone', maxLength: 20, required: false);
+        updateData['phone'] = ValidatorUtils.validateString(data['phone'], 'phone', maxLength: 20, required: false);
       }
 
       if (data.containsKey('avatar_url')) {
-        updateData['avatar_url'] = Validator.validateUrl(data['avatar_url'], 'avatar_url', required: false);
+        updateData['avatar_url'] = ValidatorUtils.validateUrl(data['avatar_url'], 'avatar_url', required: false);
       }
 
       if (data.containsKey('timezone')) {
-        updateData['timezone'] = Validator.validateString(data['timezone'], 'timezone', maxLength: 50, required: false);
+        updateData['timezone'] =
+            ValidatorUtils.validateString(data['timezone'], 'timezone', maxLength: 50, required: false);
       }
 
       if (data.containsKey('locale')) {
-        updateData['locale'] = Validator.validateString(data['locale'], 'locale', maxLength: 10, required: false);
+        updateData['locale'] = ValidatorUtils.validateString(data['locale'], 'locale', maxLength: 10, required: false);
       }
 
       final updatedUser = await _userService.updateUser(userId, updateData, updatedBy: userId);
@@ -305,8 +307,8 @@ class UserController {
       final body = await request.readAsString();
       final data = jsonDecode(body) as Map<String, dynamic>;
 
-      final currentPassword = Validator.validateString(data['current_password'], 'current_password');
-      final newPassword = Validator.validateString(data['new_password'], 'new_password', minLength: 8);
+      final currentPassword = ValidatorUtils.validateString(data['current_password'], 'current_password');
+      final newPassword = ValidatorUtils.validateString(data['new_password'], 'new_password', minLength: 8);
 
       await _userService.changePassword(userId, currentPassword, newPassword);
 

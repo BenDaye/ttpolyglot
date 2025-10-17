@@ -53,9 +53,9 @@ class AuthController {
       final data = jsonDecode(body) as Map<String, dynamic>;
 
       // 验证必需字段
-      final username = Validator.validateString(data['username'], 'username', minLength: 3, maxLength: 50);
-      final email = Validator.validateEmail(data['email'], 'email');
-      final password = Validator.validateString(data['password'], 'password', minLength: 8);
+      final username = ValidatorUtils.validateString(data['username'], 'username', minLength: 3, maxLength: 50);
+      final email = ValidatorUtils.validateEmail(data['email'], 'email');
+      final password = ValidatorUtils.validateString(data['password'], 'password', minLength: 8);
 
       // 可选字段
       final displayName = data['display_name'] as String?;
@@ -102,8 +102,8 @@ class AuthController {
       final data = jsonDecode(body) as Map<String, dynamic>;
 
       // 验证必需字段
-      final emailOrUsername = Validator.validateString(data['email_or_username'], 'email_or_username');
-      final password = Validator.validateString(data['password'], 'password');
+      final emailOrUsername = ValidatorUtils.validateString(data['email_or_username'], 'email_or_username');
+      final password = ValidatorUtils.validateString(data['password'], 'password');
 
       // 可选字段
       final deviceId = data['device_id'] as String?;
@@ -188,7 +188,7 @@ class AuthController {
       final data = jsonDecode(body) as Map<String, dynamic>;
 
       // 验证刷新令牌
-      final refreshToken = Validator.validateString(data['refresh_token'], 'refresh_token');
+      final refreshToken = ValidatorUtils.validateString(data['refresh_token'], 'refresh_token');
 
       // 调用认证服务
       final result = await _authService.refreshToken(refreshToken);
@@ -228,7 +228,7 @@ class AuthController {
       final data = jsonDecode(body) as Map<String, dynamic>;
 
       // 验证邮箱
-      final email = Validator.validateEmail(data['email'], 'email');
+      final email = ValidatorUtils.validateEmail(data['email'], 'email');
 
       // 调用认证服务
       final result = await _authService.forgotPassword(email);
@@ -266,8 +266,8 @@ class AuthController {
       final data = jsonDecode(body) as Map<String, dynamic>;
 
       // 验证参数
-      final token = Validator.validateString(data['token'], 'token');
-      final newPassword = Validator.validateString(data['new_password'], 'new_password', minLength: 8);
+      final token = ValidatorUtils.validateString(data['token'], 'token');
+      final newPassword = ValidatorUtils.validateString(data['new_password'], 'new_password', minLength: 8);
 
       // 调用认证服务
       final result = await _authService.resetPassword(token, newPassword);
@@ -305,7 +305,7 @@ class AuthController {
       final data = jsonDecode(body) as Map<String, dynamic>;
 
       // 验证令牌
-      final token = Validator.validateString(data['token'], 'token');
+      final token = ValidatorUtils.validateString(data['token'], 'token');
 
       // 调用认证服务
       final result = await _authService.verifyEmail(token);

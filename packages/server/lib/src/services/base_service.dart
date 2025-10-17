@@ -3,7 +3,7 @@ import 'dart:developer' as developer;
 import 'package:ttpolyglot_model/model.dart';
 
 import '../exceptions/exceptions.dart';
-import '../utils/structured_logger.dart';
+import '../utils/logging/logger_utils.dart';
 
 /// 服务基类
 /// 提供统一的日志记录和错误处理机制

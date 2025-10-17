@@ -7,7 +7,7 @@ import '../config/server_config.dart';
 import '../controllers/controllers.dart';
 import '../middleware/auth_middleware.dart';
 import '../services/services.dart';
-import '../utils/jwt_utils.dart';
+import '../utils/security/jwt_utils.dart';
 
 /// API路由配置
 class ApiRoutes {

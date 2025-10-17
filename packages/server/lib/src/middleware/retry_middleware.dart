@@ -1,7 +1,7 @@
 import 'package:shelf/shelf.dart';
 
-import '../utils/retry_utils.dart';
-import '../utils/structured_logger.dart';
+import '../utils/infrastructure/retry_utils.dart';
+import '../utils/logging/logger_utils.dart';
 
 /// 重试中间件
 class RetryMiddleware {

@@ -3,7 +3,7 @@ import '../base_service.dart';
 import '../../config/server_config.dart';
 import '../infrastructure/database_service.dart';
 import '../infrastructure/redis_service.dart';
-import '../../utils/string_utils.dart';
+import '../../utils/data/string_utils.dart';
 
 /// 项目服务
 class ProjectService extends BaseService {

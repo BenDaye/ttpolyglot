@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math' hide log;
 
-import 'structured_logger.dart';
+import '../logging/logger_utils.dart';
 
 /// 重试策略
 enum RetryStrategy {

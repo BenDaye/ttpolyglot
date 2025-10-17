@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:dotenv/dotenv.dart';
-import 'package:ttpolyglot_server/src/utils/structured_logger.dart';
+import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
 
 /// 服务器配置类
 class ServerConfig {
