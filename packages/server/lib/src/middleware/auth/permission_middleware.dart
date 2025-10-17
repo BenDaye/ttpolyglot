@@ -2,8 +2,7 @@ import 'dart:convert';
 
 import 'package:shelf/shelf.dart';
 import 'package:ttpolyglot_server/server.dart';
-
-import 'auth_middleware.dart';
+import 'package:ttpolyglot_server/src/middleware/auth/auth_middleware.dart';
 
 /// 权限中间件
 class PermissionMiddleware {

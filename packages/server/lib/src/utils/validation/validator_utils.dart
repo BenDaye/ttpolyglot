@@ -1,4 +1,4 @@
-import 'package:ttpolyglot_server/src/middleware/error_handler_middleware.dart';
+import 'package:ttpolyglot_server/src/middleware/error_handling/error_handler_middleware.dart';
 
 import '../logging/logger_utils.dart';
 

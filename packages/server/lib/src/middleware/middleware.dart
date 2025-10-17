@@ -1,12 +1,11 @@
 /// 中间件导出文件
 library middleware;
 
-export 'auth_middleware.dart';
-export 'cors_middleware.dart';
-export 'error_handler_middleware.dart';
-export 'logging_middleware.dart';
-export 'metrics_middleware.dart';
-export 'permission_middleware.dart';
-export 'rate_limit_middleware.dart';
-export 'request_id_middleware.dart';
-export 'retry_middleware.dart';
+// 认证和授权中间件
+export 'auth/auth.dart';
+// 错误处理中间件
+export 'error_handling/error_handling.dart';
+// 可观测性中间件
+export 'observability/observability.dart';
+// 安全相关中间件
+export 'security/security.dart';

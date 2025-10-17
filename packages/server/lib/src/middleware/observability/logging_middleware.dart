@@ -1,6 +1,6 @@
 import 'package:shelf/shelf.dart';
 
-import '../utils/logging/logger_utils.dart';
+import '../../utils/logging/logger_utils.dart';
 
 /// 结构化日志中间件
 Middleware structuredLoggingMiddleware() {

@@ -5,8 +5,6 @@ import 'package:shelf_router/shelf_router.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
 
-import '../middleware/auth_middleware.dart';
-
 /// 认证控制器
 class AuthController {
   final AuthService _authService;

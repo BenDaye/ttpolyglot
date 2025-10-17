@@ -1,7 +1,7 @@
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
-import '../middleware/auth_middleware.dart';
+import '../middleware/auth/auth_middleware.dart';
 import '../services/services.dart';
 import '../utils/http/response_utils.dart';
 import '../utils/security/jwt_utils.dart';

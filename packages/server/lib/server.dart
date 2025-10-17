@@ -6,7 +6,7 @@ export 'src/config/server_config.dart';
 // 异常体系
 export 'src/exceptions/exceptions.dart';
 // 中间件
-export 'src/middleware/error_handler_middleware.dart';
+export 'src/middleware/middleware.dart';
 // 核心服务器
 export 'src/server.dart';
 // 服务层

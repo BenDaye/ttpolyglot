@@ -5,8 +5,6 @@ import 'package:shelf_router/shelf_router.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
 
-import '../middleware/auth_middleware.dart';
-
 /// 项目管理控制器
 class ProjectController {
   final ProjectService _projectService;

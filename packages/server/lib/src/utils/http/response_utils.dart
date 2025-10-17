@@ -5,7 +5,7 @@ import 'package:ttpolyglot_model/model.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../config/server_config.dart';
-import '../../middleware/error_handler_middleware.dart';
+import '../../middleware/error_handling/error_handler_middleware.dart';
 import '../../services/services.dart';
 
 /// API响应构建器
