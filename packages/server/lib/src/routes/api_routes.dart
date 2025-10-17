@@ -4,12 +4,14 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
 import '../config/server_config.dart';
-import '../controllers/controllers.dart';
 import '../middleware/auth_middleware.dart';
 import '../services/services.dart';
 import '../utils/security/jwt_utils.dart';
+import 'modules/modules.dart';
 
 /// API路由配置
+///
+/// 此类负责组装所有功能模块的路由，提供统一的路由入口
 class ApiRoutes {
   final DatabaseService databaseService;
   final RedisService redisService;
@@ -59,246 +61,81 @@ class ApiRoutes {
     _router.get('/version', _versionHandler);
     _router.get('/status', _statusHandler);
 
-    // 认证相关路由
-    _setupAuthRoutes();
-
-    // 用户管理路由
-    _setupUserRoutes();
-
-    // 项目管理路由
-    _setupProjectRoutes();
-
-    // 翻译管理路由
-    _setupTranslationRoutes();
-
-    // 语言管理路由
-    _setupLanguageRoutes();
-
-    // 角色权限管理路由
-    _setupRolePermissionRoutes();
-
-    // 系统配置管理路由
-    _setupConfigRoutes();
-
-    // 文件管理路由
-    _setupFileRoutes();
-
-    // 通知管理路由
-    _setupNotificationRoutes();
+    // 挂载各功能模块路由
+    _mountModuleRoutes();
   }
 
-  /// 设置认证路由
-  void _setupAuthRoutes() {
-    final authController = AuthController(
+  /// 挂载各功能模块的路由
+  void _mountModuleRoutes() {
+    // 认证路由模块（认证路由内部自行处理认证）
+    final authRoutes = AuthRoutes(
       authService: authService,
+      withAuth: _withAuth,
     );
+    _router.mount('/', authRoutes.configure().call);
 
-    // 公开路由（无需认证）
-    _router.post('/auth/login', authController.login);
-    _router.post('/auth/refresh', authController.refresh);
-    _router.post('/auth/register', authController.register);
-    _router.post('/auth/forgot-password', authController.forgotPassword);
-    _router.post('/auth/reset-password', authController.resetPassword);
-    _router.get('/auth/verify-email', authController.verifyEmail);
-    _router.post('/auth/resend-verification', authController.resendVerification);
-
-    // 需要认证的路由
-    _router.post('/auth/logout', _withAuth(authController.logout));
-  }
-
-  /// 设置用户路由
-  void _setupUserRoutes() {
-    final userController = UserController(
+    // 用户路由模块（内部已处理认证）
+    final userRoutes = UserRoutes(
       userService: userService,
       fileUploadService: fileUploadService,
+      withAuth: _withAuth,
     );
+    _router.mount('/', userRoutes.configure().call);
 
-    // 创建用户子路由器
-    // ⚠️ 重要：更具体的路由必须先注册！
-    final userRouter = Router();
-    userRouter.get('/', userController.getUsers);
-    // 先注册 /me 相关路由（更具体）
-    userRouter.get('/me', userController.getCurrentUser);
-    userRouter.put('/me', userController.updateCurrentUser);
-    userRouter.post('/me/avatar', userController.uploadAvatar);
-    userRouter.delete('/me/avatar', userController.deleteAvatar);
-    userRouter.get('/me/sessions', userController.getUserSessions);
-    userRouter.delete('/me/sessions/<sessionId>', userController.deleteSession);
-    userRouter.post('/me/change-password', userController.changePassword);
-    // 后注册 /<id> 路由（更通用）
-    userRouter.get('/<id>', userController.getUser);
-    userRouter.put('/<id>', userController.updateUser);
-    userRouter.delete('/<id>', userController.deleteUser);
-
-    // 挂载用户路由并应用认证中间件
-    _router.mount('/users', _withAuth(userRouter));
-  }
-
-  /// 设置项目路由
-  void _setupProjectRoutes() {
-    final projectController = ProjectController(
+    // 项目路由模块（整体应用认证）
+    final projectRoutes = ProjectRoutes(
       projectService: projectService,
+      withAuth: _withAuth,
     );
+    _router.mount('/', _withAuth(projectRoutes.configure().call));
 
-    _router.get('/projects', projectController.getProjects);
-    _router.post('/projects', projectController.createProject);
-    _router.get('/projects/<id>', projectController.getProject);
-    _router.put('/projects/<id>', projectController.updateProject);
-    _router.delete('/projects/<id>', projectController.deleteProject);
-    _router.post('/projects/<id>/archive', projectController.archiveProject);
-    _router.post('/projects/<id>/restore', projectController.restoreProject);
-
-    // 项目成员管理
-    _router.get('/projects/<id>/members', projectController.getProjectMembers);
-    _router.post('/projects/<id>/members', projectController.addProjectMember);
-    _router.put('/projects/<id>/members/<userId>', projectController.updateMemberRole);
-    _router.delete('/projects/<id>/members/<userId>', projectController.removeProjectMember);
-
-    // 项目语言管理
-    _router.get('/projects/<id>/languages', projectController.getProjectLanguages);
-    _router.post('/projects/<id>/languages', projectController.addProjectLanguage);
-    _router.put('/projects/<id>/languages/<code>', projectController.updateLanguageSettings);
-    _router.delete('/projects/<id>/languages/<code>', projectController.removeProjectLanguage);
-
-    // 项目统计
-    _router.get('/projects/<id>/statistics', projectController.getProjectStatistics);
-    _router.get('/projects/<id>/activity', projectController.getProjectActivity);
-  }
-
-  /// 设置翻译路由
-  void _setupTranslationRoutes() {
-    final translationController = TranslationController(
+    // 翻译路由模块（整体应用认证）
+    final translationRoutes = TranslationRoutes(
       databaseService: databaseService,
       redisService: redisService,
+      withAuth: _withAuth,
     );
+    _router.mount('/', _withAuth(translationRoutes.configure().call));
 
-    // 翻译条目 CRUD
-    _router.get('/projects/<projectId>/translations', translationController.getTranslations);
-    _router.post('/projects/<projectId>/translations', translationController.createTranslation);
-    _router.get('/projects/<projectId>/translations/<entryId>', translationController.getTranslation);
-    _router.put('/projects/<projectId>/translations/<entryId>', translationController.updateTranslation);
-    _router.patch('/projects/<projectId>/translations/<entryId>', translationController.patchTranslation);
-    _router.delete('/projects/<projectId>/translations/<entryId>', translationController.deleteTranslation);
-
-    // 批量操作
-    _router.post('/projects/<projectId>/translations/batch', translationController.batchOperations);
-    _router.delete('/projects/<projectId>/translations/batch', translationController.batchDelete);
-    _router.post('/projects/<projectId>/translations/batch/translate', translationController.batchTranslate);
-    _router.post('/projects/<projectId>/translations/batch/approve', translationController.batchApprove);
-
-    // 翻译历史和版本
-    _router.get('/projects/<projectId>/translations/<entryId>/history', translationController.getTranslationHistory);
-    _router.get('/projects/<projectId>/translations/<entryId>/versions', translationController.getTranslationVersions);
-    _router.post('/projects/<projectId>/translations/<entryId>/revert', translationController.revertTranslation);
-
-    // 翻译状态管理
-    _router.post('/projects/<projectId>/translations/<entryId>/assign', translationController.assignTranslator);
-    _router.post('/projects/<projectId>/translations/<entryId>/submit', translationController.submitTranslation);
-    _router.post('/projects/<projectId>/translations/<entryId>/review', translationController.reviewTranslation);
-    _router.post('/projects/<projectId>/translations/<entryId>/approve', translationController.approveTranslation);
-    _router.post('/projects/<projectId>/translations/<entryId>/reject', translationController.rejectTranslation);
-
-    // 翻译搜索和过滤
-    _router.get('/projects/<projectId>/translations/search', translationController.searchTranslations);
-    _router.get('/projects/<projectId>/translations/filter', translationController.filterTranslations);
-  }
-
-  /// 设置语言路由
-  void _setupLanguageRoutes() {
-    final languageController = LanguageController(
+    // 语言路由模块（整体应用认证）
+    final languageRoutes = LanguageRoutes(
       databaseService: databaseService,
       redisService: redisService,
+      withAuth: _withAuth,
     );
+    _router.mount('/', _withAuth(languageRoutes.configure().call));
 
-    _router.get('/languages', languageController.getLanguages);
-    _router.post('/languages', languageController.createLanguage);
-    _router.get('/languages/<code>', languageController.getLanguage);
-    _router.put('/languages/<code>', languageController.updateLanguage);
-    _router.delete('/languages/<code>', languageController.deleteLanguage);
-  }
-
-  /// 设置角色权限路由
-  void _setupRolePermissionRoutes() {
-    final roleController = RoleController(
+    // 角色权限路由模块（整体应用认证）
+    final rolePermissionRoutes = RolePermissionRoutes(
       databaseService: databaseService,
       redisService: redisService,
+      withAuth: _withAuth,
     );
+    _router.mount('/', _withAuth(rolePermissionRoutes.configure().call));
 
-    final permissionController = PermissionController(
+    // 系统配置路由模块（内部自行处理认证，部分公开）
+    final configRoutes = ConfigRoutes(
       databaseService: databaseService,
       redisService: redisService,
+      withAuth: _withAuth,
     );
+    _router.mount('/', configRoutes.configure().call);
 
-    // 角色管理
-    _router.get('/roles', roleController.getRoles);
-    _router.post('/roles', roleController.createRole);
-    _router.get('/roles/<id>', roleController.getRole);
-    _router.put('/roles/<id>', roleController.updateRole);
-    _router.delete('/roles/<id>', roleController.deleteRole);
-
-    // 权限管理
-    _router.get('/permissions', permissionController.getPermissions);
-    _router.get('/permissions/<id>', permissionController.getPermission);
-
-    // 角色权限关联
-    _router.get('/roles/<id>/permissions', roleController.getRolePermissions);
-    _router.post('/roles/<id>/permissions', roleController.assignPermissions);
-    _router.delete('/roles/<id>/permissions/<permissionId>', roleController.revokePermission);
-
-    // 用户角色管理
-    _router.get('/users/<userId>/roles', roleController.getUserRoles);
-    _router.post('/users/<userId>/roles', roleController.assignUserRole);
-    _router.delete('/users/<userId>/roles/<roleId>', roleController.revokeUserRole);
-  }
-
-  /// 设置系统配置路由
-  void _setupConfigRoutes() {
-    final configController = ConfigController(
+    // 文件路由模块（整体应用认证）
+    final fileRoutes = FileRoutes(
       databaseService: databaseService,
       redisService: redisService,
+      withAuth: _withAuth,
     );
+    _router.mount('/', _withAuth(fileRoutes.configure().call));
 
-    _router.get('/configs', configController.getConfigs);
-    _router.get('/configs/public', configController.getPublicConfigs);
-    _router.get('/configs/<key>', configController.getConfig);
-    _router.put('/configs/<key>', configController.updateConfig);
-    _router.post('/configs', configController.createConfig);
-    _router.delete('/configs/<key>', configController.deleteConfig);
-    _router.get('/configs/categories', configController.getConfigCategories);
-    _router.post('/configs/batch', configController.batchUpdateConfigs);
-    _router.post('/configs/reset/<key>', configController.resetConfig);
-  }
-
-  /// 设置文件管理路由
-  void _setupFileRoutes() {
-    final fileController = FileController(
+    // 通知路由模块（整体应用认证）
+    final notificationRoutes = NotificationRoutes(
       databaseService: databaseService,
       redisService: redisService,
+      withAuth: _withAuth,
     );
-
-    _router.post('/files/upload', fileController.uploadFile);
-    _router.get('/files/<id>', fileController.getFile);
-    _router.get('/files/<id>/download', fileController.downloadFile);
-    _router.delete('/files/<id>', fileController.deleteFile);
-
-    // 项目文件导入导出
-    _router.post('/projects/<id>/import', fileController.importTranslations);
-    _router.post('/projects/<id>/export', fileController.exportTranslations);
-    _router.get('/projects/<id>/export/<taskId>', fileController.getExportStatus);
-  }
-
-  /// 设置通知路由
-  void _setupNotificationRoutes() {
-    final notificationController = NotificationController(
-      databaseService: databaseService,
-      redisService: redisService,
-    );
-
-    _router.get('/notifications', notificationController.getNotifications);
-    _router.get('/notifications/<id>', notificationController.getNotification);
-    _router.put('/notifications/<id>/read', notificationController.markAsRead);
-    _router.post('/notifications/mark-all-read', notificationController.markAllAsRead);
-    _router.delete('/notifications/<id>', notificationController.deleteNotification);
+    _router.mount('/', _withAuth(notificationRoutes.configure().call));
   }
 
   /// 版本信息处理器

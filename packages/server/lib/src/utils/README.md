@@ -13,17 +13,17 @@ utils/
 │   └── jwt_utils.dart           # JWT 令牌工具
 │
 ├── validation/                   # 验证相关工具
-│   ├── validation_utils.dart    # 验证工具导出
-│   └── validator.dart           # 数据验证器
+│   ├── validation_utils_export.dart    # 验证工具导出
+│   └── validator_utils.dart           # 数据验证器
 │
 ├── http/                         # HTTP 相关工具
 │   ├── http_utils_export.dart   # HTTP 工具导出
 │   ├── http_utils.dart          # HTTP 请求工具
-│   └── response_builder.dart    # 响应构建器
+│   └── response_utils.dart    # 响应构建器
 │
 ├── logging/                      # 日志相关工具
-│   ├── logging_utils.dart       # 日志工具导出
-│   └── structured_logger.dart   # 结构化日志工具
+│   ├── logging_utils_export.dart       # 日志工具导出
+│   └── logger_utils.dart   # 结构化日志工具
 │
 ├── data/                         # 数据处理相关工具
 │   ├── data_utils.dart          # 数据工具导出
@@ -55,7 +55,7 @@ utils/
 提供各类数据验证功能。
 
 **文件：**
-- `validator.dart` - 邮箱、电话、URL、数字等格式验证
+- `validator_utils.dart` - 邮箱、电话、URL、数字等格式验证
 
 **使用场景：**
 - 用户输入验证
@@ -67,7 +67,7 @@ utils/
 
 **文件：**
 - `http_utils.dart` - HTTP 请求辅助工具
-- `response_builder.dart` - 统一响应格式构建
+- `response_utils.dart` - 统一响应格式构建
 
 **使用场景：**
 - API 响应格式化
@@ -78,7 +78,7 @@ utils/
 提供结构化日志记录功能。
 
 **文件：**
-- `structured_logger.dart` - 结构化日志记录器，支持不同日志级别
+- `logger_utils.dart` - 结构化日志记录器，支持不同日志级别
 
 **使用场景：**
 - 应用日志记录
@@ -134,7 +134,7 @@ import 'package:ttpolyglot_server/src/utils/security/crypto_utils.dart';
 ```dart
 // 从项目内部文件导入
 import '../../utils/security/crypto_utils.dart';
-import '../../utils/validation/validator.dart';
+import '../../utils/validation/validator_utils.dart';
 ```
 
 ## 添加新工具的规范
