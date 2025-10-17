@@ -8,7 +8,7 @@ import '../../middleware/error_handler_middleware.dart';
 
 /// API响应构建器
 /// 提供统一的响应格式构建方法
-class ResponseBuilder {
+class ResponseUtils {
   static const String _contentTypeJson = 'application/json; charset=utf-8';
   static const _uuid = Uuid();
 

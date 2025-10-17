@@ -11,10 +11,10 @@ class PermissionController {
   });
 
   Future<Response> getPermissions(Request request) async {
-    return ResponseBuilder.success(message: '获取权限列表功能待实现');
+    return ResponseUtils.success(message: '获取权限列表功能待实现');
   }
 
   Future<Response> getPermission(Request request) async {
-    return ResponseBuilder.success(message: '获取权限详情功能待实现');
+    return ResponseUtils.success(message: '获取权限详情功能待实现');
   }
 }

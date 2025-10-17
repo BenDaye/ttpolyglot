@@ -11,22 +11,22 @@ class LanguageController {
   });
 
   Future<Response> getLanguages(Request request) async {
-    return ResponseBuilder.success(message: '获取语言列表功能待实现');
+    return ResponseUtils.success(message: '获取语言列表功能待实现');
   }
 
   Future<Response> createLanguage(Request request) async {
-    return ResponseBuilder.success(message: '创建语言功能待实现');
+    return ResponseUtils.success(message: '创建语言功能待实现');
   }
 
   Future<Response> getLanguage(Request request) async {
-    return ResponseBuilder.success(message: '获取语言详情功能待实现');
+    return ResponseUtils.success(message: '获取语言详情功能待实现');
   }
 
   Future<Response> updateLanguage(Request request) async {
-    return ResponseBuilder.success(message: '更新语言功能待实现');
+    return ResponseUtils.success(message: '更新语言功能待实现');
   }
 
   Future<Response> deleteLanguage(Request request) async {
-    return ResponseBuilder.success(message: '删除语言功能待实现');
+    return ResponseUtils.success(message: '删除语言功能待实现');
   }
 }

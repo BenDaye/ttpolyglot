@@ -29,7 +29,7 @@ class ErrorHandlerMiddleware {
     // 生成或获取请求ID用于追踪
     final requestId = (request.context['request_id'] ?? 'unknown').toString();
 
-    // 如果是 ServerException，直接使用 ResponseBuilder 构建响应
+    // 如果是 ServerException，直接使用 ResponseUtils 构建响应
     if (error is ServerException) {
       _logger.error(
         '服务器异常: ${error.message}',
@@ -38,7 +38,7 @@ class ErrorHandlerMiddleware {
         context: LogContext().field('request_id', requestId).field('error_code', error.code.value),
       );
 
-      return ResponseBuilder.fromException(
+      return ResponseUtils.fromException(
         error,
         requestId: requestId,
       );
@@ -60,7 +60,7 @@ class ErrorHandlerMiddleware {
       stackTrace: stackTrace,
     );
 
-    return ResponseBuilder.fromException(
+    return ResponseUtils.fromException(
       wrappedException,
       requestId: requestId,
     );

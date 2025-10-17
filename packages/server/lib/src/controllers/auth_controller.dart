@@ -73,12 +73,12 @@ class AuthController {
       );
 
       if (result.success) {
-        return ResponseBuilder.success(
+        return ResponseUtils.success(
           message: result.message,
           data: result.data,
         );
       } else {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           code: result.code,
           message: result.message,
         );
@@ -87,10 +87,10 @@ class AuthController {
       logger.error('用户注册失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
-        return ResponseBuilder.error(code: ApiResponseCode.validationError, message: '用户注册参数验证失败');
+        return ResponseUtils.error(code: ApiResponseCode.validationError, message: '用户注册参数验证失败');
       }
 
-      return ResponseBuilder.error(code: ApiResponseCode.internalServerError, message: '注册失败，请稍后重试');
+      return ResponseUtils.error(code: ApiResponseCode.internalServerError, message: '注册失败，请稍后重试');
     }
   }
 
@@ -126,12 +126,12 @@ class AuthController {
       );
 
       if (result.success) {
-        return ResponseBuilder.success(
+        return ResponseUtils.success(
           message: result.message,
           data: result.data,
         );
       } else {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           code: result.code,
           message: result.message,
         );
@@ -140,10 +140,10 @@ class AuthController {
       logger.error('用户登录失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
-        return ResponseBuilder.error(code: ApiResponseCode.validationError, message: '用户登录参数验证失败');
+        return ResponseUtils.error(code: ApiResponseCode.validationError, message: '用户登录参数验证失败');
       }
 
-      return ResponseBuilder.error(
+      return ResponseUtils.error(
         message: '登录失败，请稍后重试',
       );
     }
@@ -155,7 +155,7 @@ class AuthController {
       // 获取访问令牌
       final token = getAuthToken(request);
       if (token == null) {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           message: '认证令牌缺失',
         );
       }
@@ -164,9 +164,9 @@ class AuthController {
       final result = await _authService.logout(token);
 
       if (result.success) {
-        return ResponseBuilder.success(message: result.message);
+        return ResponseUtils.success(message: result.message);
       } else {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           code: result.code,
           message: result.message,
         );
@@ -174,7 +174,7 @@ class AuthController {
     } catch (error, stackTrace) {
       logger.error('用户登出失败', error: error, stackTrace: stackTrace);
 
-      return ResponseBuilder.error(
+      return ResponseUtils.error(
         message: '登出失败，请稍后重试',
       );
     }
@@ -194,12 +194,12 @@ class AuthController {
       final result = await _authService.refreshToken(refreshToken);
 
       if (result.success) {
-        return ResponseBuilder.success(
+        return ResponseUtils.success(
           message: result.message,
           data: result.data,
         );
       } else {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           message: result.message,
         );
       }
@@ -207,13 +207,13 @@ class AuthController {
       logger.error('刷新令牌失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           code: ApiResponseCode.validationError,
           message: '令牌刷新参数验证失败',
         );
       }
 
-      return ResponseBuilder.error(
+      return ResponseUtils.error(
         code: ApiResponseCode.internalServerError,
         message: '令牌刷新失败',
       );
@@ -234,9 +234,9 @@ class AuthController {
       final result = await _authService.forgotPassword(email);
 
       if (result.success) {
-        return ResponseBuilder.success(message: result.message);
+        return ResponseUtils.success(message: result.message);
       } else {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           code: result.code,
           message: result.message,
         );
@@ -245,13 +245,13 @@ class AuthController {
       logger.error('忘记密码失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           code: ApiResponseCode.validationError,
           message: '忘记密码参数验证失败',
         );
       }
 
-      return ResponseBuilder.error(
+      return ResponseUtils.error(
         code: ApiResponseCode.internalServerError,
         message: '请求失败，请稍后重试',
       );
@@ -273,9 +273,9 @@ class AuthController {
       final result = await _authService.resetPassword(token, newPassword);
 
       if (result.success) {
-        return ResponseBuilder.success(message: result.message);
+        return ResponseUtils.success(message: result.message);
       } else {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           code: result.code,
           message: result.message,
         );
@@ -284,13 +284,13 @@ class AuthController {
       logger.error('重置密码失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           code: ApiResponseCode.validationError,
           message: '重置密码参数验证失败',
         );
       }
 
-      return ResponseBuilder.error(
+      return ResponseUtils.error(
         code: ApiResponseCode.internalServerError,
         message: '重置失败，请稍后重试',
       );
@@ -311,9 +311,9 @@ class AuthController {
       final result = await _authService.verifyEmail(token);
 
       if (result.success) {
-        return ResponseBuilder.success(message: result.message);
+        return ResponseUtils.success(message: result.message);
       } else {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           code: result.code,
           message: result.message,
         );
@@ -322,13 +322,13 @@ class AuthController {
       logger.error('邮箱验证失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           code: ApiResponseCode.validationError,
           message: '邮箱验证参数验证失败',
         );
       }
 
-      return ResponseBuilder.error(
+      return ResponseUtils.error(
         code: ApiResponseCode.internalServerError,
         message: '验证失败，请稍后重试',
       );
@@ -340,7 +340,7 @@ class AuthController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           code: ApiResponseCode.unauthorized,
           message: '用户信息不存在',
         );
@@ -350,20 +350,20 @@ class AuthController {
       final user = await _authService.getUserById(userId);
 
       if (user == null) {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           code: ApiResponseCode.notFound,
           message: '用户不存在',
         );
       }
 
-      return ResponseBuilder.success(
+      return ResponseUtils.success(
         message: '获取用户信息成功',
         data: user,
       );
     } catch (error, stackTrace) {
       logger.error('获取当前用户信息失败', error: error, stackTrace: stackTrace);
 
-      return ResponseBuilder.error(
+      return ResponseUtils.error(
         code: ApiResponseCode.internalServerError,
         message: '获取用户信息失败',
       );
@@ -401,7 +401,7 @@ class AuthController {
 
       final email = data['email'] as String?;
       if (email == null || email.isEmpty) {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           code: ApiResponseCode.validationError,
           message: '邮箱地址不能为空',
         );
@@ -410,9 +410,9 @@ class AuthController {
       final result = await _authService.resendVerification(email);
 
       if (result.success) {
-        return ResponseBuilder.success(message: result.message);
+        return ResponseUtils.success(message: result.message);
       } else {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           code: result.code,
           message: result.message,
         );
@@ -420,7 +420,7 @@ class AuthController {
     } catch (error, stackTrace) {
       logger.error('重发验证邮件失败', error: error, stackTrace: stackTrace);
 
-      return ResponseBuilder.error(
+      return ResponseUtils.error(
         code: ApiResponseCode.internalServerError,
         message: '重发验证邮件失败，请稍后重试',
       );

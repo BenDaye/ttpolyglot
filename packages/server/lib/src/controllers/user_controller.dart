@@ -59,7 +59,7 @@ class UserController {
       final limit = int.tryParse(params['limit'] ?? '20') ?? 20;
 
       if (page < 1 || limit < 1 || limit > 100) {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           code: ApiResponseCode.validationError,
           message: '分页参数无效',
         );
@@ -73,7 +73,7 @@ class UserController {
         role: params['role'],
       );
 
-      return ResponseBuilder.paginated(
+      return ResponseUtils.paginated(
         data: result['users'],
         page: page,
         limit: limit,
@@ -83,7 +83,7 @@ class UserController {
     } catch (error, stackTrace) {
       logger.error('获取用户列表失败', error: error, stackTrace: stackTrace);
 
-      return ResponseBuilder.error(
+      return ResponseUtils.error(
         code: ApiResponseCode.internalServerError,
         message: '获取用户列表失败',
       );
@@ -98,10 +98,10 @@ class UserController {
       final user = await _userService.getUserById(id);
 
       if (user == null) {
-        return ResponseBuilder.error(message: '用户不存在');
+        return ResponseUtils.error(message: '用户不存在');
       }
 
-      return ResponseBuilder.success(
+      return ResponseUtils.success(
         message: '获取用户详情成功',
         data: user,
       );
@@ -109,13 +109,13 @@ class UserController {
       logger.error('获取用户详情失败: $id', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           code: ApiResponseCode.validationError,
           message: error.message,
         );
       }
 
-      return ResponseBuilder.error(
+      return ResponseUtils.error(
         message: '获取用户详情失败',
       );
     }
@@ -159,7 +159,7 @@ class UserController {
 
       final updatedUser = await _userService.updateUser(id, updateData, updatedBy: getCurrentUserId(request));
 
-      return ResponseBuilder.success(
+      return ResponseUtils.success(
         message: '用户信息更新成功',
         data: updatedUser,
       );
@@ -167,14 +167,14 @@ class UserController {
       logger.error('更新用户信息失败: $id', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
-        return ResponseBuilder.error(code: ApiResponseCode.validationError, message: error.message);
+        return ResponseUtils.error(code: ApiResponseCode.validationError, message: error.message);
       }
 
       if (error is BusinessException) {
-        return ResponseBuilder.error(code: ApiResponseCode.businessError, message: error.message);
+        return ResponseUtils.error(code: ApiResponseCode.businessError, message: error.message);
       }
 
-      return ResponseBuilder.error(code: ApiResponseCode.internalServerError, message: '更新用户信息失败');
+      return ResponseUtils.error(code: ApiResponseCode.internalServerError, message: '更新用户信息失败');
     }
   }
 
@@ -185,7 +185,7 @@ class UserController {
 
       final currentUserId = getCurrentUserId(request);
       if (id == currentUserId) {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           code: ApiResponseCode.businessError,
           message: '不能删除自己的账户',
         );
@@ -193,19 +193,19 @@ class UserController {
 
       await _userService.deleteUser(id, deletedBy: currentUserId);
 
-      return ResponseBuilder.success(message: '用户删除成功');
+      return ResponseUtils.success(message: '用户删除成功');
     } catch (error, stackTrace) {
       logger.error('删除用户失败: $id', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
-        return ResponseBuilder.error(code: ApiResponseCode.validationError, message: error.message);
+        return ResponseUtils.error(code: ApiResponseCode.validationError, message: error.message);
       }
 
       if (error is NotFoundException) {
-        return ResponseBuilder.error(code: ApiResponseCode.notFound, message: '用户不存在');
+        return ResponseUtils.error(code: ApiResponseCode.notFound, message: '用户不存在');
       }
 
-      return ResponseBuilder.error(code: ApiResponseCode.internalServerError, message: '删除用户失败');
+      return ResponseUtils.error(code: ApiResponseCode.internalServerError, message: '删除用户失败');
     }
   }
 
@@ -214,23 +214,23 @@ class UserController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseBuilder.error(code: ApiResponseCode.unauthorized, message: '用户信息不存在');
+        return ResponseUtils.error(code: ApiResponseCode.unauthorized, message: '用户信息不存在');
       }
 
       final user = await _userService.getUserById(userId);
 
       if (user == null) {
-        return ResponseBuilder.error(code: ApiResponseCode.notFound, message: '用户不存在');
+        return ResponseUtils.error(code: ApiResponseCode.notFound, message: '用户不存在');
       }
 
-      return ResponseBuilder.success(
+      return ResponseUtils.success(
         message: '获取当前用户信息成功',
         data: user,
       );
     } catch (error, stackTrace) {
       logger.error('获取当前用户信息失败', error: error, stackTrace: stackTrace);
 
-      return ResponseBuilder.error(code: ApiResponseCode.internalServerError, message: '获取用户信息失败');
+      return ResponseUtils.error(code: ApiResponseCode.internalServerError, message: '获取用户信息失败');
     }
   }
 
@@ -239,7 +239,7 @@ class UserController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseBuilder.error(code: ApiResponseCode.unauthorized, message: '用户信息不存在');
+        return ResponseUtils.error(code: ApiResponseCode.unauthorized, message: '用户信息不存在');
       }
 
       final body = await request.readAsString();
@@ -271,7 +271,7 @@ class UserController {
 
       final updatedUser = await _userService.updateUser(userId, updateData, updatedBy: userId);
 
-      return ResponseBuilder.success(
+      return ResponseUtils.success(
         message: '个人信息更新成功',
         data: updatedUser,
       );
@@ -279,14 +279,14 @@ class UserController {
       logger.error('更新当前用户信息失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
-        return ResponseBuilder.error(code: ApiResponseCode.validationError, message: error.message);
+        return ResponseUtils.error(code: ApiResponseCode.validationError, message: error.message);
       }
 
       if (error is BusinessException) {
-        return ResponseBuilder.error(code: ApiResponseCode.businessError, message: error.message);
+        return ResponseUtils.error(code: ApiResponseCode.businessError, message: error.message);
       }
 
-      return ResponseBuilder.error(
+      return ResponseUtils.error(
         code: ApiResponseCode.internalServerError,
         message: '更新个人信息失败',
       );
@@ -298,7 +298,7 @@ class UserController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           code: ApiResponseCode.unauthorized,
           message: '用户信息不存在',
         );
@@ -312,19 +312,19 @@ class UserController {
 
       await _userService.changePassword(userId, currentPassword, newPassword);
 
-      return ResponseBuilder.success(message: '密码修改成功，请重新登录');
+      return ResponseUtils.success(message: '密码修改成功，请重新登录');
     } catch (error, stackTrace) {
       logger.error('修改密码失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
-        return ResponseBuilder.error(code: ApiResponseCode.validationError, message: error.message);
+        return ResponseUtils.error(code: ApiResponseCode.validationError, message: error.message);
       }
 
       if (error is BusinessException) {
-        return ResponseBuilder.error(code: ApiResponseCode.businessError, message: error.message);
+        return ResponseUtils.error(code: ApiResponseCode.businessError, message: error.message);
       }
 
-      return ResponseBuilder.error(
+      return ResponseUtils.error(
         code: ApiResponseCode.internalServerError,
         message: '修改密码失败',
       );
@@ -336,14 +336,14 @@ class UserController {
     try {
       final stats = await _userService.getUserStats();
 
-      return ResponseBuilder.success(
+      return ResponseUtils.success(
         message: '获取用户统计信息成功',
         data: stats,
       );
     } catch (error, stackTrace) {
       logger.error('获取用户统计信息失败', error: error, stackTrace: stackTrace);
 
-      return ResponseBuilder.error(
+      return ResponseUtils.error(
         code: ApiResponseCode.internalServerError,
         message: '获取统计信息失败',
       );
@@ -355,13 +355,13 @@ class UserController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseBuilder.error(code: ApiResponseCode.unauthorized, message: '用户信息不存在');
+        return ResponseUtils.error(code: ApiResponseCode.unauthorized, message: '用户信息不存在');
       }
 
       // 解析multipart请求
       final contentType = request.headers['content-type'];
       if (contentType == null || !contentType.startsWith('multipart/form-data')) {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           code: ApiResponseCode.validationError,
           message: '请使用multipart/form-data格式上传文件',
         );
@@ -374,7 +374,7 @@ class UserController {
       final fileContentType = 'image/jpeg';
 
       if (body.isEmpty) {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           code: ApiResponseCode.validationError,
           message: '请选择要上传的头像文件',
         );
@@ -392,7 +392,7 @@ class UserController {
       );
 
       if (!uploadResult.success) {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           code: ApiResponseCode.businessError,
           message: uploadResult.message ?? '上传头像失败',
         );
@@ -403,7 +403,7 @@ class UserController {
         'avatar_url': uploadResult.url,
       });
 
-      return ResponseBuilder.success(
+      return ResponseUtils.success(
         message: '头像上传成功',
         data: {
           'avatar_url': uploadResult.url,
@@ -413,7 +413,7 @@ class UserController {
       );
     } catch (error, stackTrace) {
       logger.error('上传头像失败', error: error, stackTrace: stackTrace);
-      return ResponseBuilder.error(
+      return ResponseUtils.error(
         code: ApiResponseCode.internalServerError,
         message: '上传头像失败',
       );
@@ -425,14 +425,14 @@ class UserController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseBuilder.error(code: ApiResponseCode.unauthorized, message: '用户信息不存在');
+        return ResponseUtils.error(code: ApiResponseCode.unauthorized, message: '用户信息不存在');
       }
 
       await _userService.updateUser(userId, {'avatar_url': null});
-      return ResponseBuilder.success(message: '头像删除成功');
+      return ResponseUtils.success(message: '头像删除成功');
     } catch (error, stackTrace) {
       logger.error('删除头像失败', error: error, stackTrace: stackTrace);
-      return ResponseBuilder.error(
+      return ResponseUtils.error(
         code: ApiResponseCode.internalServerError,
         message: '删除头像失败',
       );
@@ -444,16 +444,16 @@ class UserController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseBuilder.error(
+        return ResponseUtils.error(
           message: '用户信息不存在',
         );
       }
 
       final sessions = await _userService.getUserSessions(userId);
-      return ResponseBuilder.success(message: '获取用户会话成功', data: sessions);
+      return ResponseUtils.success(message: '获取用户会话成功', data: sessions);
     } catch (error, stackTrace) {
       logger.error('获取用户会话失败', error: error, stackTrace: stackTrace);
-      return ResponseBuilder.error(
+      return ResponseUtils.error(
         code: ApiResponseCode.internalServerError,
         message: '获取用户会话失败',
       );
@@ -465,14 +465,14 @@ class UserController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseBuilder.error(code: ApiResponseCode.unauthorized, message: '用户信息不存在');
+        return ResponseUtils.error(code: ApiResponseCode.unauthorized, message: '用户信息不存在');
       }
 
       await _userService.deleteUserSession(userId, sessionId);
-      return ResponseBuilder.success(message: '会话删除成功');
+      return ResponseUtils.success(message: '会话删除成功');
     } catch (error, stackTrace) {
       logger.error('删除用户会话失败', error: error, stackTrace: stackTrace);
-      return ResponseBuilder.error(
+      return ResponseUtils.error(
         code: ApiResponseCode.internalServerError,
         message: '删除会话失败',
       );

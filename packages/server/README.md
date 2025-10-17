@@ -583,9 +583,9 @@ class MyController {
   Future<Response> handleRequest(Request request) async {
     try {
       final data = await _myService.getData();
-      return ResponseBuilder.success(data: data);
+      return ResponseUtils.success(data: data);
     } catch (error, stackTrace) {
-      return ResponseBuilder.error(
+      return ResponseUtils.error(
         message: '获取数据失败',
         error: error,
       );
