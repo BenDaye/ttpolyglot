@@ -9,8 +9,6 @@ import '../logging/logger_utils.dart';
 
 /// 加密工具类
 class CryptoUtils {
-  static final _logger = LoggerFactory.getLogger('CryptoUtils');
-
   CryptoUtils();
 
   /// 生成密码哈希值
@@ -18,7 +16,7 @@ class CryptoUtils {
     try {
       return BCrypt.hashpw(password, BCrypt.gensalt(logRounds: ServerConfig.bcryptRounds));
     } catch (error, stackTrace) {
-      _logger.error('密码哈希生成失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('密码哈希生成失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -28,7 +26,7 @@ class CryptoUtils {
     try {
       return BCrypt.checkpw(password, hash);
     } catch (error, stackTrace) {
-      _logger.error('密码验证失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('密码验证失败', error: error, stackTrace: stackTrace);
       return false;
     }
   }
@@ -80,7 +78,7 @@ class CryptoUtils {
 
       return base64.encode(encryptedBytes);
     } catch (error, stackTrace) {
-      _logger.error('字符串加密失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('字符串加密失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -98,7 +96,7 @@ class CryptoUtils {
 
       return utf8.decode(decryptedBytes);
     } catch (error, stackTrace) {
-      _logger.error('字符串解密失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('字符串解密失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

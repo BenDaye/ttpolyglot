@@ -6,7 +6,6 @@ import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
 /// 服务器配置类
 class ServerConfig {
   static final DotEnv _env = DotEnv(includePlatformEnvironment: true);
-  static final StructuredLogger _logger = LoggerFactory.getLogger('ServerConfig');
 
   /// 加载配置
   static Future<void> load() async {
@@ -15,16 +14,16 @@ class ServerConfig {
       final envFile = File('.env');
       if (await envFile.exists()) {
         _env.load();
-        _logger.info('从 .env 文件加载配置完成', context: LogContext().field('config_name', 'ServerConfig'));
+        LoggerUtils.info('从 .env 文件加载配置完成', context: LogContext.simple({'config_name': 'ServerConfig'}));
       } else {
         // .env 文件不存在，使用系统环境变量（Docker 容器场景）
-        _logger.info('未找到 .env 文件，使用系统环境变量', context: LogContext().field('config_name', 'ServerConfig'));
+        LoggerUtils.info('未找到 .env 文件，使用系统环境变量', context: LogContext.simple({'config_name': 'ServerConfig'}));
       }
 
-      _logger.info('配置加载完成', context: LogContext().field('config_name', 'ServerConfig'));
+      LoggerUtils.info('配置加载完成', context: LogContext.simple({'config_name': 'ServerConfig'}));
     } catch (error, stackTrace) {
-      _logger.error('配置加载失败',
-          error: error, stackTrace: stackTrace, context: LogContext().field('config_name', 'ServerConfig'));
+      LoggerUtils.error('配置加载失败',
+          error: error, stackTrace: stackTrace, context: LogContext.simple({'config_name': 'ServerConfig'}));
       rethrow;
     }
   }
@@ -41,16 +40,16 @@ class ServerConfig {
 
       for (final field in requiredFields) {
         if (_env[field] == null || _env[field]!.isEmpty) {
-          _logger.error('缺少必需的配置项: $field', context: LogContext().field('config_name', 'ServerConfig'));
+          LoggerUtils.error('缺少必需的配置项: $field', context: LogContext.simple({'config_name': 'ServerConfig'}));
           return false;
         }
       }
 
-      _logger.info('配置验证通过', context: LogContext().field('config_name', 'ServerConfig'));
+      LoggerUtils.info('配置验证通过', context: LogContext.simple({'config_name': 'ServerConfig'}));
       return true;
     } catch (error, stackTrace) {
-      _logger.error('配置验证失败',
-          error: error, stackTrace: stackTrace, context: LogContext().field('config_name', 'ServerConfig'));
+      LoggerUtils.error('配置验证失败',
+          error: error, stackTrace: stackTrace, context: LogContext.simple({'config_name': 'ServerConfig'}));
       return false;
     }
   }

@@ -10,7 +10,6 @@ import '../middleware/auth_middleware.dart';
 /// 认证控制器
 class AuthController {
   final AuthService _authService;
-  static final logger = LoggerFactory.getLogger('AuthController');
 
   AuthController({
     required AuthService authService,
@@ -84,7 +83,7 @@ class AuthController {
         );
       }
     } catch (error, stackTrace) {
-      logger.error('用户注册失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('用户注册失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseUtils.error(code: ApiResponseCode.validationError, message: '用户注册参数验证失败');
@@ -137,7 +136,7 @@ class AuthController {
         );
       }
     } catch (error, stackTrace) {
-      logger.error('用户登录失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('用户登录失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseUtils.error(code: ApiResponseCode.validationError, message: '用户登录参数验证失败');
@@ -172,7 +171,7 @@ class AuthController {
         );
       }
     } catch (error, stackTrace) {
-      logger.error('用户登出失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('用户登出失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(
         message: '登出失败，请稍后重试',
@@ -204,7 +203,7 @@ class AuthController {
         );
       }
     } catch (error, stackTrace) {
-      logger.error('刷新令牌失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('刷新令牌失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseUtils.error(
@@ -242,7 +241,7 @@ class AuthController {
         );
       }
     } catch (error, stackTrace) {
-      logger.error('忘记密码失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('忘记密码失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseUtils.error(
@@ -281,7 +280,7 @@ class AuthController {
         );
       }
     } catch (error, stackTrace) {
-      logger.error('重置密码失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('重置密码失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseUtils.error(
@@ -319,7 +318,7 @@ class AuthController {
         );
       }
     } catch (error, stackTrace) {
-      logger.error('邮箱验证失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('邮箱验证失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseUtils.error(
@@ -361,7 +360,7 @@ class AuthController {
         data: user,
       );
     } catch (error, stackTrace) {
-      logger.error('获取当前用户信息失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取当前用户信息失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(
         code: ApiResponseCode.internalServerError,
@@ -418,7 +417,7 @@ class AuthController {
         );
       }
     } catch (error, stackTrace) {
-      logger.error('重发验证邮件失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('重发验证邮件失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(
         code: ApiResponseCode.internalServerError,

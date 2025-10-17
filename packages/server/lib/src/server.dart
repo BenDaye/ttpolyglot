@@ -24,13 +24,6 @@ class TTPolyglotServer {
   late final FileUploadService _fileUploadService;
   HttpServer? _server;
   late final DateTime _startTime;
-  late final StructuredLogger _logger;
-
-  /// 初始化服务器
-  TTPolyglotServer() {
-    // 初始化日志记录器
-    _logger = LoggerFactory.getLogger('TTPolyglotServer');
-  }
 
   /// 从依赖注入容器初始化服务
   void _initializeFromDI() {
@@ -48,7 +41,7 @@ class TTPolyglotServer {
   Future<void> start() async {
     try {
       _startTime = DateTime.now();
-      _logger.info('开始启动服务器');
+      LoggerUtils.info('开始启动服务器');
 
       // 第一阶段：注册所有服务
       await serviceRegistry.registerAllServices();
@@ -63,17 +56,21 @@ class TTPolyglotServer {
       await _startHttpServer();
 
       final duration = DateTime.now().difference(_startTime);
-      _logger.info(
+      LoggerUtils.info(
         '服务器启动完成',
-        context: LogContext()
-            .performance('startup_time', duration.inMilliseconds.toDouble(), unit: 'ms')
-            .field('host', ServerConfig.host)
-            .field('port', ServerConfig.port),
+        context: LogContext.simple({
+          'startup_time': duration.inMilliseconds.toDouble(),
+          'host': ServerConfig.host,
+          'port': ServerConfig.port,
+        }),
       );
     } catch (error, stackTrace) {
-      _logger.error(
+      LoggerUtils.error(
         '服务器启动失败',
-        context: LogContext().error(error, stackTrace: stackTrace),
+        context: LogContext.simple({
+          'error': error.toString(),
+          'stack_trace': stackTrace.toString(),
+        }),
       );
       rethrow;
     }
@@ -81,7 +78,7 @@ class TTPolyglotServer {
 
   /// 启动HTTP服务器
   Future<void> _startHttpServer() async {
-    _logger.info('启动HTTP服务器');
+    LoggerUtils.info('启动HTTP服务器');
 
     // 创建中间件管道
     final handler = _createHandler();
@@ -93,34 +90,38 @@ class TTPolyglotServer {
       ServerConfig.port,
     );
 
-    _logger.info(
+    LoggerUtils.info(
       'HTTP服务器启动成功',
-      context: LogContext()
-          .field('url', 'http://${ServerConfig.host}:${ServerConfig.port}')
-          .field('host', ServerConfig.host)
-          .field('port', ServerConfig.port),
+      context: LogContext.simple({
+        'url': 'http://${ServerConfig.host}:${ServerConfig.port}',
+        'host': ServerConfig.host,
+        'port': ServerConfig.port,
+      }),
     );
   }
 
   /// 停止服务器
   Future<void> stop() async {
     try {
-      _logger.info('开始关闭服务器');
+      LoggerUtils.info('开始关闭服务器');
 
       // 关闭HTTP服务器
       if (_server != null) {
         await _server!.close();
-        _logger.info('HTTP服务器已关闭');
+        LoggerUtils.info('HTTP服务器已关闭');
       }
 
       // 使用DI容器清理所有服务
       await serviceRegistry.dispose();
 
-      _logger.info('服务器已优雅关闭');
+      LoggerUtils.info('服务器已优雅关闭');
     } catch (error, stackTrace) {
-      _logger.error(
+      LoggerUtils.error(
         '服务器关闭时出错',
-        context: LogContext().error(error, stackTrace: stackTrace),
+        context: LogContext.simple({
+          'error': error.toString(),
+          'stack_trace': stackTrace.toString(),
+        }),
       );
     }
   }
@@ -167,7 +168,7 @@ class TTPolyglotServer {
         // 2. 指标收集（记录所有请求指标）
         .addMiddleware(metricsMiddleware(metricsService: serviceRegistry.get<MetricsService>()))
         // 3. 结构化日志（记录详细请求信息）
-        .addMiddleware(structuredLoggingMiddleware(logger: _logger))
+        .addMiddleware(structuredLoggingMiddleware())
         // 4. CORS处理（处理跨域，避免后续中间件处理被拒绝的请求）
         .addMiddleware(corsMiddleware(allowedOrigins: ServerConfig.corsOrigins))
         // 5. 速率限制（早期拒绝，保护系统资源）
@@ -236,7 +237,7 @@ class TTPolyglotServer {
         headers: {'Content-Type': 'application/json'},
       );
     } catch (error, stackTrace) {
-      _logger.error('健康检查失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('健康检查失败', error: error, stackTrace: stackTrace);
 
       return Response(
         503,
@@ -342,7 +343,7 @@ class TTPolyglotServer {
     } catch (error, stackTrace) {
       healthStatus['status'] = 'unhealthy';
       healthStatus['error'] = error.toString();
-      _logger.error('健康检查异常', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('健康检查异常', error: error, stackTrace: stackTrace);
     }
 
     return healthStatus;
@@ -461,7 +462,7 @@ class TTPolyglotServer {
         },
       );
     } catch (error, stackTrace) {
-      _logger.error('获取指标失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取指标失败', error: error, stackTrace: stackTrace);
 
       return Response.internalServerError(
         body: '# 指标获取失败\n',

@@ -10,7 +10,6 @@ import '../middleware/auth_middleware.dart';
 /// 项目管理控制器
 class ProjectController {
   final ProjectService _projectService;
-  static final logger = LoggerFactory.getLogger('ProjectController');
 
   ProjectController({
     required ProjectService projectService,
@@ -74,7 +73,7 @@ class ProjectController {
           total: result['pagination']['total'],
           message: '获取项目列表成功');
     } catch (error, stackTrace) {
-      logger.error('获取项目列表失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取项目列表失败', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(code: ApiResponseCode.internalServerError, message: '获取项目列表失败');
     }
   }
@@ -106,7 +105,7 @@ class ProjectController {
 
       return ResponseUtils.success(message: '项目创建成功', data: project);
     } catch (error, stackTrace) {
-      logger.error('创建项目失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('创建项目失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseUtils.error(code: ApiResponseCode.validationError, message: error.message);
@@ -130,7 +129,7 @@ class ProjectController {
 
       return ResponseUtils.success(message: '获取项目详情成功', data: project);
     } catch (error, stackTrace) {
-      logger.error('获取项目详情失败: $id', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取项目详情失败: $id', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseUtils.error(code: ApiResponseCode.validationError, message: error.message);
@@ -169,7 +168,7 @@ class ProjectController {
 
       return ResponseUtils.success(message: '项目信息更新成功', data: updatedProject);
     } catch (error, stackTrace) {
-      logger.error('更新项目信息失败: $id', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('更新项目信息失败: $id', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseUtils.error(code: ApiResponseCode.validationError, message: error.message);
@@ -188,7 +187,7 @@ class ProjectController {
       await _projectService.deleteProject(id, deletedBy: getCurrentUserId(request));
       return ResponseUtils.success(message: '项目删除成功');
     } catch (error, stackTrace) {
-      logger.error('删除项目失败: $id', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('删除项目失败: $id', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseUtils.error(code: ApiResponseCode.validationError, message: error.message);
@@ -207,7 +206,7 @@ class ProjectController {
       final members = await _projectService.getProjectMembers(id);
       return ResponseUtils.success(message: '获取项目成员成功', data: {'members': members});
     } catch (error, stackTrace) {
-      logger.error('获取项目成员失败: $id', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取项目成员失败: $id', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(code: ApiResponseCode.internalServerError, message: '获取项目成员失败');
     }
   }
@@ -236,7 +235,7 @@ class ProjectController {
 
       return ResponseUtils.success(message: '项目成员添加成功');
     } catch (error, stackTrace) {
-      logger.error('添加项目成员失败: $id', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('添加项目成员失败: $id', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseUtils.error(code: ApiResponseCode.validationError, message: error.message);
@@ -256,7 +255,7 @@ class ProjectController {
       await _projectService.removeProjectMember(id, userId);
       return ResponseUtils.success(message: '项目成员删除成功');
     } catch (error, stackTrace) {
-      logger.error('移除项目成员失败: $id, user: $userId', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('移除项目成员失败: $id, user: $userId', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(code: ApiResponseCode.internalServerError, message: '移除项目成员失败');
     }
   }
@@ -266,7 +265,7 @@ class ProjectController {
       final stats = await _projectService.getProjectStats();
       return ResponseUtils.success(message: '获取项目统计信息成功', data: stats);
     } catch (error, stackTrace) {
-      logger.error('获取项目统计信息失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取项目统计信息失败', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(code: ApiResponseCode.internalServerError, message: '获取统计信息失败');
     }
   }
@@ -278,7 +277,7 @@ class ProjectController {
       await _projectService.archiveProject(id);
       return ResponseUtils.success(message: '项目已归档');
     } catch (error, stackTrace) {
-      logger.error('归档项目失败: $id', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('归档项目失败: $id', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(code: ApiResponseCode.internalServerError, message: '归档项目失败');
     }
   }
@@ -290,7 +289,7 @@ class ProjectController {
       await _projectService.restoreProject(id);
       return ResponseUtils.success(message: '项目已恢复');
     } catch (error, stackTrace) {
-      logger.error('恢复项目失败: $id', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('恢复项目失败: $id', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(code: ApiResponseCode.internalServerError, message: '恢复项目失败');
     }
   }
@@ -312,7 +311,7 @@ class ProjectController {
       await _projectService.updateProjectMemberRole(id, userId, roleId);
       return ResponseUtils.success(message: '成员角色已更新');
     } catch (error, stackTrace) {
-      logger.error('更新成员角色失败: $id, user: $userId', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('更新成员角色失败: $id, user: $userId', error: error, stackTrace: stackTrace);
       if (error is ValidationException) {
         return ResponseUtils.error(code: ApiResponseCode.validationError, message: error.message);
       }
@@ -327,7 +326,7 @@ class ProjectController {
       final languages = await _projectService.getProjectLanguages(id);
       return ResponseUtils.success(message: '获取项目语言成功', data: languages);
     } catch (error, stackTrace) {
-      logger.error('获取项目语言失败: $id', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取项目语言失败: $id', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(code: ApiResponseCode.internalServerError, message: '获取项目语言失败');
     }
   }
@@ -348,7 +347,7 @@ class ProjectController {
       await _projectService.addProjectLanguage(id, languageCode);
       return ResponseUtils.success(message: '语言已添加到项目');
     } catch (error, stackTrace) {
-      logger.error('添加项目语言失败: $id', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('添加项目语言失败: $id', error: error, stackTrace: stackTrace);
       if (error is ValidationException) {
         return ResponseUtils.error(code: ApiResponseCode.validationError, message: error.message);
       }
@@ -363,7 +362,7 @@ class ProjectController {
       await _projectService.removeProjectLanguage(id, languageCode);
       return ResponseUtils.success(message: '语言已从项目中移除');
     } catch (error, stackTrace) {
-      logger.error('移除项目语言失败: $id, language: $languageCode', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('移除项目语言失败: $id, language: $languageCode', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(code: ApiResponseCode.internalServerError, message: '移除项目语言失败');
     }
   }
@@ -385,7 +384,7 @@ class ProjectController {
       await _projectService.updateLanguageSettings(id, languageCode, settings ?? {});
       return ResponseUtils.success(message: '语言设置已更新');
     } catch (error, stackTrace) {
-      logger.error('更新语言设置失败: $id', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('更新语言设置失败: $id', error: error, stackTrace: stackTrace);
       if (error is ValidationException) {
         return ResponseUtils.error(code: ApiResponseCode.validationError, message: error.message);
       }
@@ -400,7 +399,7 @@ class ProjectController {
       final stats = await _projectService.getProjectStatistics(id);
       return ResponseUtils.success(message: '获取项目统计信息成功', data: stats);
     } catch (error, stackTrace) {
-      logger.error('获取项目统计信息失败: $id', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取项目统计信息失败: $id', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(code: ApiResponseCode.internalServerError, message: '获取项目统计信息失败');
     }
   }
@@ -422,7 +421,7 @@ class ProjectController {
         total: activity.length, // 这里需要从服务层获取总数
       );
     } catch (error, stackTrace) {
-      logger.error('获取项目活动失败: $id', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取项目活动失败: $id', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(code: ApiResponseCode.internalServerError, message: '获取项目活动失败');
     }
   }

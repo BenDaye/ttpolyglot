@@ -12,7 +12,6 @@ import '../middleware/auth_middleware.dart';
 class UserController {
   final UserService _userService;
   final FileUploadService _fileUploadService;
-  static final logger = LoggerFactory.getLogger('UserController');
 
   UserController({
     required UserService userService,
@@ -81,7 +80,7 @@ class UserController {
         message: '获取用户列表成功',
       );
     } catch (error, stackTrace) {
-      logger.error('获取用户列表失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取用户列表失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(
         code: ApiResponseCode.internalServerError,
@@ -106,7 +105,7 @@ class UserController {
         data: user,
       );
     } catch (error, stackTrace) {
-      logger.error('获取用户详情失败: $id', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取用户详情失败: $id', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseUtils.error(
@@ -164,7 +163,7 @@ class UserController {
         data: updatedUser,
       );
     } catch (error, stackTrace) {
-      logger.error('更新用户信息失败: $id', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('更新用户信息失败: $id', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseUtils.error(code: ApiResponseCode.validationError, message: error.message);
@@ -195,7 +194,7 @@ class UserController {
 
       return ResponseUtils.success(message: '用户删除成功');
     } catch (error, stackTrace) {
-      logger.error('删除用户失败: $id', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('删除用户失败: $id', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseUtils.error(code: ApiResponseCode.validationError, message: error.message);
@@ -228,7 +227,7 @@ class UserController {
         data: user,
       );
     } catch (error, stackTrace) {
-      logger.error('获取当前用户信息失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取当前用户信息失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(code: ApiResponseCode.internalServerError, message: '获取用户信息失败');
     }
@@ -276,7 +275,7 @@ class UserController {
         data: updatedUser,
       );
     } catch (error, stackTrace) {
-      logger.error('更新当前用户信息失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('更新当前用户信息失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseUtils.error(code: ApiResponseCode.validationError, message: error.message);
@@ -314,7 +313,7 @@ class UserController {
 
       return ResponseUtils.success(message: '密码修改成功，请重新登录');
     } catch (error, stackTrace) {
-      logger.error('修改密码失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('修改密码失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
         return ResponseUtils.error(code: ApiResponseCode.validationError, message: error.message);
@@ -341,7 +340,7 @@ class UserController {
         data: stats,
       );
     } catch (error, stackTrace) {
-      logger.error('获取用户统计信息失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取用户统计信息失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(
         code: ApiResponseCode.internalServerError,
@@ -412,7 +411,7 @@ class UserController {
         },
       );
     } catch (error, stackTrace) {
-      logger.error('上传头像失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('上传头像失败', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(
         code: ApiResponseCode.internalServerError,
         message: '上传头像失败',
@@ -431,7 +430,7 @@ class UserController {
       await _userService.updateUser(userId, {'avatar_url': null});
       return ResponseUtils.success(message: '头像删除成功');
     } catch (error, stackTrace) {
-      logger.error('删除头像失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('删除头像失败', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(
         code: ApiResponseCode.internalServerError,
         message: '删除头像失败',
@@ -452,7 +451,7 @@ class UserController {
       final sessions = await _userService.getUserSessions(userId);
       return ResponseUtils.success(message: '获取用户会话成功', data: sessions);
     } catch (error, stackTrace) {
-      logger.error('获取用户会话失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取用户会话失败', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(
         code: ApiResponseCode.internalServerError,
         message: '获取用户会话失败',
@@ -471,7 +470,7 @@ class UserController {
       await _userService.deleteUserSession(userId, sessionId);
       return ResponseUtils.success(message: '会话删除成功');
     } catch (error, stackTrace) {
-      logger.error('删除用户会话失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('删除用户会话失败', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(
         code: ApiResponseCode.internalServerError,
         message: '删除会话失败',

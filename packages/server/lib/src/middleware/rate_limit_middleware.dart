@@ -6,7 +6,6 @@ import 'package:ttpolyglot_server/server.dart';
 
 /// 速率限制中间件
 class RateLimitMiddleware {
-  static final _logger = LoggerFactory.getLogger('RateLimitMiddleware');
   final RedisService _redisService;
 
   RateLimitMiddleware(this._redisService);
@@ -36,7 +35,7 @@ class RateLimitMiddleware {
             // 在响应头中添加速率限制信息
             return _addRateLimitHeaders(response, clientId);
           } catch (error, stackTrace) {
-            _logger.error('速率限制检查失败', error: error, stackTrace: stackTrace);
+            LoggerUtils.error('速率限制检查失败', error: error, stackTrace: stackTrace);
 
             // 如果速率限制检查失败，允许请求通过
             return await innerHandler(request);
@@ -87,9 +86,8 @@ class RateLimitMiddleware {
       await _redisService.expire(windowKey, ServerConfig.rateLimitWindowMinutes * 60);
 
       return true;
-    } catch (error) {
-      _logger.warn('速率限制Redis操作失败',
-          error: error, context: LogContext().field('client_id', clientId).field('window_key', windowKey));
+    } catch (error, stackTrace) {
+      LoggerUtils.warn('速率限制Redis操作失败', error: error, stackTrace: stackTrace);
       // 如果Redis操作失败，允许请求通过
       return true;
     }
@@ -113,7 +111,8 @@ class RateLimitMiddleware {
         'remaining': remaining,
         'resetTime': resetTime.millisecondsSinceEpoch ~/ 1000,
       };
-    } catch (error) {
+    } catch (error, stackTrace) {
+      LoggerUtils.warn('获取速率限制信息失败', error: error, stackTrace: stackTrace);
       return {
         'limit': ServerConfig.rateLimitRequests,
         'remaining': ServerConfig.rateLimitRequests,
@@ -133,7 +132,8 @@ class RateLimitMiddleware {
         'X-RateLimit-Remaining': rateLimitInfo['remaining'].toString(),
         'X-RateLimit-Reset': rateLimitInfo['resetTime'].toString(),
       });
-    } catch (error) {
+    } catch (error, stackTrace) {
+      LoggerUtils.warn('添加速率限制响应头失败', error: error, stackTrace: stackTrace);
       return response;
     }
   }

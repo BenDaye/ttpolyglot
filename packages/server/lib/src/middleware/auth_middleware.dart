@@ -63,8 +63,7 @@ class AuthMiddleware {
 
           return await handler(updatedRequest);
         } catch (error, stackTrace) {
-          final logger = LoggerFactory.getLogger('AuthMiddleware');
-          logger.error('认证中间件错误', error: error, stackTrace: stackTrace);
+          LoggerUtils.error('认证中间件错误', error: error, stackTrace: stackTrace);
 
           return _unauthorized('认证失败');
         }
@@ -133,7 +132,7 @@ class AuthMiddleware {
 
           return await handler(updatedRequest);
         } catch (error, stackTrace) {
-          logger.error('可选认证中间件错误', error: error, stackTrace: stackTrace);
+          LoggerUtils.error('可选认证中间件错误', error: error, stackTrace: stackTrace);
 
           // 出错时标记为未认证，继续处理
           final updatedRequest = request.change(context: {
@@ -238,8 +237,7 @@ class AuthMiddleware {
       final isBlacklisted = await _redisService.get(blacklistKey);
       return isBlacklisted != null;
     } catch (error) {
-      final logger = LoggerFactory.getLogger('AuthMiddleware');
-      logger.error('检查令牌黑名单失败', error: error);
+      LoggerUtils.error('检查令牌黑名单失败', error: error);
       return false; // 出错时允许通过，避免误杀
     }
   }
@@ -275,7 +273,7 @@ class AuthMiddleware {
 
       return payload;
     } catch (error) {
-      logger.error('令牌验证失败', error: error);
+      LoggerUtils.error('令牌验证失败', error: error);
       return null;
     }
   }
@@ -287,7 +285,7 @@ class AuthMiddleware {
       // return await _permissionService.isSuperAdmin(userId);
       return false; // 暂时返回false，需要后续实现
     } catch (error) {
-      logger.error('检查管理员权限失败', error: error);
+      LoggerUtils.error('检查管理员权限失败', error: error);
       return false;
     }
   }
@@ -322,9 +320,9 @@ class AuthMiddleware {
       _tokenCache.remove(tokenHash);
       _cacheTimestamps.remove(tokenHash);
 
-      logger.info('令牌已撤销: $tokenHash');
+      LoggerUtils.info('令牌已撤销: $tokenHash');
     } catch (error) {
-      logger.error('撤销令牌失败', error: error);
+      LoggerUtils.error('撤销令牌失败', error: error);
     }
   }
 
@@ -332,7 +330,7 @@ class AuthMiddleware {
   void clearCache() {
     _tokenCache.clear();
     _cacheTimestamps.clear();
-    logger.info('认证缓存已清理');
+    LoggerUtils.info('认证缓存已清理');
   }
 }
 

@@ -4,8 +4,6 @@ import '../logging/logger_utils.dart';
 
 /// 数据验证工具类
 class ValidatorUtils {
-  static final StructuredLogger _logger = LoggerFactory.getLogger('ValidatorUtils');
-
   /// 验证字符串字段
   static String validateString(
     dynamic value,
@@ -467,7 +465,7 @@ class ValidatorUtils {
         if (error is ValidationException) {
           allErrors.addAll(error.fieldErrors);
         } else {
-          _logger.error('验证过程中出现未知错误', error: error, stackTrace: stackTrace);
+          LoggerUtils.error('验证过程中出现未知错误', error: error, stackTrace: stackTrace);
         }
       }
     }

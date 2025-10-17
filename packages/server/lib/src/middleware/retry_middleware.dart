@@ -5,7 +5,6 @@ import '../utils/logging/logger_utils.dart';
 
 /// 重试中间件
 class RetryMiddleware {
-  static final _logger = LoggerFactory.getLogger('RetryMiddleware');
   final RetryConfig _config;
 
   RetryMiddleware({
@@ -34,8 +33,7 @@ class RetryMiddleware {
             operationName: 'http_request_${request.method}_${request.url.path}',
           );
         } catch (error, stackTrace) {
-          _logger.error('重试中间件失败',
-              error: error, stackTrace: stackTrace, context: LogContext().request(request.method, request.url.path));
+          LoggerUtils.error('重试中间件失败', error: error, stackTrace: stackTrace);
           rethrow;
         }
       };

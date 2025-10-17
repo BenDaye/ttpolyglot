@@ -1,8 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import '../base_service.dart';
-import '../../config/server_config.dart';
+import 'package:ttpolyglot_server/server.dart';
 
 /// 文件上传结果
 class FileUploadResult {
@@ -73,7 +72,7 @@ class FileUploadService extends BaseService {
   }) async {
     try {
       // final logger = LoggerFactory.getLogger('FileUploadService');
-      logger.info('开始上传头像: $userId, 文件名: $fileName');
+      LoggerUtils.info('开始上传头像: $userId, 文件名: $fileName');
 
       // 验证文件类型
       if (!_isValidImageType(contentType)) {
@@ -104,7 +103,7 @@ class FileUploadService extends BaseService {
       // 生成访问URL
       final avatarUrl = '${ServerConfig.siteUrl}/$filePath';
 
-      logger.info('头像上传成功: $avatarUrl');
+      LoggerUtils.info('头像上传成功: $avatarUrl');
 
       return FileUploadResult.success(
         filePath: filePath,
@@ -115,7 +114,7 @@ class FileUploadService extends BaseService {
         url: avatarUrl,
       );
     } catch (error, stackTrace) {
-      logger.error('头像上传失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('头像上传失败', error: error, stackTrace: stackTrace);
       return FileUploadResult.failure('UPLOAD_FAILED', '上传失败，请稍后重试');
     }
   }
@@ -124,19 +123,19 @@ class FileUploadService extends BaseService {
   Future<bool> deleteAvatar(String filePath) async {
     try {
       // final logger = LoggerFactory.getLogger('FileUploadService');
-      logger.info('删除头像: $filePath');
+      LoggerUtils.info('删除头像: $filePath');
 
       final file = File(filePath);
       if (await file.exists()) {
         await file.delete();
-        logger.info('头像删除成功: $filePath');
+        LoggerUtils.info('头像删除成功: $filePath');
         return true;
       }
 
-      logger.warn('头像文件不存在: $filePath');
+      LoggerUtils.warn('头像文件不存在: $filePath');
       return false;
     } catch (error, stackTrace) {
-      logger.error('删除头像失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('删除头像失败', error: error, stackTrace: stackTrace);
       return false;
     }
   }
@@ -164,7 +163,7 @@ class FileUploadService extends BaseService {
   Future<void> cleanupOldAvatars(String userId) async {
     try {
       // final logger = LoggerFactory.getLogger('FileUploadService');
-      logger.info('清理用户旧头像: $userId');
+      LoggerUtils.info('清理用户旧头像: $userId');
 
       final uploadDir = Directory(_uploadDir);
       if (!await uploadDir.exists()) return;
@@ -173,11 +172,11 @@ class FileUploadService extends BaseService {
       for (final file in files) {
         if (file is File && file.path.contains('${userId}_')) {
           await file.delete();
-          logger.info('删除旧头像: ${file.path}');
+          LoggerUtils.info('删除旧头像: ${file.path}');
         }
       }
     } catch (error, stackTrace) {
-      logger.error('清理旧头像失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('清理旧头像失败', error: error, stackTrace: stackTrace);
     }
   }
 }

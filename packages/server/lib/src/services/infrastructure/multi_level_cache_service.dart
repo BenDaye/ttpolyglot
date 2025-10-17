@@ -6,7 +6,6 @@ import 'redis_service.dart';
 /// 多级缓存服务
 /// 实现 L1(内存) + L2(Redis) 的两级缓存策略
 class MultiLevelCacheService {
-  static final _logger = LoggerFactory.getLogger('MultiLevelCacheService');
   final RedisService _redisService;
 
   // L1 缓存：内存缓存
@@ -34,7 +33,7 @@ class MultiLevelCacheService {
       final l1Result = _getFromL1<T>(key, fromJson);
       if (l1Result != null) {
         _l1Hits++;
-        _logger.info('L1缓存命中: $key');
+        LoggerUtils.info('L1缓存命中: $key');
         return l1Result;
       }
       _l1Misses++;
@@ -43,7 +42,7 @@ class MultiLevelCacheService {
       final l2Result = await _getFromL2<T>(key, fromJson);
       if (l2Result != null) {
         _l2Hits++;
-        _logger.info('L2缓存命中: $key');
+        LoggerUtils.info('L2缓存命中: $key');
 
         // 回填L1缓存
         _setToL1(key, l2Result);
@@ -51,10 +50,10 @@ class MultiLevelCacheService {
       }
       _l2Misses++;
 
-      _logger.info('缓存未命中: $key');
+      LoggerUtils.info('缓存未命中: $key');
       return null;
     } catch (error, stackTrace) {
-      _logger.error('获取缓存失败: $key', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取缓存失败: $key', error: error, stackTrace: stackTrace);
       return null;
     }
   }
@@ -74,9 +73,9 @@ class MultiLevelCacheService {
       // 设置L2缓存
       await _setToL2(key, value, l2Ttl, toJson);
 
-      _logger.info('缓存设置成功: $key');
+      LoggerUtils.info('缓存设置成功: $key');
     } catch (error, stackTrace) {
-      _logger.error('设置缓存失败: $key', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('设置缓存失败: $key', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -89,9 +88,9 @@ class MultiLevelCacheService {
       // 删除L2缓存
       await _deleteFromL2(key);
 
-      _logger.info('缓存删除成功: $key');
+      LoggerUtils.info('缓存删除成功: $key');
     } catch (error, stackTrace) {
-      _logger.error('删除缓存失败: $key', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('删除缓存失败: $key', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -114,9 +113,9 @@ class MultiLevelCacheService {
         results[entry.key] = entry.value;
       }
 
-      _logger.info('批量获取缓存完成: ${keys.length}个键');
+      LoggerUtils.info('批量获取缓存完成: ${keys.length}个键');
     } catch (error, stackTrace) {
-      _logger.error('批量获取缓存失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('批量获取缓存失败', error: error, stackTrace: stackTrace);
     }
 
     return results;
@@ -142,9 +141,9 @@ class MultiLevelCacheService {
       });
 
       await Future.wait(futures);
-      _logger.info('批量设置缓存完成: ${values.length}个键');
+      LoggerUtils.info('批量设置缓存完成: ${values.length}个键');
     } catch (error, stackTrace) {
-      _logger.error('批量设置缓存失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('批量设置缓存失败', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -158,9 +157,9 @@ class MultiLevelCacheService {
       // 清空L2缓存（需要实现Redis清空逻辑）
       // await _redisService.clearAll();
 
-      _logger.info('所有缓存已清空');
+      LoggerUtils.info('所有缓存已清空');
     } catch (error, stackTrace) {
-      _logger.error('清空缓存失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('清空缓存失败', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -202,7 +201,7 @@ class MultiLevelCacheService {
     String Function(T)? toJson,
   }) async {
     try {
-      _logger.info('开始缓存预热: ${keys.length}个键');
+      LoggerUtils.info('开始缓存预热: ${keys.length}个键');
 
       // 并行预热所有键
       final futures = keys.map((key) async {
@@ -211,9 +210,9 @@ class MultiLevelCacheService {
       });
 
       await Future.wait(futures);
-      _logger.info('缓存预热完成');
+      LoggerUtils.info('缓存预热完成');
     } catch (error, stackTrace) {
-      _logger.error('缓存预热失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('缓存预热失败', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -280,7 +279,7 @@ class MultiLevelCacheService {
 
     if (oldestKey != null) {
       _deleteFromL1(oldestKey);
-      _logger.info('L1缓存淘汰: $oldestKey');
+      LoggerUtils.info('L1缓存淘汰: $oldestKey');
     }
   }
 
@@ -303,7 +302,7 @@ class MultiLevelCacheService {
 
       return null;
     } catch (error) {
-      _logger.error('L2缓存获取失败: $key', error: error);
+      LoggerUtils.error('L2缓存获取失败: $key', error: error);
       return null;
     }
   }
@@ -323,7 +322,7 @@ class MultiLevelCacheService {
       final ttlSeconds = ttl?.inSeconds ?? _l2DefaultTtl.inSeconds;
       await _redisService.set(key, jsonValue, ttlSeconds);
     } catch (error) {
-      _logger.error('L2缓存设置失败: $key', error: error);
+      LoggerUtils.error('L2缓存设置失败: $key', error: error);
     }
   }
 
@@ -332,7 +331,7 @@ class MultiLevelCacheService {
     try {
       await _redisService.delete(key);
     } catch (error) {
-      _logger.error('L2缓存删除失败: $key', error: error);
+      LoggerUtils.error('L2缓存删除失败: $key', error: error);
     }
   }
 }

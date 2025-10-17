@@ -12,7 +12,6 @@ import 'seeds/base_seed.dart';
 /// 根据字段更新最佳实践指南实现的安全迁移服务
 class MigrationService {
   final DatabaseService _databaseService;
-  static final _logger = LoggerFactory.getLogger('MigrationService');
 
   MigrationService(this._databaseService);
 
@@ -56,7 +55,7 @@ class MigrationService {
     });
 
     try {
-      _logger.info('开始运行数据库迁移...');
+      LoggerUtils.info('开始运行数据库迁移...');
 
       // 确保迁移记录表存在
       await _ensureMigrationTableExists();
@@ -102,19 +101,19 @@ class MigrationService {
         if (!executedMigrations.containsKey(migrationName)) {
           // 新迁移
           pendingMigrations.add(migrationName);
-          _logger.info('发现新迁移: $migrationName');
+          LoggerUtils.info('发现新迁移: $migrationName');
         } else {
           // 迁移已执行，跳过
-          _logger.info('迁移已执行，跳过: $migrationName');
+          LoggerUtils.info('迁移已执行，跳过: $migrationName');
         }
       }
 
       if (pendingMigrations.isEmpty) {
-        _logger.info('没有待执行的迁移');
+        LoggerUtils.info('没有待执行的迁移');
         return;
       }
 
-      _logger.info('发现 ${pendingMigrations.length} 个待执行的迁移');
+      LoggerUtils.info('发现 ${pendingMigrations.length} 个待执行的迁移');
 
       // 按迁移名称排序执行迁移
       pendingMigrations.sort();
@@ -123,9 +122,9 @@ class MigrationService {
         await _executeMigrationClass(migrationName);
       }
 
-      _logger.info('所有迁移执行完成');
+      LoggerUtils.info('所有迁移执行完成');
     } catch (error, stackTrace) {
-      _logger.error('❌ 迁移执行失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('❌ 迁移执行失败', error: error, stackTrace: stackTrace);
       rethrow;
     } finally {
       // 停止心跳定时器
@@ -154,7 +153,7 @@ class MigrationService {
     });
 
     try {
-      _logger.info('开始运行种子数据...');
+      LoggerUtils.info('开始运行种子数据...');
 
       // 确保种子数据记录表存在
       await _ensureSeedTableExists();
@@ -163,7 +162,7 @@ class MigrationService {
       final registeredSeeds = _seedFactories;
 
       if (registeredSeeds.isEmpty) {
-        _logger.info('没有找到已注册的种子数据');
+        LoggerUtils.info('没有找到已注册的种子数据');
         return;
       }
 
@@ -177,19 +176,19 @@ class MigrationService {
         if (!executedSeeds.containsKey(seedName)) {
           // 新种子数据
           pendingSeeds.add(seedName);
-          _logger.info('发现新种子数据: $seedName');
+          LoggerUtils.info('发现新种子数据: $seedName');
         } else {
           // 种子数据已执行，跳过
-          _logger.info('种子数据已执行，跳过: $seedName');
+          LoggerUtils.info('种子数据已执行，跳过: $seedName');
         }
       }
 
       if (pendingSeeds.isEmpty) {
-        _logger.info('没有待执行的种子数据');
+        LoggerUtils.info('没有待执行的种子数据');
         return;
       }
 
-      _logger.info('发现 ${pendingSeeds.length} 个待执行的种子数据');
+      LoggerUtils.info('发现 ${pendingSeeds.length} 个待执行的种子数据');
 
       // 按种子名称排序执行种子数据
       pendingSeeds.sort();
@@ -198,9 +197,9 @@ class MigrationService {
         await _executeSeedClass(seedName);
       }
 
-      _logger.info('所有种子数据执行完成');
+      LoggerUtils.info('所有种子数据执行完成');
     } catch (error, stackTrace) {
-      _logger.error('种子数据执行失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('种子数据执行失败', error: error, stackTrace: stackTrace);
       rethrow;
     } finally {
       // 停止心跳定时器
@@ -223,7 +222,7 @@ class MigrationService {
       )''';
 
     await _databaseService.query(sql);
-    _logger.info('确保迁移记录表存在: $tableName');
+    LoggerUtils.info('确保迁移记录表存在: $tableName');
   }
 
   /// 确保种子数据记录表存在
@@ -238,7 +237,7 @@ class MigrationService {
       )''';
 
     await _databaseService.query(sql);
-    _logger.info('确保种子数据记录表存在: $tableName');
+    LoggerUtils.info('确保种子数据记录表存在: $tableName');
   }
 
   /// 确保迁移锁表存在
@@ -253,7 +252,7 @@ class MigrationService {
       )''';
 
     await _databaseService.query(sql);
-    _logger.info('确保迁移锁表存在: $tableName');
+    LoggerUtils.info('确保迁移锁表存在: $tableName');
   }
 
   /// 获取迁移锁
@@ -284,7 +283,7 @@ class MigrationService {
       });
 
       if (result.isNotEmpty) {
-        _logger.info('成功获取迁移锁: $lockedBy');
+        LoggerUtils.info('成功获取迁移锁: $lockedBy');
         return true;
       } else {
         // 获取当前锁的持有者信息
@@ -298,12 +297,12 @@ class MigrationService {
           final owner = lockInfo.first[0];
           final lockedAt = lockInfo.first[1];
           final expiresAtTime = lockInfo.first[2];
-          _logger.warn('迁移锁已被占用: $owner (锁定于: $lockedAt, 过期时间: $expiresAtTime)');
+          LoggerUtils.warn('迁移锁已被占用: $owner (锁定于: $lockedAt, 过期时间: $expiresAtTime)');
         }
         return false;
       }
     } catch (error, stackTrace) {
-      _logger.error('获取迁移锁失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取迁移锁失败', error: error, stackTrace: stackTrace);
       return false;
     }
   }
@@ -319,9 +318,9 @@ class MigrationService {
         WHERE lock_key = @key
       ''', {'key': lockKey});
 
-      _logger.info('迁移锁已释放');
+      LoggerUtils.info('迁移锁已释放');
     } catch (error, stackTrace) {
-      _logger.error('释放迁移锁失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('释放迁移锁失败', error: error, stackTrace: stackTrace);
       // 不抛出异常，避免影响主流程
     }
   }
@@ -344,12 +343,12 @@ class MigrationService {
       });
 
       if (result.isNotEmpty) {
-        _logger.debug('迁移锁已续期至: $newExpiresAt');
+        LoggerUtils.debug('迁移锁已续期至: $newExpiresAt');
       } else {
-        _logger.warn('续期失败：锁可能已被其他进程获取');
+        LoggerUtils.warn('续期失败：锁可能已被其他进程获取');
       }
     } catch (error, stackTrace) {
-      _logger.error('续期迁移锁失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('续期迁移锁失败', error: error, stackTrace: stackTrace);
       // 不抛出异常，让主流程继续
     }
   }
@@ -381,12 +380,12 @@ class MigrationService {
       final errorMessage = error.toString().toLowerCase();
       if (errorMessage.contains('does not exist') ||
           errorMessage.contains('relation') && errorMessage.contains('not found')) {
-        _logger.info('迁移记录表不存在，将在首次运行时创建');
+        LoggerUtils.info('迁移记录表不存在，将在首次运行时创建');
         return <String, Map<String, dynamic>>{};
       }
 
       // 其他错误（如数据库连接失败、权限问题等）需要抛出
-      _logger.error('获取已执行迁移失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取已执行迁移失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -418,19 +417,19 @@ class MigrationService {
       final errorMessage = error.toString().toLowerCase();
       if (errorMessage.contains('does not exist') ||
           errorMessage.contains('relation') && errorMessage.contains('not found')) {
-        _logger.info('种子数据记录表不存在，将在首次运行时创建');
+        LoggerUtils.info('种子数据记录表不存在，将在首次运行时创建');
         return <String, Map<String, dynamic>>{};
       }
 
       // 其他错误（如数据库连接失败、权限问题等）需要抛出
-      _logger.error('获取已执行种子数据失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取已执行种子数据失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
 
   /// 执行单个迁移类
   Future<void> _executeMigrationClass(String migrationName) async {
-    _logger.info('执行迁移: $migrationName');
+    LoggerUtils.info('执行迁移: $migrationName');
 
     try {
       // 获取迁移工厂函数
@@ -453,7 +452,7 @@ class MigrationService {
       ''', {'name': migrationName});
 
       if (existingRecord.isNotEmpty) {
-        _logger.warn('迁移记录已存在，跳过执行: $migrationName');
+        LoggerUtils.warn('迁移记录已存在，跳过执行: $migrationName');
         return;
       }
 
@@ -473,9 +472,9 @@ class MigrationService {
             'path': 'class://$migrationName',
             'hash': _calculateClassHash(migrationName),
           });
-          _logger.info('创建迁移记录: $migrationName');
+          LoggerUtils.info('创建迁移记录: $migrationName');
         } catch (recordError, recordStackTrace) {
-          _logger.error(
+          LoggerUtils.error(
             '\n'
             '🚨 严重错误：迁移已执行但无法记录到数据库！\n'
             '\n'
@@ -497,9 +496,9 @@ class MigrationService {
         }
       });
 
-      _logger.info('迁移执行成功: $migrationName');
+      LoggerUtils.info('迁移执行成功: $migrationName');
     } catch (error, stackTrace) {
-      _logger.error('迁移执行失败: $migrationName', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('迁移执行失败: $migrationName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -532,7 +531,7 @@ class MigrationService {
 
   /// 执行单个种子数据类
   Future<void> _executeSeedClass(String seedName) async {
-    _logger.info('执行种子数据: $seedName');
+    LoggerUtils.info('执行种子数据: $seedName');
 
     try {
       // 获取种子工厂函数
@@ -564,12 +563,12 @@ class MigrationService {
           'path': 'class://$seedName',
           'hash': _calculateSeedHash(seedName),
         });
-        _logger.info('创建种子数据记录: $seedName');
+        LoggerUtils.info('创建种子数据记录: $seedName');
       });
 
-      _logger.info('种子数据执行成功: $seedName');
+      LoggerUtils.info('种子数据执行成功: $seedName');
     } catch (error, stackTrace) {
-      _logger.error('种子数据执行失败: $seedName', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('种子数据执行失败: $seedName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -621,7 +620,7 @@ class MigrationService {
 
       return status;
     } catch (error, stackTrace) {
-      _logger.error('获取迁移状态失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取迁移状态失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -676,7 +675,7 @@ class MigrationService {
 
       return status;
     } catch (error, stackTrace) {
-      _logger.error('获取种子数据状态失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取种子数据状态失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -688,7 +687,7 @@ class MigrationService {
     }
 
     try {
-      _logger.info('回滚迁移: $migrationName');
+      LoggerUtils.info('回滚迁移: $migrationName');
 
       // 获取迁移工厂函数
       final factory = _migrationFactories[migrationName];
@@ -713,13 +712,13 @@ class MigrationService {
             .query('DELETE FROM $tableName WHERE migration_name = @name', {'name': migrationName});
 
         if (result.isEmpty) {
-          _logger.warn('未找到迁移记录: $migrationName');
+          LoggerUtils.warn('未找到迁移记录: $migrationName');
         } else {
-          _logger.info('迁移回滚成功: $migrationName');
+          LoggerUtils.info('迁移回滚成功: $migrationName');
         }
       });
     } catch (error, stackTrace) {
-      _logger.error('迁移回滚失败: $migrationName', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('迁移回滚失败: $migrationName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -727,7 +726,7 @@ class MigrationService {
   /// 生产环境回滚策略 - 创建回滚迁移文件
   Future<String> createRollbackMigration(String migrationName) async {
     try {
-      _logger.info('为生产环境创建回滚迁移: $migrationName');
+      LoggerUtils.info('为生产环境创建回滚迁移: $migrationName');
 
       // 查找原始迁移类
       final factory = _migrationFactories[migrationName];
@@ -748,10 +747,10 @@ class MigrationService {
       final rollbackFile = File(rollbackPath);
       await rollbackFile.writeAsString(rollbackSql);
 
-      _logger.info('回滚迁移文件已创建: $rollbackPath');
+      LoggerUtils.info('回滚迁移文件已创建: $rollbackPath');
       return rollbackPath;
     } catch (error, stackTrace) {
-      _logger.error('创建回滚迁移失败: $migrationName', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('创建回滚迁移失败: $migrationName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -824,7 +823,7 @@ class MigrationService {
     });
 
     try {
-      _logger.info('开始运行迁移和种子数据...');
+      LoggerUtils.info('开始运行迁移和种子数据...');
 
       // 确保记录表存在
       await _ensureMigrationTableExists();
@@ -836,9 +835,9 @@ class MigrationService {
       // 再运行种子数据（不单独获取锁，使用当前锁）
       await _runSeedsInternal();
 
-      _logger.info('迁移和种子数据执行完成');
+      LoggerUtils.info('迁移和种子数据执行完成');
     } catch (error, stackTrace) {
-      _logger.error('❌ 迁移和种子数据执行失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('❌ 迁移和种子数据执行失败', error: error, stackTrace: stackTrace);
       rethrow;
     } finally {
       // 停止心跳定时器
@@ -851,7 +850,7 @@ class MigrationService {
 
   /// 内部方法：运行迁移（不获取锁）
   Future<void> _runMigrationsInternal() async {
-    _logger.info('开始运行数据库迁移...');
+    LoggerUtils.info('开始运行数据库迁移...');
 
     // 获取已注册的迁移
     final registeredMigrations = _migrationFactories;
@@ -892,18 +891,18 @@ class MigrationService {
     for (final migrationName in registeredMigrations.keys) {
       if (!executedMigrations.containsKey(migrationName)) {
         pendingMigrations.add(migrationName);
-        _logger.info('发现新迁移: $migrationName');
+        LoggerUtils.info('发现新迁移: $migrationName');
       } else {
-        _logger.info('迁移已执行，跳过: $migrationName');
+        LoggerUtils.info('迁移已执行，跳过: $migrationName');
       }
     }
 
     if (pendingMigrations.isEmpty) {
-      _logger.info('没有待执行的迁移');
+      LoggerUtils.info('没有待执行的迁移');
       return;
     }
 
-    _logger.info('发现 ${pendingMigrations.length} 个待执行的迁移');
+    LoggerUtils.info('发现 ${pendingMigrations.length} 个待执行的迁移');
 
     // 按迁移名称排序执行迁移
     pendingMigrations.sort();
@@ -912,18 +911,18 @@ class MigrationService {
       await _executeMigrationClass(migrationName);
     }
 
-    _logger.info('所有迁移执行完成');
+    LoggerUtils.info('所有迁移执行完成');
   }
 
   /// 内部方法：运行种子数据（不获取锁）
   Future<void> _runSeedsInternal() async {
-    _logger.info('开始运行种子数据...');
+    LoggerUtils.info('开始运行种子数据...');
 
     // 获取已注册的种子数据
     final registeredSeeds = _seedFactories;
 
     if (registeredSeeds.isEmpty) {
-      _logger.info('没有找到已注册的种子数据');
+      LoggerUtils.info('没有找到已注册的种子数据');
       return;
     }
 
@@ -935,18 +934,18 @@ class MigrationService {
     for (final seedName in registeredSeeds.keys) {
       if (!executedSeeds.containsKey(seedName)) {
         pendingSeeds.add(seedName);
-        _logger.info('发现新种子数据: $seedName');
+        LoggerUtils.info('发现新种子数据: $seedName');
       } else {
-        _logger.info('种子数据已执行，跳过: $seedName');
+        LoggerUtils.info('种子数据已执行，跳过: $seedName');
       }
     }
 
     if (pendingSeeds.isEmpty) {
-      _logger.info('没有待执行的种子数据');
+      LoggerUtils.info('没有待执行的种子数据');
       return;
     }
 
-    _logger.info('发现 ${pendingSeeds.length} 个待执行的种子数据');
+    LoggerUtils.info('发现 ${pendingSeeds.length} 个待执行的种子数据');
 
     // 按种子名称排序执行种子数据
     pendingSeeds.sort();
@@ -955,7 +954,7 @@ class MigrationService {
       await _executeSeedClass(seedName);
     }
 
-    _logger.info('所有种子数据执行完成');
+    LoggerUtils.info('所有种子数据执行完成');
   }
 
   /// 检查表结构差异
@@ -1009,7 +1008,7 @@ class MigrationService {
             .toList()
       };
     } catch (error, stackTrace) {
-      _logger.error('检查表结构失败: $tableName', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('检查表结构失败: $tableName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -1021,9 +1020,9 @@ class MigrationService {
       final sql = 'ALTER TABLE $prefixedTableName ADD COLUMN IF NOT EXISTS $columnName $columnDefinition';
 
       await _databaseService.query(sql);
-      _logger.info('成功添加列: $prefixedTableName.$columnName');
+      LoggerUtils.info('成功添加列: $prefixedTableName.$columnName');
     } catch (error, stackTrace) {
-      _logger.error('添加列失败: $tableName.$columnName', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('添加列失败: $tableName.$columnName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -1035,9 +1034,9 @@ class MigrationService {
       final sql = 'ALTER TABLE $prefixedTableName DROP COLUMN IF EXISTS $columnName';
 
       await _databaseService.query(sql);
-      _logger.info('成功删除列: $prefixedTableName.$columnName');
+      LoggerUtils.info('成功删除列: $prefixedTableName.$columnName');
     } catch (error, stackTrace) {
-      _logger.error('删除列失败: $tableName.$columnName', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('删除列失败: $tableName.$columnName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -1049,9 +1048,9 @@ class MigrationService {
       final sql = 'ALTER TABLE $prefixedTableName ALTER COLUMN $columnName TYPE $newType';
 
       await _databaseService.query(sql);
-      _logger.info('成功修改列类型: $prefixedTableName.$columnName -> $newType');
+      LoggerUtils.info('成功修改列类型: $prefixedTableName.$columnName -> $newType');
     } catch (error, stackTrace) {
-      _logger.error('修改列类型失败: $tableName.$columnName', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('修改列类型失败: $tableName.$columnName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -1063,9 +1062,9 @@ class MigrationService {
       final sql = 'ALTER TABLE $prefixedTableName ADD CONSTRAINT IF NOT EXISTS $constraintName $constraintDefinition';
 
       await _databaseService.query(sql);
-      _logger.info('成功添加约束: $prefixedTableName.$constraintName');
+      LoggerUtils.info('成功添加约束: $prefixedTableName.$constraintName');
     } catch (error, stackTrace) {
-      _logger.error('添加约束失败: $tableName.$constraintName', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('添加约束失败: $tableName.$constraintName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -1077,9 +1076,9 @@ class MigrationService {
       final sql = 'ALTER TABLE $prefixedTableName DROP CONSTRAINT IF EXISTS $constraintName';
 
       await _databaseService.query(sql);
-      _logger.info('成功删除约束: $prefixedTableName.$constraintName');
+      LoggerUtils.info('成功删除约束: $prefixedTableName.$constraintName');
     } catch (error, stackTrace) {
-      _logger.error('删除约束失败: $tableName.$constraintName', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('删除约束失败: $tableName.$constraintName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -1092,9 +1091,9 @@ class MigrationService {
       final sql = 'CREATE ${uniqueKeyword}INDEX IF NOT EXISTS $indexName ON $prefixedTableName $indexDefinition';
 
       await _databaseService.query(sql);
-      _logger.info('成功添加索引: $indexName on $prefixedTableName');
+      LoggerUtils.info('成功添加索引: $indexName on $prefixedTableName');
     } catch (error, stackTrace) {
-      _logger.error('添加索引失败: $indexName on $tableName', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('添加索引失败: $indexName on $tableName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -1105,9 +1104,9 @@ class MigrationService {
       final sql = 'DROP INDEX IF EXISTS $indexName';
 
       await _databaseService.query(sql);
-      _logger.info('成功删除索引: $indexName');
+      LoggerUtils.info('成功删除索引: $indexName');
     } catch (error, stackTrace) {
-      _logger.error('删除索引失败: $indexName', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('删除索引失败: $indexName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -1119,9 +1118,9 @@ class MigrationService {
       final sql = 'ALTER TABLE $prefixedTableName RENAME COLUMN $oldColumnName TO $newColumnName';
 
       await _databaseService.query(sql);
-      _logger.info('成功重命名列: $prefixedTableName.$oldColumnName -> $newColumnName');
+      LoggerUtils.info('成功重命名列: $prefixedTableName.$oldColumnName -> $newColumnName');
     } catch (error, stackTrace) {
-      _logger.error('重命名列失败: $tableName.$oldColumnName', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('重命名列失败: $tableName.$oldColumnName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -1133,9 +1132,9 @@ class MigrationService {
       final sql = 'ALTER TABLE $prefixedTableName ALTER COLUMN $columnName SET DEFAULT $defaultValue';
 
       await _databaseService.query(sql);
-      _logger.info('成功设置列默认值: $prefixedTableName.$columnName = $defaultValue');
+      LoggerUtils.info('成功设置列默认值: $prefixedTableName.$columnName = $defaultValue');
     } catch (error, stackTrace) {
-      _logger.error('设置列默认值失败: $tableName.$columnName', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('设置列默认值失败: $tableName.$columnName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -1147,9 +1146,9 @@ class MigrationService {
       final sql = 'ALTER TABLE $prefixedTableName ALTER COLUMN $columnName DROP DEFAULT';
 
       await _databaseService.query(sql);
-      _logger.info('成功删除列默认值: $prefixedTableName.$columnName');
+      LoggerUtils.info('成功删除列默认值: $prefixedTableName.$columnName');
     } catch (error, stackTrace) {
-      _logger.error('删除列默认值失败: $tableName.$columnName', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('删除列默认值失败: $tableName.$columnName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -1161,9 +1160,9 @@ class MigrationService {
       final sql = 'ALTER TABLE $prefixedTableName ALTER COLUMN $columnName SET NOT NULL';
 
       await _databaseService.query(sql);
-      _logger.info('成功设置列为非空: $prefixedTableName.$columnName');
+      LoggerUtils.info('成功设置列为非空: $prefixedTableName.$columnName');
     } catch (error, stackTrace) {
-      _logger.error('设置列非空失败: $tableName.$columnName', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('设置列非空失败: $tableName.$columnName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -1175,9 +1174,9 @@ class MigrationService {
       final sql = 'ALTER TABLE $prefixedTableName ALTER COLUMN $columnName DROP NOT NULL';
 
       await _databaseService.query(sql);
-      _logger.info('成功设置列为可空: $prefixedTableName.$columnName');
+      LoggerUtils.info('成功设置列为可空: $prefixedTableName.$columnName');
     } catch (error, stackTrace) {
-      _logger.error('设置列可空失败: $tableName.$columnName', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('设置列可空失败: $tableName.$columnName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -1185,7 +1184,7 @@ class MigrationService {
   /// 迁移前检查
   Future<Map<String, dynamic>> preMigrationCheck(String tableName) async {
     try {
-      _logger.info('执行迁移前检查: $tableName');
+      LoggerUtils.info('执行迁移前检查: $tableName');
 
       final prefixedTableName = '${ServerConfig.tablePrefix}$tableName';
       final results = <String, dynamic>{};
@@ -1267,10 +1266,10 @@ class MigrationService {
         results['row_count'] = countResult.first[0] as int;
       }
 
-      _logger.info('迁移前检查完成: $prefixedTableName');
+      LoggerUtils.info('迁移前检查完成: $prefixedTableName');
       return results;
     } catch (error, stackTrace) {
-      _logger.error('迁移前检查失败: $tableName', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('迁移前检查失败: $tableName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -1278,7 +1277,7 @@ class MigrationService {
   /// 迁移后验证
   Future<Map<String, dynamic>> postMigrationValidation(String tableName, Map<String, dynamic> preCheckResults) async {
     try {
-      _logger.info('执行迁移后验证: $tableName');
+      LoggerUtils.info('执行迁移后验证: $tableName');
 
       final prefixedTableName = '${ServerConfig.tablePrefix}$tableName';
       final validationResults = <String, dynamic>{};
@@ -1342,10 +1341,10 @@ class MigrationService {
         }
       }
 
-      _logger.info('迁移后验证完成: $prefixedTableName, 通过: ${validationResults['passed']}');
+      LoggerUtils.info('迁移后验证完成: $prefixedTableName, 通过: ${validationResults['passed']}');
       return validationResults;
     } catch (error, stackTrace) {
-      _logger.error('迁移后验证失败: $tableName', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('迁移后验证失败: $tableName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -1353,10 +1352,10 @@ class MigrationService {
   /// 备份数据库（生产环境）
   Future<String> backupDatabase({String? backupPath}) async {
     try {
-      _logger.info('执行数据库备份');
+      LoggerUtils.info('执行数据库备份');
 
       if (ServerConfig.isDevelopment) {
-        _logger.warn('备份功能仅在生产环境中使用');
+        LoggerUtils.warn('备份功能仅在生产环境中使用');
         return '';
       }
 
@@ -1385,7 +1384,7 @@ class MigrationService {
         '--file=$finalBackupPath'
       ];
 
-      _logger.info('执行备份命令: ${pgDumpCommand.join(' ')}');
+      LoggerUtils.info('执行备份命令: ${pgDumpCommand.join(' ')}');
 
       // 设置环境变量
       final environment = <String, String>{
@@ -1400,14 +1399,14 @@ class MigrationService {
       );
 
       if (result.exitCode == 0) {
-        _logger.info('数据库备份成功: $finalBackupPath');
-        _logger.info('备份大小: ${await _getFileSize(finalBackupPath)}');
+        LoggerUtils.info('数据库备份成功: $finalBackupPath');
+        LoggerUtils.info('备份大小: ${await _getFileSize(finalBackupPath)}');
         return finalBackupPath;
       } else {
         throw Exception('备份失败: ${result.stderr}');
       }
     } catch (error, stackTrace) {
-      _logger.error('数据库备份失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('数据库备份失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -1415,7 +1414,7 @@ class MigrationService {
   /// 恢复数据库
   Future<void> restoreDatabase(String backupPath) async {
     try {
-      _logger.info('执行数据库恢复: $backupPath');
+      LoggerUtils.info('执行数据库恢复: $backupPath');
 
       // 检查备份文件是否存在
       final backupFile = File(backupPath);
@@ -1434,7 +1433,7 @@ class MigrationService {
         '--file=$backupPath'
       ];
 
-      _logger.info('执行恢复命令: ${psqlCommand.join(' ')}');
+      LoggerUtils.info('执行恢复命令: ${psqlCommand.join(' ')}');
 
       // 设置环境变量
       final environment = <String, String>{
@@ -1449,12 +1448,12 @@ class MigrationService {
       );
 
       if (result.exitCode == 0) {
-        _logger.info('数据库恢复成功');
+        LoggerUtils.info('数据库恢复成功');
       } else {
         throw Exception('恢复失败: ${result.stderr}');
       }
     } catch (error, stackTrace) {
-      _logger.error('数据库恢复失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('数据库恢复失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -1509,7 +1508,7 @@ class MigrationService {
 
       return backups;
     } catch (error, stackTrace) {
-      _logger.error('获取备份列表失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取备份列表失败', error: error, stackTrace: stackTrace);
       return [];
     }
   }
@@ -1520,12 +1519,12 @@ class MigrationService {
       final file = File(backupPath);
       if (await file.exists()) {
         await file.delete();
-        _logger.info('备份文件已删除: $backupPath');
+        LoggerUtils.info('备份文件已删除: $backupPath');
       } else {
-        _logger.warn('备份文件不存在: $backupPath');
+        LoggerUtils.warn('备份文件不存在: $backupPath');
       }
     } catch (error, stackTrace) {
-      _logger.error('删除备份文件失败: $backupPath', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('删除备份文件失败: $backupPath', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -1543,10 +1542,10 @@ class MigrationService {
       final result = await _databaseService.query(query);
       final referenceCount = result.first[0] as int;
 
-      _logger.info('列引用检查: $prefixedTableName.$columnName, 引用数: $referenceCount');
+      LoggerUtils.info('列引用检查: $prefixedTableName.$columnName, 引用数: $referenceCount');
       return referenceCount > 0;
     } catch (error, stackTrace) {
-      _logger.error('检查列引用失败: $tableName.$columnName', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('检查列引用失败: $tableName.$columnName', error: error, stackTrace: stackTrace);
       return false;
     }
   }
@@ -1584,14 +1583,14 @@ class MigrationService {
               })
           .toList();
     } catch (error, stackTrace) {
-      _logger.error('获取表外键失败: $tableName', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取表外键失败: $tableName', error: error, stackTrace: stackTrace);
       return [];
     }
   }
 
   /// 显示帮助信息
   void showHelpMigration() {
-    _logger.info('''
+    LoggerUtils.info('''
 数据库迁移工具使用说明:
 
 用法: dart migrate.dart [命令] [参数]

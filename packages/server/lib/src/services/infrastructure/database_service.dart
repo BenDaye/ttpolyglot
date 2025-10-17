@@ -5,7 +5,6 @@ import '../../utils/logging/logger_utils.dart';
 
 /// 数据库服务类
 class DatabaseService {
-  static final _logger = LoggerFactory.getLogger('DatabaseService');
   Connection? _connection;
 
   /// 事务状态标记（防止嵌套事务）
@@ -38,9 +37,9 @@ class DatabaseService {
         settings: connectionSettings,
       );
 
-      _logger.info('数据库连接成功: ${uri.host}:${uri.port}/${endpoint.database}');
+      LoggerUtils.info('数据库连接成功: ${uri.host}:${uri.port}/${endpoint.database}');
     } catch (error, stackTrace) {
-      _logger.error('数据库连接失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('数据库连接失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -61,7 +60,7 @@ class DatabaseService {
       final result = await _connection!.execute('SELECT 1');
       return result.isNotEmpty;
     } catch (error) {
-      _logger.warn('数据库健康检查失败', error: error);
+      LoggerUtils.warn('数据库健康检查失败', error: error);
       return false;
     }
   }
@@ -78,7 +77,8 @@ class DatabaseService {
         return await connection.execute(sql);
       }
     } catch (error, stackTrace) {
-      _logger.error('数据库查询失败: $sql', error: error, stackTrace: stackTrace, context: LogContext().field('sql', sql));
+      LoggerUtils.error('数据库查询失败: $sql',
+          error: error, stackTrace: stackTrace, context: LogContext.simple({'sql': sql}));
       rethrow;
     }
   }
@@ -89,41 +89,41 @@ class DatabaseService {
   /// 开始事务
   Future<void> beginTransaction() async {
     if (_inTransaction) {
-      _logger.warn('尝试开启事务，但已在事务中。跳过 BEGIN。');
+      LoggerUtils.warn('尝试开启事务，但已在事务中。跳过 BEGIN。');
       return;
     }
     await connection.execute('BEGIN');
     _inTransaction = true;
-    _logger.debug('事务已开始');
+    LoggerUtils.debug('事务已开始');
   }
 
   /// 提交事务
   Future<void> commitTransaction() async {
     if (!_inTransaction) {
-      _logger.warn('尝试提交事务，但不在事务中。跳过 COMMIT。');
+      LoggerUtils.warn('尝试提交事务，但不在事务中。跳过 COMMIT。');
       return;
     }
     await connection.execute('COMMIT');
     _inTransaction = false;
-    _logger.debug('事务已提交');
+    LoggerUtils.debug('事务已提交');
   }
 
   /// 回滚事务
   Future<void> rollbackTransaction() async {
     if (!_inTransaction) {
-      _logger.warn('尝试回滚事务，但不在事务中。跳过 ROLLBACK。');
+      LoggerUtils.warn('尝试回滚事务，但不在事务中。跳过 ROLLBACK。');
       return;
     }
     await connection.execute('ROLLBACK');
     _inTransaction = false;
-    _logger.debug('事务已回滚');
+    LoggerUtils.debug('事务已回滚');
   }
 
   /// 在事务中执行操作（支持嵌套调用）
   Future<T> transaction<T>(Future<T> Function() operation) async {
     // 如果已在事务中，直接执行操作（避免嵌套事务）
     if (_inTransaction) {
-      _logger.debug('已在事务中，直接执行操作（嵌套调用）');
+      LoggerUtils.debug('已在事务中，直接执行操作（嵌套调用）');
       return await operation();
     }
 
@@ -145,10 +145,10 @@ class DatabaseService {
       if (_connection != null) {
         await _connection!.close();
         _connection = null;
-        _logger.info('数据库连接已关闭');
+        LoggerUtils.info('数据库连接已关闭');
       }
     } catch (error, stackTrace) {
-      _logger.error('关闭数据库连接时出错', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('关闭数据库连接时出错', error: error, stackTrace: stackTrace);
     }
   }
 }
