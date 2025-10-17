@@ -58,7 +58,9 @@ class ServerConfig {
   static String get host => _env['HOST'] ?? '0.0.0.0';
   static int get port => int.tryParse(_env['PORT'] ?? '8080') ?? 8080;
   static String get logLevel => _env['LOG_LEVEL'] ?? 'info';
-  static bool get isDevelopment => _env['ENVIRONMENT'] == 'dev';
+  static bool get isDevelopment => ['dev', 'development', 'develop'].contains(_env['ENVIRONMENT']?.toLowerCase() ?? '');
+  static bool get isProduction => ['production', 'prod'].contains(_env['ENVIRONMENT']?.toLowerCase() ?? '');
+  static bool get isTest => ['test', 'testing'].contains(_env['ENVIRONMENT']?.toLowerCase() ?? '');
 
   // 数据库配置
   static String get databaseUrl => _env['DATABASE_URL'] ?? '';

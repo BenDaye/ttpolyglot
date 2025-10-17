@@ -133,15 +133,11 @@ class ResponseUtils {
       items: data,
     );
 
-    final apiResponse = ApiResponse<ApiResponsePager<T>>(
-      code: ApiResponseCode.success,
-      message: message ?? ApiResponseCode.success.message,
-      type: type,
-      data: paginatedData,
-    );
-
     return success(
-      data: apiResponse.toJson((data) => data.toJson((item) => _toJsonValue(item))),
+      message: message,
+      data: paginatedData,
+      type: type,
+      headers: headers,
     );
   }
 
@@ -149,33 +145,28 @@ class ResponseUtils {
   static Response fromException(
     ServerException exception, {
     Map<String, String>? headers,
+    ApiResponseTipsType type = ApiResponseTipsType.showToast,
   }) {
-    final apiResponse = ApiResponse<Map<String, dynamic>>(
+    return error<Map<String, dynamic>>(
       code: exception.code,
       message: exception.message,
-      type: ApiResponseTipsType.showToast,
       data: exception.toMap(),
-    );
-
-    return Response(
-      exception.httpStatusCode,
-      body: jsonEncode(apiResponse.toJson((data) => data)),
+      type: type,
+      headers: headers,
     );
   }
 
   /// 构建无内容响应（204）
   static Response noContent({
     Map<String, String>? headers,
+    ApiResponseTipsType type = ApiResponseTipsType.showToast,
   }) {
-    final apiResponse = ApiResponse<Map<String, dynamic>>(
+    return error<Map<String, dynamic>>(
       code: ApiResponseCode.noContent,
       message: ApiResponseCode.noContent.message,
-      type: ApiResponseTipsType.showToast,
       data: {},
-    );
-    return error(
-      code: ApiResponseCode.noContent,
-      data: apiResponse.toJson((data) => _toJsonValue(data)),
+      type: type,
+      headers: headers,
     );
   }
 
@@ -185,16 +176,12 @@ class ResponseUtils {
     T? data,
     String? location,
     Map<String, String>? headers,
+    ApiResponseTipsType type = ApiResponseTipsType.showToast,
   }) {
-    final apiResponse = ApiResponse<T>(
-      code: ApiResponseCode.created,
-      message: message ?? '创建成功',
-      type: ApiResponseTipsType.showToast,
-      data: data,
-    );
-
     return success(
-      data: apiResponse.toJson((data) => _toJsonValue(data)),
+      message: message ?? '创建成功',
+      data: data,
+      type: type,
       headers: headers,
     );
   }
@@ -204,16 +191,12 @@ class ResponseUtils {
     String? message,
     T? data,
     Map<String, String>? headers,
+    ApiResponseTipsType type = ApiResponseTipsType.showToast,
   }) {
-    final apiResponse = ApiResponse<T>(
-      code: ApiResponseCode.success,
-      message: message ?? '请求已接受',
-      type: ApiResponseTipsType.showToast,
-      data: data,
-    );
-
     return success(
-      data: apiResponse.toJson((data) => _toJsonValue(data)),
+      message: message ?? '请求已接受',
+      data: data,
+      type: type,
       headers: headers,
     );
   }
@@ -223,11 +206,10 @@ class ResponseUtils {
     String? version,
     String? apiVersion,
     String? serverName,
+    ApiResponseTipsType type = ApiResponseTipsType.showToast,
   }) {
-    final apiResponse = ApiResponse<Map<String, dynamic>>(
-      code: ApiResponseCode.success,
+    return success<Map<String, dynamic>>(
       message: ApiResponseCode.success.message,
-      type: ApiResponseTipsType.showToast,
       data: {
         'version': version ?? '1.0.0',
         'api_version': apiVersion ?? 'v1',
@@ -235,10 +217,7 @@ class ResponseUtils {
         'environment': ServerConfig.isDevelopment ? 'development' : 'production',
         'timestamp': DateTime.now().toIso8601String(),
       },
-    );
-
-    return success(
-      data: apiResponse.toJson((data) => _toJsonValue(data)),
+      type: type,
     );
   }
 
@@ -247,15 +226,14 @@ class ResponseUtils {
     required DatabaseService databaseService,
     required RedisService redisService,
     required DateTime startTime,
+    ApiResponseTipsType type = ApiResponseTipsType.showToast,
   }) async {
     try {
       final dbHealthy = await databaseService.isHealthy();
       final redisHealthy = await redisService.isHealthy();
 
-      final apiResponse = ApiResponse<Map<String, dynamic>>(
-        code: ApiResponseCode.success,
+      return success<Map<String, dynamic>>(
         message: ApiResponseCode.success.message,
-        type: ApiResponseTipsType.showToast,
         data: {
           'status': dbHealthy && redisHealthy ? 'healthy' : 'degraded',
           'services': {
@@ -265,13 +243,10 @@ class ResponseUtils {
           'timestamp': DateTime.now().toIso8601String(),
           'uptime': DateTime.now().difference(startTime).inSeconds,
         },
-      );
-
-      return success(
-        data: apiResponse.toJson((data) => _toJsonValue(data)),
+        type: type,
       );
     } catch (err) {
-      return error(
+      return error<Map<String, dynamic>>(
         code: ApiResponseCode.internalServerError,
         message: '状态检查失败',
         data: {
