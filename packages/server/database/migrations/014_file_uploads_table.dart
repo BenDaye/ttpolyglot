@@ -1,5 +1,6 @@
-import 'dart:developer';
 
+
+import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
 import 'base_migration.dart';
 
 /// 迁移: 014 - 创建文件上传表
@@ -18,7 +19,7 @@ class Migration014FileUploadsTable extends BaseMigration {
   @override
   Future<void> up() async {
     try {
-      log('开始执行迁移: $name', name: 'Migration014FileUploadsTable');
+      LoggerUtils.info('开始执行迁移: $name');
 
       // 创建文件上传表
       await createTable('file_uploads', '''
@@ -71,9 +72,9 @@ class Migration014FileUploadsTable extends BaseMigration {
       await addColumnComment('file_uploads', 'created_at', '创建时间');
       await addColumnComment('file_uploads', 'expires_at', '过期时间');
 
-      log('迁移完成: $name', name: 'Migration014FileUploadsTable');
+      LoggerUtils.info('迁移完成: $name');
     } catch (error, stackTrace) {
-      log('迁移失败: $name', error: error, stackTrace: stackTrace, name: 'Migration014FileUploadsTable');
+      LoggerUtils.error('迁移失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -81,14 +82,14 @@ class Migration014FileUploadsTable extends BaseMigration {
   @override
   Future<void> down() async {
     try {
-      log('开始回滚迁移: $name', name: 'Migration014FileUploadsTable');
+      LoggerUtils.info('开始回滚迁移: $name');
 
       // 删除文件上传表
       await dropTable('file_uploads');
 
-      log('回滚完成: $name', name: 'Migration014FileUploadsTable');
+      LoggerUtils.info('回滚完成: $name');
     } catch (error, stackTrace) {
-      log('回滚失败: $name', error: error, stackTrace: stackTrace, name: 'Migration014FileUploadsTable');
+      LoggerUtils.error('回滚失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

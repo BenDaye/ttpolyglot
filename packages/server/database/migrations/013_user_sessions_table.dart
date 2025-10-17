@@ -1,5 +1,6 @@
-import 'dart:developer';
 
+
+import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
 import 'base_migration.dart';
 
 /// 迁移: 013 - 创建用户会话表
@@ -18,7 +19,7 @@ class Migration013UserSessionsTable extends BaseMigration {
   @override
   Future<void> up() async {
     try {
-      log('开始执行迁移: $name', name: 'Migration013UserSessionsTable');
+      LoggerUtils.info('开始执行迁移: $name');
 
       // 创建用户会话表
       await createTable('user_sessions', '''
@@ -79,9 +80,9 @@ class Migration013UserSessionsTable extends BaseMigration {
       await addColumnComment('user_sessions', 'created_at', '创建时间');
       await addColumnComment('user_sessions', 'updated_at', '更新时间');
 
-      log('迁移完成: $name', name: 'Migration013UserSessionsTable');
+      LoggerUtils.info('迁移完成: $name');
     } catch (error, stackTrace) {
-      log('迁移失败: $name', error: error, stackTrace: stackTrace, name: 'Migration013UserSessionsTable');
+      LoggerUtils.error('迁移失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -89,14 +90,14 @@ class Migration013UserSessionsTable extends BaseMigration {
   @override
   Future<void> down() async {
     try {
-      log('开始回滚迁移: $name', name: 'Migration013UserSessionsTable');
+      LoggerUtils.info('开始回滚迁移: $name');
 
       // 删除用户会话表
       await dropTable('user_sessions');
 
-      log('回滚完成: $name', name: 'Migration013UserSessionsTable');
+      LoggerUtils.info('回滚完成: $name');
     } catch (error, stackTrace) {
-      log('回滚失败: $name', error: error, stackTrace: stackTrace, name: 'Migration013UserSessionsTable');
+      LoggerUtils.error('回滚失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

@@ -1,5 +1,6 @@
-import 'dart:developer';
 
+
+import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
 import 'base_seed.dart';
 
 /// 种子: 004 - 插入默认语言
@@ -18,7 +19,7 @@ class Seed004InsertLanguages extends BaseSeed {
   @override
   Future<void> run() async {
     try {
-      log('开始插入默认语言数据', name: 'Seed004InsertLanguages');
+      LoggerUtils.info('开始插入默认语言数据');
 
       // 定义默认语言列表
       final languages = [
@@ -304,9 +305,9 @@ class Seed004InsertLanguages extends BaseSeed {
       // 插入语言数据
       await insertData('languages', languages);
 
-      log('默认语言数据插入完成，共 ${languages.length} 种语言', name: 'Seed004InsertLanguages');
+      LoggerUtils.info('默认语言数据插入完成，共 ${languages.length} 种语言');
     } catch (error, stackTrace) {
-      log('插入默认语言数据失败', error: error, stackTrace: stackTrace, name: 'Seed004InsertLanguages');
+      LoggerUtils.error('插入默认语言数据失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

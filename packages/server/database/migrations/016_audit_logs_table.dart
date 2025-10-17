@@ -1,5 +1,6 @@
-import 'dart:developer';
 
+
+import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
 import 'base_migration.dart';
 
 /// 迁移: 016 - 创建审计日志表
@@ -18,7 +19,7 @@ class Migration016AuditLogsTable extends BaseMigration {
   @override
   Future<void> up() async {
     try {
-      log('开始执行迁移: $name', name: 'Migration016AuditLogsTable');
+      LoggerUtils.info('开始执行迁移: $name');
 
       // 创建审计日志表
       await createTable('audit_logs', '''
@@ -59,9 +60,9 @@ class Migration016AuditLogsTable extends BaseMigration {
       await addColumnComment('audit_logs', 'user_agent', '用户代理');
       await addColumnComment('audit_logs', 'created_at', '创建时间');
 
-      log('迁移完成: $name', name: 'Migration016AuditLogsTable');
+      LoggerUtils.info('迁移完成: $name');
     } catch (error, stackTrace) {
-      log('迁移失败: $name', error: error, stackTrace: stackTrace, name: 'Migration016AuditLogsTable');
+      LoggerUtils.error('迁移失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -69,14 +70,14 @@ class Migration016AuditLogsTable extends BaseMigration {
   @override
   Future<void> down() async {
     try {
-      log('开始回滚迁移: $name', name: 'Migration016AuditLogsTable');
+      LoggerUtils.info('开始回滚迁移: $name');
 
       // 删除审计日志表
       await dropTable('audit_logs');
 
-      log('回滚完成: $name', name: 'Migration016AuditLogsTable');
+      LoggerUtils.info('回滚完成: $name');
     } catch (error, stackTrace) {
-      log('回滚失败: $name', error: error, stackTrace: stackTrace, name: 'Migration016AuditLogsTable');
+      LoggerUtils.error('回滚失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

@@ -1,5 +1,6 @@
-import 'dart:developer';
 
+
+import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
 import 'base_migration.dart';
 
 /// 迁移: 012 - 创建系统配置表
@@ -18,7 +19,7 @@ class Migration012SystemConfigsTable extends BaseMigration {
   @override
   Future<void> up() async {
     try {
-      log('开始执行迁移: $name', name: 'Migration012SystemConfigsTable');
+      LoggerUtils.info('开始执行迁移: $name');
 
       // 创建系统配置表
       await createTable('system_configs', '''
@@ -61,9 +62,9 @@ class Migration012SystemConfigsTable extends BaseMigration {
       await addColumnComment('system_configs', 'created_at', '创建时间');
       await addColumnComment('system_configs', 'updated_at', '更新时间');
 
-      log('迁移完成: $name', name: 'Migration012SystemConfigsTable');
+      LoggerUtils.info('迁移完成: $name');
     } catch (error, stackTrace) {
-      log('迁移失败: $name', error: error, stackTrace: stackTrace, name: 'Migration012SystemConfigsTable');
+      LoggerUtils.error('迁移失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -71,14 +72,14 @@ class Migration012SystemConfigsTable extends BaseMigration {
   @override
   Future<void> down() async {
     try {
-      log('开始回滚迁移: $name', name: 'Migration012SystemConfigsTable');
+      LoggerUtils.info('开始回滚迁移: $name');
 
       // 删除系统配置表
       await dropTable('system_configs');
 
-      log('回滚完成: $name', name: 'Migration012SystemConfigsTable');
+      LoggerUtils.info('回滚完成: $name');
     } catch (error, stackTrace) {
-      log('回滚失败: $name', error: error, stackTrace: stackTrace, name: 'Migration012SystemConfigsTable');
+      LoggerUtils.error('回滚失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

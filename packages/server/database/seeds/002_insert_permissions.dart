@@ -1,5 +1,6 @@
-import 'dart:developer';
 
+
+import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
 import 'base_seed.dart';
 
 /// 种子: 002 - 插入默认权限
@@ -18,7 +19,7 @@ class Seed002InsertPermissions extends BaseSeed {
   @override
   Future<void> run() async {
     try {
-      log('开始插入默认权限数据', name: 'Seed002InsertPermissions');
+      LoggerUtils.info('开始插入默认权限数据');
 
       // 定义所有权限
       final permissions = [
@@ -348,9 +349,9 @@ class Seed002InsertPermissions extends BaseSeed {
       // 插入权限数据
       await insertData('permissions', permissions);
 
-      log('默认权限数据插入完成', name: 'Seed002InsertPermissions');
+      LoggerUtils.info('默认权限数据插入完成');
     } catch (error, stackTrace) {
-      log('插入默认权限数据失败', error: error, stackTrace: stackTrace, name: 'Seed002InsertPermissions');
+      LoggerUtils.error('插入默认权限数据失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

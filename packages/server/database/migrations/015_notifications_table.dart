@@ -1,5 +1,6 @@
-import 'dart:developer';
 
+
+import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
 import 'base_migration.dart';
 
 /// 迁移: 015 - 创建通知表
@@ -18,7 +19,7 @@ class Migration015NotificationsTable extends BaseMigration {
   @override
   Future<void> up() async {
     try {
-      log('开始执行迁移: $name', name: 'Migration015NotificationsTable');
+      LoggerUtils.info('开始执行迁移: $name');
 
       // 创建通知表
       await createTable('notifications', '''
@@ -65,9 +66,9 @@ class Migration015NotificationsTable extends BaseMigration {
       await addColumnComment('notifications', 'created_at', '创建时间');
       await addColumnComment('notifications', 'read_at', '阅读时间');
 
-      log('迁移完成: $name', name: 'Migration015NotificationsTable');
+      LoggerUtils.info('迁移完成: $name');
     } catch (error, stackTrace) {
-      log('迁移失败: $name', error: error, stackTrace: stackTrace, name: 'Migration015NotificationsTable');
+      LoggerUtils.error('迁移失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -75,14 +76,14 @@ class Migration015NotificationsTable extends BaseMigration {
   @override
   Future<void> down() async {
     try {
-      log('开始回滚迁移: $name', name: 'Migration015NotificationsTable');
+      LoggerUtils.info('开始回滚迁移: $name');
 
       // 删除通知表
       await dropTable('notifications');
 
-      log('回滚完成: $name', name: 'Migration015NotificationsTable');
+      LoggerUtils.info('回滚完成: $name');
     } catch (error, stackTrace) {
-      log('回滚失败: $name', error: error, stackTrace: stackTrace, name: 'Migration015NotificationsTable');
+      LoggerUtils.error('回滚失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

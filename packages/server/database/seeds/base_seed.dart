@@ -1,7 +1,6 @@
-import 'dart:developer';
-
 import 'package:postgres/postgres.dart';
 import 'package:ttpolyglot_server/src/config/server_config.dart';
+import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
 
 /// 种子数据基础类
 /// 创建时间: 2024-12-26
@@ -85,27 +84,26 @@ abstract class BaseSeed {
       }
 
       if (skippedCount > 0) {
-        log('插入数据完成: $fullTableName, 新插入: $insertedCount 条, 跳过(已存在): $skippedCount 条', name: runtimeType.toString());
+        LoggerUtils.info('插入数据完成: $fullTableName, 新插入: $insertedCount 条, 跳过(已存在): $skippedCount 条');
       } else {
-        log('插入数据完成: $fullTableName, ${dataList.length} 条记录', name: runtimeType.toString());
+        LoggerUtils.info('插入数据完成: $fullTableName, ${dataList.length} 条记录');
       }
 
       // 如果所有数据都被跳过，可能是表没有唯一约束
       if (insertedCount == 0 && skippedCount == dataList.length) {
-        log('⚠️  警告：所有数据都被跳过，请确认表 $fullTableName 是否有正确的唯一约束', name: runtimeType.toString());
+        LoggerUtils.warn('⚠️  警告：所有数据都被跳过，请确认表 $fullTableName 是否有正确的唯一约束');
       }
     } catch (error, stackTrace) {
       // 检查是否是缺少唯一约束导致的错误
       final errorMessage = error.toString().toLowerCase();
       if (errorMessage.contains('conflict') || errorMessage.contains('constraint')) {
-        log(
+        LoggerUtils.error(
             '插入数据失败: $tableName\n'
             '⚠️  提示：请确保表有主键或唯一约束，否则 ON CONFLICT DO NOTHING 无法正常工作',
             error: error,
-            stackTrace: stackTrace,
-            name: runtimeType.toString());
+            stackTrace: stackTrace);
       } else {
-        log('插入数据失败: $tableName', error: error, stackTrace: stackTrace, name: runtimeType.toString());
+        LoggerUtils.error('插入数据失败: $tableName', error: error, stackTrace: stackTrace);
       }
       rethrow;
     }
@@ -130,7 +128,7 @@ abstract class BaseSeed {
               ))
           .toList();
     } catch (error, stackTrace) {
-      log('查询数据失败', error: error, stackTrace: stackTrace, name: runtimeType.toString());
+      LoggerUtils.error('查询数据失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -146,7 +144,7 @@ abstract class BaseSeed {
       final count = result.first[0] as int;
       return count > 0;
     } catch (error, stackTrace) {
-      log('检查表数据失败: $tableName', error: error, stackTrace: stackTrace, name: runtimeType.toString());
+      LoggerUtils.error('检查表数据失败: $tableName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

@@ -1,7 +1,6 @@
-import 'dart:developer';
-
 import 'package:postgres/postgres.dart';
 import 'package:ttpolyglot_server/src/config/server_config.dart';
+import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
 
 /// 迁移基础类
 /// 创建时间: 2024-12-26
@@ -49,11 +48,11 @@ abstract class BaseMigration {
       final fullTableName = '$tablePrefix$tableName';
       final fullSql = sql.replaceAll('{table_name}', fullTableName);
 
-      log('创建表: $fullTableName', name: runtimeType.toString());
+      LoggerUtils.info('创建表: $fullTableName');
       await connection.execute(fullSql);
-      log('表创建完成: $fullTableName', name: runtimeType.toString());
+      LoggerUtils.info('表创建完成: $fullTableName');
     } catch (error, stackTrace) {
-      log('创建表失败: $tableName', error: error, stackTrace: stackTrace, name: runtimeType.toString());
+      LoggerUtils.error('创建表失败: $tableName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -63,11 +62,11 @@ abstract class BaseMigration {
     try {
       final fullTableName = '$tablePrefix$tableName';
 
-      log('删除表: $fullTableName', name: runtimeType.toString());
+      LoggerUtils.info('删除表: $fullTableName');
       await connection.execute('DROP TABLE IF EXISTS $fullTableName CASCADE;');
-      log('表删除完成: $fullTableName', name: runtimeType.toString());
+      LoggerUtils.info('表删除完成: $fullTableName');
     } catch (error, stackTrace) {
-      log('删除表失败: $tableName', error: error, stackTrace: stackTrace, name: runtimeType.toString());
+      LoggerUtils.error('删除表失败: $tableName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -78,11 +77,11 @@ abstract class BaseMigration {
       final fullIndexName = '${tablePrefix}idx_$indexName';
       final fullTableName = '$tablePrefix$tableName';
 
-      log('创建索引: $fullIndexName', name: runtimeType.toString());
+      LoggerUtils.info('创建索引: $fullIndexName');
       await connection.execute('CREATE INDEX IF NOT EXISTS $fullIndexName ON $fullTableName ($columns);');
-      log('索引创建完成: $fullIndexName', name: runtimeType.toString());
+      LoggerUtils.info('索引创建完成: $fullIndexName');
     } catch (error, stackTrace) {
-      log('创建索引失败: $indexName', error: error, stackTrace: stackTrace, name: runtimeType.toString());
+      LoggerUtils.error('创建索引失败: $indexName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -95,7 +94,7 @@ abstract class BaseMigration {
       final fullRefTable = '$tablePrefix$refTable';
       final fullConstraintName = '${tablePrefix}fk_$constraintName';
 
-      log('添加外键约束: $fullConstraintName', name: runtimeType.toString());
+      LoggerUtils.info('添加外键约束: $fullConstraintName');
 
       // PostgreSQL 不支持 ADD CONSTRAINT IF NOT EXISTS，使用 DO 块来处理
       await connection.execute('''
@@ -110,9 +109,9 @@ abstract class BaseMigration {
           END IF;
         END \$\$;
       ''');
-      log('外键约束添加完成: $fullConstraintName', name: runtimeType.toString());
+      LoggerUtils.info('外键约束添加完成: $fullConstraintName');
     } catch (error, stackTrace) {
-      log('添加外键约束失败: $constraintName', error: error, stackTrace: stackTrace, name: runtimeType.toString());
+      LoggerUtils.error('添加外键约束失败: $constraintName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -122,11 +121,11 @@ abstract class BaseMigration {
     try {
       final fullTableName = '$tablePrefix$tableName';
 
-      log('添加表注释: $fullTableName', name: runtimeType.toString());
+      LoggerUtils.info('添加表注释: $fullTableName');
       await connection.execute('COMMENT ON TABLE $fullTableName IS \'$comment\';');
-      log('表注释添加完成: $fullTableName', name: runtimeType.toString());
+      LoggerUtils.info('表注释添加完成: $fullTableName');
     } catch (error, stackTrace) {
-      log('添加表注释失败: $tableName', error: error, stackTrace: stackTrace, name: runtimeType.toString());
+      LoggerUtils.error('添加表注释失败: $tableName', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -136,11 +135,11 @@ abstract class BaseMigration {
     try {
       final fullTableName = '$tablePrefix$tableName';
 
-      log('添加列注释: $fullTableName.$column', name: runtimeType.toString());
+      LoggerUtils.info('添加列注释: $fullTableName.$column');
       await connection.execute('COMMENT ON COLUMN $fullTableName.$column IS \'$comment\';');
-      log('列注释添加完成: $fullTableName.$column', name: runtimeType.toString());
+      LoggerUtils.info('列注释添加完成: $fullTableName.$column');
     } catch (error, stackTrace) {
-      log('添加列注释失败: $tableName.$column', error: error, stackTrace: stackTrace, name: runtimeType.toString());
+      LoggerUtils.error('添加列注释失败: $tableName.$column', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

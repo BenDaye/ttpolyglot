@@ -1,5 +1,6 @@
-import 'dart:developer';
 
+
+import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
 import 'base_migration.dart';
 
 /// 迁移: 004 - 创建角色权限关联表
@@ -18,7 +19,7 @@ class Migration004RolePermissionsTable extends BaseMigration {
   @override
   Future<void> up() async {
     try {
-      log('开始执行迁移: $name', name: 'Migration004RolePermissionsTable');
+      LoggerUtils.info('开始执行迁移: $name');
 
       // 创建角色权限关联表
       await createTable('role_permissions', '''
@@ -46,9 +47,9 @@ class Migration004RolePermissionsTable extends BaseMigration {
       await addColumnComment('role_permissions', 'permission_id', '权限ID，外键关联permissions表');
       await addColumnComment('role_permissions', 'created_at', '创建时间');
 
-      log('迁移完成: $name', name: 'Migration004RolePermissionsTable');
+      LoggerUtils.info('迁移完成: $name');
     } catch (error, stackTrace) {
-      log('迁移失败: $name', error: error, stackTrace: stackTrace, name: 'Migration004RolePermissionsTable');
+      LoggerUtils.error('迁移失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -56,14 +57,14 @@ class Migration004RolePermissionsTable extends BaseMigration {
   @override
   Future<void> down() async {
     try {
-      log('开始回滚迁移: $name', name: 'Migration004RolePermissionsTable');
+      LoggerUtils.info('开始回滚迁移: $name');
 
       // 删除角色权限关联表
       await dropTable('role_permissions');
 
-      log('回滚完成: $name', name: 'Migration004RolePermissionsTable');
+      LoggerUtils.info('回滚完成: $name');
     } catch (error, stackTrace) {
-      log('回滚失败: $name', error: error, stackTrace: stackTrace, name: 'Migration004RolePermissionsTable');
+      LoggerUtils.error('回滚失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

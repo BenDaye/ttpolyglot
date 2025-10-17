@@ -1,5 +1,6 @@
-import 'dart:developer';
 
+
+import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
 import 'base_migration.dart';
 
 /// 迁移: 008 - 创建项目语言关联表
@@ -18,7 +19,7 @@ class Migration008ProjectLanguagesTable extends BaseMigration {
   @override
   Future<void> up() async {
     try {
-      log('开始执行迁移: $name', name: 'Migration008ProjectLanguagesTable');
+      LoggerUtils.info('开始执行迁移: $name');
 
       // 创建项目语言关联表
       await createTable('project_languages', '''
@@ -52,9 +53,9 @@ class Migration008ProjectLanguagesTable extends BaseMigration {
       await addColumnComment('project_languages', 'is_active', '是否激活');
       await addColumnComment('project_languages', 'created_at', '创建时间');
 
-      log('迁移完成: $name', name: 'Migration008ProjectLanguagesTable');
+      LoggerUtils.info('迁移完成: $name');
     } catch (error, stackTrace) {
-      log('迁移失败: $name', error: error, stackTrace: stackTrace, name: 'Migration008ProjectLanguagesTable');
+      LoggerUtils.error('迁移失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -62,14 +63,14 @@ class Migration008ProjectLanguagesTable extends BaseMigration {
   @override
   Future<void> down() async {
     try {
-      log('开始回滚迁移: $name', name: 'Migration008ProjectLanguagesTable');
+      LoggerUtils.info('开始回滚迁移: $name');
 
       // 删除项目语言关联表
       await dropTable('project_languages');
 
-      log('回滚完成: $name', name: 'Migration008ProjectLanguagesTable');
+      LoggerUtils.info('回滚完成: $name');
     } catch (error, stackTrace) {
-      log('回滚失败: $name', error: error, stackTrace: stackTrace, name: 'Migration008ProjectLanguagesTable');
+      LoggerUtils.error('回滚失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

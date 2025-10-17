@@ -1,5 +1,6 @@
-import 'dart:developer';
 
+
+import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
 import 'base_migration.dart';
 
 /// 迁移: 002 - 创建角色表
@@ -18,7 +19,7 @@ class Migration002RolesTable extends BaseMigration {
   @override
   Future<void> up() async {
     try {
-      log('开始执行迁移: $name', name: 'Migration002RolesTable');
+      LoggerUtils.info('开始执行迁移: $name');
 
       // 创建角色表
       await createTable('roles', '''
@@ -58,9 +59,9 @@ class Migration002RolesTable extends BaseMigration {
       await addColumnComment('roles', 'created_at', '创建时间');
       await addColumnComment('roles', 'updated_at', '更新时间');
 
-      log('迁移完成: $name', name: 'Migration002RolesTable');
+      LoggerUtils.info('迁移完成: $name');
     } catch (error, stackTrace) {
-      log('迁移失败: $name', error: error, stackTrace: stackTrace, name: 'Migration002RolesTable');
+      LoggerUtils.error('迁移失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -68,14 +69,14 @@ class Migration002RolesTable extends BaseMigration {
   @override
   Future<void> down() async {
     try {
-      log('开始回滚迁移: $name', name: 'Migration002RolesTable');
+      LoggerUtils.info('开始回滚迁移: $name');
 
       // 删除角色表
       await dropTable('roles');
 
-      log('回滚完成: $name', name: 'Migration002RolesTable');
+      LoggerUtils.info('回滚完成: $name');
     } catch (error, stackTrace) {
-      log('回滚失败: $name', error: error, stackTrace: stackTrace, name: 'Migration002RolesTable');
+      LoggerUtils.error('回滚失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

@@ -1,5 +1,6 @@
-import 'dart:developer';
 
+
+import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
 import 'base_migration.dart';
 
 /// 迁移: 001 - 创建用户表
@@ -18,7 +19,7 @@ class Migration001UsersTable extends BaseMigration {
   @override
   Future<void> up() async {
     try {
-      log('开始执行迁移: $name', name: 'Migration001UsersTable');
+      LoggerUtils.info('开始执行迁移: $name');
 
       // 启用 UUID 扩展
       await connection.execute('CREATE EXTENSION IF NOT EXISTS "pgcrypto";');
@@ -99,9 +100,9 @@ class Migration001UsersTable extends BaseMigration {
       await addColumnComment('users', 'created_at', '创建时间');
       await addColumnComment('users', 'updated_at', '更新时间');
 
-      log('迁移完成: $name', name: 'Migration001UsersTable');
+      LoggerUtils.info('迁移完成: $name');
     } catch (error, stackTrace) {
-      log('迁移失败: $name', error: error, stackTrace: stackTrace, name: 'Migration001UsersTable');
+      LoggerUtils.error('迁移失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -109,14 +110,14 @@ class Migration001UsersTable extends BaseMigration {
   @override
   Future<void> down() async {
     try {
-      log('开始回滚迁移: $name', name: 'Migration001UsersTable');
+      LoggerUtils.info('开始回滚迁移: $name');
 
       // 删除用户表
       await dropTable('users');
 
-      log('回滚完成: $name', name: 'Migration001UsersTable');
+      LoggerUtils.info('回滚完成: $name');
     } catch (error, stackTrace) {
-      log('回滚失败: $name', error: error, stackTrace: stackTrace, name: 'Migration001UsersTable');
+      LoggerUtils.error('回滚失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

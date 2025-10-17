@@ -1,5 +1,6 @@
-import 'dart:developer';
 
+
+import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
 import 'base_seed.dart';
 
 /// 种子: 003 - 分配角色权限
@@ -18,7 +19,7 @@ class Seed003AssignRolePermissions extends BaseSeed {
   @override
   Future<void> run() async {
     try {
-      log('开始分配角色权限', name: 'Seed003AssignRolePermissions');
+      LoggerUtils.info('开始分配角色权限');
 
       // 获取所有角色
       final roles = await queryData('SELECT id, name FROM ${tablePrefix}roles');
@@ -173,7 +174,7 @@ class Seed003AssignRolePermissions extends BaseSeed {
 
         final roleId = roleMap[roleName];
         if (roleId == null) {
-          log('角色未找到: $roleName', name: 'Seed003AssignRolePermissions');
+          LoggerUtils.info('角色未找到: $roleName');
           continue;
         }
 
@@ -190,13 +191,13 @@ class Seed003AssignRolePermissions extends BaseSeed {
 
         if (rolePermissionData.isNotEmpty) {
           await insertData('role_permissions', rolePermissionData);
-          log('角色 $roleName 已分配 ${rolePermissionData.length} 个权限', name: 'Seed003AssignRolePermissions');
+          LoggerUtils.info('角色 $roleName 已分配 ${rolePermissionData.length} 个权限');
         }
       }
 
-      log('角色权限分配完成', name: 'Seed003AssignRolePermissions');
+      LoggerUtils.info('角色权限分配完成');
     } catch (error, stackTrace) {
-      log('分配角色权限失败', error: error, stackTrace: stackTrace, name: 'Seed003AssignRolePermissions');
+      LoggerUtils.error('分配角色权限失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

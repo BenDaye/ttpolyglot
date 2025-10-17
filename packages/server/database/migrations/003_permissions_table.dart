@@ -1,5 +1,6 @@
-import 'dart:developer';
 
+
+import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
 import 'base_migration.dart';
 
 /// 迁移: 003 - 创建权限表
@@ -18,7 +19,7 @@ class Migration003PermissionsTable extends BaseMigration {
   @override
   Future<void> up() async {
     try {
-      log('开始执行迁移: $name', name: 'Migration003PermissionsTable');
+      LoggerUtils.info('开始执行迁移: $name');
 
       // 创建权限表
       await createTable('permissions', '''
@@ -64,9 +65,9 @@ class Migration003PermissionsTable extends BaseMigration {
       await addColumnComment('permissions', 'created_at', '创建时间');
       await addColumnComment('permissions', 'updated_at', '更新时间');
 
-      log('迁移完成: $name', name: 'Migration003PermissionsTable');
+      LoggerUtils.info('迁移完成: $name');
     } catch (error, stackTrace) {
-      log('迁移失败: $name', error: error, stackTrace: stackTrace, name: 'Migration003PermissionsTable');
+      LoggerUtils.error('迁移失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -74,14 +75,14 @@ class Migration003PermissionsTable extends BaseMigration {
   @override
   Future<void> down() async {
     try {
-      log('开始回滚迁移: $name', name: 'Migration003PermissionsTable');
+      LoggerUtils.info('开始回滚迁移: $name');
 
       // 删除权限表
       await dropTable('permissions');
 
-      log('回滚完成: $name', name: 'Migration003PermissionsTable');
+      LoggerUtils.info('回滚完成: $name');
     } catch (error, stackTrace) {
-      log('回滚失败: $name', error: error, stackTrace: stackTrace, name: 'Migration003PermissionsTable');
+      LoggerUtils.error('回滚失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
