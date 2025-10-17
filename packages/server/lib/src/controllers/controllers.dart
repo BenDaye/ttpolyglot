@@ -1,13 +1,9 @@
 /// 控制器导出文件
 library controllers;
 
-export 'auth_controller.dart';
-export 'config_controller.dart';
-export 'file_controller.dart';
-export 'language_controller.dart';
-export 'notification_controller.dart';
-export 'permission_controller.dart';
-export 'project_controller.dart';
-export 'role_controller.dart';
-export 'translation_controller.dart';
-export 'user_controller.dart';
+// 认证与授权控制器
+export 'auth/auth.dart';
+// 项目与翻译控制器
+export 'project/project.dart';
+// 系统功能控制器
+export 'system/system.dart';
