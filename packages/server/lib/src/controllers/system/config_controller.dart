@@ -1,14 +1,16 @@
 import 'package:shelf/shelf.dart';
 import 'package:ttpolyglot_server/server.dart';
 
-class ConfigController {
+import '../base_controller.dart';
+
+class ConfigController extends BaseController {
   final DatabaseService databaseService;
   final RedisService redisService;
 
   ConfigController({
     required this.databaseService,
     required this.redisService,
-  });
+  }) : super('ConfigController');
 
   Future<Response> getConfigs(Request request) async {
     return ResponseUtils.success(message: '获取配置列表功能待实现');

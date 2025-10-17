@@ -6,6 +6,7 @@
 
 ```
 controllers/
+├── base_controller.dart        # 控制器基类
 ├── auth/                        # 认证与授权
 │   ├── auth_controller.dart
 │   ├── user_controller.dart
@@ -115,14 +116,60 @@ import 'package:ttpolyglot_server/src/controllers/project/project_controller.dar
 4. **响应构建**: 使用 `ResponseUtils` 构建标准化的响应
 5. **异常处理**: 捕获并转换异常为合适的 HTTP 响应
 
+## BaseController 基类
+
+所有控制器都继承自 `BaseController`，提供以下统一功能：
+
+### 1. 请求信息获取
+```dart
+// 获取当前用户ID
+final userId = getCurrentUserId(request);
+
+// 获取认证令牌
+final token = getAuthToken(request);
+
+// 获取客户端IP
+final ip = getClientIp(request);
+```
+
+### 2. 统一错误处理
+```dart
+return execute(
+  () async {
+    // 业务逻辑
+    return ResponseUtils.success(data: result);
+  },
+  operationName: '操作名称',
+  context: {'key': 'value'},
+);
+```
+
+`execute` 方法会自动处理以下异常：
+- `ValidationException` -> 验证错误响应
+- `NotFoundException` -> 资源不存在响应
+- `BusinessException` -> 业务错误响应
+- `UnauthorizedException` -> 未授权响应
+- `ForbiddenException` -> 禁止访问响应
+- 其他异常 -> 内部服务器错误响应
+
+### 3. 统一日志记录
+```dart
+logInfo('操作描述', context: {'key': 'value'});
+logWarn('警告信息', context: {'key': 'value'});
+logError('错误信息', error: error, stackTrace: stackTrace);
+logDebug('调试信息', context: {'key': 'value'});
+```
+
 ## 注意事项
 
-1. 所有导入都使用 package 风格，不使用相对路径
-2. 每个子目录都有一个默认导出文件，方便批量导入
-3. 控制器应该保持轻量，复杂的业务逻辑应放在 Service 层
-4. 使用 `ResponseUtils` 构建统一格式的响应
-5. 使用 `ValidatorUtils` 进行参数验证
-6. 控制器方法应该是 async，返回 `Future<Response>`
+1. **所有控制器必须继承 `BaseController`**，并在构造函数中调用 `super(controllerName)`
+2. 所有导入都使用 package 风格，不使用相对路径
+3. 每个子目录都有一个默认导出文件，方便批量导入
+4. 控制器应该保持轻量，复杂的业务逻辑应放在 Service 层
+5. 使用 `ResponseUtils` 构建统一格式的响应
+6. 使用 `ValidatorUtils` 进行参数验证
+7. 控制器方法应该是 async，返回 `Future<Response>`
+8. 优先使用 `execute` 方法包装业务逻辑，自动处理错误和日志
 
 ## 相关文档
 

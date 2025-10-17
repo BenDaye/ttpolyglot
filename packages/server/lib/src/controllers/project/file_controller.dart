@@ -1,14 +1,16 @@
 import 'package:shelf/shelf.dart';
 import 'package:ttpolyglot_server/server.dart';
 
-class FileController {
+import '../base_controller.dart';
+
+class FileController extends BaseController {
   final DatabaseService databaseService;
   final RedisService redisService;
 
   FileController({
     required this.databaseService,
     required this.redisService,
-  });
+  }) : super('FileController');
 
   Future<Response> uploadFile(Request request) async {
     return ResponseUtils.success(message: '文件上传功能待实现');

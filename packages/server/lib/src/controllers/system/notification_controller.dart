@@ -1,14 +1,16 @@
 import 'package:shelf/shelf.dart';
 import 'package:ttpolyglot_server/server.dart';
 
-class NotificationController {
+import '../base_controller.dart';
+
+class NotificationController extends BaseController {
   final DatabaseService databaseService;
   final RedisService redisService;
 
   NotificationController({
     required this.databaseService,
     required this.redisService,
-  });
+  }) : super('NotificationController');
 
   Future<Response> getNotifications(Request request) async {
     return ResponseUtils.success(message: '获取通知列表功能待实现');

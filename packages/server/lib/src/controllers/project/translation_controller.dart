@@ -1,15 +1,17 @@
 import 'package:shelf/shelf.dart';
 import 'package:ttpolyglot_server/server.dart';
 
+import '../base_controller.dart';
+
 /// 翻译控制器
-class TranslationController {
+class TranslationController extends BaseController {
   final DatabaseService databaseService;
   final RedisService redisService;
 
   TranslationController({
     required this.databaseService,
     required this.redisService,
-  });
+  }) : super('TranslationController');
 
   Future<Response> getTranslations(Request request) async {
     return ResponseUtils.success(message: '获取翻译列表功能待实现');

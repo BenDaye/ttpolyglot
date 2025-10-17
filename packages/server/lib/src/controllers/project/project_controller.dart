@@ -5,13 +5,16 @@ import 'package:shelf_router/shelf_router.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
 
+import '../base_controller.dart';
+
 /// 项目管理控制器
-class ProjectController {
+class ProjectController extends BaseController {
   final ProjectService _projectService;
 
   ProjectController({
     required ProjectService projectService,
-  }) : _projectService = projectService;
+  })  : _projectService = projectService,
+        super('ProjectController');
 
   Router get router {
     final router = Router();

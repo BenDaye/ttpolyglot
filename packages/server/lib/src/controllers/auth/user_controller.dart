@@ -6,8 +6,10 @@ import 'package:shelf_router/shelf_router.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
 
+import '../base_controller.dart';
+
 /// 用户管理控制器
-class UserController {
+class UserController extends BaseController {
   final UserService _userService;
   final FileUploadService _fileUploadService;
 
@@ -15,7 +17,8 @@ class UserController {
     required UserService userService,
     required FileUploadService fileUploadService,
   })  : _userService = userService,
-        _fileUploadService = fileUploadService;
+        _fileUploadService = fileUploadService,
+        super('UserController');
 
   Router get router {
     final router = Router();

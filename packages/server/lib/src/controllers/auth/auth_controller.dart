@@ -5,13 +5,16 @@ import 'package:shelf_router/shelf_router.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
 
+import '../base_controller.dart';
+
 /// 认证控制器
-class AuthController {
+class AuthController extends BaseController {
   final AuthService _authService;
 
   AuthController({
     required AuthService authService,
-  }) : _authService = authService;
+  })  : _authService = authService,
+        super('AuthController');
 
   Router get router {
     final router = Router();
@@ -108,7 +111,7 @@ class AuthController {
       final deviceType = data['device_type'] as String?;
 
       // 获取客户端信息
-      final ipAddress = _getClientIp(request);
+      final ipAddress = getClientIp(request);
       final userAgent = request.headers['user-agent'];
 
       // 调用认证服务
@@ -365,29 +368,6 @@ class AuthController {
         message: '获取用户信息失败',
       );
     }
-  }
-
-  /// 获取客户端IP地址
-  String? _getClientIp(Request request) {
-    // 尝试从X-Forwarded-For头获取真实IP
-    final forwardedFor = request.headers['x-forwarded-for'];
-    if (forwardedFor != null && forwardedFor.isNotEmpty) {
-      return forwardedFor.split(',').first.trim();
-    }
-
-    // 尝试从X-Real-IP头获取
-    final realIp = request.headers['x-real-ip'];
-    if (realIp != null && realIp.isNotEmpty) {
-      return realIp;
-    }
-
-    // 从连接信息获取
-    final connectionInfo = request.context['shelf.io.connection_info'];
-    if (connectionInfo != null) {
-      return connectionInfo.toString();
-    }
-
-    return null;
   }
 
   /// 重发验证邮件
