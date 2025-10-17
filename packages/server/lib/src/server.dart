@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:shelf/shelf.dart';
@@ -10,6 +9,7 @@ import 'di/di.dart';
 import 'middleware/middleware.dart';
 import 'routes/api_routes.dart';
 import 'services/services.dart';
+import 'utils/http/response_utils.dart';
 import 'utils/logging/logger_utils.dart';
 
 /// TTPolyglot 服务器主类
@@ -227,249 +227,42 @@ class TTPolyglotServer {
 
   /// 健康检查端点
   Future<Response> _healthCheck(Request request) async {
-    try {
-      final healthStatus = await _getComprehensiveHealthStatus();
-      final statusCode = healthStatus['status'] == 'healthy' ? 200 : 503;
-
-      return Response(
-        statusCode,
-        body: jsonEncode(healthStatus),
-        headers: {'Content-Type': 'application/json'},
-      );
-    } catch (error, stackTrace) {
-      LoggerUtils.error('健康检查失败', error: error, stackTrace: stackTrace);
-
-      return Response(
-        503,
-        body: jsonEncode({
-          'status': 'unhealthy',
-          'error': '健康检查失败',
-          'timestamp': DateTime.now().toIso8601String(),
-        }),
-        headers: {'Content-Type': 'application/json'},
-      );
-    }
+    return ResponseUtils.healthCheck(
+      databaseService: _databaseService,
+      redisService: _redisService,
+      cacheService: _cacheService,
+      startTime: _startTime,
+    );
   }
 
   /// 数据库健康检查
   Future<Response> _dbHealthCheck(Request request) async {
-    try {
-      final isHealthy = await _databaseService.isHealthy();
-      if (isHealthy) {
-        return Response.ok('{"status": "healthy", "database": "connected"}',
-            headers: {'Content-Type': 'application/json'});
-      } else {
-        return Response.internalServerError(
-            body: '{"status": "unhealthy", "database": "disconnected"}', headers: {'Content-Type': 'application/json'});
-      }
-    } catch (error) {
-      return Response.internalServerError(
-          body: '{"status": "error", "message": "${error.toString()}"}', headers: {'Content-Type': 'application/json'});
-    }
+    return ResponseUtils.dbHealthCheck(
+      databaseService: _databaseService,
+    );
   }
 
   /// 服务就绪检查
   Future<Response> _readyCheck(Request request) async {
-    try {
-      final dbHealthy = await _databaseService.isHealthy();
-      final redisHealthy = await _redisService.isHealthy();
-
-      if (dbHealthy && redisHealthy) {
-        return Response.ok('{"status": "ready", "services": {"database": true, "redis": true}}',
-            headers: {'Content-Type': 'application/json'});
-      } else {
-        return Response(503,
-            body: '{"status": "not_ready", "services": {"database": $dbHealthy, "redis": $redisHealthy}}',
-            headers: {'Content-Type': 'application/json'});
-      }
-    } catch (error) {
-      return Response.internalServerError(
-          body: '{"status": "error", "message": "${error.toString()}"}', headers: {'Content-Type': 'application/json'});
-    }
+    return ResponseUtils.readyCheck(
+      databaseService: _databaseService,
+      redisService: _redisService,
+    );
   }
 
   /// 404处理器
   Response _notFoundHandler(Request request) {
-    return Response.notFound(
-        '{"error": {"code": "RESOURCE_NOT_FOUND", "message": "请求的资源不存在", "path": "${request.requestedUri.path}"}}',
-        headers: {'Content-Type': 'application/json'});
-  }
-
-  /// 获取综合健康状态
-  Future<Map<String, dynamic>> _getComprehensiveHealthStatus() async {
-    final healthStatus = <String, dynamic>{
-      'status': 'healthy',
-      'timestamp': DateTime.now().toIso8601String(),
-      'uptime_seconds': DateTime.now().difference(_startTime).inSeconds,
-      'version': '1.0.0',
-      'services': <String, dynamic>{},
-      'performance': <String, dynamic>{},
-    };
-
-    try {
-      // 并行检查所有服务
-      final serviceChecks = await Future.wait([
-        _checkDatabaseHealth(),
-        _checkRedisHealth(),
-        _checkCacheHealth(),
-        _checkHttpServerHealth(),
-      ]);
-
-      // 处理服务检查结果
-      healthStatus['services']['database'] = serviceChecks[0];
-      healthStatus['services']['redis'] = serviceChecks[1];
-      healthStatus['services']['cache'] = serviceChecks[2];
-      healthStatus['services']['http'] = serviceChecks[3];
-
-      // 计算性能指标
-      healthStatus['performance'] = await _getPerformanceMetrics();
-
-      // 计算整体健康状态
-      final services = healthStatus['services'] as Map<String, dynamic>;
-      final unhealthyServices = services.values.where((service) => service['status'] == 'unhealthy').length;
-
-      if (unhealthyServices > 0) {
-        healthStatus['status'] = 'degraded';
-        healthStatus['unhealthy_services'] = unhealthyServices;
-      }
-
-      // 检查关键服务
-      final criticalServices = ['database', 'redis'];
-      final criticalUnhealthy = criticalServices.where((service) => services[service]?['status'] == 'unhealthy').length;
-
-      if (criticalUnhealthy > 0) {
-        healthStatus['status'] = 'unhealthy';
-      }
-    } catch (error, stackTrace) {
-      healthStatus['status'] = 'unhealthy';
-      healthStatus['error'] = error.toString();
-      LoggerUtils.error('健康检查异常', error: error, stackTrace: stackTrace);
-    }
-
-    return healthStatus;
-  }
-
-  /// 检查数据库健康状态
-  Future<Map<String, dynamic>> _checkDatabaseHealth() async {
-    try {
-      final startTime = DateTime.now();
-      final isHealthy = await _databaseService.isHealthy();
-      final responseTime = DateTime.now().difference(startTime).inMilliseconds;
-
-      return {
-        'status': isHealthy ? 'healthy' : 'unhealthy',
-        'response_time_ms': responseTime,
-        'connection_pool': 'active',
-      };
-    } catch (error) {
-      return {
-        'status': 'unhealthy',
-        'error': error.toString(),
-        'response_time_ms': -1,
-      };
-    }
-  }
-
-  /// 检查Redis健康状态
-  Future<Map<String, dynamic>> _checkRedisHealth() async {
-    try {
-      final startTime = DateTime.now();
-      final isHealthy = await _redisService.isHealthy();
-      final responseTime = DateTime.now().difference(startTime).inMilliseconds;
-
-      return {
-        'status': isHealthy ? 'healthy' : 'unhealthy',
-        'response_time_ms': responseTime,
-        'connection': 'active',
-      };
-    } catch (error) {
-      return {
-        'status': 'unhealthy',
-        'error': error.toString(),
-        'response_time_ms': -1,
-      };
-    }
-  }
-
-  /// 检查缓存健康状态
-  Future<Map<String, dynamic>> _checkCacheHealth() async {
-    try {
-      final cacheStats = _cacheService.getStats();
-      final overall = cacheStats['overall'] as Map<String, dynamic>;
-
-      return {
-        'status': 'healthy',
-        'l1_hit_rate': overall['l1_hit_rate'],
-        'l2_hit_rate': overall['l2_hit_rate'],
-        'overall_hit_rate': overall['hit_rate'],
-        'l1_size': cacheStats['l1_cache']['size'],
-        'l1_max_size': cacheStats['l1_cache']['max_size'],
-      };
-    } catch (error) {
-      return {
-        'status': 'unhealthy',
-        'error': error.toString(),
-      };
-    }
-  }
-
-  /// 检查HTTP服务器健康状态
-  Future<Map<String, dynamic>> _checkHttpServerHealth() async {
-    return {
-      'status': _server != null ? 'healthy' : 'unhealthy',
-      'port': ServerConfig.port,
-      'host': ServerConfig.host,
-      'uptime_seconds': DateTime.now().difference(_startTime).inSeconds,
-    };
-  }
-
-  /// 获取性能指标
-  Future<Map<String, dynamic>> _getPerformanceMetrics() async {
-    try {
-      return {
-        'memory_usage': 'normal',
-        'cpu_usage': 'normal',
-        'active_connections': 0,
-        'cache_performance': _cacheService.getStats(),
-      };
-    } catch (error) {
-      return {
-        'error': '无法获取性能指标: ${error.toString()}',
-      };
-    }
+    return ResponseUtils.notFound(
+      path: request.requestedUri.path,
+    );
   }
 
   /// 指标端点（Prometheus格式）
   Future<Response> _metricsEndpoint(Request request) async {
-    try {
-      final metricsService = serviceRegistry.get<MetricsService>();
-
-      // 更新系统指标
-      final uptime = DateTime.now().difference(_startTime).inSeconds.toDouble();
-      metricsService.recordSystemMetrics(
-        uptimeSeconds: uptime,
-        memoryUsageBytes: 0.0, // 这里可以添加实际内存使用量
-        cpuUsagePercent: 0.0, // 这里可以添加实际CPU使用率
-      );
-
-      // 获取Prometheus格式的指标
-      final prometheusMetrics = metricsService.getPrometheusMetrics();
-
-      return Response.ok(
-        prometheusMetrics,
-        headers: {
-          'Content-Type': 'text/plain; version=0.0.4; charset=utf-8',
-        },
-      );
-    } catch (error, stackTrace) {
-      LoggerUtils.error('获取指标失败', error: error, stackTrace: stackTrace);
-
-      return Response.internalServerError(
-        body: '# 指标获取失败\n',
-        headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
-        },
-      );
-    }
+    final metricsService = serviceRegistry.get<MetricsService>();
+    return ResponseUtils.metricsEndpoint(
+      metricsService: metricsService,
+      startTime: _startTime,
+    );
   }
 }
