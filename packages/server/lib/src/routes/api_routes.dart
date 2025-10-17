@@ -46,7 +46,7 @@ class ApiRoutes {
   }
 
   /// 获取路由处理器
-  Handler get handler => _router;
+  Handler get handler => _router.call;
 
   /// 应用认证中间件到处理器
   Handler _withAuth(Handler handler) {
@@ -78,7 +78,7 @@ class ApiRoutes {
       authService: authService,
       withAuth: _withAuth,
     );
-    _router.mount('/', authRoutes.configure().call);
+    _router.mount('/', authRoutes.configure());
 
     // 用户路由模块（内部已处理认证）
     final userRoutes = UserRoutes(
@@ -86,14 +86,14 @@ class ApiRoutes {
       fileUploadService: fileUploadService,
       withAuth: _withAuth,
     );
-    _router.mount('/', userRoutes.configure().call);
+    _router.mount('/', userRoutes.configure());
 
     // 项目路由模块（整体应用认证）
     final projectRoutes = ProjectRoutes(
       projectService: projectService,
       withAuth: _withAuth,
     );
-    _router.mount('/', _withAuth(projectRoutes.configure().call));
+    _router.mount('/', _withAuth(projectRoutes.configure()));
 
     // 翻译路由模块（整体应用认证）
     final translationRoutes = TranslationRoutes(
@@ -101,7 +101,7 @@ class ApiRoutes {
       redisService: redisService,
       withAuth: _withAuth,
     );
-    _router.mount('/', _withAuth(translationRoutes.configure().call));
+    _router.mount('/', _withAuth(translationRoutes.configure()));
 
     // 语言路由模块（整体应用认证）
     final languageRoutes = LanguageRoutes(
@@ -109,7 +109,7 @@ class ApiRoutes {
       redisService: redisService,
       withAuth: _withAuth,
     );
-    _router.mount('/', _withAuth(languageRoutes.configure().call));
+    _router.mount('/', _withAuth(languageRoutes.configure()));
 
     // 角色权限路由模块（整体应用认证）
     final rolePermissionRoutes = RolePermissionRoutes(
@@ -117,7 +117,7 @@ class ApiRoutes {
       redisService: redisService,
       withAuth: _withAuth,
     );
-    _router.mount('/', _withAuth(rolePermissionRoutes.configure().call));
+    _router.mount('/', _withAuth(rolePermissionRoutes.configure()));
 
     // 系统配置路由模块（内部自行处理认证，部分公开）
     final configRoutes = ConfigRoutes(
@@ -125,7 +125,7 @@ class ApiRoutes {
       redisService: redisService,
       withAuth: _withAuth,
     );
-    _router.mount('/', configRoutes.configure().call);
+    _router.mount('/', configRoutes.configure());
 
     // 文件路由模块（整体应用认证）
     final fileRoutes = FileRoutes(
@@ -133,7 +133,7 @@ class ApiRoutes {
       redisService: redisService,
       withAuth: _withAuth,
     );
-    _router.mount('/', _withAuth(fileRoutes.configure().call));
+    _router.mount('/', _withAuth(fileRoutes.configure()));
 
     // 通知路由模块（整体应用认证）
     final notificationRoutes = NotificationRoutes(
@@ -141,6 +141,6 @@ class ApiRoutes {
       redisService: redisService,
       withAuth: _withAuth,
     );
-    _router.mount('/', _withAuth(notificationRoutes.configure().call));
+    _router.mount('/', _withAuth(notificationRoutes.configure()));
   }
 }
