@@ -110,8 +110,8 @@ class TranslationService extends BaseService {
   }
 
   /// 根据ID获取翻译条目详情
-  Future<TranslationEntryDto?> getTranslationEntryById(String entryId) async {
-    return execute<TranslationEntryDto?>(
+  Future<TranslationEntryModel?> getTranslationEntryById(String entryId) async {
+    return execute<TranslationEntryModel?>(
       () async {
         logInfo('获取翻译条目详情', context: {'entry_id': entryId});
 
@@ -135,14 +135,14 @@ class TranslationService extends BaseService {
           return null;
         }
 
-        return TranslationEntryDto.fromJson(result.first.toColumnMap());
+        return TranslationEntryModel.fromJson(result.first.toColumnMap());
       },
       operationName: 'getTranslationEntryById',
     );
   }
 
   /// 创建翻译条目
-  Future<TranslationEntryDto> createTranslationEntry({
+  Future<TranslationEntryModel> createTranslationEntry({
     required String projectId,
     required String entryKey,
     required String languageCode,
@@ -151,7 +151,7 @@ class TranslationService extends BaseService {
     String? translatorId,
     String? contextInfo,
   }) async {
-    return execute<TranslationEntryDto>(
+    return execute<TranslationEntryModel>(
       () async {
         logInfo('创建翻译条目', context: {
           'entry_key': entryKey,
@@ -191,7 +191,7 @@ class TranslationService extends BaseService {
           'context_info': contextInfo,
         });
 
-        final entry = TranslationEntryDto.fromJson(result.first.toColumnMap());
+        final entry = TranslationEntryModel.fromJson(result.first.toColumnMap());
 
         // 更新项目统计信息
         await _updateProjectStats(projectId);
@@ -205,7 +205,7 @@ class TranslationService extends BaseService {
   }
 
   /// 更新翻译条目
-  Future<TranslationEntryDto> updateTranslationEntry({
+  Future<TranslationEntryModel> updateTranslationEntry({
     required String entryId,
     String? targetText,
     String? status,
@@ -216,7 +216,7 @@ class TranslationService extends BaseService {
     Map<String, dynamic>? issues,
     String? updatedBy,
   }) async {
-    return execute<TranslationEntryDto>(
+    return execute<TranslationEntryModel>(
       () async {
         logInfo('更新翻译条目', context: {'entry_id': entryId});
 
@@ -289,7 +289,7 @@ class TranslationService extends BaseService {
       ''';
 
         final result = await _databaseService.query(sql, parameters);
-        final updatedEntry = TranslationEntryDto.fromJson(result.first.toColumnMap());
+        final updatedEntry = TranslationEntryModel.fromJson(result.first.toColumnMap());
 
         // 记录翻译历史
         await _recordTranslationHistory(updatedEntry, updatedBy);
@@ -333,18 +333,18 @@ class TranslationService extends BaseService {
   }
 
   /// 批量更新翻译条目
-  Future<List<TranslationEntryDto>> bulkUpdateTranslationEntries({
+  Future<List<TranslationEntryModel>> bulkUpdateTranslationEntries({
     required List<String> entryIds,
     String? status,
     String? translatorId,
     String? reviewerId,
     String? updatedBy,
   }) async {
-    return execute<List<TranslationEntryDto>>(
+    return execute<List<TranslationEntryModel>>(
       () async {
         logInfo('批量更新翻译条目', context: {'count': entryIds.length});
 
-        final updatedEntries = <TranslationEntryDto>[];
+        final updatedEntries = <TranslationEntryModel>[];
 
         await _databaseService.transaction(() async {
           for (final entryId in entryIds) {
@@ -449,7 +449,7 @@ class TranslationService extends BaseService {
 
   /// 记录翻译历史
   Future<void> _recordTranslationHistory(
-    TranslationEntryDto entry,
+    TranslationEntryModel entry,
     String? changedBy, {
     String changeType = 'update',
     String? changeReason,

@@ -14,12 +14,12 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
-UserInfo _$UserInfoFromJson(Map<String, dynamic> json) {
-  return _UserInfo.fromJson(json);
+UserInfoModel _$UserInfoModelFromJson(Map<String, dynamic> json) {
+  return _UserInfoModel.fromJson(json);
 }
 
 /// @nodoc
-mixin _$UserInfo {
+mixin _$UserInfoModel {
   String get id => throw _privateConstructorUsedError;
   String get username => throw _privateConstructorUsedError;
   String get email => throw _privateConstructorUsedError;
@@ -56,20 +56,21 @@ mixin _$UserInfo {
   @JsonKey(name: 'updated_at')
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this UserInfo to a JSON map.
+  /// Serializes this UserInfoModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// Create a copy of UserInfo
+  /// Create a copy of UserInfoModel
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $UserInfoCopyWith<UserInfo> get copyWith =>
+  $UserInfoModelCopyWith<UserInfoModel> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $UserInfoCopyWith<$Res> {
-  factory $UserInfoCopyWith(UserInfo value, $Res Function(UserInfo) then) =
-      _$UserInfoCopyWithImpl<$Res, UserInfo>;
+abstract class $UserInfoModelCopyWith<$Res> {
+  factory $UserInfoModelCopyWith(
+          UserInfoModel value, $Res Function(UserInfoModel) then) =
+      _$UserInfoModelCopyWithImpl<$Res, UserInfoModel>;
   @useResult
   $Res call(
       {String id,
@@ -94,16 +95,16 @@ abstract class $UserInfoCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$UserInfoCopyWithImpl<$Res, $Val extends UserInfo>
-    implements $UserInfoCopyWith<$Res> {
-  _$UserInfoCopyWithImpl(this._value, this._then);
+class _$UserInfoModelCopyWithImpl<$Res, $Val extends UserInfoModel>
+    implements $UserInfoModelCopyWith<$Res> {
+  _$UserInfoModelCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of UserInfo
+  /// Create a copy of UserInfoModel
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -210,11 +211,11 @@ class _$UserInfoCopyWithImpl<$Res, $Val extends UserInfo>
 }
 
 /// @nodoc
-abstract class _$$UserInfoImplCopyWith<$Res>
-    implements $UserInfoCopyWith<$Res> {
-  factory _$$UserInfoImplCopyWith(
-          _$UserInfoImpl value, $Res Function(_$UserInfoImpl) then) =
-      __$$UserInfoImplCopyWithImpl<$Res>;
+abstract class _$$UserInfoModelImplCopyWith<$Res>
+    implements $UserInfoModelCopyWith<$Res> {
+  factory _$$UserInfoModelImplCopyWith(
+          _$UserInfoModelImpl value, $Res Function(_$UserInfoModelImpl) then) =
+      __$$UserInfoModelImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call(
@@ -240,14 +241,14 @@ abstract class _$$UserInfoImplCopyWith<$Res>
 }
 
 /// @nodoc
-class __$$UserInfoImplCopyWithImpl<$Res>
-    extends _$UserInfoCopyWithImpl<$Res, _$UserInfoImpl>
-    implements _$$UserInfoImplCopyWith<$Res> {
-  __$$UserInfoImplCopyWithImpl(
-      _$UserInfoImpl _value, $Res Function(_$UserInfoImpl) _then)
+class __$$UserInfoModelImplCopyWithImpl<$Res>
+    extends _$UserInfoModelCopyWithImpl<$Res, _$UserInfoModelImpl>
+    implements _$$UserInfoModelImplCopyWith<$Res> {
+  __$$UserInfoModelImplCopyWithImpl(
+      _$UserInfoModelImpl _value, $Res Function(_$UserInfoModelImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of UserInfo
+  /// Create a copy of UserInfoModel
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -272,7 +273,7 @@ class __$$UserInfoImplCopyWithImpl<$Res>
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
-    return _then(_$UserInfoImpl(
+    return _then(_$UserInfoModelImpl(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
@@ -355,8 +356,8 @@ class __$$UserInfoImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$UserInfoImpl implements _UserInfo {
-  const _$UserInfoImpl(
+class _$UserInfoModelImpl implements _UserInfoModel {
+  const _$UserInfoModelImpl(
       {required this.id,
       required this.username,
       required this.email,
@@ -377,8 +378,8 @@ class _$UserInfoImpl implements _UserInfo {
       @JsonKey(name: 'created_at') this.createdAt,
       @JsonKey(name: 'updated_at') this.updatedAt});
 
-  factory _$UserInfoImpl.fromJson(Map<String, dynamic> json) =>
-      _$$UserInfoImplFromJson(json);
+  factory _$UserInfoModelImpl.fromJson(Map<String, dynamic> json) =>
+      _$$UserInfoModelImplFromJson(json);
 
   @override
   final String id;
@@ -437,14 +438,14 @@ class _$UserInfoImpl implements _UserInfo {
 
   @override
   String toString() {
-    return 'UserInfo(id: $id, username: $username, email: $email, emailEncrypted: $emailEncrypted, displayName: $displayName, avatarUrl: $avatarUrl, phone: $phone, timezone: $timezone, locale: $locale, isActive: $isActive, isEmailVerified: $isEmailVerified, emailVerifiedAt: $emailVerifiedAt, lastLoginAt: $lastLoginAt, lastLoginIp: $lastLoginIp, loginAttempts: $loginAttempts, lockedUntil: $lockedUntil, passwordChangedAt: $passwordChangedAt, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserInfoModel(id: $id, username: $username, email: $email, emailEncrypted: $emailEncrypted, displayName: $displayName, avatarUrl: $avatarUrl, phone: $phone, timezone: $timezone, locale: $locale, isActive: $isActive, isEmailVerified: $isEmailVerified, emailVerifiedAt: $emailVerifiedAt, lastLoginAt: $lastLoginAt, lastLoginIp: $lastLoginIp, loginAttempts: $loginAttempts, lockedUntil: $lockedUntil, passwordChangedAt: $passwordChangedAt, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$UserInfoImpl &&
+            other is _$UserInfoModelImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.username, username) ||
                 other.username == username) &&
@@ -506,24 +507,24 @@ class _$UserInfoImpl implements _UserInfo {
         updatedAt
       ]);
 
-  /// Create a copy of UserInfo
+  /// Create a copy of UserInfoModel
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$UserInfoImplCopyWith<_$UserInfoImpl> get copyWith =>
-      __$$UserInfoImplCopyWithImpl<_$UserInfoImpl>(this, _$identity);
+  _$$UserInfoModelImplCopyWith<_$UserInfoModelImpl> get copyWith =>
+      __$$UserInfoModelImplCopyWithImpl<_$UserInfoModelImpl>(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$UserInfoImplToJson(
+    return _$$UserInfoModelImplToJson(
       this,
     );
   }
 }
 
-abstract class _UserInfo implements UserInfo {
-  const factory _UserInfo(
+abstract class _UserInfoModel implements UserInfoModel {
+  const factory _UserInfoModel(
       {required final String id,
       required final String username,
       required final String email,
@@ -542,10 +543,11 @@ abstract class _UserInfo implements UserInfo {
       @JsonKey(name: 'locked_until') final DateTime? lockedUntil,
       @JsonKey(name: 'password_changed_at') final DateTime? passwordChangedAt,
       @JsonKey(name: 'created_at') final DateTime? createdAt,
-      @JsonKey(name: 'updated_at') final DateTime? updatedAt}) = _$UserInfoImpl;
+      @JsonKey(name: 'updated_at')
+      final DateTime? updatedAt}) = _$UserInfoModelImpl;
 
-  factory _UserInfo.fromJson(Map<String, dynamic> json) =
-      _$UserInfoImpl.fromJson;
+  factory _UserInfoModel.fromJson(Map<String, dynamic> json) =
+      _$UserInfoModelImpl.fromJson;
 
   @override
   String get id;
@@ -602,10 +604,10 @@ abstract class _UserInfo implements UserInfo {
   @JsonKey(name: 'updated_at')
   DateTime? get updatedAt;
 
-  /// Create a copy of UserInfo
+  /// Create a copy of UserInfoModel
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$UserInfoImplCopyWith<_$UserInfoImpl> get copyWith =>
+  _$$UserInfoModelImplCopyWith<_$UserInfoModelImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

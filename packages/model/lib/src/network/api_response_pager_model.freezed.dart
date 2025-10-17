@@ -14,13 +14,13 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
-ApiResponsePager<T> _$ApiResponsePagerFromJson<T>(
+ApiResponsePagerModel<T> _$ApiResponsePagerModelFromJson<T>(
     Map<String, dynamic> json, T Function(Object?) fromJsonT) {
-  return _ApiResponsePager<T>.fromJson(json, fromJsonT);
+  return _ApiResponsePagerModel<T>.fromJson(json, fromJsonT);
 }
 
 /// @nodoc
-mixin _$ApiResponsePager<T> {
+mixin _$ApiResponsePagerModel<T> {
   @JsonKey(name: 'page')
   int get page => throw _privateConstructorUsedError;
   @JsonKey(name: 'page_size')
@@ -32,22 +32,22 @@ mixin _$ApiResponsePager<T> {
   @JsonKey(name: 'items')
   List<T>? get items => throw _privateConstructorUsedError;
 
-  /// Serializes this ApiResponsePager to a JSON map.
+  /// Serializes this ApiResponsePagerModel to a JSON map.
   Map<String, dynamic> toJson(Object? Function(T) toJsonT) =>
       throw _privateConstructorUsedError;
 
-  /// Create a copy of ApiResponsePager
+  /// Create a copy of ApiResponsePagerModel
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $ApiResponsePagerCopyWith<T, ApiResponsePager<T>> get copyWith =>
+  $ApiResponsePagerModelCopyWith<T, ApiResponsePagerModel<T>> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $ApiResponsePagerCopyWith<T, $Res> {
-  factory $ApiResponsePagerCopyWith(
-          ApiResponsePager<T> value, $Res Function(ApiResponsePager<T>) then) =
-      _$ApiResponsePagerCopyWithImpl<T, $Res, ApiResponsePager<T>>;
+abstract class $ApiResponsePagerModelCopyWith<T, $Res> {
+  factory $ApiResponsePagerModelCopyWith(ApiResponsePagerModel<T> value,
+          $Res Function(ApiResponsePagerModel<T>) then) =
+      _$ApiResponsePagerModelCopyWithImpl<T, $Res, ApiResponsePagerModel<T>>;
   @useResult
   $Res call(
       {@JsonKey(name: 'page') int page,
@@ -58,16 +58,17 @@ abstract class $ApiResponsePagerCopyWith<T, $Res> {
 }
 
 /// @nodoc
-class _$ApiResponsePagerCopyWithImpl<T, $Res, $Val extends ApiResponsePager<T>>
-    implements $ApiResponsePagerCopyWith<T, $Res> {
-  _$ApiResponsePagerCopyWithImpl(this._value, this._then);
+class _$ApiResponsePagerModelCopyWithImpl<T, $Res,
+        $Val extends ApiResponsePagerModel<T>>
+    implements $ApiResponsePagerModelCopyWith<T, $Res> {
+  _$ApiResponsePagerModelCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of ApiResponsePager
+  /// Create a copy of ApiResponsePagerModel
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -104,11 +105,12 @@ class _$ApiResponsePagerCopyWithImpl<T, $Res, $Val extends ApiResponsePager<T>>
 }
 
 /// @nodoc
-abstract class _$$ApiResponsePagerImplCopyWith<T, $Res>
-    implements $ApiResponsePagerCopyWith<T, $Res> {
-  factory _$$ApiResponsePagerImplCopyWith(_$ApiResponsePagerImpl<T> value,
-          $Res Function(_$ApiResponsePagerImpl<T>) then) =
-      __$$ApiResponsePagerImplCopyWithImpl<T, $Res>;
+abstract class _$$ApiResponsePagerModelImplCopyWith<T, $Res>
+    implements $ApiResponsePagerModelCopyWith<T, $Res> {
+  factory _$$ApiResponsePagerModelImplCopyWith(
+          _$ApiResponsePagerModelImpl<T> value,
+          $Res Function(_$ApiResponsePagerModelImpl<T>) then) =
+      __$$ApiResponsePagerModelImplCopyWithImpl<T, $Res>;
   @override
   @useResult
   $Res call(
@@ -120,14 +122,16 @@ abstract class _$$ApiResponsePagerImplCopyWith<T, $Res>
 }
 
 /// @nodoc
-class __$$ApiResponsePagerImplCopyWithImpl<T, $Res>
-    extends _$ApiResponsePagerCopyWithImpl<T, $Res, _$ApiResponsePagerImpl<T>>
-    implements _$$ApiResponsePagerImplCopyWith<T, $Res> {
-  __$$ApiResponsePagerImplCopyWithImpl(_$ApiResponsePagerImpl<T> _value,
-      $Res Function(_$ApiResponsePagerImpl<T>) _then)
+class __$$ApiResponsePagerModelImplCopyWithImpl<T, $Res>
+    extends _$ApiResponsePagerModelCopyWithImpl<T, $Res,
+        _$ApiResponsePagerModelImpl<T>>
+    implements _$$ApiResponsePagerModelImplCopyWith<T, $Res> {
+  __$$ApiResponsePagerModelImplCopyWithImpl(
+      _$ApiResponsePagerModelImpl<T> _value,
+      $Res Function(_$ApiResponsePagerModelImpl<T>) _then)
       : super(_value, _then);
 
-  /// Create a copy of ApiResponsePager
+  /// Create a copy of ApiResponsePagerModel
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -138,7 +142,7 @@ class __$$ApiResponsePagerImplCopyWithImpl<T, $Res>
     Object? totalPage = null,
     Object? items = freezed,
   }) {
-    return _then(_$ApiResponsePagerImpl<T>(
+    return _then(_$ApiResponsePagerModelImpl<T>(
       page: null == page
           ? _value.page
           : page // ignore: cast_nullable_to_non_nullable
@@ -165,8 +169,8 @@ class __$$ApiResponsePagerImplCopyWithImpl<T, $Res>
 
 /// @nodoc
 @JsonSerializable(genericArgumentFactories: true)
-class _$ApiResponsePagerImpl<T> implements _ApiResponsePager<T> {
-  const _$ApiResponsePagerImpl(
+class _$ApiResponsePagerModelImpl<T> implements _ApiResponsePagerModel<T> {
+  const _$ApiResponsePagerModelImpl(
       {@JsonKey(name: 'page') required this.page,
       @JsonKey(name: 'page_size') required this.pageSize,
       @JsonKey(name: 'total_size') required this.totalSize,
@@ -174,9 +178,9 @@ class _$ApiResponsePagerImpl<T> implements _ApiResponsePager<T> {
       @JsonKey(name: 'items') final List<T>? items})
       : _items = items;
 
-  factory _$ApiResponsePagerImpl.fromJson(
+  factory _$ApiResponsePagerModelImpl.fromJson(
           Map<String, dynamic> json, T Function(Object?) fromJsonT) =>
-      _$$ApiResponsePagerImplFromJson(json, fromJsonT);
+      _$$ApiResponsePagerModelImplFromJson(json, fromJsonT);
 
   @override
   @JsonKey(name: 'page')
@@ -203,14 +207,14 @@ class _$ApiResponsePagerImpl<T> implements _ApiResponsePager<T> {
 
   @override
   String toString() {
-    return 'ApiResponsePager<$T>(page: $page, pageSize: $pageSize, totalSize: $totalSize, totalPage: $totalPage, items: $items)';
+    return 'ApiResponsePagerModel<$T>(page: $page, pageSize: $pageSize, totalSize: $totalSize, totalPage: $totalPage, items: $items)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$ApiResponsePagerImpl<T> &&
+            other is _$ApiResponsePagerModelImpl<T> &&
             (identical(other.page, page) || other.page == page) &&
             (identical(other.pageSize, pageSize) ||
                 other.pageSize == pageSize) &&
@@ -226,33 +230,33 @@ class _$ApiResponsePagerImpl<T> implements _ApiResponsePager<T> {
   int get hashCode => Object.hash(runtimeType, page, pageSize, totalSize,
       totalPage, const DeepCollectionEquality().hash(_items));
 
-  /// Create a copy of ApiResponsePager
+  /// Create a copy of ApiResponsePagerModel
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$ApiResponsePagerImplCopyWith<T, _$ApiResponsePagerImpl<T>> get copyWith =>
-      __$$ApiResponsePagerImplCopyWithImpl<T, _$ApiResponsePagerImpl<T>>(
-          this, _$identity);
+  _$$ApiResponsePagerModelImplCopyWith<T, _$ApiResponsePagerModelImpl<T>>
+      get copyWith => __$$ApiResponsePagerModelImplCopyWithImpl<T,
+          _$ApiResponsePagerModelImpl<T>>(this, _$identity);
 
   @override
   Map<String, dynamic> toJson(Object? Function(T) toJsonT) {
-    return _$$ApiResponsePagerImplToJson<T>(this, toJsonT);
+    return _$$ApiResponsePagerModelImplToJson<T>(this, toJsonT);
   }
 }
 
-abstract class _ApiResponsePager<T> implements ApiResponsePager<T> {
-  const factory _ApiResponsePager(
+abstract class _ApiResponsePagerModel<T> implements ApiResponsePagerModel<T> {
+  const factory _ApiResponsePagerModel(
           {@JsonKey(name: 'page') required final int page,
           @JsonKey(name: 'page_size') required final int pageSize,
           @JsonKey(name: 'total_size') required final int totalSize,
           @JsonKey(name: 'total_page') required final int totalPage,
           @JsonKey(name: 'items') final List<T>? items}) =
-      _$ApiResponsePagerImpl<T>;
+      _$ApiResponsePagerModelImpl<T>;
 
-  factory _ApiResponsePager.fromJson(
+  factory _ApiResponsePagerModel.fromJson(
           Map<String, dynamic> json, T Function(Object?) fromJsonT) =
-      _$ApiResponsePagerImpl<T>.fromJson;
+      _$ApiResponsePagerModelImpl<T>.fromJson;
 
   @override
   @JsonKey(name: 'page')
@@ -270,10 +274,10 @@ abstract class _ApiResponsePager<T> implements ApiResponsePager<T> {
   @JsonKey(name: 'items')
   List<T>? get items;
 
-  /// Create a copy of ApiResponsePager
+  /// Create a copy of ApiResponsePagerModel
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$ApiResponsePagerImplCopyWith<T, _$ApiResponsePagerImpl<T>> get copyWith =>
-      throw _privateConstructorUsedError;
+  _$$ApiResponsePagerModelImplCopyWith<T, _$ApiResponsePagerModelImpl<T>>
+      get copyWith => throw _privateConstructorUsedError;
 }

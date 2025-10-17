@@ -1,5 +1,5 @@
 /// 请求额外配置类
-class RequestExtra {
+class RequestExtraModel {
   /// 是否显示 loading
   final bool showLoading;
 
@@ -12,7 +12,7 @@ class RequestExtra {
   /// 是否显示失败提示
   final bool showErrorToast;
 
-  const RequestExtra({
+  const RequestExtraModel({
     this.showLoading = false,
     this.showLazyLoading = true,
     this.showSuccessToast = false,
@@ -30,8 +30,8 @@ class RequestExtra {
   }
 
   /// 从 JSON 创建
-  factory RequestExtra.fromJson(Map<String, dynamic> json) {
-    return RequestExtra(
+  factory RequestExtraModel.fromJson(Map<String, dynamic> json) {
+    return RequestExtraModel(
       showLoading: json['showLoading'] as bool? ?? false,
       showLazyLoading: json['showLazyLoading'] as bool? ?? true,
       showSuccessToast: json['showSuccessToast'] as bool? ?? false,

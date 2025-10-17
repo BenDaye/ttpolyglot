@@ -5,8 +5,8 @@ part 'translation_entry_model.g.dart';
 
 /// 翻译条目数据传输对象
 @freezed
-class TranslationEntryDto with _$TranslationEntryDto {
-  const factory TranslationEntryDto({
+class TranslationEntryModel with _$TranslationEntryModel {
+  const factory TranslationEntryModel({
     /// 条目ID
     String? id,
 
@@ -84,11 +84,11 @@ class TranslationEntryDto with _$TranslationEntryDto {
 
     /// 更新时间
     @JsonKey(name: 'updated_at') DateTime? updatedAt,
-  }) = _TranslationEntryDto;
+  }) = _TranslationEntryModel;
 
-  const TranslationEntryDto._();
+  const TranslationEntryModel._();
 
-  factory TranslationEntryDto.fromJson(Map<String, dynamic> json) => _$TranslationEntryDtoFromJson(json);
+  factory TranslationEntryModel.fromJson(Map<String, dynamic> json) => _$TranslationEntryModelFromJson(json);
 
   /// 是否已翻译
   bool get isTranslated => targetText != null && targetText!.isNotEmpty;

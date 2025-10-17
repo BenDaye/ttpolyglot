@@ -40,8 +40,8 @@ extension ImportRecordStatusExtension on ImportRecordStatus {
 }
 
 /// 导入记录
-class ImportRecord {
-  const ImportRecord({
+class ImportRecordModel {
+  const ImportRecordModel({
     required this.id,
     required this.fileName,
     required this.status,
@@ -139,7 +139,7 @@ class ImportRecord {
   }
 
   /// 创建副本
-  ImportRecord copyWith({
+  ImportRecordModel copyWith({
     String? id,
     String? fileName,
     ImportRecordStatus? status,
@@ -152,7 +152,7 @@ class ImportRecord {
     int? fileSize,
     int? duration,
   }) {
-    return ImportRecord(
+    return ImportRecordModel(
       id: id ?? this.id,
       fileName: fileName ?? this.fileName,
       status: status ?? this.status,
@@ -185,8 +185,8 @@ class ImportRecord {
   }
 
   /// 从 Map 创建
-  factory ImportRecord.fromMap(Map<String, dynamic> map) {
-    return ImportRecord(
+  factory ImportRecordModel.fromMap(Map<String, dynamic> map) {
+    return ImportRecordModel(
       id: map['id'] ?? '',
       fileName: map['fileName'] ?? '',
       status: ImportRecordStatus.values[map['status'] ?? 0],
@@ -205,18 +205,18 @@ class ImportRecord {
   String toJson() => json.encode(toMap());
 
   /// 从 JSON 创建
-  factory ImportRecord.fromJson(String source) => ImportRecord.fromMap(json.decode(source));
+  factory ImportRecordModel.fromJson(String source) => ImportRecordModel.fromMap(json.decode(source));
 
   @override
   String toString() {
-    return 'ImportRecord(id: $id, fileName: $fileName, status: $status, message: $message, importedCount: $importedCount, conflictCount: $conflictCount, skippedCount: $skippedCount, timestamp: $timestamp)';
+    return 'ImportRecordModel(id: $id, fileName: $fileName, status: $status, message: $message, importedCount: $importedCount, conflictCount: $conflictCount, skippedCount: $skippedCount, timestamp: $timestamp)';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
-    return other is ImportRecord &&
+    return other is ImportRecordModel &&
         other.id == id &&
         other.fileName == fileName &&
         other.status == status &&
@@ -247,7 +247,7 @@ class ImportRecord {
 }
 
 /// 导入历史记录数据模型
-class ImportHistoryItem {
+class ImportHistoryItemModel {
   final String filename;
   final String description;
   final DateTime timestamp;
@@ -255,7 +255,7 @@ class ImportHistoryItem {
   final String format;
   final int recordCount;
 
-  ImportHistoryItem({
+  ImportHistoryItemModel({
     required this.filename,
     required this.description,
     required this.timestamp,
@@ -275,8 +275,8 @@ class ImportHistoryItem {
     };
   }
 
-  factory ImportHistoryItem.fromJson(Map<String, dynamic> json) {
-    return ImportHistoryItem(
+  factory ImportHistoryItemModel.fromJson(Map<String, dynamic> json) {
+    return ImportHistoryItemModel(
       filename: json['filename'],
       description: json['description'],
       timestamp: DateTime.parse(json['timestamp']),

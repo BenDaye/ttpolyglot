@@ -14,12 +14,13 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
-TranslationEntryDto _$TranslationEntryDtoFromJson(Map<String, dynamic> json) {
-  return _TranslationEntryDto.fromJson(json);
+TranslationEntryModel _$TranslationEntryModelFromJson(
+    Map<String, dynamic> json) {
+  return _TranslationEntryModel.fromJson(json);
 }
 
 /// @nodoc
-mixin _$TranslationEntryDto {
+mixin _$TranslationEntryModel {
   /// 条目ID
   String? get id => throw _privateConstructorUsedError;
 
@@ -120,21 +121,21 @@ mixin _$TranslationEntryDto {
   @JsonKey(name: 'updated_at')
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this TranslationEntryDto to a JSON map.
+  /// Serializes this TranslationEntryModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// Create a copy of TranslationEntryDto
+  /// Create a copy of TranslationEntryModel
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $TranslationEntryDtoCopyWith<TranslationEntryDto> get copyWith =>
+  $TranslationEntryModelCopyWith<TranslationEntryModel> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $TranslationEntryDtoCopyWith<$Res> {
-  factory $TranslationEntryDtoCopyWith(
-          TranslationEntryDto value, $Res Function(TranslationEntryDto) then) =
-      _$TranslationEntryDtoCopyWithImpl<$Res, TranslationEntryDto>;
+abstract class $TranslationEntryModelCopyWith<$Res> {
+  factory $TranslationEntryModelCopyWith(TranslationEntryModel value,
+          $Res Function(TranslationEntryModel) then) =
+      _$TranslationEntryModelCopyWithImpl<$Res, TranslationEntryModel>;
   @useResult
   $Res call(
       {String? id,
@@ -166,16 +167,17 @@ abstract class $TranslationEntryDtoCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$TranslationEntryDtoCopyWithImpl<$Res, $Val extends TranslationEntryDto>
-    implements $TranslationEntryDtoCopyWith<$Res> {
-  _$TranslationEntryDtoCopyWithImpl(this._value, this._then);
+class _$TranslationEntryModelCopyWithImpl<$Res,
+        $Val extends TranslationEntryModel>
+    implements $TranslationEntryModelCopyWith<$Res> {
+  _$TranslationEntryModelCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of TranslationEntryDto
+  /// Create a copy of TranslationEntryModel
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -317,11 +319,12 @@ class _$TranslationEntryDtoCopyWithImpl<$Res, $Val extends TranslationEntryDto>
 }
 
 /// @nodoc
-abstract class _$$TranslationEntryDtoImplCopyWith<$Res>
-    implements $TranslationEntryDtoCopyWith<$Res> {
-  factory _$$TranslationEntryDtoImplCopyWith(_$TranslationEntryDtoImpl value,
-          $Res Function(_$TranslationEntryDtoImpl) then) =
-      __$$TranslationEntryDtoImplCopyWithImpl<$Res>;
+abstract class _$$TranslationEntryModelImplCopyWith<$Res>
+    implements $TranslationEntryModelCopyWith<$Res> {
+  factory _$$TranslationEntryModelImplCopyWith(
+          _$TranslationEntryModelImpl value,
+          $Res Function(_$TranslationEntryModelImpl) then) =
+      __$$TranslationEntryModelImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call(
@@ -354,14 +357,15 @@ abstract class _$$TranslationEntryDtoImplCopyWith<$Res>
 }
 
 /// @nodoc
-class __$$TranslationEntryDtoImplCopyWithImpl<$Res>
-    extends _$TranslationEntryDtoCopyWithImpl<$Res, _$TranslationEntryDtoImpl>
-    implements _$$TranslationEntryDtoImplCopyWith<$Res> {
-  __$$TranslationEntryDtoImplCopyWithImpl(_$TranslationEntryDtoImpl _value,
-      $Res Function(_$TranslationEntryDtoImpl) _then)
+class __$$TranslationEntryModelImplCopyWithImpl<$Res>
+    extends _$TranslationEntryModelCopyWithImpl<$Res,
+        _$TranslationEntryModelImpl>
+    implements _$$TranslationEntryModelImplCopyWith<$Res> {
+  __$$TranslationEntryModelImplCopyWithImpl(_$TranslationEntryModelImpl _value,
+      $Res Function(_$TranslationEntryModelImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of TranslationEntryDto
+  /// Create a copy of TranslationEntryModel
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -393,7 +397,7 @@ class __$$TranslationEntryDtoImplCopyWithImpl<$Res>
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
-    return _then(_$TranslationEntryDtoImpl(
+    return _then(_$TranslationEntryModelImpl(
       id: freezed == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
@@ -504,8 +508,8 @@ class __$$TranslationEntryDtoImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$TranslationEntryDtoImpl extends _TranslationEntryDto {
-  const _$TranslationEntryDtoImpl(
+class _$TranslationEntryModelImpl extends _TranslationEntryModel {
+  const _$TranslationEntryModelImpl(
       {this.id,
       @JsonKey(name: 'project_id') required this.projectId,
       @JsonKey(name: 'entry_key') required this.entryKey,
@@ -534,8 +538,8 @@ class _$TranslationEntryDtoImpl extends _TranslationEntryDto {
       @JsonKey(name: 'updated_at') this.updatedAt})
       : super._();
 
-  factory _$TranslationEntryDtoImpl.fromJson(Map<String, dynamic> json) =>
-      _$$TranslationEntryDtoImplFromJson(json);
+  factory _$TranslationEntryModelImpl.fromJson(Map<String, dynamic> json) =>
+      _$$TranslationEntryModelImplFromJson(json);
 
   /// 条目ID
   @override
@@ -667,14 +671,14 @@ class _$TranslationEntryDtoImpl extends _TranslationEntryDto {
 
   @override
   String toString() {
-    return 'TranslationEntryDto(id: $id, projectId: $projectId, entryKey: $entryKey, languageCode: $languageCode, sourceText: $sourceText, targetText: $targetText, translatorId: $translatorId, translatorUsername: $translatorUsername, reviewerId: $reviewerId, reviewerUsername: $reviewerUsername, contextInfo: $contextInfo, status: $status, version: $version, qualityScore: $qualityScore, issues: $issues, hasIssues: $hasIssues, characterCount: $characterCount, wordCount: $wordCount, assignedAt: $assignedAt, translatedAt: $translatedAt, reviewedAt: $reviewedAt, approvedAt: $approvedAt, languageName: $languageName, languageNativeName: $languageNativeName, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'TranslationEntryModel(id: $id, projectId: $projectId, entryKey: $entryKey, languageCode: $languageCode, sourceText: $sourceText, targetText: $targetText, translatorId: $translatorId, translatorUsername: $translatorUsername, reviewerId: $reviewerId, reviewerUsername: $reviewerUsername, contextInfo: $contextInfo, status: $status, version: $version, qualityScore: $qualityScore, issues: $issues, hasIssues: $hasIssues, characterCount: $characterCount, wordCount: $wordCount, assignedAt: $assignedAt, translatedAt: $translatedAt, reviewedAt: $reviewedAt, approvedAt: $approvedAt, languageName: $languageName, languageNativeName: $languageNativeName, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$TranslationEntryDtoImpl &&
+            other is _$TranslationEntryModelImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.projectId, projectId) ||
                 other.projectId == projectId) &&
@@ -757,25 +761,25 @@ class _$TranslationEntryDtoImpl extends _TranslationEntryDto {
         updatedAt
       ]);
 
-  /// Create a copy of TranslationEntryDto
+  /// Create a copy of TranslationEntryModel
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$TranslationEntryDtoImplCopyWith<_$TranslationEntryDtoImpl> get copyWith =>
-      __$$TranslationEntryDtoImplCopyWithImpl<_$TranslationEntryDtoImpl>(
-          this, _$identity);
+  _$$TranslationEntryModelImplCopyWith<_$TranslationEntryModelImpl>
+      get copyWith => __$$TranslationEntryModelImplCopyWithImpl<
+          _$TranslationEntryModelImpl>(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$TranslationEntryDtoImplToJson(
+    return _$$TranslationEntryModelImplToJson(
       this,
     );
   }
 }
 
-abstract class _TranslationEntryDto extends TranslationEntryDto {
-  const factory _TranslationEntryDto(
+abstract class _TranslationEntryModel extends TranslationEntryModel {
+  const factory _TranslationEntryModel(
       {final String? id,
       @JsonKey(name: 'project_id') required final String projectId,
       @JsonKey(name: 'entry_key') required final String entryKey,
@@ -802,11 +806,11 @@ abstract class _TranslationEntryDto extends TranslationEntryDto {
       @JsonKey(name: 'language_native_name') final String? languageNativeName,
       @JsonKey(name: 'created_at') final DateTime? createdAt,
       @JsonKey(name: 'updated_at')
-      final DateTime? updatedAt}) = _$TranslationEntryDtoImpl;
-  const _TranslationEntryDto._() : super._();
+      final DateTime? updatedAt}) = _$TranslationEntryModelImpl;
+  const _TranslationEntryModel._() : super._();
 
-  factory _TranslationEntryDto.fromJson(Map<String, dynamic> json) =
-      _$TranslationEntryDtoImpl.fromJson;
+  factory _TranslationEntryModel.fromJson(Map<String, dynamic> json) =
+      _$TranslationEntryModelImpl.fromJson;
 
   /// 条目ID
   @override
@@ -934,10 +938,10 @@ abstract class _TranslationEntryDto extends TranslationEntryDto {
   @JsonKey(name: 'updated_at')
   DateTime? get updatedAt;
 
-  /// Create a copy of TranslationEntryDto
+  /// Create a copy of TranslationEntryModel
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$TranslationEntryDtoImplCopyWith<_$TranslationEntryDtoImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+  _$$TranslationEntryModelImplCopyWith<_$TranslationEntryModelImpl>
+      get copyWith => throw _privateConstructorUsedError;
 }

@@ -54,7 +54,7 @@ class HttpClient {
   }
 
   /// GET 请求
-  static Future<ApiResponse<T>> get<T>(
+  static Future<ApiResponseModel<T>> get<T>(
     String path, {
     Map<String, dynamic>? query,
     Options? options,
@@ -64,7 +64,7 @@ class HttpClient {
   }) {
     return _fetch<T>(
       delay,
-      RequestExtra.fromJson(options?.extra ?? {}),
+      RequestExtraModel.fromJson(options?.extra ?? {}),
       dio.get<dynamic>(
         path,
         queryParameters: query,
@@ -76,7 +76,7 @@ class HttpClient {
   }
 
   /// POST 请求
-  static Future<ApiResponse<T>> post<T>(
+  static Future<ApiResponseModel<T>> post<T>(
     String path, {
     Object? data,
     Map<String, dynamic>? query,
@@ -88,7 +88,7 @@ class HttpClient {
   }) {
     return _fetch<T>(
       delay,
-      RequestExtra.fromJson(options?.extra ?? {}),
+      RequestExtraModel.fromJson(options?.extra ?? {}),
       dio.post<dynamic>(
         path,
         data: data,
@@ -102,7 +102,7 @@ class HttpClient {
   }
 
   /// PUT 请求
-  static Future<ApiResponse<T>> put<T>(
+  static Future<ApiResponseModel<T>> put<T>(
     String path, {
     Object? data,
     Map<String, dynamic>? query,
@@ -114,7 +114,7 @@ class HttpClient {
   }) {
     return _fetch<T>(
       delay,
-      RequestExtra.fromJson(options?.extra ?? {}),
+      RequestExtraModel.fromJson(options?.extra ?? {}),
       dio.put<dynamic>(
         path,
         data: data,
@@ -128,7 +128,7 @@ class HttpClient {
   }
 
   /// DELETE 请求
-  static Future<ApiResponse<T>> delete<T>(
+  static Future<ApiResponseModel<T>> delete<T>(
     String path, {
     Object? data,
     Map<String, dynamic>? query,
@@ -138,7 +138,7 @@ class HttpClient {
   }) {
     return _fetch<T>(
       delay,
-      RequestExtra.fromJson(options?.extra ?? {}),
+      RequestExtraModel.fromJson(options?.extra ?? {}),
       dio.delete<dynamic>(
         path,
         data: data,
@@ -150,14 +150,14 @@ class HttpClient {
   }
 
   /// 统一请求处理
-  static Future<ApiResponse<T>> _fetch<T>(
+  static Future<ApiResponseModel<T>> _fetch<T>(
     Duration? delay,
-    RequestExtra extra,
+    RequestExtraModel extra,
     Future<Response<dynamic>> future,
   ) {
     final start = DateTime.now().millisecondsSinceEpoch;
 
-    return future.then<ApiResponse<T>>((response) async {
+    return future.then<ApiResponseModel<T>>((response) async {
       final current = DateTime.now().millisecondsSinceEpoch - start;
 
       // 如果设置了延时，并且当前请求时间小于阈值，则等待剩余时间
@@ -167,8 +167,8 @@ class HttpClient {
         );
       }
       // 成功处理
-      final apiResponse = response.data as ApiResponse;
-      final typedResponse = ApiResponse<T>(
+      final apiResponse = response.data as ApiResponseModel;
+      final typedResponse = ApiResponseModel<T>(
         code: apiResponse.code,
         message: apiResponse.message,
         type: apiResponse.type,
@@ -177,18 +177,18 @@ class HttpClient {
       return _successCallback(typedResponse, extra);
     }).catchError((err) {
       // 定义错误类型
-      ApiResponse<T> response;
-      if (err is DioException && err.error is ApiResponse) {
-        // 从原始 ApiResponse 中提取信息，重新构造为 ApiResponse<T>
-        final original = err.error as ApiResponse;
-        response = ApiResponse<T>(
+      ApiResponseModel<T> response;
+      if (err is DioException && err.error is ApiResponseModel) {
+        // 从原始 ApiResponse 中提取信息，重新构造为 ApiResponseModel<T>
+        final original = err.error as ApiResponseModel;
+        response = ApiResponseModel<T>(
           code: original.code,
           message: original.message,
           type: original.type,
           data: original.data as T?,
         );
       } else {
-        response = ApiResponse.of(ApiResponseCode.unknown, message: err.toString());
+        response = ApiResponseModel.of(ApiResponseCode.unknown, message: err.toString());
       }
       // 错误处理
       throw _failCallback(response, extra);
@@ -196,13 +196,13 @@ class HttpClient {
   }
 
   // 成功方法
-  static ApiResponse<T> _successCallback<T>(ApiResponse<T> response, RequestExtra extra) {
+  static ApiResponseModel<T> _successCallback<T>(ApiResponseModel<T> response, RequestExtraModel extra) {
     MessageTips.showSuccessTips(message: response.message, type: response.type, extra: extra);
     return response;
   }
 
   // 错误方法
-  static ApiResponse<T> _failCallback<T>(ApiResponse<T> response, RequestExtra extra) {
+  static ApiResponseModel<T> _failCallback<T>(ApiResponseModel<T> response, RequestExtraModel extra) {
     MessageTips.showFailTips(
       message: response.message,
       type: response.type,

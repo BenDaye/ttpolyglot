@@ -3,24 +3,24 @@ import 'package:ttpolyglot_server/server.dart';
 
 /// 认证服务结果辅助类
 class AuthResult {
-  static ApiResponse<Map<String, dynamic>> success({
+  static ApiResponseModel<Map<String, dynamic>> success({
     String? userId,
     String? message,
     Map<String, dynamic>? data,
   }) {
-    return ApiResponse(
+    return ApiResponseModel(
       code: ApiResponseCode.success,
       message: message ?? ApiResponseCode.success.message,
       data: data,
     );
   }
 
-  static ApiResponse<Map<String, dynamic>> failure({
+  static ApiResponseModel<Map<String, dynamic>> failure({
     ApiResponseCode code = ApiResponseCode.error,
     String? message,
     Map<String, dynamic>? data,
   }) {
-    return ApiResponse(
+    return ApiResponseModel(
       code: code,
       message: message ?? code.message,
       data: data,
@@ -49,7 +49,7 @@ class AuthService extends BaseService {
   }
 
   /// 用户注册
-  Future<ApiResponse<Map<String, dynamic>>> register({
+  Future<ApiResponseModel<Map<String, dynamic>>> register({
     required String username,
     required String email,
     required String password,
@@ -136,7 +136,7 @@ class AuthService extends BaseService {
   }
 
   /// 用户登录
-  Future<ApiResponse> login({
+  Future<ApiResponseModel> login({
     required String emailOrUsername,
     required String password,
     String? deviceId,
@@ -254,7 +254,7 @@ class AuthService extends BaseService {
   }
 
   /// 刷新令牌
-  Future<ApiResponse> refreshToken(String refreshToken) async {
+  Future<ApiResponseModel> refreshToken(String refreshToken) async {
     try {
       // final logger = LoggerFactory.getLogger('AuthService');
       LoggerUtils.info('刷新令牌');
@@ -326,7 +326,7 @@ class AuthService extends BaseService {
   }
 
   /// 用户登出
-  Future<ApiResponse> logout(String accessToken) async {
+  Future<ApiResponseModel> logout(String accessToken) async {
     try {
       LoggerUtils.info('用户登出');
 
@@ -395,7 +395,7 @@ class AuthService extends BaseService {
   }
 
   /// 邮箱验证
-  Future<ApiResponse> verifyEmail(String token) async {
+  Future<ApiResponseModel> verifyEmail(String token) async {
     try {
       LoggerUtils.info('邮箱验证');
 
@@ -445,7 +445,7 @@ class AuthService extends BaseService {
   }
 
   /// 忘记密码
-  Future<ApiResponse> forgotPassword(String email) async {
+  Future<ApiResponseModel> forgotPassword(String email) async {
     try {
       LoggerUtils.info('忘记密码请求: $email');
 
@@ -499,7 +499,7 @@ class AuthService extends BaseService {
   }
 
   /// 重置密码
-  Future<ApiResponse> resetPassword(String token, String newPassword) async {
+  Future<ApiResponseModel> resetPassword(String token, String newPassword) async {
     try {
       LoggerUtils.info('重置密码');
 
@@ -563,7 +563,7 @@ class AuthService extends BaseService {
   }
 
   /// 重发邮箱验证邮件
-  Future<ApiResponse> resendVerification(String email) async {
+  Future<ApiResponseModel> resendVerification(String email) async {
     try {
       if (!_cryptoUtils.isValidEmail(email)) {
         return AuthResult.failure(code: ApiResponseCode.validationError, message: '邮箱格式不正确');

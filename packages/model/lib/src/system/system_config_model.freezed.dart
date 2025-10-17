@@ -14,12 +14,12 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
-SystemConfig _$SystemConfigFromJson(Map<String, dynamic> json) {
-  return _SystemConfig.fromJson(json);
+SystemConfigModel _$SystemConfigModelFromJson(Map<String, dynamic> json) {
+  return _SystemConfigModel.fromJson(json);
 }
 
 /// @nodoc
-mixin _$SystemConfig {
+mixin _$SystemConfigModel {
   /// 配置ID
   String? get id => throw _privateConstructorUsedError;
 
@@ -81,21 +81,21 @@ mixin _$SystemConfig {
   @JsonKey(name: 'updated_at')
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this SystemConfig to a JSON map.
+  /// Serializes this SystemConfigModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// Create a copy of SystemConfig
+  /// Create a copy of SystemConfigModel
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $SystemConfigCopyWith<SystemConfig> get copyWith =>
+  $SystemConfigModelCopyWith<SystemConfigModel> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $SystemConfigCopyWith<$Res> {
-  factory $SystemConfigCopyWith(
-          SystemConfig value, $Res Function(SystemConfig) then) =
-      _$SystemConfigCopyWithImpl<$Res, SystemConfig>;
+abstract class $SystemConfigModelCopyWith<$Res> {
+  factory $SystemConfigModelCopyWith(
+          SystemConfigModel value, $Res Function(SystemConfigModel) then) =
+      _$SystemConfigModelCopyWithImpl<$Res, SystemConfigModel>;
   @useResult
   $Res call(
       {String? id,
@@ -117,16 +117,16 @@ abstract class $SystemConfigCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$SystemConfigCopyWithImpl<$Res, $Val extends SystemConfig>
-    implements $SystemConfigCopyWith<$Res> {
-  _$SystemConfigCopyWithImpl(this._value, this._then);
+class _$SystemConfigModelCopyWithImpl<$Res, $Val extends SystemConfigModel>
+    implements $SystemConfigModelCopyWith<$Res> {
+  _$SystemConfigModelCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of SystemConfig
+  /// Create a copy of SystemConfigModel
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -218,11 +218,11 @@ class _$SystemConfigCopyWithImpl<$Res, $Val extends SystemConfig>
 }
 
 /// @nodoc
-abstract class _$$SystemConfigImplCopyWith<$Res>
-    implements $SystemConfigCopyWith<$Res> {
-  factory _$$SystemConfigImplCopyWith(
-          _$SystemConfigImpl value, $Res Function(_$SystemConfigImpl) then) =
-      __$$SystemConfigImplCopyWithImpl<$Res>;
+abstract class _$$SystemConfigModelImplCopyWith<$Res>
+    implements $SystemConfigModelCopyWith<$Res> {
+  factory _$$SystemConfigModelImplCopyWith(_$SystemConfigModelImpl value,
+          $Res Function(_$SystemConfigModelImpl) then) =
+      __$$SystemConfigModelImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call(
@@ -245,14 +245,14 @@ abstract class _$$SystemConfigImplCopyWith<$Res>
 }
 
 /// @nodoc
-class __$$SystemConfigImplCopyWithImpl<$Res>
-    extends _$SystemConfigCopyWithImpl<$Res, _$SystemConfigImpl>
-    implements _$$SystemConfigImplCopyWith<$Res> {
-  __$$SystemConfigImplCopyWithImpl(
-      _$SystemConfigImpl _value, $Res Function(_$SystemConfigImpl) _then)
+class __$$SystemConfigModelImplCopyWithImpl<$Res>
+    extends _$SystemConfigModelCopyWithImpl<$Res, _$SystemConfigModelImpl>
+    implements _$$SystemConfigModelImplCopyWith<$Res> {
+  __$$SystemConfigModelImplCopyWithImpl(_$SystemConfigModelImpl _value,
+      $Res Function(_$SystemConfigModelImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of SystemConfig
+  /// Create a copy of SystemConfigModel
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -274,7 +274,7 @@ class __$$SystemConfigImplCopyWithImpl<$Res>
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
-    return _then(_$SystemConfigImpl(
+    return _then(_$SystemConfigModelImpl(
       id: freezed == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
@@ -345,8 +345,8 @@ class __$$SystemConfigImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$SystemConfigImpl extends _SystemConfig {
-  const _$SystemConfigImpl(
+class _$SystemConfigModelImpl extends _SystemConfigModel {
+  const _$SystemConfigModelImpl(
       {this.id,
       @JsonKey(name: 'config_key') required this.configKey,
       @JsonKey(name: 'config_value') required this.configValue,
@@ -365,8 +365,8 @@ class _$SystemConfigImpl extends _SystemConfig {
       @JsonKey(name: 'updated_at') this.updatedAt})
       : super._();
 
-  factory _$SystemConfigImpl.fromJson(Map<String, dynamic> json) =>
-      _$$SystemConfigImplFromJson(json);
+  factory _$SystemConfigModelImpl.fromJson(Map<String, dynamic> json) =>
+      _$$SystemConfigModelImplFromJson(json);
 
   /// 配置ID
   @override
@@ -447,14 +447,14 @@ class _$SystemConfigImpl extends _SystemConfig {
 
   @override
   String toString() {
-    return 'SystemConfig(id: $id, configKey: $configKey, configValue: $configValue, valueType: $valueType, defaultValue: $defaultValue, category: $category, displayName: $displayName, description: $description, sortOrder: $sortOrder, isEditable: $isEditable, isPublic: $isPublic, isActive: $isActive, updatedBy: $updatedBy, changeReason: $changeReason, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'SystemConfigModel(id: $id, configKey: $configKey, configValue: $configValue, valueType: $valueType, defaultValue: $defaultValue, category: $category, displayName: $displayName, description: $description, sortOrder: $sortOrder, isEditable: $isEditable, isPublic: $isPublic, isActive: $isActive, updatedBy: $updatedBy, changeReason: $changeReason, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$SystemConfigImpl &&
+            other is _$SystemConfigModelImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.configKey, configKey) ||
                 other.configKey == configKey) &&
@@ -509,24 +509,25 @@ class _$SystemConfigImpl extends _SystemConfig {
       createdAt,
       updatedAt);
 
-  /// Create a copy of SystemConfig
+  /// Create a copy of SystemConfigModel
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$SystemConfigImplCopyWith<_$SystemConfigImpl> get copyWith =>
-      __$$SystemConfigImplCopyWithImpl<_$SystemConfigImpl>(this, _$identity);
+  _$$SystemConfigModelImplCopyWith<_$SystemConfigModelImpl> get copyWith =>
+      __$$SystemConfigModelImplCopyWithImpl<_$SystemConfigModelImpl>(
+          this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$SystemConfigImplToJson(
+    return _$$SystemConfigModelImplToJson(
       this,
     );
   }
 }
 
-abstract class _SystemConfig extends SystemConfig {
-  const factory _SystemConfig(
+abstract class _SystemConfigModel extends SystemConfigModel {
+  const factory _SystemConfigModel(
           {final String? id,
           @JsonKey(name: 'config_key') required final String configKey,
           @JsonKey(name: 'config_value') required final String configValue,
@@ -543,11 +544,11 @@ abstract class _SystemConfig extends SystemConfig {
           @JsonKey(name: 'change_reason') final String? changeReason,
           @JsonKey(name: 'created_at') final DateTime? createdAt,
           @JsonKey(name: 'updated_at') final DateTime? updatedAt}) =
-      _$SystemConfigImpl;
-  const _SystemConfig._() : super._();
+      _$SystemConfigModelImpl;
+  const _SystemConfigModel._() : super._();
 
-  factory _SystemConfig.fromJson(Map<String, dynamic> json) =
-      _$SystemConfigImpl.fromJson;
+  factory _SystemConfigModel.fromJson(Map<String, dynamic> json) =
+      _$SystemConfigModelImpl.fromJson;
 
   /// 配置ID
   @override
@@ -626,10 +627,10 @@ abstract class _SystemConfig extends SystemConfig {
   @JsonKey(name: 'updated_at')
   DateTime? get updatedAt;
 
-  /// Create a copy of SystemConfig
+  /// Create a copy of SystemConfigModel
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$SystemConfigImplCopyWith<_$SystemConfigImpl> get copyWith =>
+  _$$SystemConfigModelImplCopyWith<_$SystemConfigModelImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

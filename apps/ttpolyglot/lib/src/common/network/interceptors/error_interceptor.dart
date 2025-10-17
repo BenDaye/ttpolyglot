@@ -9,26 +9,26 @@ class ErrorInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) {
     // Logger.talker.info('Response Error -> $err');
     // 如果已经处理过了
-    if (err.error is ApiResponse) {
+    if (err.error is ApiResponseModel) {
       return super.onError(err, handler);
     }
     // 构造返回错误体
     final result = switch (err.type) {
-      DioExceptionType.connectionTimeout => ApiResponse.of(
+      DioExceptionType.connectionTimeout => ApiResponseModel.of(
           ApiResponseCode.connectionTimeout,
         ),
-      DioExceptionType.sendTimeout => ApiResponse.of(ApiResponseCode.sendTimeout),
-      DioExceptionType.receiveTimeout => ApiResponse.of(
+      DioExceptionType.sendTimeout => ApiResponseModel.of(ApiResponseCode.sendTimeout),
+      DioExceptionType.receiveTimeout => ApiResponseModel.of(
           ApiResponseCode.receiveTimeout,
         ),
-      DioExceptionType.badCertificate => ApiResponse.of(
+      DioExceptionType.badCertificate => ApiResponseModel.of(
           ApiResponseCode.badCertificate,
         ),
-      DioExceptionType.badResponse => ApiResponse.of(
+      DioExceptionType.badResponse => ApiResponseModel.of(
           ApiResponseCode.fromValue(err.response?.statusCode ?? 400),
         ),
-      DioExceptionType.cancel => ApiResponse.of(ApiResponseCode.cancelRequest),
-      DioExceptionType.connectionError => ApiResponse.of(
+      DioExceptionType.cancel => ApiResponseModel.of(ApiResponseCode.cancelRequest),
+      DioExceptionType.connectionError => ApiResponseModel.of(
           ApiResponseCode.networkError,
         ),
       DioExceptionType.unknown => _unknown(err),
@@ -38,11 +38,11 @@ class ErrorInterceptor extends Interceptor {
   }
 
   // 处理未知异常
-  ApiResponse _unknown(DioException err) {
+  ApiResponseModel _unknown(DioException err) {
     Object? error = err.error;
     if (error is HandshakeException) {
-      return ApiResponse.of(ApiResponseCode.domainError);
+      return ApiResponseModel.of(ApiResponseCode.domainError);
     }
-    return ApiResponse.of(ApiResponseCode.unknown);
+    return ApiResponseModel.of(ApiResponseCode.unknown);
   }
 }

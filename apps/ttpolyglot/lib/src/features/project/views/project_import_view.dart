@@ -357,7 +357,7 @@ class _ProjectImportViewState extends State<ProjectImportView> {
                                     final description = '$languageText - $format格式 - $totalRecords 条记录';
 
                                     // 保存导入历史
-                                    final historyItem = ImportHistoryItem(
+                                    final historyItem = ImportHistoryItemModel(
                                       filename: filename,
                                       description: description,
                                       timestamp: DateTime.now(),
@@ -376,7 +376,7 @@ class _ProjectImportViewState extends State<ProjectImportView> {
                                     final filename = firstFile?.name ?? '导入失败';
                                     final format = firstFile?.name.split('.').last.toUpperCase() ?? 'UNKNOWN';
 
-                                    final historyItem = ImportHistoryItem(
+                                    final historyItem = ImportHistoryItemModel(
                                       filename: filename,
                                       description: '导入过程中发生错误 - $format格式',
                                       timestamp: DateTime.now(),
@@ -455,7 +455,7 @@ class _ProjectImportViewState extends State<ProjectImportView> {
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
                           const Spacer(),
-                          FutureBuilder<List<ImportHistoryItem>>(
+                          FutureBuilder<List<ImportHistoryItemModel>>(
                             future: ImportHistoryCache.getImportHistory(widget.projectId),
                             builder: (context, snapshot) {
                               if (snapshot.hasData && snapshot.data!.isNotEmpty) {
@@ -499,7 +499,7 @@ class _ProjectImportViewState extends State<ProjectImportView> {
                         ],
                       ),
                       const SizedBox(height: 16.0),
-                      FutureBuilder<List<ImportHistoryItem>>(
+                      FutureBuilder<List<ImportHistoryItemModel>>(
                         future: ImportHistoryCache.getImportHistory(widget.projectId),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -563,7 +563,7 @@ class _ProjectImportViewState extends State<ProjectImportView> {
 
                           return Column(
                             children: historyList
-                                .map((item) => _buildImportHistoryItem(
+                                .map((item) => _buildImportHistoryItemModel(
                                       context,
                                       item.filename,
                                       item.description,
@@ -607,13 +607,13 @@ class _ProjectImportViewState extends State<ProjectImportView> {
     );
   }
 
-  Widget _buildImportHistoryItem(
+  Widget _buildImportHistoryItemModel(
     BuildContext context,
     String filename,
     String description,
     String time,
     bool isSuccess, {
-    ImportHistoryItem? item,
+    ImportHistoryItemModel? item,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),

@@ -1,10 +1,10 @@
 import 'package:ttpolyglot_model/model.dart';
 
-import '../base_service.dart';
 import '../../config/server_config.dart';
+import '../../utils/infrastructure/cache_utils.dart';
+import '../base_service.dart';
 import '../infrastructure/database_service.dart';
 import '../infrastructure/redis_service.dart';
-import '../../utils/infrastructure/cache_utils.dart';
 
 /// 系统配置服务
 class ConfigService extends BaseService {
@@ -66,7 +66,7 @@ class ConfigService extends BaseService {
   }
 
   /// 根据键获取配置项
-  Future<SystemConfig?> getConfigByKey(String key) async {
+  Future<SystemConfigModel?> getConfigByKey(String key) async {
     try {
       final result = await _databaseService.query('''
         SELECT * FROM system_configs
@@ -77,7 +77,7 @@ class ConfigService extends BaseService {
         return null;
       }
 
-      return SystemConfig.fromJson(result.first.toColumnMap());
+      return SystemConfigModel.fromJson(result.first.toColumnMap());
     } catch (error, stackTrace) {
       logError('获取配置项失败', error: error, stackTrace: stackTrace, context: {'config_key': key});
       rethrow;
@@ -85,7 +85,7 @@ class ConfigService extends BaseService {
   }
 
   /// 获取配置列表
-  Future<List<SystemConfig>> getConfigs({
+  Future<List<SystemConfigModel>> getConfigs({
     String? category,
     bool? isPublic,
     bool? isEditable,
@@ -125,7 +125,7 @@ class ConfigService extends BaseService {
 
       final result = await _databaseService.query(sql, parameters);
 
-      return result.map((row) => SystemConfig.fromJson(row.toColumnMap())).toList();
+      return result.map((row) => SystemConfigModel.fromJson(row.toColumnMap())).toList();
     } catch (error, stackTrace) {
       logError('获取配置列表失败', error: error, stackTrace: stackTrace);
       rethrow;
@@ -164,13 +164,13 @@ class ConfigService extends BaseService {
   }
 
   /// 更新配置值
-  Future<SystemConfig> updateConfig({
+  Future<SystemConfigModel> updateConfig({
     required String key,
     required String value,
     String? updatedBy,
     String? reason,
   }) async {
-    return execute<SystemConfig>(
+    return execute<SystemConfigModel>(
       () async {
         // 获取当前配置
         final currentConfig = await getConfigByKey(key);
@@ -217,14 +217,14 @@ class ConfigService extends BaseService {
   }
 
   /// 批量更新配置
-  Future<List<SystemConfig>> updateConfigs({
+  Future<List<SystemConfigModel>> updateConfigs({
     required Map<String, String> updates,
     String? updatedBy,
     String? reason,
   }) async {
-    return execute<List<SystemConfig>>(
+    return execute<List<SystemConfigModel>>(
       () async {
-        final updatedConfigs = <SystemConfig>[];
+        final updatedConfigs = <SystemConfigModel>[];
 
         await _databaseService.transaction(() async {
           for (final entry in updates.entries) {
@@ -277,8 +277,8 @@ class ConfigService extends BaseService {
   }
 
   /// 重置配置为默认值
-  Future<SystemConfig> resetConfigToDefault(String key, {String? updatedBy}) async {
-    return execute<SystemConfig>(
+  Future<SystemConfigModel> resetConfigToDefault(String key, {String? updatedBy}) async {
+    return execute<SystemConfigModel>(
       () async {
         final config = await getConfigByKey(key);
         if (config == null) {

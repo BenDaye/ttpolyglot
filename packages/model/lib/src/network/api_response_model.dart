@@ -7,10 +7,10 @@ part 'api_response_model.g.dart';
 
 /// 统一 API 响应模型
 @Freezed(genericArgumentFactories: true)
-class ApiResponse<T> with _$ApiResponse<T> {
-  const ApiResponse._();
+class ApiResponseModel<T> with _$ApiResponseModel<T> {
+  const ApiResponseModel._();
 
-  const factory ApiResponse({
+  const factory ApiResponseModel({
     @JsonKey(
       fromJson: apiResponseCodeFromJson,
       toJson: apiResponseCodeToJson,
@@ -24,16 +24,16 @@ class ApiResponse<T> with _$ApiResponse<T> {
     @Default(ApiResponseTipsType.showToast)
     ApiResponseTipsType type,
     T? data,
-  }) = _ApiResponse<T>;
+  }) = _ApiResponseModel<T>;
 
-  factory ApiResponse.fromJson(
+  factory ApiResponseModel.fromJson(
     Map<String, dynamic> json,
     T Function(Object?) fromJsonT,
   ) =>
-      _$ApiResponseFromJson(json, fromJsonT);
+      _$ApiResponseModelFromJson(json, fromJsonT);
 
-  factory ApiResponse.of(ApiResponseCode code, {ApiResponseTipsType? type, String? message}) {
-    return ApiResponse(
+  factory ApiResponseModel.of(ApiResponseCode code, {ApiResponseTipsType? type, String? message}) {
+    return ApiResponseModel(
       code: code,
       type: type ?? ApiResponseTipsType.showToast,
       message: message ?? code.message,

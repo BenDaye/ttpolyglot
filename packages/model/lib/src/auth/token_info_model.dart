@@ -5,13 +5,13 @@ part 'token_info_model.g.dart';
 
 /// Token 信息模型
 @freezed
-class TokenInfo with _$TokenInfo {
-  const factory TokenInfo({
+class TokenInfoModel with _$TokenInfoModel {
+  const factory TokenInfoModel({
     @JsonKey(name: 'access_token') required String accessToken,
     @JsonKey(name: 'refresh_token') required String refreshToken,
     @JsonKey(name: 'token_type') required String tokenType,
     @JsonKey(name: 'expires_in') required int expiresIn,
-  }) = _TokenInfo;
+  }) = _TokenInfoModel;
 
-  factory TokenInfo.fromJson(Map<String, dynamic> json) => _$TokenInfoFromJson(json);
+  factory TokenInfoModel.fromJson(Map<String, dynamic> json) => _$TokenInfoModelFromJson(json);
 }

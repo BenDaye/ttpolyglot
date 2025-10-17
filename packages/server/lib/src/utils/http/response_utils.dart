@@ -65,7 +65,7 @@ class ResponseUtils {
     Map<String, String>? headers,
   }) {
     final requestId = _uuid.v4();
-    final apiResponse = ApiResponse<T>(
+    final apiResponse = ApiResponseModel<T>(
       code: ApiResponseCode.success,
       message: message ?? ApiResponseCode.success.message,
       type: type,
@@ -95,7 +95,7 @@ class ResponseUtils {
   }) {
     code ??= ApiResponseCode.error;
     final requestId = _uuid.v4();
-    final apiResponse = ApiResponse<T>(
+    final apiResponse = ApiResponseModel<T>(
       code: code,
       message: message ?? code.message,
       type: type,
@@ -125,8 +125,8 @@ class ResponseUtils {
     ApiResponseTipsType type = ApiResponseTipsType.showToast,
     Map<String, String>? headers,
   }) {
-    // 使用 ApiResponsePager 模型构建分页数据
-    final paginatedData = ApiResponsePager<T>(
+    // 使用 ApiResponsePagerModel 模型构建分页数据
+    final paginatedData = ApiResponsePagerModel<T>(
       page: page,
       pageSize: limit,
       totalSize: total,

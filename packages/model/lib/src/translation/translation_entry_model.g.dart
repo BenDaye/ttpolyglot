@@ -6,9 +6,9 @@ part of 'translation_entry_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$TranslationEntryDtoImpl _$$TranslationEntryDtoImplFromJson(
+_$TranslationEntryModelImpl _$$TranslationEntryModelImplFromJson(
         Map<String, dynamic> json) =>
-    _$TranslationEntryDtoImpl(
+    _$TranslationEntryModelImpl(
       id: json['id'] as String?,
       projectId: json['project_id'] as String,
       entryKey: json['entry_key'] as String,
@@ -49,8 +49,8 @@ _$TranslationEntryDtoImpl _$$TranslationEntryDtoImplFromJson(
           : DateTime.parse(json['updated_at'] as String),
     );
 
-Map<String, dynamic> _$$TranslationEntryDtoImplToJson(
-        _$TranslationEntryDtoImpl instance) =>
+Map<String, dynamic> _$$TranslationEntryModelImplToJson(
+        _$TranslationEntryModelImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'project_id': instance.projectId,

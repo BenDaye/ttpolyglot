@@ -9,7 +9,7 @@ final class MessageTips {
   static void showSuccessTips({
     required String message,
     required ApiResponseTipsType type,
-    RequestExtra? extra,
+    RequestExtraModel? extra,
   }) {
     if (extra?.showSuccessToast == false || message.isEmpty) return;
     switch (type) {
@@ -37,7 +37,7 @@ final class MessageTips {
     required String message,
     required ApiResponseTipsType type,
     ApiResponseCode? status,
-    RequestExtra? extra,
+    RequestExtraModel? extra,
   }) {
     // // 鉴权失败处理
     // if (status == StatusCode.error) {

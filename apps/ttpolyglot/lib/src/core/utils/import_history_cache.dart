@@ -8,7 +8,7 @@ class ImportHistoryCache {
   static const String _cacheKey = 'import_history';
   static const int _maxHistoryPerProject = 5;
 
-  static Future<void> saveImportHistory(String projectId, ImportHistoryItem item) async {
+  static Future<void> saveImportHistory(String projectId, ImportHistoryItemModel item) async {
     final prefs = await SharedPreferences.getInstance();
     final key = '$_cacheKey:$projectId';
 
@@ -28,7 +28,7 @@ class ImportHistoryCache {
     await prefs.setString(key, jsonEncode(jsonList));
   }
 
-  static Future<List<ImportHistoryItem>> getImportHistory(String projectId) async {
+  static Future<List<ImportHistoryItemModel>> getImportHistory(String projectId) async {
     final prefs = await SharedPreferences.getInstance();
     final key = '$_cacheKey:$projectId';
 
@@ -37,7 +37,7 @@ class ImportHistoryCache {
 
     try {
       final jsonList = jsonDecode(jsonString) as List;
-      return jsonList.map((json) => ImportHistoryItem.fromJson(json)).toList();
+      return jsonList.map((json) => ImportHistoryItemModel.fromJson(json)).toList();
     } catch (e) {
       return [];
     }

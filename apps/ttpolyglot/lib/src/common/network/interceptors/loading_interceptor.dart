@@ -12,7 +12,7 @@ final class LoadingInterceptor extends Interceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    final extra = RequestExtra.fromJson(options.extra);
+    final extra = RequestExtraModel.fromJson(options.extra);
     _cancelLoading();
     //
     if (extra.showLoading == true) {

@@ -10,9 +10,9 @@ class AuthService extends GetxService {
   final TokenStorageService _tokenStorage;
 
   // 当前用户
-  final Rx<UserInfo?> _currentUser = Rx<UserInfo?>(null);
-  UserInfo? get currentUser => _currentUser.value;
-  Rx<UserInfo?> get currentUserObs => _currentUser;
+  final Rx<UserInfoModel?> _currentUser = Rx<UserInfoModel?>(null);
+  UserInfoModel? get currentUser => _currentUser.value;
+  Rx<UserInfoModel?> get currentUserObs => _currentUser;
 
   // 是否已登录
   bool get isLoggedIn => _tokenStorage.isLoggedIn && _currentUser.value != null;
@@ -56,7 +56,7 @@ class AuthService extends GetxService {
     String? deviceType,
   }) async {
     try {
-      final request = LoginRequest(
+      final request = LoginRequestModel(
         emailOrUsername: emailOrUsername,
         password: password,
       );
@@ -132,7 +132,7 @@ class AuthService extends GetxService {
   }
 
   /// 获取当前用户（强制刷新）
-  Future<UserInfo> getCurrentUser({bool forceRefresh = false}) async {
+  Future<UserInfoModel> getCurrentUser({bool forceRefresh = false}) async {
     if (forceRefresh || _currentUser.value == null) {
       await _refreshUserInfo();
     }

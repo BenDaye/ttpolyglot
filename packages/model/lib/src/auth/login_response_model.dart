@@ -7,11 +7,11 @@ part 'login_response_model.g.dart';
 
 /// 登录响应模型
 @freezed
-class LoginResponse with _$LoginResponse {
-  const factory LoginResponse({
-    required UserInfo user,
-    required TokenInfo tokens,
-  }) = _LoginResponse;
+class LoginResponseModel with _$LoginResponseModel {
+  const factory LoginResponseModel({
+    required UserInfoModel user,
+    required TokenInfoModel tokens,
+  }) = _LoginResponseModel;
 
-  factory LoginResponse.fromJson(Map<String, dynamic> json) => _$LoginResponseFromJson(json);
+  factory LoginResponseModel.fromJson(Map<String, dynamic> json) => _$LoginResponseModelFromJson(json);
 }

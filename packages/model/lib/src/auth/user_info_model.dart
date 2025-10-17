@@ -5,8 +5,8 @@ part 'user_info_model.g.dart';
 
 /// 用户信息模型
 @freezed
-class UserInfo with _$UserInfo {
-  const factory UserInfo({
+class UserInfoModel with _$UserInfoModel {
+  const factory UserInfoModel({
     required String id,
     required String username,
     required String email,
@@ -26,7 +26,7 @@ class UserInfo with _$UserInfo {
     @JsonKey(name: 'password_changed_at') DateTime? passwordChangedAt,
     @JsonKey(name: 'created_at') DateTime? createdAt,
     @JsonKey(name: 'updated_at') DateTime? updatedAt,
-  }) = _UserInfo;
+  }) = _UserInfoModel;
 
-  factory UserInfo.fromJson(Map<String, dynamic> json) => _$UserInfoFromJson(json);
+  factory UserInfoModel.fromJson(Map<String, dynamic> json) => _$UserInfoModelFromJson(json);
 }

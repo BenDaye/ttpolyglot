@@ -5,8 +5,8 @@ part 'system_config_model.g.dart';
 
 /// 系统配置模型
 @freezed
-class SystemConfig with _$SystemConfig {
-  const factory SystemConfig({
+class SystemConfigModel with _$SystemConfigModel {
+  const factory SystemConfigModel({
     /// 配置ID
     String? id,
 
@@ -54,11 +54,11 @@ class SystemConfig with _$SystemConfig {
 
     /// 更新时间
     @JsonKey(name: 'updated_at') DateTime? updatedAt,
-  }) = _SystemConfig;
+  }) = _SystemConfigModel;
 
-  const SystemConfig._();
+  const SystemConfigModel._();
 
-  factory SystemConfig.fromJson(Map<String, dynamic> json) => _$SystemConfigFromJson(json);
+  factory SystemConfigModel.fromJson(Map<String, dynamic> json) => _$SystemConfigModelFromJson(json);
 
   /// 获取解析后的值
   dynamic getParsedValue() {

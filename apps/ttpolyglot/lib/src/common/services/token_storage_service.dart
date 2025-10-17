@@ -59,7 +59,7 @@ class TokenStorageService {
   }
 
   /// 保存用户信息
-  Future<void> saveUserInfo(UserInfo userInfo) async {
+  Future<void> saveUserInfo(UserInfoModel userInfo) async {
     try {
       final jsonString = jsonEncode(userInfo.toJson());
       await _prefs.setString(AppConfig.userInfoKey, jsonString);
@@ -71,13 +71,13 @@ class TokenStorageService {
   }
 
   /// 获取用户信息
-  UserInfo? getUserInfo() {
+  UserInfoModel? getUserInfo() {
     try {
       final jsonString = _prefs.getString(AppConfig.userInfoKey);
       if (jsonString == null) return null;
 
       final json = jsonDecode(jsonString) as Map<String, dynamic>;
-      return UserInfo.fromJson(json);
+      return UserInfoModel.fromJson(json);
     } catch (error, stackTrace) {
       Logger.error('获取用户信息失败', error: error, stackTrace: stackTrace);
       return null;

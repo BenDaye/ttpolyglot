@@ -55,11 +55,11 @@ class ProjectController extends GetxController {
   void setIgnoreEmpty(bool value) => _ignoreEmpty.value = value;
 
   // 导入记录
-  final RxList<ImportRecord> _importRecords = <ImportRecord>[].obs;
-  List<ImportRecord> get importRecords => _importRecords.toList();
+  final RxList<ImportRecordModel> _importRecords = <ImportRecordModel>[].obs;
+  List<ImportRecordModel> get importRecords => _importRecords.toList();
 
   /// 添加导入记录
-  void addImportRecord(ImportRecord record) {
+  void addImportRecordModel(ImportRecordModel record) {
     _importRecords.insert(0, record); // 最新记录插在最前面
 
     // 最多保留5条记录
@@ -598,7 +598,7 @@ class ProjectController extends GetxController {
           }
         }
 
-        final record = ImportRecord(
+        final record = ImportRecordModel(
           id: DateTime.now().millisecondsSinceEpoch.toString() +
               (DateTime.now().microsecond % 1000).toString().padLeft(3, '0'),
           fileName: fileName,
@@ -612,11 +612,11 @@ class ProjectController extends GetxController {
           duration: duration,
         );
 
-        addImportRecord(record);
+        addImportRecordModel(record);
       }
     } else {
       // 如果没有文件，创建一个通用的失败记录
-      final record = ImportRecord(
+      final record = ImportRecordModel(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         fileName: '未知文件',
         status: ImportRecordStatus.failure,
@@ -628,7 +628,7 @@ class ProjectController extends GetxController {
         duration: duration,
       );
 
-      addImportRecord(record);
+      addImportRecordModel(record);
     }
 
     Logger.info('已创建导入记录，当前记录数: ${_importRecords.length}');

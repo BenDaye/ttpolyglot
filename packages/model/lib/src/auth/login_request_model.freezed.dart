@@ -14,31 +14,31 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
-LoginRequest _$LoginRequestFromJson(Map<String, dynamic> json) {
-  return _LoginRequest.fromJson(json);
+LoginRequestModel _$LoginRequestModelFromJson(Map<String, dynamic> json) {
+  return _LoginRequestModel.fromJson(json);
 }
 
 /// @nodoc
-mixin _$LoginRequest {
+mixin _$LoginRequestModel {
   @JsonKey(name: 'email_or_username')
   String get emailOrUsername => throw _privateConstructorUsedError;
   String get password => throw _privateConstructorUsedError;
 
-  /// Serializes this LoginRequest to a JSON map.
+  /// Serializes this LoginRequestModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// Create a copy of LoginRequest
+  /// Create a copy of LoginRequestModel
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $LoginRequestCopyWith<LoginRequest> get copyWith =>
+  $LoginRequestModelCopyWith<LoginRequestModel> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $LoginRequestCopyWith<$Res> {
-  factory $LoginRequestCopyWith(
-          LoginRequest value, $Res Function(LoginRequest) then) =
-      _$LoginRequestCopyWithImpl<$Res, LoginRequest>;
+abstract class $LoginRequestModelCopyWith<$Res> {
+  factory $LoginRequestModelCopyWith(
+          LoginRequestModel value, $Res Function(LoginRequestModel) then) =
+      _$LoginRequestModelCopyWithImpl<$Res, LoginRequestModel>;
   @useResult
   $Res call(
       {@JsonKey(name: 'email_or_username') String emailOrUsername,
@@ -46,16 +46,16 @@ abstract class $LoginRequestCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$LoginRequestCopyWithImpl<$Res, $Val extends LoginRequest>
-    implements $LoginRequestCopyWith<$Res> {
-  _$LoginRequestCopyWithImpl(this._value, this._then);
+class _$LoginRequestModelCopyWithImpl<$Res, $Val extends LoginRequestModel>
+    implements $LoginRequestModelCopyWith<$Res> {
+  _$LoginRequestModelCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of LoginRequest
+  /// Create a copy of LoginRequestModel
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -77,11 +77,11 @@ class _$LoginRequestCopyWithImpl<$Res, $Val extends LoginRequest>
 }
 
 /// @nodoc
-abstract class _$$LoginRequestImplCopyWith<$Res>
-    implements $LoginRequestCopyWith<$Res> {
-  factory _$$LoginRequestImplCopyWith(
-          _$LoginRequestImpl value, $Res Function(_$LoginRequestImpl) then) =
-      __$$LoginRequestImplCopyWithImpl<$Res>;
+abstract class _$$LoginRequestModelImplCopyWith<$Res>
+    implements $LoginRequestModelCopyWith<$Res> {
+  factory _$$LoginRequestModelImplCopyWith(_$LoginRequestModelImpl value,
+          $Res Function(_$LoginRequestModelImpl) then) =
+      __$$LoginRequestModelImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call(
@@ -90,14 +90,14 @@ abstract class _$$LoginRequestImplCopyWith<$Res>
 }
 
 /// @nodoc
-class __$$LoginRequestImplCopyWithImpl<$Res>
-    extends _$LoginRequestCopyWithImpl<$Res, _$LoginRequestImpl>
-    implements _$$LoginRequestImplCopyWith<$Res> {
-  __$$LoginRequestImplCopyWithImpl(
-      _$LoginRequestImpl _value, $Res Function(_$LoginRequestImpl) _then)
+class __$$LoginRequestModelImplCopyWithImpl<$Res>
+    extends _$LoginRequestModelCopyWithImpl<$Res, _$LoginRequestModelImpl>
+    implements _$$LoginRequestModelImplCopyWith<$Res> {
+  __$$LoginRequestModelImplCopyWithImpl(_$LoginRequestModelImpl _value,
+      $Res Function(_$LoginRequestModelImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of LoginRequest
+  /// Create a copy of LoginRequestModel
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -105,7 +105,7 @@ class __$$LoginRequestImplCopyWithImpl<$Res>
     Object? emailOrUsername = null,
     Object? password = null,
   }) {
-    return _then(_$LoginRequestImpl(
+    return _then(_$LoginRequestModelImpl(
       emailOrUsername: null == emailOrUsername
           ? _value.emailOrUsername
           : emailOrUsername // ignore: cast_nullable_to_non_nullable
@@ -120,13 +120,13 @@ class __$$LoginRequestImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$LoginRequestImpl implements _LoginRequest {
-  const _$LoginRequestImpl(
+class _$LoginRequestModelImpl implements _LoginRequestModel {
+  const _$LoginRequestModelImpl(
       {@JsonKey(name: 'email_or_username') required this.emailOrUsername,
       required this.password});
 
-  factory _$LoginRequestImpl.fromJson(Map<String, dynamic> json) =>
-      _$$LoginRequestImplFromJson(json);
+  factory _$LoginRequestModelImpl.fromJson(Map<String, dynamic> json) =>
+      _$$LoginRequestModelImplFromJson(json);
 
   @override
   @JsonKey(name: 'email_or_username')
@@ -136,14 +136,14 @@ class _$LoginRequestImpl implements _LoginRequest {
 
   @override
   String toString() {
-    return 'LoginRequest(emailOrUsername: $emailOrUsername, password: $password)';
+    return 'LoginRequestModel(emailOrUsername: $emailOrUsername, password: $password)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$LoginRequestImpl &&
+            other is _$LoginRequestModelImpl &&
             (identical(other.emailOrUsername, emailOrUsername) ||
                 other.emailOrUsername == emailOrUsername) &&
             (identical(other.password, password) ||
@@ -154,30 +154,31 @@ class _$LoginRequestImpl implements _LoginRequest {
   @override
   int get hashCode => Object.hash(runtimeType, emailOrUsername, password);
 
-  /// Create a copy of LoginRequest
+  /// Create a copy of LoginRequestModel
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$LoginRequestImplCopyWith<_$LoginRequestImpl> get copyWith =>
-      __$$LoginRequestImplCopyWithImpl<_$LoginRequestImpl>(this, _$identity);
+  _$$LoginRequestModelImplCopyWith<_$LoginRequestModelImpl> get copyWith =>
+      __$$LoginRequestModelImplCopyWithImpl<_$LoginRequestModelImpl>(
+          this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$LoginRequestImplToJson(
+    return _$$LoginRequestModelImplToJson(
       this,
     );
   }
 }
 
-abstract class _LoginRequest implements LoginRequest {
-  const factory _LoginRequest(
+abstract class _LoginRequestModel implements LoginRequestModel {
+  const factory _LoginRequestModel(
       {@JsonKey(name: 'email_or_username')
       required final String emailOrUsername,
-      required final String password}) = _$LoginRequestImpl;
+      required final String password}) = _$LoginRequestModelImpl;
 
-  factory _LoginRequest.fromJson(Map<String, dynamic> json) =
-      _$LoginRequestImpl.fromJson;
+  factory _LoginRequestModel.fromJson(Map<String, dynamic> json) =
+      _$LoginRequestModelImpl.fromJson;
 
   @override
   @JsonKey(name: 'email_or_username')
@@ -185,10 +186,10 @@ abstract class _LoginRequest implements LoginRequest {
   @override
   String get password;
 
-  /// Create a copy of LoginRequest
+  /// Create a copy of LoginRequestModel
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$LoginRequestImplCopyWith<_$LoginRequestImpl> get copyWith =>
+  _$$LoginRequestModelImplCopyWith<_$LoginRequestModelImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

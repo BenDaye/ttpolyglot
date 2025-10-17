@@ -5,15 +5,15 @@ part 'api_response_pager_model.g.dart';
 
 /// 分页响应模型
 @Freezed(genericArgumentFactories: true)
-class ApiResponsePager<T> with _$ApiResponsePager<T> {
-  const factory ApiResponsePager({
+class ApiResponsePagerModel<T> with _$ApiResponsePagerModel<T> {
+  const factory ApiResponsePagerModel({
     @JsonKey(name: 'page') required int page,
     @JsonKey(name: 'page_size') required int pageSize,
     @JsonKey(name: 'total_size') required int totalSize,
     @JsonKey(name: 'total_page') required int totalPage,
     @JsonKey(name: 'items') List<T>? items,
-  }) = _ApiResponsePager<T>;
+  }) = _ApiResponsePagerModel<T>;
 
-  factory ApiResponsePager.fromJson(Map<String, dynamic> json, T Function(Object?) fromJsonT) =>
-      _$ApiResponsePagerFromJson(json, fromJsonT);
+  factory ApiResponsePagerModel.fromJson(Map<String, dynamic> json, T Function(Object?) fromJsonT) =>
+      _$ApiResponsePagerModelFromJson(json, fromJsonT);
 }

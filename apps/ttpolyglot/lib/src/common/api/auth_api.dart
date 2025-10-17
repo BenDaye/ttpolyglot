@@ -7,13 +7,13 @@ import 'package:ttpolyglot_model/model.dart';
 class AuthApi {
   /// 登录
   /// 注意：登录不使用拦截器的 loading，由 Controller 控制
-  Future<LoginResponse> login(LoginRequest request) async {
+  Future<LoginResponseModel> login(LoginRequestModel request) async {
     try {
       final response = await HttpClient.post<Map<String, dynamic>>(
         '/auth/login',
         data: request.toJson(),
         options: Options(
-          extra: const RequestExtra(
+          extra: const RequestExtraModel(
             showLoading: false, // 关键：登录不使用拦截器 loading
             showErrorToast: true,
           ).toJson(),
@@ -22,7 +22,7 @@ class AuthApi {
 
       // response 已经被 ResponseInterceptor 处理，直接获取 data 字段
       final data = response.data as Map<String, dynamic>;
-      return LoginResponse.fromJson(data);
+      return LoginResponseModel.fromJson(data);
     } catch (error, stackTrace) {
       Logger.error('登录请求失败', error: error, stackTrace: stackTrace);
       rethrow;
@@ -35,7 +35,7 @@ class AuthApi {
       await HttpClient.post(
         '/auth/logout',
         options: Options(
-          extra: const RequestExtra(
+          extra: const RequestExtraModel(
             showSuccessToast: true,
           ).toJson(),
         ),
@@ -47,7 +47,7 @@ class AuthApi {
   }
 
   /// 刷新 Token
-  Future<TokenInfo> refreshToken(String refreshToken) async {
+  Future<TokenInfoModel> refreshToken(String refreshToken) async {
     try {
       final response = await HttpClient.post<Map<String, dynamic>>(
         '/auth/refresh',
@@ -55,7 +55,7 @@ class AuthApi {
       );
 
       final data = response.data as Map<String, dynamic>;
-      return TokenInfo.fromJson(data);
+      return TokenInfoModel.fromJson(data);
     } catch (error, stackTrace) {
       Logger.error('刷新 Token 失败', error: error, stackTrace: stackTrace);
       rethrow;
@@ -63,12 +63,12 @@ class AuthApi {
   }
 
   /// 获取当前用户
-  Future<UserInfo> getCurrentUser() async {
+  Future<UserInfoModel> getCurrentUser() async {
     try {
       final response = await HttpClient.get<Map<String, dynamic>>('/users/me');
 
       final data = response.data as Map<String, dynamic>;
-      return UserInfo.fromJson(data);
+      return UserInfoModel.fromJson(data);
     } catch (error, stackTrace) {
       Logger.error('获取当前用户失败', error: error, stackTrace: stackTrace);
       rethrow;

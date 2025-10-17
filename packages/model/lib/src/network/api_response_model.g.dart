@@ -6,11 +6,11 @@ part of 'api_response_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$ApiResponseImpl<T> _$$ApiResponseImplFromJson<T>(
+_$ApiResponseModelImpl<T> _$$ApiResponseModelImplFromJson<T>(
   Map<String, dynamic> json,
   T Function(Object? json) fromJsonT,
 ) =>
-    _$ApiResponseImpl<T>(
+    _$ApiResponseModelImpl<T>(
       code: apiResponseCodeFromJson((json['code'] as num).toInt()),
       message: json['message'] as String? ?? "",
       type: json['type'] == null
@@ -19,8 +19,8 @@ _$ApiResponseImpl<T> _$$ApiResponseImplFromJson<T>(
       data: _$nullableGenericFromJson(json['data'], fromJsonT),
     );
 
-Map<String, dynamic> _$$ApiResponseImplToJson<T>(
-  _$ApiResponseImpl<T> instance,
+Map<String, dynamic> _$$ApiResponseModelImplToJson<T>(
+  _$ApiResponseModelImpl<T> instance,
   Object? Function(T value) toJsonT,
 ) =>
     <String, dynamic>{

@@ -6,11 +6,11 @@ part of 'api_response_pager_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$ApiResponsePagerImpl<T> _$$ApiResponsePagerImplFromJson<T>(
+_$ApiResponsePagerModelImpl<T> _$$ApiResponsePagerModelImplFromJson<T>(
   Map<String, dynamic> json,
   T Function(Object? json) fromJsonT,
 ) =>
-    _$ApiResponsePagerImpl<T>(
+    _$ApiResponsePagerModelImpl<T>(
       page: (json['page'] as num).toInt(),
       pageSize: (json['page_size'] as num).toInt(),
       totalSize: (json['total_size'] as num).toInt(),
@@ -18,8 +18,8 @@ _$ApiResponsePagerImpl<T> _$$ApiResponsePagerImplFromJson<T>(
       items: (json['items'] as List<dynamic>?)?.map(fromJsonT).toList(),
     );
 
-Map<String, dynamic> _$$ApiResponsePagerImplToJson<T>(
-  _$ApiResponsePagerImpl<T> instance,
+Map<String, dynamic> _$$ApiResponsePagerModelImplToJson<T>(
+  _$ApiResponsePagerModelImpl<T> instance,
   Object? Function(T value) toJsonT,
 ) =>
     <String, dynamic>{

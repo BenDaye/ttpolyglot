@@ -14,13 +14,13 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
-ApiResponse<T> _$ApiResponseFromJson<T>(
+ApiResponseModel<T> _$ApiResponseModelFromJson<T>(
     Map<String, dynamic> json, T Function(Object?) fromJsonT) {
-  return _ApiResponse<T>.fromJson(json, fromJsonT);
+  return _ApiResponseModel<T>.fromJson(json, fromJsonT);
 }
 
 /// @nodoc
-mixin _$ApiResponse<T> {
+mixin _$ApiResponseModel<T> {
   @JsonKey(fromJson: apiResponseCodeFromJson, toJson: apiResponseCodeToJson)
   ApiResponseCode get code => throw _privateConstructorUsedError;
   String get message => throw _privateConstructorUsedError;
@@ -29,22 +29,22 @@ mixin _$ApiResponse<T> {
   ApiResponseTipsType get type => throw _privateConstructorUsedError;
   T? get data => throw _privateConstructorUsedError;
 
-  /// Serializes this ApiResponse to a JSON map.
+  /// Serializes this ApiResponseModel to a JSON map.
   Map<String, dynamic> toJson(Object? Function(T) toJsonT) =>
       throw _privateConstructorUsedError;
 
-  /// Create a copy of ApiResponse
+  /// Create a copy of ApiResponseModel
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $ApiResponseCopyWith<T, ApiResponse<T>> get copyWith =>
+  $ApiResponseModelCopyWith<T, ApiResponseModel<T>> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $ApiResponseCopyWith<T, $Res> {
-  factory $ApiResponseCopyWith(
-          ApiResponse<T> value, $Res Function(ApiResponse<T>) then) =
-      _$ApiResponseCopyWithImpl<T, $Res, ApiResponse<T>>;
+abstract class $ApiResponseModelCopyWith<T, $Res> {
+  factory $ApiResponseModelCopyWith(
+          ApiResponseModel<T> value, $Res Function(ApiResponseModel<T>) then) =
+      _$ApiResponseModelCopyWithImpl<T, $Res, ApiResponseModel<T>>;
   @useResult
   $Res call(
       {@JsonKey(
@@ -59,16 +59,16 @@ abstract class $ApiResponseCopyWith<T, $Res> {
 }
 
 /// @nodoc
-class _$ApiResponseCopyWithImpl<T, $Res, $Val extends ApiResponse<T>>
-    implements $ApiResponseCopyWith<T, $Res> {
-  _$ApiResponseCopyWithImpl(this._value, this._then);
+class _$ApiResponseModelCopyWithImpl<T, $Res, $Val extends ApiResponseModel<T>>
+    implements $ApiResponseModelCopyWith<T, $Res> {
+  _$ApiResponseModelCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of ApiResponse
+  /// Create a copy of ApiResponseModel
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -100,11 +100,11 @@ class _$ApiResponseCopyWithImpl<T, $Res, $Val extends ApiResponse<T>>
 }
 
 /// @nodoc
-abstract class _$$ApiResponseImplCopyWith<T, $Res>
-    implements $ApiResponseCopyWith<T, $Res> {
-  factory _$$ApiResponseImplCopyWith(_$ApiResponseImpl<T> value,
-          $Res Function(_$ApiResponseImpl<T>) then) =
-      __$$ApiResponseImplCopyWithImpl<T, $Res>;
+abstract class _$$ApiResponseModelImplCopyWith<T, $Res>
+    implements $ApiResponseModelCopyWith<T, $Res> {
+  factory _$$ApiResponseModelImplCopyWith(_$ApiResponseModelImpl<T> value,
+          $Res Function(_$ApiResponseModelImpl<T>) then) =
+      __$$ApiResponseModelImplCopyWithImpl<T, $Res>;
   @override
   @useResult
   $Res call(
@@ -120,14 +120,14 @@ abstract class _$$ApiResponseImplCopyWith<T, $Res>
 }
 
 /// @nodoc
-class __$$ApiResponseImplCopyWithImpl<T, $Res>
-    extends _$ApiResponseCopyWithImpl<T, $Res, _$ApiResponseImpl<T>>
-    implements _$$ApiResponseImplCopyWith<T, $Res> {
-  __$$ApiResponseImplCopyWithImpl(
-      _$ApiResponseImpl<T> _value, $Res Function(_$ApiResponseImpl<T>) _then)
+class __$$ApiResponseModelImplCopyWithImpl<T, $Res>
+    extends _$ApiResponseModelCopyWithImpl<T, $Res, _$ApiResponseModelImpl<T>>
+    implements _$$ApiResponseModelImplCopyWith<T, $Res> {
+  __$$ApiResponseModelImplCopyWithImpl(_$ApiResponseModelImpl<T> _value,
+      $Res Function(_$ApiResponseModelImpl<T>) _then)
       : super(_value, _then);
 
-  /// Create a copy of ApiResponse
+  /// Create a copy of ApiResponseModel
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -137,7 +137,7 @@ class __$$ApiResponseImplCopyWithImpl<T, $Res>
     Object? type = null,
     Object? data = freezed,
   }) {
-    return _then(_$ApiResponseImpl<T>(
+    return _then(_$ApiResponseModelImpl<T>(
       code: null == code
           ? _value.code
           : code // ignore: cast_nullable_to_non_nullable
@@ -160,8 +160,8 @@ class __$$ApiResponseImplCopyWithImpl<T, $Res>
 
 /// @nodoc
 @JsonSerializable(genericArgumentFactories: true)
-class _$ApiResponseImpl<T> extends _ApiResponse<T> {
-  const _$ApiResponseImpl(
+class _$ApiResponseModelImpl<T> extends _ApiResponseModel<T> {
+  const _$ApiResponseModelImpl(
       {@JsonKey(
           fromJson: apiResponseCodeFromJson, toJson: apiResponseCodeToJson)
       required this.code,
@@ -173,9 +173,9 @@ class _$ApiResponseImpl<T> extends _ApiResponse<T> {
       this.data})
       : super._();
 
-  factory _$ApiResponseImpl.fromJson(
+  factory _$ApiResponseModelImpl.fromJson(
           Map<String, dynamic> json, T Function(Object?) fromJsonT) =>
-      _$$ApiResponseImplFromJson(json, fromJsonT);
+      _$$ApiResponseModelImplFromJson(json, fromJsonT);
 
   @override
   @JsonKey(fromJson: apiResponseCodeFromJson, toJson: apiResponseCodeToJson)
@@ -192,14 +192,14 @@ class _$ApiResponseImpl<T> extends _ApiResponse<T> {
 
   @override
   String toString() {
-    return 'ApiResponse<$T>(code: $code, message: $message, type: $type, data: $data)';
+    return 'ApiResponseModel<$T>(code: $code, message: $message, type: $type, data: $data)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$ApiResponseImpl<T> &&
+            other is _$ApiResponseModelImpl<T> &&
             (identical(other.code, code) || other.code == code) &&
             (identical(other.message, message) || other.message == message) &&
             (identical(other.type, type) || other.type == type) &&
@@ -211,23 +211,23 @@ class _$ApiResponseImpl<T> extends _ApiResponse<T> {
   int get hashCode => Object.hash(runtimeType, code, message, type,
       const DeepCollectionEquality().hash(data));
 
-  /// Create a copy of ApiResponse
+  /// Create a copy of ApiResponseModel
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$ApiResponseImplCopyWith<T, _$ApiResponseImpl<T>> get copyWith =>
-      __$$ApiResponseImplCopyWithImpl<T, _$ApiResponseImpl<T>>(
+  _$$ApiResponseModelImplCopyWith<T, _$ApiResponseModelImpl<T>> get copyWith =>
+      __$$ApiResponseModelImplCopyWithImpl<T, _$ApiResponseModelImpl<T>>(
           this, _$identity);
 
   @override
   Map<String, dynamic> toJson(Object? Function(T) toJsonT) {
-    return _$$ApiResponseImplToJson<T>(this, toJsonT);
+    return _$$ApiResponseModelImplToJson<T>(this, toJsonT);
   }
 }
 
-abstract class _ApiResponse<T> extends ApiResponse<T> {
-  const factory _ApiResponse(
+abstract class _ApiResponseModel<T> extends ApiResponseModel<T> {
+  const factory _ApiResponseModel(
       {@JsonKey(
           fromJson: apiResponseCodeFromJson, toJson: apiResponseCodeToJson)
       required final ApiResponseCode code,
@@ -236,12 +236,12 @@ abstract class _ApiResponse<T> extends ApiResponse<T> {
           fromJson: apiResponseTipsTypeFromJson,
           toJson: apiResponseTipsTypeToJson)
       final ApiResponseTipsType type,
-      final T? data}) = _$ApiResponseImpl<T>;
-  const _ApiResponse._() : super._();
+      final T? data}) = _$ApiResponseModelImpl<T>;
+  const _ApiResponseModel._() : super._();
 
-  factory _ApiResponse.fromJson(
+  factory _ApiResponseModel.fromJson(
           Map<String, dynamic> json, T Function(Object?) fromJsonT) =
-      _$ApiResponseImpl<T>.fromJson;
+      _$ApiResponseModelImpl<T>.fromJson;
 
   @override
   @JsonKey(fromJson: apiResponseCodeFromJson, toJson: apiResponseCodeToJson)
@@ -255,10 +255,10 @@ abstract class _ApiResponse<T> extends ApiResponse<T> {
   @override
   T? get data;
 
-  /// Create a copy of ApiResponse
+  /// Create a copy of ApiResponseModel
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$ApiResponseImplCopyWith<T, _$ApiResponseImpl<T>> get copyWith =>
+  _$$ApiResponseModelImplCopyWith<T, _$ApiResponseModelImpl<T>> get copyWith =>
       throw _privateConstructorUsedError;
 }

@@ -6,8 +6,9 @@ part of 'system_config_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$SystemConfigImpl _$$SystemConfigImplFromJson(Map<String, dynamic> json) =>
-    _$SystemConfigImpl(
+_$SystemConfigModelImpl _$$SystemConfigModelImplFromJson(
+        Map<String, dynamic> json) =>
+    _$SystemConfigModelImpl(
       id: json['id'] as String?,
       configKey: json['config_key'] as String,
       configValue: json['config_value'] as String,
@@ -30,7 +31,8 @@ _$SystemConfigImpl _$$SystemConfigImplFromJson(Map<String, dynamic> json) =>
           : DateTime.parse(json['updated_at'] as String),
     );
 
-Map<String, dynamic> _$$SystemConfigImplToJson(_$SystemConfigImpl instance) =>
+Map<String, dynamic> _$$SystemConfigModelImplToJson(
+        _$SystemConfigModelImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'config_key': instance.configKey,
