@@ -1,11 +1,9 @@
-import 'dart:convert';
-
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
-import '../config/server_config.dart';
 import '../middleware/auth_middleware.dart';
 import '../services/services.dart';
+import '../utils/http/response_utils.dart';
 import '../utils/security/jwt_utils.dart';
 import 'modules/modules.dart';
 
@@ -58,8 +56,16 @@ class ApiRoutes {
   /// 设置所有路由
   void _setupRoutes() {
     // 系统信息端点
-    _router.get('/version', _versionHandler);
-    _router.get('/status', _statusHandler);
+    _router.get('/version', (Request request) {
+      return ResponseUtils.version();
+    });
+    _router.get('/status', (Request request) {
+      return ResponseUtils.status(
+        databaseService: databaseService,
+        redisService: redisService,
+        startTime: startTime,
+      );
+    });
 
     // 挂载各功能模块路由
     _mountModuleRoutes();
@@ -136,60 +142,5 @@ class ApiRoutes {
       withAuth: _withAuth,
     );
     _router.mount('/', _withAuth(notificationRoutes.configure().call));
-  }
-
-  /// 版本信息处理器
-  Response _versionHandler(Request request) {
-    final version = {
-      'version': '1.0.0',
-      'api_version': 'v1',
-      'server': 'TTPolyglot Server',
-      'environment': ServerConfig.isDevelopment ? 'development' : 'production',
-      'timestamp': DateTime.now().toIso8601String(),
-    };
-
-    return Response.ok(
-      '{"data": ${_encodeJson(version)}}',
-      headers: {'Content-Type': 'application/json'},
-    );
-  }
-
-  /// 状态信息处理器
-  Future<Response> _statusHandler(Request request) async {
-    try {
-      final dbHealthy = await databaseService.isHealthy();
-      final redisHealthy = await redisService.isHealthy();
-
-      final status = {
-        'status': dbHealthy && redisHealthy ? 'healthy' : 'degraded',
-        'services': {
-          'database': dbHealthy ? 'healthy' : 'unhealthy',
-          'redis': redisHealthy ? 'healthy' : 'unhealthy',
-        },
-        'timestamp': DateTime.now().toIso8601String(),
-        'uptime': DateTime.now().difference(startTime).inSeconds,
-      };
-
-      final statusCode = dbHealthy && redisHealthy ? 200 : 503;
-      return Response(
-        statusCode,
-        headers: {'Content-Type': 'application/json'},
-        body: '{"data": ${_encodeJson(status)}}',
-      );
-    } catch (error) {
-      return Response.internalServerError(
-        body: '{"error": {"code": "SYSTEM_ERROR", "message": "状态检查失败"}}',
-        headers: {'Content-Type': 'application/json'},
-      );
-    }
-  }
-
-  /// JSON编码辅助方法
-  String _encodeJson(dynamic object) {
-    try {
-      return jsonEncode(object);
-    } catch (e) {
-      return jsonEncode({'error': 'Failed to encode JSON: $e'});
-    }
   }
 }

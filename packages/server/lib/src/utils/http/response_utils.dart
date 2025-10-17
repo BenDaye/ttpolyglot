@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:shelf/shelf.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../config/server_config.dart';
 import '../../middleware/error_handler_middleware.dart';
+import '../../services/services.dart';
 
 /// API响应构建器
 /// 提供统一的响应格式构建方法
@@ -253,5 +256,74 @@ class ResponseUtils {
       headers: responseHeaders,
       body: jsonEncode(apiResponse.toJson((data) => _toJsonValue(data))),
     );
+  }
+
+  /// 版本信息响应
+  static Response version({
+    String? version,
+    String? apiVersion,
+    String? serverName,
+  }) {
+    final versionData = {
+      'version': version ?? '1.0.0',
+      'api_version': apiVersion ?? 'v1',
+      'server': serverName ?? 'TTPolyglot Server',
+      'environment': ServerConfig.isDevelopment ? 'development' : 'production',
+      'timestamp': DateTime.now().toIso8601String(),
+    };
+
+    return Response.ok(
+      '{"data": ${_safeJsonEncode(versionData)}}',
+      headers: {'Content-Type': 'application/json'},
+    );
+  }
+
+  /// 状态信息响应
+  static Future<Response> status({
+    required DatabaseService databaseService,
+    required RedisService redisService,
+    required DateTime startTime,
+  }) async {
+    try {
+      final dbHealthy = await databaseService.isHealthy();
+      final redisHealthy = await redisService.isHealthy();
+
+      final statusData = {
+        'status': dbHealthy && redisHealthy ? 'healthy' : 'degraded',
+        'services': {
+          'database': dbHealthy ? 'healthy' : 'unhealthy',
+          'redis': redisHealthy ? 'healthy' : 'unhealthy',
+        },
+        'timestamp': DateTime.now().toIso8601String(),
+        'uptime': DateTime.now().difference(startTime).inSeconds,
+      };
+
+      final statusCode = dbHealthy && redisHealthy ? 200 : 503;
+      return Response(
+        statusCode,
+        headers: {'Content-Type': 'application/json'},
+        body: '{"data": ${_safeJsonEncode(statusData)}}',
+      );
+    } catch (error, stackTrace) {
+      log(
+        'status',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'ResponseUtils',
+      );
+      return Response.internalServerError(
+        body: '{"error": {"code": "SYSTEM_ERROR", "message": "状态检查失败"}}',
+        headers: {'Content-Type': 'application/json'},
+      );
+    }
+  }
+
+  /// JSON编码辅助方法
+  static String _safeJsonEncode(dynamic object) {
+    try {
+      return jsonEncode(object);
+    } catch (e) {
+      return jsonEncode({'error': 'Failed to encode JSON: $e'});
+    }
   }
 }
