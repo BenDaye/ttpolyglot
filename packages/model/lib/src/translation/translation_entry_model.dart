@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'translation_entry.freezed.dart';
-part 'translation_entry.g.dart';
+part 'translation_entry_model.freezed.dart';
+part 'translation_entry_model.g.dart';
 
 /// 翻译条目数据传输对象
 @freezed

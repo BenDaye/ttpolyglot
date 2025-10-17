@@ -1,9 +1,9 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:ttpolyglot_model/src/auth/token_info.dart';
-import 'package:ttpolyglot_model/src/auth/user_info.dart';
+import 'package:ttpolyglot_model/src/auth/token_info_model.dart';
+import 'package:ttpolyglot_model/src/auth/user_info_model.dart';
 
-part 'login_response.freezed.dart';
-part 'login_response.g.dart';
+part 'login_response_model.freezed.dart';
+part 'login_response_model.g.dart';
 
 /// 登录响应模型
 @freezed

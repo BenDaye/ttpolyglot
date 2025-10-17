@@ -2,8 +2,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:ttpolyglot_model/src/common/model.dart';
 import 'package:ttpolyglot_model/src/enums/enums.dart';
 
-part 'api_response.freezed.dart';
-part 'api_response.g.dart';
+part 'api_response_model.freezed.dart';
+part 'api_response_model.g.dart';
 
 /// 统一 API 响应模型
 @Freezed(genericArgumentFactories: true)

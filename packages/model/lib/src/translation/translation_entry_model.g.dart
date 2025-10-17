@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'translation_entry.dart';
+part of 'translation_entry_model.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator

@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'api_response_pager.dart';
+part of 'api_response_pager_model.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator

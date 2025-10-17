@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'user_info.freezed.dart';
-part 'user_info.g.dart';
+part 'user_info_model.freezed.dart';
+part 'user_info_model.g.dart';
 
 /// 用户信息模型
 @freezed

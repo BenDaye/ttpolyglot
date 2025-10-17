@@ -7,7 +7,7 @@ export 'src/enums/enums.dart';
 // 网络模型
 export 'src/network/network_models.dart';
 // 项目模型
-export 'src/project/import_record.dart';
+export 'src/project/import_record_model.dart';
 // 系统模型
 export 'src/system/system_models.dart';
 // 翻译模型

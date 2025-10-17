@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'login_request.freezed.dart';
-part 'login_request.g.dart';
+part 'login_request_model.freezed.dart';
+part 'login_request_model.g.dart';
 
 /// 登录请求模型
 @freezed

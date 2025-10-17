@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'api_response_pager.freezed.dart';
-part 'api_response_pager.g.dart';
+part 'api_response_pager_model.freezed.dart';
+part 'api_response_pager_model.g.dart';
 
 /// 分页响应模型
 @Freezed(genericArgumentFactories: true)

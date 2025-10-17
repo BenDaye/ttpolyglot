@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'system_config.freezed.dart';
-part 'system_config.g.dart';
+part 'system_config_model.freezed.dart';
+part 'system_config_model.g.dart';
 
 /// 系统配置模型
 @freezed

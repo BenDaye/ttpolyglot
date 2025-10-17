@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'token_info.freezed.dart';
-part 'token_info.g.dart';
+part 'token_info_model.freezed.dart';
+part 'token_info_model.g.dart';
 
 /// Token 信息模型
 @freezed
