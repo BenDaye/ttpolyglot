@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:shelf/shelf.dart';
 import 'package:ttpolyglot_model/model.dart';
@@ -125,8 +124,6 @@ class ResponseUtils {
     ApiResponseTipsType type = ApiResponseTipsType.showToast,
     Map<String, String>? headers,
   }) {
-    final requestId = _uuid.v4();
-
     // 使用 ApiResponsePager 模型构建分页数据
     final paginatedData = ApiResponsePager<T>(
       page: page,
@@ -143,18 +140,8 @@ class ResponseUtils {
       data: paginatedData,
     );
 
-    final responseHeaders = <String, String>{
-      'Content-Type': _contentTypeJson,
-      'X-Request-ID': requestId,
-      ...?headers,
-    };
-
-    return Response(
-      200,
-      headers: responseHeaders,
-      body: jsonEncode(
-        apiResponse.toJson((data) => data.toJson((item) => _toJsonValue(item))),
-      ),
+    return success(
+      data: apiResponse.toJson((data) => data.toJson((item) => _toJsonValue(item))),
     );
   }
 
@@ -190,26 +177,18 @@ class ResponseUtils {
   static Response noContent({
     Map<String, String>? headers,
   }) {
-    final requestId = _uuid.v4();
-    final responseHeaders = <String, String>{
-      'X-Request-ID': requestId,
-      ...?headers,
-    };
-
-    return Response(
-      204,
-      headers: responseHeaders,
+    return error(
+      code: ApiResponseCode.noContent,
     );
   }
 
-  /// 构建创建成功响应（201）
+  /// 构建创建成功响应
   static Response created<T>({
     String? message,
     T? data,
     String? location,
     Map<String, String>? headers,
   }) {
-    final requestId = _uuid.v4();
     final apiResponse = ApiResponse<T>(
       code: ApiResponseCode.created,
       message: message ?? '创建成功',
@@ -217,27 +196,18 @@ class ResponseUtils {
       data: data,
     );
 
-    final responseHeaders = <String, String>{
-      'Content-Type': _contentTypeJson,
-      'X-Request-ID': requestId,
-      if (location != null) 'Location': location,
-      ...?headers,
-    };
-
-    return Response(
-      201,
-      headers: responseHeaders,
-      body: jsonEncode(apiResponse.toJson((data) => _toJsonValue(data))),
+    return success(
+      data: apiResponse.toJson((data) => _toJsonValue(data)),
+      headers: headers,
     );
   }
 
-  /// 构建接受响应（202）
+  /// 构建接受响应
   static Response accepted<T>({
     String? message,
     T? data,
     Map<String, String>? headers,
   }) {
-    final requestId = _uuid.v4();
     final apiResponse = ApiResponse<T>(
       code: ApiResponseCode.success,
       message: message ?? '请求已接受',
@@ -245,16 +215,9 @@ class ResponseUtils {
       data: data,
     );
 
-    final responseHeaders = <String, String>{
-      'Content-Type': _contentTypeJson,
-      'X-Request-ID': requestId,
-      ...?headers,
-    };
-
-    return Response(
-      202,
-      headers: responseHeaders,
-      body: jsonEncode(apiResponse.toJson((data) => _toJsonValue(data))),
+    return success(
+      data: apiResponse.toJson((data) => _toJsonValue(data)),
+      headers: headers,
     );
   }
 
@@ -272,9 +235,8 @@ class ResponseUtils {
       'timestamp': DateTime.now().toIso8601String(),
     };
 
-    return Response.ok(
-      '{"data": ${_safeJsonEncode(versionData)}}',
-      headers: {'Content-Type': 'application/json'},
+    return success(
+      data: versionData,
     );
   }
 
@@ -298,32 +260,15 @@ class ResponseUtils {
         'uptime': DateTime.now().difference(startTime).inSeconds,
       };
 
-      final statusCode = dbHealthy && redisHealthy ? 200 : 503;
-      return Response(
-        statusCode,
-        headers: {'Content-Type': 'application/json'},
-        body: '{"data": ${_safeJsonEncode(statusData)}}',
-      );
-    } catch (error, stackTrace) {
-      log(
-        'status',
-        error: error,
-        stackTrace: stackTrace,
-        name: 'ResponseUtils',
-      );
-      return Response.internalServerError(
-        body: '{"error": {"code": "SYSTEM_ERROR", "message": "状态检查失败"}}',
+      return success(
+        data: statusData,
         headers: {'Content-Type': 'application/json'},
       );
-    }
-  }
-
-  /// JSON编码辅助方法
-  static String _safeJsonEncode(dynamic object) {
-    try {
-      return jsonEncode(object);
-    } catch (e) {
-      return jsonEncode({'error': 'Failed to encode JSON: $e'});
+    } catch (err) {
+      return error(
+        code: ApiResponseCode.internalServerError,
+        message: '状态检查失败: $err',
+      );
     }
   }
 }
