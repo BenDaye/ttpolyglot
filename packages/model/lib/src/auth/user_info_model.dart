@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:ttpolyglot_model/src/auth/location_model.dart';
 
 part 'user_info_model.freezed.dart';
 part 'user_info_model.g.dart';
@@ -21,7 +22,7 @@ class UserInfoModel with _$UserInfoModel {
     @JsonKey(name: 'email_verified_at') DateTime? emailVerifiedAt,
     @JsonKey(name: 'last_login_at') DateTime? lastLoginAt,
     @JsonKey(name: 'last_login_ip') String? lastLoginIp,
-    @JsonKey(name: 'last_login_location_string') String? lastLoginLocationString,
+    @JsonKey(name: 'last_login_location') LocationModel? lastLoginLocation,
     @JsonKey(name: 'login_attempts') int? loginAttempts,
     @JsonKey(name: 'locked_until') DateTime? lockedUntil,
     @JsonKey(name: 'password_changed_at') DateTime? passwordChangedAt,

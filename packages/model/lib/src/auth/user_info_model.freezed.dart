@@ -45,8 +45,8 @@ mixin _$UserInfoModel {
   DateTime? get lastLoginAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'last_login_ip')
   String? get lastLoginIp => throw _privateConstructorUsedError;
-  @JsonKey(name: 'last_login_location_string')
-  String? get lastLoginLocationString => throw _privateConstructorUsedError;
+  @JsonKey(name: 'last_login_location')
+  LocationModel? get lastLoginLocation => throw _privateConstructorUsedError;
   @JsonKey(name: 'login_attempts')
   int? get loginAttempts => throw _privateConstructorUsedError;
   @JsonKey(name: 'locked_until')
@@ -89,13 +89,14 @@ abstract class $UserInfoModelCopyWith<$Res> {
       @JsonKey(name: 'email_verified_at') DateTime? emailVerifiedAt,
       @JsonKey(name: 'last_login_at') DateTime? lastLoginAt,
       @JsonKey(name: 'last_login_ip') String? lastLoginIp,
-      @JsonKey(name: 'last_login_location_string')
-      String? lastLoginLocationString,
+      @JsonKey(name: 'last_login_location') LocationModel? lastLoginLocation,
       @JsonKey(name: 'login_attempts') int? loginAttempts,
       @JsonKey(name: 'locked_until') DateTime? lockedUntil,
       @JsonKey(name: 'password_changed_at') DateTime? passwordChangedAt,
       @JsonKey(name: 'created_at') DateTime? createdAt,
       @JsonKey(name: 'updated_at') DateTime? updatedAt});
+
+  $LocationModelCopyWith<$Res>? get lastLoginLocation;
 }
 
 /// @nodoc
@@ -127,7 +128,7 @@ class _$UserInfoModelCopyWithImpl<$Res, $Val extends UserInfoModel>
     Object? emailVerifiedAt = freezed,
     Object? lastLoginAt = freezed,
     Object? lastLoginIp = freezed,
-    Object? lastLoginLocationString = freezed,
+    Object? lastLoginLocation = freezed,
     Object? loginAttempts = freezed,
     Object? lockedUntil = freezed,
     Object? passwordChangedAt = freezed,
@@ -191,10 +192,10 @@ class _$UserInfoModelCopyWithImpl<$Res, $Val extends UserInfoModel>
           ? _value.lastLoginIp
           : lastLoginIp // ignore: cast_nullable_to_non_nullable
               as String?,
-      lastLoginLocationString: freezed == lastLoginLocationString
-          ? _value.lastLoginLocationString
-          : lastLoginLocationString // ignore: cast_nullable_to_non_nullable
-              as String?,
+      lastLoginLocation: freezed == lastLoginLocation
+          ? _value.lastLoginLocation
+          : lastLoginLocation // ignore: cast_nullable_to_non_nullable
+              as LocationModel?,
       loginAttempts: freezed == loginAttempts
           ? _value.loginAttempts
           : loginAttempts // ignore: cast_nullable_to_non_nullable
@@ -216,6 +217,20 @@ class _$UserInfoModelCopyWithImpl<$Res, $Val extends UserInfoModel>
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
     ) as $Val);
+  }
+
+  /// Create a copy of UserInfoModel
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $LocationModelCopyWith<$Res>? get lastLoginLocation {
+    if (_value.lastLoginLocation == null) {
+      return null;
+    }
+
+    return $LocationModelCopyWith<$Res>(_value.lastLoginLocation!, (value) {
+      return _then(_value.copyWith(lastLoginLocation: value) as $Val);
+    });
   }
 }
 
@@ -242,13 +257,15 @@ abstract class _$$UserInfoModelImplCopyWith<$Res>
       @JsonKey(name: 'email_verified_at') DateTime? emailVerifiedAt,
       @JsonKey(name: 'last_login_at') DateTime? lastLoginAt,
       @JsonKey(name: 'last_login_ip') String? lastLoginIp,
-      @JsonKey(name: 'last_login_location_string')
-      String? lastLoginLocationString,
+      @JsonKey(name: 'last_login_location') LocationModel? lastLoginLocation,
       @JsonKey(name: 'login_attempts') int? loginAttempts,
       @JsonKey(name: 'locked_until') DateTime? lockedUntil,
       @JsonKey(name: 'password_changed_at') DateTime? passwordChangedAt,
       @JsonKey(name: 'created_at') DateTime? createdAt,
       @JsonKey(name: 'updated_at') DateTime? updatedAt});
+
+  @override
+  $LocationModelCopyWith<$Res>? get lastLoginLocation;
 }
 
 /// @nodoc
@@ -278,7 +295,7 @@ class __$$UserInfoModelImplCopyWithImpl<$Res>
     Object? emailVerifiedAt = freezed,
     Object? lastLoginAt = freezed,
     Object? lastLoginIp = freezed,
-    Object? lastLoginLocationString = freezed,
+    Object? lastLoginLocation = freezed,
     Object? loginAttempts = freezed,
     Object? lockedUntil = freezed,
     Object? passwordChangedAt = freezed,
@@ -342,10 +359,10 @@ class __$$UserInfoModelImplCopyWithImpl<$Res>
           ? _value.lastLoginIp
           : lastLoginIp // ignore: cast_nullable_to_non_nullable
               as String?,
-      lastLoginLocationString: freezed == lastLoginLocationString
-          ? _value.lastLoginLocationString
-          : lastLoginLocationString // ignore: cast_nullable_to_non_nullable
-              as String?,
+      lastLoginLocation: freezed == lastLoginLocation
+          ? _value.lastLoginLocation
+          : lastLoginLocation // ignore: cast_nullable_to_non_nullable
+              as LocationModel?,
       loginAttempts: freezed == loginAttempts
           ? _value.loginAttempts
           : loginAttempts // ignore: cast_nullable_to_non_nullable
@@ -388,7 +405,7 @@ class _$UserInfoModelImpl implements _UserInfoModel {
       @JsonKey(name: 'email_verified_at') this.emailVerifiedAt,
       @JsonKey(name: 'last_login_at') this.lastLoginAt,
       @JsonKey(name: 'last_login_ip') this.lastLoginIp,
-      @JsonKey(name: 'last_login_location_string') this.lastLoginLocationString,
+      @JsonKey(name: 'last_login_location') this.lastLoginLocation,
       @JsonKey(name: 'login_attempts') this.loginAttempts,
       @JsonKey(name: 'locked_until') this.lockedUntil,
       @JsonKey(name: 'password_changed_at') this.passwordChangedAt,
@@ -439,8 +456,8 @@ class _$UserInfoModelImpl implements _UserInfoModel {
   @JsonKey(name: 'last_login_ip')
   final String? lastLoginIp;
   @override
-  @JsonKey(name: 'last_login_location_string')
-  final String? lastLoginLocationString;
+  @JsonKey(name: 'last_login_location')
+  final LocationModel? lastLoginLocation;
   @override
   @JsonKey(name: 'login_attempts')
   final int? loginAttempts;
@@ -459,7 +476,7 @@ class _$UserInfoModelImpl implements _UserInfoModel {
 
   @override
   String toString() {
-    return 'UserInfoModel(id: $id, username: $username, email: $email, emailEncrypted: $emailEncrypted, displayName: $displayName, avatarUrl: $avatarUrl, phone: $phone, timezone: $timezone, locale: $locale, isActive: $isActive, isEmailVerified: $isEmailVerified, emailVerifiedAt: $emailVerifiedAt, lastLoginAt: $lastLoginAt, lastLoginIp: $lastLoginIp, lastLoginLocationString: $lastLoginLocationString, loginAttempts: $loginAttempts, lockedUntil: $lockedUntil, passwordChangedAt: $passwordChangedAt, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserInfoModel(id: $id, username: $username, email: $email, emailEncrypted: $emailEncrypted, displayName: $displayName, avatarUrl: $avatarUrl, phone: $phone, timezone: $timezone, locale: $locale, isActive: $isActive, isEmailVerified: $isEmailVerified, emailVerifiedAt: $emailVerifiedAt, lastLoginAt: $lastLoginAt, lastLoginIp: $lastLoginIp, lastLoginLocation: $lastLoginLocation, loginAttempts: $loginAttempts, lockedUntil: $lockedUntil, passwordChangedAt: $passwordChangedAt, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -491,9 +508,8 @@ class _$UserInfoModelImpl implements _UserInfoModel {
                 other.lastLoginAt == lastLoginAt) &&
             (identical(other.lastLoginIp, lastLoginIp) ||
                 other.lastLoginIp == lastLoginIp) &&
-            (identical(
-                    other.lastLoginLocationString, lastLoginLocationString) ||
-                other.lastLoginLocationString == lastLoginLocationString) &&
+            (identical(other.lastLoginLocation, lastLoginLocation) ||
+                other.lastLoginLocation == lastLoginLocation) &&
             (identical(other.loginAttempts, loginAttempts) ||
                 other.loginAttempts == loginAttempts) &&
             (identical(other.lockedUntil, lockedUntil) ||
@@ -524,7 +540,7 @@ class _$UserInfoModelImpl implements _UserInfoModel {
         emailVerifiedAt,
         lastLoginAt,
         lastLoginIp,
-        lastLoginLocationString,
+        lastLoginLocation,
         loginAttempts,
         lockedUntil,
         passwordChangedAt,
@@ -564,8 +580,8 @@ abstract class _UserInfoModel implements UserInfoModel {
       @JsonKey(name: 'email_verified_at') final DateTime? emailVerifiedAt,
       @JsonKey(name: 'last_login_at') final DateTime? lastLoginAt,
       @JsonKey(name: 'last_login_ip') final String? lastLoginIp,
-      @JsonKey(name: 'last_login_location_string')
-      final String? lastLoginLocationString,
+      @JsonKey(name: 'last_login_location')
+      final LocationModel? lastLoginLocation,
       @JsonKey(name: 'login_attempts') final int? loginAttempts,
       @JsonKey(name: 'locked_until') final DateTime? lockedUntil,
       @JsonKey(name: 'password_changed_at') final DateTime? passwordChangedAt,
@@ -616,8 +632,8 @@ abstract class _UserInfoModel implements UserInfoModel {
   @JsonKey(name: 'last_login_ip')
   String? get lastLoginIp;
   @override
-  @JsonKey(name: 'last_login_location_string')
-  String? get lastLoginLocationString;
+  @JsonKey(name: 'last_login_location')
+  LocationModel? get lastLoginLocation;
   @override
   @JsonKey(name: 'login_attempts')
   int? get loginAttempts;

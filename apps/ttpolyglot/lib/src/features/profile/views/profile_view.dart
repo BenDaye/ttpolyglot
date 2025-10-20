@@ -144,11 +144,11 @@ class ProfileViewContent extends GetView<ProfileController> {
                             label: '最后登录IP',
                             value: user.lastLoginIp!,
                           ),
-                        if (user.lastLoginLocationString != null)
+                        if (user.lastLoginLocation?.locationString != null)
                           _InfoItem(
                             icon: Icons.public_outlined,
                             label: '最后登录地址',
-                            value: user.lastLoginLocationString!,
+                            value: user.lastLoginLocation!.locationString,
                           ),
                       ],
                     ),

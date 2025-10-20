@@ -148,15 +148,13 @@ class UserService extends BaseService {
             'region': location['region'],
             'country_code': location['countryCode'],
           };
-          user['last_login_location_string'] = '${location['country']}/${location['city']}';
         } else {
           user['last_login_location'] = {
-            'country': '未知',
-            'city': '未知',
+            'country': '',
+            'city': '',
             'region': '',
             'country_code': '',
           };
-          user['last_login_location_string'] = '未知';
         }
       }
 
@@ -252,10 +250,10 @@ class UserService extends BaseService {
             // IP地址类型，尝试转换为字符串，失败则返回默认值
             try {
               final ipString = String.fromCharCodes(value as List<int>);
-              lastLoginIp = ipString.isNotEmpty ? ipString : '未知';
+              lastLoginIp = ipString.isNotEmpty ? ipString : '';
               serializedData[key] = lastLoginIp;
             } catch (e) {
-              serializedData[key] = '未知';
+              serializedData[key] = '';
             }
           } else {
             // 其他二进制数据转换为字符串
@@ -275,7 +273,7 @@ class UserService extends BaseService {
       });
 
       // 添加IP地理位置信息
-      if (lastLoginIp != null && lastLoginIp != '未知') {
+      if (lastLoginIp != null && lastLoginIp != '') {
         try {
           final location = await _ipLocationService.getLocation(lastLoginIp!);
           serializedData['last_login_location'] = {
@@ -284,26 +282,22 @@ class UserService extends BaseService {
             'region': location['region'],
             'country_code': location['countryCode'],
           };
-          // 同时添加格式化的位置字符串
-          serializedData['last_login_location_string'] = await _ipLocationService.getLocationString(lastLoginIp!);
         } catch (e) {
           // IP地理位置查询失败时使用默认值
           serializedData['last_login_location'] = {
-            'country': '未知',
-            'city': '未知',
+            'country': '',
+            'city': '',
             'region': '',
             'country_code': '',
           };
-          serializedData['last_login_location_string'] = '未知';
         }
       } else {
         serializedData['last_login_location'] = {
-          'country': '未知',
-          'city': '未知',
+          'country': '',
+          'city': '',
           'region': '',
           'country_code': '',
         };
-        serializedData['last_login_location_string'] = '未知';
       }
 
       // 缓存用户信息
@@ -612,7 +606,6 @@ class UserService extends BaseService {
               'region': location['region'],
               'country_code': location['countryCode'],
             };
-            session['last_login_location_string'] = await _ipLocationService.getLocationString(ip);
           } catch (e) {
             session['ip_location'] = {
               'country': '未知',
@@ -620,7 +613,6 @@ class UserService extends BaseService {
               'region': '',
               'country_code': '',
             };
-            session['last_login_location_string'] = '未知';
           }
         } else {
           session['ip_location'] = {
@@ -629,7 +621,6 @@ class UserService extends BaseService {
             'region': '',
             'country_code': '',
           };
-          session['last_login_location_string'] = '未知';
         }
       }
 
