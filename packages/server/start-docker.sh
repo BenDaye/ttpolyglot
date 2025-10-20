@@ -299,9 +299,9 @@ start_services() {
     echo ""
     
     echo -e "${BOLD}管理命令:${NC}"
-    echo "  查看状态: ./scripts/start-docker.sh status"
-    echo "  查看日志: ./scripts/start-docker.sh logs"
-    echo "  停止服务: ./scripts/start-docker.sh stop"
+    echo "  查看状态: ./start-docker.sh status"
+    echo "  查看日志: ./start-docker.sh logs"
+    echo "  停止服务: ./start-docker.sh stop"
     echo ""
     
     echo -e "${BOLD}数据库管理:${NC}"
@@ -319,7 +319,7 @@ stop_services() {
     docker-compose $COMPOSE_FILES stop
     
     print_success "服务已停止（容器保留）"
-    print_info "如需删除容器，请使用: ./scripts/start-docker.sh down"
+    print_info "如需删除容器，请使用: ./start-docker.sh down"
 }
 
 # 停止并删除服务
@@ -488,7 +488,7 @@ show_help() {
     cat << EOF
 
 ${BOLD}用法:${NC}
-  ./scripts/start-docker.sh [操作] [选项]
+  ./start-docker.sh [操作] [选项]
 
 ${BOLD}操作:${NC}
   start          启动服务（默认，根据 .env 自动判断环境）
@@ -512,22 +512,22 @@ ${BOLD}选项:${NC}
 
 ${BOLD}示例:${NC}
   # 启动服务（自动检测环境）
-  ./scripts/start-docker.sh
+  ./start-docker.sh
 
   # 前台运行查看日志
-  ./scripts/start-docker.sh start --foreground
+  ./start-docker.sh start --foreground
 
   # 重新构建并启动
-  ./scripts/start-docker.sh rebuild
+  ./start-docker.sh rebuild
 
   # 查看状态
-  ./scripts/start-docker.sh status
+  ./start-docker.sh status
 
   # 查看实时日志
-  ./scripts/start-docker.sh logs -f
+  ./start-docker.sh logs -f
 
   # 清理环境
-  ./scripts/start-docker.sh clean
+  ./start-docker.sh clean
 
 ${BOLD}环境配置:${NC}
   脚本会自动读取 .env 文件中的 ENVIRONMENT 变量：
@@ -547,7 +547,7 @@ ${BOLD}注意:${NC}
   • 可通过 .env 文件配置 Nginx 端口
 
 ${BOLD}更多信息:${NC}
-  查看详细文档: ./scripts/START_DOCKER_README.md
+  查看详细文档: ./START_DOCKER_README.md
 
 EOF
 }
@@ -562,8 +562,8 @@ show_version() {
 main() {
     # 获取脚本所在目录
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    # 切换到项目根目录
-    cd "$SCRIPT_DIR/.."
+    # 切换到项目根目录（脚本现在在根目录，所以不需要 /..）
+    cd "$SCRIPT_DIR"
     
     print_header "🚀 TTPolyglot Docker 启动脚本"
     print_separator

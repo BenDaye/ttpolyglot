@@ -32,7 +32,7 @@ COPY packages/server/scripts ./scripts
 RUN dart compile exe bin/server.dart -o server
 
 # 编译迁移脚本为独立可执行文件
-RUN dart compile exe scripts/migrate.dart -o migrate
+RUN dart compile exe database/migrate.dart -o migrate
 
 # ============================================
 # 运行阶段

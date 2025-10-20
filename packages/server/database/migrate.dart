@@ -4,29 +4,29 @@ import 'dart:io';
 
 import 'package:ttpolyglot_server/server.dart';
 
-import '../database/migration_service.dart';
-import '../database/migrations/001_users_table.dart';
-import '../database/migrations/002_roles_table.dart';
-import '../database/migrations/003_permissions_table.dart';
-import '../database/migrations/004_role_permissions_table.dart';
-import '../database/migrations/005_languages_table.dart';
-import '../database/migrations/006_projects_table.dart';
-import '../database/migrations/007_user_roles_table.dart';
-import '../database/migrations/008_project_languages_table.dart';
-import '../database/migrations/009_user_translation_providers_table.dart';
-import '../database/migrations/010_translation_entries_table.dart';
-import '../database/migrations/011_translation_history_table.dart';
-import '../database/migrations/012_system_configs_table.dart';
-import '../database/migrations/013_user_sessions_table.dart';
-import '../database/migrations/014_file_uploads_table.dart';
-import '../database/migrations/015_notifications_table.dart';
-import '../database/migrations/016_audit_logs_table.dart';
-import '../database/seeds/001_insert_default_roles.dart';
-import '../database/seeds/002_insert_permissions.dart';
-import '../database/seeds/003_assign_role_permissions.dart';
-import '../database/seeds/004_insert_languages.dart';
-import '../database/seeds/005_insert_system_configs.dart';
-import '../database/seeds/006_insert_default_admin_user.dart';
+import './migration_service.dart';
+import './migrations/001_users_table.dart';
+import './migrations/002_roles_table.dart';
+import './migrations/003_permissions_table.dart';
+import './migrations/004_role_permissions_table.dart';
+import './migrations/005_languages_table.dart';
+import './migrations/006_projects_table.dart';
+import './migrations/007_user_roles_table.dart';
+import './migrations/008_project_languages_table.dart';
+import './migrations/009_user_translation_providers_table.dart';
+import './migrations/010_translation_entries_table.dart';
+import './migrations/011_translation_history_table.dart';
+import './migrations/012_system_configs_table.dart';
+import './migrations/013_user_sessions_table.dart';
+import './migrations/014_file_uploads_table.dart';
+import './migrations/015_notifications_table.dart';
+import './migrations/016_audit_logs_table.dart';
+import './seeds/001_insert_default_roles.dart';
+import './seeds/002_insert_permissions.dart';
+import './seeds/003_assign_role_permissions.dart';
+import './seeds/004_insert_languages.dart';
+import './seeds/005_insert_system_configs.dart';
+import './seeds/006_insert_default_admin_user.dart';
 
 /// 主函数
 Future<void> main(List<String> args) async {

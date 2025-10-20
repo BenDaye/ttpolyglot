@@ -33,7 +33,7 @@ RUN sed -i '/^resolution: workspace$/d' pubspec.yaml
 RUN dart pub get
 
 # 创建 migrate 脚本的符号链接
-RUN echo '#!/bin/sh\ncd /app/packages/server && dart run scripts/migrate.dart "$@"' > /app/migrate && \
+RUN echo '#!/bin/sh\ncd /app/packages/server && dart run database/migrate.dart "$@"' > /app/migrate && \
   chmod +x /app/migrate
 
 # 创建热重载启动脚本
