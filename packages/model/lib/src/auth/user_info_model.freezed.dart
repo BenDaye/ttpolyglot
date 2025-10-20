@@ -20,8 +20,11 @@ UserInfoModel _$UserInfoModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$UserInfoModel {
+  @JsonKey(name: 'id')
   String? get id => throw _privateConstructorUsedError; // ID 为可选，后端不返回真实ID
+  @JsonKey(name: 'username')
   String get username => throw _privateConstructorUsedError;
+  @JsonKey(name: 'email')
   String get email => throw _privateConstructorUsedError;
   @JsonKey(name: 'email_encrypted')
   String? get emailEncrypted => throw _privateConstructorUsedError;
@@ -77,9 +80,9 @@ abstract class $UserInfoModelCopyWith<$Res> {
       _$UserInfoModelCopyWithImpl<$Res, UserInfoModel>;
   @useResult
   $Res call(
-      {String? id,
-      String username,
-      String email,
+      {@JsonKey(name: 'id') String? id,
+      @JsonKey(name: 'username') String username,
+      @JsonKey(name: 'email') String email,
       @JsonKey(name: 'email_encrypted') String? emailEncrypted,
       @JsonKey(name: 'display_name') String? displayName,
       @JsonKey(name: 'avatar_url') String? avatarUrl,
@@ -251,9 +254,9 @@ abstract class _$$UserInfoModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String? id,
-      String username,
-      String email,
+      {@JsonKey(name: 'id') String? id,
+      @JsonKey(name: 'username') String username,
+      @JsonKey(name: 'email') String email,
       @JsonKey(name: 'email_encrypted') String? emailEncrypted,
       @JsonKey(name: 'display_name') String? displayName,
       @JsonKey(name: 'avatar_url') String? avatarUrl,
@@ -405,9 +408,9 @@ class __$$UserInfoModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$UserInfoModelImpl implements _UserInfoModel {
   const _$UserInfoModelImpl(
-      {this.id,
-      required this.username,
-      required this.email,
+      {@JsonKey(name: 'id') this.id,
+      @JsonKey(name: 'username') required this.username,
+      @JsonKey(name: 'email') required this.email,
       @JsonKey(name: 'email_encrypted') this.emailEncrypted,
       @JsonKey(name: 'display_name') this.displayName,
       @JsonKey(name: 'avatar_url') this.avatarUrl,
@@ -432,11 +435,14 @@ class _$UserInfoModelImpl implements _UserInfoModel {
       _$$UserInfoModelImplFromJson(json);
 
   @override
+  @JsonKey(name: 'id')
   final String? id;
 // ID 为可选，后端不返回真实ID
   @override
+  @JsonKey(name: 'username')
   final String username;
   @override
+  @JsonKey(name: 'email')
   final String email;
   @override
   @JsonKey(name: 'email_encrypted')
@@ -594,9 +600,9 @@ class _$UserInfoModelImpl implements _UserInfoModel {
 
 abstract class _UserInfoModel implements UserInfoModel {
   const factory _UserInfoModel(
-      {final String? id,
-      required final String username,
-      required final String email,
+      {@JsonKey(name: 'id') final String? id,
+      @JsonKey(name: 'username') required final String username,
+      @JsonKey(name: 'email') required final String email,
       @JsonKey(name: 'email_encrypted') final String? emailEncrypted,
       @JsonKey(name: 'display_name') final String? displayName,
       @JsonKey(name: 'avatar_url') final String? avatarUrl,
@@ -622,10 +628,13 @@ abstract class _UserInfoModel implements UserInfoModel {
       _$UserInfoModelImpl.fromJson;
 
   @override
+  @JsonKey(name: 'id')
   String? get id; // ID 为可选，后端不返回真实ID
   @override
+  @JsonKey(name: 'username')
   String get username;
   @override
+  @JsonKey(name: 'email')
   String get email;
   @override
   @JsonKey(name: 'email_encrypted')

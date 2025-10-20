@@ -176,7 +176,6 @@ class UserService extends BaseService {
       logInfo('获取用户详情: $userId');
 
       // 先检查缓存
-      _clearUserCache(userId);
       final cacheKey = 'user:details:$userId';
       final cachedUser = await _redisService.getJson(cacheKey);
       if (cachedUser != null) {

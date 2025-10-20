@@ -4,7 +4,6 @@ import 'package:ttpolyglot_server/server.dart';
 /// 认证服务结果辅助类
 class AuthResult {
   static ApiResponseModel<Map<String, dynamic>> success({
-    String? userId,
     String? message,
     Map<String, dynamic>? data,
   }) {
@@ -117,7 +116,6 @@ class AuthService extends BaseService {
       await _redisService.setTempData('email_verification:$userId', verificationToken);
 
       return AuthResult.success(
-        userId: userId,
         message: '注册成功，请查收邮箱验证邮件',
         data: {
           'user_id': userId,
@@ -208,35 +206,21 @@ class AuthService extends BaseService {
         userAgent: userAgent,
       );
 
-      // 缓存用户会话到Redis
-      await _redisService.setUserSession(userId, {
-        'user_id': userId,
-        'username': user['username'],
-        'email': user['email'],
-        'display_name': user['display_name'],
-        'access_token_hash': accessTokenHash,
-        'login_at': DateTime.now().toIso8601String(),
-      });
-
       // 更新最后登录时间
       await _updateLastLogin(userId, ipAddress);
+
+      // 获取完整的用户信息（包括角色、地理位置等）
+      final fullUserInfo = await _userService.getUserById(userId);
+      if (fullUserInfo == null) {
+        throwBusiness('获取用户信息失败');
+      }
 
       LoggerUtils.info('用户登录成功: $userId');
 
       return AuthResult.success(
-        userId: userId,
         message: '登录成功',
         data: {
-          'user': {
-            'id': userId,
-            'username': user['username'],
-            'email': user['email'],
-            'display_name': user['display_name'],
-            'avatar_url': user['avatar_url'],
-            'timezone': user['timezone'],
-            'locale': user['locale'],
-            'is_email_verified': user['is_email_verified'],
-          },
+          'user': fullUserInfo,
           'tokens': {
             'access_token': accessToken,
             'refresh_token': refreshToken,
@@ -309,7 +293,6 @@ class AuthService extends BaseService {
       LoggerUtils.info('令牌刷新成功: $userId');
 
       return AuthResult.success(
-        userId: userId,
         message: '令牌刷新成功',
         data: {
           'access_token': newAccessToken,
@@ -351,7 +334,6 @@ class AuthService extends BaseService {
       LoggerUtils.info('用户登出成功: $userId');
 
       return AuthResult.success(
-        userId: userId,
         message: '登出成功',
       );
     } catch (error, stackTrace) {
@@ -433,7 +415,6 @@ class AuthService extends BaseService {
       LoggerUtils.info('邮箱验证成功: $userId');
 
       return AuthResult.success(
-        userId: userId,
         message: '邮箱验证成功',
       );
     } catch (error, stackTrace) {
@@ -551,7 +532,6 @@ class AuthService extends BaseService {
       LoggerUtils.info('密码重置成功: $userId');
 
       return AuthResult.success(
-        userId: userId,
         message: '密码重置成功，请重新登录',
       );
     } catch (error, stackTrace) {
