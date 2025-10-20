@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:ttpolyglot_model/src/auth/location_model.dart';
+import 'package:ttpolyglot_model/src/auth/role_model.dart';
 
 part 'user_info_model.freezed.dart';
 part 'user_info_model.g.dart';
@@ -8,9 +9,9 @@ part 'user_info_model.g.dart';
 @freezed
 class UserInfoModel with _$UserInfoModel {
   const factory UserInfoModel({
-    String? id, // ID 为可选，后端不返回真实ID
-    required String username,
-    required String email,
+    @JsonKey(name: 'id') String? id, // ID 为可选，后端不返回真实ID
+    @JsonKey(name: 'username') required String username,
+    @JsonKey(name: 'email') required String email,
     @JsonKey(name: 'email_encrypted') String? emailEncrypted,
     @JsonKey(name: 'display_name') String? displayName,
     @JsonKey(name: 'avatar_url') String? avatarUrl,
@@ -28,6 +29,7 @@ class UserInfoModel with _$UserInfoModel {
     @JsonKey(name: 'password_changed_at') DateTime? passwordChangedAt,
     @JsonKey(name: 'created_at') DateTime? createdAt,
     @JsonKey(name: 'updated_at') DateTime? updatedAt,
+    @JsonKey(name: 'roles') List<RoleModel>? roles,
   }) = _UserInfoModel;
 
   factory UserInfoModel.fromJson(Map<String, dynamic> json) => _$UserInfoModelFromJson(json);

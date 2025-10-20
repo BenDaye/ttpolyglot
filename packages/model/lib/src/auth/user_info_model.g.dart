@@ -43,6 +43,9 @@ _$UserInfoModelImpl _$$UserInfoModelImplFromJson(Map<String, dynamic> json) =>
       updatedAt: json['updated_at'] == null
           ? null
           : DateTime.parse(json['updated_at'] as String),
+      roles: (json['roles'] as List<dynamic>?)
+          ?.map((e) => RoleModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$$UserInfoModelImplToJson(_$UserInfoModelImpl instance) =>
@@ -67,4 +70,5 @@ Map<String, dynamic> _$$UserInfoModelImplToJson(_$UserInfoModelImpl instance) =>
       'password_changed_at': instance.passwordChangedAt?.toIso8601String(),
       'created_at': instance.createdAt?.toIso8601String(),
       'updated_at': instance.updatedAt?.toIso8601String(),
+      'roles': instance.roles,
     };

@@ -57,6 +57,8 @@ mixin _$UserInfoModel {
   DateTime? get createdAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'updated_at')
   DateTime? get updatedAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'roles')
+  List<RoleModel>? get roles => throw _privateConstructorUsedError;
 
   /// Serializes this UserInfoModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -94,7 +96,8 @@ abstract class $UserInfoModelCopyWith<$Res> {
       @JsonKey(name: 'locked_until') DateTime? lockedUntil,
       @JsonKey(name: 'password_changed_at') DateTime? passwordChangedAt,
       @JsonKey(name: 'created_at') DateTime? createdAt,
-      @JsonKey(name: 'updated_at') DateTime? updatedAt});
+      @JsonKey(name: 'updated_at') DateTime? updatedAt,
+      @JsonKey(name: 'roles') List<RoleModel>? roles});
 
   $LocationModelCopyWith<$Res>? get lastLoginLocation;
 }
@@ -134,6 +137,7 @@ class _$UserInfoModelCopyWithImpl<$Res, $Val extends UserInfoModel>
     Object? passwordChangedAt = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
+    Object? roles = freezed,
   }) {
     return _then(_value.copyWith(
       id: freezed == id
@@ -216,6 +220,10 @@ class _$UserInfoModelCopyWithImpl<$Res, $Val extends UserInfoModel>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      roles: freezed == roles
+          ? _value.roles
+          : roles // ignore: cast_nullable_to_non_nullable
+              as List<RoleModel>?,
     ) as $Val);
   }
 
@@ -262,7 +270,8 @@ abstract class _$$UserInfoModelImplCopyWith<$Res>
       @JsonKey(name: 'locked_until') DateTime? lockedUntil,
       @JsonKey(name: 'password_changed_at') DateTime? passwordChangedAt,
       @JsonKey(name: 'created_at') DateTime? createdAt,
-      @JsonKey(name: 'updated_at') DateTime? updatedAt});
+      @JsonKey(name: 'updated_at') DateTime? updatedAt,
+      @JsonKey(name: 'roles') List<RoleModel>? roles});
 
   @override
   $LocationModelCopyWith<$Res>? get lastLoginLocation;
@@ -301,6 +310,7 @@ class __$$UserInfoModelImplCopyWithImpl<$Res>
     Object? passwordChangedAt = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
+    Object? roles = freezed,
   }) {
     return _then(_$UserInfoModelImpl(
       id: freezed == id
@@ -383,6 +393,10 @@ class __$$UserInfoModelImplCopyWithImpl<$Res>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      roles: freezed == roles
+          ? _value._roles
+          : roles // ignore: cast_nullable_to_non_nullable
+              as List<RoleModel>?,
     ));
   }
 }
@@ -410,7 +424,9 @@ class _$UserInfoModelImpl implements _UserInfoModel {
       @JsonKey(name: 'locked_until') this.lockedUntil,
       @JsonKey(name: 'password_changed_at') this.passwordChangedAt,
       @JsonKey(name: 'created_at') this.createdAt,
-      @JsonKey(name: 'updated_at') this.updatedAt});
+      @JsonKey(name: 'updated_at') this.updatedAt,
+      @JsonKey(name: 'roles') final List<RoleModel>? roles})
+      : _roles = roles;
 
   factory _$UserInfoModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserInfoModelImplFromJson(json);
@@ -473,10 +489,20 @@ class _$UserInfoModelImpl implements _UserInfoModel {
   @override
   @JsonKey(name: 'updated_at')
   final DateTime? updatedAt;
+  final List<RoleModel>? _roles;
+  @override
+  @JsonKey(name: 'roles')
+  List<RoleModel>? get roles {
+    final value = _roles;
+    if (value == null) return null;
+    if (_roles is EqualUnmodifiableListView) return _roles;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
 
   @override
   String toString() {
-    return 'UserInfoModel(id: $id, username: $username, email: $email, emailEncrypted: $emailEncrypted, displayName: $displayName, avatarUrl: $avatarUrl, phone: $phone, timezone: $timezone, locale: $locale, isActive: $isActive, isEmailVerified: $isEmailVerified, emailVerifiedAt: $emailVerifiedAt, lastLoginAt: $lastLoginAt, lastLoginIp: $lastLoginIp, lastLoginLocation: $lastLoginLocation, loginAttempts: $loginAttempts, lockedUntil: $lockedUntil, passwordChangedAt: $passwordChangedAt, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserInfoModel(id: $id, username: $username, email: $email, emailEncrypted: $emailEncrypted, displayName: $displayName, avatarUrl: $avatarUrl, phone: $phone, timezone: $timezone, locale: $locale, isActive: $isActive, isEmailVerified: $isEmailVerified, emailVerifiedAt: $emailVerifiedAt, lastLoginAt: $lastLoginAt, lastLoginIp: $lastLoginIp, lastLoginLocation: $lastLoginLocation, loginAttempts: $loginAttempts, lockedUntil: $lockedUntil, passwordChangedAt: $passwordChangedAt, createdAt: $createdAt, updatedAt: $updatedAt, roles: $roles)';
   }
 
   @override
@@ -519,7 +545,8 @@ class _$UserInfoModelImpl implements _UserInfoModel {
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+                other.updatedAt == updatedAt) &&
+            const DeepCollectionEquality().equals(other._roles, _roles));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -545,7 +572,8 @@ class _$UserInfoModelImpl implements _UserInfoModel {
         lockedUntil,
         passwordChangedAt,
         createdAt,
-        updatedAt
+        updatedAt,
+        const DeepCollectionEquality().hash(_roles)
       ]);
 
   /// Create a copy of UserInfoModel
@@ -586,8 +614,9 @@ abstract class _UserInfoModel implements UserInfoModel {
       @JsonKey(name: 'locked_until') final DateTime? lockedUntil,
       @JsonKey(name: 'password_changed_at') final DateTime? passwordChangedAt,
       @JsonKey(name: 'created_at') final DateTime? createdAt,
-      @JsonKey(name: 'updated_at')
-      final DateTime? updatedAt}) = _$UserInfoModelImpl;
+      @JsonKey(name: 'updated_at') final DateTime? updatedAt,
+      @JsonKey(name: 'roles')
+      final List<RoleModel>? roles}) = _$UserInfoModelImpl;
 
   factory _UserInfoModel.fromJson(Map<String, dynamic> json) =
       _$UserInfoModelImpl.fromJson;
@@ -649,6 +678,9 @@ abstract class _UserInfoModel implements UserInfoModel {
   @override
   @JsonKey(name: 'updated_at')
   DateTime? get updatedAt;
+  @override
+  @JsonKey(name: 'roles')
+  List<RoleModel>? get roles;
 
   /// Create a copy of UserInfoModel
   /// with the given fields replaced by the non-null parameter values.
