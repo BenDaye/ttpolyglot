@@ -1,22 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:ttpolyglot/src/core/layout/layout_controller.dart';
+import 'package:ttpolyglot/src/core/routing/app_pages.dart';
 import 'package:ttpolyglot/src/features/profile/controllers/profile_controller.dart';
 
 /// 个人信息页面
-class ProfileView extends GetView<ProfileController> {
+class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
+
+  @override
+  State<ProfileView> createState() => _ProfileViewState();
+}
+
+class _ProfileViewState extends State<ProfileView> {
+  @override
+  void initState() {
+    super.initState();
+    // 更新布局控制器
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.isRegistered<LayoutController>()) {
+        final controller = Get.find<LayoutController>();
+        controller.updateLayoutForRoute(Routes.profile);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const ProfileViewContent();
+  }
+}
+
+/// 个人信息页面内容组件
+class ProfileViewContent extends GetView<ProfileController> {
+  const ProfileViewContent({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: AppBar(
-        title: const Text('个人信息'),
-        elevation: 0.0,
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        scrolledUnderElevation: 1.0,
-      ),
       body: Obx(
         () {
           if (controller.isLoading.value) {
@@ -33,13 +56,24 @@ class ProfileView extends GetView<ProfileController> {
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
             child: Center(
               child: Container(
                 constraints: const BoxConstraints(maxWidth: 800.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    // 页面标题
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 24.0),
+                      child: Text(
+                        '个人信息',
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ),
+
                     // 用户头像和基本信息
                     _buildUserHeader(context, user),
 

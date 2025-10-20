@@ -497,7 +497,10 @@ class ResponsiveSidebar extends StatelessWidget {
         ],
         onSelected: (value) {
           if (value == 'profile') {
-            Get.toNamed(Routes.profile);
+            Get.rootDelegate.offAndToNamed(Routes.profile);
+            if (ResponsiveUtils.isMobile(context)) {
+              Get.back();
+            }
           } else if (value == 'logout') {
             _handleLogout(context);
           }

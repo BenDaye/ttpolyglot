@@ -17,7 +17,7 @@ class LayoutController extends GetxController {
 
   // 导航徽章
   final _badges = <String, String>{}.obs;
-  
+
   // 项目徽章数量
   final _projectsBadge = 0.obs;
 
@@ -76,6 +76,13 @@ class LayoutController extends GetxController {
       _currentIndex.value = config.index;
       _pageTitle.value = config.title;
       _showFab.value = config.showFab;
+    } else {
+      // 处理不在导航列表中的路由
+      if (route == Routes.profile) {
+        _currentIndex.value = -1; // 不高亮任何导航项
+        _pageTitle.value = '个人信息';
+        _showFab.value = false;
+      }
     }
   }
 
