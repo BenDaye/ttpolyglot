@@ -165,10 +165,15 @@ import 'package:ttpolyglot_server/src/services/services.dart';
 // 创建服务实例
 final dbService = DatabaseService();
 final redisService = RedisService();
+final userService = UserService(
+  databaseService: dbService,
+  redisService: redisService,
+);
 final authService = AuthService(
   databaseService: dbService,
   redisService: redisService,
   emailService: emailService,
+  userService: userService,
 );
 
 // 使用服务

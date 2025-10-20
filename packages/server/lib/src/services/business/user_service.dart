@@ -455,7 +455,6 @@ class UserService extends BaseService {
   }
 
   // 私有辅助方法
-
   Future<bool> _isUsernameExists(String username, [String? excludeUserId]) async {
     var sql = 'SELECT 1 FROM users WHERE username = @username';
     final parameters = <String, dynamic>{'username': username};

@@ -32,6 +32,7 @@ class AuthResult {
 class AuthService extends BaseService {
   final DatabaseService _databaseService;
   final RedisService _redisService;
+  final UserService _userService;
   late final JwtUtils _jwtUtils;
   late final CryptoUtils _cryptoUtils;
   late final EmailService _emailService;
@@ -40,9 +41,11 @@ class AuthService extends BaseService {
     required DatabaseService databaseService,
     required RedisService redisService,
     required EmailService emailService,
+    required UserService userService,
   })  : _databaseService = databaseService,
         _redisService = redisService,
         _emailService = emailService,
+        _userService = userService,
         super('AuthService') {
     _jwtUtils = JwtUtils();
     _cryptoUtils = CryptoUtils();
@@ -612,7 +615,6 @@ class AuthService extends BaseService {
   }
 
   // 私有辅助方法
-
   void _validateRegistrationInput(String username, String email, String password) {
     if (username.isEmpty || username.length < 3) {
       throwBusiness('用户名至少3个字符');
@@ -663,39 +665,9 @@ class AuthService extends BaseService {
   }
 
   /// 根据ID获取用户信息（公开方法）
+  /// 委托给 UserService 处理，避免重复代码
   Future<Map<String, dynamic>?> getUserById(String userId) async {
-    try {
-      // final logger = LoggerFactory.getLogger('AuthService');
-      LoggerUtils.info('获取用户信息: $userId');
-
-      final result = await _databaseService.query('''
-        SELECT id, username, email, display_name, avatar_url,
-               phone, timezone, locale,
-               is_active, is_email_verified, email_verified_at,
-               created_at, updated_at, last_login_at, last_login_ip,
-               password_changed_at
-        FROM users 
-        WHERE id = @user_id
-        LIMIT 1
-      ''', {'user_id': userId});
-
-      if (result.isEmpty) {
-        return null;
-      }
-
-      final user = result.first.toColumnMap();
-
-      // 移除敏感信息
-      user.remove('password_hash');
-      user.remove('login_attempts');
-      user.remove('locked_until');
-      user.remove('email_encrypted');
-
-      return user;
-    } catch (error, stackTrace) {
-      LoggerUtils.error('获取用户信息失败', error: error, stackTrace: stackTrace);
-      return null;
-    }
+    return await _userService.getUserById(userId);
   }
 
   Future<void> _incrementLoginAttempts(String userId) async {

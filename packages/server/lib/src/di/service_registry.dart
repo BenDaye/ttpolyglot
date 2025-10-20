@@ -109,21 +109,22 @@ class ServiceRegistry {
       lifetime: ServiceLifetime.singleton,
     );
 
-    // 注册认证服务
-    _container.register<AuthService>(
-      () => AuthService(
-        emailService: _container.get<EmailService>(),
+    // 注册用户服务（必须先注册，因为 AuthService 依赖它）
+    _container.register<UserService>(
+      () => UserService(
         databaseService: _container.get<DatabaseService>(),
         redisService: _container.get<RedisService>(),
       ),
       lifetime: ServiceLifetime.singleton,
     );
 
-    // 注册用户服务
-    _container.register<UserService>(
-      () => UserService(
+    // 注册认证服务（依赖 UserService）
+    _container.register<AuthService>(
+      () => AuthService(
+        emailService: _container.get<EmailService>(),
         databaseService: _container.get<DatabaseService>(),
         redisService: _container.get<RedisService>(),
+        userService: _container.get<UserService>(),
       ),
       lifetime: ServiceLifetime.singleton,
     );
