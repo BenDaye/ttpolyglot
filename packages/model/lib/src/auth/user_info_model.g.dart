@@ -26,6 +26,7 @@ _$UserInfoModelImpl _$$UserInfoModelImplFromJson(Map<String, dynamic> json) =>
           ? null
           : DateTime.parse(json['last_login_at'] as String),
       lastLoginIp: json['last_login_ip'] as String?,
+      lastLoginLocationString: json['last_login_location_string'] as String?,
       loginAttempts: (json['login_attempts'] as num?)?.toInt(),
       lockedUntil: json['locked_until'] == null
           ? null
@@ -57,6 +58,7 @@ Map<String, dynamic> _$$UserInfoModelImplToJson(_$UserInfoModelImpl instance) =>
       'email_verified_at': instance.emailVerifiedAt?.toIso8601String(),
       'last_login_at': instance.lastLoginAt?.toIso8601String(),
       'last_login_ip': instance.lastLoginIp,
+      'last_login_location_string': instance.lastLoginLocationString,
       'login_attempts': instance.loginAttempts,
       'locked_until': instance.lockedUntil?.toIso8601String(),
       'password_changed_at': instance.passwordChangedAt?.toIso8601String(),

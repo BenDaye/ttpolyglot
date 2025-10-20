@@ -1,6 +1,7 @@
 import '../../config/server_config.dart';
 import '../../utils/security/crypto_utils.dart';
 import '../base_service.dart';
+import '../feature/ip_location_service.dart';
 import '../infrastructure/database_service.dart';
 import '../infrastructure/redis_service.dart';
 
@@ -8,13 +9,16 @@ import '../infrastructure/redis_service.dart';
 class UserService extends BaseService {
   final DatabaseService _databaseService;
   final RedisService _redisService;
+  final IpLocationService _ipLocationService;
   late final CryptoUtils _cryptoUtils;
 
   UserService({
     required DatabaseService databaseService,
     required RedisService redisService,
+    required IpLocationService ipLocationService,
   })  : _databaseService = databaseService,
         _redisService = redisService,
+        _ipLocationService = ipLocationService,
         super('UserService') {
     _cryptoUtils = CryptoUtils();
   }
@@ -105,6 +109,57 @@ class UserService extends BaseService {
         return userData;
       }).toList();
 
+      // 批量查询IP地理位置信息
+      // 收集所有唯一的IP地址
+      final uniqueIps = <String>{};
+      for (final user in users) {
+        final ip = user['last_login_ip']?.toString();
+        if (ip != null && ip != '未知' && ip.isNotEmpty) {
+          uniqueIps.add(ip);
+        }
+      }
+
+      // 批量查询位置信息
+      final locationMap = <String, Map<String, String>>{};
+      if (uniqueIps.isNotEmpty) {
+        try {
+          // 为了避免API限流，这里限制批量查询数量
+          final ipsToQuery = uniqueIps.take(10).toList();
+          for (final ip in ipsToQuery) {
+            locationMap[ip] = await _ipLocationService.getLocation(ip);
+            // 添加延迟以避免API限流
+            if (ipsToQuery.length > 1) {
+              await Future.delayed(const Duration(milliseconds: 1500));
+            }
+          }
+        } catch (e) {
+          logWarning('批量查询IP地理位置失败: $e');
+        }
+      }
+
+      // 为每个用户添加位置信息
+      for (final user in users) {
+        final ip = user['last_login_ip']?.toString();
+        if (ip != null && locationMap.containsKey(ip)) {
+          final location = locationMap[ip]!;
+          user['last_login_location'] = {
+            'country': location['country'],
+            'city': location['city'],
+            'region': location['region'],
+            'country_code': location['countryCode'],
+          };
+          user['last_login_location_string'] = '${location['country']}/${location['city']}';
+        } else {
+          user['last_login_location'] = {
+            'country': '未知',
+            'city': '未知',
+            'region': '',
+            'country_code': '',
+          };
+          user['last_login_location_string'] = '未知';
+        }
+      }
+
       return {
         'users': users,
         'pagination': {
@@ -183,6 +238,8 @@ class UserService extends BaseService {
 
       // 转换特殊类型对象为可序列化格式
       final serializedData = <String, dynamic>{};
+      String? lastLoginIp;
+
       userData.forEach((key, value) {
         if (value == null) {
           serializedData[key] = null;
@@ -195,7 +252,8 @@ class UserService extends BaseService {
             // IP地址类型，尝试转换为字符串，失败则返回默认值
             try {
               final ipString = String.fromCharCodes(value as List<int>);
-              serializedData[key] = ipString.isNotEmpty ? ipString : '未知';
+              lastLoginIp = ipString.isNotEmpty ? ipString : '未知';
+              serializedData[key] = lastLoginIp;
             } catch (e) {
               serializedData[key] = '未知';
             }
@@ -206,11 +264,47 @@ class UserService extends BaseService {
         } else if (value is List || value is Map || value is String || value is num || value is bool) {
           // 基本类型直接使用
           serializedData[key] = value;
+          // 同时保存IP地址字符串
+          if (key == 'last_login_ip' && value is String) {
+            lastLoginIp = value;
+          }
         } else {
           // 其他类型转换为字符串
           serializedData[key] = value.toString();
         }
       });
+
+      // 添加IP地理位置信息
+      if (lastLoginIp != null && lastLoginIp != '未知') {
+        try {
+          final location = await _ipLocationService.getLocation(lastLoginIp!);
+          serializedData['last_login_location'] = {
+            'country': location['country'],
+            'city': location['city'],
+            'region': location['region'],
+            'country_code': location['countryCode'],
+          };
+          // 同时添加格式化的位置字符串
+          serializedData['last_login_location_string'] = await _ipLocationService.getLocationString(lastLoginIp!);
+        } catch (e) {
+          // IP地理位置查询失败时使用默认值
+          serializedData['last_login_location'] = {
+            'country': '未知',
+            'city': '未知',
+            'region': '',
+            'country_code': '',
+          };
+          serializedData['last_login_location_string'] = '未知';
+        }
+      } else {
+        serializedData['last_login_location'] = {
+          'country': '未知',
+          'city': '未知',
+          'region': '',
+          'country_code': '',
+        };
+        serializedData['last_login_location_string'] = '未知';
+      }
 
       // 缓存用户信息
       await _redisService.setJson(cacheKey, serializedData, ServerConfig.cacheApiResponseTtl);
@@ -504,7 +598,42 @@ class UserService extends BaseService {
         ORDER BY last_activity_at DESC
       ''', {'user_id': userId});
 
-      return result.map((row) => row.toColumnMap()).toList();
+      final sessions = result.map((row) => row.toColumnMap()).toList();
+
+      // 为每个会话添加IP地理位置信息
+      for (final session in sessions) {
+        final ip = session['ip_address']?.toString();
+        if (ip != null && ip != '未知' && ip.isNotEmpty) {
+          try {
+            final location = await _ipLocationService.getLocation(ip);
+            session['ip_location'] = {
+              'country': location['country'],
+              'city': location['city'],
+              'region': location['region'],
+              'country_code': location['countryCode'],
+            };
+            session['last_login_location_string'] = await _ipLocationService.getLocationString(ip);
+          } catch (e) {
+            session['ip_location'] = {
+              'country': '未知',
+              'city': '未知',
+              'region': '',
+              'country_code': '',
+            };
+            session['last_login_location_string'] = '未知';
+          }
+        } else {
+          session['ip_location'] = {
+            'country': '未知',
+            'city': '未知',
+            'region': '',
+            'country_code': '',
+          };
+          session['last_login_location_string'] = '未知';
+        }
+      }
+
+      return sessions;
     } catch (error, stackTrace) {
       logError('获取用户会话失败: $userId', error: error, stackTrace: stackTrace);
       rethrow;

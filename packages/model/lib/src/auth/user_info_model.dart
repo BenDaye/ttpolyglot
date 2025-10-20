@@ -21,6 +21,7 @@ class UserInfoModel with _$UserInfoModel {
     @JsonKey(name: 'email_verified_at') DateTime? emailVerifiedAt,
     @JsonKey(name: 'last_login_at') DateTime? lastLoginAt,
     @JsonKey(name: 'last_login_ip') String? lastLoginIp,
+    @JsonKey(name: 'last_login_location_string') String? lastLoginLocationString,
     @JsonKey(name: 'login_attempts') int? loginAttempts,
     @JsonKey(name: 'locked_until') DateTime? lockedUntil,
     @JsonKey(name: 'password_changed_at') DateTime? passwordChangedAt,

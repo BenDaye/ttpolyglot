@@ -100,6 +100,14 @@ class ServiceRegistry {
       lifetime: ServiceLifetime.singleton,
     );
 
+    // 注册IP地理位置服务
+    _container.register<IpLocationService>(
+      () => IpLocationService(
+        redisService: _container.get<RedisService>(),
+      ),
+      lifetime: ServiceLifetime.singleton,
+    );
+
     // 注册权限服务
     _container.register<PermissionService>(
       () => PermissionService(
@@ -114,6 +122,7 @@ class ServiceRegistry {
       () => UserService(
         databaseService: _container.get<DatabaseService>(),
         redisService: _container.get<RedisService>(),
+        ipLocationService: _container.get<IpLocationService>(),
       ),
       lifetime: ServiceLifetime.singleton,
     );
