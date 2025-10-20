@@ -1,7 +1,6 @@
 import 'dart:developer' as developer;
 
 import 'package:shelf/shelf.dart';
-import 'package:ttpolyglot_model/model.dart';
 
 import '../exceptions/exceptions.dart';
 import '../utils/http/response_utils.dart';
@@ -84,7 +83,6 @@ abstract class BaseController {
       );
 
       return ResponseUtils.error(
-        code: ApiResponseCode.validationError,
         message: error.message,
       );
     } on NotFoundException catch (error, stackTrace) {
@@ -96,7 +94,6 @@ abstract class BaseController {
       );
 
       return ResponseUtils.error(
-        code: ApiResponseCode.notFound,
         message: error.message,
       );
     } on BusinessException catch (error, stackTrace) {
@@ -108,7 +105,6 @@ abstract class BaseController {
       );
 
       return ResponseUtils.error(
-        code: error.code,
         message: error.message,
       );
     } on AuthenticationException catch (error, stackTrace) {
@@ -120,7 +116,6 @@ abstract class BaseController {
       );
 
       return ResponseUtils.error(
-        code: ApiResponseCode.unauthorized,
         message: error.message,
       );
     } on AuthorizationException catch (error, stackTrace) {
@@ -132,7 +127,6 @@ abstract class BaseController {
       );
 
       return ResponseUtils.error(
-        code: ApiResponseCode.forbidden,
         message: error.message,
       );
     } catch (error, stackTrace) {
@@ -144,7 +138,6 @@ abstract class BaseController {
       );
 
       return ResponseUtils.error(
-        code: ApiResponseCode.internalServerError,
         message: '操作失败，请稍后重试',
       );
     }

@@ -16,9 +16,6 @@ abstract class ServerException implements Exception {
     this.stackTrace,
   });
 
-  /// 获取 HTTP 状态码
-  int get httpStatusCode => code.value > 0 ? code.value : 500;
-
   /// 转换为 Map
   Map<String, dynamic> toMap() {
     return {
@@ -52,7 +49,7 @@ class ValidationException extends ServerException {
     this.fieldErrors = const [],
     super.details,
     super.stackTrace,
-  }) : super(code: ApiResponseCode.unprocessableEntity);
+  }) : super(code: ApiResponseCode.validationError);
 
   @override
   Map<String, dynamic> toMap() {
@@ -74,7 +71,7 @@ class AuthenticationException extends ServerException {
     required super.message,
     super.details,
     super.stackTrace,
-  }) : super(code: ApiResponseCode.unauthorized);
+  }) : super(code: ApiResponseCode.authenticationError);
 }
 
 /// 授权异常
@@ -83,7 +80,7 @@ class AuthorizationException extends ServerException {
     required super.message,
     super.details,
     super.stackTrace,
-  }) : super(code: ApiResponseCode.forbidden);
+  }) : super(code: ApiResponseCode.authorizationError);
 }
 
 /// 资源未找到异常
@@ -92,17 +89,16 @@ class NotFoundException extends ServerException {
     required super.message,
     super.details,
     super.stackTrace,
-  }) : super(code: ApiResponseCode.notFound);
+  }) : super(code: ApiResponseCode.dataNotFound);
 }
 
 /// 业务逻辑异常
 class BusinessException extends ServerException {
   const BusinessException({
-    required super.code,
     required super.message,
     super.details,
     super.stackTrace,
-  });
+  }) : super(code: ApiResponseCode.businessError);
 }
 
 /// 数据库异常
@@ -111,7 +107,7 @@ class DatabaseException extends ServerException {
     required super.message,
     super.details,
     super.stackTrace,
-  }) : super(code: ApiResponseCode.internalServerError);
+  }) : super(code: ApiResponseCode.databaseError);
 }
 
 /// 缓存异常
@@ -120,7 +116,7 @@ class CacheException extends ServerException {
     required super.message,
     super.details,
     super.stackTrace,
-  }) : super(code: ApiResponseCode.internalServerError);
+  }) : super(code: ApiResponseCode.cacheError);
 }
 
 /// 外部服务异常
@@ -132,7 +128,7 @@ class ExternalServiceException extends ServerException {
     required super.message,
     super.details,
     super.stackTrace,
-  }) : super(code: ApiResponseCode.badGateway);
+  }) : super(code: ApiResponseCode.externalServiceError);
 
   @override
   Map<String, dynamic> toMap() {
@@ -154,7 +150,7 @@ class RateLimitException extends ServerException {
     this.retryAfterSeconds = 60,
     super.details,
     super.stackTrace,
-  }) : super(code: ApiResponseCode.tooManyRequests);
+  }) : super(code: ApiResponseCode.rateLimitError);
 
   @override
   Map<String, dynamic> toMap() {
@@ -170,7 +166,7 @@ class ConflictException extends ServerException {
     required super.message,
     super.details,
     super.stackTrace,
-  }) : super(code: ApiResponseCode.conflict);
+  }) : super(code: ApiResponseCode.conflictError);
 }
 
 /// 文件上传异常
@@ -184,7 +180,7 @@ class FileUploadException extends ServerException {
     this.fileSize,
     super.details,
     super.stackTrace,
-  }) : super(code: ApiResponseCode.badRequest);
+  }) : super(code: ApiResponseCode.fileUploadError);
 
   @override
   Map<String, dynamic> toMap() {

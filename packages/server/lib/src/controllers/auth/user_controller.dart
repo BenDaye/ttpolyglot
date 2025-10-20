@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
-import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
 
 import '../base_controller.dart';
@@ -60,7 +59,6 @@ class UserController extends BaseController {
 
       if (page < 1 || limit < 1 || limit > 100) {
         return ResponseUtils.error(
-          code: ApiResponseCode.validationError,
           message: '分页参数无效',
         );
       }
@@ -84,7 +82,6 @@ class UserController extends BaseController {
       LoggerUtils.error('获取用户列表失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(
-        code: ApiResponseCode.internalServerError,
         message: '获取用户列表失败',
       );
     }
@@ -110,7 +107,6 @@ class UserController extends BaseController {
 
       if (error is ValidationException) {
         return ResponseUtils.error(
-          code: ApiResponseCode.validationError,
           message: error.message,
         );
       }
@@ -167,14 +163,14 @@ class UserController extends BaseController {
       LoggerUtils.error('更新用户信息失败: $id', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
-        return ResponseUtils.error(code: ApiResponseCode.validationError, message: error.message);
+        return ResponseUtils.error(message: error.message);
       }
 
       if (error is BusinessException) {
-        return ResponseUtils.error(code: ApiResponseCode.businessError, message: error.message);
+        return ResponseUtils.error(message: error.message);
       }
 
-      return ResponseUtils.error(code: ApiResponseCode.internalServerError, message: '更新用户信息失败');
+      return ResponseUtils.error(message: '更新用户信息失败');
     }
   }
 
@@ -186,7 +182,6 @@ class UserController extends BaseController {
       final currentUserId = getCurrentUserId(request);
       if (id == currentUserId) {
         return ResponseUtils.error(
-          code: ApiResponseCode.businessError,
           message: '不能删除自己的账户',
         );
       }
@@ -198,14 +193,14 @@ class UserController extends BaseController {
       LoggerUtils.error('删除用户失败: $id', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
-        return ResponseUtils.error(code: ApiResponseCode.validationError, message: error.message);
+        return ResponseUtils.error(message: error.message);
       }
 
       if (error is NotFoundException) {
-        return ResponseUtils.error(code: ApiResponseCode.notFound, message: '用户不存在');
+        return ResponseUtils.error(message: '用户不存在');
       }
 
-      return ResponseUtils.error(code: ApiResponseCode.internalServerError, message: '删除用户失败');
+      return ResponseUtils.error(message: '删除用户失败');
     }
   }
 
@@ -230,7 +225,7 @@ class UserController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('获取当前用户信息失败', error: error, stackTrace: stackTrace);
 
-      return ResponseUtils.error(code: ApiResponseCode.internalServerError, message: '获取用户信息失败');
+      return ResponseUtils.error(message: '获取用户信息失败');
     }
   }
 
@@ -239,7 +234,7 @@ class UserController extends BaseController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseUtils.error(code: ApiResponseCode.unauthorized, message: '用户信息不存在');
+        return ResponseUtils.error(message: '用户信息不存在');
       }
 
       final body = await request.readAsString();
@@ -279,15 +274,14 @@ class UserController extends BaseController {
       LoggerUtils.error('更新当前用户信息失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
-        return ResponseUtils.error(code: ApiResponseCode.validationError, message: error.message);
+        return ResponseUtils.error(message: error.message);
       }
 
       if (error is BusinessException) {
-        return ResponseUtils.error(code: ApiResponseCode.businessError, message: error.message);
+        return ResponseUtils.error(message: error.message);
       }
 
       return ResponseUtils.error(
-        code: ApiResponseCode.internalServerError,
         message: '更新个人信息失败',
       );
     }
@@ -299,7 +293,6 @@ class UserController extends BaseController {
       final userId = getCurrentUserId(request);
       if (userId == null) {
         return ResponseUtils.error(
-          code: ApiResponseCode.unauthorized,
           message: '用户信息不存在',
         );
       }
@@ -317,15 +310,14 @@ class UserController extends BaseController {
       LoggerUtils.error('修改密码失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
-        return ResponseUtils.error(code: ApiResponseCode.validationError, message: error.message);
+        return ResponseUtils.error(message: error.message);
       }
 
       if (error is BusinessException) {
-        return ResponseUtils.error(code: ApiResponseCode.businessError, message: error.message);
+        return ResponseUtils.error(message: error.message);
       }
 
       return ResponseUtils.error(
-        code: ApiResponseCode.internalServerError,
         message: '修改密码失败',
       );
     }
@@ -344,7 +336,6 @@ class UserController extends BaseController {
       LoggerUtils.error('获取用户统计信息失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(
-        code: ApiResponseCode.internalServerError,
         message: '获取统计信息失败',
       );
     }
@@ -355,14 +346,13 @@ class UserController extends BaseController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseUtils.error(code: ApiResponseCode.unauthorized, message: '用户信息不存在');
+        return ResponseUtils.error(message: '用户信息不存在');
       }
 
       // 解析multipart请求
       final contentType = request.headers['content-type'];
       if (contentType == null || !contentType.startsWith('multipart/form-data')) {
         return ResponseUtils.error(
-          code: ApiResponseCode.validationError,
           message: '请使用multipart/form-data格式上传文件',
         );
       }
@@ -375,7 +365,6 @@ class UserController extends BaseController {
 
       if (body.isEmpty) {
         return ResponseUtils.error(
-          code: ApiResponseCode.validationError,
           message: '请选择要上传的头像文件',
         );
       }
@@ -393,7 +382,6 @@ class UserController extends BaseController {
 
       if (!uploadResult.success) {
         return ResponseUtils.error(
-          code: ApiResponseCode.businessError,
           message: uploadResult.message ?? '上传头像失败',
         );
       }
@@ -414,7 +402,6 @@ class UserController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('上传头像失败', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(
-        code: ApiResponseCode.internalServerError,
         message: '上传头像失败',
       );
     }
@@ -425,7 +412,7 @@ class UserController extends BaseController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseUtils.error(code: ApiResponseCode.unauthorized, message: '用户信息不存在');
+        return ResponseUtils.error(message: '用户信息不存在');
       }
 
       await _userService.updateUser(userId, {'avatar_url': null});
@@ -433,7 +420,6 @@ class UserController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('删除头像失败', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(
-        code: ApiResponseCode.internalServerError,
         message: '删除头像失败',
       );
     }
@@ -454,7 +440,6 @@ class UserController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('获取用户会话失败', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(
-        code: ApiResponseCode.internalServerError,
         message: '获取用户会话失败',
       );
     }
@@ -465,7 +450,7 @@ class UserController extends BaseController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseUtils.error(code: ApiResponseCode.unauthorized, message: '用户信息不存在');
+        return ResponseUtils.error(message: '用户信息不存在');
       }
 
       await _userService.deleteUserSession(userId, sessionId);
@@ -473,7 +458,6 @@ class UserController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('删除用户会话失败', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(
-        code: ApiResponseCode.internalServerError,
         message: '删除会话失败',
       );
     }

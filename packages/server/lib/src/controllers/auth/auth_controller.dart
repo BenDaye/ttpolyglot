@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
-import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
 
 import '../base_controller.dart';
@@ -87,10 +86,10 @@ class AuthController extends BaseController {
       LoggerUtils.error('用户注册失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
-        return ResponseUtils.error(code: ApiResponseCode.validationError, message: '用户注册参数验证失败');
+        return ResponseUtils.error(message: '用户注册参数验证失败');
       }
 
-      return ResponseUtils.error(code: ApiResponseCode.internalServerError, message: '注册失败，请稍后重试');
+      return ResponseUtils.error(message: '注册失败，请稍后重试');
     }
   }
 
@@ -140,7 +139,7 @@ class AuthController extends BaseController {
       LoggerUtils.error('用户登录失败', error: error, stackTrace: stackTrace);
 
       if (error is ValidationException) {
-        return ResponseUtils.error(code: ApiResponseCode.validationError, message: '用户登录参数验证失败');
+        return ResponseUtils.error(message: '用户登录参数验证失败');
       }
 
       return ResponseUtils.error(
@@ -208,13 +207,11 @@ class AuthController extends BaseController {
 
       if (error is ValidationException) {
         return ResponseUtils.error(
-          code: ApiResponseCode.validationError,
           message: '令牌刷新参数验证失败',
         );
       }
 
       return ResponseUtils.error(
-        code: ApiResponseCode.internalServerError,
         message: '令牌刷新失败',
       );
     }
@@ -246,13 +243,11 @@ class AuthController extends BaseController {
 
       if (error is ValidationException) {
         return ResponseUtils.error(
-          code: ApiResponseCode.validationError,
           message: '忘记密码参数验证失败',
         );
       }
 
       return ResponseUtils.error(
-        code: ApiResponseCode.internalServerError,
         message: '请求失败，请稍后重试',
       );
     }
@@ -285,13 +280,11 @@ class AuthController extends BaseController {
 
       if (error is ValidationException) {
         return ResponseUtils.error(
-          code: ApiResponseCode.validationError,
           message: '重置密码参数验证失败',
         );
       }
 
       return ResponseUtils.error(
-        code: ApiResponseCode.internalServerError,
         message: '重置失败，请稍后重试',
       );
     }
@@ -323,13 +316,11 @@ class AuthController extends BaseController {
 
       if (error is ValidationException) {
         return ResponseUtils.error(
-          code: ApiResponseCode.validationError,
           message: '邮箱验证参数验证失败',
         );
       }
 
       return ResponseUtils.error(
-        code: ApiResponseCode.internalServerError,
         message: '验证失败，请稍后重试',
       );
     }
@@ -341,7 +332,6 @@ class AuthController extends BaseController {
       final userId = getCurrentUserId(request);
       if (userId == null) {
         return ResponseUtils.error(
-          code: ApiResponseCode.unauthorized,
           message: '用户信息不存在',
         );
       }
@@ -351,7 +341,6 @@ class AuthController extends BaseController {
 
       if (user == null) {
         return ResponseUtils.error(
-          code: ApiResponseCode.notFound,
           message: '用户不存在',
         );
       }
@@ -364,7 +353,6 @@ class AuthController extends BaseController {
       LoggerUtils.error('获取当前用户信息失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(
-        code: ApiResponseCode.internalServerError,
         message: '获取用户信息失败',
       );
     }
@@ -379,7 +367,6 @@ class AuthController extends BaseController {
       final email = data['email'] as String?;
       if (email == null || email.isEmpty) {
         return ResponseUtils.error(
-          code: ApiResponseCode.validationError,
           message: '邮箱地址不能为空',
         );
       }
@@ -398,7 +385,6 @@ class AuthController extends BaseController {
       LoggerUtils.error('重发验证邮件失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(
-        code: ApiResponseCode.internalServerError,
         message: '重发验证邮件失败，请稍后重试',
       );
     }

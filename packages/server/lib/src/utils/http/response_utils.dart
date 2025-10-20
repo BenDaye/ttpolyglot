@@ -248,7 +248,7 @@ class ResponseUtils {
       );
     } catch (err) {
       return error<Map<String, dynamic>>(
-        code: ApiResponseCode.internalServerError,
+        code: ApiResponseCode.serviceUnavailable,
         message: '状态检查失败',
         data: {
           'error': err.toString(),
@@ -298,7 +298,7 @@ class ResponseUtils {
         );
       } else {
         return error<Map<String, dynamic>>(
-          code: ApiResponseCode.serviceUnavailable,
+          code: ApiResponseCode.internalServerError,
           message: '系统不健康',
           data: healthStatus,
           type: type,
@@ -343,7 +343,7 @@ class ResponseUtils {
         );
       } else {
         return error<Map<String, dynamic>>(
-          code: ApiResponseCode.serviceUnavailable,
+          code: ApiResponseCode.databaseError,
           message: '数据库连接失败',
           data: {
             'status': 'unhealthy',

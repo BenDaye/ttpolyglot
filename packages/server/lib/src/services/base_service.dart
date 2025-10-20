@@ -51,7 +51,6 @@ abstract class BaseService {
 
       // 否则包装为服务器异常
       throw BusinessException(
-        code: ApiResponseCode.internalServerError,
         message: '操作失败: $opName',
         details: error.toString(),
         stackTrace: stackTrace,
@@ -94,7 +93,6 @@ abstract class BaseService {
       }
 
       throw BusinessException(
-        code: ApiResponseCode.internalServerError,
         message: '操作失败: $opName',
         details: error.toString(),
         stackTrace: stackTrace,
@@ -130,7 +128,6 @@ abstract class BaseService {
   void require(bool condition, String message, {ApiResponseCode? code}) {
     if (!condition) {
       throw BusinessException(
-        code: code ?? ApiResponseCode.badRequest,
         message: message,
       );
     }
@@ -160,11 +157,9 @@ abstract class BaseService {
   /// 抛出业务异常
   Never throwBusiness(
     String message, {
-    ApiResponseCode? code,
     dynamic details,
   }) {
     throw BusinessException(
-      code: code ?? ApiResponseCode.businessError,
       message: message,
       details: details,
     );

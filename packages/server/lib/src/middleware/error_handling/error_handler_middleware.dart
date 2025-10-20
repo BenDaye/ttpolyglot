@@ -1,5 +1,4 @@
 import 'package:shelf/shelf.dart';
-import 'package:ttpolyglot_model/model.dart';
 
 import '../../exceptions/exceptions.dart';
 import '../../utils/http/response_utils.dart';
@@ -46,7 +45,6 @@ class ErrorHandlerMiddleware {
 
     // 包装未知异常为 BusinessException
     final wrappedException = BusinessException(
-      code: ApiResponseCode.internalServerError,
       message: '服务器内部错误',
       details: error.toString(),
       stackTrace: stackTrace,
