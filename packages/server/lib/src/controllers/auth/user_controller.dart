@@ -214,13 +214,13 @@ class UserController extends BaseController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseUtils.error(code: ApiResponseCode.unauthorized, message: '用户信息不存在');
+        return ResponseUtils.error(message: '用户信息不存在');
       }
 
       final user = await _userService.getUserById(userId);
 
       if (user == null) {
-        return ResponseUtils.error(code: ApiResponseCode.notFound, message: '用户不存在');
+        return ResponseUtils.error(message: '用户不存在');
       }
 
       return ResponseUtils.success(
