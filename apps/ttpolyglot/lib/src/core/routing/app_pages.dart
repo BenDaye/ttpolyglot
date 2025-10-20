@@ -60,6 +60,12 @@ class AppPages {
                 transition: Transition.fadeIn,
               ),
               GetPage(
+                name: _Paths.profile,
+                page: () => const ProfileView(),
+                bindings: [ProfileBinding()],
+                transition: Transition.fadeIn,
+              ),
+              GetPage(
                 name: _Paths.projects,
                 page: () => const ProjectsShell(),
                 bindings: [ProjectsBinding()],

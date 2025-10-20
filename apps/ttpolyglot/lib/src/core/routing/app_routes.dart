@@ -22,6 +22,8 @@ abstract class Routes {
 
   static const settings = _Paths.home + _Paths.settings;
 
+  static const profile = _Paths.home + _Paths.profile;
+
   static const unknown = _Paths.unknown;
 
   static const signIn = _Paths.signIn;
@@ -34,6 +36,7 @@ abstract class _Paths {
   static const dashboard = '/dashboard';
   static const projects = '/projects';
   static const settings = '/settings';
+  static const profile = '/profile';
 
   static const project = '/:projectId';
 

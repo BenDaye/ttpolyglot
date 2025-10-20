@@ -1,4 +1,5 @@
 export 'dashboard/dashboard.dart';
+export 'profile/profile.dart';
 export 'project/project.dart';
 export 'projects/projects.dart';
 export 'root/root.dart';

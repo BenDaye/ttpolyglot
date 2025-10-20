@@ -462,6 +462,20 @@ class ResponsiveSidebar extends StatelessWidget {
         ),
         itemBuilder: (context) => [
           PopupMenuItem<String>(
+            value: 'profile',
+            child: Row(
+              children: [
+                Icon(
+                  Icons.person_outline_rounded,
+                  size: 20.0,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 12.0),
+                const Text('个人信息'),
+              ],
+            ),
+          ),
+          PopupMenuItem<String>(
             value: 'logout',
             child: Row(
               children: [
@@ -482,7 +496,9 @@ class ResponsiveSidebar extends StatelessWidget {
           ),
         ],
         onSelected: (value) {
-          if (value == 'logout') {
+          if (value == 'profile') {
+            Get.toNamed(Routes.profile);
+          } else if (value == 'logout') {
             _handleLogout(context);
           }
         },
