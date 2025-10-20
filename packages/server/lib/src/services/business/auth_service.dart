@@ -206,6 +206,16 @@ class AuthService extends BaseService {
         userAgent: userAgent,
       );
 
+      // 缓存用户会话到Redis
+      await _redisService.setUserSession(userId, {
+        'user_id': userId,
+        'username': user['username'],
+        'email': user['email'],
+        'display_name': user['display_name'],
+        'access_token_hash': accessTokenHash,
+        'login_at': DateTime.now().toIso8601String(),
+      });
+
       // 更新最后登录时间
       await _updateLastLogin(userId, ipAddress);
 
