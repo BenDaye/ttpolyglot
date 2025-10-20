@@ -38,7 +38,7 @@ class IpLocationService extends BaseService {
   Future<Map<String, String>> getLocation(String ipAddress) async {
     return execute(() async {
       // 处理特殊IP地址
-      if (ipAddress.isEmpty || ipAddress == '未知' || ipAddress == 'unknown' || _isLocalIp(ipAddress)) {
+      if (ipAddress.isEmpty || ipAddress == '' || ipAddress == 'unknown' || _isLocalIp(ipAddress)) {
         return _getDefaultLocation();
       }
 
@@ -74,10 +74,10 @@ class IpLocationService extends BaseService {
           // 检查API返回状态
           if (data['status'] == 'success') {
             final locationData = {
-              'country': data['country']?.toString() ?? '未知',
+              'country': data['country']?.toString() ?? '',
               'countryCode': data['countryCode']?.toString() ?? '',
               'region': data['regionName']?.toString() ?? '',
-              'city': data['city']?.toString() ?? '未知',
+              'city': data['city']?.toString() ?? '',
               'timezone': data['timezone']?.toString() ?? '',
               'isp': data['isp']?.toString() ?? '',
             };
@@ -108,11 +108,11 @@ class IpLocationService extends BaseService {
   /// 返回格式：中国/北京
   Future<String> getLocationString(String ipAddress) async {
     final location = await getLocation(ipAddress);
-    final country = location['country'] ?? '未知';
-    final city = location['city'] ?? '未知';
+    final country = location['country'] ?? '';
+    final city = location['city'] ?? '';
 
-    if (country == '未知' && city == '未知') {
-      return '未知';
+    if (country == '' && city == '') {
+      return '';
     }
 
     if (country == city) {
@@ -163,10 +163,10 @@ class IpLocationService extends BaseService {
   /// 获取默认位置信息
   Map<String, String> _getDefaultLocation() {
     return {
-      'country': '未知',
+      'country': '',
       'countryCode': '',
       'region': '',
-      'city': '未知',
+      'city': '',
       'timezone': '',
       'isp': '',
     };

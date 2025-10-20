@@ -71,7 +71,7 @@ class UserService extends BaseService {
           u.phone, u.timezone, u.locale,
           u.is_active, u.is_email_verified,
           u.last_login_at, 
-          COALESCE(HOST(u.last_login_ip)::text, '未知') as last_login_ip,
+          COALESCE(HOST(u.last_login_ip)::text, '') as last_login_ip,
           u.created_at, u.updated_at,
           COALESCE(
             json_agg(
@@ -114,7 +114,7 @@ class UserService extends BaseService {
       final uniqueIps = <String>{};
       for (final user in users) {
         final ip = user['last_login_ip']?.toString();
-        if (ip != null && ip != '未知' && ip.isNotEmpty) {
+        if (ip != null && ip != '' && ip.isNotEmpty) {
           uniqueIps.add(ip);
         }
       }
@@ -176,6 +176,7 @@ class UserService extends BaseService {
       logInfo('获取用户详情: $userId');
 
       // 先检查缓存
+      _clearUserCache(userId);
       final cacheKey = 'user:details:$userId';
       final cachedUser = await _redisService.getJson(cacheKey);
       if (cachedUser != null) {
@@ -188,7 +189,7 @@ class UserService extends BaseService {
           u.phone, u.timezone, u.locale,
           u.is_active, u.is_email_verified, u.email_verified_at,
           u.last_login_at, 
-          COALESCE(HOST(u.last_login_ip)::text, '未知') as last_login_ip,
+          COALESCE(HOST(u.last_login_ip)::text, '') as last_login_ip,
           u.login_attempts, u.locked_until, u.password_changed_at,
           u.created_at, u.updated_at,
           COALESCE(
@@ -597,7 +598,7 @@ class UserService extends BaseService {
       // 为每个会话添加IP地理位置信息
       for (final session in sessions) {
         final ip = session['ip_address']?.toString();
-        if (ip != null && ip != '未知' && ip.isNotEmpty) {
+        if (ip != null && ip != '') {
           try {
             final location = await _ipLocationService.getLocation(ip);
             session['ip_location'] = {
@@ -608,16 +609,16 @@ class UserService extends BaseService {
             };
           } catch (e) {
             session['ip_location'] = {
-              'country': '未知',
-              'city': '未知',
+              'country': '',
+              'city': '',
               'region': '',
               'country_code': '',
             };
           }
         } else {
           session['ip_location'] = {
-            'country': '未知',
-            'city': '未知',
+            'country': '',
+            'city': '',
             'region': '',
             'country_code': '',
           };
