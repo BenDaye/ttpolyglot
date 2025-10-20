@@ -66,7 +66,9 @@ class UserService extends BaseService {
           u.id, u.username, u.email, u.display_name, u.avatar_url,
           u.phone, u.timezone, u.locale,
           u.is_active, u.is_email_verified,
-          u.last_login_at, u.last_login_ip, u.created_at, u.updated_at,
+          u.last_login_at, 
+          COALESCE(HOST(u.last_login_ip)::text, '未知') as last_login_ip,
+          u.created_at, u.updated_at,
           COALESCE(
             json_agg(
               json_build_object(
@@ -132,7 +134,8 @@ class UserService extends BaseService {
           u.id, u.username, u.email, u.display_name, u.avatar_url,
           u.phone, u.timezone, u.locale,
           u.is_active, u.is_email_verified, u.email_verified_at,
-          u.last_login_at, u.last_login_ip, 
+          u.last_login_at, 
+          COALESCE(HOST(u.last_login_ip)::text, '未知') as last_login_ip,
           u.login_attempts, u.locked_until, u.password_changed_at,
           u.created_at, u.updated_at,
           COALESCE(
@@ -187,8 +190,19 @@ class UserService extends BaseService {
           // DateTime转换为ISO8601字符串
           serializedData[key] = value.toIso8601String();
         } else if (value.runtimeType.toString().contains('UndecodedBytes')) {
-          // UndecodedBytes（二进制数据）转换为字符串
-          serializedData[key] = value.toString();
+          // UndecodedBytes（二进制数据）特殊处理
+          if (key == 'last_login_ip') {
+            // IP地址类型，尝试转换为字符串，失败则返回默认值
+            try {
+              final ipString = String.fromCharCodes(value as List<int>);
+              serializedData[key] = ipString.isNotEmpty ? ipString : '未知';
+            } catch (e) {
+              serializedData[key] = '未知';
+            }
+          } else {
+            // 其他二进制数据转换为字符串
+            serializedData[key] = value.toString();
+          }
         } else if (value is List || value is Map || value is String || value is num || value is bool) {
           // 基本类型直接使用
           serializedData[key] = value;
