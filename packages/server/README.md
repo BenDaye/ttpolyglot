@@ -152,8 +152,8 @@ docker-compose up -d ttpolyglot-db ttpolyglot-redis
 # 生成数据库表结构
 dart run build_runner build
 
-# 执行数据库迁移（如有迁移脚本）
-# dart run bin/migrate.dart
+# 执行数据库迁移
+dart run database/migrate.dart
 ```
 
 #### 5. 启动服务器
@@ -527,6 +527,11 @@ Query: language=en&format=json
 packages/server/
 ├── bin/
 │   └── server.dart              # 服务器入口文件
+├── database/                    # 数据库迁移和种子数据
+│   ├── migrate.dart             # 数据库迁移脚本
+│   ├── migration_service.dart   # 迁移服务
+│   ├── migrations/              # 迁移文件
+│   └── seeds/                   # 种子数据
 ├── lib/
 │   ├── server.dart              # 库导出文件
 │   └── src/
@@ -562,7 +567,10 @@ packages/server/
 │           └── ...
 ├── test/                        # 测试文件
 ├── docker-compose.yml           # Docker Compose 配置
+├── docker-compose.dev.yml       # 开发环境 Docker Compose 配置
 ├── Dockerfile                   # Docker 镜像配置
+├── Dockerfile.dev               # 开发环境 Dockerfile
+├── start-docker.sh              # Docker 启动脚本
 └── pubspec.yaml                # 依赖配置
 ```
 
