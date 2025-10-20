@@ -267,23 +267,12 @@ class ProfileViewContent extends GetView<ProfileController> {
 
           const SizedBox(height: 8.0),
 
-          // 用户ID
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12.0,
-              vertical: 6.0,
-            ),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(4.0),
-            ),
-            child: Text(
-              'ID: ${user.id}',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                    fontFamily: 'monospace',
-                  ),
-            ),
+          // 用户邮箱
+          Text(
+            user.email,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
           ),
         ],
       ),

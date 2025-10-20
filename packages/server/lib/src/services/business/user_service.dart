@@ -98,6 +98,7 @@ class UserService extends BaseService {
 
         // 移除敏感信息
         userData.remove('password_hash');
+        userData.remove('id'); // 隐藏用户ID
 
         return userData;
       }).toList();
@@ -175,6 +176,7 @@ class UserService extends BaseService {
 
       // 移除敏感信息
       userData.remove('password_hash');
+      userData.remove('id'); // 隐藏用户ID
 
       // 转换特殊类型对象为可序列化格式
       final serializedData = <String, dynamic>{};
