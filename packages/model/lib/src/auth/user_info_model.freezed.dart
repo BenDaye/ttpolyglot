@@ -20,7 +20,7 @@ UserInfoModel _$UserInfoModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$UserInfoModel {
-  String get id => throw _privateConstructorUsedError;
+  String? get id => throw _privateConstructorUsedError; // ID 为可选，后端不返回真实ID
   String get username => throw _privateConstructorUsedError;
   String get email => throw _privateConstructorUsedError;
   @JsonKey(name: 'email_encrypted')
@@ -73,7 +73,7 @@ abstract class $UserInfoModelCopyWith<$Res> {
       _$UserInfoModelCopyWithImpl<$Res, UserInfoModel>;
   @useResult
   $Res call(
-      {String id,
+      {String? id,
       String username,
       String email,
       @JsonKey(name: 'email_encrypted') String? emailEncrypted,
@@ -109,7 +109,7 @@ class _$UserInfoModelCopyWithImpl<$Res, $Val extends UserInfoModel>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
+    Object? id = freezed,
     Object? username = null,
     Object? email = null,
     Object? emailEncrypted = freezed,
@@ -130,10 +130,10 @@ class _$UserInfoModelCopyWithImpl<$Res, $Val extends UserInfoModel>
     Object? updatedAt = freezed,
   }) {
     return _then(_value.copyWith(
-      id: null == id
+      id: freezed == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       username: null == username
           ? _value.username
           : username // ignore: cast_nullable_to_non_nullable
@@ -219,7 +219,7 @@ abstract class _$$UserInfoModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String id,
+      {String? id,
       String username,
       String email,
       @JsonKey(name: 'email_encrypted') String? emailEncrypted,
@@ -253,7 +253,7 @@ class __$$UserInfoModelImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
+    Object? id = freezed,
     Object? username = null,
     Object? email = null,
     Object? emailEncrypted = freezed,
@@ -274,10 +274,10 @@ class __$$UserInfoModelImplCopyWithImpl<$Res>
     Object? updatedAt = freezed,
   }) {
     return _then(_$UserInfoModelImpl(
-      id: null == id
+      id: freezed == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       username: null == username
           ? _value.username
           : username // ignore: cast_nullable_to_non_nullable
@@ -358,7 +358,7 @@ class __$$UserInfoModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$UserInfoModelImpl implements _UserInfoModel {
   const _$UserInfoModelImpl(
-      {required this.id,
+      {this.id,
       required this.username,
       required this.email,
       @JsonKey(name: 'email_encrypted') this.emailEncrypted,
@@ -382,7 +382,8 @@ class _$UserInfoModelImpl implements _UserInfoModel {
       _$$UserInfoModelImplFromJson(json);
 
   @override
-  final String id;
+  final String? id;
+// ID 为可选，后端不返回真实ID
   @override
   final String username;
   @override
@@ -525,7 +526,7 @@ class _$UserInfoModelImpl implements _UserInfoModel {
 
 abstract class _UserInfoModel implements UserInfoModel {
   const factory _UserInfoModel(
-      {required final String id,
+      {final String? id,
       required final String username,
       required final String email,
       @JsonKey(name: 'email_encrypted') final String? emailEncrypted,
@@ -550,7 +551,7 @@ abstract class _UserInfoModel implements UserInfoModel {
       _$UserInfoModelImpl.fromJson;
 
   @override
-  String get id;
+  String? get id; // ID 为可选，后端不返回真实ID
   @override
   String get username;
   @override

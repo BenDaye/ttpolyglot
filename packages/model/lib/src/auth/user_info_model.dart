@@ -7,7 +7,7 @@ part 'user_info_model.g.dart';
 @freezed
 class UserInfoModel with _$UserInfoModel {
   const factory UserInfoModel({
-    required String id,
+    String? id, // ID 为可选，后端不返回真实ID
     required String username,
     required String email,
     @JsonKey(name: 'email_encrypted') String? emailEncrypted,
