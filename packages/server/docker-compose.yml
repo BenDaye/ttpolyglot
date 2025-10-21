@@ -11,10 +11,11 @@ volumes:
 services:
   ttpolyglot-db:
     image: postgres:15-alpine
+    env_file: .env
     environment:
-      - POSTGRES_DB=${DB_NAME:-ttpolyglot}
-      - POSTGRES_USER=${DB_USER:-ttpolyglot}
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-password}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_INITDB_ARGS="--encoding=UTF8"
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -23,19 +24,16 @@ services:
       - ttpolyglot-network
     restart: unless-stopped
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${DB_USER:-ttpolyglot} -d ${DB_NAME:-ttpolyglot}",
-        ]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 30s
       timeout: 10s
       retries: 5
 
   ttpolyglot-redis:
     image: redis:7-alpine
+    env_file: .env
     environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     volumes:
       - redis_data:/data
       - ./logs/redis:/var/log/redis
@@ -60,22 +58,24 @@ services:
     build:
       context: ../..
       dockerfile: packages/server/Dockerfile
+    env_file: .env
     environment:
-      - DATABASE_URL=postgresql://${DB_USER:-ttpolyglot}:${DB_PASSWORD:-password}@ttpolyglot-db:5432/${DB_NAME:-ttpolyglot}?sslmode=disable
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@ttpolyglot-db:5432/${DB_NAME}?sslmode=disable
       - DB_HOST=ttpolyglot-db
       - DB_PORT=5432
-      - DB_NAME=${DB_NAME:-ttpolyglot}
-      - DB_USER=${DB_USER:-ttpolyglot}
-      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
       - REDIS_URL=redis://ttpolyglot-redis:6379
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
-      - JWT_SECRET=${JWT_SECRET:-dev-jwt-secret-change-in-production}
-      - SESSION_SECRET=${SESSION_SECRET:-dev-session-secret-change-in-production}
-      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-dev-encryption-key-change-in-production}
-      - LOG_LEVEL=${LOG_LEVEL:-info}
-      - SERVER_HOST=${SERVER_HOST:-0.0.0.0}
-      - SERVER_PORT=${SERVER_PORT:-8080}
-      - ENVIRONMENT=${ENVIRONMENT:-dev}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - SESSION_SECRET=${SESSION_SECRET}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - SERVER_HOST=${SERVER_HOST}
+      - SERVER_PORT=${SERVER_PORT}
+      - ENVIRONMENT=${ENVIRONMENT}
+      - DB_TABLE_PREFIX=${DB_TABLE_PREFIX}
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs
@@ -95,9 +95,10 @@ services:
 
   ttpolyglot-nginx:
     image: nginx:alpine
+    env_file: .env
     ports:
-      - "${NGINX_HTTP_PORT:-80}:80"
-      - "${NGINX_HTTPS_PORT:-443}:443"
+      - "${NGINX_HTTP_PORT}:80"
+      - "${NGINX_HTTPS_PORT}:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/conf.d:/etc/nginx/conf.d
