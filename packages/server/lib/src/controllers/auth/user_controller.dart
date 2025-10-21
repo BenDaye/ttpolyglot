@@ -30,7 +30,6 @@ class UserController extends BaseController {
     router.get('/me', _getCurrentUser);
     router.put('/me', _updateCurrentUser);
     router.post('/me/change-password', _changePassword);
-    router.get('/stats', _getUserStats);
 
     return router;
   }
@@ -46,9 +45,6 @@ class UserController extends BaseController {
   Future<Response> Function(Request) get changePassword => _changePassword;
   Future<Response> Function(Request) get uploadAvatar => _uploadAvatar;
   Future<Response> Function(Request) get deleteAvatar => _deleteAvatar;
-  Future<Response> Function(Request) get getUserSessions => _getUserSessions;
-  Future<Response> Function(Request, String) get deleteSession => _deleteSession;
-  Future<Response> Function(Request) get stats => _getUserStats;
 
   /// 获取用户列表
   Future<Response> _getUsers(Request request) async {
@@ -63,7 +59,7 @@ class UserController extends BaseController {
         );
       }
 
-      final result = await _userService.getUsers(
+      final users = await _userService.getUsers(
         page: page,
         limit: limit,
         search: params['search'],
@@ -71,11 +67,8 @@ class UserController extends BaseController {
         role: params['role'],
       );
 
-      return ResponseUtils.paginated(
-        data: result['users'],
-        page: page,
-        limit: limit,
-        total: result['pagination']['total'],
+      return ResponseUtils.success(
+        data: users.toJson((data) => data.toJson()),
         message: '获取用户列表成功',
       );
     } catch (error, stackTrace) {
@@ -323,24 +316,6 @@ class UserController extends BaseController {
     }
   }
 
-  /// 获取用户统计信息
-  Future<Response> _getUserStats(Request request) async {
-    try {
-      final stats = await _userService.getUserStats();
-
-      return ResponseUtils.success(
-        message: '获取用户统计信息成功',
-        data: stats,
-      );
-    } catch (error, stackTrace) {
-      LoggerUtils.error('获取用户统计信息失败', error: error, stackTrace: stackTrace);
-
-      return ResponseUtils.error(
-        message: '获取统计信息失败',
-      );
-    }
-  }
-
   /// 上传头像
   Future<Response> _uploadAvatar(Request request) async {
     try {
@@ -421,44 +396,6 @@ class UserController extends BaseController {
       LoggerUtils.error('删除头像失败', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(
         message: '删除头像失败',
-      );
-    }
-  }
-
-  /// 获取用户会话
-  Future<Response> _getUserSessions(Request request) async {
-    try {
-      final userId = getCurrentUserId(request);
-      if (userId == null) {
-        return ResponseUtils.error(
-          message: '用户信息不存在',
-        );
-      }
-
-      final sessions = await _userService.getUserSessions(userId);
-      return ResponseUtils.success(message: '获取用户会话成功', data: sessions);
-    } catch (error, stackTrace) {
-      LoggerUtils.error('获取用户会话失败', error: error, stackTrace: stackTrace);
-      return ResponseUtils.error(
-        message: '获取用户会话失败',
-      );
-    }
-  }
-
-  /// 删除用户会话
-  Future<Response> _deleteSession(Request request, String sessionId) async {
-    try {
-      final userId = getCurrentUserId(request);
-      if (userId == null) {
-        return ResponseUtils.error(message: '用户信息不存在');
-      }
-
-      await _userService.deleteUserSession(userId, sessionId);
-      return ResponseUtils.success(message: '会话删除成功');
-    } catch (error, stackTrace) {
-      LoggerUtils.error('删除用户会话失败', error: error, stackTrace: stackTrace);
-      return ResponseUtils.error(
-        message: '删除会话失败',
       );
     }
   }

@@ -8,6 +8,8 @@ export 'src/enums/enums.dart';
 export 'src/network/network_models.dart';
 // 项目模型
 export 'src/project/import_record_model.dart';
+// 项目模型
+export 'src/project/project_models.dart';
 // 系统模型
 export 'src/system/system_models.dart';
 // 翻译模型

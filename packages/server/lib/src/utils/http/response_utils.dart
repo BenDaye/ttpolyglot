@@ -115,33 +115,6 @@ class ResponseUtils {
     );
   }
 
-  /// 构建分页成功响应
-  static Response paginated<T>({
-    required List<T> data,
-    required int page,
-    required int limit,
-    required int total,
-    String? message,
-    ApiResponseTipsType type = ApiResponseTipsType.showToast,
-    Map<String, String>? headers,
-  }) {
-    // 使用 ApiResponsePagerModel 模型构建分页数据
-    final paginatedData = ApiResponsePagerModel<T>(
-      page: page,
-      pageSize: limit,
-      totalSize: total,
-      totalPage: (total / limit).ceil(),
-      items: data,
-    );
-
-    return success(
-      message: message,
-      data: paginatedData,
-      type: type,
-      headers: headers,
-    );
-  }
-
   /// 从异常构建错误响应
   static Response fromException(
     ServerException exception, {

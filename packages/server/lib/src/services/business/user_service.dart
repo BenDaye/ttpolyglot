@@ -1,3 +1,5 @@
+import 'package:ttpolyglot_model/model.dart';
+
 import '../../config/server_config.dart';
 import '../../utils/security/crypto_utils.dart';
 import '../base_service.dart';
@@ -24,7 +26,7 @@ class UserService extends BaseService {
   }
 
   /// 获取用户列表
-  Future<Map<String, dynamic>> getUsers({
+  Future<ApiResponsePagerModel<UserInfoModel>> getUsers({
     int page = 1,
     int limit = 20,
     String? search,
@@ -95,7 +97,7 @@ class UserService extends BaseService {
 
       final usersResult = await _databaseService.query(usersSql, parameters);
 
-      final users = usersResult.map((row) {
+      final usersData = usersResult.map((row) {
         final userData = row.toColumnMap();
 
         // 解析角色信息
@@ -112,7 +114,7 @@ class UserService extends BaseService {
       // 批量查询IP地理位置信息
       // 收集所有唯一的IP地址
       final uniqueIps = <String>{};
-      for (final user in users) {
+      for (final user in usersData) {
         final ip = user['last_login_ip']?.toString();
         if (ip != null && ip != '' && ip.isNotEmpty) {
           uniqueIps.add(ip);
@@ -137,8 +139,8 @@ class UserService extends BaseService {
         }
       }
 
-      // 为每个用户添加位置信息
-      for (final user in users) {
+      // 为每个用户添加位置信息并转换为 UserInfoModel
+      final users = usersData.map((user) {
         final ip = user['last_login_ip']?.toString();
         if (ip != null && locationMap.containsKey(ip)) {
           final location = locationMap[ip]!;
@@ -156,22 +158,21 @@ class UserService extends BaseService {
             'country_code': '',
           };
         }
-      }
+        return UserInfoModel.fromJson(user);
+      }).toList();
 
-      return {
-        'users': users,
-        'pagination': {
-          'page': page,
-          'limit': limit,
-          'total': total,
-          'pages': (total / limit).ceil(),
-        },
-      };
+      return ApiResponsePagerModel<UserInfoModel>(
+        page: page,
+        pageSize: limit,
+        totalSize: total,
+        totalPage: (total / limit).ceil(),
+        items: users,
+      );
     }, operationName: 'getUsers');
   }
 
   /// 根据ID获取用户详情
-  Future<Map<String, dynamic>?> getUserById(String userId) async {
+  Future<UserInfoModel?> getUserById(String userId) async {
     try {
       logInfo('获取用户详情: $userId');
 
@@ -179,7 +180,7 @@ class UserService extends BaseService {
       final cacheKey = 'user:details:$userId';
       final cachedUser = await _redisService.getJson(cacheKey);
       if (cachedUser != null) {
-        return cachedUser;
+        return UserInfoModel.fromJson(cachedUser);
       }
 
       final sql = '''
@@ -303,7 +304,7 @@ class UserService extends BaseService {
       // 缓存用户信息
       await _redisService.setJson(cacheKey, serializedData, ServerConfig.cacheApiResponseTtl);
 
-      return serializedData;
+      return UserInfoModel.fromJson(serializedData);
     } catch (error, stackTrace) {
       logError('获取用户详情失败: $userId', error: error, stackTrace: stackTrace);
       rethrow;
@@ -311,7 +312,7 @@ class UserService extends BaseService {
   }
 
   /// 更新用户信息
-  Future<Map<String, dynamic>> updateUser(String userId, Map<String, dynamic> updateData, {String? updatedBy}) async {
+  Future<UserInfoModel> updateUser(String userId, Map<String, dynamic> updateData, {String? updatedBy}) async {
     try {
       logInfo('更新用户信息: $userId');
 
@@ -506,42 +507,6 @@ class UserService extends BaseService {
     }
   }
 
-  /// 获取用户统计信息
-  Future<Map<String, dynamic>> getUserStats() async {
-    try {
-      logInfo('获取用户统计信息');
-
-      // 检查缓存
-      const cacheKey = 'user:stats';
-      final cachedStats = await _redisService.getJson(cacheKey);
-      if (cachedStats != null) {
-        return cachedStats;
-      }
-
-      final sql = '''
-        SELECT 
-          COUNT(*) as total_users,
-          COUNT(*) FILTER (WHERE is_active = true) as active_users,
-          COUNT(*) FILTER (WHERE is_active = false) as inactive_users,
-          COUNT(*) FILTER (WHERE is_email_verified = true) as verified_users,
-          COUNT(*) FILTER (WHERE last_login_at > CURRENT_TIMESTAMP - INTERVAL '30 days') as active_last_month,
-          COUNT(*) FILTER (WHERE created_at > CURRENT_TIMESTAMP - INTERVAL '30 days') as new_last_month
-        FROM users
-      ''';
-
-      final result = await _databaseService.query(sql);
-      final stats = result.first.toColumnMap();
-
-      // 缓存统计信息
-      await _redisService.setJson(cacheKey, stats, 3600); // 1小时缓存
-
-      return stats;
-    } catch (error, stackTrace) {
-      logError('获取用户统计信息失败', error: error, stackTrace: stackTrace);
-      rethrow;
-    }
-  }
-
   // 私有辅助方法
   Future<bool> _isUsernameExists(String username, [String? excludeUserId]) async {
     var sql = 'SELECT 1 FROM users WHERE username = @username';
@@ -575,60 +540,6 @@ class UserService extends BaseService {
 
     // 清除Redis中的会话缓存
     await _redisService.deleteUserSession(userId);
-  }
-
-  /// 获取用户会话列表
-  Future<List<Map<String, dynamic>>> getUserSessions(String userId) async {
-    try {
-      logInfo('获取用户会话: $userId');
-
-      final result = await _databaseService.query('''
-        SELECT
-          id, device_name, device_type, ip_address,
-          user_agent, location_info, last_activity_at,
-          created_at, expires_at, is_active
-        FROM user_sessions
-        WHERE user_id = @user_id AND is_active = true
-        ORDER BY last_activity_at DESC
-      ''', {'user_id': userId});
-
-      final sessions = result.map((row) => row.toColumnMap()).toList();
-
-      // 为每个会话添加IP地理位置信息
-      for (final session in sessions) {
-        final ip = session['ip_address']?.toString();
-        if (ip != null && ip != '') {
-          try {
-            final location = await _ipLocationService.getLocation(ip);
-            session['ip_location'] = {
-              'country': location['country'],
-              'city': location['city'],
-              'region': location['region'],
-              'country_code': location['countryCode'],
-            };
-          } catch (e) {
-            session['ip_location'] = {
-              'country': '',
-              'city': '',
-              'region': '',
-              'country_code': '',
-            };
-          }
-        } else {
-          session['ip_location'] = {
-            'country': '',
-            'city': '',
-            'region': '',
-            'country_code': '',
-          };
-        }
-      }
-
-      return sessions;
-    } catch (error, stackTrace) {
-      logError('获取用户会话失败: $userId', error: error, stackTrace: stackTrace);
-      rethrow;
-    }
   }
 
   /// 删除用户会话

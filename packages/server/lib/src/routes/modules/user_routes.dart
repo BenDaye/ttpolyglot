@@ -33,8 +33,6 @@ class UserRoutes {
     userRouter.put('/me', userController.updateCurrentUser);
     userRouter.post('/me/avatar', userController.uploadAvatar);
     userRouter.delete('/me/avatar', userController.deleteAvatar);
-    userRouter.get('/me/sessions', userController.getUserSessions);
-    userRouter.delete('/me/sessions/<sessionId>', userController.deleteSession);
     userRouter.post('/me/change-password', userController.changePassword);
     // 后注册 /<id> 路由（更通用）
     userRouter.get('/<id>', userController.getUser);

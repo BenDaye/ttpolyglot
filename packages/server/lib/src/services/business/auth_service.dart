@@ -656,7 +656,7 @@ class AuthService extends BaseService {
 
   /// 根据ID获取用户信息（公开方法）
   /// 委托给 UserService 处理，避免重复代码
-  Future<Map<String, dynamic>?> getUserById(String userId) async {
+  Future<UserInfoModel?> getUserById(String userId) async {
     return await _userService.getUserById(userId);
   }
 

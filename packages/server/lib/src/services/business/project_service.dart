@@ -1,9 +1,10 @@
+import 'package:ttpolyglot_model/model.dart';
 
-import '../base_service.dart';
 import '../../config/server_config.dart';
+import '../../utils/data/string_utils.dart';
+import '../base_service.dart';
 import '../infrastructure/database_service.dart';
 import '../infrastructure/redis_service.dart';
-import '../../utils/data/string_utils.dart';
 
 /// 项目服务
 class ProjectService extends BaseService {
@@ -18,7 +19,7 @@ class ProjectService extends BaseService {
         super('ProjectService');
 
   /// 获取项目列表
-  Future<Map<String, dynamic>> getProjects({
+  Future<ApiResponsePagerModel<ProjectModel>> getProjects({
     int page = 1,
     int limit = 20,
     String? search,
@@ -104,15 +105,13 @@ class ProjectService extends BaseService {
         return projectData;
       }).toList();
 
-      return {
-        'projects': projects,
-        'pagination': {
-          'page': page,
-          'limit': limit,
-          'total': total,
-          'pages': (total / limit).ceil(),
-        },
-      };
+      return ApiResponsePagerModel<ProjectModel>(
+        page: page,
+        pageSize: limit,
+        totalSize: total,
+        totalPage: (total / limit).ceil(),
+        items: projects.map((project) => ProjectModel.fromJson(project)).toList(),
+      );
     } catch (error, stackTrace) {
       logError('获取项目列表失败', error: error, stackTrace: stackTrace);
       rethrow;
@@ -120,7 +119,7 @@ class ProjectService extends BaseService {
   }
 
   /// 根据ID获取项目详情
-  Future<Map<String, dynamic>?> getProjectById(String projectId, {String? userId}) async {
+  Future<ProjectModel?> getProjectById(String projectId, {String? userId}) async {
     try {
       logInfo('获取项目详情: $projectId');
 
@@ -128,7 +127,7 @@ class ProjectService extends BaseService {
       final cacheKey = 'project:details:$projectId';
       final cachedProject = await _redisService.getJson(cacheKey);
       if (cachedProject != null) {
-        return cachedProject;
+        return ProjectModel.fromJson(cachedProject);
       }
 
       final sql = '''
@@ -191,7 +190,7 @@ class ProjectService extends BaseService {
       // 缓存项目信息
       await _redisService.setJson(cacheKey, projectData, ServerConfig.cacheApiResponseTtl);
 
-      return projectData;
+      return ProjectModel.fromJson(projectData);
     } catch (error, stackTrace) {
       logError('获取项目详情失败: $projectId', error: error, stackTrace: stackTrace);
       rethrow;
@@ -199,7 +198,7 @@ class ProjectService extends BaseService {
   }
 
   /// 创建项目
-  Future<Map<String, dynamic>> createProject({
+  Future<ProjectModel> createProject({
     required String name,
     required String ownerId,
     required String primaryLanguageCode,
@@ -282,8 +281,7 @@ class ProjectService extends BaseService {
   }
 
   /// 更新项目信息
-  Future<Map<String, dynamic>> updateProject(String projectId, Map<String, dynamic> updateData,
-      {String? updatedBy}) async {
+  Future<ProjectModel> updateProject(String projectId, Map<String, dynamic> updateData, {String? updatedBy}) async {
     try {
       logInfo('更新项目信息: $projectId');
 
@@ -823,7 +821,8 @@ class ProjectService extends BaseService {
   }
 
   /// 获取项目活动日志
-  Future<List<Map<String, dynamic>>> getProjectActivity(String projectId, {int page = 1, int limit = 20}) async {
+  Future<ApiResponsePagerModel<TranslationEntryModel>> getProjectActivity(String projectId,
+      {int page = 1, int limit = 20}) async {
     try {
       logInfo('获取项目活动: $projectId, page=$page, limit=$limit');
 
@@ -848,7 +847,13 @@ class ProjectService extends BaseService {
         'offset': offset,
       });
 
-      return activities.map((row) => row.toColumnMap()).toList();
+      return ApiResponsePagerModel<TranslationEntryModel>(
+        page: page,
+        pageSize: limit,
+        totalSize: activities.length,
+        totalPage: (activities.length / limit).ceil(),
+        items: activities.map((row) => TranslationEntryModel.fromJson(row.toColumnMap())).toList(),
+      );
     } catch (error, stackTrace) {
       logError('获取项目活动失败: $projectId', error: error, stackTrace: stackTrace);
       rethrow;

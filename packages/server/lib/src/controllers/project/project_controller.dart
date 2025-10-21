@@ -59,19 +59,18 @@ class ProjectController extends BaseController {
         return ResponseUtils.error(message: '分页参数无效');
       }
 
-      final result = await _projectService.getProjects(
-          page: page,
-          limit: limit,
-          search: params['search'],
-          status: params['status'],
-          userId: getCurrentUserId(request));
+      final projects = await _projectService.getProjects(
+        page: page,
+        limit: limit,
+        search: params['search'],
+        status: params['status'],
+        userId: getCurrentUserId(request),
+      );
 
-      return ResponseUtils.paginated(
-          data: result['projects'],
-          page: page,
-          limit: limit,
-          total: result['pagination']['total'],
-          message: '获取项目列表成功');
+      return ResponseUtils.success(
+        data: projects.toJson((data) => data.toJson()),
+        message: '获取项目列表成功',
+      );
     } catch (error, stackTrace) {
       LoggerUtils.error('获取项目列表失败', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(message: '获取项目列表失败');
@@ -413,12 +412,9 @@ class ProjectController extends BaseController {
       final limit = int.tryParse(params['limit'] ?? '20') ?? 20;
 
       final activity = await _projectService.getProjectActivity(id, page: page, limit: limit);
-      return ResponseUtils.paginated(
+      return ResponseUtils.success(
         message: '获取项目活动成功',
-        data: activity,
-        page: page,
-        limit: limit,
-        total: activity.length, // 这里需要从服务层获取总数
+        data: activity.toJson((data) => data.toJson()),
       );
     } catch (error, stackTrace) {
       LoggerUtils.error('获取项目活动失败: $id', error: error, stackTrace: stackTrace);
