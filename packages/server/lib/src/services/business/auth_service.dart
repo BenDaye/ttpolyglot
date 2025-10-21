@@ -88,7 +88,7 @@ class AuthService extends BaseService {
       final userId = await _databaseService.transaction(() async {
         // 插入用户
         final result = await _databaseService.query('''
-          INSERT INTO users (
+          INSERT INTO {users} (
             username, email, password_hash, display_name, 
             timezone, locale, is_active, is_email_verified
           ) VALUES (
@@ -411,7 +411,7 @@ class AuthService extends BaseService {
 
       // 更新用户邮箱验证状态
       await _databaseService.query('''
-        UPDATE users 
+        UPDATE {users} 
         SET is_email_verified = true, email_verified_at = CURRENT_TIMESTAMP
         WHERE id = @user_id AND email = @email
       ''', {
@@ -452,7 +452,7 @@ class AuthService extends BaseService {
 
       // 查找用户
       final userResult = await _databaseService.query(
-        'SELECT id, username, email, display_name FROM users WHERE email = @email AND is_active = true',
+        'SELECT id, username, email, display_name FROM {users} WHERE email = @email AND is_active = true',
         {'email': email},
       );
 
@@ -523,7 +523,7 @@ class AuthService extends BaseService {
 
       // 更新密码
       await _databaseService.query('''
-        UPDATE users 
+        UPDATE {users} 
         SET password_hash = @password_hash, 
             updated_at = CURRENT_TIMESTAMP
         WHERE id = @user_id AND email = @email
@@ -564,7 +564,7 @@ class AuthService extends BaseService {
 
       // 查找用户
       final userResult = await _databaseService.query(
-        'SELECT id, username, is_email_verified FROM users WHERE email = @email',
+        'SELECT id, username, is_email_verified FROM {users} WHERE email = @email',
         {'email': email},
       );
 
@@ -620,8 +620,8 @@ class AuthService extends BaseService {
   }
 
   Future<bool> _isUsernameExists(String username) async {
-    final result =
-        await _databaseService.query('SELECT 1 FROM users WHERE username = @username LIMIT 1', {'username': username});
+    final result = await _databaseService
+        .query('SELECT 1 FROM {users} WHERE username = @username LIMIT 1', {'username': username});
     return result.isNotEmpty;
   }
 

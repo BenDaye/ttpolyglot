@@ -48,7 +48,7 @@ class ProjectService extends BaseService {
         conditions.add('''
           (p.owner_id = @user_id OR 
            EXISTS (
-             SELECT 1 FROM user_roles ur 
+             SELECT 1 FROM {user_roles} ur 
              WHERE ur.user_id = @user_id 
                AND ur.project_id = p.id 
                AND ur.is_active = true
@@ -59,7 +59,7 @@ class ProjectService extends BaseService {
 
       // 计算总数
       final countSql = '''
-        SELECT COUNT(*) FROM projects p
+        SELECT COUNT(*) FROM {projects} p
         ${conditions.isNotEmpty ? 'WHERE ${conditions.join(' AND ')}' : ''}
       ''';
 
@@ -85,9 +85,9 @@ class ProjectService extends BaseService {
             THEN ROUND((p.translated_keys::float / p.total_keys * 100), 2)
             ELSE 0 
           END as completion_percentage
-        FROM projects p
-        LEFT JOIN users u ON p.owner_id = u.id
-        LEFT JOIN languages l ON p.primary_language_code = l.code
+        FROM {projects} p
+        LEFT JOIN {users} u ON p.owner_id = u.id
+        LEFT JOIN {languages} l ON p.primary_language_code = l.code
         ${conditions.isNotEmpty ? 'WHERE ${conditions.join(' AND ')}' : ''}
         ORDER BY p.last_activity_at DESC
         LIMIT @limit OFFSET @offset
@@ -157,11 +157,11 @@ class ProjectService extends BaseService {
             ) FILTER (WHERE pl.language_code IS NOT NULL), 
             '[]'
           ) as languages
-        FROM projects p
-        LEFT JOIN users u ON p.owner_id = u.id
-        LEFT JOIN languages l ON p.primary_language_code = l.code
-        LEFT JOIN project_languages pl ON p.id = pl.project_id AND pl.is_enabled = true
-        LEFT JOIN languages lang ON pl.language_code = lang.code
+        FROM {projects} p
+        LEFT JOIN {users} u ON p.owner_id = u.id
+        LEFT JOIN {languages} l ON p.primary_language_code = l.code
+        LEFT JOIN {project_languages} pl ON p.id = pl.project_id AND pl.is_enabled = true
+        LEFT JOIN {languages} lang ON pl.language_code = lang.code
         WHERE p.id = @project_id
         GROUP BY p.id, u.id, l.code
       ''';
@@ -230,7 +230,7 @@ class ProjectService extends BaseService {
       await _databaseService.transaction(() async {
         // 创建项目
         final projectResult = await _databaseService.query('''
-          INSERT INTO projects (
+          INSERT INTO {projects} (
             name, slug, description, owner_id, primary_language_code,
             visibility, settings, status
           ) VALUES (
@@ -251,7 +251,7 @@ class ProjectService extends BaseService {
 
         // 添加主语言到项目语言列表
         await _databaseService.query('''
-          INSERT INTO project_languages (
+          INSERT INTO {project_languages} (
             project_id, language_code, is_enabled, is_primary
           ) VALUES (
             @project_id, @language_code, true, true
@@ -328,7 +328,7 @@ class ProjectService extends BaseService {
       // 在事务中更新项目
       await _databaseService.transaction(() async {
         final sql = '''
-          UPDATE projects 
+          UPDATE {projects} 
           SET ${updates.join(', ')}, 
               updated_at = CURRENT_TIMESTAMP,
               last_activity_at = CURRENT_TIMESTAMP
@@ -368,18 +368,18 @@ class ProjectService extends BaseService {
       await _databaseService.transaction(() async {
         // 删除翻译条目
         await _databaseService
-            .query('DELETE FROM translation_entries WHERE project_id = @project_id', {'project_id': projectId});
+            .query('DELETE FROM {translation_entries} WHERE project_id = @project_id', {'project_id': projectId});
 
         // 删除项目语言关联
         await _databaseService
-            .query('DELETE FROM project_languages WHERE project_id = @project_id', {'project_id': projectId});
+            .query('DELETE FROM {project_languages} WHERE project_id = @project_id', {'project_id': projectId});
 
         // 删除项目角色关联
         await _databaseService
-            .query('DELETE FROM user_roles WHERE project_id = @project_id', {'project_id': projectId});
+            .query('DELETE FROM {user_roles} WHERE project_id = @project_id', {'project_id': projectId});
 
         // 删除项目
-        await _databaseService.query('DELETE FROM projects WHERE id = @project_id', {'project_id': projectId});
+        await _databaseService.query('DELETE FROM {projects} WHERE id = @project_id', {'project_id': projectId});
       });
 
       // 清除缓存
@@ -403,10 +403,10 @@ class ProjectService extends BaseService {
           ur.granted_at, ur.expires_at,
           r.name as role_name, r.display_name as role_display_name,
           p.owner_id = u.id as is_owner
-        FROM user_roles ur
-        JOIN users u ON ur.user_id = u.id
-        JOIN roles r ON ur.role_id = r.id
-        JOIN projects p ON ur.project_id = p.id
+        FROM {user_roles} ur
+        JOIN {users} u ON ur.user_id = u.id
+        JOIN {roles} r ON ur.role_id = r.id
+        JOIN {projects} p ON ur.project_id = p.id
         WHERE ur.project_id = @project_id 
           AND ur.is_active = true 
           AND u.is_active = true
@@ -442,7 +442,7 @@ class ProjectService extends BaseService {
 
       // 添加角色关联
       await _databaseService.query('''
-        INSERT INTO user_roles (
+        INSERT INTO {user_roles} (
           user_id, role_id, project_id, granted_by, expires_at
         ) VALUES (
           @user_id, @role_id, @project_id, @granted_by, @expires_at
@@ -472,7 +472,7 @@ class ProjectService extends BaseService {
 
       // 移除角色关联
       await _databaseService.query('''
-        UPDATE user_roles 
+        UPDATE {user_roles} 
         SET is_active = false 
         WHERE project_id = @project_id AND user_id = @user_id
       ''', {
@@ -532,12 +532,12 @@ class ProjectService extends BaseService {
 
   Future<bool> _isLanguageExists(String languageCode) async {
     final result = await _databaseService
-        .query('SELECT 1 FROM languages WHERE code = @code AND is_active = true LIMIT 1', {'code': languageCode});
+        .query('SELECT 1 FROM {languages} WHERE code = @code AND is_active = true LIMIT 1', {'code': languageCode});
     return result.isNotEmpty;
   }
 
   Future<bool> _isSlugExists(String slug, [String? excludeProjectId]) async {
-    var sql = 'SELECT 1 FROM projects WHERE slug = @slug';
+    var sql = 'SELECT 1 FROM {projects} WHERE slug = @slug';
     final parameters = <String, dynamic>{'slug': slug};
 
     if (excludeProjectId != null) {
@@ -564,7 +564,7 @@ class ProjectService extends BaseService {
   Future<void> _assignProjectOwnerRole(String projectId, String ownerId) async {
     // 查找project_owner角色ID
     final roleResult =
-        await _databaseService.query('SELECT id FROM roles WHERE name = @name LIMIT 1', {'name': 'project_owner'});
+        await _databaseService.query('SELECT id FROM {roles} WHERE name = @name LIMIT 1', {'name': 'project_owner'});
 
     if (roleResult.isEmpty) {
       throwBusiness('项目所有者角色不存在');
@@ -574,7 +574,7 @@ class ProjectService extends BaseService {
 
     // 分配角色
     await _databaseService.query('''
-      INSERT INTO user_roles (
+      INSERT INTO {user_roles} (
         user_id, role_id, project_id, granted_by
       ) VALUES (
         @user_id, @role_id, @project_id, @user_id
@@ -589,8 +589,8 @@ class ProjectService extends BaseService {
   Future<Map<String, dynamic>?> _getUserRoleInProject(String userId, String projectId) async {
     final result = await _databaseService.query('''
       SELECT r.name, r.display_name
-      FROM user_roles ur
-      JOIN roles r ON ur.role_id = r.id
+      FROM {user_roles} ur
+      JOIN {roles} r ON ur.role_id = r.id
       WHERE ur.user_id = @user_id 
         AND ur.project_id = @project_id 
         AND ur.is_active = true
@@ -606,10 +606,10 @@ class ProjectService extends BaseService {
 
   Future<void> _updateProjectMemberCount(String projectId) async {
     await _databaseService.query('''
-      UPDATE projects 
+      UPDATE {projects} 
       SET members_count = (
         SELECT COUNT(DISTINCT ur.user_id)
-        FROM user_roles ur
+        FROM {user_roles} ur
         WHERE ur.project_id = @project_id 
           AND ur.is_active = true
           AND (ur.expires_at IS NULL OR ur.expires_at > CURRENT_TIMESTAMP)
@@ -694,8 +694,8 @@ class ProjectService extends BaseService {
 
       final result = await _databaseService.query('''
         SELECT pl.*, l.name, l.native_name, l.direction, l.is_rtl
-        FROM project_languages pl
-        JOIN languages l ON pl.language_code = l.code
+        FROM {project_languages} pl
+        JOIN {languages} l ON pl.language_code = l.code
         WHERE pl.project_id = @project_id AND pl.is_enabled = true
         ORDER BY l.sort_index, l.name
       ''', {'project_id': projectId});
@@ -728,7 +728,7 @@ class ProjectService extends BaseService {
       }
 
       await _databaseService.query('''
-        INSERT INTO project_languages (project_id, language_code, is_enabled)
+        INSERT INTO {project_languages} (project_id, language_code, is_enabled)
         VALUES (@project_id, @language_code, true)
       ''', {
         'project_id': projectId,
@@ -805,10 +805,10 @@ class ProjectService extends BaseService {
           COUNT(te.id) FILTER (WHERE te.status = 'reviewing') as reviewing_entries,
           COUNT(te.id) FILTER (WHERE te.status = 'approved') as approved_entries,
           COALESCE(AVG(te.quality_score), 0) as avg_quality_score
-        FROM projects p
-        LEFT JOIN project_languages pl ON p.id = pl.project_id AND pl.is_enabled = true
-        LEFT JOIN project_members pm ON p.id = pm.project_id AND pm.status = 'active'
-        LEFT JOIN translation_entries te ON p.id = te.project_id
+        FROM {projects} p
+        LEFT JOIN {project_languages} pl ON p.id = pl.project_id AND pl.is_enabled = true
+        LEFT JOIN {project_members} pm ON p.id = pm.project_id AND pm.status = 'active'
+        LEFT JOIN {translation_entries} te ON p.id = te.project_id
         WHERE p.id = @project_id
         GROUP BY p.id
       ''', {'project_id': projectId});
@@ -836,8 +836,8 @@ class ProjectService extends BaseService {
           u.username as user_name,
           te.status,
           te.updated_at as activity_at
-        FROM translation_entries te
-        JOIN users u ON te.translator_id = u.id OR te.reviewer_id = u.id
+        FROM {translation_entries} te
+        JOIN {users} u ON te.translator_id = u.id OR te.reviewer_id = u.id
         WHERE te.project_id = @project_id
         ORDER BY te.updated_at DESC
         LIMIT @limit OFFSET @offset

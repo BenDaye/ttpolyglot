@@ -63,7 +63,7 @@ class TranslationService extends BaseService {
 
         // 计算总数
         final countSql = '''
-        SELECT COUNT(*) FROM translation_entries te
+        SELECT COUNT(*) FROM {translation_entries} te
         WHERE ${conditions.join(' AND ')}
       ''';
 
@@ -82,10 +82,10 @@ class TranslationService extends BaseService {
           u_reviewer.username as reviewer_username,
           l.name as language_name,
           l.native_name as language_native_name
-        FROM translation_entries te
-        LEFT JOIN users u_translator ON te.translator_id = u_translator.id
-        LEFT JOIN users u_reviewer ON te.reviewer_id = u_reviewer.id
-        LEFT JOIN languages l ON te.language_code = l.code
+        FROM {translation_entries} te
+        LEFT JOIN {users} u_translator ON te.translator_id = u_translator.id
+        LEFT JOIN {users} u_reviewer ON te.reviewer_id = u_reviewer.id
+        LEFT JOIN {languages} l ON te.language_code = l.code
         WHERE ${conditions.join(' AND ')}
         ORDER BY te.updated_at DESC
         LIMIT @limit OFFSET @offset
@@ -122,10 +122,10 @@ class TranslationService extends BaseService {
           u_reviewer.username as reviewer_username,
           l.name as language_name,
           l.native_name as language_native_name
-        FROM translation_entries te
-        LEFT JOIN users u_translator ON te.translator_id = u_translator.id
-        LEFT JOIN users u_reviewer ON te.reviewer_id = u_reviewer.id
-        LEFT JOIN languages l ON te.language_code = l.code
+        FROM {translation_entries} te
+        LEFT JOIN {users} u_translator ON te.translator_id = u_translator.id
+        LEFT JOIN {users} u_reviewer ON te.reviewer_id = u_reviewer.id
+        LEFT JOIN {languages} l ON te.language_code = l.code
         WHERE te.id = @entry_id
       ''';
 
@@ -321,7 +321,7 @@ class TranslationService extends BaseService {
         await _recordTranslationHistory(entry, deletedBy, changeType: 'delete');
 
         // 删除条目
-        await _databaseService.query('DELETE FROM translation_entries WHERE id = @entry_id', {'entry_id': entryId});
+        await _databaseService.query('DELETE FROM {translation_entries} WHERE id = @entry_id', {'entry_id': entryId});
 
         // 更新项目统计信息
         await _updateProjectStats(entry.projectId);
@@ -401,8 +401,8 @@ class TranslationService extends BaseService {
         SELECT
           th.*,
           u.username as changed_by_username
-        FROM translation_history th
-        LEFT JOIN users u ON th.changed_by = u.id
+        FROM {translation_history} th
+        LEFT JOIN {users} u ON th.changed_by = u.id
         WHERE th.translation_entry_id = @entry_id
         ORDER BY th.created_at DESC
         LIMIT @limit

@@ -55,7 +55,7 @@ class UserService extends BaseService {
 
       // 计算总数
       final countSql = '''
-        SELECT COUNT(*) FROM users u
+        SELECT COUNT(*) FROM {users} u
         ${conditions.isNotEmpty ? 'WHERE ${conditions.join(' AND ')}' : ''}
       ''';
 
@@ -86,9 +86,9 @@ class UserService extends BaseService {
             ) FILTER (WHERE r.id IS NOT NULL), 
             '[]'
           ) as roles
-        FROM users u
-        LEFT JOIN user_roles ur ON u.id = ur.user_id AND ur.is_active = true
-        LEFT JOIN roles r ON ur.role_id = r.id AND r.is_active = true
+        FROM {users} u
+        LEFT JOIN {user_roles} ur ON u.id = ur.user_id AND ur.is_active = true
+        LEFT JOIN {roles} r ON ur.role_id = r.id AND r.is_active = true
         ${conditions.isNotEmpty ? 'WHERE ${conditions.join(' AND ')}' : ''}
         GROUP BY u.id
         ORDER BY u.created_at DESC
@@ -195,11 +195,11 @@ class UserService extends BaseService {
             ) FILTER (WHERE r.id IS NOT NULL), 
             '[]'
           ) as roles
-        FROM users u
-        LEFT JOIN user_roles ur ON u.id = ur.user_id 
+        FROM {users} u
+        LEFT JOIN {user_roles} ur ON u.id = ur.user_id 
           AND ur.is_active = true 
           AND (ur.expires_at IS NULL OR ur.expires_at > CURRENT_TIMESTAMP)
-        LEFT JOIN roles r ON ur.role_id = r.id AND r.is_active = true
+        LEFT JOIN {roles} r ON ur.role_id = r.id AND r.is_active = true
         WHERE u.id = @user_id
         GROUP BY u.id
       ''';
@@ -346,7 +346,7 @@ class UserService extends BaseService {
       // 在事务中更新用户
       await _databaseService.transaction(() async {
         final sql = '''
-          UPDATE users 
+          UPDATE {users} 
           SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP
           WHERE id = @user_id
         ''';
@@ -375,7 +375,7 @@ class UserService extends BaseService {
       logInfo('更改用户密码: $userId');
 
       // 获取当前密码哈希
-      final sql = 'SELECT password_hash FROM users WHERE id = @user_id AND is_active = true';
+      final sql = 'SELECT password_hash FROM {users} WHERE id = @user_id AND is_active = true';
       final result = await _databaseService.query(sql, {'user_id': userId});
 
       if (result.isEmpty) {
@@ -400,7 +400,7 @@ class UserService extends BaseService {
 
       // 更新密码
       await _databaseService.query('''
-        UPDATE users 
+        UPDATE {users} 
         SET password_hash = @password_hash, 
             password_changed_at = CURRENT_TIMESTAMP,
             updated_at = CURRENT_TIMESTAMP
@@ -426,7 +426,7 @@ class UserService extends BaseService {
       logInfo('切换用户状态: $userId -> $isActive');
 
       await _databaseService.query('''
-        UPDATE users 
+        UPDATE {users} 
         SET is_active = @is_active, updated_at = CURRENT_TIMESTAMP
         WHERE id = @user_id
       ''', {
@@ -463,13 +463,13 @@ class UserService extends BaseService {
       // 在事务中删除用户相关数据
       await _databaseService.transaction(() async {
         // 删除用户会话
-        await _databaseService.query('DELETE FROM user_sessions WHERE user_id = @user_id', {'user_id': userId});
+        await _databaseService.query('DELETE FROM {user_sessions} WHERE user_id = @user_id', {'user_id': userId});
 
         // 删除用户角色关联
-        await _databaseService.query('DELETE FROM user_roles WHERE user_id = @user_id', {'user_id': userId});
+        await _databaseService.query('DELETE FROM {user_roles} WHERE user_id = @user_id', {'user_id': userId});
 
         // 删除用户
-        await _databaseService.query('DELETE FROM users WHERE id = @user_id', {'user_id': userId});
+        await _databaseService.query('DELETE FROM {users} WHERE id = @user_id', {'user_id': userId});
       });
 
       // 清除缓存
@@ -484,7 +484,7 @@ class UserService extends BaseService {
 
   // 私有辅助方法
   Future<bool> _isUsernameExists(String username, [String? excludeUserId]) async {
-    var sql = 'SELECT 1 FROM users WHERE username = @username';
+    var sql = 'SELECT 1 FROM {users} WHERE username = @username';
     final parameters = <String, dynamic>{'username': username};
 
     if (excludeUserId != null) {
@@ -497,7 +497,7 @@ class UserService extends BaseService {
   }
 
   Future<bool> _isEmailExists(String email, [String? excludeUserId]) async {
-    var sql = 'SELECT 1 FROM users WHERE email = @email';
+    var sql = 'SELECT 1 FROM {users} WHERE email = @email';
     final parameters = <String, dynamic>{'email': email};
 
     if (excludeUserId != null) {
@@ -511,7 +511,7 @@ class UserService extends BaseService {
 
   Future<void> _revokeAllUserSessions(String userId) async {
     await _databaseService
-        .query('UPDATE user_sessions SET is_active = false WHERE user_id = @user_id', {'user_id': userId});
+        .query('UPDATE {user_sessions} SET is_active = false WHERE user_id = @user_id', {'user_id': userId});
 
     // 清除Redis中的会话缓存
     await _redisService.deleteUserSession(userId);
@@ -523,7 +523,7 @@ class UserService extends BaseService {
       logInfo('删除用户会话: user=$userId, session=$sessionId');
 
       await _databaseService.query('''
-        UPDATE user_sessions
+        UPDATE {user_sessions}
         SET is_active = false, updated_at = CURRENT_TIMESTAMP
         WHERE id = @session_id AND user_id = @user_id
       ''', {'session_id': sessionId, 'user_id': userId});
