@@ -274,11 +274,11 @@ start_services() {
         print_info "运行数据库迁移和种子数据..."
         sleep 3  # 等待应用完全启动
         
-        if docker-compose $COMPOSE_FILES exec -T ttpolyglot-server ./migrate; then
+        if docker-compose $COMPOSE_FILES exec -T ttpolyglot-server /app/migrate; then
             print_success "数据库迁移完成"
         else
             print_warning "数据库迁移失败，请手动执行："
-            echo "  docker-compose $COMPOSE_FILES exec ttpolyglot-server ./migrate"
+            echo "sh ./migrate.sh"
         fi
     fi
     
