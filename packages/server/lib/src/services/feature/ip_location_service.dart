@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:http/http.dart' as http;
+import 'package:ttpolyglot_model/model.dart';
 
 import '../base_service.dart';
 import '../infrastructure/redis_service.dart';
@@ -24,18 +25,8 @@ class IpLocationService extends BaseService {
 
   /// 查询IP地理位置信息
   ///
-  /// 返回格式：
-  /// ```dart
-  /// {
-  ///   'country': '中国',
-  ///   'city': '北京',
-  ///   'region': '北京市',
-  ///   'countryCode': 'CN',
-  ///   'timezone': 'Asia/Shanghai',
-  ///   'isp': 'China Telecom',
-  /// }
-  /// ```
-  Future<Map<String, String>> getLocation(String ipAddress) async {
+  /// 返回 LocationModel 包含国家、城市、地区、时区、ISP等信息
+  Future<LocationModel> getLocation(String ipAddress) async {
     return execute(() async {
       // 处理特殊IP地址
       if (ipAddress.isEmpty || ipAddress == '' || ipAddress == 'unknown' || _isLocalIp(ipAddress)) {
@@ -48,7 +39,7 @@ class IpLocationService extends BaseService {
 
       if (cachedData != null) {
         logInfo('从缓存获取IP位置: $ipAddress');
-        return Map<String, String>.from(cachedData);
+        return LocationModel.fromJson(cachedData);
       }
 
       // 调用API查询
@@ -73,19 +64,19 @@ class IpLocationService extends BaseService {
 
           // 检查API返回状态
           if (data['status'] == 'success') {
-            final locationData = {
-              'country': data['country']?.toString() ?? '',
-              'countryCode': data['countryCode']?.toString() ?? '',
-              'region': data['regionName']?.toString() ?? '',
-              'city': data['city']?.toString() ?? '',
-              'timezone': data['timezone']?.toString() ?? '',
-              'isp': data['isp']?.toString() ?? '',
-            };
+            final locationData = LocationModel(
+              country: data['country']?.toString() ?? '',
+              countryCode: data['countryCode']?.toString() ?? '',
+              region: data['regionName']?.toString() ?? '',
+              city: data['city']?.toString() ?? '',
+              timezone: data['timezone']?.toString() ?? '',
+              isp: data['isp']?.toString() ?? '',
+            );
 
             // 缓存结果
-            await _redisService.setJson(cacheKey, locationData, _cacheTtl);
+            await _redisService.setJson(cacheKey, locationData.toJson(), _cacheTtl);
 
-            logInfo('IP地理位置查询成功: $ipAddress -> ${locationData['country']}/${locationData['city']}');
+            logInfo('IP地理位置查询成功: $ipAddress -> ${locationData.locationString}');
             return locationData;
           } else {
             logWarning('IP地理位置查询失败: $ipAddress, 原因: ${data['message']}');
@@ -108,25 +99,14 @@ class IpLocationService extends BaseService {
   /// 返回格式：中国/北京
   Future<String> getLocationString(String ipAddress) async {
     final location = await getLocation(ipAddress);
-    final country = location['country'] ?? '';
-    final city = location['city'] ?? '';
-
-    if (country == '' && city == '') {
-      return '';
-    }
-
-    if (country == city) {
-      return country;
-    }
-
-    return '$country/$city';
+    return location.locationString == '未知' ? '' : location.locationString;
   }
 
   /// 批量查询IP地理位置
   ///
   /// 注意：为了避免API限流，会在每次请求之间添加延迟
-  Future<Map<String, Map<String, String>>> getLocations(List<String> ipAddresses) async {
-    final results = <String, Map<String, String>>{};
+  Future<Map<String, LocationModel>> getLocations(List<String> ipAddresses) async {
+    final results = <String, LocationModel>{};
 
     for (final ip in ipAddresses) {
       results[ip] = await getLocation(ip);
@@ -161,15 +141,15 @@ class IpLocationService extends BaseService {
   }
 
   /// 获取默认位置信息
-  Map<String, String> _getDefaultLocation() {
-    return {
-      'country': '',
-      'countryCode': '',
-      'region': '',
-      'city': '',
-      'timezone': '',
-      'isp': '',
-    };
+  LocationModel _getDefaultLocation() {
+    return const LocationModel(
+      country: '',
+      countryCode: '',
+      region: '',
+      city: '',
+      timezone: '',
+      isp: '',
+    );
   }
 
   /// 清除IP位置缓存

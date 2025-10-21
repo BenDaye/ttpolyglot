@@ -20,10 +20,23 @@ LocationModel _$LocationModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$LocationModel {
+  /// 国家名称
   String get country => throw _privateConstructorUsedError;
+
+  /// 城市
   String get city => throw _privateConstructorUsedError;
+
+  /// 省份/地区
   String get region => throw _privateConstructorUsedError;
+
+  /// 国家代码
   String get countryCode => throw _privateConstructorUsedError;
+
+  /// 时区
+  String get timezone => throw _privateConstructorUsedError;
+
+  /// ISP运营商
+  String get isp => throw _privateConstructorUsedError;
 
   /// Serializes this LocationModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -41,7 +54,13 @@ abstract class $LocationModelCopyWith<$Res> {
           LocationModel value, $Res Function(LocationModel) then) =
       _$LocationModelCopyWithImpl<$Res, LocationModel>;
   @useResult
-  $Res call({String country, String city, String region, String countryCode});
+  $Res call(
+      {String country,
+      String city,
+      String region,
+      String countryCode,
+      String timezone,
+      String isp});
 }
 
 /// @nodoc
@@ -63,6 +82,8 @@ class _$LocationModelCopyWithImpl<$Res, $Val extends LocationModel>
     Object? city = null,
     Object? region = null,
     Object? countryCode = null,
+    Object? timezone = null,
+    Object? isp = null,
   }) {
     return _then(_value.copyWith(
       country: null == country
@@ -81,6 +102,14 @@ class _$LocationModelCopyWithImpl<$Res, $Val extends LocationModel>
           ? _value.countryCode
           : countryCode // ignore: cast_nullable_to_non_nullable
               as String,
+      timezone: null == timezone
+          ? _value.timezone
+          : timezone // ignore: cast_nullable_to_non_nullable
+              as String,
+      isp: null == isp
+          ? _value.isp
+          : isp // ignore: cast_nullable_to_non_nullable
+              as String,
     ) as $Val);
   }
 }
@@ -93,7 +122,13 @@ abstract class _$$LocationModelImplCopyWith<$Res>
       __$$LocationModelImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String country, String city, String region, String countryCode});
+  $Res call(
+      {String country,
+      String city,
+      String region,
+      String countryCode,
+      String timezone,
+      String isp});
 }
 
 /// @nodoc
@@ -113,6 +148,8 @@ class __$$LocationModelImplCopyWithImpl<$Res>
     Object? city = null,
     Object? region = null,
     Object? countryCode = null,
+    Object? timezone = null,
+    Object? isp = null,
   }) {
     return _then(_$LocationModelImpl(
       country: null == country
@@ -131,6 +168,14 @@ class __$$LocationModelImplCopyWithImpl<$Res>
           ? _value.countryCode
           : countryCode // ignore: cast_nullable_to_non_nullable
               as String,
+      timezone: null == timezone
+          ? _value.timezone
+          : timezone // ignore: cast_nullable_to_non_nullable
+              as String,
+      isp: null == isp
+          ? _value.isp
+          : isp // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
@@ -139,31 +184,50 @@ class __$$LocationModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$LocationModelImpl extends _LocationModel {
   const _$LocationModelImpl(
-      {this.country = "",
-      this.city = "",
-      this.region = "",
-      this.countryCode = ""})
+      {this.country = '',
+      this.city = '',
+      this.region = '',
+      this.countryCode = '',
+      this.timezone = '',
+      this.isp = ''})
       : super._();
 
   factory _$LocationModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$LocationModelImplFromJson(json);
 
+  /// 国家名称
   @override
   @JsonKey()
   final String country;
+
+  /// 城市
   @override
   @JsonKey()
   final String city;
+
+  /// 省份/地区
   @override
   @JsonKey()
   final String region;
+
+  /// 国家代码
   @override
   @JsonKey()
   final String countryCode;
 
+  /// 时区
+  @override
+  @JsonKey()
+  final String timezone;
+
+  /// ISP运营商
+  @override
+  @JsonKey()
+  final String isp;
+
   @override
   String toString() {
-    return 'LocationModel(country: $country, city: $city, region: $region, countryCode: $countryCode)';
+    return 'LocationModel(country: $country, city: $city, region: $region, countryCode: $countryCode, timezone: $timezone, isp: $isp)';
   }
 
   @override
@@ -175,13 +239,16 @@ class _$LocationModelImpl extends _LocationModel {
             (identical(other.city, city) || other.city == city) &&
             (identical(other.region, region) || other.region == region) &&
             (identical(other.countryCode, countryCode) ||
-                other.countryCode == countryCode));
+                other.countryCode == countryCode) &&
+            (identical(other.timezone, timezone) ||
+                other.timezone == timezone) &&
+            (identical(other.isp, isp) || other.isp == isp));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, country, city, region, countryCode);
+  int get hashCode => Object.hash(
+      runtimeType, country, city, region, countryCode, timezone, isp);
 
   /// Create a copy of LocationModel
   /// with the given fields replaced by the non-null parameter values.
@@ -204,20 +271,37 @@ abstract class _LocationModel extends LocationModel {
       {final String country,
       final String city,
       final String region,
-      final String countryCode}) = _$LocationModelImpl;
+      final String countryCode,
+      final String timezone,
+      final String isp}) = _$LocationModelImpl;
   const _LocationModel._() : super._();
 
   factory _LocationModel.fromJson(Map<String, dynamic> json) =
       _$LocationModelImpl.fromJson;
 
+  /// 国家名称
   @override
   String get country;
+
+  /// 城市
   @override
   String get city;
+
+  /// 省份/地区
   @override
   String get region;
+
+  /// 国家代码
   @override
   String get countryCode;
+
+  /// 时区
+  @override
+  String get timezone;
+
+  /// ISP运营商
+  @override
+  String get isp;
 
   /// Create a copy of LocationModel
   /// with the given fields replaced by the non-null parameter values.

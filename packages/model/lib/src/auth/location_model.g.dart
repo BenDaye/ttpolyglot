@@ -8,10 +8,12 @@ part of 'location_model.dart';
 
 _$LocationModelImpl _$$LocationModelImplFromJson(Map<String, dynamic> json) =>
     _$LocationModelImpl(
-      country: json['country'] as String? ?? "",
-      city: json['city'] as String? ?? "",
-      region: json['region'] as String? ?? "",
-      countryCode: json['countryCode'] as String? ?? "",
+      country: json['country'] as String? ?? '',
+      city: json['city'] as String? ?? '',
+      region: json['region'] as String? ?? '',
+      countryCode: json['countryCode'] as String? ?? '',
+      timezone: json['timezone'] as String? ?? '',
+      isp: json['isp'] as String? ?? '',
     );
 
 Map<String, dynamic> _$$LocationModelImplToJson(_$LocationModelImpl instance) =>
@@ -20,4 +22,6 @@ Map<String, dynamic> _$$LocationModelImplToJson(_$LocationModelImpl instance) =>
       'city': instance.city,
       'region': instance.region,
       'countryCode': instance.countryCode,
+      'timezone': instance.timezone,
+      'isp': instance.isp,
     };

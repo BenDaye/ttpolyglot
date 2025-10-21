@@ -122,7 +122,7 @@ class UserService extends BaseService {
       }
 
       // 批量查询位置信息
-      final locationMap = <String, Map<String, String>>{};
+      final locationMap = <String, LocationModel>{};
       if (uniqueIps.isNotEmpty) {
         try {
           // 为了避免API限流，这里限制批量查询数量
@@ -144,19 +144,9 @@ class UserService extends BaseService {
         final ip = user['last_login_ip']?.toString();
         if (ip != null && locationMap.containsKey(ip)) {
           final location = locationMap[ip]!;
-          user['last_login_location'] = {
-            'country': location['country'],
-            'city': location['city'],
-            'region': location['region'],
-            'country_code': location['countryCode'],
-          };
+          user['last_login_location'] = location.toJson();
         } else {
-          user['last_login_location'] = {
-            'country': '',
-            'city': '',
-            'region': '',
-            'country_code': '',
-          };
+          user['last_login_location'] = const LocationModel().toJson();
         }
         return UserInfoModel.fromJson(user);
       }).toList();
@@ -277,28 +267,13 @@ class UserService extends BaseService {
       if (lastLoginIp != null && lastLoginIp != '') {
         try {
           final location = await _ipLocationService.getLocation(lastLoginIp!);
-          serializedData['last_login_location'] = {
-            'country': location['country'],
-            'city': location['city'],
-            'region': location['region'],
-            'country_code': location['countryCode'],
-          };
+          serializedData['last_login_location'] = location.toJson();
         } catch (e) {
           // IP地理位置查询失败时使用默认值
-          serializedData['last_login_location'] = {
-            'country': '',
-            'city': '',
-            'region': '',
-            'country_code': '',
-          };
+          serializedData['last_login_location'] = const LocationModel().toJson();
         }
       } else {
-        serializedData['last_login_location'] = {
-          'country': '',
-          'city': '',
-          'region': '',
-          'country_code': '',
-        };
+        serializedData['last_login_location'] = const LocationModel().toJson();
       }
 
       // 缓存用户信息
