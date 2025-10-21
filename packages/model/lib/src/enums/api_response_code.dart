@@ -1,32 +1,34 @@
 enum ApiResponseCode {
-  // dio默认错误码
-  cancelRequest(3, '取消请求'),
-  domainError(4, '域名错误'),
-  networkError(5, '网络错误'),
-  sendTimeout(6, '发送超时'),
-  connectionTimeout(7, '连接超时'),
-  receiveTimeout(8, '证书过期'),
-  badCertificate(9, '接收超时'),
-
-  // 业务自定义错误码
-  unknown(-10000, '未知错误'),
-  validationError(-10001, '验证失败'),
-  authenticationError(-10002, '认证失败'),
-  authorizationError(-10003, '授权失败'),
-  dataNotFound(-10004, '数据不存在'),
-  businessError(-10005, '业务错误'),
-  databaseError(-10006, '数据库错误'),
-  cacheError(-10007, '缓存错误'),
-  externalServiceError(-10008, '外部服务错误'),
-  rateLimitError(-10009, '速率限制错误'),
-  conflictError(-10010, '冲突错误'),
-  fileUploadError(-10011, '文件上传错误'),
-  internalServerError(-10012, '服务器内部错误'),
-  serviceUnavailable(-10013, '服务不可用'),
-  notFound(-10014, '资源不存在'),
+  // 业务自定义错误码 < 10000
+  unknown(-10001, '未知错误'),
+  validationError(-10002, '验证失败'),
+  authenticationError(-10003, '认证失败'),
+  authorizationError(-10004, '授权失败'),
+  dataNotFound(-10005, '数据不存在'),
+  businessError(-10006, '业务错误'),
+  databaseError(-10007, '数据库错误'),
+  cacheError(-10008, '缓存错误'),
+  externalServiceError(-10009, '外部服务错误'),
+  rateLimitError(-10010, '速率限制错误'),
+  conflictError(-10011, '冲突错误'),
+  fileUploadError(-10012, '文件上传错误'),
+  internalServerError(-10013, '服务器内部错误'),
+  serviceUnavailable(-10014, '服务不可用'),
   noContent(-10015, '无内容'),
+  notFound(-10016, '资源不存在'),
+
+  // 通用错误码
   error(-1, '错误'),
-  success(0, '成功');
+  success(0, '成功'),
+
+  // dio默认错误码 < 1000
+  cancelRequest(-1001, '取消请求'),
+  domainError(-1002, '域名错误'),
+  networkError(-1003, '网络错误'),
+  sendTimeout(-1004, '发送超时'),
+  connectionTimeout(-1005, '连接超时'),
+  receiveTimeout(-1006, '证书过期'),
+  badCertificate(-1007, '接收超时');
 
   final int value;
   final String message;

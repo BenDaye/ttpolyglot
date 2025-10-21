@@ -569,7 +569,7 @@ class AuthService extends BaseService {
       );
 
       if (userResult.isEmpty) {
-        return AuthResult.failure(code: ApiResponseCode.notFound, message: '用户不存在');
+        return AuthResult.failure(code: ApiResponseCode.noContent, message: '用户不存在');
       }
 
       final user = userResult.first.toColumnMap();
