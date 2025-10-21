@@ -707,7 +707,7 @@ class AuthService extends BaseService {
     String? userAgent,
   }) async {
     await _databaseService.query('''
-      INSERT INTO user_sessions (
+      INSERT INTO {user_sessions} (
         user_id, token_hash, refresh_token_hash, device_id, device_name,
         device_type, ip_address, user_agent, expires_at
       ) VALUES (
@@ -729,7 +729,7 @@ class AuthService extends BaseService {
 
   Future<bool> _isSessionExists(String userId, String refreshTokenHash) async {
     final result = await _databaseService.query('''
-      SELECT 1 FROM user_sessions 
+      SELECT 1 FROM {user_sessions} 
       WHERE user_id = @user_id 
         AND refresh_token_hash = @refresh_token_hash 
         AND is_active = true 
@@ -745,7 +745,7 @@ class AuthService extends BaseService {
 
   Future<void> _updateSessionAccessToken(String userId, String refreshTokenHash, String newAccessTokenHash) async {
     await _databaseService.query('''
-      UPDATE user_sessions 
+      UPDATE {user_sessions} 
       SET token_hash = @new_token_hash, last_activity_at = CURRENT_TIMESTAMP
       WHERE user_id = @user_id AND refresh_token_hash = @refresh_token_hash
     ''', {
@@ -757,7 +757,7 @@ class AuthService extends BaseService {
 
   Future<void> _deleteUserSession(String userId, String accessTokenHash) async {
     await _databaseService.query('''
-      UPDATE user_sessions 
+      UPDATE {user_sessions} 
       SET is_active = false
       WHERE user_id = @user_id AND token_hash = @token_hash
     ''', {
@@ -768,7 +768,7 @@ class AuthService extends BaseService {
 
   Future<void> _deleteAllUserSessions(String userId) async {
     await _databaseService.query('''
-      UPDATE user_sessions 
+      UPDATE {user_sessions} 
       SET is_active = false
       WHERE user_id = @user_id
     ''', {
