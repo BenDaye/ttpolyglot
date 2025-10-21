@@ -519,84 +519,60 @@ class ResponsiveSidebar extends StatelessWidget {
   }
 
   /// 处理退出登录
-  void _handleLogout(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
+  Future<void> _handleLogout(BuildContext context) async {
+    try {
+      // 确认退出
+      final confirmed = await Get.dialog<bool>(
+        AlertDialog(
+          title: const Text('确认退出'),
+          content: const Text('确定要退出登录吗？'),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(result: false),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () => Get.back(result: true),
+              child: const Text('确定'),
+            ),
+          ],
         ),
-        title: const Text('确认退出'),
-        content: const Text('确定要退出登录吗？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              '取消',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () async {
-              // 在异步操作前保存主题颜色，避免 context 失效
-              final theme = Theme.of(context);
-              final primaryContainer = theme.colorScheme.primaryContainer;
-              final onPrimaryContainer = theme.colorScheme.onPrimaryContainer;
-              final errorContainer = theme.colorScheme.errorContainer;
-              final onErrorContainer = theme.colorScheme.onErrorContainer;
+      );
 
-              Navigator.of(context).pop();
+      if (confirmed != true) return;
 
-              try {
-                // 获取认证服务
-                final authService = Get.find<AuthService>();
+      // 在异步操作前保存主题颜色，避免 context 失效
+      final theme = Theme.of(Get.context!);
+      final primaryContainer = theme.colorScheme.primaryContainer;
+      final onPrimaryContainer = theme.colorScheme.onPrimaryContainer;
 
-                // 执行退出
-                await authService.logout();
+      // 执行退出
+      await Get.find<AuthService>().logout();
 
-                // 跳转到登录页面
-                Get.offAllNamed(Routes.signIn);
+      // 跳转到登录页面
+      Get.offAllNamed(Routes.signIn);
 
-                // 显示退出成功提示
-                Get.snackbar(
-                  '提示',
-                  '已退出登录',
-                  snackPosition: SnackPosition.TOP,
-                  backgroundColor: primaryContainer,
-                  colorText: onPrimaryContainer,
-                  duration: const Duration(seconds: 2),
-                  margin: const EdgeInsets.all(16.0),
-                  borderRadius: 8.0,
-                );
-              } catch (error, stackTrace) {
-                log('_handleLogout', error: error, stackTrace: stackTrace, name: 'ResponsiveSidebar');
-
-                // 显示错误提示
-                Get.snackbar(
-                  '错误',
-                  '退出登录失败，请重试',
-                  snackPosition: SnackPosition.TOP,
-                  backgroundColor: errorContainer,
-                  colorText: onErrorContainer,
-                  duration: const Duration(seconds: 3),
-                  margin: const EdgeInsets.all(16.0),
-                  borderRadius: 8.0,
-                );
-              }
-            },
-            child: Text(
-              '确定',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.error,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+      // 显示退出成功提示
+      Get.snackbar(
+        '提示',
+        '已退出登录',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: primaryContainer,
+        colorText: onPrimaryContainer,
+        duration: const Duration(seconds: 2),
+        margin: const EdgeInsets.all(16.0),
+        borderRadius: 8.0,
+      );
+    } catch (error, stackTrace) {
+      log('_handleLogout', error: error, stackTrace: stackTrace, name: 'ResponsiveSidebar');
+      Get.snackbar(
+        '错误',
+        '退出登录失败',
+        snackPosition: SnackPosition.TOP,
+        margin: const EdgeInsets.all(16.0),
+        borderRadius: 8.0,
+      );
+    }
   }
 
   /// 构建底部信息 - 微信风格

@@ -364,15 +364,16 @@ class ProfileViewContent extends GetView<ProfileController> {
         Expanded(
           child: OutlinedButton.icon(
             onPressed: () {
-              controller.refreshUserInfo();
+              controller.logout();
             },
-            icon: const Icon(Icons.refresh_outlined),
-            label: const Text('刷新信息'),
+            icon: const Icon(Icons.logout_outlined),
+            label: const Text('退出登录'),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8.0),
               ),
+              foregroundColor: Colors.red,
             ),
           ),
         ),
