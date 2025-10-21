@@ -6,6 +6,9 @@ import '../../utils/logging/logger_utils.dart';
 /// 数据库服务类
 class DatabaseService {
   Connection? _connection;
+  final String tablePrefix;
+
+  DatabaseService() : tablePrefix = ServerConfig.tablePrefix;
 
   /// 事务状态标记（防止嵌套事务）
   bool _inTransaction = false;
@@ -65,16 +68,33 @@ class DatabaseService {
     }
   }
 
+  /// 获取带前缀的表名
+  String table(String tableName) {
+    return '$tablePrefix$tableName';
+  }
+
+  /// 在 SQL 中替换表名为带前缀的表名
+  /// 例如: SELECT * FROM {users} -> SELECT * FROM tt_users
+  String replaceTables(String sql) {
+    return sql.replaceAllMapped(
+      RegExp(r'\{(\w+)\}'),
+      (match) => '$tablePrefix${match.group(1)}',
+    );
+  }
+
   /// 执行查询
   Future<Result> query(String sql, [Map<String, dynamic>? parameters]) async {
     try {
+      // 自动替换表名占位符
+      final processedSql = replaceTables(sql);
+
       if (parameters != null && parameters.isNotEmpty) {
         return await connection.execute(
-          Sql.named(sql),
+          Sql.named(processedSql),
           parameters: parameters,
         );
       } else {
-        return await connection.execute(sql);
+        return await connection.execute(processedSql);
       }
     } catch (error, stackTrace) {
       LoggerUtils.error('数据库查询失败: $sql',

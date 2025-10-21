@@ -626,7 +626,7 @@ class AuthService extends BaseService {
   }
 
   Future<bool> _isEmailExists(String email) async {
-    final result = await _databaseService.query('SELECT 1 FROM users WHERE email = @email LIMIT 1', {'email': email});
+    final result = await _databaseService.query('SELECT 1 FROM {users} WHERE email = @email LIMIT 1', {'email': email});
     return result.isNotEmpty;
   }
 
@@ -634,7 +634,7 @@ class AuthService extends BaseService {
     final result = await _databaseService.query('''
       SELECT id, username, email, password_hash, display_name, avatar_url,
              timezone, locale, is_active, is_email_verified, locked_until
-      FROM users 
+      FROM {users} 
       WHERE (email = @identifier OR username = @identifier) AND is_active = true
       LIMIT 1
     ''', {'identifier': emailOrUsername});
@@ -646,7 +646,7 @@ class AuthService extends BaseService {
     final result = await _databaseService.query('''
       SELECT id, username, email, display_name, avatar_url,
              timezone, locale, is_active, is_email_verified
-      FROM users 
+      FROM {users} 
       WHERE id = @user_id AND is_active = true
       LIMIT 1
     ''', {'user_id': userId});
@@ -662,7 +662,7 @@ class AuthService extends BaseService {
 
   Future<void> _incrementLoginAttempts(String userId) async {
     await _databaseService.query('''
-      UPDATE users 
+      UPDATE {users} 
       SET login_attempts = login_attempts + 1,
           locked_until = CASE 
             WHEN login_attempts + 1 >= @max_attempts 
@@ -679,7 +679,7 @@ class AuthService extends BaseService {
 
   Future<void> _resetLoginAttempts(String userId) async {
     await _databaseService.query('''
-      UPDATE users 
+      UPDATE {users} 
       SET login_attempts = 0, locked_until = NULL
       WHERE id = @user_id
     ''', {'user_id': userId});
@@ -687,7 +687,7 @@ class AuthService extends BaseService {
 
   Future<void> _updateLastLogin(String userId, String? ipAddress) async {
     await _databaseService.query('''
-      UPDATE users 
+      UPDATE {users} 
       SET last_login_at = CURRENT_TIMESTAMP, last_login_ip = @ip_address
       WHERE id = @user_id
     ''', {
