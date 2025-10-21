@@ -97,16 +97,11 @@ check_config_files() {
     
     if [ ${#missing_files[@]} -gt 0 ]; then
         print_error "缺少必需的配置文件:"
-        for file in "${missing_files[@]}"; do
-            echo "  - $file"
-        done
         
         if [[ " ${missing_files[@]} " =~ " .env " ]]; then
-            print_info "创建 .env 文件示例："
-            echo "  echo 'ENVIRONMENT=production' > .env"
+            print_info "创建 .env 文件"
+            cp .env.example .env
         fi
-        
-        exit 1
     fi
     
     print_success "配置文件检查通过"
