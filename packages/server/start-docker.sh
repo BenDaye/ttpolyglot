@@ -301,8 +301,8 @@ start_services() {
     
     echo -e "${BOLD}数据库管理:${NC}"
     echo "  数据库连接: docker-compose $COMPOSE_FILES exec ttpolyglot-db psql -U ${DB_USER:-ttpolyglot} -d ${DB_NAME:-ttpolyglot}"
-    echo "  运行迁移: docker-compose $COMPOSE_FILES exec ttpolyglot-server ./migrate"
-    echo "  迁移状态: docker-compose $COMPOSE_FILES exec ttpolyglot-server ./migrate status"
+    echo "  运行迁移: sh ./migrate.sh"
+    echo "  迁移状态: sh ./migrate.sh status"
     print_separator
 }
 
