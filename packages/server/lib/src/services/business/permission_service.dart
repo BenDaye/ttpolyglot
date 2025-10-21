@@ -136,8 +136,8 @@ class PermissionService extends BaseService {
 
       // 查询数据库
       final result = await _databaseService.query('''
-        SELECT 1 FROM user_roles ur
-        JOIN roles r ON ur.role_id = r.id
+        SELECT 1 FROM {user_roles} ur
+        JOIN {roles} r ON ur.role_id = r.id
         WHERE ur.user_id = @user_id 
           AND r.name = 'super_admin'
           AND ur.is_active = true
@@ -173,7 +173,7 @@ class PermissionService extends BaseService {
 
       // 查询数据库
       final result = await _databaseService.query('''
-        SELECT 1 FROM projects 
+        SELECT 1 FROM {projects} 
         WHERE id = @project_id AND owner_id = @user_id AND status = 'active'
         LIMIT 1
       ''', {
@@ -206,8 +206,8 @@ class PermissionService extends BaseService {
 
       // 查询数据库
       final result = await _databaseService.query('''
-        SELECT r.name FROM user_roles ur
-        JOIN roles r ON ur.role_id = r.id
+        SELECT r.name FROM {user_roles} ur
+        JOIN {roles} r ON ur.role_id = r.id
         WHERE ur.user_id = @user_id 
           AND ur.project_id = @project_id
           AND ur.is_active = true
@@ -245,8 +245,8 @@ class PermissionService extends BaseService {
 
       // 查询数据库
       final result = await _databaseService.query('''
-        SELECT r.name FROM user_roles ur
-        JOIN roles r ON ur.role_id = r.id
+        SELECT r.name FROM {user_roles} ur
+        JOIN {roles} r ON ur.role_id = r.id
         WHERE ur.user_id = @user_id 
           AND ur.project_id IS NULL
           AND ur.is_active = true
@@ -386,10 +386,10 @@ class PermissionService extends BaseService {
   /// 检查项目级权限
   Future<bool> _checkProjectPermission(String userId, String permission, String projectId) async {
     final result = await _databaseService.query('''
-      SELECT 1 FROM user_roles ur
-      JOIN roles r ON ur.role_id = r.id
-      JOIN role_permissions rp ON r.id = rp.role_id
-      JOIN permissions p ON rp.permission_id = p.id
+      SELECT 1 FROM {user_roles} ur
+      JOIN {roles} r ON ur.role_id = r.id
+      JOIN {role_permissions} rp ON r.id = rp.role_id
+      JOIN {permissions} p ON rp.permission_id = p.id
       WHERE ur.user_id = @user_id 
         AND ur.project_id = @project_id
         AND p.name = @permission
@@ -411,10 +411,10 @@ class PermissionService extends BaseService {
   /// 检查全局权限
   Future<bool> _checkGlobalPermission(String userId, String permission) async {
     final result = await _databaseService.query('''
-      SELECT 1 FROM user_roles ur
-      JOIN roles r ON ur.role_id = r.id
-      JOIN role_permissions rp ON r.id = rp.role_id
-      JOIN permissions p ON rp.permission_id = p.id
+      SELECT 1 FROM {user_roles} ur
+      JOIN {roles} r ON ur.role_id = r.id
+      JOIN {role_permissions} rp ON r.id = rp.role_id
+      JOIN {permissions} p ON rp.permission_id = p.id
       WHERE ur.user_id = @user_id 
         AND ur.project_id IS NULL
         AND p.name = @permission
@@ -444,9 +444,9 @@ class PermissionService extends BaseService {
 
     // 查询数据库
     final result = await _databaseService.query('''
-      SELECT p.name FROM roles r
-      JOIN role_permissions rp ON r.id = rp.role_id
-      JOIN permissions p ON rp.permission_id = p.id
+      SELECT p.name FROM {roles} r
+      JOIN {role_permissions} rp ON r.id = rp.role_id
+      JOIN {permissions} p ON rp.permission_id = p.id
       WHERE r.name = @role_name
         AND r.is_active = true
         AND p.is_active = true
@@ -497,10 +497,10 @@ class PermissionService extends BaseService {
       }
 
       final sql = '''
-        SELECT p.name FROM user_roles ur
-        JOIN roles r ON ur.role_id = r.id
-        JOIN role_permissions rp ON r.id = rp.role_id
-        JOIN permissions p ON rp.permission_id = p.id
+        SELECT p.name FROM {user_roles} ur
+        JOIN {roles} r ON ur.role_id = r.id
+        JOIN {role_permissions} rp ON r.id = rp.role_id
+        JOIN {permissions} p ON rp.permission_id = p.id
         WHERE ur.user_id = @user_id 
           AND p.name IN ($permissionPlaceholders)
           AND ur.is_active = true
@@ -540,10 +540,10 @@ class PermissionService extends BaseService {
           COUNT(DISTINCT ur.user_id) as users_with_roles,
           COUNT(DISTINCT ur.role_id) as active_roles,
           COUNT(DISTINCT rp.permission_id) as active_permissions
-        FROM users u
-        LEFT JOIN user_roles ur ON u.id = ur.user_id AND ur.is_active = true
-        LEFT JOIN roles r ON ur.role_id = r.id AND r.is_active = true
-        LEFT JOIN role_permissions rp ON r.id = rp.role_id AND rp.is_granted = true
+        FROM {users} u
+        LEFT JOIN {user_roles} ur ON u.id = ur.user_id AND ur.is_active = true
+        LEFT JOIN {roles} r ON ur.role_id = r.id AND r.is_active = true
+        LEFT JOIN {role_permissions} rp ON r.id = rp.role_id AND rp.is_granted = true
       ''');
 
       if (dbStats.isNotEmpty) {

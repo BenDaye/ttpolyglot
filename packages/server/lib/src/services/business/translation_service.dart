@@ -174,7 +174,7 @@ class TranslationService extends BaseService {
 
         // 创建翻译条目
         final result = await _databaseService.query('''
-        INSERT INTO translation_entries (
+        INSERT INTO {translation_entries} (
           project_id, entry_key, language_code, source_text, target_text,
           translator_id, context_info, status, version
         ) VALUES (
@@ -456,7 +456,7 @@ class TranslationService extends BaseService {
   }) async {
     try {
       await _databaseService.query('''
-        INSERT INTO translation_history (
+        INSERT INTO {translation_history} (
           translation_entry_id, old_target_text, new_target_text,
           old_status, new_status, change_type, changed_by, change_reason
         ) VALUES (

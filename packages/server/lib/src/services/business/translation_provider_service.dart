@@ -109,7 +109,7 @@ class TranslationProviderService extends BaseService {
 
       // 创建配置
       final result = await _databaseService.query('''
-        INSERT INTO user_translation_providers (
+        INSERT INTO {user_translation_providers} (
           user_id, provider_type, display_name, app_id,
           app_key_encrypted, api_url, is_enabled, is_default,
           settings
@@ -274,7 +274,7 @@ class TranslationProviderService extends BaseService {
       logInfo('测试翻译接口配置: $providerId');
 
       // 获取配置详情（包含加密密钥）
-      const sql = 'SELECT * FROM user_translation_providers WHERE id = @provider_id AND user_id = @user_id';
+      const sql = 'SELECT * FROM {user_translation_providers} WHERE id = @provider_id AND user_id = @user_id';
       final result = await _databaseService.query(sql, {
         'provider_id': providerId,
         'user_id': userId,
@@ -356,7 +356,7 @@ class TranslationProviderService extends BaseService {
       logInfo('使用翻译接口翻译: $providerId, $fromLanguage -> $toLanguage');
 
       // 获取配置详情
-      const sql = 'SELECT * FROM user_translation_providers WHERE id = @provider_id AND user_id = @user_id';
+      const sql = 'SELECT * FROM {user_translation_providers} WHERE id = @provider_id AND user_id = @user_id';
       final result = await _databaseService.query(sql, {
         'provider_id': providerId,
         'user_id': userId,
