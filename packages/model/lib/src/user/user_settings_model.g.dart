@@ -1,0 +1,106 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'user_settings_model.dart';
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+_$UserSettingsModelImpl _$$UserSettingsModelImplFromJson(
+        Map<String, dynamic> json) =>
+    _$UserSettingsModelImpl(
+      userId: json['user_id'] as String?,
+      languageSettings: LanguageSettingsModel.fromJson(
+          json['language_settings'] as Map<String, dynamic>),
+      generalSettings: GeneralSettingsModel.fromJson(
+          json['general_settings'] as Map<String, dynamic>),
+      translationSettings: TranslationSettingsModel.fromJson(
+          json['translation_settings'] as Map<String, dynamic>),
+      createdAt: json['created_at'] == null
+          ? null
+          : DateTime.parse(json['created_at'] as String),
+      updatedAt: json['updated_at'] == null
+          ? null
+          : DateTime.parse(json['updated_at'] as String),
+    );
+
+Map<String, dynamic> _$$UserSettingsModelImplToJson(
+        _$UserSettingsModelImpl instance) =>
+    <String, dynamic>{
+      'user_id': instance.userId,
+      'language_settings': instance.languageSettings,
+      'general_settings': instance.generalSettings,
+      'translation_settings': instance.translationSettings,
+      'created_at': instance.createdAt?.toIso8601String(),
+      'updated_at': instance.updatedAt?.toIso8601String(),
+    };
+
+_$LanguageSettingsModelImpl _$$LanguageSettingsModelImplFromJson(
+        Map<String, dynamic> json) =>
+    _$LanguageSettingsModelImpl(
+      languageCode: json['language_code'] as String? ?? 'zh_CN',
+    );
+
+Map<String, dynamic> _$$LanguageSettingsModelImplToJson(
+        _$LanguageSettingsModelImpl instance) =>
+    <String, dynamic>{
+      'language_code': instance.languageCode,
+    };
+
+_$GeneralSettingsModelImpl _$$GeneralSettingsModelImplFromJson(
+        Map<String, dynamic> json) =>
+    _$GeneralSettingsModelImpl(
+      autoSave: json['auto_save'] as bool? ?? true,
+      notifications: json['notifications'] as bool? ?? true,
+    );
+
+Map<String, dynamic> _$$GeneralSettingsModelImplToJson(
+        _$GeneralSettingsModelImpl instance) =>
+    <String, dynamic>{
+      'auto_save': instance.autoSave,
+      'notifications': instance.notifications,
+    };
+
+_$TranslationSettingsModelImpl _$$TranslationSettingsModelImplFromJson(
+        Map<String, dynamic> json) =>
+    _$TranslationSettingsModelImpl(
+      providers: (json['providers'] as List<dynamic>?)
+              ?.map((e) => TranslationProviderConfigModel.fromJson(
+                  e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      maxRetries: (json['max_retries'] as num?)?.toInt() ?? 3,
+      timeoutSeconds: (json['timeout_seconds'] as num?)?.toInt() ?? 30,
+    );
+
+Map<String, dynamic> _$$TranslationSettingsModelImplToJson(
+        _$TranslationSettingsModelImpl instance) =>
+    <String, dynamic>{
+      'providers': instance.providers,
+      'max_retries': instance.maxRetries,
+      'timeout_seconds': instance.timeoutSeconds,
+    };
+
+_$TranslationProviderConfigModelImpl
+    _$$TranslationProviderConfigModelImplFromJson(Map<String, dynamic> json) =>
+        _$TranslationProviderConfigModelImpl(
+          id: json['id'] as String,
+          provider: json['provider'] as String,
+          name: json['name'] as String?,
+          appId: json['app_id'] as String? ?? '',
+          appKey: json['app_key'] as String? ?? '',
+          apiUrl: json['api_url'] as String?,
+          isDefault: json['is_default'] as bool? ?? false,
+        );
+
+Map<String, dynamic> _$$TranslationProviderConfigModelImplToJson(
+        _$TranslationProviderConfigModelImpl instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'provider': instance.provider,
+      'name': instance.name,
+      'app_id': instance.appId,
+      'app_key': instance.appKey,
+      'api_url': instance.apiUrl,
+      'is_default': instance.isDefault,
+    };

@@ -127,6 +127,15 @@ class ServiceRegistry {
       lifetime: ServiceLifetime.singleton,
     );
 
+    // 注册用户设置服务
+    _container.register<UserSettingsService>(
+      () => UserSettingsService(
+        databaseService: _container.get<DatabaseService>(),
+        redisService: _container.get<RedisService>(),
+      ),
+      lifetime: ServiceLifetime.singleton,
+    );
+
     // 注册认证服务（依赖 UserService）
     _container.register<AuthService>(
       () => AuthService(

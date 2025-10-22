@@ -16,6 +16,7 @@ class ApiRoutes {
   final MultiLevelCacheService cacheService;
   final AuthService authService;
   final UserService userService;
+  final UserSettingsService userSettingsService;
   final ProjectService projectService;
   final PermissionService permissionService;
   final FileUploadService fileUploadService;
@@ -30,6 +31,7 @@ class ApiRoutes {
     required this.cacheService,
     required this.authService,
     required this.userService,
+    required this.userSettingsService,
     required this.projectService,
     required this.permissionService,
     required this.fileUploadService,
@@ -83,6 +85,7 @@ class ApiRoutes {
     // 用户路由模块（内部已处理认证）
     final userRoutes = UserRoutes(
       userService: userService,
+      userSettingsService: userSettingsService,
       fileUploadService: fileUploadService,
       withAuth: _withAuth,
     );

@@ -19,6 +19,7 @@ class TTPolyglotServer {
   late final MultiLevelCacheService _cacheService;
   late final AuthService _authService;
   late final UserService _userService;
+  late final UserSettingsService _userSettingsService;
   late final ProjectService _projectService;
   late final PermissionService _permissionService;
   late final FileUploadService _fileUploadService;
@@ -32,6 +33,7 @@ class TTPolyglotServer {
     _cacheService = serviceRegistry.get<MultiLevelCacheService>();
     _authService = serviceRegistry.get<AuthService>();
     _userService = serviceRegistry.get<UserService>();
+    _userSettingsService = serviceRegistry.get<UserSettingsService>();
     _projectService = serviceRegistry.get<ProjectService>();
     _permissionService = serviceRegistry.get<PermissionService>();
     _fileUploadService = serviceRegistry.get<FileUploadService>();
@@ -145,6 +147,7 @@ class TTPolyglotServer {
       cacheService: _cacheService,
       authService: _authService,
       userService: _userService,
+      userSettingsService: _userSettingsService,
       projectService: _projectService,
       permissionService: _permissionService,
       fileUploadService: _fileUploadService,

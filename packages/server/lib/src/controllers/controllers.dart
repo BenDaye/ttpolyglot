@@ -9,3 +9,5 @@ export 'base_controller.dart';
 export 'project/project.dart';
 // 系统功能控制器
 export 'system/system.dart';
+// 用户功能控制器
+export 'user/user.dart';
