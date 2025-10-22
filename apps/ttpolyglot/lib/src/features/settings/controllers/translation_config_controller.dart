@@ -190,32 +190,17 @@ class TranslationConfigController extends GetxController {
   /// 重置为默认配置
   Future<void> resetToDefault() async {
     try {
-      final defaultSettings = await _userSettingsApi.resetUserSettings();
-
-      // 转换 Model 到 Core 类型
-      final providers = defaultSettings.translationSettings.providers
-          .map((p) => TranslationProviderConfig(
-                id: p.id,
-                provider: TranslationProvider.fromCode(p.provider) ?? TranslationProvider.google,
-                name: p.name,
-                appId: p.appId,
-                appKey: p.appKey,
-                apiUrl: p.apiUrl,
-                isDefault: p.isDefault,
-              ))
-          .toList();
-
-      _config.value = TranslationConfig(
-        providers: providers,
-        maxRetries: defaultSettings.translationSettings.maxRetries,
-        timeoutSeconds: defaultSettings.translationSettings.timeoutSeconds,
+      // 只重置最大重试次数和超时时间，保留翻译接口列表
+      _config.value = config.copyWith(
+        maxRetries: 3,
+        timeoutSeconds: 30,
       );
 
-      await _saveConfigLocal();
+      await _saveConfigToServer();
+      Logger.info('重置翻译配置成功');
     } catch (error, stackTrace) {
       Logger.error('重置翻译配置失败', error: error, stackTrace: stackTrace);
-      _config.value = TranslationConfig(providers: []);
-      await _saveConfigLocal();
+      rethrow;
     }
   }
 
