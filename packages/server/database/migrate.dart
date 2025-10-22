@@ -13,7 +13,6 @@ import './migrations/005_languages_table.dart';
 import './migrations/006_projects_table.dart';
 import './migrations/007_user_roles_table.dart';
 import './migrations/008_project_languages_table.dart';
-import './migrations/009_user_translation_providers_table.dart';
 import './migrations/010_translation_entries_table.dart';
 import './migrations/011_translation_history_table.dart';
 import './migrations/012_system_configs_table.dart';
@@ -463,8 +462,6 @@ void _registerMigrations() {
   MigrationService.registerMigration('006_projects_table', () => Migration006ProjectsTable());
   MigrationService.registerMigration('007_user_roles_table', () => Migration007UserRolesTable());
   MigrationService.registerMigration('008_project_languages_table', () => Migration008ProjectLanguagesTable());
-  MigrationService.registerMigration(
-      '009_user_translation_providers_table', () => Migration009UserTranslationProvidersTable());
   MigrationService.registerMigration('010_translation_entries_table', () => Migration010TranslationEntriesTable());
   MigrationService.registerMigration('011_translation_history_table', () => Migration011TranslationHistoryTable());
   MigrationService.registerMigration('012_system_configs_table', () => Migration012SystemConfigsTable());

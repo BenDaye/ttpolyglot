@@ -164,14 +164,6 @@ class ServiceRegistry {
       lifetime: ServiceLifetime.singleton,
     );
 
-    // 注册翻译提供商服务
-    _container.register<TranslationProviderService>(
-      () => TranslationProviderService(
-        databaseService: _container.get<DatabaseService>(),
-      ),
-      lifetime: ServiceLifetime.singleton,
-    );
-
     LoggerUtils.info('业务服务注册完成');
   }
 
