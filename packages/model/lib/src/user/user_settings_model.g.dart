@@ -9,7 +9,6 @@ part of 'user_settings_model.dart';
 _$UserSettingsModelImpl _$$UserSettingsModelImplFromJson(
         Map<String, dynamic> json) =>
     _$UserSettingsModelImpl(
-      userId: json['user_id'] as String?,
       languageSettings: LanguageSettingsModel.fromJson(
           json['language_settings'] as Map<String, dynamic>),
       generalSettings: GeneralSettingsModel.fromJson(
@@ -27,7 +26,6 @@ _$UserSettingsModelImpl _$$UserSettingsModelImplFromJson(
 Map<String, dynamic> _$$UserSettingsModelImplToJson(
         _$UserSettingsModelImpl instance) =>
     <String, dynamic>{
-      'user_id': instance.userId,
       'language_settings': instance.languageSettings,
       'general_settings': instance.generalSettings,
       'translation_settings': instance.translationSettings,

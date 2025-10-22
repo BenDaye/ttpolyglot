@@ -20,10 +20,6 @@ UserSettingsModel _$UserSettingsModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$UserSettingsModel {
-  /// 用户ID
-  @JsonKey(name: 'user_id')
-  String? get userId => throw _privateConstructorUsedError;
-
   /// 语言设置
   @JsonKey(name: 'language_settings')
   LanguageSettingsModel get languageSettings =>
@@ -64,8 +60,7 @@ abstract class $UserSettingsModelCopyWith<$Res> {
       _$UserSettingsModelCopyWithImpl<$Res, UserSettingsModel>;
   @useResult
   $Res call(
-      {@JsonKey(name: 'user_id') String? userId,
-      @JsonKey(name: 'language_settings')
+      {@JsonKey(name: 'language_settings')
       LanguageSettingsModel languageSettings,
       @JsonKey(name: 'general_settings') GeneralSettingsModel generalSettings,
       @JsonKey(name: 'translation_settings')
@@ -93,7 +88,6 @@ class _$UserSettingsModelCopyWithImpl<$Res, $Val extends UserSettingsModel>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? userId = freezed,
     Object? languageSettings = null,
     Object? generalSettings = null,
     Object? translationSettings = null,
@@ -101,10 +95,6 @@ class _$UserSettingsModelCopyWithImpl<$Res, $Val extends UserSettingsModel>
     Object? updatedAt = freezed,
   }) {
     return _then(_value.copyWith(
-      userId: freezed == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
-              as String?,
       languageSettings: null == languageSettings
           ? _value.languageSettings
           : languageSettings // ignore: cast_nullable_to_non_nullable
@@ -170,8 +160,7 @@ abstract class _$$UserSettingsModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {@JsonKey(name: 'user_id') String? userId,
-      @JsonKey(name: 'language_settings')
+      {@JsonKey(name: 'language_settings')
       LanguageSettingsModel languageSettings,
       @JsonKey(name: 'general_settings') GeneralSettingsModel generalSettings,
       @JsonKey(name: 'translation_settings')
@@ -200,7 +189,6 @@ class __$$UserSettingsModelImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? userId = freezed,
     Object? languageSettings = null,
     Object? generalSettings = null,
     Object? translationSettings = null,
@@ -208,10 +196,6 @@ class __$$UserSettingsModelImplCopyWithImpl<$Res>
     Object? updatedAt = freezed,
   }) {
     return _then(_$UserSettingsModelImpl(
-      userId: freezed == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
-              as String?,
       languageSettings: null == languageSettings
           ? _value.languageSettings
           : languageSettings // ignore: cast_nullable_to_non_nullable
@@ -240,8 +224,7 @@ class __$$UserSettingsModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$UserSettingsModelImpl implements _UserSettingsModel {
   const _$UserSettingsModelImpl(
-      {@JsonKey(name: 'user_id') this.userId,
-      @JsonKey(name: 'language_settings') required this.languageSettings,
+      {@JsonKey(name: 'language_settings') required this.languageSettings,
       @JsonKey(name: 'general_settings') required this.generalSettings,
       @JsonKey(name: 'translation_settings') required this.translationSettings,
       @JsonKey(name: 'created_at') this.createdAt,
@@ -249,11 +232,6 @@ class _$UserSettingsModelImpl implements _UserSettingsModel {
 
   factory _$UserSettingsModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserSettingsModelImplFromJson(json);
-
-  /// 用户ID
-  @override
-  @JsonKey(name: 'user_id')
-  final String? userId;
 
   /// 语言设置
   @override
@@ -282,7 +260,7 @@ class _$UserSettingsModelImpl implements _UserSettingsModel {
 
   @override
   String toString() {
-    return 'UserSettingsModel(userId: $userId, languageSettings: $languageSettings, generalSettings: $generalSettings, translationSettings: $translationSettings, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'UserSettingsModel(languageSettings: $languageSettings, generalSettings: $generalSettings, translationSettings: $translationSettings, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -290,7 +268,6 @@ class _$UserSettingsModelImpl implements _UserSettingsModel {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$UserSettingsModelImpl &&
-            (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.languageSettings, languageSettings) ||
                 other.languageSettings == languageSettings) &&
             (identical(other.generalSettings, generalSettings) ||
@@ -305,7 +282,7 @@ class _$UserSettingsModelImpl implements _UserSettingsModel {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, userId, languageSettings,
+  int get hashCode => Object.hash(runtimeType, languageSettings,
       generalSettings, translationSettings, createdAt, updatedAt);
 
   /// Create a copy of UserSettingsModel
@@ -327,8 +304,7 @@ class _$UserSettingsModelImpl implements _UserSettingsModel {
 
 abstract class _UserSettingsModel implements UserSettingsModel {
   const factory _UserSettingsModel(
-          {@JsonKey(name: 'user_id') final String? userId,
-          @JsonKey(name: 'language_settings')
+          {@JsonKey(name: 'language_settings')
           required final LanguageSettingsModel languageSettings,
           @JsonKey(name: 'general_settings')
           required final GeneralSettingsModel generalSettings,
@@ -340,11 +316,6 @@ abstract class _UserSettingsModel implements UserSettingsModel {
 
   factory _UserSettingsModel.fromJson(Map<String, dynamic> json) =
       _$UserSettingsModelImpl.fromJson;
-
-  /// 用户ID
-  @override
-  @JsonKey(name: 'user_id')
-  String? get userId;
 
   /// 语言设置
   @override
