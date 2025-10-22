@@ -20,10 +20,12 @@ class TranslationConfigController extends GetxController {
   ).obs;
 
   final _isLoading = false.obs;
+  final _isInitialized = false.obs;
 
   // Getters
   TranslationConfig get config => _config.value;
   bool get isLoading => _isLoading.value;
+  bool get isInitialized => _isInitialized.value;
 
   /// 获取所有提供商选项
   List<Map<String, String>> get providerOptions => TranslationProvider.getAllProviders();
@@ -349,15 +351,20 @@ class TranslationConfigController extends GetxController {
 
   /// 加载设置（优先从服务器，失败则从本地）
   Future<void> loadSettings() async {
-    // 先从本地快速加载
-    await _loadConfigLocal();
-    // 然后从服务器加载最新数据
-    await loadConfigFromServer();
+    try {
+      // 先从本地快速加载
+      await _loadConfigLocal();
+      // 然后从服务器加载最新数据
+      await loadConfigFromServer();
+    } finally {
+      _isInitialized.value = true;
+    }
   }
 
   @override
   void onInit() {
     super.onInit();
+    // 确保配置加载完成后再继续
     loadSettings();
   }
 

@@ -19,15 +19,13 @@ class TranslationServiceManager extends GetxService {
 
   /// 异步检查翻译配置是否完整（等待配置加载完成）
   Future<bool> hasValidConfigAsync() async {
-    // 如果正在加载配置，等待加载完成
-    if (TranslationConfigController.instance.isLoading) {
-      // 等待配置加载完成
-      while (TranslationConfigController.instance.isLoading) {
-        await Future.delayed(const Duration(milliseconds: 50));
-      }
+    final controller = TranslationConfigController.instance;
+
+    if (!controller.isInitialized) {
+      await controller.loadSettings();
     }
 
-    final config = TranslationConfigController.instance.config;
+    final config = controller.config;
     return config.enabledProviders.isNotEmpty;
   }
 
@@ -38,15 +36,29 @@ class TranslationServiceManager extends GetxService {
 
   /// 检查是否有设置默认翻译接口
   Future<bool> hasDefaultProviderAsync() async {
-    // 如果正在加载配置，等待加载完成
-    if (TranslationConfigController.instance.isLoading) {
-      // 等待配置加载完成
-      while (TranslationConfigController.instance.isLoading) {
-        await Future.delayed(const Duration(milliseconds: 50));
+    final controller = TranslationConfigController.instance;
+
+    // 等待控制器初始化完成（最多等待10秒）
+    final initStartTime = DateTime.now();
+    while (!controller.isInitialized) {
+      if (DateTime.now().difference(initStartTime).inSeconds > 10) {
+        Logger.warning('等待翻译配置初始化超时');
+        return false;
       }
+      await Future.delayed(const Duration(milliseconds: 50));
     }
 
-    final config = TranslationConfigController.instance.config;
+    // 如果正在加载配置，等待加载完成（最多等待5秒）
+    final loadStartTime = DateTime.now();
+    while (controller.isLoading) {
+      if (DateTime.now().difference(loadStartTime).inSeconds > 5) {
+        Logger.warning('等待翻译配置加载超时');
+        return false;
+      }
+      await Future.delayed(const Duration(milliseconds: 50));
+    }
+
+    final config = controller.config;
     // 检查是否有明确设置为默认的接口
     return config.providers.any((p) => p.isDefault);
   }
