@@ -99,7 +99,6 @@ class UserSettingsService extends BaseService {
       }
 
       final userSettings = UserSettingsModel(
-        userId: userId,
         languageSettings: languageSettings,
         generalSettings: generalSettings,
         translationSettings: translationSettings,

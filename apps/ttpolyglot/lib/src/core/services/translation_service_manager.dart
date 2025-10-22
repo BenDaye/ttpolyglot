@@ -21,8 +21,24 @@ class TranslationServiceManager extends GetxService {
   Future<bool> hasValidConfigAsync() async {
     final controller = TranslationConfigController.instance;
 
+    // 等待控制器初始化完成（最多等待10秒）
+    final initStartTime = DateTime.now();
     if (!controller.isInitialized) {
-      await controller.loadSettings();
+      if (DateTime.now().difference(initStartTime).inSeconds > 10) {
+        Logger.warning('等待翻译配置初始化超时');
+        return false;
+      }
+      await Future.delayed(const Duration(milliseconds: 50));
+    }
+
+    // 如果正在加载配置，等待加载完成（最多等待5秒）
+    final loadStartTime = DateTime.now();
+    while (controller.isLoading) {
+      if (DateTime.now().difference(loadStartTime).inSeconds > 5) {
+        Logger.warning('等待翻译配置加载超时');
+        return false;
+      }
+      await Future.delayed(const Duration(milliseconds: 50));
     }
 
     final config = controller.config;

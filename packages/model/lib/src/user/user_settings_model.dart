@@ -7,9 +7,6 @@ part 'user_settings_model.g.dart';
 @freezed
 class UserSettingsModel with _$UserSettingsModel {
   const factory UserSettingsModel({
-    /// 用户ID
-    @JsonKey(name: 'user_id') String? userId,
-
     /// 语言设置
     @JsonKey(name: 'language_settings') required LanguageSettingsModel languageSettings,
 
