@@ -1,21 +1,19 @@
 name: ttpolyglot_model
 description: TTPolyglot 模型包，提供翻译管理平台的数据模型
 version: 1.0.0
-publish_to: none 
+publish_to: none
 
 environment:
   sdk: ^3.6.1
 
 dependencies:
+  flutter:
+    sdk: flutter
   # Freezed 数据类
   freezed_annotation: ^2.4.0
   json_annotation: ^4.9.0
 
 dev_dependencies:
-  # Flutter 依赖
-  flutter:
-    sdk: flutter
-  
   # 代码生成
   build_runner: ^2.4.0
   freezed: ^2.5.0
