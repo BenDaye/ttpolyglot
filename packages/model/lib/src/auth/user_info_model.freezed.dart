@@ -20,8 +20,6 @@ UserInfoModel _$UserInfoModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$UserInfoModel {
-  @JsonKey(name: 'id')
-  String? get id => throw _privateConstructorUsedError; // ID 为可选，后端不返回真实ID
   @JsonKey(name: 'username')
   String get username => throw _privateConstructorUsedError;
   @JsonKey(name: 'email')
@@ -80,8 +78,7 @@ abstract class $UserInfoModelCopyWith<$Res> {
       _$UserInfoModelCopyWithImpl<$Res, UserInfoModel>;
   @useResult
   $Res call(
-      {@JsonKey(name: 'id') String? id,
-      @JsonKey(name: 'username') String username,
+      {@JsonKey(name: 'username') String username,
       @JsonKey(name: 'email') String email,
       @JsonKey(name: 'email_encrypted') String? emailEncrypted,
       @JsonKey(name: 'display_name') String? displayName,
@@ -120,7 +117,6 @@ class _$UserInfoModelCopyWithImpl<$Res, $Val extends UserInfoModel>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = freezed,
     Object? username = null,
     Object? email = null,
     Object? emailEncrypted = freezed,
@@ -143,10 +139,6 @@ class _$UserInfoModelCopyWithImpl<$Res, $Val extends UserInfoModel>
     Object? roles = freezed,
   }) {
     return _then(_value.copyWith(
-      id: freezed == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String?,
       username: null == username
           ? _value.username
           : username // ignore: cast_nullable_to_non_nullable
@@ -254,8 +246,7 @@ abstract class _$$UserInfoModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {@JsonKey(name: 'id') String? id,
-      @JsonKey(name: 'username') String username,
+      {@JsonKey(name: 'username') String username,
       @JsonKey(name: 'email') String email,
       @JsonKey(name: 'email_encrypted') String? emailEncrypted,
       @JsonKey(name: 'display_name') String? displayName,
@@ -293,7 +284,6 @@ class __$$UserInfoModelImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = freezed,
     Object? username = null,
     Object? email = null,
     Object? emailEncrypted = freezed,
@@ -316,10 +306,6 @@ class __$$UserInfoModelImplCopyWithImpl<$Res>
     Object? roles = freezed,
   }) {
     return _then(_$UserInfoModelImpl(
-      id: freezed == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String?,
       username: null == username
           ? _value.username
           : username // ignore: cast_nullable_to_non_nullable
@@ -408,8 +394,7 @@ class __$$UserInfoModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$UserInfoModelImpl implements _UserInfoModel {
   const _$UserInfoModelImpl(
-      {@JsonKey(name: 'id') this.id,
-      @JsonKey(name: 'username') required this.username,
+      {@JsonKey(name: 'username') required this.username,
       @JsonKey(name: 'email') required this.email,
       @JsonKey(name: 'email_encrypted') this.emailEncrypted,
       @JsonKey(name: 'display_name') this.displayName,
@@ -434,10 +419,6 @@ class _$UserInfoModelImpl implements _UserInfoModel {
   factory _$UserInfoModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserInfoModelImplFromJson(json);
 
-  @override
-  @JsonKey(name: 'id')
-  final String? id;
-// ID 为可选，后端不返回真实ID
   @override
   @JsonKey(name: 'username')
   final String username;
@@ -508,7 +489,7 @@ class _$UserInfoModelImpl implements _UserInfoModel {
 
   @override
   String toString() {
-    return 'UserInfoModel(id: $id, username: $username, email: $email, emailEncrypted: $emailEncrypted, displayName: $displayName, avatarUrl: $avatarUrl, phone: $phone, timezone: $timezone, locale: $locale, isActive: $isActive, isEmailVerified: $isEmailVerified, emailVerifiedAt: $emailVerifiedAt, lastLoginAt: $lastLoginAt, lastLoginIp: $lastLoginIp, lastLoginLocation: $lastLoginLocation, loginAttempts: $loginAttempts, lockedUntil: $lockedUntil, passwordChangedAt: $passwordChangedAt, createdAt: $createdAt, updatedAt: $updatedAt, roles: $roles)';
+    return 'UserInfoModel(username: $username, email: $email, emailEncrypted: $emailEncrypted, displayName: $displayName, avatarUrl: $avatarUrl, phone: $phone, timezone: $timezone, locale: $locale, isActive: $isActive, isEmailVerified: $isEmailVerified, emailVerifiedAt: $emailVerifiedAt, lastLoginAt: $lastLoginAt, lastLoginIp: $lastLoginIp, lastLoginLocation: $lastLoginLocation, loginAttempts: $loginAttempts, lockedUntil: $lockedUntil, passwordChangedAt: $passwordChangedAt, createdAt: $createdAt, updatedAt: $updatedAt, roles: $roles)';
   }
 
   @override
@@ -516,7 +497,6 @@ class _$UserInfoModelImpl implements _UserInfoModel {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$UserInfoModelImpl &&
-            (identical(other.id, id) || other.id == id) &&
             (identical(other.username, username) ||
                 other.username == username) &&
             (identical(other.email, email) || other.email == email) &&
@@ -559,7 +539,6 @@ class _$UserInfoModelImpl implements _UserInfoModel {
   @override
   int get hashCode => Object.hashAll([
         runtimeType,
-        id,
         username,
         email,
         emailEncrypted,
@@ -600,8 +579,7 @@ class _$UserInfoModelImpl implements _UserInfoModel {
 
 abstract class _UserInfoModel implements UserInfoModel {
   const factory _UserInfoModel(
-      {@JsonKey(name: 'id') final String? id,
-      @JsonKey(name: 'username') required final String username,
+      {@JsonKey(name: 'username') required final String username,
       @JsonKey(name: 'email') required final String email,
       @JsonKey(name: 'email_encrypted') final String? emailEncrypted,
       @JsonKey(name: 'display_name') final String? displayName,
@@ -627,9 +605,6 @@ abstract class _UserInfoModel implements UserInfoModel {
   factory _UserInfoModel.fromJson(Map<String, dynamic> json) =
       _$UserInfoModelImpl.fromJson;
 
-  @override
-  @JsonKey(name: 'id')
-  String? get id; // ID 为可选，后端不返回真实ID
   @override
   @JsonKey(name: 'username')
   String get username;

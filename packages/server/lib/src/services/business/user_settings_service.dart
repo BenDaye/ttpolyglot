@@ -28,7 +28,7 @@ class UserSettingsService extends BaseService {
       final cacheKey = 'user:settings:$userId';
       final cachedSettings = await _redisService.getJson(cacheKey);
       if (cachedSettings != null) {
-        logDebug('从缓存获取用户设置');
+        logInfo('从缓存获取用户设置');
         return UserSettingsModel.fromJson(cachedSettings);
       }
 
