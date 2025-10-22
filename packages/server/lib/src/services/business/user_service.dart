@@ -170,6 +170,7 @@ class UserService extends BaseService {
       final cacheKey = 'user:details:$userId';
       final cachedUser = await _redisService.getJson(cacheKey);
       if (cachedUser != null) {
+        logInfo('从缓存获取用户详情');
         return UserInfoModel.fromJson(cachedUser);
       }
 
