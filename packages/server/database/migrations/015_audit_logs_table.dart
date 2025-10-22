@@ -1,14 +1,13 @@
-
-
 import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
+
 import 'base_migration.dart';
 
-/// 迁移: 016 - 创建审计日志表
+/// 迁移: 015 - 创建审计日志表
 /// 创建时间: 2024-12-26
 /// 描述: 创建审计日志表，存储系统审计日志
-class Migration016AuditLogsTable extends BaseMigration {
+class Migration015AuditLogsTable extends BaseMigration {
   @override
-  String get name => '016_audit_logs_table';
+  String get name => '015_audit_logs_table';
 
   @override
   String get description => '创建审计日志表，存储系统审计日志';

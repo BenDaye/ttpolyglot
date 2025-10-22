@@ -1,14 +1,13 @@
-
-
 import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
+
 import 'base_migration.dart';
 
-/// 迁移: 010 - 创建翻译条目表
+/// 迁移: 009 - 创建翻译条目表
 /// 创建时间: 2024-12-26
 /// 描述: 创建翻译条目表，存储翻译条目内容
-class Migration010TranslationEntriesTable extends BaseMigration {
+class Migration009TranslationEntriesTable extends BaseMigration {
   @override
-  String get name => '010_translation_entries_table';
+  String get name => '009_translation_entries_table';
 
   @override
   String get description => '创建翻译条目表，存储翻译条目内容';

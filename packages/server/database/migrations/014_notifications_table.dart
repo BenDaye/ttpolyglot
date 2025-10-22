@@ -1,14 +1,13 @@
-
-
 import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
+
 import 'base_migration.dart';
 
-/// 迁移: 015 - 创建通知表
+/// 迁移: 014 - 创建通知表
 /// 创建时间: 2024-12-26
 /// 描述: 创建通知表，存储系统通知信息
-class Migration015NotificationsTable extends BaseMigration {
+class Migration014NotificationsTable extends BaseMigration {
   @override
-  String get name => '015_notifications_table';
+  String get name => '014_notifications_table';
 
   @override
   String get description => '创建通知表，存储系统通知信息';

@@ -1,14 +1,13 @@
-
-
 import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
+
 import 'base_migration.dart';
 
-/// 迁移: 013 - 创建用户会话表
+/// 迁移: 012 - 创建用户会话表
 /// 创建时间: 2024-12-26
 /// 描述: 创建用户会话表，存储用户会话信息
-class Migration013UserSessionsTable extends BaseMigration {
+class Migration012UserSessionsTable extends BaseMigration {
   @override
-  String get name => '013_user_sessions_table';
+  String get name => '012_user_sessions_table';
 
   @override
   String get description => '创建用户会话表，存储用户会话信息';

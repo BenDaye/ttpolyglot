@@ -2,12 +2,12 @@ import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
 
 import 'base_migration.dart';
 
-/// 迁移: 017 - 创建用户设置表
+/// 迁移: 016 - 创建用户设置表
 /// 创建时间: 2025-10-22
 /// 描述: 创建用户设置表，存储用户的语言设置和通用设置
-class Migration017UserSettingsTable extends BaseMigration {
+class Migration016UserSettingsTable extends BaseMigration {
   @override
-  String get name => '017_user_settings_table';
+  String get name => '016_user_settings_table';
 
   @override
   String get description => '创建用户设置表，存储用户的语言设置和通用设置';

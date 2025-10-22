@@ -1,14 +1,13 @@
-
-
 import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
+
 import 'base_migration.dart';
 
-/// 迁移: 011 - 创建翻译历史表
+/// 迁移: 010 - 创建翻译历史表
 /// 创建时间: 2024-12-26
 /// 描述: 创建翻译历史表，存储翻译历史记录
-class Migration011TranslationHistoryTable extends BaseMigration {
+class Migration010TranslationHistoryTable extends BaseMigration {
   @override
-  String get name => '011_translation_history_table';
+  String get name => '010_translation_history_table';
 
   @override
   String get description => '创建翻译历史表，存储翻译历史记录';

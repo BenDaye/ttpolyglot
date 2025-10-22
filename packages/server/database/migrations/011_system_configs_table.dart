@@ -1,14 +1,13 @@
-
-
 import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
+
 import 'base_migration.dart';
 
-/// 迁移: 012 - 创建系统配置表
+/// 迁移: 011 - 创建系统配置表
 /// 创建时间: 2024-12-26
 /// 描述: 创建系统配置表，存储系统配置信息
-class Migration012SystemConfigsTable extends BaseMigration {
+class Migration011SystemConfigsTable extends BaseMigration {
   @override
-  String get name => '012_system_configs_table';
+  String get name => '011_system_configs_table';
 
   @override
   String get description => '创建系统配置表，存储系统配置信息';

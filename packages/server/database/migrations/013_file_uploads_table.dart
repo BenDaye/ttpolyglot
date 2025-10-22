@@ -1,14 +1,13 @@
-
-
 import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
+
 import 'base_migration.dart';
 
-/// 迁移: 014 - 创建文件上传表
+/// 迁移: 013 - 创建文件上传表
 /// 创建时间: 2024-12-26
 /// 描述: 创建文件上传表，存储文件上传信息
-class Migration014FileUploadsTable extends BaseMigration {
+class Migration013FileUploadsTable extends BaseMigration {
   @override
-  String get name => '014_file_uploads_table';
+  String get name => '013_file_uploads_table';
 
   @override
   String get description => '创建文件上传表，存储文件上传信息';
