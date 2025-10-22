@@ -35,7 +35,7 @@ class UserSettingsService extends BaseService {
       // 从数据库获取语言设置和通用设置
       final settingsResult = await _databaseService.query(
         '''
-        SELECT user_id, language_code, auto_save, notifications, created_at, updated_at
+        SELECT language_code, auto_save, notifications, created_at, updated_at
         FROM {user_settings}
         WHERE user_id = @user_id
         ''',
@@ -45,7 +45,7 @@ class UserSettingsService extends BaseService {
       // 从数据库获取翻译配置
       final translationConfigResult = await _databaseService.query(
         '''
-        SELECT user_id, providers, max_retries, timeout_seconds
+        SELECT providers, max_retries, timeout_seconds
         FROM {user_translation_configs}
         WHERE user_id = @user_id
         ''',
