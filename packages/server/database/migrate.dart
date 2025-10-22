@@ -21,6 +21,8 @@ import './migrations/013_user_sessions_table.dart';
 import './migrations/014_file_uploads_table.dart';
 import './migrations/015_notifications_table.dart';
 import './migrations/016_audit_logs_table.dart';
+import './migrations/017_user_settings_table.dart';
+import './migrations/018_user_translation_configs_table.dart';
 import './seeds/001_insert_default_roles.dart';
 import './seeds/002_insert_permissions.dart';
 import './seeds/003_assign_role_permissions.dart';
@@ -470,6 +472,9 @@ void _registerMigrations() {
   MigrationService.registerMigration('014_file_uploads_table', () => Migration014FileUploadsTable());
   MigrationService.registerMigration('015_notifications_table', () => Migration015NotificationsTable());
   MigrationService.registerMigration('016_audit_logs_table', () => Migration016AuditLogsTable());
+  MigrationService.registerMigration('017_user_settings_table', () => Migration017UserSettingsTable());
+  MigrationService.registerMigration(
+      '018_user_translation_configs_table', () => Migration018UserTranslationConfigsTable());
 }
 
 /// 注册所有种子数据

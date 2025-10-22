@@ -115,6 +115,12 @@ Future<void> _initializeService() async {
     permanent: true,
   );
 
+  // 注册用户设置 API
+  Get.put<UserSettingsApi>(
+    UserSettingsApi(),
+    permanent: true,
+  );
+
   // 初始化认证服务（检查登录状态）
   await Get.find<AuthService>().init();
 

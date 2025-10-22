@@ -57,21 +57,38 @@ class _SettingsViewContentState extends State<_SettingsViewContent> {
   Widget build(BuildContext context) {
     // 获取控制器
     final controller = Get.find<SettingsController>();
+    final translationController = Get.find<TranslationConfigController>();
 
     return Scaffold(
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          spacing: 16.0,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildThemeSection(AppThemeController.instance),
-            _buildLanguageSection(controller),
-            _buildGeneralSection(controller),
-            _buildTranslationSection(context),
-          ],
-        ),
-      ),
+      body: Obx(() {
+        // 显示加载状态
+        if (controller.isLoading || translationController.isLoading) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16.0),
+                Text('加载设置中...'),
+              ],
+            ),
+          );
+        }
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            spacing: 16.0,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildThemeSection(AppThemeController.instance),
+              _buildLanguageSection(controller),
+              _buildGeneralSection(controller),
+              _buildTranslationSection(context),
+            ],
+          ),
+        );
+      }),
     );
   }
 

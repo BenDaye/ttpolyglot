@@ -2,13 +2,17 @@ import 'dart:convert';
 
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ttpolyglot/src/common/api/api.dart';
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// 翻译配置控制器
 class TranslationConfigController extends GetxController {
   static TranslationConfigController get instance => Get.isRegistered<TranslationConfigController>()
       ? Get.find<TranslationConfigController>()
       : Get.put(TranslationConfigController());
+
+  final UserSettingsApi _userSettingsApi = Get.find<UserSettingsApi>();
 
   // 响应式变量
   final _config = TranslationConfig(
@@ -47,21 +51,21 @@ class TranslationConfigController extends GetxController {
     }).toList();
 
     _config.value = config.copyWith(providers: updatedProviders);
-    _saveConfig();
+    _saveConfigToServer();
   }
 
   /// 设置最大重试次数
-  void setMaxRetries(int retries) {
+  Future<void> setMaxRetries(int retries) async {
     if (retries < 0 || retries > 10) return;
     _config.value = config.copyWith(maxRetries: retries);
-    _saveConfig();
+    await _saveConfigToServer();
   }
 
   /// 设置超时时间
-  void setTimeout(int seconds) {
+  Future<void> setTimeout(int seconds) async {
     if (seconds < 5 || seconds > 300) return;
     _config.value = config.copyWith(timeoutSeconds: seconds);
-    _saveConfig();
+    await _saveConfigToServer();
   }
 
   /// 验证配置
@@ -85,50 +89,134 @@ class TranslationConfigController extends GetxController {
     return errors;
   }
 
-  /// 保存配置到本地存储
-  Future<void> _saveConfig() async {
+  /// 从服务器加载配置
+  Future<void> loadConfigFromServer() async {
     try {
       _isLoading.value = true;
-      final prefs = await SharedPreferences.getInstance();
-      final configMap = config.toMap();
-      final configJson = jsonEncode(configMap);
-      await prefs.setString('translation_config', configJson);
+      final settings = await _userSettingsApi.getUserSettings();
+
+      // 转换 Model 到 Core 类型
+      final providers = settings.translationSettings.providers
+          .map((p) => TranslationProviderConfig(
+                id: p.id,
+                provider: TranslationProvider.fromCode(p.provider) ?? TranslationProvider.google,
+                name: p.name,
+                appId: p.appId,
+                appKey: p.appKey,
+                apiUrl: p.apiUrl,
+                isDefault: p.isDefault,
+              ))
+          .toList();
+
+      _config.value = TranslationConfig(
+        providers: providers,
+        maxRetries: settings.translationSettings.maxRetries,
+        timeoutSeconds: settings.translationSettings.timeoutSeconds,
+      );
+
+      // 同时保存到本地缓存
+      await _saveConfigLocal();
+
+      Logger.info('从服务器加载翻译配置成功');
     } catch (error, stackTrace) {
-      Logger.error('保存翻译配置失败', error: error, stackTrace: stackTrace);
+      Logger.error('从服务器加载翻译配置失败', error: error, stackTrace: stackTrace);
+      // 加载失败时从本地加载
+      await _loadConfigLocal();
     } finally {
       _isLoading.value = false;
     }
   }
 
-  /// 从本地存储加载配置
-  Future<void> _loadConfig() async {
+  /// 保存配置到服务器
+  Future<void> _saveConfigToServer() async {
     try {
-      _isLoading.value = true;
+      // 转换 Core 类型到 Model
+      final providers = config.providers
+          .map((p) => TranslationProviderConfigModel(
+                id: p.id,
+                provider: p.provider.code,
+                name: p.name,
+                appId: p.appId,
+                appKey: p.appKey,
+                apiUrl: p.apiUrl,
+                isDefault: p.isDefault,
+              ))
+          .toList();
+
+      final translationSettings = TranslationSettingsModel(
+        providers: providers,
+        maxRetries: config.maxRetries,
+        timeoutSeconds: config.timeoutSeconds,
+      );
+
+      await _userSettingsApi.updateTranslationSettings(translationSettings);
+      await _saveConfigLocal();
+
+      Logger.info('保存翻译配置到服务器成功');
+    } catch (error, stackTrace) {
+      Logger.error('保存翻译配置到服务器失败', error: error, stackTrace: stackTrace);
+      // 保存失败时仅保存到本地
+      await _saveConfigLocal();
+    }
+  }
+
+  /// 保存配置到本地存储（作为缓存）
+  Future<void> _saveConfigLocal() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final configMap = config.toMap();
+      final configJson = jsonEncode(configMap);
+      await prefs.setString('translation_config', configJson);
+    } catch (error, stackTrace) {
+      Logger.error('保存翻译配置到本地失败', error: error, stackTrace: stackTrace);
+    }
+  }
+
+  /// 从本地存储加载配置
+  Future<void> _loadConfigLocal() async {
+    try {
       final prefs = await SharedPreferences.getInstance();
       final configString = prefs.getString('translation_config');
       if (configString != null && configString.isNotEmpty) {
         final configMap = jsonDecode(configString) as Map<String, dynamic>;
         final loadedConfig = TranslationConfig.fromMap(configMap);
         _config.value = loadedConfig;
-      } else {
-        // 没有保存的配置，使用默认配置
-        // 不需要重新赋值，因为 _config 已经初始化为默认值
       }
     } catch (error, stackTrace) {
-      Logger.error('加载翻译配置失败', error: error, stackTrace: stackTrace);
-      // 加载失败时使用默认配置
-      // 不需要重新赋值，因为 _config 已经初始化为默认值
-    } finally {
-      _isLoading.value = false;
+      Logger.error('从本地加载翻译配置失败', error: error, stackTrace: stackTrace);
     }
   }
 
   /// 重置为默认配置
-  void resetToDefault() {
-    _config.value = TranslationConfig(
-      providers: [],
-    );
-    _saveConfig();
+  Future<void> resetToDefault() async {
+    try {
+      final defaultSettings = await _userSettingsApi.resetUserSettings();
+
+      // 转换 Model 到 Core 类型
+      final providers = defaultSettings.translationSettings.providers
+          .map((p) => TranslationProviderConfig(
+                id: p.id,
+                provider: TranslationProvider.fromCode(p.provider) ?? TranslationProvider.google,
+                name: p.name,
+                appId: p.appId,
+                appKey: p.appKey,
+                apiUrl: p.apiUrl,
+                isDefault: p.isDefault,
+              ))
+          .toList();
+
+      _config.value = TranslationConfig(
+        providers: providers,
+        maxRetries: defaultSettings.translationSettings.maxRetries,
+        timeoutSeconds: defaultSettings.translationSettings.timeoutSeconds,
+      );
+
+      await _saveConfigLocal();
+    } catch (error, stackTrace) {
+      Logger.error('重置翻译配置失败', error: error, stackTrace: stackTrace);
+      _config.value = TranslationConfig(providers: []);
+      await _saveConfigLocal();
+    }
   }
 
   /// 生成唯一ID
@@ -137,44 +225,74 @@ class TranslationConfigController extends GetxController {
   }
 
   /// 添加翻译接口
-  void addTranslationProvider({
+  Future<void> addTranslationProvider({
     required TranslationProvider provider,
     required String name,
     String? appId,
     String? appKey,
     String? apiUrl,
     bool isDefault = false,
-  }) {
-    // 如果设置为默认，先取消其他默认设置
-    var updatedProviders = config.providers;
-    if (isDefault) {
-      updatedProviders = config.providers.map((p) => p.copyWith(isDefault: false)).toList();
+  }) async {
+    try {
+      // 转换 Core 类型到 Model
+      final providerModel = TranslationProviderConfigModel(
+        id: _generateId(),
+        provider: provider.code,
+        name: name,
+        appId: appId ?? '',
+        appKey: appKey ?? '',
+        apiUrl: apiUrl,
+        isDefault: isDefault,
+      );
+
+      final addedProvider = await _userSettingsApi.addTranslationProvider(providerModel);
+
+      // 如果设置为默认，先取消其他默认设置
+      var updatedProviders = config.providers;
+      if (isDefault) {
+        updatedProviders = config.providers.map((p) => p.copyWith(isDefault: false)).toList();
+      }
+
+      // 添加新接口
+      final newConfig = TranslationProviderConfig(
+        id: addedProvider.id,
+        provider: provider,
+        name: name,
+        appId: appId ?? '',
+        appKey: appKey ?? '',
+        apiUrl: apiUrl,
+        isDefault: isDefault,
+      );
+
+      updatedProviders = [...updatedProviders, newConfig];
+      _config.value = config.copyWith(providers: updatedProviders);
+      await _saveConfigLocal();
+
+      Logger.info('添加翻译接口成功');
+    } catch (error, stackTrace) {
+      Logger.error('添加翻译接口失败', error: error, stackTrace: stackTrace);
+      rethrow;
     }
-
-    final newConfig = TranslationProviderConfig(
-      id: _generateId(),
-      provider: provider,
-      name: name,
-      appId: appId ?? '',
-      appKey: appKey ?? '',
-      apiUrl: apiUrl,
-      isDefault: isDefault,
-    );
-
-    updatedProviders = [...updatedProviders, newConfig];
-    _config.value = config.copyWith(providers: updatedProviders);
-    _saveConfig();
   }
 
   /// 删除翻译接口
-  void removeTranslationProvider(String id) {
-    final updatedProviders = config.providers.where((p) => p.id != id).toList();
-    _config.value = config.copyWith(providers: updatedProviders);
-    _saveConfig();
+  Future<void> removeTranslationProvider(String id) async {
+    try {
+      await _userSettingsApi.deleteTranslationProvider(id);
+
+      final updatedProviders = config.providers.where((p) => p.id != id).toList();
+      _config.value = config.copyWith(providers: updatedProviders);
+      await _saveConfigLocal();
+
+      Logger.info('删除翻译接口成功');
+    } catch (error, stackTrace) {
+      Logger.error('删除翻译接口失败', error: error, stackTrace: stackTrace);
+      rethrow;
+    }
   }
 
   /// 更新翻译接口配置
-  void updateProviderConfigById(
+  Future<void> updateProviderConfigById(
     String id, {
     String? name,
     String? appId,
@@ -182,28 +300,61 @@ class TranslationConfigController extends GetxController {
     String? apiUrl,
     bool? isEnabled,
     bool? isDefault,
-  }) {
-    var updatedProviders = config.providers;
-    if (isDefault == true) {
-      // 如果设置为默认，先取消其他默认设置
-      updatedProviders = config.providers.map((p) => p.copyWith(isDefault: false)).toList();
-    }
-
-    updatedProviders = updatedProviders.map((p) {
-      if (p.id == id) {
-        return p.copyWith(
-          name: name,
-          appId: appId,
-          appKey: appKey,
-          apiUrl: apiUrl,
-          isDefault: isDefault,
-        );
+  }) async {
+    try {
+      // 获取现有配置
+      final existingProvider = config.getProviderConfigById(id);
+      if (existingProvider == null) {
+        Logger.warning('翻译接口不存在: $id');
+        return;
       }
-      return p;
-    }).toList();
 
-    _config.value = config.copyWith(providers: updatedProviders);
-    _saveConfig();
+      // 构建更新后的配置
+      final updatedProviderConfig = TranslationProviderConfig(
+        id: id,
+        provider: existingProvider.provider,
+        name: name ?? existingProvider.name,
+        appId: appId ?? existingProvider.appId,
+        appKey: appKey ?? existingProvider.appKey,
+        apiUrl: apiUrl ?? existingProvider.apiUrl,
+        isDefault: isDefault ?? existingProvider.isDefault,
+      );
+
+      // 转换为 Model
+      final providerModel = TranslationProviderConfigModel(
+        id: updatedProviderConfig.id,
+        provider: updatedProviderConfig.provider.code,
+        name: updatedProviderConfig.name,
+        appId: updatedProviderConfig.appId,
+        appKey: updatedProviderConfig.appKey,
+        apiUrl: updatedProviderConfig.apiUrl,
+        isDefault: updatedProviderConfig.isDefault,
+      );
+
+      await _userSettingsApi.updateTranslationProvider(id, providerModel);
+
+      // 更新本地状态
+      var updatedProviders = config.providers;
+      if (isDefault == true) {
+        // 如果设置为默认，先取消其他默认设置
+        updatedProviders = config.providers.map((p) => p.copyWith(isDefault: false)).toList();
+      }
+
+      updatedProviders = updatedProviders.map((p) {
+        if (p.id == id) {
+          return updatedProviderConfig;
+        }
+        return p;
+      }).toList();
+
+      _config.value = config.copyWith(providers: updatedProviders);
+      await _saveConfigLocal();
+
+      Logger.info('更新翻译接口成功');
+    } catch (error, stackTrace) {
+      Logger.error('更新翻译接口失败', error: error, stackTrace: stackTrace);
+      rethrow;
+    }
   }
 
   /// 获取翻译接口配置
@@ -211,15 +362,23 @@ class TranslationConfigController extends GetxController {
     return config.getProviderConfigById(id);
   }
 
+  /// 加载设置（优先从服务器，失败则从本地）
+  Future<void> loadSettings() async {
+    // 先从本地快速加载
+    await _loadConfigLocal();
+    // 然后从服务器加载最新数据
+    await loadConfigFromServer();
+  }
+
   @override
   void onInit() {
     super.onInit();
-    _loadConfig();
+    loadSettings();
   }
 
   @override
   void onClose() {
-    _saveConfig();
+    _saveConfigLocal();
     super.onClose();
   }
 }
