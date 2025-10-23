@@ -7,6 +7,7 @@ import 'package:ttpolyglot_core/core.dart';
 /// 项目弹窗控制器
 class ProjectDialogController extends GetxController {
   final ProjectApi _projectApi = Get.find<ProjectApi>();
+  final LanguageApi _languageApi = Get.find<LanguageApi>();
 
   final formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
@@ -16,6 +17,7 @@ class ProjectDialogController extends GetxController {
   final _selectedTargetLanguages = <Language>[].obs;
   final _availableLanguages = <Language>[].obs;
   final _isLoading = false.obs;
+  final _isLoadingLanguages = false.obs;
   final _nameError = Rxn<String>();
   final _isEditMode = false.obs;
   final _editingProject = Rxn<Project>();
@@ -25,6 +27,7 @@ class ProjectDialogController extends GetxController {
   List<Language> get selectedTargetLanguages => _selectedTargetLanguages;
   List<Language> get availableLanguages => _availableLanguages;
   bool get isLoading => _isLoading.value;
+  bool get isLoadingLanguages => _isLoadingLanguages.value;
   String? get nameError => _nameError.value;
   bool get isEditMode => _isEditMode.value;
   Project? get editingProject => _editingProject.value;
@@ -43,14 +46,37 @@ class ProjectDialogController extends GetxController {
   }
 
   /// 初始化语言列表
-  void _initializeLanguages() {
-    final presetLanguages = ProjectsController.getPresetLanguages();
-    _availableLanguages.assignAll(presetLanguages);
-    // 设置主语言为中文
-    _selectedPrimaryLanguage.value = presetLanguages.firstWhere(
-      (lang) => lang.code == 'zh-CN',
-      orElse: () => presetLanguages.first,
-    );
+  Future<void> _initializeLanguages() async {
+    try {
+      _isLoadingLanguages.value = true;
+
+      // 尝试从 API 获取语言列表
+      try {
+        final apiLanguages = await _languageApi.getLanguages();
+        if (apiLanguages.isNotEmpty) {
+          _availableLanguages.assignAll(apiLanguages);
+          Logger.info('从 API 加载 ${apiLanguages.length} 个语言');
+        } else {
+          // API 返回空数据，使用默认语言列表
+          final defaultLanguages = LanguageApi.getDefaultLanguages();
+          _availableLanguages.assignAll(defaultLanguages);
+          Logger.warning('API 返回空数据，使用默认语言列表');
+        }
+      } catch (error, stackTrace) {
+        // API 请求失败，使用默认语言列表
+        Logger.error('从 API 加载语言失败，使用默认语言列表', error: error, stackTrace: stackTrace);
+        final defaultLanguages = LanguageApi.getDefaultLanguages();
+        _availableLanguages.assignAll(defaultLanguages);
+      }
+
+      // 设置主语言为中文
+      _selectedPrimaryLanguage.value = _availableLanguages.firstWhere(
+        (lang) => lang.code == 'zh-CN',
+        orElse: () => _availableLanguages.first,
+      );
+    } finally {
+      _isLoadingLanguages.value = false;
+    }
   }
 
   /// 显示创建项目弹窗
