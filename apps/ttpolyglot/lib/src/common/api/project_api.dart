@@ -29,7 +29,7 @@ class ProjectApi {
       }
 
       final response = await HttpClient.get(
-        '/api/projects',
+        '/projects',
         query: queryParams,
       );
 
@@ -50,7 +50,7 @@ class ProjectApi {
     try {
       log('[getProject] projectId=$projectId', name: 'ProjectApi');
 
-      final response = await HttpClient.get('/api/projects/$projectId');
+      final response = await HttpClient.get('/projects/$projectId');
 
       final data = response.data as Map<String, dynamic>;
       final project = ProjectModel.fromJson(data['data'] as Map<String, dynamic>);
@@ -86,7 +86,7 @@ class ProjectApi {
       };
 
       final response = await HttpClient.post(
-        '/api/projects',
+        '/projects',
         data: requestData,
       );
 
@@ -125,7 +125,7 @@ class ProjectApi {
       if (settings != null) requestData['settings'] = settings;
 
       final response = await HttpClient.put(
-        '/api/projects/$projectId',
+        '/projects/$projectId',
         data: requestData,
       );
 
@@ -146,7 +146,7 @@ class ProjectApi {
     try {
       log('[deleteProject] projectId=$projectId', name: 'ProjectApi');
 
-      await HttpClient.delete('/api/projects/$projectId');
+      await HttpClient.delete('/projects/$projectId');
 
       log('[deleteProject] 项目删除成功', name: 'ProjectApi');
     } catch (error, stackTrace) {
@@ -169,7 +169,7 @@ class ProjectApi {
       }
 
       final response = await HttpClient.get(
-        '/api/projects/check-name',
+        '/projects/check-name',
         query: queryParams,
       );
 
@@ -188,7 +188,7 @@ class ProjectApi {
     try {
       log('[getProjectStats] projectId=$projectId', name: 'ProjectApi');
 
-      final response = await HttpClient.get('/api/projects/$projectId/stats');
+      final response = await HttpClient.get('/projects/$projectId/stats');
 
       final data = response.data as Map<String, dynamic>;
       return data['data'] as Map<String, dynamic>;
@@ -203,7 +203,7 @@ class ProjectApi {
     try {
       log('[archiveProject] projectId=$projectId', name: 'ProjectApi');
 
-      final response = await HttpClient.post('/api/projects/$projectId/archive');
+      final response = await HttpClient.post('/projects/$projectId/archive');
 
       final data = response.data as Map<String, dynamic>;
       final project = ProjectModel.fromJson(data['data'] as Map<String, dynamic>);
@@ -222,7 +222,7 @@ class ProjectApi {
     try {
       log('[restoreProject] projectId=$projectId', name: 'ProjectApi');
 
-      final response = await HttpClient.post('/api/projects/$projectId/restore');
+      final response = await HttpClient.post('/projects/$projectId/restore');
 
       final data = response.data as Map<String, dynamic>;
       final project = ProjectModel.fromJson(data['data'] as Map<String, dynamic>);
