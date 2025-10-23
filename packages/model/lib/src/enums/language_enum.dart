@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 enum LanguageEnum {
   enUS('en-US', 'English (US)', 'English (US)', '🇺🇸'),
@@ -28,19 +29,23 @@ enum LanguageEnum {
   }
 
   /// 获取所有语言的数组格式
-  static List<Map<String, dynamic>> toArray() {
+  static List<LanguageModel> toArray() {
     return LanguageEnum.values.asMap().entries.map((entry) {
       final index = entry.key;
       final lang = entry.value;
-      return {
-        'code': lang.code,
-        'name': lang.name,
-        'native_name': lang.nativeName,
-        'flag_emoji': lang.flagEmoji,
-        'is_active': true,
-        'is_rtl': false,
-        'sort_order': index + 1,
-      };
+
+      return LanguageModel(
+        id: index + 1,
+        code: lang,
+        name: lang.name,
+        nativeName: lang.nativeName,
+        flagEmoji: lang.flagEmoji,
+        isActive: true,
+        isRtl: false,
+        sortOrder: index + 1,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
     }).toList();
   }
 }

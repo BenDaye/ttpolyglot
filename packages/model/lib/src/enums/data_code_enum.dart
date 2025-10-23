@@ -18,6 +18,7 @@ enum DataCodeEnum {
   serviceUnavailable(-10014, '服务不可用'),
   noContent(-10015, '无内容'),
   notFound(-10016, '资源不存在'),
+  unauthorized(-10017, '未授权'),
 
   // 通用错误码
   error(-1, '错误'),

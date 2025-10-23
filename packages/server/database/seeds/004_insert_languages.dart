@@ -25,7 +25,7 @@ class Seed004InsertLanguages extends BaseSeed {
       final languages = LanguageEnum.toArray();
 
       // 插入语言数据
-      await insertData('languages', languages);
+      await insertData('languages', languages.map((item) => item.toJson()).toList());
 
       LoggerUtils.info('默认语言数据插入完成，共 ${languages.length} 种语言');
     } catch (error, stackTrace) {
