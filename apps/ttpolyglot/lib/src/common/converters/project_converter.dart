@@ -114,7 +114,14 @@ class ProjectConverter {
     // 使用 LanguageApi 的默认语言列表
     final presetLanguages = LanguageApi.getDefaultLanguages();
     try {
-      return presetLanguages.firstWhere((lang) => lang.code == code);
+      final model = presetLanguages.firstWhere((lang) => lang.code.code == code);
+      return Language(
+        code: code,
+        name: model.name,
+        nativeName: model.nativeName ?? '',
+        isRtl: model.isRtl,
+        sortIndex: model.sortOrder,
+      );
     } catch (_) {
       return null;
     }

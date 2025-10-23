@@ -25,6 +25,12 @@ mixin _$LanguageModel {
   @JsonKey(name: 'code')
   @LanguageEnumConverter()
   LanguageEnum get code => throw _privateConstructorUsedError;
+  @JsonKey(name: 'name')
+  String get name => throw _privateConstructorUsedError;
+  @JsonKey(name: 'native_name')
+  String? get nativeName => throw _privateConstructorUsedError;
+  @JsonKey(name: 'flag_emoji')
+  String? get flagEmoji => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_active')
   bool get isActive => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_rtl')
@@ -55,6 +61,9 @@ abstract class $LanguageModelCopyWith<$Res> {
   $Res call(
       {@JsonKey(name: 'id') int id,
       @JsonKey(name: 'code') @LanguageEnumConverter() LanguageEnum code,
+      @JsonKey(name: 'name') String name,
+      @JsonKey(name: 'native_name') String? nativeName,
+      @JsonKey(name: 'flag_emoji') String? flagEmoji,
       @JsonKey(name: 'is_active') bool isActive,
       @JsonKey(name: 'is_rtl') bool isRtl,
       @JsonKey(name: 'sort_order') int sortOrder,
@@ -79,6 +88,9 @@ class _$LanguageModelCopyWithImpl<$Res, $Val extends LanguageModel>
   $Res call({
     Object? id = null,
     Object? code = null,
+    Object? name = null,
+    Object? nativeName = freezed,
+    Object? flagEmoji = freezed,
     Object? isActive = null,
     Object? isRtl = null,
     Object? sortOrder = null,
@@ -94,6 +106,18 @@ class _$LanguageModelCopyWithImpl<$Res, $Val extends LanguageModel>
           ? _value.code
           : code // ignore: cast_nullable_to_non_nullable
               as LanguageEnum,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      nativeName: freezed == nativeName
+          ? _value.nativeName
+          : nativeName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      flagEmoji: freezed == flagEmoji
+          ? _value.flagEmoji
+          : flagEmoji // ignore: cast_nullable_to_non_nullable
+              as String?,
       isActive: null == isActive
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
@@ -129,6 +153,9 @@ abstract class _$$LanguageModelImplCopyWith<$Res>
   $Res call(
       {@JsonKey(name: 'id') int id,
       @JsonKey(name: 'code') @LanguageEnumConverter() LanguageEnum code,
+      @JsonKey(name: 'name') String name,
+      @JsonKey(name: 'native_name') String? nativeName,
+      @JsonKey(name: 'flag_emoji') String? flagEmoji,
       @JsonKey(name: 'is_active') bool isActive,
       @JsonKey(name: 'is_rtl') bool isRtl,
       @JsonKey(name: 'sort_order') int sortOrder,
@@ -151,6 +178,9 @@ class __$$LanguageModelImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? code = null,
+    Object? name = null,
+    Object? nativeName = freezed,
+    Object? flagEmoji = freezed,
     Object? isActive = null,
     Object? isRtl = null,
     Object? sortOrder = null,
@@ -166,6 +196,18 @@ class __$$LanguageModelImplCopyWithImpl<$Res>
           ? _value.code
           : code // ignore: cast_nullable_to_non_nullable
               as LanguageEnum,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      nativeName: freezed == nativeName
+          ? _value.nativeName
+          : nativeName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      flagEmoji: freezed == flagEmoji
+          ? _value.flagEmoji
+          : flagEmoji // ignore: cast_nullable_to_non_nullable
+              as String?,
       isActive: null == isActive
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
@@ -196,6 +238,9 @@ class _$LanguageModelImpl implements _LanguageModel {
   const _$LanguageModelImpl(
       {@JsonKey(name: 'id') required this.id,
       @JsonKey(name: 'code') @LanguageEnumConverter() required this.code,
+      @JsonKey(name: 'name') required this.name,
+      @JsonKey(name: 'native_name') this.nativeName,
+      @JsonKey(name: 'flag_emoji') this.flagEmoji,
       @JsonKey(name: 'is_active') this.isActive = true,
       @JsonKey(name: 'is_rtl') this.isRtl = false,
       @JsonKey(name: 'sort_order') this.sortOrder = 0,
@@ -212,6 +257,15 @@ class _$LanguageModelImpl implements _LanguageModel {
   @JsonKey(name: 'code')
   @LanguageEnumConverter()
   final LanguageEnum code;
+  @override
+  @JsonKey(name: 'name')
+  final String name;
+  @override
+  @JsonKey(name: 'native_name')
+  final String? nativeName;
+  @override
+  @JsonKey(name: 'flag_emoji')
+  final String? flagEmoji;
   @override
   @JsonKey(name: 'is_active')
   final bool isActive;
@@ -230,7 +284,7 @@ class _$LanguageModelImpl implements _LanguageModel {
 
   @override
   String toString() {
-    return 'LanguageModel(id: $id, code: $code, isActive: $isActive, isRtl: $isRtl, sortOrder: $sortOrder, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'LanguageModel(id: $id, code: $code, name: $name, nativeName: $nativeName, flagEmoji: $flagEmoji, isActive: $isActive, isRtl: $isRtl, sortOrder: $sortOrder, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -240,6 +294,11 @@ class _$LanguageModelImpl implements _LanguageModel {
             other is _$LanguageModelImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.code, code) || other.code == code) &&
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.nativeName, nativeName) ||
+                other.nativeName == nativeName) &&
+            (identical(other.flagEmoji, flagEmoji) ||
+                other.flagEmoji == flagEmoji) &&
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive) &&
             (identical(other.isRtl, isRtl) || other.isRtl == isRtl) &&
@@ -253,8 +312,8 @@ class _$LanguageModelImpl implements _LanguageModel {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType, id, code, isActive, isRtl, sortOrder, createdAt, updatedAt);
+  int get hashCode => Object.hash(runtimeType, id, code, name, nativeName,
+      flagEmoji, isActive, isRtl, sortOrder, createdAt, updatedAt);
 
   /// Create a copy of LanguageModel
   /// with the given fields replaced by the non-null parameter values.
@@ -278,6 +337,9 @@ abstract class _LanguageModel implements LanguageModel {
           @JsonKey(name: 'code')
           @LanguageEnumConverter()
           required final LanguageEnum code,
+          @JsonKey(name: 'name') required final String name,
+          @JsonKey(name: 'native_name') final String? nativeName,
+          @JsonKey(name: 'flag_emoji') final String? flagEmoji,
           @JsonKey(name: 'is_active') final bool isActive,
           @JsonKey(name: 'is_rtl') final bool isRtl,
           @JsonKey(name: 'sort_order') final int sortOrder,
@@ -295,6 +357,15 @@ abstract class _LanguageModel implements LanguageModel {
   @JsonKey(name: 'code')
   @LanguageEnumConverter()
   LanguageEnum get code;
+  @override
+  @JsonKey(name: 'name')
+  String get name;
+  @override
+  @JsonKey(name: 'native_name')
+  String? get nativeName;
+  @override
+  @JsonKey(name: 'flag_emoji')
+  String? get flagEmoji;
   @override
   @JsonKey(name: 'is_active')
   bool get isActive;

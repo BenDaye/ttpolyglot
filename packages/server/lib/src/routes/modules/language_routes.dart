@@ -1,8 +1,10 @@
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 
-import '../../controllers/controllers.dart';
-import '../../services/services.dart';
+import '../../controllers/language/language_controller.dart';
+import '../../services/business/language_service.dart';
+import '../../services/infrastructure/database_service.dart';
+import '../../services/infrastructure/redis_service.dart';
 
 /// 语言路由模块
 class LanguageRoutes {
@@ -18,18 +20,15 @@ class LanguageRoutes {
 
   /// 配置语言相关路由
   Router configure() {
-    final router = Router();
-    final languageController = LanguageController(
+    final languageService = LanguageService(
       databaseService: databaseService,
       redisService: redisService,
     );
 
-    router.get('/languages', languageController.getLanguages);
-    router.post('/languages', languageController.createLanguage);
-    router.get('/languages/<code>', languageController.getLanguage);
-    router.put('/languages/<code>', languageController.updateLanguage);
-    router.delete('/languages/<code>', languageController.deleteLanguage);
+    final languageController = LanguageController(
+      languageService: languageService,
+    );
 
-    return router;
+    return languageController.router;
   }
 }

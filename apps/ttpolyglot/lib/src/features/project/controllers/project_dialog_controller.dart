@@ -45,6 +45,19 @@ class ProjectDialogController extends GetxController {
     super.onClose();
   }
 
+  /// 将 LanguageModel 转换为 Language
+  List<Language> _convertToLanguages(List<LanguageModel> models) {
+    return models.map((model) {
+      return Language(
+        code: model.code.code,
+        name: model.name,
+        nativeName: model.nativeName ?? model.name,
+        isRtl: model.isRtl,
+        sortIndex: model.sortOrder,
+      );
+    }).toList();
+  }
+
   /// 初始化语言列表
   Future<void> _initializeLanguages() async {
     try {
@@ -54,19 +67,19 @@ class ProjectDialogController extends GetxController {
       try {
         final apiLanguages = await _languageApi.getLanguages();
         if (apiLanguages.isNotEmpty) {
-          _availableLanguages.assignAll(apiLanguages);
+          _availableLanguages.assignAll(_convertToLanguages(apiLanguages));
           Logger.info('从 API 加载 ${apiLanguages.length} 个语言');
         } else {
           // API 返回空数据，使用默认语言列表
           final defaultLanguages = LanguageApi.getDefaultLanguages();
-          _availableLanguages.assignAll(defaultLanguages);
+          _availableLanguages.assignAll(_convertToLanguages(defaultLanguages));
           Logger.warning('API 返回空数据，使用默认语言列表');
         }
       } catch (error, stackTrace) {
         // API 请求失败，使用默认语言列表
         Logger.error('从 API 加载语言失败，使用默认语言列表', error: error, stackTrace: stackTrace);
         final defaultLanguages = LanguageApi.getDefaultLanguages();
-        _availableLanguages.assignAll(defaultLanguages);
+        _availableLanguages.assignAll(_convertToLanguages(defaultLanguages));
       }
 
       // 设置主语言为中文
