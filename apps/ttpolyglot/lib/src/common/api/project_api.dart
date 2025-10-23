@@ -61,7 +61,7 @@ class ProjectApi {
   }
 
   /// 创建项目
-  Future<ProjectModel> createProject({
+  Future<ProjectModel?> createProject({
     required String name,
     String? description,
     required String primaryLanguageCode,
@@ -87,14 +87,17 @@ class ProjectApi {
       );
 
       final data = response.data as Map<String, dynamic>;
+      if (data['data'] == null) {
+        return null;
+      }
       final project = ProjectModel.fromJson(data['data'] as Map<String, dynamic>);
 
-      log('[createProject] 项目创建成功: id=${project.id}', name: 'ProjectApi');
+      log('[createProject] 项目创建成功: id=${data['data']['id']}', name: 'ProjectApi');
 
       return project;
     } catch (error, stackTrace) {
       log('[createProject]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
-      rethrow;
+      return null;
     }
   }
 

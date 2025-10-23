@@ -194,6 +194,34 @@ class ProjectService extends BaseService {
     }
   }
 
+  /// 检查项目名称是否可用
+  Future<bool> checkProjectNameAvailable(String name, {int? excludeProjectId}) async {
+    try {
+      logInfo('检查项目名称: $name, excludeProjectId: $excludeProjectId');
+
+      final conditions = <String>['LOWER(name) = LOWER(@name)'];
+      final parameters = <String, dynamic>{'name': name};
+
+      if (excludeProjectId != null) {
+        conditions.add('id != @exclude_id');
+        parameters['exclude_id'] = excludeProjectId;
+      }
+
+      final sql = '''
+        SELECT COUNT(*) as count FROM {projects}
+        WHERE ${conditions.join(' AND ')}
+      ''';
+
+      final result = await _databaseService.query(sql, parameters);
+      final count = result.first[0] as int;
+
+      return count == 0;
+    } catch (error, stackTrace) {
+      logError('检查项目名称失败: $name', error: error, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
   /// 创建项目
   Future<ProjectModel> createProject({
     required String name,

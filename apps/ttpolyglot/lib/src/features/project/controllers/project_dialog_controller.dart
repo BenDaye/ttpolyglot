@@ -343,12 +343,17 @@ class ProjectDialogController extends GetxController {
           return;
         }
 
-        await _projectApi.createProject(
+        final project = await _projectApi.createProject(
           name: name,
           description: description,
           primaryLanguageCode: primaryLanguageCode,
           visibility: 'private',
         );
+
+        if (project == null) {
+          Get.snackbar('错误', '项目创建失败');
+          return;
+        }
 
         Get.back(closeOverlays: true);
         Get.snackbar('成功', '项目创建成功');

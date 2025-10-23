@@ -19,6 +19,7 @@ class ProjectController extends BaseController {
     final router = Router();
     router.get('/', _getProjects);
     router.post('/', _createProject);
+    router.get('/check-name', _checkProjectName);
     router.get('/<id>', _getProjectById);
     router.put('/<id>', _updateProject);
     router.delete('/<id>', _deleteProject);
@@ -117,9 +118,36 @@ class ProjectController extends BaseController {
     }
   }
 
+  Future<Response> _checkProjectName(Request request) async {
+    try {
+      final params = request.url.queryParameters;
+      final name = params['name'];
+
+      if (name == null || name.trim().isEmpty) {
+        return ResponseUtils.error(message: '项目名称不能为空');
+      }
+
+      final excludeIdStr = params['exclude_id'];
+      final excludeId = excludeIdStr != null ? int.tryParse(excludeIdStr) : null;
+
+      final isAvailable = await _projectService.checkProjectNameAvailable(name, excludeProjectId: excludeId);
+
+      return ResponseUtils.success(
+        message: '检查项目名称成功',
+        data: {'available': isAvailable},
+      );
+    } catch (error, stackTrace) {
+      LoggerUtils.error('检查项目名称失败', error: error, stackTrace: stackTrace);
+      return ResponseUtils.error(message: '检查项目名称失败');
+    }
+  }
+
   Future<Response> _getProjectById(Request request, String id) async {
     try {
-      ValidatorUtils.validateUuid(id, 'project_id');
+      final projectId = int.tryParse(id);
+      if (projectId == null) {
+        return ResponseUtils.error(message: '项目ID格式无效');
+      }
       final project = await _projectService.getProjectById(id, userId: getCurrentUserId(request));
 
       if (project == null) {
@@ -140,7 +168,10 @@ class ProjectController extends BaseController {
 
   Future<Response> _updateProject(Request request, String id) async {
     try {
-      ValidatorUtils.validateUuid(id, 'project_id');
+      final projectId = int.tryParse(id);
+      if (projectId == null) {
+        return ResponseUtils.error(message: '项目ID格式无效');
+      }
       final body = await request.readAsString();
       final data = jsonDecode(body) as Map<String, dynamic>;
       final updateData = <String, dynamic>{};
@@ -182,7 +213,10 @@ class ProjectController extends BaseController {
 
   Future<Response> _deleteProject(Request request, String id) async {
     try {
-      ValidatorUtils.validateUuid(id, 'project_id');
+      final projectId = int.tryParse(id);
+      if (projectId == null) {
+        return ResponseUtils.error(message: '项目ID格式无效');
+      }
       await _projectService.deleteProject(id, deletedBy: getCurrentUserId(request));
       return ResponseUtils.success(message: '项目删除成功');
     } catch (error, stackTrace) {
@@ -201,7 +235,10 @@ class ProjectController extends BaseController {
 
   Future<Response> _getProjectMembers(Request request, String id) async {
     try {
-      ValidatorUtils.validateUuid(id, 'project_id');
+      final projectId = int.tryParse(id);
+      if (projectId == null) {
+        return ResponseUtils.error(message: '项目ID格式无效');
+      }
       final members = await _projectService.getProjectMembers(id);
       return ResponseUtils.success(message: '获取项目成员成功', data: {'members': members});
     } catch (error, stackTrace) {
@@ -212,7 +249,10 @@ class ProjectController extends BaseController {
 
   Future<Response> _addProjectMember(Request request, String id) async {
     try {
-      ValidatorUtils.validateUuid(id, 'project_id');
+      final projectId = int.tryParse(id);
+      if (projectId == null) {
+        return ResponseUtils.error(message: '项目ID格式无效');
+      }
       final body = await request.readAsString();
       final data = jsonDecode(body) as Map<String, dynamic>;
 
@@ -249,7 +289,10 @@ class ProjectController extends BaseController {
 
   Future<Response> _removeProjectMember(Request request, String id, String userId) async {
     try {
-      ValidatorUtils.validateUuid(id, 'project_id');
+      final projectId = int.tryParse(id);
+      if (projectId == null) {
+        return ResponseUtils.error(message: '项目ID格式无效');
+      }
       ValidatorUtils.validateUuid(userId, 'user_id');
       await _projectService.removeProjectMember(id, userId);
       return ResponseUtils.success(message: '项目成员删除成功');
@@ -272,7 +315,10 @@ class ProjectController extends BaseController {
   /// 归档项目
   Future<Response> _archiveProject(Request request, String id) async {
     try {
-      ValidatorUtils.validateUuid(id, 'project_id');
+      final projectId = int.tryParse(id);
+      if (projectId == null) {
+        return ResponseUtils.error(message: '项目ID格式无效');
+      }
       await _projectService.archiveProject(id);
       return ResponseUtils.success(message: '项目已归档');
     } catch (error, stackTrace) {
@@ -284,7 +330,10 @@ class ProjectController extends BaseController {
   /// 恢复项目
   Future<Response> _restoreProject(Request request, String id) async {
     try {
-      ValidatorUtils.validateUuid(id, 'project_id');
+      final projectId = int.tryParse(id);
+      if (projectId == null) {
+        return ResponseUtils.error(message: '项目ID格式无效');
+      }
       await _projectService.restoreProject(id);
       return ResponseUtils.success(message: '项目已恢复');
     } catch (error, stackTrace) {
@@ -296,7 +345,10 @@ class ProjectController extends BaseController {
   /// 更新项目成员角色
   Future<Response> _updateMemberRole(Request request, String id, String userId) async {
     try {
-      ValidatorUtils.validateUuid(id, 'project_id');
+      final projectId = int.tryParse(id);
+      if (projectId == null) {
+        return ResponseUtils.error(message: '项目ID格式无效');
+      }
       ValidatorUtils.validateUuid(userId, 'user_id');
 
       final body = await request.readAsString();
@@ -321,7 +373,10 @@ class ProjectController extends BaseController {
   /// 获取项目语言
   Future<Response> _getProjectLanguages(Request request, String id) async {
     try {
-      ValidatorUtils.validateUuid(id, 'project_id');
+      final projectId = int.tryParse(id);
+      if (projectId == null) {
+        return ResponseUtils.error(message: '项目ID格式无效');
+      }
       final languages = await _projectService.getProjectLanguages(id);
       return ResponseUtils.success(message: '获取项目语言成功', data: languages);
     } catch (error, stackTrace) {
@@ -333,7 +388,10 @@ class ProjectController extends BaseController {
   /// 添加项目语言
   Future<Response> _addProjectLanguage(Request request, String id) async {
     try {
-      ValidatorUtils.validateUuid(id, 'project_id');
+      final projectId = int.tryParse(id);
+      if (projectId == null) {
+        return ResponseUtils.error(message: '项目ID格式无效');
+      }
 
       final body = await request.readAsString();
       final data = jsonDecode(body) as Map<String, dynamic>;
@@ -357,7 +415,10 @@ class ProjectController extends BaseController {
   /// 移除项目语言
   Future<Response> _removeProjectLanguage(Request request, String id, String languageCode) async {
     try {
-      ValidatorUtils.validateUuid(id, 'project_id');
+      final projectId = int.tryParse(id);
+      if (projectId == null) {
+        return ResponseUtils.error(message: '项目ID格式无效');
+      }
       await _projectService.removeProjectLanguage(id, languageCode);
       return ResponseUtils.success(message: '语言已从项目中移除');
     } catch (error, stackTrace) {
@@ -369,7 +430,10 @@ class ProjectController extends BaseController {
   /// 更新语言设置
   Future<Response> _updateLanguageSettings(Request request, String id) async {
     try {
-      ValidatorUtils.validateUuid(id, 'project_id');
+      final projectId = int.tryParse(id);
+      if (projectId == null) {
+        return ResponseUtils.error(message: '项目ID格式无效');
+      }
 
       final body = await request.readAsString();
       final data = jsonDecode(body) as Map<String, dynamic>;
@@ -394,7 +458,10 @@ class ProjectController extends BaseController {
   /// 获取项目统计信息
   Future<Response> _getProjectStatistics(Request request, String id) async {
     try {
-      ValidatorUtils.validateUuid(id, 'project_id');
+      final projectId = int.tryParse(id);
+      if (projectId == null) {
+        return ResponseUtils.error(message: '项目ID格式无效');
+      }
       final stats = await _projectService.getProjectStatistics(id);
       return ResponseUtils.success(message: '获取项目统计信息成功', data: stats);
     } catch (error, stackTrace) {
@@ -406,7 +473,10 @@ class ProjectController extends BaseController {
   /// 获取项目活动日志
   Future<Response> _getProjectActivity(Request request, String id) async {
     try {
-      ValidatorUtils.validateUuid(id, 'project_id');
+      final projectId = int.tryParse(id);
+      if (projectId == null) {
+        return ResponseUtils.error(message: '项目ID格式无效');
+      }
       final params = request.url.queryParameters;
       final page = int.tryParse(params['page'] ?? '1') ?? 1;
       final limit = int.tryParse(params['limit'] ?? '20') ?? 20;
