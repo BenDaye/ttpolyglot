@@ -4,7 +4,7 @@ import 'package:ttpolyglot_model/model.dart';
 
 /// 服务器异常基类
 abstract class ServerException implements Exception {
-  final ApiResponseCode code;
+  final DataCodeEnum code;
   final String message;
   final dynamic details;
   final StackTrace? stackTrace;
@@ -49,7 +49,7 @@ class ValidationException extends ServerException {
     this.fieldErrors = const [],
     super.details,
     super.stackTrace,
-  }) : super(code: ApiResponseCode.validationError);
+  }) : super(code: DataCodeEnum.validationError);
 
   @override
   Map<String, dynamic> toMap() {
@@ -71,7 +71,7 @@ class AuthenticationException extends ServerException {
     required super.message,
     super.details,
     super.stackTrace,
-  }) : super(code: ApiResponseCode.authenticationError);
+  }) : super(code: DataCodeEnum.authenticationError);
 }
 
 /// 授权异常
@@ -80,7 +80,7 @@ class AuthorizationException extends ServerException {
     required super.message,
     super.details,
     super.stackTrace,
-  }) : super(code: ApiResponseCode.authorizationError);
+  }) : super(code: DataCodeEnum.authorizationError);
 }
 
 /// 资源未找到异常
@@ -89,7 +89,7 @@ class NotFoundException extends ServerException {
     required super.message,
     super.details,
     super.stackTrace,
-  }) : super(code: ApiResponseCode.dataNotFound);
+  }) : super(code: DataCodeEnum.dataNotFound);
 }
 
 /// 业务逻辑异常
@@ -98,7 +98,7 @@ class BusinessException extends ServerException {
     required super.message,
     super.details,
     super.stackTrace,
-  }) : super(code: ApiResponseCode.businessError);
+  }) : super(code: DataCodeEnum.businessError);
 }
 
 /// 数据库异常
@@ -107,7 +107,7 @@ class DatabaseException extends ServerException {
     required super.message,
     super.details,
     super.stackTrace,
-  }) : super(code: ApiResponseCode.databaseError);
+  }) : super(code: DataCodeEnum.databaseError);
 }
 
 /// 缓存异常
@@ -116,7 +116,7 @@ class CacheException extends ServerException {
     required super.message,
     super.details,
     super.stackTrace,
-  }) : super(code: ApiResponseCode.cacheError);
+  }) : super(code: DataCodeEnum.cacheError);
 }
 
 /// 外部服务异常
@@ -128,7 +128,7 @@ class ExternalServiceException extends ServerException {
     required super.message,
     super.details,
     super.stackTrace,
-  }) : super(code: ApiResponseCode.externalServiceError);
+  }) : super(code: DataCodeEnum.externalServiceError);
 
   @override
   Map<String, dynamic> toMap() {
@@ -150,7 +150,7 @@ class RateLimitException extends ServerException {
     this.retryAfterSeconds = 60,
     super.details,
     super.stackTrace,
-  }) : super(code: ApiResponseCode.rateLimitError);
+  }) : super(code: DataCodeEnum.rateLimitError);
 
   @override
   Map<String, dynamic> toMap() {
@@ -166,7 +166,7 @@ class ConflictException extends ServerException {
     required super.message,
     super.details,
     super.stackTrace,
-  }) : super(code: ApiResponseCode.conflictError);
+  }) : super(code: DataCodeEnum.conflictError);
 }
 
 /// 文件上传异常
@@ -180,7 +180,7 @@ class FileUploadException extends ServerException {
     this.fileSize,
     super.details,
     super.stackTrace,
-  }) : super(code: ApiResponseCode.fileUploadError);
+  }) : super(code: DataCodeEnum.fileUploadError);
 
   @override
   Map<String, dynamic> toMap() {

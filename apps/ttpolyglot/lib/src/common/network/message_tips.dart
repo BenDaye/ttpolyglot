@@ -8,18 +8,18 @@ final class MessageTips {
 
   static void showSuccessTips({
     required String message,
-    required ApiResponseTipsType type,
+    required DataMessageTipsEnum type,
     RequestExtraModel? extra,
   }) {
     if (extra?.showSuccessToast == false || message.isEmpty) return;
     switch (type) {
-      case ApiResponseTipsType.showDialog:
+      case DataMessageTipsEnum.showDialog:
         DialogManager.showSuccess(message);
         break;
-      case ApiResponseTipsType.showToast:
+      case DataMessageTipsEnum.showToast:
         Toast.showSuccess(message);
         break;
-      case ApiResponseTipsType.showSnackBar:
+      case DataMessageTipsEnum.showSnackBar:
         if (Get.context != null) {
           ScaffoldMessenger.of(Get.context!).showSnackBar(
             SnackBar(
@@ -35,8 +35,8 @@ final class MessageTips {
 
   static void showFailTips({
     required String message,
-    required ApiResponseTipsType type,
-    ApiResponseCode? status,
+    required DataMessageTipsEnum type,
+    DataCodeEnum? status,
     RequestExtraModel? extra,
   }) {
     // // 鉴权失败处理
@@ -46,13 +46,13 @@ final class MessageTips {
     // 其他错误
     if (extra?.showErrorToast == false || message.isEmpty) return;
     switch (type) {
-      case ApiResponseTipsType.showDialog:
+      case DataMessageTipsEnum.showDialog:
         DialogManager.showError(message);
         break;
-      case ApiResponseTipsType.showToast:
+      case DataMessageTipsEnum.showToast:
         Toast.showError(message);
         break;
-      case ApiResponseTipsType.showSnackBar:
+      case DataMessageTipsEnum.showSnackBar:
         if (Get.context != null) {
           ScaffoldMessenger.of(Get.context!).showSnackBar(
             SnackBar(

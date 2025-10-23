@@ -15,21 +15,21 @@ class ErrorInterceptor extends Interceptor {
     // 构造返回错误体
     final result = switch (err.type) {
       DioExceptionType.connectionTimeout => ApiResponseModel.of(
-          ApiResponseCode.connectionTimeout,
+          DataCodeEnum.connectionTimeout,
         ),
-      DioExceptionType.sendTimeout => ApiResponseModel.of(ApiResponseCode.sendTimeout),
+      DioExceptionType.sendTimeout => ApiResponseModel.of(DataCodeEnum.sendTimeout),
       DioExceptionType.receiveTimeout => ApiResponseModel.of(
-          ApiResponseCode.receiveTimeout,
+          DataCodeEnum.receiveTimeout,
         ),
       DioExceptionType.badCertificate => ApiResponseModel.of(
-          ApiResponseCode.badCertificate,
+          DataCodeEnum.badCertificate,
         ),
       DioExceptionType.badResponse => ApiResponseModel.of(
-          ApiResponseCode.fromValue(err.response?.statusCode ?? 400),
+          DataCodeEnum.fromValue(err.response?.statusCode ?? 400),
         ),
-      DioExceptionType.cancel => ApiResponseModel.of(ApiResponseCode.cancelRequest),
+      DioExceptionType.cancel => ApiResponseModel.of(DataCodeEnum.cancelRequest),
       DioExceptionType.connectionError => ApiResponseModel.of(
-          ApiResponseCode.networkError,
+          DataCodeEnum.networkError,
         ),
       DioExceptionType.unknown => _unknown(err),
     };
@@ -41,8 +41,8 @@ class ErrorInterceptor extends Interceptor {
   ApiResponseModel _unknown(DioException err) {
     Object? error = err.error;
     if (error is HandshakeException) {
-      return ApiResponseModel.of(ApiResponseCode.domainError);
+      return ApiResponseModel.of(DataCodeEnum.domainError);
     }
-    return ApiResponseModel.of(ApiResponseCode.unknown);
+    return ApiResponseModel.of(DataCodeEnum.unknown);
   }
 }

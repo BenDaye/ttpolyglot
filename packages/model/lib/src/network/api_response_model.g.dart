@@ -11,11 +11,13 @@ _$ApiResponseModelImpl<T> _$$ApiResponseModelImplFromJson<T>(
   T Function(Object? json) fromJsonT,
 ) =>
     _$ApiResponseModelImpl<T>(
-      code: apiResponseCodeFromJson((json['code'] as num).toInt()),
+      code:
+          const DataCodeEnumConverter().fromJson((json['code'] as num).toInt()),
       message: json['message'] as String? ?? "",
       type: json['type'] == null
-          ? ApiResponseTipsType.showToast
-          : apiResponseTipsTypeFromJson(json['type'] as String),
+          ? DataMessageTipsEnum.showToast
+          : const DataMessageTipsEnumConverter()
+              .fromJson(json['type'] as String),
       data: _$nullableGenericFromJson(json['data'], fromJsonT),
     );
 
@@ -24,9 +26,9 @@ Map<String, dynamic> _$$ApiResponseModelImplToJson<T>(
   Object? Function(T value) toJsonT,
 ) =>
     <String, dynamic>{
-      'code': apiResponseCodeToJson(instance.code),
+      'code': const DataCodeEnumConverter().toJson(instance.code),
       'message': instance.message,
-      'type': apiResponseTipsTypeToJson(instance.type),
+      'type': const DataMessageTipsEnumConverter().toJson(instance.type),
       'data': _$nullableGenericToJson(instance.data, toJsonT),
     };
 

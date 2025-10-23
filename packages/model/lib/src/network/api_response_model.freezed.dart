@@ -21,12 +21,13 @@ ApiResponseModel<T> _$ApiResponseModelFromJson<T>(
 
 /// @nodoc
 mixin _$ApiResponseModel<T> {
-  @JsonKey(fromJson: apiResponseCodeFromJson, toJson: apiResponseCodeToJson)
-  ApiResponseCode get code => throw _privateConstructorUsedError;
+  @JsonKey(name: 'code')
+  @DataCodeEnumConverter()
+  DataCodeEnum get code => throw _privateConstructorUsedError;
   String get message => throw _privateConstructorUsedError;
-  @JsonKey(
-      fromJson: apiResponseTipsTypeFromJson, toJson: apiResponseTipsTypeToJson)
-  ApiResponseTipsType get type => throw _privateConstructorUsedError;
+  @JsonKey(name: 'type')
+  @DataMessageTipsEnumConverter()
+  DataMessageTipsEnum get type => throw _privateConstructorUsedError;
   T? get data => throw _privateConstructorUsedError;
 
   /// Serializes this ApiResponseModel to a JSON map.
@@ -47,14 +48,11 @@ abstract class $ApiResponseModelCopyWith<T, $Res> {
       _$ApiResponseModelCopyWithImpl<T, $Res, ApiResponseModel<T>>;
   @useResult
   $Res call(
-      {@JsonKey(
-          fromJson: apiResponseCodeFromJson, toJson: apiResponseCodeToJson)
-      ApiResponseCode code,
+      {@JsonKey(name: 'code') @DataCodeEnumConverter() DataCodeEnum code,
       String message,
-      @JsonKey(
-          fromJson: apiResponseTipsTypeFromJson,
-          toJson: apiResponseTipsTypeToJson)
-      ApiResponseTipsType type,
+      @JsonKey(name: 'type')
+      @DataMessageTipsEnumConverter()
+      DataMessageTipsEnum type,
       T? data});
 }
 
@@ -82,7 +80,7 @@ class _$ApiResponseModelCopyWithImpl<T, $Res, $Val extends ApiResponseModel<T>>
       code: null == code
           ? _value.code
           : code // ignore: cast_nullable_to_non_nullable
-              as ApiResponseCode,
+              as DataCodeEnum,
       message: null == message
           ? _value.message
           : message // ignore: cast_nullable_to_non_nullable
@@ -90,7 +88,7 @@ class _$ApiResponseModelCopyWithImpl<T, $Res, $Val extends ApiResponseModel<T>>
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
-              as ApiResponseTipsType,
+              as DataMessageTipsEnum,
       data: freezed == data
           ? _value.data
           : data // ignore: cast_nullable_to_non_nullable
@@ -108,14 +106,11 @@ abstract class _$$ApiResponseModelImplCopyWith<T, $Res>
   @override
   @useResult
   $Res call(
-      {@JsonKey(
-          fromJson: apiResponseCodeFromJson, toJson: apiResponseCodeToJson)
-      ApiResponseCode code,
+      {@JsonKey(name: 'code') @DataCodeEnumConverter() DataCodeEnum code,
       String message,
-      @JsonKey(
-          fromJson: apiResponseTipsTypeFromJson,
-          toJson: apiResponseTipsTypeToJson)
-      ApiResponseTipsType type,
+      @JsonKey(name: 'type')
+      @DataMessageTipsEnumConverter()
+      DataMessageTipsEnum type,
       T? data});
 }
 
@@ -141,7 +136,7 @@ class __$$ApiResponseModelImplCopyWithImpl<T, $Res>
       code: null == code
           ? _value.code
           : code // ignore: cast_nullable_to_non_nullable
-              as ApiResponseCode,
+              as DataCodeEnum,
       message: null == message
           ? _value.message
           : message // ignore: cast_nullable_to_non_nullable
@@ -149,7 +144,7 @@ class __$$ApiResponseModelImplCopyWithImpl<T, $Res>
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
-              as ApiResponseTipsType,
+              as DataMessageTipsEnum,
       data: freezed == data
           ? _value.data
           : data // ignore: cast_nullable_to_non_nullable
@@ -162,14 +157,11 @@ class __$$ApiResponseModelImplCopyWithImpl<T, $Res>
 @JsonSerializable(genericArgumentFactories: true)
 class _$ApiResponseModelImpl<T> extends _ApiResponseModel<T> {
   const _$ApiResponseModelImpl(
-      {@JsonKey(
-          fromJson: apiResponseCodeFromJson, toJson: apiResponseCodeToJson)
-      required this.code,
+      {@JsonKey(name: 'code') @DataCodeEnumConverter() required this.code,
       this.message = "",
-      @JsonKey(
-          fromJson: apiResponseTipsTypeFromJson,
-          toJson: apiResponseTipsTypeToJson)
-      this.type = ApiResponseTipsType.showToast,
+      @JsonKey(name: 'type')
+      @DataMessageTipsEnumConverter()
+      this.type = DataMessageTipsEnum.showToast,
       this.data})
       : super._();
 
@@ -178,15 +170,16 @@ class _$ApiResponseModelImpl<T> extends _ApiResponseModel<T> {
       _$$ApiResponseModelImplFromJson(json, fromJsonT);
 
   @override
-  @JsonKey(fromJson: apiResponseCodeFromJson, toJson: apiResponseCodeToJson)
-  final ApiResponseCode code;
+  @JsonKey(name: 'code')
+  @DataCodeEnumConverter()
+  final DataCodeEnum code;
   @override
   @JsonKey()
   final String message;
   @override
-  @JsonKey(
-      fromJson: apiResponseTipsTypeFromJson, toJson: apiResponseTipsTypeToJson)
-  final ApiResponseTipsType type;
+  @JsonKey(name: 'type')
+  @DataMessageTipsEnumConverter()
+  final DataMessageTipsEnum type;
   @override
   final T? data;
 
@@ -228,14 +221,13 @@ class _$ApiResponseModelImpl<T> extends _ApiResponseModel<T> {
 
 abstract class _ApiResponseModel<T> extends ApiResponseModel<T> {
   const factory _ApiResponseModel(
-      {@JsonKey(
-          fromJson: apiResponseCodeFromJson, toJson: apiResponseCodeToJson)
-      required final ApiResponseCode code,
+      {@JsonKey(name: 'code')
+      @DataCodeEnumConverter()
+      required final DataCodeEnum code,
       final String message,
-      @JsonKey(
-          fromJson: apiResponseTipsTypeFromJson,
-          toJson: apiResponseTipsTypeToJson)
-      final ApiResponseTipsType type,
+      @JsonKey(name: 'type')
+      @DataMessageTipsEnumConverter()
+      final DataMessageTipsEnum type,
       final T? data}) = _$ApiResponseModelImpl<T>;
   const _ApiResponseModel._() : super._();
 
@@ -244,14 +236,15 @@ abstract class _ApiResponseModel<T> extends ApiResponseModel<T> {
       _$ApiResponseModelImpl<T>.fromJson;
 
   @override
-  @JsonKey(fromJson: apiResponseCodeFromJson, toJson: apiResponseCodeToJson)
-  ApiResponseCode get code;
+  @JsonKey(name: 'code')
+  @DataCodeEnumConverter()
+  DataCodeEnum get code;
   @override
   String get message;
   @override
-  @JsonKey(
-      fromJson: apiResponseTipsTypeFromJson, toJson: apiResponseTipsTypeToJson)
-  ApiResponseTipsType get type;
+  @JsonKey(name: 'type')
+  @DataMessageTipsEnumConverter()
+  DataMessageTipsEnum get type;
   @override
   T? get data;
 

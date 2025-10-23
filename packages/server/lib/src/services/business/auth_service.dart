@@ -8,14 +8,14 @@ class AuthResult {
     Map<String, dynamic>? data,
   }) {
     return ApiResponseModel(
-      code: ApiResponseCode.success,
-      message: message ?? ApiResponseCode.success.message,
+      code: DataCodeEnum.success,
+      message: message ?? DataCodeEnum.success.message,
       data: data,
     );
   }
 
   static ApiResponseModel<Map<String, dynamic>> failure({
-    ApiResponseCode code = ApiResponseCode.error,
+    DataCodeEnum code = DataCodeEnum.error,
     String? message,
     Map<String, dynamic>? data,
   }) {
@@ -445,7 +445,7 @@ class AuthService extends BaseService {
 
       if (!_cryptoUtils.isValidEmail(email)) {
         return AuthResult.failure(
-          code: ApiResponseCode.validationError,
+          code: DataCodeEnum.validationError,
           message: '邮箱格式不正确',
         );
       }
@@ -559,7 +559,7 @@ class AuthService extends BaseService {
   Future<ApiResponseModel> resendVerification(String email) async {
     try {
       if (!_cryptoUtils.isValidEmail(email)) {
-        return AuthResult.failure(code: ApiResponseCode.validationError, message: '邮箱格式不正确');
+        return AuthResult.failure(code: DataCodeEnum.validationError, message: '邮箱格式不正确');
       }
 
       // 查找用户
@@ -569,12 +569,12 @@ class AuthService extends BaseService {
       );
 
       if (userResult.isEmpty) {
-        return AuthResult.failure(code: ApiResponseCode.noContent, message: '用户不存在');
+        return AuthResult.failure(code: DataCodeEnum.noContent, message: '用户不存在');
       }
 
       final user = userResult.first.toColumnMap();
       if (user['is_email_verified'] as bool) {
-        return AuthResult.failure(code: ApiResponseCode.businessError, message: '邮箱已验证');
+        return AuthResult.failure(code: DataCodeEnum.businessError, message: '邮箱已验证');
       }
 
       // 生成新的验证令牌

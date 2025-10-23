@@ -62,15 +62,6 @@ class NotificationSettingsService extends BaseService {
       log('[updateNotificationSetting] userId=$userId, type=$notificationType, channel=$channel, enabled=$isEnabled',
           name: 'NotificationSettingsService');
 
-      // 验证通知类型和渠道
-      if (!NotificationType.isValid(notificationType)) {
-        throwBusiness('无效的通知类型');
-      }
-
-      if (!NotificationChannel.isValid(channel)) {
-        throwBusiness('无效的通知渠道');
-      }
-
       // 检查是否已存在
       final existing = await _getNotificationSetting(
         userId: userId,
@@ -151,8 +142,8 @@ class NotificationSettingsService extends BaseService {
           final setting = await updateNotificationSetting(
             userId: userId,
             projectId: projectId,
-            notificationType: update.notificationType,
-            channel: update.channel,
+            notificationType: update.notificationType.value,
+            channel: update.channel.value,
             isEnabled: update.isEnabled,
           );
           updatedSettings.add(setting);
@@ -180,18 +171,58 @@ class NotificationSettingsService extends BaseService {
       // 默认通知设置
       final defaultSettings = [
         // 邮件通知 - 重要事件
-        {'type': NotificationType.memberInvited, 'channel': NotificationChannel.email, 'enabled': true},
-        {'type': NotificationType.projectCreated, 'channel': NotificationChannel.email, 'enabled': true},
-        {'type': NotificationType.memberRoleChanged, 'channel': NotificationChannel.email, 'enabled': true},
+        {
+          'type': NotificationTypeEnum.memberInvited.value,
+          'channel': NotificationChannelEnum.email.value,
+          'enabled': true
+        },
+        {
+          'type': NotificationTypeEnum.projectCreated.value,
+          'channel': NotificationChannelEnum.email.value,
+          'enabled': true
+        },
+        {
+          'type': NotificationTypeEnum.memberRoleChanged.value,
+          'channel': NotificationChannelEnum.email.value,
+          'enabled': true
+        },
 
         // 站内通知 - 所有事件
-        {'type': NotificationType.memberInvited, 'channel': NotificationChannel.inApp, 'enabled': true},
-        {'type': NotificationType.memberJoined, 'channel': NotificationChannel.inApp, 'enabled': true},
-        {'type': NotificationType.memberRemoved, 'channel': NotificationChannel.inApp, 'enabled': true},
-        {'type': NotificationType.memberRoleChanged, 'channel': NotificationChannel.inApp, 'enabled': true},
-        {'type': NotificationType.projectCreated, 'channel': NotificationChannel.inApp, 'enabled': true},
-        {'type': NotificationType.projectUpdated, 'channel': NotificationChannel.inApp, 'enabled': true},
-        {'type': NotificationType.commentMentioned, 'channel': NotificationChannel.inApp, 'enabled': true},
+        {
+          'type': NotificationTypeEnum.memberInvited.value,
+          'channel': NotificationChannelEnum.inApp.value,
+          'enabled': true
+        },
+        {
+          'type': NotificationTypeEnum.memberJoined.value,
+          'channel': NotificationChannelEnum.inApp.value,
+          'enabled': true
+        },
+        {
+          'type': NotificationTypeEnum.memberRemoved.value,
+          'channel': NotificationChannelEnum.inApp.value,
+          'enabled': true
+        },
+        {
+          'type': NotificationTypeEnum.memberRoleChanged.value,
+          'channel': NotificationChannelEnum.inApp.value,
+          'enabled': true
+        },
+        {
+          'type': NotificationTypeEnum.projectCreated.value,
+          'channel': NotificationChannelEnum.inApp.value,
+          'enabled': true
+        },
+        {
+          'type': NotificationTypeEnum.projectUpdated.value,
+          'channel': NotificationChannelEnum.inApp.value,
+          'enabled': true
+        },
+        {
+          'type': NotificationTypeEnum.commentMentioned.value,
+          'channel': NotificationChannelEnum.inApp.value,
+          'enabled': true
+        },
       ];
 
       await _databaseService.transaction(() async {

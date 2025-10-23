@@ -24,11 +24,21 @@ class NotificationRoutes {
       redisService: redisService,
     );
 
+    // 通知基本操作
     router.get('/notifications', notificationController.getNotifications);
     router.get('/notifications/<id>', notificationController.getNotification);
     router.put('/notifications/<id>/read', notificationController.markAsRead);
     router.post('/notifications/mark-all-read', notificationController.markAllAsRead);
     router.delete('/notifications/<id>', notificationController.deleteNotification);
+
+    // 通知设置
+    router.get('/notification-settings', notificationController.getNotificationSettings);
+    router.put('/notification-settings', notificationController.updateNotificationSettings);
+    router.post('/notification-settings/batch', notificationController.batchUpdateNotificationSettings);
+
+    // 项目通知设置
+    router.get('/projects/<id>/notification-settings', notificationController.getProjectNotificationSettings);
+    router.put('/projects/<id>/notification-settings', notificationController.updateProjectNotificationSettings);
 
     return router;
   }

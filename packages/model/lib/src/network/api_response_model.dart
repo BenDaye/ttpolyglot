@@ -11,18 +11,12 @@ class ApiResponseModel<T> with _$ApiResponseModel<T> {
   const ApiResponseModel._();
 
   const factory ApiResponseModel({
-    @JsonKey(
-      fromJson: apiResponseCodeFromJson,
-      toJson: apiResponseCodeToJson,
-    )
-    required ApiResponseCode code,
+    @JsonKey(name: 'code') @DataCodeEnumConverter() required DataCodeEnum code,
     @Default("") String message,
-    @JsonKey(
-      fromJson: apiResponseTipsTypeFromJson,
-      toJson: apiResponseTipsTypeToJson,
-    )
-    @Default(ApiResponseTipsType.showToast)
-    ApiResponseTipsType type,
+    @JsonKey(name: 'type')
+    @DataMessageTipsEnumConverter()
+    @Default(DataMessageTipsEnum.showToast)
+    DataMessageTipsEnum type,
     T? data,
   }) = _ApiResponseModel<T>;
 
@@ -32,17 +26,17 @@ class ApiResponseModel<T> with _$ApiResponseModel<T> {
   ) =>
       _$ApiResponseModelFromJson(json, fromJsonT);
 
-  factory ApiResponseModel.of(ApiResponseCode code, {ApiResponseTipsType? type, String? message}) {
+  factory ApiResponseModel.of(DataCodeEnum code, {DataMessageTipsEnum? type, String? message}) {
     return ApiResponseModel(
       code: code,
-      type: type ?? ApiResponseTipsType.showToast,
+      type: type ?? DataMessageTipsEnum.showToast,
       message: message ?? code.message,
       data: null,
     );
   }
 
   // 成功
-  bool get success => code == ApiResponseCode.success;
+  bool get success => code == DataCodeEnum.success;
 
   bool get isArray => !isEmpty && data is Iterable;
 

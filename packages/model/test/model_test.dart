@@ -13,9 +13,6 @@ void main() {
     expect(ApiResponseModel, isNotNull);
     expect(RequestExtraModel, isNotNull);
 
-    // 验证枚举可以导入
-    expect(ApiResponseCode, isNotNull);
-
     // 验证项目模型可以导入
     expect(ImportRecordModel, isNotNull);
   });

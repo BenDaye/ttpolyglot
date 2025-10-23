@@ -188,7 +188,7 @@ class HttpClient {
           data: original.data as T?,
         );
       } else {
-        response = ApiResponseModel.of(ApiResponseCode.unknown, message: err.toString());
+        response = ApiResponseModel.of(DataCodeEnum.unknown, message: err.toString());
       }
       // 错误处理
       throw _failCallback(response, extra);

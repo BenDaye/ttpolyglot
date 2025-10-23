@@ -28,6 +28,8 @@ import './seeds/003_assign_role_permissions.dart';
 import './seeds/004_insert_languages.dart';
 import './seeds/005_insert_system_configs.dart';
 import './seeds/006_insert_default_admin_user.dart';
+import 'migrations/018_project_members_table.dart';
+import 'migrations/019_notification_settings_table.dart';
 
 /// 主函数
 Future<void> main(List<String> args) async {
@@ -472,6 +474,8 @@ void _registerMigrations() {
   MigrationService.registerMigration('016_user_settings_table', () => Migration016UserSettingsTable());
   MigrationService.registerMigration(
       '017_user_translation_configs_table', () => Migration017UserTranslationConfigsTable());
+  MigrationService.registerMigration('018_project_members_table', () => Migration018ProjectMembersTable());
+  MigrationService.registerMigration('019_notification_settings_table', () => Migration019NotificationSettingsTable());
 }
 
 /// 注册所有种子数据

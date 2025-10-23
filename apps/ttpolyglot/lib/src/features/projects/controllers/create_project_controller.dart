@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/features/features.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 /// 创建项目控制器
@@ -192,15 +193,45 @@ class CreateProjectController extends GetxController {
     try {
       _isLoading.value = true;
 
-      // TODO: 调用实际的项目创建服务
-      // 暂时模拟延迟
-      await Future.delayed(const Duration(seconds: 2));
+      // 调用项目创建 API
+      // 注意：此应用使用本地文件系统存储，而非远程服务器
+      // 如果需要服务器版本，请使用以下代码：
+      /*
+      final projectApi = ProjectApi(); // 需要注入
+      final request = CreateProjectRequest(
+        name: nameController.text.trim(),
+        slug: slugController.text.trim(),
+        description: descriptionController.text.trim(),
+        status: 'active',
+        visibility: visibility,
+        primaryLanguageCode: primaryLanguage?.code,
+        settings: {},
+      );
+      
+      final project = await projectApi.createProject(request);
+      
+      // 初始化通知设置
+      if (primaryLanguage != null) {
+        final notificationApi = NotificationSettingsApi();
+        await notificationApi.initializeDefaultSettings(
+          projectId: project.id,
+        );
+      }
+      */
+
+      // 调用本地项目服务创建项目
+      await ProjectsController.createProject(
+        name: nameController.text.trim(),
+        description: descriptionController.text.trim(),
+        primaryLanguage: _primaryLanguage.value!,
+        targetLanguages: _targetLanguages.toList(),
+      );
 
       Get.back();
       Get.snackbar('成功', '项目创建成功');
 
       // 刷新项目列表
-      // ProjectsController.loadProjects();
+      await ProjectsController.loadProjects();
     } catch (error, stackTrace) {
       Logger.error('创建项目失败', error: error, stackTrace: stackTrace);
       Get.snackbar('错误', '创建项目失败: $error');

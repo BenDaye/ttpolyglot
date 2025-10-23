@@ -1,4 +1,6 @@
-enum ApiResponseCode {
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+enum DataCodeEnum {
   // 业务自定义错误码 < 10000
   unknown(-10001, '未知错误'),
   validationError(-10002, '验证失败'),
@@ -33,22 +35,29 @@ enum ApiResponseCode {
   final int value;
   final String message;
 
-  const ApiResponseCode(this.value, this.message);
+  const DataCodeEnum(this.value, this.message);
 
   /// 是否成功
   bool get isSuccess => value == 0;
 
   /// 根据值获取对应的枚举
-  static ApiResponseCode fromValue(int value) {
-    return ApiResponseCode.values.firstWhere(
+  static DataCodeEnum fromValue(int value) {
+    return DataCodeEnum.values.firstWhere(
       (code) => code.value == value,
-      orElse: () => ApiResponseCode.unknown,
+      orElse: () => DataCodeEnum.unknown,
     );
   }
 }
 
-/// 将 int 转换为 ApiResponseCode
-ApiResponseCode apiResponseCodeFromJson(int value) => ApiResponseCode.fromValue(value);
+/// DataCodeEnum 的 JSON 转换器
+class DataCodeEnumConverter implements JsonConverter<DataCodeEnum, int> {
+  const DataCodeEnumConverter();
 
-/// 将 ApiResponseCode 转换为 int
-int apiResponseCodeToJson(ApiResponseCode code) => code.value;
+  @override
+  DataCodeEnum fromJson(int json) {
+    return DataCodeEnum.fromValue(json);
+  }
+
+  @override
+  int toJson(DataCodeEnum object) => object.value;
+}

@@ -15,8 +15,8 @@ class ResponseUtils {
   static const String _contentTypeJson = 'application/json; charset=utf-8';
   static const _uuid = Uuid();
 
-  /// 根据 ApiResponseCode 获取 HTTP 状态码
-  static int _getHttpStatusCode(ApiResponseCode code) {
+  /// 根据 DataCodeEnum 获取 HTTP 状态码
+  static int _getHttpStatusCode(DataCodeEnum code) {
     // 对于自定义业务错误码，统一返回 200
     if (code.value <= 0) {
       return 200;
@@ -61,13 +61,13 @@ class ResponseUtils {
   static Response success<T>({
     String? message,
     T? data,
-    ApiResponseTipsType type = ApiResponseTipsType.showToast,
+    DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
     Map<String, String>? headers,
   }) {
     final requestId = _uuid.v4();
     final apiResponse = ApiResponseModel<T>(
-      code: ApiResponseCode.success,
-      message: message ?? ApiResponseCode.success.message,
+      code: DataCodeEnum.success,
+      message: message ?? DataCodeEnum.success.message,
       type: type,
       data: data,
     );
@@ -87,13 +87,13 @@ class ResponseUtils {
 
   /// 构建错误响应
   static Response error<T>({
-    ApiResponseCode? code,
+    DataCodeEnum? code,
     T? data,
     String? message,
-    ApiResponseTipsType type = ApiResponseTipsType.showToast,
+    DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
     Map<String, String>? headers,
   }) {
-    code ??= ApiResponseCode.error;
+    code ??= DataCodeEnum.error;
     final requestId = _uuid.v4();
     final apiResponse = ApiResponseModel<T>(
       code: code,
@@ -119,7 +119,7 @@ class ResponseUtils {
   static Response fromException(
     ServerException exception, {
     Map<String, String>? headers,
-    ApiResponseTipsType type = ApiResponseTipsType.showToast,
+    DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
   }) {
     return error<Map<String, dynamic>>(
       code: exception.code,
@@ -133,11 +133,11 @@ class ResponseUtils {
   /// 构建无内容响应（204）
   static Response noContent({
     Map<String, String>? headers,
-    ApiResponseTipsType type = ApiResponseTipsType.showToast,
+    DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
   }) {
     return error<Map<String, dynamic>>(
-      code: ApiResponseCode.noContent,
-      message: ApiResponseCode.noContent.message,
+      code: DataCodeEnum.noContent,
+      message: DataCodeEnum.noContent.message,
       data: {},
       type: type,
       headers: headers,
@@ -150,7 +150,7 @@ class ResponseUtils {
     T? data,
     String? location,
     Map<String, String>? headers,
-    ApiResponseTipsType type = ApiResponseTipsType.showToast,
+    DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
   }) {
     return success(
       message: message ?? '创建成功',
@@ -165,7 +165,7 @@ class ResponseUtils {
     String? message,
     T? data,
     Map<String, String>? headers,
-    ApiResponseTipsType type = ApiResponseTipsType.showToast,
+    DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
   }) {
     return success(
       message: message ?? '请求已接受',
@@ -180,10 +180,10 @@ class ResponseUtils {
     String? version,
     String? apiVersion,
     String? serverName,
-    ApiResponseTipsType type = ApiResponseTipsType.showToast,
+    DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
   }) {
     return success<Map<String, dynamic>>(
-      message: ApiResponseCode.success.message,
+      message: DataCodeEnum.success.message,
       data: {
         'version': version ?? '1.0.0',
         'api_version': apiVersion ?? 'v1',
@@ -200,14 +200,14 @@ class ResponseUtils {
     required DatabaseService databaseService,
     required RedisService redisService,
     required DateTime startTime,
-    ApiResponseTipsType type = ApiResponseTipsType.showToast,
+    DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
   }) async {
     try {
       final dbHealthy = await databaseService.isHealthy();
       final redisHealthy = await redisService.isHealthy();
 
       return success<Map<String, dynamic>>(
-        message: ApiResponseCode.success.message,
+        message: DataCodeEnum.success.message,
         data: {
           'status': dbHealthy && redisHealthy ? 'healthy' : 'degraded',
           'services': {
@@ -221,7 +221,7 @@ class ResponseUtils {
       );
     } catch (err) {
       return error<Map<String, dynamic>>(
-        code: ApiResponseCode.serviceUnavailable,
+        code: DataCodeEnum.serviceUnavailable,
         message: '状态检查失败',
         data: {
           'error': err.toString(),
@@ -233,10 +233,10 @@ class ResponseUtils {
   /// 404处理器
   static Response notFound({
     required String path,
-    ApiResponseTipsType type = ApiResponseTipsType.showToast,
+    DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
   }) {
     return error<Map<String, dynamic>>(
-      code: ApiResponseCode.notFound,
+      code: DataCodeEnum.notFound,
       message: '请求的资源不存在',
       data: {
         'path': path,
@@ -251,7 +251,7 @@ class ResponseUtils {
     required RedisService redisService,
     required MultiLevelCacheService cacheService,
     required DateTime startTime,
-    ApiResponseTipsType type = ApiResponseTipsType.showToast,
+    DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
   }) async {
     try {
       final healthStatus = await _getComprehensiveHealthStatus(
@@ -271,7 +271,7 @@ class ResponseUtils {
         );
       } else {
         return error<Map<String, dynamic>>(
-          code: ApiResponseCode.internalServerError,
+          code: DataCodeEnum.internalServerError,
           message: '系统不健康',
           data: healthStatus,
           type: type,
@@ -285,7 +285,7 @@ class ResponseUtils {
       );
 
       return error<Map<String, dynamic>>(
-        code: ApiResponseCode.serviceUnavailable,
+        code: DataCodeEnum.serviceUnavailable,
         message: '健康检查失败',
         data: {
           'status': 'unhealthy',
@@ -300,7 +300,7 @@ class ResponseUtils {
   /// 数据库健康检查
   static Future<Response> dbHealthCheck({
     required DatabaseService databaseService,
-    ApiResponseTipsType type = ApiResponseTipsType.showToast,
+    DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
   }) async {
     try {
       final isHealthy = await databaseService.isHealthy();
@@ -316,7 +316,7 @@ class ResponseUtils {
         );
       } else {
         return error<Map<String, dynamic>>(
-          code: ApiResponseCode.databaseError,
+          code: DataCodeEnum.databaseError,
           message: '数据库连接失败',
           data: {
             'status': 'unhealthy',
@@ -333,7 +333,7 @@ class ResponseUtils {
       );
 
       return error<Map<String, dynamic>>(
-        code: ApiResponseCode.internalServerError,
+        code: DataCodeEnum.internalServerError,
         message: '数据库检查出错',
         data: {
           'status': 'error',
@@ -348,7 +348,7 @@ class ResponseUtils {
   static Future<Response> readyCheck({
     required DatabaseService databaseService,
     required RedisService redisService,
-    ApiResponseTipsType type = ApiResponseTipsType.showToast,
+    DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
   }) async {
     try {
       final dbHealthy = await databaseService.isHealthy();
@@ -368,7 +368,7 @@ class ResponseUtils {
         );
       } else {
         return error<Map<String, dynamic>>(
-          code: ApiResponseCode.serviceUnavailable,
+          code: DataCodeEnum.serviceUnavailable,
           message: '服务未就绪',
           data: {
             'status': 'not_ready',
@@ -388,7 +388,7 @@ class ResponseUtils {
       );
 
       return error<Map<String, dynamic>>(
-        code: ApiResponseCode.internalServerError,
+        code: DataCodeEnum.internalServerError,
         message: '就绪检查出错',
         data: {
           'status': 'error',

@@ -51,7 +51,7 @@ class UserSettingsController extends BaseController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseUtils.error(code: ApiResponseCode.authenticationError, message: '未授权访问');
+        return ResponseUtils.error(code: DataCodeEnum.authenticationError, message: '未授权访问');
       }
 
       final settings = await _userSettingsService.getUserSettings(userId);
@@ -72,7 +72,7 @@ class UserSettingsController extends BaseController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseUtils.error(code: ApiResponseCode.authenticationError, message: '未授权访问');
+        return ResponseUtils.error(code: DataCodeEnum.authenticationError, message: '未授权访问');
       }
 
       final body = await request.readAsString();
@@ -96,7 +96,7 @@ class UserSettingsController extends BaseController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseUtils.error(code: ApiResponseCode.authenticationError, message: '未授权访问');
+        return ResponseUtils.error(code: DataCodeEnum.authenticationError, message: '未授权访问');
       }
 
       final settings = await _userSettingsService.getUserSettings(userId);
@@ -117,7 +117,7 @@ class UserSettingsController extends BaseController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseUtils.error(code: ApiResponseCode.authenticationError, message: '未授权访问');
+        return ResponseUtils.error(code: DataCodeEnum.authenticationError, message: '未授权访问');
       }
 
       final body = await request.readAsString();
@@ -146,7 +146,7 @@ class UserSettingsController extends BaseController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseUtils.error(code: ApiResponseCode.authenticationError, message: '未授权访问');
+        return ResponseUtils.error(code: DataCodeEnum.authenticationError, message: '未授权访问');
       }
 
       final settings = await _userSettingsService.getUserSettings(userId);
@@ -167,7 +167,7 @@ class UserSettingsController extends BaseController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseUtils.error(code: ApiResponseCode.authenticationError, message: '未授权访问');
+        return ResponseUtils.error(code: DataCodeEnum.authenticationError, message: '未授权访问');
       }
 
       final body = await request.readAsString();
@@ -198,7 +198,7 @@ class UserSettingsController extends BaseController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseUtils.error(code: ApiResponseCode.authenticationError, message: '未授权访问');
+        return ResponseUtils.error(code: DataCodeEnum.authenticationError, message: '未授权访问');
       }
 
       final settings = await _userSettingsService.getUserSettings(userId);
@@ -219,7 +219,7 @@ class UserSettingsController extends BaseController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseUtils.error(code: ApiResponseCode.authenticationError, message: '未授权访问');
+        return ResponseUtils.error(code: DataCodeEnum.authenticationError, message: '未授权访问');
       }
 
       final body = await request.readAsString();
@@ -245,7 +245,7 @@ class UserSettingsController extends BaseController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseUtils.error(code: ApiResponseCode.authenticationError, message: '未授权访问');
+        return ResponseUtils.error(code: DataCodeEnum.authenticationError, message: '未授权访问');
       }
 
       final body = await request.readAsString();
@@ -271,7 +271,7 @@ class UserSettingsController extends BaseController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseUtils.error(code: ApiResponseCode.authenticationError, message: '未授权访问');
+        return ResponseUtils.error(code: DataCodeEnum.authenticationError, message: '未授权访问');
       }
 
       final body = await request.readAsString();
@@ -297,7 +297,7 @@ class UserSettingsController extends BaseController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseUtils.error(code: ApiResponseCode.authenticationError, message: '未授权访问');
+        return ResponseUtils.error(code: DataCodeEnum.authenticationError, message: '未授权访问');
       }
 
       await _userSettingsService.deleteTranslationProvider(userId, providerId);
@@ -317,7 +317,7 @@ class UserSettingsController extends BaseController {
     try {
       final userId = getCurrentUserId(request);
       if (userId == null) {
-        return ResponseUtils.error(code: ApiResponseCode.authenticationError, message: '未授权访问');
+        return ResponseUtils.error(code: DataCodeEnum.authenticationError, message: '未授权访问');
       }
 
       final defaultSettings = await _userSettingsService.resetUserSettings(userId);

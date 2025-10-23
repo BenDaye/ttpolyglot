@@ -28,9 +28,12 @@ mixin _$NotificationSettingsModel {
   @JsonKey(name: 'project_id')
   int? get projectId => throw _privateConstructorUsedError;
   @JsonKey(name: 'notification_type')
-  String get notificationType => throw _privateConstructorUsedError;
+  @NotificationTypeEnumConverter()
+  NotificationTypeEnum get notificationType =>
+      throw _privateConstructorUsedError;
   @JsonKey(name: 'channel')
-  String get channel => throw _privateConstructorUsedError;
+  @NotificationChannelEnumConverter()
+  NotificationChannelEnum get channel => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_enabled')
   bool get isEnabled => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
@@ -58,8 +61,12 @@ abstract class $NotificationSettingsModelCopyWith<$Res> {
       {@JsonKey(name: 'id') int id,
       @JsonKey(name: 'user_id') String userId,
       @JsonKey(name: 'project_id') int? projectId,
-      @JsonKey(name: 'notification_type') String notificationType,
-      @JsonKey(name: 'channel') String channel,
+      @JsonKey(name: 'notification_type')
+      @NotificationTypeEnumConverter()
+      NotificationTypeEnum notificationType,
+      @JsonKey(name: 'channel')
+      @NotificationChannelEnumConverter()
+      NotificationChannelEnum channel,
       @JsonKey(name: 'is_enabled') bool isEnabled,
       @JsonKey(name: 'created_at') DateTime createdAt,
       @JsonKey(name: 'updated_at') DateTime updatedAt});
@@ -106,11 +113,11 @@ class _$NotificationSettingsModelCopyWithImpl<$Res,
       notificationType: null == notificationType
           ? _value.notificationType
           : notificationType // ignore: cast_nullable_to_non_nullable
-              as String,
+              as NotificationTypeEnum,
       channel: null == channel
           ? _value.channel
           : channel // ignore: cast_nullable_to_non_nullable
-              as String,
+              as NotificationChannelEnum,
       isEnabled: null == isEnabled
           ? _value.isEnabled
           : isEnabled // ignore: cast_nullable_to_non_nullable
@@ -140,8 +147,12 @@ abstract class _$$NotificationSettingsModelImplCopyWith<$Res>
       {@JsonKey(name: 'id') int id,
       @JsonKey(name: 'user_id') String userId,
       @JsonKey(name: 'project_id') int? projectId,
-      @JsonKey(name: 'notification_type') String notificationType,
-      @JsonKey(name: 'channel') String channel,
+      @JsonKey(name: 'notification_type')
+      @NotificationTypeEnumConverter()
+      NotificationTypeEnum notificationType,
+      @JsonKey(name: 'channel')
+      @NotificationChannelEnumConverter()
+      NotificationChannelEnum channel,
       @JsonKey(name: 'is_enabled') bool isEnabled,
       @JsonKey(name: 'created_at') DateTime createdAt,
       @JsonKey(name: 'updated_at') DateTime updatedAt});
@@ -187,11 +198,11 @@ class __$$NotificationSettingsModelImplCopyWithImpl<$Res>
       notificationType: null == notificationType
           ? _value.notificationType
           : notificationType // ignore: cast_nullable_to_non_nullable
-              as String,
+              as NotificationTypeEnum,
       channel: null == channel
           ? _value.channel
           : channel // ignore: cast_nullable_to_non_nullable
-              as String,
+              as NotificationChannelEnum,
       isEnabled: null == isEnabled
           ? _value.isEnabled
           : isEnabled // ignore: cast_nullable_to_non_nullable
@@ -215,8 +226,12 @@ class _$NotificationSettingsModelImpl implements _NotificationSettingsModel {
       {@JsonKey(name: 'id') required this.id,
       @JsonKey(name: 'user_id') required this.userId,
       @JsonKey(name: 'project_id') this.projectId,
-      @JsonKey(name: 'notification_type') required this.notificationType,
-      @JsonKey(name: 'channel') required this.channel,
+      @JsonKey(name: 'notification_type')
+      @NotificationTypeEnumConverter()
+      required this.notificationType,
+      @JsonKey(name: 'channel')
+      @NotificationChannelEnumConverter()
+      required this.channel,
       @JsonKey(name: 'is_enabled') this.isEnabled = true,
       @JsonKey(name: 'created_at') required this.createdAt,
       @JsonKey(name: 'updated_at') required this.updatedAt});
@@ -235,10 +250,12 @@ class _$NotificationSettingsModelImpl implements _NotificationSettingsModel {
   final int? projectId;
   @override
   @JsonKey(name: 'notification_type')
-  final String notificationType;
+  @NotificationTypeEnumConverter()
+  final NotificationTypeEnum notificationType;
   @override
   @JsonKey(name: 'channel')
-  final String channel;
+  @NotificationChannelEnumConverter()
+  final NotificationChannelEnum channel;
   @override
   @JsonKey(name: 'is_enabled')
   final bool isEnabled;
@@ -302,8 +319,11 @@ abstract class _NotificationSettingsModel implements NotificationSettingsModel {
           @JsonKey(name: 'user_id') required final String userId,
           @JsonKey(name: 'project_id') final int? projectId,
           @JsonKey(name: 'notification_type')
-          required final String notificationType,
-          @JsonKey(name: 'channel') required final String channel,
+          @NotificationTypeEnumConverter()
+          required final NotificationTypeEnum notificationType,
+          @JsonKey(name: 'channel')
+          @NotificationChannelEnumConverter()
+          required final NotificationChannelEnum channel,
           @JsonKey(name: 'is_enabled') final bool isEnabled,
           @JsonKey(name: 'created_at') required final DateTime createdAt,
           @JsonKey(name: 'updated_at') required final DateTime updatedAt}) =
@@ -323,10 +343,12 @@ abstract class _NotificationSettingsModel implements NotificationSettingsModel {
   int? get projectId;
   @override
   @JsonKey(name: 'notification_type')
-  String get notificationType;
+  @NotificationTypeEnumConverter()
+  NotificationTypeEnum get notificationType;
   @override
   @JsonKey(name: 'channel')
-  String get channel;
+  @NotificationChannelEnumConverter()
+  NotificationChannelEnum get channel;
   @override
   @JsonKey(name: 'is_enabled')
   bool get isEnabled;
@@ -354,8 +376,13 @@ UpdateNotificationSettingsRequest _$UpdateNotificationSettingsRequestFromJson(
 mixin _$UpdateNotificationSettingsRequest {
   String get userId => throw _privateConstructorUsedError;
   int? get projectId => throw _privateConstructorUsedError;
-  String get notificationType => throw _privateConstructorUsedError;
-  String get channel => throw _privateConstructorUsedError;
+  @JsonKey(name: 'notification_type')
+  @NotificationTypeEnumConverter()
+  NotificationTypeEnum get notificationType =>
+      throw _privateConstructorUsedError;
+  @JsonKey(name: 'channel')
+  @NotificationChannelEnumConverter()
+  NotificationChannelEnum get channel => throw _privateConstructorUsedError;
   bool get isEnabled => throw _privateConstructorUsedError;
 
   /// Serializes this UpdateNotificationSettingsRequest to a JSON map.
@@ -379,8 +406,12 @@ abstract class $UpdateNotificationSettingsRequestCopyWith<$Res> {
   $Res call(
       {String userId,
       int? projectId,
-      String notificationType,
-      String channel,
+      @JsonKey(name: 'notification_type')
+      @NotificationTypeEnumConverter()
+      NotificationTypeEnum notificationType,
+      @JsonKey(name: 'channel')
+      @NotificationChannelEnumConverter()
+      NotificationChannelEnum channel,
       bool isEnabled});
 }
 
@@ -418,11 +449,11 @@ class _$UpdateNotificationSettingsRequestCopyWithImpl<$Res,
       notificationType: null == notificationType
           ? _value.notificationType
           : notificationType // ignore: cast_nullable_to_non_nullable
-              as String,
+              as NotificationTypeEnum,
       channel: null == channel
           ? _value.channel
           : channel // ignore: cast_nullable_to_non_nullable
-              as String,
+              as NotificationChannelEnum,
       isEnabled: null == isEnabled
           ? _value.isEnabled
           : isEnabled // ignore: cast_nullable_to_non_nullable
@@ -443,8 +474,12 @@ abstract class _$$UpdateNotificationSettingsRequestImplCopyWith<$Res>
   $Res call(
       {String userId,
       int? projectId,
-      String notificationType,
-      String channel,
+      @JsonKey(name: 'notification_type')
+      @NotificationTypeEnumConverter()
+      NotificationTypeEnum notificationType,
+      @JsonKey(name: 'channel')
+      @NotificationChannelEnumConverter()
+      NotificationChannelEnum channel,
       bool isEnabled});
 }
 
@@ -481,11 +516,11 @@ class __$$UpdateNotificationSettingsRequestImplCopyWithImpl<$Res>
       notificationType: null == notificationType
           ? _value.notificationType
           : notificationType // ignore: cast_nullable_to_non_nullable
-              as String,
+              as NotificationTypeEnum,
       channel: null == channel
           ? _value.channel
           : channel // ignore: cast_nullable_to_non_nullable
-              as String,
+              as NotificationChannelEnum,
       isEnabled: null == isEnabled
           ? _value.isEnabled
           : isEnabled // ignore: cast_nullable_to_non_nullable
@@ -501,7 +536,11 @@ class _$UpdateNotificationSettingsRequestImpl
   const _$UpdateNotificationSettingsRequestImpl(
       {required this.userId,
       this.projectId,
+      @JsonKey(name: 'notification_type')
+      @NotificationTypeEnumConverter()
       required this.notificationType,
+      @JsonKey(name: 'channel')
+      @NotificationChannelEnumConverter()
       required this.channel,
       required this.isEnabled});
 
@@ -514,9 +553,13 @@ class _$UpdateNotificationSettingsRequestImpl
   @override
   final int? projectId;
   @override
-  final String notificationType;
+  @JsonKey(name: 'notification_type')
+  @NotificationTypeEnumConverter()
+  final NotificationTypeEnum notificationType;
   @override
-  final String channel;
+  @JsonKey(name: 'channel')
+  @NotificationChannelEnumConverter()
+  final NotificationChannelEnum channel;
   @override
   final bool isEnabled;
 
@@ -568,8 +611,12 @@ abstract class _UpdateNotificationSettingsRequest
   const factory _UpdateNotificationSettingsRequest(
       {required final String userId,
       final int? projectId,
-      required final String notificationType,
-      required final String channel,
+      @JsonKey(name: 'notification_type')
+      @NotificationTypeEnumConverter()
+      required final NotificationTypeEnum notificationType,
+      @JsonKey(name: 'channel')
+      @NotificationChannelEnumConverter()
+      required final NotificationChannelEnum channel,
       required final bool isEnabled}) = _$UpdateNotificationSettingsRequestImpl;
 
   factory _UpdateNotificationSettingsRequest.fromJson(
@@ -581,9 +628,13 @@ abstract class _UpdateNotificationSettingsRequest
   @override
   int? get projectId;
   @override
-  String get notificationType;
+  @JsonKey(name: 'notification_type')
+  @NotificationTypeEnumConverter()
+  NotificationTypeEnum get notificationType;
   @override
-  String get channel;
+  @JsonKey(name: 'channel')
+  @NotificationChannelEnumConverter()
+  NotificationChannelEnum get channel;
   @override
   bool get isEnabled;
 
@@ -819,8 +870,13 @@ NotificationSettingUpdate _$NotificationSettingUpdateFromJson(
 
 /// @nodoc
 mixin _$NotificationSettingUpdate {
-  String get notificationType => throw _privateConstructorUsedError;
-  String get channel => throw _privateConstructorUsedError;
+  @JsonKey(name: 'notification_type')
+  @NotificationTypeEnumConverter()
+  NotificationTypeEnum get notificationType =>
+      throw _privateConstructorUsedError;
+  @JsonKey(name: 'channel')
+  @NotificationChannelEnumConverter()
+  NotificationChannelEnum get channel => throw _privateConstructorUsedError;
   bool get isEnabled => throw _privateConstructorUsedError;
 
   /// Serializes this NotificationSettingUpdate to a JSON map.
@@ -839,7 +895,14 @@ abstract class $NotificationSettingUpdateCopyWith<$Res> {
           $Res Function(NotificationSettingUpdate) then) =
       _$NotificationSettingUpdateCopyWithImpl<$Res, NotificationSettingUpdate>;
   @useResult
-  $Res call({String notificationType, String channel, bool isEnabled});
+  $Res call(
+      {@JsonKey(name: 'notification_type')
+      @NotificationTypeEnumConverter()
+      NotificationTypeEnum notificationType,
+      @JsonKey(name: 'channel')
+      @NotificationChannelEnumConverter()
+      NotificationChannelEnum channel,
+      bool isEnabled});
 }
 
 /// @nodoc
@@ -866,11 +929,11 @@ class _$NotificationSettingUpdateCopyWithImpl<$Res,
       notificationType: null == notificationType
           ? _value.notificationType
           : notificationType // ignore: cast_nullable_to_non_nullable
-              as String,
+              as NotificationTypeEnum,
       channel: null == channel
           ? _value.channel
           : channel // ignore: cast_nullable_to_non_nullable
-              as String,
+              as NotificationChannelEnum,
       isEnabled: null == isEnabled
           ? _value.isEnabled
           : isEnabled // ignore: cast_nullable_to_non_nullable
@@ -888,7 +951,14 @@ abstract class _$$NotificationSettingUpdateImplCopyWith<$Res>
       __$$NotificationSettingUpdateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String notificationType, String channel, bool isEnabled});
+  $Res call(
+      {@JsonKey(name: 'notification_type')
+      @NotificationTypeEnumConverter()
+      NotificationTypeEnum notificationType,
+      @JsonKey(name: 'channel')
+      @NotificationChannelEnumConverter()
+      NotificationChannelEnum channel,
+      bool isEnabled});
 }
 
 /// @nodoc
@@ -914,11 +984,11 @@ class __$$NotificationSettingUpdateImplCopyWithImpl<$Res>
       notificationType: null == notificationType
           ? _value.notificationType
           : notificationType // ignore: cast_nullable_to_non_nullable
-              as String,
+              as NotificationTypeEnum,
       channel: null == channel
           ? _value.channel
           : channel // ignore: cast_nullable_to_non_nullable
-              as String,
+              as NotificationChannelEnum,
       isEnabled: null == isEnabled
           ? _value.isEnabled
           : isEnabled // ignore: cast_nullable_to_non_nullable
@@ -931,7 +1001,11 @@ class __$$NotificationSettingUpdateImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$NotificationSettingUpdateImpl implements _NotificationSettingUpdate {
   const _$NotificationSettingUpdateImpl(
-      {required this.notificationType,
+      {@JsonKey(name: 'notification_type')
+      @NotificationTypeEnumConverter()
+      required this.notificationType,
+      @JsonKey(name: 'channel')
+      @NotificationChannelEnumConverter()
       required this.channel,
       required this.isEnabled});
 
@@ -939,9 +1013,13 @@ class _$NotificationSettingUpdateImpl implements _NotificationSettingUpdate {
       _$$NotificationSettingUpdateImplFromJson(json);
 
   @override
-  final String notificationType;
+  @JsonKey(name: 'notification_type')
+  @NotificationTypeEnumConverter()
+  final NotificationTypeEnum notificationType;
   @override
-  final String channel;
+  @JsonKey(name: 'channel')
+  @NotificationChannelEnumConverter()
+  final NotificationChannelEnum channel;
   @override
   final bool isEnabled;
 
@@ -986,17 +1064,25 @@ class _$NotificationSettingUpdateImpl implements _NotificationSettingUpdate {
 
 abstract class _NotificationSettingUpdate implements NotificationSettingUpdate {
   const factory _NotificationSettingUpdate(
-      {required final String notificationType,
-      required final String channel,
+      {@JsonKey(name: 'notification_type')
+      @NotificationTypeEnumConverter()
+      required final NotificationTypeEnum notificationType,
+      @JsonKey(name: 'channel')
+      @NotificationChannelEnumConverter()
+      required final NotificationChannelEnum channel,
       required final bool isEnabled}) = _$NotificationSettingUpdateImpl;
 
   factory _NotificationSettingUpdate.fromJson(Map<String, dynamic> json) =
       _$NotificationSettingUpdateImpl.fromJson;
 
   @override
-  String get notificationType;
+  @JsonKey(name: 'notification_type')
+  @NotificationTypeEnumConverter()
+  NotificationTypeEnum get notificationType;
   @override
-  String get channel;
+  @JsonKey(name: 'channel')
+  @NotificationChannelEnumConverter()
+  NotificationChannelEnum get channel;
   @override
   bool get isEnabled;
 

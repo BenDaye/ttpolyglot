@@ -27,7 +27,8 @@ mixin _$ProjectMemberModel {
   @JsonKey(name: 'user_id')
   String get userId => throw _privateConstructorUsedError;
   @JsonKey(name: 'role')
-  String get role => throw _privateConstructorUsedError;
+  @ProjectRoleEnumConverter()
+  ProjectRoleEnum get role => throw _privateConstructorUsedError;
   @JsonKey(name: 'invited_by')
   String? get invitedBy => throw _privateConstructorUsedError;
   @JsonKey(name: 'invited_at')
@@ -35,7 +36,8 @@ mixin _$ProjectMemberModel {
   @JsonKey(name: 'joined_at')
   DateTime? get joinedAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'status')
-  String get status => throw _privateConstructorUsedError;
+  @MemberStatusEnumConverter()
+  MemberStatusEnum get status => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_active')
   bool get isActive => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
@@ -75,11 +77,13 @@ abstract class $ProjectMemberModelCopyWith<$Res> {
       {@JsonKey(name: 'id') int id,
       @JsonKey(name: 'project_id') int projectId,
       @JsonKey(name: 'user_id') String userId,
-      @JsonKey(name: 'role') String role,
+      @JsonKey(name: 'role') @ProjectRoleEnumConverter() ProjectRoleEnum role,
       @JsonKey(name: 'invited_by') String? invitedBy,
       @JsonKey(name: 'invited_at') DateTime invitedAt,
       @JsonKey(name: 'joined_at') DateTime? joinedAt,
-      @JsonKey(name: 'status') String status,
+      @JsonKey(name: 'status')
+      @MemberStatusEnumConverter()
+      MemberStatusEnum status,
       @JsonKey(name: 'is_active') bool isActive,
       @JsonKey(name: 'created_at') DateTime createdAt,
       @JsonKey(name: 'updated_at') DateTime updatedAt,
@@ -140,7 +144,7 @@ class _$ProjectMemberModelCopyWithImpl<$Res, $Val extends ProjectMemberModel>
       role: null == role
           ? _value.role
           : role // ignore: cast_nullable_to_non_nullable
-              as String,
+              as ProjectRoleEnum,
       invitedBy: freezed == invitedBy
           ? _value.invitedBy
           : invitedBy // ignore: cast_nullable_to_non_nullable
@@ -156,7 +160,7 @@ class _$ProjectMemberModelCopyWithImpl<$Res, $Val extends ProjectMemberModel>
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
-              as String,
+              as MemberStatusEnum,
       isActive: null == isActive
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
@@ -209,11 +213,13 @@ abstract class _$$ProjectMemberModelImplCopyWith<$Res>
       {@JsonKey(name: 'id') int id,
       @JsonKey(name: 'project_id') int projectId,
       @JsonKey(name: 'user_id') String userId,
-      @JsonKey(name: 'role') String role,
+      @JsonKey(name: 'role') @ProjectRoleEnumConverter() ProjectRoleEnum role,
       @JsonKey(name: 'invited_by') String? invitedBy,
       @JsonKey(name: 'invited_at') DateTime invitedAt,
       @JsonKey(name: 'joined_at') DateTime? joinedAt,
-      @JsonKey(name: 'status') String status,
+      @JsonKey(name: 'status')
+      @MemberStatusEnumConverter()
+      MemberStatusEnum status,
       @JsonKey(name: 'is_active') bool isActive,
       @JsonKey(name: 'created_at') DateTime createdAt,
       @JsonKey(name: 'updated_at') DateTime updatedAt,
@@ -272,7 +278,7 @@ class __$$ProjectMemberModelImplCopyWithImpl<$Res>
       role: null == role
           ? _value.role
           : role // ignore: cast_nullable_to_non_nullable
-              as String,
+              as ProjectRoleEnum,
       invitedBy: freezed == invitedBy
           ? _value.invitedBy
           : invitedBy // ignore: cast_nullable_to_non_nullable
@@ -288,7 +294,7 @@ class __$$ProjectMemberModelImplCopyWithImpl<$Res>
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
-              as String,
+              as MemberStatusEnum,
       isActive: null == isActive
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
@@ -336,11 +342,13 @@ class _$ProjectMemberModelImpl implements _ProjectMemberModel {
       {@JsonKey(name: 'id') required this.id,
       @JsonKey(name: 'project_id') required this.projectId,
       @JsonKey(name: 'user_id') required this.userId,
-      @JsonKey(name: 'role') required this.role,
+      @JsonKey(name: 'role') @ProjectRoleEnumConverter() required this.role,
       @JsonKey(name: 'invited_by') this.invitedBy,
       @JsonKey(name: 'invited_at') required this.invitedAt,
       @JsonKey(name: 'joined_at') this.joinedAt,
-      @JsonKey(name: 'status') required this.status,
+      @JsonKey(name: 'status')
+      @MemberStatusEnumConverter()
+      required this.status,
       @JsonKey(name: 'is_active') this.isActive = true,
       @JsonKey(name: 'created_at') required this.createdAt,
       @JsonKey(name: 'updated_at') required this.updatedAt,
@@ -365,7 +373,8 @@ class _$ProjectMemberModelImpl implements _ProjectMemberModel {
   final String userId;
   @override
   @JsonKey(name: 'role')
-  final String role;
+  @ProjectRoleEnumConverter()
+  final ProjectRoleEnum role;
   @override
   @JsonKey(name: 'invited_by')
   final String? invitedBy;
@@ -377,7 +386,8 @@ class _$ProjectMemberModelImpl implements _ProjectMemberModel {
   final DateTime? joinedAt;
   @override
   @JsonKey(name: 'status')
-  final String status;
+  @MemberStatusEnumConverter()
+  final MemberStatusEnum status;
   @override
   @JsonKey(name: 'is_active')
   final bool isActive;
@@ -492,11 +502,15 @@ abstract class _ProjectMemberModel implements ProjectMemberModel {
       {@JsonKey(name: 'id') required final int id,
       @JsonKey(name: 'project_id') required final int projectId,
       @JsonKey(name: 'user_id') required final String userId,
-      @JsonKey(name: 'role') required final String role,
+      @JsonKey(name: 'role')
+      @ProjectRoleEnumConverter()
+      required final ProjectRoleEnum role,
       @JsonKey(name: 'invited_by') final String? invitedBy,
       @JsonKey(name: 'invited_at') required final DateTime invitedAt,
       @JsonKey(name: 'joined_at') final DateTime? joinedAt,
-      @JsonKey(name: 'status') required final String status,
+      @JsonKey(name: 'status')
+      @MemberStatusEnumConverter()
+      required final MemberStatusEnum status,
       @JsonKey(name: 'is_active') final bool isActive,
       @JsonKey(name: 'created_at') required final DateTime createdAt,
       @JsonKey(name: 'updated_at') required final DateTime updatedAt,
@@ -522,7 +536,8 @@ abstract class _ProjectMemberModel implements ProjectMemberModel {
   String get userId;
   @override
   @JsonKey(name: 'role')
-  String get role;
+  @ProjectRoleEnumConverter()
+  ProjectRoleEnum get role;
   @override
   @JsonKey(name: 'invited_by')
   String? get invitedBy;
@@ -534,7 +549,8 @@ abstract class _ProjectMemberModel implements ProjectMemberModel {
   DateTime? get joinedAt;
   @override
   @JsonKey(name: 'status')
-  String get status;
+  @MemberStatusEnumConverter()
+  MemberStatusEnum get status;
   @override
   @JsonKey(name: 'is_active')
   bool get isActive;
@@ -579,7 +595,8 @@ InviteMemberRequest _$InviteMemberRequestFromJson(Map<String, dynamic> json) {
 mixin _$InviteMemberRequest {
   int get projectId => throw _privateConstructorUsedError;
   String get userId => throw _privateConstructorUsedError;
-  String get role => throw _privateConstructorUsedError;
+  @ProjectRoleEnumConverter()
+  ProjectRoleEnum get role => throw _privateConstructorUsedError;
 
   /// Serializes this InviteMemberRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -597,7 +614,10 @@ abstract class $InviteMemberRequestCopyWith<$Res> {
           InviteMemberRequest value, $Res Function(InviteMemberRequest) then) =
       _$InviteMemberRequestCopyWithImpl<$Res, InviteMemberRequest>;
   @useResult
-  $Res call({int projectId, String userId, String role});
+  $Res call(
+      {int projectId,
+      String userId,
+      @ProjectRoleEnumConverter() ProjectRoleEnum role});
 }
 
 /// @nodoc
@@ -631,7 +651,7 @@ class _$InviteMemberRequestCopyWithImpl<$Res, $Val extends InviteMemberRequest>
       role: null == role
           ? _value.role
           : role // ignore: cast_nullable_to_non_nullable
-              as String,
+              as ProjectRoleEnum,
     ) as $Val);
   }
 }
@@ -644,7 +664,10 @@ abstract class _$$InviteMemberRequestImplCopyWith<$Res>
       __$$InviteMemberRequestImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int projectId, String userId, String role});
+  $Res call(
+      {int projectId,
+      String userId,
+      @ProjectRoleEnumConverter() ProjectRoleEnum role});
 }
 
 /// @nodoc
@@ -676,7 +699,7 @@ class __$$InviteMemberRequestImplCopyWithImpl<$Res>
       role: null == role
           ? _value.role
           : role // ignore: cast_nullable_to_non_nullable
-              as String,
+              as ProjectRoleEnum,
     ));
   }
 }
@@ -685,7 +708,9 @@ class __$$InviteMemberRequestImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$InviteMemberRequestImpl implements _InviteMemberRequest {
   const _$InviteMemberRequestImpl(
-      {required this.projectId, required this.userId, this.role = 'member'});
+      {required this.projectId,
+      required this.userId,
+      @ProjectRoleEnumConverter() required this.role = 'member'});
 
   factory _$InviteMemberRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$InviteMemberRequestImplFromJson(json);
@@ -696,7 +721,8 @@ class _$InviteMemberRequestImpl implements _InviteMemberRequest {
   final String userId;
   @override
   @JsonKey()
-  final String role;
+  @ProjectRoleEnumConverter()
+  final ProjectRoleEnum role;
 
   @override
   String toString() {
@@ -737,9 +763,10 @@ class _$InviteMemberRequestImpl implements _InviteMemberRequest {
 
 abstract class _InviteMemberRequest implements InviteMemberRequest {
   const factory _InviteMemberRequest(
-      {required final int projectId,
-      required final String userId,
-      final String role}) = _$InviteMemberRequestImpl;
+          {required final int projectId,
+          required final String userId,
+          @ProjectRoleEnumConverter() required final ProjectRoleEnum role}) =
+      _$InviteMemberRequestImpl;
 
   factory _InviteMemberRequest.fromJson(Map<String, dynamic> json) =
       _$InviteMemberRequestImpl.fromJson;
@@ -749,7 +776,8 @@ abstract class _InviteMemberRequest implements InviteMemberRequest {
   @override
   String get userId;
   @override
-  String get role;
+  @ProjectRoleEnumConverter()
+  ProjectRoleEnum get role;
 
   /// Create a copy of InviteMemberRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -768,7 +796,9 @@ UpdateMemberRoleRequest _$UpdateMemberRoleRequestFromJson(
 mixin _$UpdateMemberRoleRequest {
   int get projectId => throw _privateConstructorUsedError;
   String get userId => throw _privateConstructorUsedError;
-  String get role => throw _privateConstructorUsedError;
+  @JsonKey(name: 'role')
+  @ProjectRoleEnumConverter()
+  ProjectRoleEnum get role => throw _privateConstructorUsedError;
 
   /// Serializes this UpdateMemberRoleRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -786,7 +816,10 @@ abstract class $UpdateMemberRoleRequestCopyWith<$Res> {
           $Res Function(UpdateMemberRoleRequest) then) =
       _$UpdateMemberRoleRequestCopyWithImpl<$Res, UpdateMemberRoleRequest>;
   @useResult
-  $Res call({int projectId, String userId, String role});
+  $Res call(
+      {int projectId,
+      String userId,
+      @JsonKey(name: 'role') @ProjectRoleEnumConverter() ProjectRoleEnum role});
 }
 
 /// @nodoc
@@ -821,7 +854,7 @@ class _$UpdateMemberRoleRequestCopyWithImpl<$Res,
       role: null == role
           ? _value.role
           : role // ignore: cast_nullable_to_non_nullable
-              as String,
+              as ProjectRoleEnum,
     ) as $Val);
   }
 }
@@ -835,7 +868,10 @@ abstract class _$$UpdateMemberRoleRequestImplCopyWith<$Res>
       __$$UpdateMemberRoleRequestImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int projectId, String userId, String role});
+  $Res call(
+      {int projectId,
+      String userId,
+      @JsonKey(name: 'role') @ProjectRoleEnumConverter() ProjectRoleEnum role});
 }
 
 /// @nodoc
@@ -869,7 +905,7 @@ class __$$UpdateMemberRoleRequestImplCopyWithImpl<$Res>
       role: null == role
           ? _value.role
           : role // ignore: cast_nullable_to_non_nullable
-              as String,
+              as ProjectRoleEnum,
     ));
   }
 }
@@ -878,7 +914,9 @@ class __$$UpdateMemberRoleRequestImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$UpdateMemberRoleRequestImpl implements _UpdateMemberRoleRequest {
   const _$UpdateMemberRoleRequestImpl(
-      {required this.projectId, required this.userId, required this.role});
+      {required this.projectId,
+      required this.userId,
+      @JsonKey(name: 'role') @ProjectRoleEnumConverter() required this.role});
 
   factory _$UpdateMemberRoleRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$UpdateMemberRoleRequestImplFromJson(json);
@@ -888,7 +926,9 @@ class _$UpdateMemberRoleRequestImpl implements _UpdateMemberRoleRequest {
   @override
   final String userId;
   @override
-  final String role;
+  @JsonKey(name: 'role')
+  @ProjectRoleEnumConverter()
+  final ProjectRoleEnum role;
 
   @override
   String toString() {
@@ -931,7 +971,9 @@ abstract class _UpdateMemberRoleRequest implements UpdateMemberRoleRequest {
   const factory _UpdateMemberRoleRequest(
       {required final int projectId,
       required final String userId,
-      required final String role}) = _$UpdateMemberRoleRequestImpl;
+      @JsonKey(name: 'role')
+      @ProjectRoleEnumConverter()
+      required final ProjectRoleEnum role}) = _$UpdateMemberRoleRequestImpl;
 
   factory _UpdateMemberRoleRequest.fromJson(Map<String, dynamic> json) =
       _$UpdateMemberRoleRequestImpl.fromJson;
@@ -941,7 +983,9 @@ abstract class _UpdateMemberRoleRequest implements UpdateMemberRoleRequest {
   @override
   String get userId;
   @override
-  String get role;
+  @JsonKey(name: 'role')
+  @ProjectRoleEnumConverter()
+  ProjectRoleEnum get role;
 
   /// Create a copy of UpdateMemberRoleRequest
   /// with the given fields replaced by the non-null parameter values.

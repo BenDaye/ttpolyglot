@@ -112,11 +112,6 @@ class ProjectMemberService extends BaseService {
     try {
       log('[inviteMember] projectId=$projectId, userId=$userId, role=$role', name: 'ProjectMemberService');
 
-      // 验证角色
-      if (!ProjectRole.isValid(role)) {
-        throwBusiness('无效的角色');
-      }
-
       // 检查项目是否存在
       final projectExists = await _isProjectExists(projectId);
       if (!projectExists) {
@@ -126,9 +121,9 @@ class ProjectMemberService extends BaseService {
       // 检查用户是否已是成员
       final existingMember = await _getMemberByUserId(projectId, userId);
       if (existingMember != null) {
-        if (existingMember.status == MemberStatus.active) {
+        if (existingMember.status == MemberStatusEnum.active) {
           throwBusiness('用户已是项目成员');
-        } else if (existingMember.status == MemberStatus.pending) {
+        } else if (existingMember.status == MemberStatusEnum.pending) {
           throwBusiness('用户已有待处理的邀请');
         }
       }
@@ -183,7 +178,7 @@ class ProjectMemberService extends BaseService {
         throwNotFound('未找到邀请记录');
       }
 
-      if (member.status != MemberStatus.pending) {
+      if (member.status != MemberStatusEnum.pending) {
         throwBusiness('邀请状态无效');
       }
 
@@ -230,7 +225,7 @@ class ProjectMemberService extends BaseService {
         throwNotFound('成员不存在');
       }
 
-      if (member.role == ProjectRole.owner) {
+      if (member.role == ProjectRoleEnum.owner) {
         throwBusiness('不能移除项目所有者');
       }
 
@@ -267,17 +262,12 @@ class ProjectMemberService extends BaseService {
     try {
       log('[updateMemberRole] projectId=$projectId, userId=$userId, newRole=$newRole', name: 'ProjectMemberService');
 
-      // 验证角色
-      if (!ProjectRole.isValid(newRole)) {
-        throwBusiness('无效的角色');
-      }
-
       final member = await _getMemberByUserId(projectId, userId);
       if (member == null) {
         throwNotFound('成员不存在');
       }
 
-      if (member.role == ProjectRole.owner && newRole != ProjectRole.owner) {
+      if (member.role == ProjectRoleEnum.owner && newRole != ProjectRoleEnum.owner.value) {
         throwBusiness('不能修改所有者角色，请先转移所有权');
       }
 
@@ -315,7 +305,7 @@ class ProjectMemberService extends BaseService {
   }) async {
     try {
       final member = await _getMemberByUserId(projectId, userId);
-      return member != null && member.status == MemberStatus.active;
+      return member != null && member.status == MemberStatusEnum.active;
     } catch (error, stackTrace) {
       log('[isMember]', error: error, stackTrace: stackTrace, name: 'ProjectMemberService');
       return false;
@@ -329,8 +319,8 @@ class ProjectMemberService extends BaseService {
   }) async {
     try {
       final member = await _getMemberByUserId(projectId, userId);
-      if (member != null && member.status == MemberStatus.active) {
-        return member.role;
+      if (member != null && member.status == MemberStatusEnum.active) {
+        return member.role.value;
       }
       return null;
     } catch (error, stackTrace) {

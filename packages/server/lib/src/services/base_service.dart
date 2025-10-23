@@ -125,7 +125,7 @@ abstract class BaseService {
   }
 
   /// 验证条件
-  void require(bool condition, String message, {ApiResponseCode? code}) {
+  void require(bool condition, String message, {DataCodeEnum? code}) {
     if (!condition) {
       throw BusinessException(
         message: message,

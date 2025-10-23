@@ -332,28 +332,30 @@ class ProjectPermission {
 
 /// 项目角色
 enum ProjectRole {
-  owner,
-  admin,
-  translator,
-  reviewer,
-  viewer,
-}
+  owner('owner', '项目所有者'),
+  admin('admin', '项目管理员'),
+  translator('translator', '翻译员'),
+  reviewer('reviewer', '审核员'),
+  viewer('viewer', '查看者');
 
-/// 项目角色扩展
-extension ProjectRoleExtension on ProjectRole {
-  String get displayName {
-    switch (this) {
-      case ProjectRole.owner:
-        return '项目所有者';
-      case ProjectRole.admin:
-        return '项目管理员';
-      case ProjectRole.translator:
-        return '翻译员';
-      case ProjectRole.reviewer:
-        return '审核员';
-      case ProjectRole.viewer:
-        return '查看者';
+  const ProjectRole(this.value, this.displayName);
+
+  final String value;
+  final String displayName;
+
+  static ProjectRole? fromValue(String value) {
+    for (final role in ProjectRole.values) {
+      if (role.value == value) {
+        return role;
+      }
     }
+    return null;
+  }
+
+  static bool isValid(String value) => fromValue(value) != null;
+
+  static String getDisplayName(String value) {
+    return fromValue(value)?.displayName ?? value;
   }
 
   bool get canRead => true;

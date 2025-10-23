@@ -263,6 +263,25 @@ class ProjectService extends BaseService {
 
         // 给项目所有者分配project_owner角色
         await _assignProjectOwnerRole(projectId, ownerId);
+
+        // 创建项目所有者成员记录
+        await _databaseService.query('''
+          INSERT INTO {project_members} (
+            project_id, user_id, role, status, joined_at
+          ) VALUES (
+            @project_id, @user_id, 'owner', 'active', CURRENT_TIMESTAMP
+          )
+        ''', {
+          'project_id': projectId,
+          'user_id': ownerId,
+        });
+
+        // 更新项目成员数量
+        await _databaseService.query('''
+          UPDATE {projects}
+          SET members_count = 1
+          WHERE id = @project_id
+        ''', {'project_id': projectId});
       });
 
       // 清除相关缓存
