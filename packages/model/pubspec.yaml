@@ -2,6 +2,7 @@ name: ttpolyglot_model
 description: TTPolyglot 模型包，提供翻译管理平台的数据模型
 version: 1.0.0
 publish_to: none
+resolution: workspace
 
 environment:
   sdk: ^3.6.1

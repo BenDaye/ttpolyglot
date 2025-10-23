@@ -7,4 +7,5 @@ dev_dependencies:
   melos: ^6.3.2
 
 workspace:
-  - packages/server
+  - packages/core
+  - packages/model

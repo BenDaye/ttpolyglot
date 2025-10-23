@@ -2,7 +2,6 @@ name: ttpolyglot_server
 description: "TTPolyglot 多语言翻译管理系统 - 服务端"
 version: 1.0.0
 publish_to: none
-resolution: workspace
 
 environment:
   sdk: ^3.6.1
