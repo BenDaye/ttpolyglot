@@ -19,20 +19,23 @@ class ProjectController extends BaseController {
     final router = Router();
     router.get('/', _getProjects);
     router.post('/', _createProject);
+    // 具体路径必须在通配符路由之前定义
     router.get('/check-name', _checkProjectName);
+    router.get('/stats', _getProjectStats);
+    // 通配符路由放在最后
     router.get('/<id>', _getProjectById);
     router.put('/<id>', _updateProject);
     router.delete('/<id>', _deleteProject);
     router.get('/<id>/members', _getProjectMembers);
     router.post('/<id>/members', _addProjectMember);
     router.delete('/<id>/members/<userId>', _removeProjectMember);
-    router.get('/stats', _getProjectStats);
     return router;
   }
 
   // 公共方法用于路由配置
   Future<Response> Function(Request) get getProjects => _getProjects;
   Future<Response> Function(Request) get createProject => _createProject;
+  Future<Response> Function(Request) get checkProjectName => _checkProjectName;
   Future<Response> Function(Request, String) get getProject => _getProjectById;
   Future<Response> Function(Request, String) get updateProject => _updateProject;
   Future<Response> Function(Request, String) get deleteProject => _deleteProject;

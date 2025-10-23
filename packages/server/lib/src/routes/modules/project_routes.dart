@@ -24,6 +24,10 @@ class ProjectRoutes {
     // 项目基本操作
     router.get('/projects', projectController.getProjects);
     router.post('/projects', projectController.createProject);
+    // 具体路径必须在通配符路由之前定义
+    router.get('/projects/check-name', projectController.checkProjectName);
+    router.get('/projects/stats', projectController.stats);
+    // 通配符路由
     router.get('/projects/<id>', projectController.getProject);
     router.put('/projects/<id>', projectController.updateProject);
     router.delete('/projects/<id>', projectController.deleteProject);
