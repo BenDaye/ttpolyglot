@@ -38,7 +38,7 @@ class InviteMemberRequest with _$InviteMemberRequest {
   const factory InviteMemberRequest({
     required int projectId,
     required String userId,
-    @Default('member') @ProjectRoleEnumConverter() required ProjectRoleEnum role,
+    @JsonKey(name: 'role') @ProjectRoleEnumConverter() @Default(ProjectRoleEnum.member) ProjectRoleEnum role,
   }) = _InviteMemberRequest;
 
   factory InviteMemberRequest.fromJson(Map<String, dynamic> json) => _$InviteMemberRequestFromJson(json);
@@ -50,7 +50,7 @@ class UpdateMemberRoleRequest with _$UpdateMemberRoleRequest {
   const factory UpdateMemberRoleRequest({
     required int projectId,
     required String userId,
-    @JsonKey(name: 'role') @ProjectRoleEnumConverter() required ProjectRoleEnum role,
+    @JsonKey(name: 'role') @ProjectRoleEnumConverter() @Default(ProjectRoleEnum.member) ProjectRoleEnum role,
   }) = _UpdateMemberRoleRequest;
 
   factory UpdateMemberRoleRequest.fromJson(Map<String, dynamic> json) => _$UpdateMemberRoleRequestFromJson(json);

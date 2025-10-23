@@ -595,6 +595,7 @@ InviteMemberRequest _$InviteMemberRequestFromJson(Map<String, dynamic> json) {
 mixin _$InviteMemberRequest {
   int get projectId => throw _privateConstructorUsedError;
   String get userId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'role')
   @ProjectRoleEnumConverter()
   ProjectRoleEnum get role => throw _privateConstructorUsedError;
 
@@ -617,7 +618,7 @@ abstract class $InviteMemberRequestCopyWith<$Res> {
   $Res call(
       {int projectId,
       String userId,
-      @ProjectRoleEnumConverter() ProjectRoleEnum role});
+      @JsonKey(name: 'role') @ProjectRoleEnumConverter() ProjectRoleEnum role});
 }
 
 /// @nodoc
@@ -667,7 +668,7 @@ abstract class _$$InviteMemberRequestImplCopyWith<$Res>
   $Res call(
       {int projectId,
       String userId,
-      @ProjectRoleEnumConverter() ProjectRoleEnum role});
+      @JsonKey(name: 'role') @ProjectRoleEnumConverter() ProjectRoleEnum role});
 }
 
 /// @nodoc
@@ -710,7 +711,9 @@ class _$InviteMemberRequestImpl implements _InviteMemberRequest {
   const _$InviteMemberRequestImpl(
       {required this.projectId,
       required this.userId,
-      @ProjectRoleEnumConverter() required this.role = 'member'});
+      @JsonKey(name: 'role')
+      @ProjectRoleEnumConverter()
+      this.role = ProjectRoleEnum.member});
 
   factory _$InviteMemberRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$InviteMemberRequestImplFromJson(json);
@@ -720,7 +723,7 @@ class _$InviteMemberRequestImpl implements _InviteMemberRequest {
   @override
   final String userId;
   @override
-  @JsonKey()
+  @JsonKey(name: 'role')
   @ProjectRoleEnumConverter()
   final ProjectRoleEnum role;
 
@@ -763,10 +766,11 @@ class _$InviteMemberRequestImpl implements _InviteMemberRequest {
 
 abstract class _InviteMemberRequest implements InviteMemberRequest {
   const factory _InviteMemberRequest(
-          {required final int projectId,
-          required final String userId,
-          @ProjectRoleEnumConverter() required final ProjectRoleEnum role}) =
-      _$InviteMemberRequestImpl;
+      {required final int projectId,
+      required final String userId,
+      @JsonKey(name: 'role')
+      @ProjectRoleEnumConverter()
+      final ProjectRoleEnum role}) = _$InviteMemberRequestImpl;
 
   factory _InviteMemberRequest.fromJson(Map<String, dynamic> json) =
       _$InviteMemberRequestImpl.fromJson;
@@ -776,6 +780,7 @@ abstract class _InviteMemberRequest implements InviteMemberRequest {
   @override
   String get userId;
   @override
+  @JsonKey(name: 'role')
   @ProjectRoleEnumConverter()
   ProjectRoleEnum get role;
 
@@ -916,7 +921,9 @@ class _$UpdateMemberRoleRequestImpl implements _UpdateMemberRoleRequest {
   const _$UpdateMemberRoleRequestImpl(
       {required this.projectId,
       required this.userId,
-      @JsonKey(name: 'role') @ProjectRoleEnumConverter() required this.role});
+      @JsonKey(name: 'role')
+      @ProjectRoleEnumConverter()
+      this.role = ProjectRoleEnum.member});
 
   factory _$UpdateMemberRoleRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$UpdateMemberRoleRequestImplFromJson(json);
@@ -973,7 +980,7 @@ abstract class _UpdateMemberRoleRequest implements UpdateMemberRoleRequest {
       required final String userId,
       @JsonKey(name: 'role')
       @ProjectRoleEnumConverter()
-      required final ProjectRoleEnum role}) = _$UpdateMemberRoleRequestImpl;
+      final ProjectRoleEnum role}) = _$UpdateMemberRoleRequestImpl;
 
   factory _UpdateMemberRoleRequest.fromJson(Map<String, dynamic> json) =
       _$UpdateMemberRoleRequestImpl.fromJson;
