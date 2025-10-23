@@ -1,8 +1,7 @@
 name: ttpolyglot_core
 description: TTPolyglot 核心包，提供翻译管理平台的核心数据模型、业务逻辑和接口定义
 version: 1.0.0
-publish_to: none
-resolution: workspace
+publish_to: none 
 
 environment:
   sdk: ^3.6.1
