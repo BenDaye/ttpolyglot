@@ -34,11 +34,21 @@ class ProjectApi {
       );
 
       final data = response.data as Map<String, dynamic>;
-      final projects = (data['data'] as List).map((e) => ProjectModel.fromJson(e as Map<String, dynamic>)).toList();
+      log('[getProjects] 服务器响应: $data', name: 'ProjectApi');
 
-      log('[getProjects] 获取到 ${projects.length} 个项目', name: 'ProjectApi');
+      // 检查 data 字段是否存在
+      if (data['data'] == null) {
+        log('[getProjects] data["data"] 为 null，返回空列表', name: 'ProjectApi');
+        return [];
+      }
 
-      return projects;
+      final pagerData = data['data'] as Map<String, dynamic>;
+      final items =
+          (pagerData['items'] as List?)?.map((e) => ProjectModel.fromJson(e as Map<String, dynamic>)).toList() ?? [];
+
+      log('[getProjects] 获取到 ${items.length} 个项目', name: 'ProjectApi');
+
+      return items;
     } catch (error, stackTrace) {
       log('[getProjects]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
