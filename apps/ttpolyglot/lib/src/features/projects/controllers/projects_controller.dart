@@ -83,13 +83,13 @@ class ProjectsController extends GetxController {
       // 第二步：同时从 API 获取最新数据
       try {
         final apiProjects = await controller._projectApi.getProjects();
-        Logger.info('从 API 获取 ${apiProjects.length} 个项目');
+        Logger.info('从 API 获取 ${apiProjects.items?.length} 个项目');
 
         // 更新缓存
-        await controller._cacheService.cacheProjects(apiProjects);
+        await controller._cacheService.cacheProjects(apiProjects.items ?? []);
 
         // 转换并更新界面
-        final projects = apiProjects.map((model) => ProjectConverter.toProject(model)).toList();
+        final projects = apiProjects.items?.map((model) => ProjectConverter.toProject(model)).toList() ?? [];
         controller._projects.assignAll(projects);
 
         Logger.info('项目列表已更新并缓存');
