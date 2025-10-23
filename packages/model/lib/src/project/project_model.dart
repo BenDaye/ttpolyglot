@@ -1,4 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:ttpolyglot_model/src/language/language_model.dart';
+
+import 'project_member_model.dart';
 
 part 'project_model.freezed.dart';
 part 'project_model.g.dart';
@@ -74,41 +77,9 @@ class UpdateProjectRequest with _$UpdateProjectRequest {
 class ProjectDetailModel with _$ProjectDetailModel {
   const factory ProjectDetailModel({
     required ProjectModel project,
-    List<ProjectLanguageInfo>? languages,
-    List<ProjectMemberInfo>? members,
+    List<LanguageModel>? languages,
+    List<ProjectMemberModel>? members,
   }) = _ProjectDetailModel;
 
   factory ProjectDetailModel.fromJson(Map<String, dynamic> json) => _$ProjectDetailModelFromJson(json);
-}
-
-/// 项目语言信息
-@freezed
-class ProjectLanguageInfo with _$ProjectLanguageInfo {
-  const factory ProjectLanguageInfo({
-    @JsonKey(name: 'language_code') required String languageCode,
-    @JsonKey(name: 'language_name') required String languageName,
-    @JsonKey(name: 'native_name') String? nativeName,
-    @JsonKey(name: 'is_primary') @Default(false) bool isPrimary,
-    @JsonKey(name: 'translated_keys') @Default(0) int translatedKeys,
-    @JsonKey(name: 'total_keys') @Default(0) int totalKeys,
-    @JsonKey(name: 'completion_percentage') @Default(0.0) double completionPercentage,
-  }) = _ProjectLanguageInfo;
-
-  factory ProjectLanguageInfo.fromJson(Map<String, dynamic> json) => _$ProjectLanguageInfoFromJson(json);
-}
-
-/// 项目成员信息（简化版）
-@freezed
-class ProjectMemberInfo with _$ProjectMemberInfo {
-  const factory ProjectMemberInfo({
-    @JsonKey(name: 'user_id') required String userId,
-    @JsonKey(name: 'username') required String username,
-    @JsonKey(name: 'display_name') String? displayName,
-    @JsonKey(name: 'avatar_url') String? avatarUrl,
-    @JsonKey(name: 'role') required String role,
-    @JsonKey(name: 'status') required String status,
-    @JsonKey(name: 'joined_at') DateTime? joinedAt,
-  }) = _ProjectMemberInfo;
-
-  factory ProjectMemberInfo.fromJson(Map<String, dynamic> json) => _$ProjectMemberInfoFromJson(json);
 }

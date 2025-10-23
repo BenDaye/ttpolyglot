@@ -1358,9 +1358,8 @@ ProjectDetailModel _$ProjectDetailModelFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$ProjectDetailModel {
   ProjectModel get project => throw _privateConstructorUsedError;
-  List<ProjectLanguageInfo>? get languages =>
-      throw _privateConstructorUsedError;
-  List<ProjectMemberInfo>? get members => throw _privateConstructorUsedError;
+  List<LanguageModel>? get languages => throw _privateConstructorUsedError;
+  List<ProjectMemberModel>? get members => throw _privateConstructorUsedError;
 
   /// Serializes this ProjectDetailModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -1380,8 +1379,8 @@ abstract class $ProjectDetailModelCopyWith<$Res> {
   @useResult
   $Res call(
       {ProjectModel project,
-      List<ProjectLanguageInfo>? languages,
-      List<ProjectMemberInfo>? members});
+      List<LanguageModel>? languages,
+      List<ProjectMemberModel>? members});
 
   $ProjectModelCopyWith<$Res> get project;
 }
@@ -1413,11 +1412,11 @@ class _$ProjectDetailModelCopyWithImpl<$Res, $Val extends ProjectDetailModel>
       languages: freezed == languages
           ? _value.languages
           : languages // ignore: cast_nullable_to_non_nullable
-              as List<ProjectLanguageInfo>?,
+              as List<LanguageModel>?,
       members: freezed == members
           ? _value.members
           : members // ignore: cast_nullable_to_non_nullable
-              as List<ProjectMemberInfo>?,
+              as List<ProjectMemberModel>?,
     ) as $Val);
   }
 
@@ -1442,8 +1441,8 @@ abstract class _$$ProjectDetailModelImplCopyWith<$Res>
   @useResult
   $Res call(
       {ProjectModel project,
-      List<ProjectLanguageInfo>? languages,
-      List<ProjectMemberInfo>? members});
+      List<LanguageModel>? languages,
+      List<ProjectMemberModel>? members});
 
   @override
   $ProjectModelCopyWith<$Res> get project;
@@ -1474,11 +1473,11 @@ class __$$ProjectDetailModelImplCopyWithImpl<$Res>
       languages: freezed == languages
           ? _value._languages
           : languages // ignore: cast_nullable_to_non_nullable
-              as List<ProjectLanguageInfo>?,
+              as List<LanguageModel>?,
       members: freezed == members
           ? _value._members
           : members // ignore: cast_nullable_to_non_nullable
-              as List<ProjectMemberInfo>?,
+              as List<ProjectMemberModel>?,
     ));
   }
 }
@@ -1488,8 +1487,8 @@ class __$$ProjectDetailModelImplCopyWithImpl<$Res>
 class _$ProjectDetailModelImpl implements _ProjectDetailModel {
   const _$ProjectDetailModelImpl(
       {required this.project,
-      final List<ProjectLanguageInfo>? languages,
-      final List<ProjectMemberInfo>? members})
+      final List<LanguageModel>? languages,
+      final List<ProjectMemberModel>? members})
       : _languages = languages,
         _members = members;
 
@@ -1498,9 +1497,9 @@ class _$ProjectDetailModelImpl implements _ProjectDetailModel {
 
   @override
   final ProjectModel project;
-  final List<ProjectLanguageInfo>? _languages;
+  final List<LanguageModel>? _languages;
   @override
-  List<ProjectLanguageInfo>? get languages {
+  List<LanguageModel>? get languages {
     final value = _languages;
     if (value == null) return null;
     if (_languages is EqualUnmodifiableListView) return _languages;
@@ -1508,9 +1507,9 @@ class _$ProjectDetailModelImpl implements _ProjectDetailModel {
     return EqualUnmodifiableListView(value);
   }
 
-  final List<ProjectMemberInfo>? _members;
+  final List<ProjectMemberModel>? _members;
   @override
-  List<ProjectMemberInfo>? get members {
+  List<ProjectMemberModel>? get members {
     final value = _members;
     if (value == null) return null;
     if (_members is EqualUnmodifiableListView) return _members;
@@ -1562,8 +1561,8 @@ class _$ProjectDetailModelImpl implements _ProjectDetailModel {
 abstract class _ProjectDetailModel implements ProjectDetailModel {
   const factory _ProjectDetailModel(
       {required final ProjectModel project,
-      final List<ProjectLanguageInfo>? languages,
-      final List<ProjectMemberInfo>? members}) = _$ProjectDetailModelImpl;
+      final List<LanguageModel>? languages,
+      final List<ProjectMemberModel>? members}) = _$ProjectDetailModelImpl;
 
   factory _ProjectDetailModel.fromJson(Map<String, dynamic> json) =
       _$ProjectDetailModelImpl.fromJson;
@@ -1571,619 +1570,14 @@ abstract class _ProjectDetailModel implements ProjectDetailModel {
   @override
   ProjectModel get project;
   @override
-  List<ProjectLanguageInfo>? get languages;
+  List<LanguageModel>? get languages;
   @override
-  List<ProjectMemberInfo>? get members;
+  List<ProjectMemberModel>? get members;
 
   /// Create a copy of ProjectDetailModel
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ProjectDetailModelImplCopyWith<_$ProjectDetailModelImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-ProjectLanguageInfo _$ProjectLanguageInfoFromJson(Map<String, dynamic> json) {
-  return _ProjectLanguageInfo.fromJson(json);
-}
-
-/// @nodoc
-mixin _$ProjectLanguageInfo {
-  @JsonKey(name: 'language_code')
-  String get languageCode => throw _privateConstructorUsedError;
-  @JsonKey(name: 'language_name')
-  String get languageName => throw _privateConstructorUsedError;
-  @JsonKey(name: 'native_name')
-  String? get nativeName => throw _privateConstructorUsedError;
-  @JsonKey(name: 'is_primary')
-  bool get isPrimary => throw _privateConstructorUsedError;
-  @JsonKey(name: 'translated_keys')
-  int get translatedKeys => throw _privateConstructorUsedError;
-  @JsonKey(name: 'total_keys')
-  int get totalKeys => throw _privateConstructorUsedError;
-  @JsonKey(name: 'completion_percentage')
-  double get completionPercentage => throw _privateConstructorUsedError;
-
-  /// Serializes this ProjectLanguageInfo to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of ProjectLanguageInfo
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $ProjectLanguageInfoCopyWith<ProjectLanguageInfo> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $ProjectLanguageInfoCopyWith<$Res> {
-  factory $ProjectLanguageInfoCopyWith(
-          ProjectLanguageInfo value, $Res Function(ProjectLanguageInfo) then) =
-      _$ProjectLanguageInfoCopyWithImpl<$Res, ProjectLanguageInfo>;
-  @useResult
-  $Res call(
-      {@JsonKey(name: 'language_code') String languageCode,
-      @JsonKey(name: 'language_name') String languageName,
-      @JsonKey(name: 'native_name') String? nativeName,
-      @JsonKey(name: 'is_primary') bool isPrimary,
-      @JsonKey(name: 'translated_keys') int translatedKeys,
-      @JsonKey(name: 'total_keys') int totalKeys,
-      @JsonKey(name: 'completion_percentage') double completionPercentage});
-}
-
-/// @nodoc
-class _$ProjectLanguageInfoCopyWithImpl<$Res, $Val extends ProjectLanguageInfo>
-    implements $ProjectLanguageInfoCopyWith<$Res> {
-  _$ProjectLanguageInfoCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of ProjectLanguageInfo
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? languageCode = null,
-    Object? languageName = null,
-    Object? nativeName = freezed,
-    Object? isPrimary = null,
-    Object? translatedKeys = null,
-    Object? totalKeys = null,
-    Object? completionPercentage = null,
-  }) {
-    return _then(_value.copyWith(
-      languageCode: null == languageCode
-          ? _value.languageCode
-          : languageCode // ignore: cast_nullable_to_non_nullable
-              as String,
-      languageName: null == languageName
-          ? _value.languageName
-          : languageName // ignore: cast_nullable_to_non_nullable
-              as String,
-      nativeName: freezed == nativeName
-          ? _value.nativeName
-          : nativeName // ignore: cast_nullable_to_non_nullable
-              as String?,
-      isPrimary: null == isPrimary
-          ? _value.isPrimary
-          : isPrimary // ignore: cast_nullable_to_non_nullable
-              as bool,
-      translatedKeys: null == translatedKeys
-          ? _value.translatedKeys
-          : translatedKeys // ignore: cast_nullable_to_non_nullable
-              as int,
-      totalKeys: null == totalKeys
-          ? _value.totalKeys
-          : totalKeys // ignore: cast_nullable_to_non_nullable
-              as int,
-      completionPercentage: null == completionPercentage
-          ? _value.completionPercentage
-          : completionPercentage // ignore: cast_nullable_to_non_nullable
-              as double,
-    ) as $Val);
-  }
-}
-
-/// @nodoc
-abstract class _$$ProjectLanguageInfoImplCopyWith<$Res>
-    implements $ProjectLanguageInfoCopyWith<$Res> {
-  factory _$$ProjectLanguageInfoImplCopyWith(_$ProjectLanguageInfoImpl value,
-          $Res Function(_$ProjectLanguageInfoImpl) then) =
-      __$$ProjectLanguageInfoImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call(
-      {@JsonKey(name: 'language_code') String languageCode,
-      @JsonKey(name: 'language_name') String languageName,
-      @JsonKey(name: 'native_name') String? nativeName,
-      @JsonKey(name: 'is_primary') bool isPrimary,
-      @JsonKey(name: 'translated_keys') int translatedKeys,
-      @JsonKey(name: 'total_keys') int totalKeys,
-      @JsonKey(name: 'completion_percentage') double completionPercentage});
-}
-
-/// @nodoc
-class __$$ProjectLanguageInfoImplCopyWithImpl<$Res>
-    extends _$ProjectLanguageInfoCopyWithImpl<$Res, _$ProjectLanguageInfoImpl>
-    implements _$$ProjectLanguageInfoImplCopyWith<$Res> {
-  __$$ProjectLanguageInfoImplCopyWithImpl(_$ProjectLanguageInfoImpl _value,
-      $Res Function(_$ProjectLanguageInfoImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of ProjectLanguageInfo
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? languageCode = null,
-    Object? languageName = null,
-    Object? nativeName = freezed,
-    Object? isPrimary = null,
-    Object? translatedKeys = null,
-    Object? totalKeys = null,
-    Object? completionPercentage = null,
-  }) {
-    return _then(_$ProjectLanguageInfoImpl(
-      languageCode: null == languageCode
-          ? _value.languageCode
-          : languageCode // ignore: cast_nullable_to_non_nullable
-              as String,
-      languageName: null == languageName
-          ? _value.languageName
-          : languageName // ignore: cast_nullable_to_non_nullable
-              as String,
-      nativeName: freezed == nativeName
-          ? _value.nativeName
-          : nativeName // ignore: cast_nullable_to_non_nullable
-              as String?,
-      isPrimary: null == isPrimary
-          ? _value.isPrimary
-          : isPrimary // ignore: cast_nullable_to_non_nullable
-              as bool,
-      translatedKeys: null == translatedKeys
-          ? _value.translatedKeys
-          : translatedKeys // ignore: cast_nullable_to_non_nullable
-              as int,
-      totalKeys: null == totalKeys
-          ? _value.totalKeys
-          : totalKeys // ignore: cast_nullable_to_non_nullable
-              as int,
-      completionPercentage: null == completionPercentage
-          ? _value.completionPercentage
-          : completionPercentage // ignore: cast_nullable_to_non_nullable
-              as double,
-    ));
-  }
-}
-
-/// @nodoc
-@JsonSerializable()
-class _$ProjectLanguageInfoImpl implements _ProjectLanguageInfo {
-  const _$ProjectLanguageInfoImpl(
-      {@JsonKey(name: 'language_code') required this.languageCode,
-      @JsonKey(name: 'language_name') required this.languageName,
-      @JsonKey(name: 'native_name') this.nativeName,
-      @JsonKey(name: 'is_primary') this.isPrimary = false,
-      @JsonKey(name: 'translated_keys') this.translatedKeys = 0,
-      @JsonKey(name: 'total_keys') this.totalKeys = 0,
-      @JsonKey(name: 'completion_percentage') this.completionPercentage = 0.0});
-
-  factory _$ProjectLanguageInfoImpl.fromJson(Map<String, dynamic> json) =>
-      _$$ProjectLanguageInfoImplFromJson(json);
-
-  @override
-  @JsonKey(name: 'language_code')
-  final String languageCode;
-  @override
-  @JsonKey(name: 'language_name')
-  final String languageName;
-  @override
-  @JsonKey(name: 'native_name')
-  final String? nativeName;
-  @override
-  @JsonKey(name: 'is_primary')
-  final bool isPrimary;
-  @override
-  @JsonKey(name: 'translated_keys')
-  final int translatedKeys;
-  @override
-  @JsonKey(name: 'total_keys')
-  final int totalKeys;
-  @override
-  @JsonKey(name: 'completion_percentage')
-  final double completionPercentage;
-
-  @override
-  String toString() {
-    return 'ProjectLanguageInfo(languageCode: $languageCode, languageName: $languageName, nativeName: $nativeName, isPrimary: $isPrimary, translatedKeys: $translatedKeys, totalKeys: $totalKeys, completionPercentage: $completionPercentage)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$ProjectLanguageInfoImpl &&
-            (identical(other.languageCode, languageCode) ||
-                other.languageCode == languageCode) &&
-            (identical(other.languageName, languageName) ||
-                other.languageName == languageName) &&
-            (identical(other.nativeName, nativeName) ||
-                other.nativeName == nativeName) &&
-            (identical(other.isPrimary, isPrimary) ||
-                other.isPrimary == isPrimary) &&
-            (identical(other.translatedKeys, translatedKeys) ||
-                other.translatedKeys == translatedKeys) &&
-            (identical(other.totalKeys, totalKeys) ||
-                other.totalKeys == totalKeys) &&
-            (identical(other.completionPercentage, completionPercentage) ||
-                other.completionPercentage == completionPercentage));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(runtimeType, languageCode, languageName,
-      nativeName, isPrimary, translatedKeys, totalKeys, completionPercentage);
-
-  /// Create a copy of ProjectLanguageInfo
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$ProjectLanguageInfoImplCopyWith<_$ProjectLanguageInfoImpl> get copyWith =>
-      __$$ProjectLanguageInfoImplCopyWithImpl<_$ProjectLanguageInfoImpl>(
-          this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$ProjectLanguageInfoImplToJson(
-      this,
-    );
-  }
-}
-
-abstract class _ProjectLanguageInfo implements ProjectLanguageInfo {
-  const factory _ProjectLanguageInfo(
-      {@JsonKey(name: 'language_code') required final String languageCode,
-      @JsonKey(name: 'language_name') required final String languageName,
-      @JsonKey(name: 'native_name') final String? nativeName,
-      @JsonKey(name: 'is_primary') final bool isPrimary,
-      @JsonKey(name: 'translated_keys') final int translatedKeys,
-      @JsonKey(name: 'total_keys') final int totalKeys,
-      @JsonKey(name: 'completion_percentage')
-      final double completionPercentage}) = _$ProjectLanguageInfoImpl;
-
-  factory _ProjectLanguageInfo.fromJson(Map<String, dynamic> json) =
-      _$ProjectLanguageInfoImpl.fromJson;
-
-  @override
-  @JsonKey(name: 'language_code')
-  String get languageCode;
-  @override
-  @JsonKey(name: 'language_name')
-  String get languageName;
-  @override
-  @JsonKey(name: 'native_name')
-  String? get nativeName;
-  @override
-  @JsonKey(name: 'is_primary')
-  bool get isPrimary;
-  @override
-  @JsonKey(name: 'translated_keys')
-  int get translatedKeys;
-  @override
-  @JsonKey(name: 'total_keys')
-  int get totalKeys;
-  @override
-  @JsonKey(name: 'completion_percentage')
-  double get completionPercentage;
-
-  /// Create a copy of ProjectLanguageInfo
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$ProjectLanguageInfoImplCopyWith<_$ProjectLanguageInfoImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-ProjectMemberInfo _$ProjectMemberInfoFromJson(Map<String, dynamic> json) {
-  return _ProjectMemberInfo.fromJson(json);
-}
-
-/// @nodoc
-mixin _$ProjectMemberInfo {
-  @JsonKey(name: 'user_id')
-  String get userId => throw _privateConstructorUsedError;
-  @JsonKey(name: 'username')
-  String get username => throw _privateConstructorUsedError;
-  @JsonKey(name: 'display_name')
-  String? get displayName => throw _privateConstructorUsedError;
-  @JsonKey(name: 'avatar_url')
-  String? get avatarUrl => throw _privateConstructorUsedError;
-  @JsonKey(name: 'role')
-  String get role => throw _privateConstructorUsedError;
-  @JsonKey(name: 'status')
-  String get status => throw _privateConstructorUsedError;
-  @JsonKey(name: 'joined_at')
-  DateTime? get joinedAt => throw _privateConstructorUsedError;
-
-  /// Serializes this ProjectMemberInfo to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of ProjectMemberInfo
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $ProjectMemberInfoCopyWith<ProjectMemberInfo> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $ProjectMemberInfoCopyWith<$Res> {
-  factory $ProjectMemberInfoCopyWith(
-          ProjectMemberInfo value, $Res Function(ProjectMemberInfo) then) =
-      _$ProjectMemberInfoCopyWithImpl<$Res, ProjectMemberInfo>;
-  @useResult
-  $Res call(
-      {@JsonKey(name: 'user_id') String userId,
-      @JsonKey(name: 'username') String username,
-      @JsonKey(name: 'display_name') String? displayName,
-      @JsonKey(name: 'avatar_url') String? avatarUrl,
-      @JsonKey(name: 'role') String role,
-      @JsonKey(name: 'status') String status,
-      @JsonKey(name: 'joined_at') DateTime? joinedAt});
-}
-
-/// @nodoc
-class _$ProjectMemberInfoCopyWithImpl<$Res, $Val extends ProjectMemberInfo>
-    implements $ProjectMemberInfoCopyWith<$Res> {
-  _$ProjectMemberInfoCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of ProjectMemberInfo
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? userId = null,
-    Object? username = null,
-    Object? displayName = freezed,
-    Object? avatarUrl = freezed,
-    Object? role = null,
-    Object? status = null,
-    Object? joinedAt = freezed,
-  }) {
-    return _then(_value.copyWith(
-      userId: null == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
-              as String,
-      username: null == username
-          ? _value.username
-          : username // ignore: cast_nullable_to_non_nullable
-              as String,
-      displayName: freezed == displayName
-          ? _value.displayName
-          : displayName // ignore: cast_nullable_to_non_nullable
-              as String?,
-      avatarUrl: freezed == avatarUrl
-          ? _value.avatarUrl
-          : avatarUrl // ignore: cast_nullable_to_non_nullable
-              as String?,
-      role: null == role
-          ? _value.role
-          : role // ignore: cast_nullable_to_non_nullable
-              as String,
-      status: null == status
-          ? _value.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as String,
-      joinedAt: freezed == joinedAt
-          ? _value.joinedAt
-          : joinedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-    ) as $Val);
-  }
-}
-
-/// @nodoc
-abstract class _$$ProjectMemberInfoImplCopyWith<$Res>
-    implements $ProjectMemberInfoCopyWith<$Res> {
-  factory _$$ProjectMemberInfoImplCopyWith(_$ProjectMemberInfoImpl value,
-          $Res Function(_$ProjectMemberInfoImpl) then) =
-      __$$ProjectMemberInfoImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call(
-      {@JsonKey(name: 'user_id') String userId,
-      @JsonKey(name: 'username') String username,
-      @JsonKey(name: 'display_name') String? displayName,
-      @JsonKey(name: 'avatar_url') String? avatarUrl,
-      @JsonKey(name: 'role') String role,
-      @JsonKey(name: 'status') String status,
-      @JsonKey(name: 'joined_at') DateTime? joinedAt});
-}
-
-/// @nodoc
-class __$$ProjectMemberInfoImplCopyWithImpl<$Res>
-    extends _$ProjectMemberInfoCopyWithImpl<$Res, _$ProjectMemberInfoImpl>
-    implements _$$ProjectMemberInfoImplCopyWith<$Res> {
-  __$$ProjectMemberInfoImplCopyWithImpl(_$ProjectMemberInfoImpl _value,
-      $Res Function(_$ProjectMemberInfoImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of ProjectMemberInfo
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? userId = null,
-    Object? username = null,
-    Object? displayName = freezed,
-    Object? avatarUrl = freezed,
-    Object? role = null,
-    Object? status = null,
-    Object? joinedAt = freezed,
-  }) {
-    return _then(_$ProjectMemberInfoImpl(
-      userId: null == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
-              as String,
-      username: null == username
-          ? _value.username
-          : username // ignore: cast_nullable_to_non_nullable
-              as String,
-      displayName: freezed == displayName
-          ? _value.displayName
-          : displayName // ignore: cast_nullable_to_non_nullable
-              as String?,
-      avatarUrl: freezed == avatarUrl
-          ? _value.avatarUrl
-          : avatarUrl // ignore: cast_nullable_to_non_nullable
-              as String?,
-      role: null == role
-          ? _value.role
-          : role // ignore: cast_nullable_to_non_nullable
-              as String,
-      status: null == status
-          ? _value.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as String,
-      joinedAt: freezed == joinedAt
-          ? _value.joinedAt
-          : joinedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime?,
-    ));
-  }
-}
-
-/// @nodoc
-@JsonSerializable()
-class _$ProjectMemberInfoImpl implements _ProjectMemberInfo {
-  const _$ProjectMemberInfoImpl(
-      {@JsonKey(name: 'user_id') required this.userId,
-      @JsonKey(name: 'username') required this.username,
-      @JsonKey(name: 'display_name') this.displayName,
-      @JsonKey(name: 'avatar_url') this.avatarUrl,
-      @JsonKey(name: 'role') required this.role,
-      @JsonKey(name: 'status') required this.status,
-      @JsonKey(name: 'joined_at') this.joinedAt});
-
-  factory _$ProjectMemberInfoImpl.fromJson(Map<String, dynamic> json) =>
-      _$$ProjectMemberInfoImplFromJson(json);
-
-  @override
-  @JsonKey(name: 'user_id')
-  final String userId;
-  @override
-  @JsonKey(name: 'username')
-  final String username;
-  @override
-  @JsonKey(name: 'display_name')
-  final String? displayName;
-  @override
-  @JsonKey(name: 'avatar_url')
-  final String? avatarUrl;
-  @override
-  @JsonKey(name: 'role')
-  final String role;
-  @override
-  @JsonKey(name: 'status')
-  final String status;
-  @override
-  @JsonKey(name: 'joined_at')
-  final DateTime? joinedAt;
-
-  @override
-  String toString() {
-    return 'ProjectMemberInfo(userId: $userId, username: $username, displayName: $displayName, avatarUrl: $avatarUrl, role: $role, status: $status, joinedAt: $joinedAt)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$ProjectMemberInfoImpl &&
-            (identical(other.userId, userId) || other.userId == userId) &&
-            (identical(other.username, username) ||
-                other.username == username) &&
-            (identical(other.displayName, displayName) ||
-                other.displayName == displayName) &&
-            (identical(other.avatarUrl, avatarUrl) ||
-                other.avatarUrl == avatarUrl) &&
-            (identical(other.role, role) || other.role == role) &&
-            (identical(other.status, status) || other.status == status) &&
-            (identical(other.joinedAt, joinedAt) ||
-                other.joinedAt == joinedAt));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(runtimeType, userId, username, displayName,
-      avatarUrl, role, status, joinedAt);
-
-  /// Create a copy of ProjectMemberInfo
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$ProjectMemberInfoImplCopyWith<_$ProjectMemberInfoImpl> get copyWith =>
-      __$$ProjectMemberInfoImplCopyWithImpl<_$ProjectMemberInfoImpl>(
-          this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$ProjectMemberInfoImplToJson(
-      this,
-    );
-  }
-}
-
-abstract class _ProjectMemberInfo implements ProjectMemberInfo {
-  const factory _ProjectMemberInfo(
-          {@JsonKey(name: 'user_id') required final String userId,
-          @JsonKey(name: 'username') required final String username,
-          @JsonKey(name: 'display_name') final String? displayName,
-          @JsonKey(name: 'avatar_url') final String? avatarUrl,
-          @JsonKey(name: 'role') required final String role,
-          @JsonKey(name: 'status') required final String status,
-          @JsonKey(name: 'joined_at') final DateTime? joinedAt}) =
-      _$ProjectMemberInfoImpl;
-
-  factory _ProjectMemberInfo.fromJson(Map<String, dynamic> json) =
-      _$ProjectMemberInfoImpl.fromJson;
-
-  @override
-  @JsonKey(name: 'user_id')
-  String get userId;
-  @override
-  @JsonKey(name: 'username')
-  String get username;
-  @override
-  @JsonKey(name: 'display_name')
-  String? get displayName;
-  @override
-  @JsonKey(name: 'avatar_url')
-  String? get avatarUrl;
-  @override
-  @JsonKey(name: 'role')
-  String get role;
-  @override
-  @JsonKey(name: 'status')
-  String get status;
-  @override
-  @JsonKey(name: 'joined_at')
-  DateTime? get joinedAt;
-
-  /// Create a copy of ProjectMemberInfo
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$ProjectMemberInfoImplCopyWith<_$ProjectMemberInfoImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

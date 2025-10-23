@@ -119,10 +119,10 @@ _$ProjectDetailModelImpl _$$ProjectDetailModelImplFromJson(
     _$ProjectDetailModelImpl(
       project: ProjectModel.fromJson(json['project'] as Map<String, dynamic>),
       languages: (json['languages'] as List<dynamic>?)
-          ?.map((e) => ProjectLanguageInfo.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => LanguageModel.fromJson(e as Map<String, dynamic>))
           .toList(),
       members: (json['members'] as List<dynamic>?)
-          ?.map((e) => ProjectMemberInfo.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => ProjectMemberModel.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 
@@ -132,55 +132,4 @@ Map<String, dynamic> _$$ProjectDetailModelImplToJson(
       'project': instance.project,
       'languages': instance.languages,
       'members': instance.members,
-    };
-
-_$ProjectLanguageInfoImpl _$$ProjectLanguageInfoImplFromJson(
-        Map<String, dynamic> json) =>
-    _$ProjectLanguageInfoImpl(
-      languageCode: json['language_code'] as String,
-      languageName: json['language_name'] as String,
-      nativeName: json['native_name'] as String?,
-      isPrimary: json['is_primary'] as bool? ?? false,
-      translatedKeys: (json['translated_keys'] as num?)?.toInt() ?? 0,
-      totalKeys: (json['total_keys'] as num?)?.toInt() ?? 0,
-      completionPercentage:
-          (json['completion_percentage'] as num?)?.toDouble() ?? 0.0,
-    );
-
-Map<String, dynamic> _$$ProjectLanguageInfoImplToJson(
-        _$ProjectLanguageInfoImpl instance) =>
-    <String, dynamic>{
-      'language_code': instance.languageCode,
-      'language_name': instance.languageName,
-      'native_name': instance.nativeName,
-      'is_primary': instance.isPrimary,
-      'translated_keys': instance.translatedKeys,
-      'total_keys': instance.totalKeys,
-      'completion_percentage': instance.completionPercentage,
-    };
-
-_$ProjectMemberInfoImpl _$$ProjectMemberInfoImplFromJson(
-        Map<String, dynamic> json) =>
-    _$ProjectMemberInfoImpl(
-      userId: json['user_id'] as String,
-      username: json['username'] as String,
-      displayName: json['display_name'] as String?,
-      avatarUrl: json['avatar_url'] as String?,
-      role: json['role'] as String,
-      status: json['status'] as String,
-      joinedAt: json['joined_at'] == null
-          ? null
-          : DateTime.parse(json['joined_at'] as String),
-    );
-
-Map<String, dynamic> _$$ProjectMemberInfoImplToJson(
-        _$ProjectMemberInfoImpl instance) =>
-    <String, dynamic>{
-      'user_id': instance.userId,
-      'username': instance.username,
-      'display_name': instance.displayName,
-      'avatar_url': instance.avatarUrl,
-      'role': instance.role,
-      'status': instance.status,
-      'joined_at': instance.joinedAt?.toIso8601String(),
     };
