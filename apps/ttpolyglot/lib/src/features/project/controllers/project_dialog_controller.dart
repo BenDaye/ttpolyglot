@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/features/features.dart';
-import 'package:ttpolyglot/src/features/projects/widgets/create_project_dialog.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 /// 项目弹窗控制器
@@ -53,15 +52,6 @@ class ProjectDialogController extends GetxController {
 
   /// 显示创建项目弹窗
   static Future<void> showCreateDialog() async {
-    // 使用新的创建项目向导对话框
-    // import 'package:ttpolyglot/src/features/projects/widgets/create_project_dialog.dart';
-    await Get.dialog(
-      const CreateProjectDialog(),
-      barrierDismissible: false,
-    );
-
-    // 旧版本的对话框（可选）
-    /*
     final tag = 'project_dialog_controller_${DateTime.now().millisecondsSinceEpoch}_project_create';
     final controller = Get.put(ProjectDialogController(), tag: tag);
     controller._resetForCreate();
@@ -73,7 +63,6 @@ class ProjectDialogController extends GetxController {
     if (Get.isRegistered<ProjectDialogController>(tag: tag)) {
       Get.delete<ProjectDialogController>(tag: tag);
     }
-    */
   }
 
   /// 显示编辑项目弹窗
@@ -174,6 +163,28 @@ class ProjectDialogController extends GetxController {
       final controller = Get.find<ProjectController>(tag: projectId);
       controller.loadProject();
     }
+  }
+
+  /// 重置表单为创建模式
+  void _resetForCreate() {
+    _isEditMode.value = false;
+    _editingProject.value = null;
+
+    // 清空表单数据
+    nameController.clear();
+    descriptionController.clear();
+
+    // 重置为默认主语言（中文）
+    final presetLanguages = ProjectsController.getPresetLanguages();
+    _selectedPrimaryLanguage.value = presetLanguages.firstWhere(
+      (lang) => lang.code == 'zh-CN',
+      orElse: () => presetLanguages.first,
+    );
+
+    // 清空目标语言
+    _selectedTargetLanguages.clear();
+
+    _nameError.value = null;
   }
 
   /// 重置表单为编辑模式
