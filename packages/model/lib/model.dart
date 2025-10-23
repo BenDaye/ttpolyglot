@@ -4,6 +4,8 @@ library ttpolyglot_model;
 export 'src/auth/auth_models.dart';
 // 枚举
 export 'src/enums/enums.dart';
+// 语言模型
+export 'src/language/language_models.dart';
 // 网络模型
 export 'src/network/network_models.dart';
 // 项目模型
