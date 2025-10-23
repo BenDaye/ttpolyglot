@@ -155,7 +155,7 @@ class ProjectApi {
   /// 检查项目名称是否可用
   Future<bool> checkProjectNameAvailable(String name, {int? excludeProjectId}) async {
     try {
-      log('[checkProjectNameAvailable] name=$name', name: 'ProjectApi');
+      log('[checkProjectNameAvailable] name=$name, excludeId=$excludeProjectId', name: 'ProjectApi');
 
       final queryParams = <String, dynamic>{
         'name': name,
@@ -171,7 +171,17 @@ class ProjectApi {
       );
 
       final data = response.data as Map<String, dynamic>;
-      final available = data['data']['available'] as bool;
+
+      // 检查响应数据是否有效
+      if (data['data'] == null) {
+        log('[checkProjectNameAvailable] 响应数据为空: $data', name: 'ProjectApi');
+        throw Exception('检查项目名称失败：响应数据无效');
+      }
+
+      final resultData = data['data'] as Map<String, dynamic>;
+      final available = resultData['available'] as bool? ?? false;
+
+      log('[checkProjectNameAvailable] result: available=$available', name: 'ProjectApi');
 
       return available;
     } catch (error, stackTrace) {

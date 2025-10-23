@@ -126,6 +126,8 @@ class ProjectController extends BaseController {
       final params = request.url.queryParameters;
       final name = params['name'];
 
+      LoggerUtils.info('_checkProjectName 被调用: name=$name, params=$params');
+
       if (name == null || name.trim().isEmpty) {
         return ResponseUtils.error(message: '项目名称不能为空');
       }
@@ -134,6 +136,8 @@ class ProjectController extends BaseController {
       final excludeId = excludeIdStr != null ? int.tryParse(excludeIdStr) : null;
 
       final isAvailable = await _projectService.checkProjectNameAvailable(name, excludeProjectId: excludeId);
+
+      LoggerUtils.info('_checkProjectName 检查结果: available=$isAvailable');
 
       return ResponseUtils.success(
         message: '检查项目名称成功',
@@ -147,8 +151,11 @@ class ProjectController extends BaseController {
 
   Future<Response> _getProjectById(Request request, String id) async {
     try {
+      LoggerUtils.info('_getProjectById 被调用: id=$id');
+
       final projectId = int.tryParse(id);
       if (projectId == null) {
+        LoggerUtils.error('_getProjectById: 无效的项目ID格式: $id');
         return ResponseUtils.error(message: '项目ID格式无效');
       }
       final project = await _projectService.getProjectById(id, userId: getCurrentUserId(request));
