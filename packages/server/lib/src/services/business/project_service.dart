@@ -47,12 +47,12 @@ class ProjectService extends BaseService {
       if (userId != null) {
         conditions.add('''
           (p.owner_id = @user_id OR 
-           EXISTS (
-             SELECT 1 FROM {user_roles} ur 
-             WHERE ur.user_id = @user_id 
-               AND ur.project_id = p.id 
-               AND ur.is_active = true
-           ))
+          EXISTS (
+            SELECT 1 FROM {project_members} pm 
+            WHERE pm.user_id = @user_id 
+              AND pm.project_id = p.id 
+              AND pm.is_active = true
+          ))
         ''');
         parameters['user_id'] = userId;
       }
@@ -96,9 +96,10 @@ class ProjectService extends BaseService {
       final projects = projectsResult.map((row) {
         final projectData = row.toColumnMap();
 
-        // 解析设置信息
-        final settingsJson = projectData['settings'] as String?;
-        projectData['settings'] = settingsJson != null && settingsJson.isNotEmpty ? settingsJson : <String, dynamic>{};
+        // 解析设置信息 - JSONB 字段已自动解析为 Map
+        if (projectData['settings'] == null || projectData['settings'] is! Map) {
+          projectData['settings'] = <String, dynamic>{};
+        }
 
         return projectData;
       }).toList();
@@ -167,12 +168,15 @@ class ProjectService extends BaseService {
 
       final projectData = result.first.toColumnMap();
 
-      // 解析设置和语言信息
-      final settingsJson = projectData['settings'] as String?;
-      projectData['settings'] = settingsJson != null && settingsJson.isNotEmpty ? settingsJson : <String, dynamic>{};
+      // 解析设置信息 - JSONB 字段已自动解析为 Map
+      if (projectData['settings'] == null || projectData['settings'] is! Map) {
+        projectData['settings'] = <String, dynamic>{};
+      }
 
-      final languagesJson = projectData['languages'] as String;
-      projectData['languages'] = languagesJson.isNotEmpty ? languagesJson : [];
+      // 解析语言信息 - 已是数组
+      if (projectData['languages'] == null || projectData['languages'] is! List) {
+        projectData['languages'] = [];
+      }
 
       // 如果指定了用户ID，检查用户权限
       if (userId != null) {
@@ -386,9 +390,9 @@ class ProjectService extends BaseService {
         await _databaseService
             .query('DELETE FROM {project_languages} WHERE project_id = @project_id', {'project_id': projectId});
 
-        // 删除项目角色关联
+        // 删除项目成员关联
         await _databaseService
-            .query('DELETE FROM {user_roles} WHERE project_id = @project_id', {'project_id': projectId});
+            .query('DELETE FROM {project_members} WHERE project_id = @project_id', {'project_id': projectId});
 
         // 删除项目
         await _databaseService.query('DELETE FROM {projects} WHERE id = @project_id', {'project_id': projectId});

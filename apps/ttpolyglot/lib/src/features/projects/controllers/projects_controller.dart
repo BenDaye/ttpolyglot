@@ -105,7 +105,6 @@ class ProjectsController extends GetxController {
         }
       }
     } catch (error, stackTrace) {
-      Get.snackbar('错误', '加载项目失败: $error');
       Logger.error('loadProjects', error: error, stackTrace: stackTrace);
     } finally {
       controller._isLoading.value = false;
