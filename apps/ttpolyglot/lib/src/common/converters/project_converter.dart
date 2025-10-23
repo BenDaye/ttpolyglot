@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-import 'package:ttpolyglot/src/common/api/language_api.dart';
 import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_model/model.dart';
 
@@ -112,7 +111,7 @@ class ProjectConverter {
   /// 获取预设语言（根据代码）
   static Language? _getPresetLanguageByCode(String code) {
     // 使用 LanguageApi 的默认语言列表
-    final presetLanguages = LanguageApi.getDefaultLanguages();
+    final presetLanguages = LanguageEnum.toArray();
     try {
       final model = presetLanguages.firstWhere((lang) => lang.code.code == code);
       return Language(

@@ -71,14 +71,14 @@ class ProjectDialogController extends GetxController {
           Logger.info('从 API 加载 ${apiLanguages.length} 个语言');
         } else {
           // API 返回空数据，使用默认语言列表
-          final defaultLanguages = LanguageApi.getDefaultLanguages();
+          final defaultLanguages = LanguageEnum.toArray();
           _availableLanguages.assignAll(_convertToLanguages(defaultLanguages));
           Logger.warning('API 返回空数据，使用默认语言列表');
         }
       } catch (error, stackTrace) {
         // API 请求失败，使用默认语言列表
         Logger.error('从 API 加载语言失败，使用默认语言列表', error: error, stackTrace: stackTrace);
-        final defaultLanguages = LanguageApi.getDefaultLanguages();
+        final defaultLanguages = LanguageEnum.toArray();
         _availableLanguages.assignAll(_convertToLanguages(defaultLanguages));
       }
 
