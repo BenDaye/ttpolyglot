@@ -81,7 +81,7 @@ class ProjectService extends BaseService {
           u.display_name as owner_display_name,
           CASE 
             WHEN p.total_keys > 0 
-            THEN ROUND((p.translated_keys::float / p.total_keys * 100), 2)
+            THEN ROUND((p.translated_keys::numeric / p.total_keys * 100), 2)
             ELSE 0 
           END as completion_percentage
         FROM {projects} p
@@ -139,7 +139,7 @@ class ProjectService extends BaseService {
           u.display_name as owner_display_name, u.avatar_url as owner_avatar,
           CASE 
             WHEN p.total_keys > 0 
-            THEN ROUND((p.translated_keys::float / p.total_keys * 100), 2)
+            THEN ROUND((p.translated_keys::numeric / p.total_keys * 100), 2)
             ELSE 0 
           END as completion_percentage,
           COALESCE(
