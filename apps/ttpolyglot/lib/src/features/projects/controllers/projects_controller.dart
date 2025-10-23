@@ -1,7 +1,9 @@
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ttpolyglot/src/common/common.dart';
 import 'package:ttpolyglot/src/core/services/service.dart';
 import 'package:ttpolyglot/src/features/features.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_core/core.dart' hide CreateProjectRequest, UpdateProjectRequest;
 
 /// 项目管理控制器
 class ProjectsController extends GetxController {
@@ -11,6 +13,8 @@ class ProjectsController extends GetxController {
 
   final ProjectServiceImpl _projectService = Get.find<ProjectServiceImpl>();
   final TranslationServiceImpl _translationService = Get.find<TranslationServiceImpl>();
+  final ProjectApi _projectApi = Get.find<ProjectApi>();
+  late final ProjectCacheService _cacheService;
 
   // 响应式项目列表
   final _projects = <Project>[].obs;
@@ -44,6 +48,10 @@ class ProjectsController extends GetxController {
   /// 初始化项目服务
   Future<void> _initializeService() async {
     try {
+      // 初始化缓存服务
+      final prefs = await SharedPreferences.getInstance();
+      _cacheService = ProjectCacheService(prefs);
+
       // 初始化示例数据
       final initializer = ProjectDataInitializer(_projectService);
       await initializer.initializeSampleProjects();
@@ -55,14 +63,47 @@ class ProjectsController extends GetxController {
     }
   }
 
-  /// 加载项目列表
+  /// 加载项目列表（缓存优先策略）
   static Future<void> loadProjects() async {
     final controller = instance;
 
     try {
       controller._isLoading.value = true;
-      final projects = await controller._projectService.getAllProjects();
-      controller._projects.assignAll(projects);
+
+      // 第一步：先尝试从缓存加载
+      final cachedProjects = await controller._cacheService.getCachedProjects();
+      if (cachedProjects != null && cachedProjects.isNotEmpty) {
+        Logger.info('从缓存加载 ${cachedProjects.length} 个项目');
+        // 转换 ProjectModel 到 Project
+        final projects = cachedProjects.map((model) => ProjectConverter.toProject(model)).toList();
+        controller._projects.assignAll(projects);
+        controller._isLoading.value = false;
+      }
+
+      // 第二步：同时从 API 获取最新数据
+      try {
+        final apiProjects = await controller._projectApi.getProjects();
+        Logger.info('从 API 获取 ${apiProjects.length} 个项目');
+
+        // 更新缓存
+        await controller._cacheService.cacheProjects(apiProjects);
+
+        // 转换并更新界面
+        final projects = apiProjects.map((model) => ProjectConverter.toProject(model)).toList();
+        controller._projects.assignAll(projects);
+
+        Logger.info('项目列表已更新并缓存');
+      } catch (apiError, apiStackTrace) {
+        Logger.error('从 API 加载项目失败', error: apiError, stackTrace: apiStackTrace);
+
+        // 如果 API 请求失败且没有缓存，显示错误
+        if (cachedProjects == null || cachedProjects.isEmpty) {
+          Get.snackbar('错误', '加载项目失败: $apiError');
+        } else {
+          // 有缓存数据，只显示警告
+          Logger.warning('使用缓存数据，API 请求失败: $apiError');
+        }
+      }
     } catch (error, stackTrace) {
       Get.snackbar('错误', '加载项目失败: $error');
       Logger.error('loadProjects', error: error, stackTrace: stackTrace);
@@ -76,51 +117,22 @@ class ProjectsController extends GetxController {
     _searchQuery.value = query;
   }
 
-  /// 创建新项目
+  /// 创建新项目（已废弃，请使用 ProjectDialogController.showCreateDialog()）
+  /// 项目创建现在通过 API 完成，在 ProjectDialogController 中处理
+  @Deprecated('Use ProjectDialogController.showCreateDialog() instead')
   static Future<void> createProject({
     required String name,
     required String description,
     required Language primaryLanguage,
     required List<Language> targetLanguages,
   }) async {
-    final controller = instance;
-    try {
-      controller._isLoading.value = true;
-      // 检查项目名称是否可用
-      final isNameAvailable = await controller._projectService.isProjectNameAvailable(name);
-      if (!isNameAvailable) {
-        Get.snackbar('错误', '项目名称已存在');
-        return;
-      }
-
-      final request = CreateProjectRequest(
-        name: name,
-        description: description,
-        primaryLanguage: primaryLanguage,
-        targetLanguages: targetLanguages,
-        ownerId: 'default-user',
-      );
-
-      final newProject = await controller._projectService.createProject(request);
-
-      Logger.info('项目创建成功: ID=${newProject.id}, 名称="${newProject.name}"');
-
-      /// 更新本地列表
-      controller._projects.add(newProject);
-
-      // 确保项目数据同步：重新从存储中加载项目列表
-      await loadProjects();
-
-      Get.snackbar('成功', '项目创建成功');
-    } catch (error, stackTrace) {
-      Get.snackbar('错误', '创建项目失败: $error');
-      Logger.error('createProject', error: error, stackTrace: stackTrace);
-    } finally {
-      controller._isLoading.value = false;
-    }
+    // 刷新项目列表以获取最新数据
+    await loadProjects();
   }
 
-  /// 更新项目
+  /// 更新项目（已废弃，请使用 ProjectDialogController.showEditDialog()）
+  /// 项目更新现在通过 API 完成，在 ProjectDialogController 中处理
+  @Deprecated('Use ProjectDialogController.showEditDialog() instead')
   static Future<void> updateProject(
     String projectId, {
     String? name,
@@ -129,51 +141,8 @@ class ProjectsController extends GetxController {
     List<Language>? targetLanguages,
     bool? isActive,
   }) async {
-    try {
-      final controller = instance;
-
-      final project = await controller._projectService.getProject(projectId);
-      if (project == null) {
-        throw Exception('项目不存在');
-      }
-
-      final hasLanguageChange = hasLanguageConfigChanged(
-        project,
-        defaultLanguage,
-        targetLanguages,
-      );
-
-      final request = UpdateProjectRequest(
-        name: name,
-        description: description,
-        targetLanguages: targetLanguages,
-        isActive: isActive,
-      );
-
-      final updatedProject = await controller._projectService.updateProject(project.id, request);
-
-      // 检查语言配置是否发生变化
-
-      // 如果语言配置发生变化，同步翻译条目
-      if (hasLanguageChange) {
-        await syncTranslationLanguages(
-          sourceLanguage: updatedProject.primaryLanguage,
-          targetLanguages: updatedProject.targetLanguages,
-          projectId: project.id,
-        );
-      }
-
-      // 更新本地列表
-      final index = controller._projects.indexWhere((p) => p.id == project.id);
-      if (index != -1) {
-        controller._projects[index] = updatedProject;
-      }
-
-      Get.snackbar('成功', '项目更新成功');
-    } catch (error, stackTrace) {
-      Get.snackbar('错误', '更新项目失败: $error');
-      Logger.error('updateProject', error: error, stackTrace: stackTrace);
-    }
+    // 刷新项目列表以获取最新数据
+    await loadProjects();
   }
 
   /// 删除项目
@@ -181,7 +150,16 @@ class ProjectsController extends GetxController {
     final controller = instance;
 
     try {
-      await controller._projectService.deleteProject(projectId);
+      // 转换项目 ID 为 int
+      final projectIdInt = int.parse(projectId);
+
+      // 调用 API 删除项目
+      await controller._projectApi.deleteProject(projectIdInt);
+
+      // 从缓存中删除
+      await controller._cacheService.removeCachedProject(projectIdInt);
+
+      // 从本地列表中删除
       controller._projects.removeWhere((project) => project.id == projectId);
 
       // 如果删除的是当前选中项目，清除选中状态
@@ -189,6 +167,7 @@ class ProjectsController extends GetxController {
         controller._selectedProjectId.value = '';
       }
 
+      Logger.info('项目删除成功: $projectId');
       Get.snackbar('成功', '项目删除成功');
     } catch (error, stackTrace) {
       Get.snackbar('错误', '删除项目失败: $error');

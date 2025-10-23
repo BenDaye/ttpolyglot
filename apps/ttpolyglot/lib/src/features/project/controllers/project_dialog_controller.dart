@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/common/common.dart';
 import 'package:ttpolyglot/src/features/features.dart';
 import 'package:ttpolyglot_core/core.dart';
 
 /// 项目弹窗控制器
 class ProjectDialogController extends GetxController {
+  final ProjectApi _projectApi = Get.find<ProjectApi>();
+
   final formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
@@ -263,11 +266,17 @@ class ProjectDialogController extends GetxController {
     try {
       final name = nameController.text.trim();
       final description = descriptionController.text.trim();
+      final primaryLanguageCode = _selectedPrimaryLanguage.value!.code;
+      final targetLanguageCodes = ProjectConverter.toLanguageCodes(_selectedTargetLanguages);
 
       if (_isEditMode.value) {
         // 编辑模式：检查名称是否与其他项目冲突
         if (name != _editingProject.value!.name) {
-          final isNameAvailable = await ProjectsController.isProjectNameAvailable(name);
+          final projectId = int.tryParse(_editingProject.value!.id);
+          final isNameAvailable = await _projectApi.checkProjectNameAvailable(
+            name,
+            excludeProjectId: projectId,
+          );
           if (!isNameAvailable) {
             _nameError.value = '项目名称已存在';
             _isLoading.value = false;
@@ -275,40 +284,59 @@ class ProjectDialogController extends GetxController {
           }
         }
 
-        await ProjectsController.updateProject(
-          _editingProject.value!.id,
+        final projectId = int.parse(_editingProject.value!.id);
+        await _projectApi.updateProject(
+          projectId: projectId,
           name: name,
           description: description,
-          // 注意：主语言不可修改，不包含在更新请求中
-          targetLanguages: _selectedTargetLanguages.toList()..sort((a, b) => a.sortIndex.compareTo(b.sortIndex)),
+          targetLanguageCodes: targetLanguageCodes,
         );
 
         Get.back(closeOverlays: true);
         Get.snackbar('成功', '项目更新成功');
+
+        // 刷新项目列表
+        await _refreshProjectsList();
       } else {
         // 创建模式：检查项目名称是否可用
-        final isNameAvailable = await ProjectsController.isProjectNameAvailable(name);
+        final isNameAvailable = await _projectApi.checkProjectNameAvailable(name);
         if (!isNameAvailable) {
           _nameError.value = '项目名称已存在';
           _isLoading.value = false;
           return;
         }
 
-        await ProjectsController.createProject(
+        await _projectApi.createProject(
           name: name,
           description: description,
-          primaryLanguage: _selectedPrimaryLanguage.value!,
-          targetLanguages: _selectedTargetLanguages.toList()..sort((a, b) => a.sortIndex.compareTo(b.sortIndex)),
+          primaryLanguageCode: primaryLanguageCode,
+          targetLanguageCodes: targetLanguageCodes,
+          status: 'active',
+          visibility: 'private',
         );
 
         Get.back(closeOverlays: true);
         Get.snackbar('成功', '项目创建成功');
+
+        // 刷新项目列表
+        await _refreshProjectsList();
       }
     } catch (error, stackTrace) {
       Logger.error(_isEditMode.value ? '更新项目失败' : '创建项目失败', error: error, stackTrace: stackTrace);
       Get.snackbar('错误', '${_isEditMode.value ? '更新' : '创建'}项目失败: $error');
     } finally {
       _isLoading.value = false;
+    }
+  }
+
+  /// 刷新项目列表
+  Future<void> _refreshProjectsList() async {
+    try {
+      if (Get.isRegistered<ProjectsController>()) {
+        await ProjectsController.loadProjects();
+      }
+    } catch (error, stackTrace) {
+      Logger.error('刷新项目列表失败', error: error, stackTrace: stackTrace);
     }
   }
 
