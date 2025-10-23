@@ -306,7 +306,6 @@ class ProjectDialogController extends GetxController {
       final name = nameController.text.trim();
       final description = descriptionController.text.trim();
       final primaryLanguageCode = _selectedPrimaryLanguage.value!.code;
-      final targetLanguageCodes = ProjectConverter.toLanguageCodes(_selectedTargetLanguages);
 
       if (_isEditMode.value) {
         // 编辑模式：检查名称是否与其他项目冲突
@@ -328,7 +327,6 @@ class ProjectDialogController extends GetxController {
           projectId: projectId,
           name: name,
           description: description,
-          targetLanguageCodes: targetLanguageCodes,
         );
 
         Get.back(closeOverlays: true);
@@ -349,8 +347,6 @@ class ProjectDialogController extends GetxController {
           name: name,
           description: description,
           primaryLanguageCode: primaryLanguageCode,
-          targetLanguageCodes: targetLanguageCodes,
-          status: 'active',
           visibility: 'private',
         );
 

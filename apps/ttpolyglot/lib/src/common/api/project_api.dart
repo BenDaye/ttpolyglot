@@ -63,10 +63,9 @@ class ProjectApi {
   /// 创建项目
   Future<ProjectModel> createProject({
     required String name,
-    required String description,
+    String? description,
     required String primaryLanguageCode,
-    required List<String> targetLanguageCodes,
-    String status = 'active',
+    String? slug,
     String visibility = 'private',
     Map<String, dynamic>? settings,
   }) async {
@@ -76,9 +75,8 @@ class ProjectApi {
       final requestData = {
         'name': name,
         'description': description,
-        'primary_language': primaryLanguageCode,
-        'target_languages': targetLanguageCodes,
-        'status': status,
+        'primary_language_code': primaryLanguageCode,
+        'slug': slug ?? name.toLowerCase().replaceAll(' ', '-'),
         'visibility': visibility,
         'settings': settings ?? {},
       };
@@ -105,7 +103,6 @@ class ProjectApi {
     required int projectId,
     String? name,
     String? description,
-    List<String>? targetLanguageCodes,
     String? status,
     String? visibility,
     Map<String, dynamic>? settings,
@@ -117,7 +114,6 @@ class ProjectApi {
 
       if (name != null) requestData['name'] = name;
       if (description != null) requestData['description'] = description;
-      if (targetLanguageCodes != null) requestData['target_languages'] = targetLanguageCodes;
       if (status != null) requestData['status'] = status;
       if (visibility != null) requestData['visibility'] = visibility;
       if (settings != null) requestData['settings'] = settings;
