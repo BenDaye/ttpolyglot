@@ -34,7 +34,8 @@ mixin _$TranslationEntryModel {
 
   /// 语言代码
   @JsonKey(name: 'language_code')
-  String get languageCode => throw _privateConstructorUsedError;
+  @LanguageEnumConverter()
+  LanguageEnum get languageCode => throw _privateConstructorUsedError;
 
   /// 源文本
   @JsonKey(name: 'source_text')
@@ -105,14 +106,6 @@ mixin _$TranslationEntryModel {
   @JsonKey(name: 'approved_at')
   DateTime? get approvedAt => throw _privateConstructorUsedError;
 
-  /// 语言名称
-  @JsonKey(name: 'language_name')
-  String? get languageName => throw _privateConstructorUsedError;
-
-  /// 语言本地名称
-  @JsonKey(name: 'language_native_name')
-  String? get languageNativeName => throw _privateConstructorUsedError;
-
   /// 创建时间
   @JsonKey(name: 'created_at')
   DateTime? get createdAt => throw _privateConstructorUsedError;
@@ -141,7 +134,9 @@ abstract class $TranslationEntryModelCopyWith<$Res> {
       {String? id,
       @JsonKey(name: 'project_id') String projectId,
       @JsonKey(name: 'entry_key') String entryKey,
-      @JsonKey(name: 'language_code') String languageCode,
+      @JsonKey(name: 'language_code')
+      @LanguageEnumConverter()
+      LanguageEnum languageCode,
       @JsonKey(name: 'source_text') String? sourceText,
       @JsonKey(name: 'target_text') String? targetText,
       @JsonKey(name: 'translator_id') String? translatorId,
@@ -160,8 +155,6 @@ abstract class $TranslationEntryModelCopyWith<$Res> {
       @JsonKey(name: 'translated_at') DateTime? translatedAt,
       @JsonKey(name: 'reviewed_at') DateTime? reviewedAt,
       @JsonKey(name: 'approved_at') DateTime? approvedAt,
-      @JsonKey(name: 'language_name') String? languageName,
-      @JsonKey(name: 'language_native_name') String? languageNativeName,
       @JsonKey(name: 'created_at') DateTime? createdAt,
       @JsonKey(name: 'updated_at') DateTime? updatedAt});
 }
@@ -204,8 +197,6 @@ class _$TranslationEntryModelCopyWithImpl<$Res,
     Object? translatedAt = freezed,
     Object? reviewedAt = freezed,
     Object? approvedAt = freezed,
-    Object? languageName = freezed,
-    Object? languageNativeName = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -225,7 +216,7 @@ class _$TranslationEntryModelCopyWithImpl<$Res,
       languageCode: null == languageCode
           ? _value.languageCode
           : languageCode // ignore: cast_nullable_to_non_nullable
-              as String,
+              as LanguageEnum,
       sourceText: freezed == sourceText
           ? _value.sourceText
           : sourceText // ignore: cast_nullable_to_non_nullable
@@ -298,14 +289,6 @@ class _$TranslationEntryModelCopyWithImpl<$Res,
           ? _value.approvedAt
           : approvedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
-      languageName: freezed == languageName
-          ? _value.languageName
-          : languageName // ignore: cast_nullable_to_non_nullable
-              as String?,
-      languageNativeName: freezed == languageNativeName
-          ? _value.languageNativeName
-          : languageNativeName // ignore: cast_nullable_to_non_nullable
-              as String?,
       createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -331,7 +314,9 @@ abstract class _$$TranslationEntryModelImplCopyWith<$Res>
       {String? id,
       @JsonKey(name: 'project_id') String projectId,
       @JsonKey(name: 'entry_key') String entryKey,
-      @JsonKey(name: 'language_code') String languageCode,
+      @JsonKey(name: 'language_code')
+      @LanguageEnumConverter()
+      LanguageEnum languageCode,
       @JsonKey(name: 'source_text') String? sourceText,
       @JsonKey(name: 'target_text') String? targetText,
       @JsonKey(name: 'translator_id') String? translatorId,
@@ -350,8 +335,6 @@ abstract class _$$TranslationEntryModelImplCopyWith<$Res>
       @JsonKey(name: 'translated_at') DateTime? translatedAt,
       @JsonKey(name: 'reviewed_at') DateTime? reviewedAt,
       @JsonKey(name: 'approved_at') DateTime? approvedAt,
-      @JsonKey(name: 'language_name') String? languageName,
-      @JsonKey(name: 'language_native_name') String? languageNativeName,
       @JsonKey(name: 'created_at') DateTime? createdAt,
       @JsonKey(name: 'updated_at') DateTime? updatedAt});
 }
@@ -392,8 +375,6 @@ class __$$TranslationEntryModelImplCopyWithImpl<$Res>
     Object? translatedAt = freezed,
     Object? reviewedAt = freezed,
     Object? approvedAt = freezed,
-    Object? languageName = freezed,
-    Object? languageNativeName = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -413,7 +394,7 @@ class __$$TranslationEntryModelImplCopyWithImpl<$Res>
       languageCode: null == languageCode
           ? _value.languageCode
           : languageCode // ignore: cast_nullable_to_non_nullable
-              as String,
+              as LanguageEnum,
       sourceText: freezed == sourceText
           ? _value.sourceText
           : sourceText // ignore: cast_nullable_to_non_nullable
@@ -486,14 +467,6 @@ class __$$TranslationEntryModelImplCopyWithImpl<$Res>
           ? _value.approvedAt
           : approvedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
-      languageName: freezed == languageName
-          ? _value.languageName
-          : languageName // ignore: cast_nullable_to_non_nullable
-              as String?,
-      languageNativeName: freezed == languageNativeName
-          ? _value.languageNativeName
-          : languageNativeName // ignore: cast_nullable_to_non_nullable
-              as String?,
       createdAt: freezed == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -513,7 +486,9 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
       {this.id,
       @JsonKey(name: 'project_id') required this.projectId,
       @JsonKey(name: 'entry_key') required this.entryKey,
-      @JsonKey(name: 'language_code') required this.languageCode,
+      @JsonKey(name: 'language_code')
+      @LanguageEnumConverter()
+      required this.languageCode,
       @JsonKey(name: 'source_text') this.sourceText,
       @JsonKey(name: 'target_text') this.targetText,
       @JsonKey(name: 'translator_id') this.translatorId,
@@ -532,8 +507,6 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
       @JsonKey(name: 'translated_at') this.translatedAt,
       @JsonKey(name: 'reviewed_at') this.reviewedAt,
       @JsonKey(name: 'approved_at') this.approvedAt,
-      @JsonKey(name: 'language_name') this.languageName,
-      @JsonKey(name: 'language_native_name') this.languageNativeName,
       @JsonKey(name: 'created_at') this.createdAt,
       @JsonKey(name: 'updated_at') this.updatedAt})
       : super._();
@@ -558,7 +531,8 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
   /// 语言代码
   @override
   @JsonKey(name: 'language_code')
-  final String languageCode;
+  @LanguageEnumConverter()
+  final LanguageEnum languageCode;
 
   /// 源文本
   @override
@@ -649,16 +623,6 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
   @JsonKey(name: 'approved_at')
   final DateTime? approvedAt;
 
-  /// 语言名称
-  @override
-  @JsonKey(name: 'language_name')
-  final String? languageName;
-
-  /// 语言本地名称
-  @override
-  @JsonKey(name: 'language_native_name')
-  final String? languageNativeName;
-
   /// 创建时间
   @override
   @JsonKey(name: 'created_at')
@@ -671,7 +635,7 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
 
   @override
   String toString() {
-    return 'TranslationEntryModel(id: $id, projectId: $projectId, entryKey: $entryKey, languageCode: $languageCode, sourceText: $sourceText, targetText: $targetText, translatorId: $translatorId, translatorUsername: $translatorUsername, reviewerId: $reviewerId, reviewerUsername: $reviewerUsername, contextInfo: $contextInfo, status: $status, version: $version, qualityScore: $qualityScore, issues: $issues, hasIssues: $hasIssues, characterCount: $characterCount, wordCount: $wordCount, assignedAt: $assignedAt, translatedAt: $translatedAt, reviewedAt: $reviewedAt, approvedAt: $approvedAt, languageName: $languageName, languageNativeName: $languageNativeName, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'TranslationEntryModel(id: $id, projectId: $projectId, entryKey: $entryKey, languageCode: $languageCode, sourceText: $sourceText, targetText: $targetText, translatorId: $translatorId, translatorUsername: $translatorUsername, reviewerId: $reviewerId, reviewerUsername: $reviewerUsername, contextInfo: $contextInfo, status: $status, version: $version, qualityScore: $qualityScore, issues: $issues, hasIssues: $hasIssues, characterCount: $characterCount, wordCount: $wordCount, assignedAt: $assignedAt, translatedAt: $translatedAt, reviewedAt: $reviewedAt, approvedAt: $approvedAt, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -719,10 +683,6 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
                 other.reviewedAt == reviewedAt) &&
             (identical(other.approvedAt, approvedAt) ||
                 other.approvedAt == approvedAt) &&
-            (identical(other.languageName, languageName) ||
-                other.languageName == languageName) &&
-            (identical(other.languageNativeName, languageNativeName) ||
-                other.languageNativeName == languageNativeName) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -755,8 +715,6 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
         translatedAt,
         reviewedAt,
         approvedAt,
-        languageName,
-        languageNativeName,
         createdAt,
         updatedAt
       ]);
@@ -783,7 +741,9 @@ abstract class _TranslationEntryModel extends TranslationEntryModel {
       {final String? id,
       @JsonKey(name: 'project_id') required final String projectId,
       @JsonKey(name: 'entry_key') required final String entryKey,
-      @JsonKey(name: 'language_code') required final String languageCode,
+      @JsonKey(name: 'language_code')
+      @LanguageEnumConverter()
+      required final LanguageEnum languageCode,
       @JsonKey(name: 'source_text') final String? sourceText,
       @JsonKey(name: 'target_text') final String? targetText,
       @JsonKey(name: 'translator_id') final String? translatorId,
@@ -802,8 +762,6 @@ abstract class _TranslationEntryModel extends TranslationEntryModel {
       @JsonKey(name: 'translated_at') final DateTime? translatedAt,
       @JsonKey(name: 'reviewed_at') final DateTime? reviewedAt,
       @JsonKey(name: 'approved_at') final DateTime? approvedAt,
-      @JsonKey(name: 'language_name') final String? languageName,
-      @JsonKey(name: 'language_native_name') final String? languageNativeName,
       @JsonKey(name: 'created_at') final DateTime? createdAt,
       @JsonKey(name: 'updated_at')
       final DateTime? updatedAt}) = _$TranslationEntryModelImpl;
@@ -829,7 +787,8 @@ abstract class _TranslationEntryModel extends TranslationEntryModel {
   /// 语言代码
   @override
   @JsonKey(name: 'language_code')
-  String get languageCode;
+  @LanguageEnumConverter()
+  LanguageEnum get languageCode;
 
   /// 源文本
   @override
@@ -917,16 +876,6 @@ abstract class _TranslationEntryModel extends TranslationEntryModel {
   @override
   @JsonKey(name: 'approved_at')
   DateTime? get approvedAt;
-
-  /// 语言名称
-  @override
-  @JsonKey(name: 'language_name')
-  String? get languageName;
-
-  /// 语言本地名称
-  @override
-  @JsonKey(name: 'language_native_name')
-  String? get languageNativeName;
 
   /// 创建时间
   @override

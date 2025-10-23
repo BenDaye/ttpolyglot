@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:ttpolyglot_model/src/enums/language_enum.dart';
 
 part 'translation_entry_model.freezed.dart';
 part 'translation_entry_model.g.dart';
@@ -17,7 +18,7 @@ class TranslationEntryModel with _$TranslationEntryModel {
     @JsonKey(name: 'entry_key') required String entryKey,
 
     /// 语言代码
-    @JsonKey(name: 'language_code') required String languageCode,
+    @JsonKey(name: 'language_code') @LanguageEnumConverter() required LanguageEnum languageCode,
 
     /// 源文本
     @JsonKey(name: 'source_text') String? sourceText,
@@ -72,12 +73,6 @@ class TranslationEntryModel with _$TranslationEntryModel {
 
     /// 批准时间
     @JsonKey(name: 'approved_at') DateTime? approvedAt,
-
-    /// 语言名称
-    @JsonKey(name: 'language_name') String? languageName,
-
-    /// 语言本地名称
-    @JsonKey(name: 'language_native_name') String? languageNativeName,
 
     /// 创建时间
     @JsonKey(name: 'created_at') DateTime? createdAt,

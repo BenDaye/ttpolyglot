@@ -79,13 +79,10 @@ class TranslationService extends BaseService {
         SELECT
           te.*,
           u_translator.username as translator_username,
-          u_reviewer.username as reviewer_username,
-          l.name as language_name,
-          l.native_name as language_native_name
+          u_reviewer.username as reviewer_username
         FROM {translation_entries} te
         LEFT JOIN {users} u_translator ON te.translator_id = u_translator.id
         LEFT JOIN {users} u_reviewer ON te.reviewer_id = u_reviewer.id
-        LEFT JOIN {languages} l ON te.language_code = l.code
         WHERE ${conditions.join(' AND ')}
         ORDER BY te.updated_at DESC
         LIMIT @limit OFFSET @offset
@@ -119,13 +116,10 @@ class TranslationService extends BaseService {
         SELECT
           te.*,
           u_translator.username as translator_username,
-          u_reviewer.username as reviewer_username,
-          l.name as language_name,
-          l.native_name as language_native_name
+          u_reviewer.username as reviewer_username
         FROM {translation_entries} te
         LEFT JOIN {users} u_translator ON te.translator_id = u_translator.id
         LEFT JOIN {users} u_reviewer ON te.reviewer_id = u_reviewer.id
-        LEFT JOIN {languages} l ON te.language_code = l.code
         WHERE te.id = @entry_id
       ''';
 

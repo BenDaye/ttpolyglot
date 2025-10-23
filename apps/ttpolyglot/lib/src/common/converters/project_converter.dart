@@ -13,10 +13,11 @@ class ProjectConverter {
   static Project toProject(ProjectModel model) {
     try {
       // 构建主语言
+      final languageEnum = model.primaryLanguageCode ?? LanguageEnum.enUS;
       final primaryLanguage = Language(
-        code: model.primaryLanguageCode ?? 'en-US',
-        name: model.primaryLanguageName ?? 'English',
-        nativeName: model.primaryLanguageNativeName ?? 'English',
+        code: languageEnum.code,
+        name: languageEnum.name,
+        nativeName: languageEnum.nativeName,
       );
 
       // 构建项目所有者
@@ -58,15 +59,13 @@ class ProjectConverter {
         ownerId: project.owner.id,
         status: project.isActive ? 'active' : 'inactive',
         visibility: 'private',
-        primaryLanguageCode: project.primaryLanguage.code,
+        primaryLanguageCode: LanguageEnum.fromValue(project.primaryLanguage.code),
         createdAt: project.createdAt,
         updatedAt: project.updatedAt,
         isActive: project.isActive,
         lastActivityAt: project.lastAccessedAt,
         ownerUsername: project.owner.email.split('@').first,
         ownerDisplayName: project.owner.name,
-        primaryLanguageName: project.primaryLanguage.name,
-        primaryLanguageNativeName: project.primaryLanguage.nativeName,
       );
     } catch (error, stackTrace) {
       log('[toProjectModel]', error: error, stackTrace: stackTrace, name: 'ProjectConverter');

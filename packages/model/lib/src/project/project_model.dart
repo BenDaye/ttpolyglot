@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:ttpolyglot_model/src/enums/language_enum.dart';
 import 'package:ttpolyglot_model/src/language/language_model.dart';
 
 import 'project_member_model.dart';
@@ -17,7 +18,7 @@ class ProjectModel with _$ProjectModel {
     @JsonKey(name: 'owner_id') required String ownerId,
     @JsonKey(name: 'status') required String status,
     @JsonKey(name: 'visibility') required String visibility,
-    @JsonKey(name: 'primary_language_code') String? primaryLanguageCode,
+    @JsonKey(name: 'primary_language_code') @LanguageEnumConverter() LanguageEnum? primaryLanguageCode,
     @JsonKey(name: 'total_keys') @Default(0) int totalKeys,
     @JsonKey(name: 'translated_keys') @Default(0) int translatedKeys,
     @JsonKey(name: 'languages_count') @Default(0) int languagesCount,
@@ -32,8 +33,6 @@ class ProjectModel with _$ProjectModel {
     @JsonKey(name: 'owner_username') String? ownerUsername,
     @JsonKey(name: 'owner_display_name') String? ownerDisplayName,
     @JsonKey(name: 'owner_avatar') String? ownerAvatar,
-    @JsonKey(name: 'primary_language_name') String? primaryLanguageName,
-    @JsonKey(name: 'primary_language_native_name') String? primaryLanguageNativeName,
     @JsonKey(name: 'completion_percentage') @Default(0.0) double completionPercentage,
   }) = _ProjectModel;
 
@@ -49,7 +48,7 @@ class CreateProjectRequest with _$CreateProjectRequest {
     String? description,
     @Default('active') String status,
     @Default('private') String visibility,
-    String? primaryLanguageCode,
+    @LanguageEnumConverter() LanguageEnum? primaryLanguageCode,
     Map<String, dynamic>? settings,
   }) = _CreateProjectRequest;
 
@@ -65,7 +64,7 @@ class UpdateProjectRequest with _$UpdateProjectRequest {
     String? description,
     String? status,
     String? visibility,
-    String? primaryLanguageCode,
+    @LanguageEnumConverter() LanguageEnum? primaryLanguageCode,
     Map<String, dynamic>? settings,
   }) = _UpdateProjectRequest;
 

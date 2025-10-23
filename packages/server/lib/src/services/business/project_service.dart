@@ -79,7 +79,6 @@ class ProjectService extends BaseService {
           p.last_activity_at, p.created_at, p.updated_at,
           u.username as owner_username,
           u.display_name as owner_display_name,
-          l.name as primary_language_name,
           CASE 
             WHEN p.total_keys > 0 
             THEN ROUND((p.translated_keys::float / p.total_keys * 100), 2)
@@ -87,7 +86,6 @@ class ProjectService extends BaseService {
           END as completion_percentage
         FROM {projects} p
         LEFT JOIN {users} u ON p.owner_id = u.id
-        LEFT JOIN {languages} l ON p.primary_language_code = l.code
         ${conditions.isNotEmpty ? 'WHERE ${conditions.join(' AND ')}' : ''}
         ORDER BY p.last_activity_at DESC
         LIMIT @limit OFFSET @offset
@@ -138,7 +136,6 @@ class ProjectService extends BaseService {
           p.last_activity_at, p.created_at, p.updated_at,
           u.id as owner_id, u.username as owner_username,
           u.display_name as owner_display_name, u.avatar_url as owner_avatar,
-          l.name as primary_language_name, l.native_name as primary_language_native_name,
           CASE 
             WHEN p.total_keys > 0 
             THEN ROUND((p.translated_keys::float / p.total_keys * 100), 2)
@@ -148,8 +145,6 @@ class ProjectService extends BaseService {
             json_agg(
               json_build_object(
                 'language_code', pl.language_code,
-                'language_name', lang.name,
-                'language_native_name', lang.native_name,
                 'is_primary', pl.is_primary,
                 'completion_percentage', pl.completion_percentage,
                 'is_enabled', pl.is_enabled
@@ -159,11 +154,9 @@ class ProjectService extends BaseService {
           ) as languages
         FROM {projects} p
         LEFT JOIN {users} u ON p.owner_id = u.id
-        LEFT JOIN {languages} l ON p.primary_language_code = l.code
         LEFT JOIN {project_languages} pl ON p.id = pl.project_id AND pl.is_enabled = true
-        LEFT JOIN {languages} lang ON pl.language_code = lang.code
         WHERE p.id = @project_id
-        GROUP BY p.id, u.id, l.code
+        GROUP BY p.id, u.id
       ''';
 
       final result = await _databaseService.query(sql, {'project_id': projectId});

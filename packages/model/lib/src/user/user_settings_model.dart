@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:ttpolyglot_model/src/enums/language_enum.dart';
 
 part 'user_settings_model.freezed.dart';
 part 'user_settings_model.g.dart';
@@ -31,7 +32,7 @@ class UserSettingsModel with _$UserSettingsModel {
 class LanguageSettingsModel with _$LanguageSettingsModel {
   const factory LanguageSettingsModel({
     /// 应用语言代码
-    @JsonKey(name: 'language_code') @Default('zh_CN') String languageCode,
+    @JsonKey(name: 'language_code') @LanguageEnumConverter() LanguageEnum? languageCode,
   }) = _LanguageSettingsModel;
 
   factory LanguageSettingsModel.fromJson(Map<String, dynamic> json) => _$LanguageSettingsModelFromJson(json);

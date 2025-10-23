@@ -35,7 +35,8 @@ mixin _$ProjectModel {
   @JsonKey(name: 'visibility')
   String get visibility => throw _privateConstructorUsedError;
   @JsonKey(name: 'primary_language_code')
-  String? get primaryLanguageCode => throw _privateConstructorUsedError;
+  @LanguageEnumConverter()
+  LanguageEnum? get primaryLanguageCode => throw _privateConstructorUsedError;
   @JsonKey(name: 'total_keys')
   int get totalKeys => throw _privateConstructorUsedError;
   @JsonKey(name: 'translated_keys')
@@ -62,10 +63,6 @@ mixin _$ProjectModel {
   String? get ownerDisplayName => throw _privateConstructorUsedError;
   @JsonKey(name: 'owner_avatar')
   String? get ownerAvatar => throw _privateConstructorUsedError;
-  @JsonKey(name: 'primary_language_name')
-  String? get primaryLanguageName => throw _privateConstructorUsedError;
-  @JsonKey(name: 'primary_language_native_name')
-  String? get primaryLanguageNativeName => throw _privateConstructorUsedError;
   @JsonKey(name: 'completion_percentage')
   double get completionPercentage => throw _privateConstructorUsedError;
 
@@ -93,7 +90,9 @@ abstract class $ProjectModelCopyWith<$Res> {
       @JsonKey(name: 'owner_id') String ownerId,
       @JsonKey(name: 'status') String status,
       @JsonKey(name: 'visibility') String visibility,
-      @JsonKey(name: 'primary_language_code') String? primaryLanguageCode,
+      @JsonKey(name: 'primary_language_code')
+      @LanguageEnumConverter()
+      LanguageEnum? primaryLanguageCode,
       @JsonKey(name: 'total_keys') int totalKeys,
       @JsonKey(name: 'translated_keys') int translatedKeys,
       @JsonKey(name: 'languages_count') int languagesCount,
@@ -107,9 +106,6 @@ abstract class $ProjectModelCopyWith<$Res> {
       @JsonKey(name: 'owner_username') String? ownerUsername,
       @JsonKey(name: 'owner_display_name') String? ownerDisplayName,
       @JsonKey(name: 'owner_avatar') String? ownerAvatar,
-      @JsonKey(name: 'primary_language_name') String? primaryLanguageName,
-      @JsonKey(name: 'primary_language_native_name')
-      String? primaryLanguageNativeName,
       @JsonKey(name: 'completion_percentage') double completionPercentage});
 }
 
@@ -149,8 +145,6 @@ class _$ProjectModelCopyWithImpl<$Res, $Val extends ProjectModel>
     Object? ownerUsername = freezed,
     Object? ownerDisplayName = freezed,
     Object? ownerAvatar = freezed,
-    Object? primaryLanguageName = freezed,
-    Object? primaryLanguageNativeName = freezed,
     Object? completionPercentage = null,
   }) {
     return _then(_value.copyWith(
@@ -185,7 +179,7 @@ class _$ProjectModelCopyWithImpl<$Res, $Val extends ProjectModel>
       primaryLanguageCode: freezed == primaryLanguageCode
           ? _value.primaryLanguageCode
           : primaryLanguageCode // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as LanguageEnum?,
       totalKeys: null == totalKeys
           ? _value.totalKeys
           : totalKeys // ignore: cast_nullable_to_non_nullable
@@ -238,14 +232,6 @@ class _$ProjectModelCopyWithImpl<$Res, $Val extends ProjectModel>
           ? _value.ownerAvatar
           : ownerAvatar // ignore: cast_nullable_to_non_nullable
               as String?,
-      primaryLanguageName: freezed == primaryLanguageName
-          ? _value.primaryLanguageName
-          : primaryLanguageName // ignore: cast_nullable_to_non_nullable
-              as String?,
-      primaryLanguageNativeName: freezed == primaryLanguageNativeName
-          ? _value.primaryLanguageNativeName
-          : primaryLanguageNativeName // ignore: cast_nullable_to_non_nullable
-              as String?,
       completionPercentage: null == completionPercentage
           ? _value.completionPercentage
           : completionPercentage // ignore: cast_nullable_to_non_nullable
@@ -270,7 +256,9 @@ abstract class _$$ProjectModelImplCopyWith<$Res>
       @JsonKey(name: 'owner_id') String ownerId,
       @JsonKey(name: 'status') String status,
       @JsonKey(name: 'visibility') String visibility,
-      @JsonKey(name: 'primary_language_code') String? primaryLanguageCode,
+      @JsonKey(name: 'primary_language_code')
+      @LanguageEnumConverter()
+      LanguageEnum? primaryLanguageCode,
       @JsonKey(name: 'total_keys') int totalKeys,
       @JsonKey(name: 'translated_keys') int translatedKeys,
       @JsonKey(name: 'languages_count') int languagesCount,
@@ -284,9 +272,6 @@ abstract class _$$ProjectModelImplCopyWith<$Res>
       @JsonKey(name: 'owner_username') String? ownerUsername,
       @JsonKey(name: 'owner_display_name') String? ownerDisplayName,
       @JsonKey(name: 'owner_avatar') String? ownerAvatar,
-      @JsonKey(name: 'primary_language_name') String? primaryLanguageName,
-      @JsonKey(name: 'primary_language_native_name')
-      String? primaryLanguageNativeName,
       @JsonKey(name: 'completion_percentage') double completionPercentage});
 }
 
@@ -324,8 +309,6 @@ class __$$ProjectModelImplCopyWithImpl<$Res>
     Object? ownerUsername = freezed,
     Object? ownerDisplayName = freezed,
     Object? ownerAvatar = freezed,
-    Object? primaryLanguageName = freezed,
-    Object? primaryLanguageNativeName = freezed,
     Object? completionPercentage = null,
   }) {
     return _then(_$ProjectModelImpl(
@@ -360,7 +343,7 @@ class __$$ProjectModelImplCopyWithImpl<$Res>
       primaryLanguageCode: freezed == primaryLanguageCode
           ? _value.primaryLanguageCode
           : primaryLanguageCode // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as LanguageEnum?,
       totalKeys: null == totalKeys
           ? _value.totalKeys
           : totalKeys // ignore: cast_nullable_to_non_nullable
@@ -413,14 +396,6 @@ class __$$ProjectModelImplCopyWithImpl<$Res>
           ? _value.ownerAvatar
           : ownerAvatar // ignore: cast_nullable_to_non_nullable
               as String?,
-      primaryLanguageName: freezed == primaryLanguageName
-          ? _value.primaryLanguageName
-          : primaryLanguageName // ignore: cast_nullable_to_non_nullable
-              as String?,
-      primaryLanguageNativeName: freezed == primaryLanguageNativeName
-          ? _value.primaryLanguageNativeName
-          : primaryLanguageNativeName // ignore: cast_nullable_to_non_nullable
-              as String?,
       completionPercentage: null == completionPercentage
           ? _value.completionPercentage
           : completionPercentage // ignore: cast_nullable_to_non_nullable
@@ -440,7 +415,9 @@ class _$ProjectModelImpl implements _ProjectModel {
       @JsonKey(name: 'owner_id') required this.ownerId,
       @JsonKey(name: 'status') required this.status,
       @JsonKey(name: 'visibility') required this.visibility,
-      @JsonKey(name: 'primary_language_code') this.primaryLanguageCode,
+      @JsonKey(name: 'primary_language_code')
+      @LanguageEnumConverter()
+      this.primaryLanguageCode,
       @JsonKey(name: 'total_keys') this.totalKeys = 0,
       @JsonKey(name: 'translated_keys') this.translatedKeys = 0,
       @JsonKey(name: 'languages_count') this.languagesCount = 0,
@@ -454,9 +431,6 @@ class _$ProjectModelImpl implements _ProjectModel {
       @JsonKey(name: 'owner_username') this.ownerUsername,
       @JsonKey(name: 'owner_display_name') this.ownerDisplayName,
       @JsonKey(name: 'owner_avatar') this.ownerAvatar,
-      @JsonKey(name: 'primary_language_name') this.primaryLanguageName,
-      @JsonKey(name: 'primary_language_native_name')
-      this.primaryLanguageNativeName,
       @JsonKey(name: 'completion_percentage') this.completionPercentage = 0.0})
       : _settings = settings;
 
@@ -486,7 +460,8 @@ class _$ProjectModelImpl implements _ProjectModel {
   final String visibility;
   @override
   @JsonKey(name: 'primary_language_code')
-  final String? primaryLanguageCode;
+  @LanguageEnumConverter()
+  final LanguageEnum? primaryLanguageCode;
   @override
   @JsonKey(name: 'total_keys')
   final int totalKeys;
@@ -536,18 +511,12 @@ class _$ProjectModelImpl implements _ProjectModel {
   @JsonKey(name: 'owner_avatar')
   final String? ownerAvatar;
   @override
-  @JsonKey(name: 'primary_language_name')
-  final String? primaryLanguageName;
-  @override
-  @JsonKey(name: 'primary_language_native_name')
-  final String? primaryLanguageNativeName;
-  @override
   @JsonKey(name: 'completion_percentage')
   final double completionPercentage;
 
   @override
   String toString() {
-    return 'ProjectModel(id: $id, name: $name, slug: $slug, description: $description, ownerId: $ownerId, status: $status, visibility: $visibility, primaryLanguageCode: $primaryLanguageCode, totalKeys: $totalKeys, translatedKeys: $translatedKeys, languagesCount: $languagesCount, membersCount: $membersCount, isPublic: $isPublic, isActive: $isActive, settings: $settings, lastActivityAt: $lastActivityAt, createdAt: $createdAt, updatedAt: $updatedAt, ownerUsername: $ownerUsername, ownerDisplayName: $ownerDisplayName, ownerAvatar: $ownerAvatar, primaryLanguageName: $primaryLanguageName, primaryLanguageNativeName: $primaryLanguageNativeName, completionPercentage: $completionPercentage)';
+    return 'ProjectModel(id: $id, name: $name, slug: $slug, description: $description, ownerId: $ownerId, status: $status, visibility: $visibility, primaryLanguageCode: $primaryLanguageCode, totalKeys: $totalKeys, translatedKeys: $translatedKeys, languagesCount: $languagesCount, membersCount: $membersCount, isPublic: $isPublic, isActive: $isActive, settings: $settings, lastActivityAt: $lastActivityAt, createdAt: $createdAt, updatedAt: $updatedAt, ownerUsername: $ownerUsername, ownerDisplayName: $ownerDisplayName, ownerAvatar: $ownerAvatar, completionPercentage: $completionPercentage)';
   }
 
   @override
@@ -591,11 +560,6 @@ class _$ProjectModelImpl implements _ProjectModel {
                 other.ownerDisplayName == ownerDisplayName) &&
             (identical(other.ownerAvatar, ownerAvatar) ||
                 other.ownerAvatar == ownerAvatar) &&
-            (identical(other.primaryLanguageName, primaryLanguageName) ||
-                other.primaryLanguageName == primaryLanguageName) &&
-            (identical(other.primaryLanguageNativeName,
-                    primaryLanguageNativeName) ||
-                other.primaryLanguageNativeName == primaryLanguageNativeName) &&
             (identical(other.completionPercentage, completionPercentage) ||
                 other.completionPercentage == completionPercentage));
   }
@@ -625,8 +589,6 @@ class _$ProjectModelImpl implements _ProjectModel {
         ownerUsername,
         ownerDisplayName,
         ownerAvatar,
-        primaryLanguageName,
-        primaryLanguageNativeName,
         completionPercentage
       ]);
 
@@ -655,7 +617,9 @@ abstract class _ProjectModel implements ProjectModel {
       @JsonKey(name: 'owner_id') required final String ownerId,
       @JsonKey(name: 'status') required final String status,
       @JsonKey(name: 'visibility') required final String visibility,
-      @JsonKey(name: 'primary_language_code') final String? primaryLanguageCode,
+      @JsonKey(name: 'primary_language_code')
+      @LanguageEnumConverter()
+      final LanguageEnum? primaryLanguageCode,
       @JsonKey(name: 'total_keys') final int totalKeys,
       @JsonKey(name: 'translated_keys') final int translatedKeys,
       @JsonKey(name: 'languages_count') final int languagesCount,
@@ -669,9 +633,6 @@ abstract class _ProjectModel implements ProjectModel {
       @JsonKey(name: 'owner_username') final String? ownerUsername,
       @JsonKey(name: 'owner_display_name') final String? ownerDisplayName,
       @JsonKey(name: 'owner_avatar') final String? ownerAvatar,
-      @JsonKey(name: 'primary_language_name') final String? primaryLanguageName,
-      @JsonKey(name: 'primary_language_native_name')
-      final String? primaryLanguageNativeName,
       @JsonKey(name: 'completion_percentage')
       final double completionPercentage}) = _$ProjectModelImpl;
 
@@ -701,7 +662,8 @@ abstract class _ProjectModel implements ProjectModel {
   String get visibility;
   @override
   @JsonKey(name: 'primary_language_code')
-  String? get primaryLanguageCode;
+  @LanguageEnumConverter()
+  LanguageEnum? get primaryLanguageCode;
   @override
   @JsonKey(name: 'total_keys')
   int get totalKeys;
@@ -742,12 +704,6 @@ abstract class _ProjectModel implements ProjectModel {
   @JsonKey(name: 'owner_avatar')
   String? get ownerAvatar;
   @override
-  @JsonKey(name: 'primary_language_name')
-  String? get primaryLanguageName;
-  @override
-  @JsonKey(name: 'primary_language_native_name')
-  String? get primaryLanguageNativeName;
-  @override
   @JsonKey(name: 'completion_percentage')
   double get completionPercentage;
 
@@ -770,7 +726,8 @@ mixin _$CreateProjectRequest {
   String? get description => throw _privateConstructorUsedError;
   String get status => throw _privateConstructorUsedError;
   String get visibility => throw _privateConstructorUsedError;
-  String? get primaryLanguageCode => throw _privateConstructorUsedError;
+  @LanguageEnumConverter()
+  LanguageEnum? get primaryLanguageCode => throw _privateConstructorUsedError;
   Map<String, dynamic>? get settings => throw _privateConstructorUsedError;
 
   /// Serializes this CreateProjectRequest to a JSON map.
@@ -795,7 +752,7 @@ abstract class $CreateProjectRequestCopyWith<$Res> {
       String? description,
       String status,
       String visibility,
-      String? primaryLanguageCode,
+      @LanguageEnumConverter() LanguageEnum? primaryLanguageCode,
       Map<String, dynamic>? settings});
 }
 
@@ -847,7 +804,7 @@ class _$CreateProjectRequestCopyWithImpl<$Res,
       primaryLanguageCode: freezed == primaryLanguageCode
           ? _value.primaryLanguageCode
           : primaryLanguageCode // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as LanguageEnum?,
       settings: freezed == settings
           ? _value.settings
           : settings // ignore: cast_nullable_to_non_nullable
@@ -870,7 +827,7 @@ abstract class _$$CreateProjectRequestImplCopyWith<$Res>
       String? description,
       String status,
       String visibility,
-      String? primaryLanguageCode,
+      @LanguageEnumConverter() LanguageEnum? primaryLanguageCode,
       Map<String, dynamic>? settings});
 }
 
@@ -919,7 +876,7 @@ class __$$CreateProjectRequestImplCopyWithImpl<$Res>
       primaryLanguageCode: freezed == primaryLanguageCode
           ? _value.primaryLanguageCode
           : primaryLanguageCode // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as LanguageEnum?,
       settings: freezed == settings
           ? _value._settings
           : settings // ignore: cast_nullable_to_non_nullable
@@ -937,7 +894,7 @@ class _$CreateProjectRequestImpl implements _CreateProjectRequest {
       this.description,
       this.status = 'active',
       this.visibility = 'private',
-      this.primaryLanguageCode,
+      @LanguageEnumConverter() this.primaryLanguageCode,
       final Map<String, dynamic>? settings})
       : _settings = settings;
 
@@ -957,7 +914,8 @@ class _$CreateProjectRequestImpl implements _CreateProjectRequest {
   @JsonKey()
   final String visibility;
   @override
-  final String? primaryLanguageCode;
+  @LanguageEnumConverter()
+  final LanguageEnum? primaryLanguageCode;
   final Map<String, dynamic>? _settings;
   @override
   Map<String, dynamic>? get settings {
@@ -1027,7 +985,7 @@ abstract class _CreateProjectRequest implements CreateProjectRequest {
       final String? description,
       final String status,
       final String visibility,
-      final String? primaryLanguageCode,
+      @LanguageEnumConverter() final LanguageEnum? primaryLanguageCode,
       final Map<String, dynamic>? settings}) = _$CreateProjectRequestImpl;
 
   factory _CreateProjectRequest.fromJson(Map<String, dynamic> json) =
@@ -1044,7 +1002,8 @@ abstract class _CreateProjectRequest implements CreateProjectRequest {
   @override
   String get visibility;
   @override
-  String? get primaryLanguageCode;
+  @LanguageEnumConverter()
+  LanguageEnum? get primaryLanguageCode;
   @override
   Map<String, dynamic>? get settings;
 
@@ -1067,7 +1026,8 @@ mixin _$UpdateProjectRequest {
   String? get description => throw _privateConstructorUsedError;
   String? get status => throw _privateConstructorUsedError;
   String? get visibility => throw _privateConstructorUsedError;
-  String? get primaryLanguageCode => throw _privateConstructorUsedError;
+  @LanguageEnumConverter()
+  LanguageEnum? get primaryLanguageCode => throw _privateConstructorUsedError;
   Map<String, dynamic>? get settings => throw _privateConstructorUsedError;
 
   /// Serializes this UpdateProjectRequest to a JSON map.
@@ -1092,7 +1052,7 @@ abstract class $UpdateProjectRequestCopyWith<$Res> {
       String? description,
       String? status,
       String? visibility,
-      String? primaryLanguageCode,
+      @LanguageEnumConverter() LanguageEnum? primaryLanguageCode,
       Map<String, dynamic>? settings});
 }
 
@@ -1144,7 +1104,7 @@ class _$UpdateProjectRequestCopyWithImpl<$Res,
       primaryLanguageCode: freezed == primaryLanguageCode
           ? _value.primaryLanguageCode
           : primaryLanguageCode // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as LanguageEnum?,
       settings: freezed == settings
           ? _value.settings
           : settings // ignore: cast_nullable_to_non_nullable
@@ -1167,7 +1127,7 @@ abstract class _$$UpdateProjectRequestImplCopyWith<$Res>
       String? description,
       String? status,
       String? visibility,
-      String? primaryLanguageCode,
+      @LanguageEnumConverter() LanguageEnum? primaryLanguageCode,
       Map<String, dynamic>? settings});
 }
 
@@ -1216,7 +1176,7 @@ class __$$UpdateProjectRequestImplCopyWithImpl<$Res>
       primaryLanguageCode: freezed == primaryLanguageCode
           ? _value.primaryLanguageCode
           : primaryLanguageCode // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as LanguageEnum?,
       settings: freezed == settings
           ? _value._settings
           : settings // ignore: cast_nullable_to_non_nullable
@@ -1234,7 +1194,7 @@ class _$UpdateProjectRequestImpl implements _UpdateProjectRequest {
       this.description,
       this.status,
       this.visibility,
-      this.primaryLanguageCode,
+      @LanguageEnumConverter() this.primaryLanguageCode,
       final Map<String, dynamic>? settings})
       : _settings = settings;
 
@@ -1252,7 +1212,8 @@ class _$UpdateProjectRequestImpl implements _UpdateProjectRequest {
   @override
   final String? visibility;
   @override
-  final String? primaryLanguageCode;
+  @LanguageEnumConverter()
+  final LanguageEnum? primaryLanguageCode;
   final Map<String, dynamic>? _settings;
   @override
   Map<String, dynamic>? get settings {
@@ -1322,7 +1283,7 @@ abstract class _UpdateProjectRequest implements UpdateProjectRequest {
       final String? description,
       final String? status,
       final String? visibility,
-      final String? primaryLanguageCode,
+      @LanguageEnumConverter() final LanguageEnum? primaryLanguageCode,
       final Map<String, dynamic>? settings}) = _$UpdateProjectRequestImpl;
 
   factory _UpdateProjectRequest.fromJson(Map<String, dynamic> json) =
@@ -1339,7 +1300,8 @@ abstract class _UpdateProjectRequest implements UpdateProjectRequest {
   @override
   String? get visibility;
   @override
-  String? get primaryLanguageCode;
+  @LanguageEnumConverter()
+  LanguageEnum? get primaryLanguageCode;
   @override
   Map<String, dynamic>? get settings;
 

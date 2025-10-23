@@ -55,7 +55,9 @@ class UserSettingsService extends BaseService {
       // 构建设置对象
       final languageSettings = settingsResult.isNotEmpty
           ? LanguageSettingsModel(
-              languageCode: settingsResult.first.toColumnMap()['language_code'] as String? ?? 'zh_CN',
+              languageCode: LanguageEnum.fromValue(
+                settingsResult.first.toColumnMap()['language_code'] as String? ?? 'zh-CN',
+              ),
             )
           : const LanguageSettingsModel();
 
@@ -204,7 +206,7 @@ class UserSettingsService extends BaseService {
       // 清除缓存
       await _redisService.delete('user:settings:$userId');
 
-      return LanguageSettingsModel(languageCode: languageCode);
+      return LanguageSettingsModel(languageCode: LanguageEnum.fromValue(languageCode));
     }, operationName: 'updateLanguageSettings');
   }
 

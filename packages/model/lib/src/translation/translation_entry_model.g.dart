@@ -12,7 +12,8 @@ _$TranslationEntryModelImpl _$$TranslationEntryModelImplFromJson(
       id: json['id'] as String?,
       projectId: json['project_id'] as String,
       entryKey: json['entry_key'] as String,
-      languageCode: json['language_code'] as String,
+      languageCode: const LanguageEnumConverter()
+          .fromJson(json['language_code'] as String),
       sourceText: json['source_text'] as String?,
       targetText: json['target_text'] as String?,
       translatorId: json['translator_id'] as String?,
@@ -39,8 +40,6 @@ _$TranslationEntryModelImpl _$$TranslationEntryModelImplFromJson(
       approvedAt: json['approved_at'] == null
           ? null
           : DateTime.parse(json['approved_at'] as String),
-      languageName: json['language_name'] as String?,
-      languageNativeName: json['language_native_name'] as String?,
       createdAt: json['created_at'] == null
           ? null
           : DateTime.parse(json['created_at'] as String),
@@ -55,7 +54,8 @@ Map<String, dynamic> _$$TranslationEntryModelImplToJson(
       'id': instance.id,
       'project_id': instance.projectId,
       'entry_key': instance.entryKey,
-      'language_code': instance.languageCode,
+      'language_code':
+          const LanguageEnumConverter().toJson(instance.languageCode),
       'source_text': instance.sourceText,
       'target_text': instance.targetText,
       'translator_id': instance.translatorId,
@@ -74,8 +74,6 @@ Map<String, dynamic> _$$TranslationEntryModelImplToJson(
       'translated_at': instance.translatedAt?.toIso8601String(),
       'reviewed_at': instance.reviewedAt?.toIso8601String(),
       'approved_at': instance.approvedAt?.toIso8601String(),
-      'language_name': instance.languageName,
-      'language_native_name': instance.languageNativeName,
       'created_at': instance.createdAt?.toIso8601String(),
       'updated_at': instance.updatedAt?.toIso8601String(),
     };

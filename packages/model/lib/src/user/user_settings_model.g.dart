@@ -36,14 +36,28 @@ Map<String, dynamic> _$$UserSettingsModelImplToJson(
 _$LanguageSettingsModelImpl _$$LanguageSettingsModelImplFromJson(
         Map<String, dynamic> json) =>
     _$LanguageSettingsModelImpl(
-      languageCode: json['language_code'] as String? ?? 'zh_CN',
+      languageCode: _$JsonConverterFromJson<String, LanguageEnum>(
+          json['language_code'], const LanguageEnumConverter().fromJson),
     );
 
 Map<String, dynamic> _$$LanguageSettingsModelImplToJson(
         _$LanguageSettingsModelImpl instance) =>
     <String, dynamic>{
-      'language_code': instance.languageCode,
+      'language_code': _$JsonConverterToJson<String, LanguageEnum>(
+          instance.languageCode, const LanguageEnumConverter().toJson),
     };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) =>
+    json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) =>
+    value == null ? null : toJson(value);
 
 _$GeneralSettingsModelImpl _$$GeneralSettingsModelImplFromJson(
         Map<String, dynamic> json) =>

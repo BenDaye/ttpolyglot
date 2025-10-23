@@ -15,7 +15,9 @@ _$ProjectModelImpl _$$ProjectModelImplFromJson(Map<String, dynamic> json) =>
       ownerId: json['owner_id'] as String,
       status: json['status'] as String,
       visibility: json['visibility'] as String,
-      primaryLanguageCode: json['primary_language_code'] as String?,
+      primaryLanguageCode: _$JsonConverterFromJson<String, LanguageEnum>(
+          json['primary_language_code'],
+          const LanguageEnumConverter().fromJson),
       totalKeys: (json['total_keys'] as num?)?.toInt() ?? 0,
       translatedKeys: (json['translated_keys'] as num?)?.toInt() ?? 0,
       languagesCount: (json['languages_count'] as num?)?.toInt() ?? 0,
@@ -31,9 +33,6 @@ _$ProjectModelImpl _$$ProjectModelImplFromJson(Map<String, dynamic> json) =>
       ownerUsername: json['owner_username'] as String?,
       ownerDisplayName: json['owner_display_name'] as String?,
       ownerAvatar: json['owner_avatar'] as String?,
-      primaryLanguageName: json['primary_language_name'] as String?,
-      primaryLanguageNativeName:
-          json['primary_language_native_name'] as String?,
       completionPercentage:
           (json['completion_percentage'] as num?)?.toDouble() ?? 0.0,
     );
@@ -47,7 +46,8 @@ Map<String, dynamic> _$$ProjectModelImplToJson(_$ProjectModelImpl instance) =>
       'owner_id': instance.ownerId,
       'status': instance.status,
       'visibility': instance.visibility,
-      'primary_language_code': instance.primaryLanguageCode,
+      'primary_language_code': _$JsonConverterToJson<String, LanguageEnum>(
+          instance.primaryLanguageCode, const LanguageEnumConverter().toJson),
       'total_keys': instance.totalKeys,
       'translated_keys': instance.translatedKeys,
       'languages_count': instance.languagesCount,
@@ -61,10 +61,20 @@ Map<String, dynamic> _$$ProjectModelImplToJson(_$ProjectModelImpl instance) =>
       'owner_username': instance.ownerUsername,
       'owner_display_name': instance.ownerDisplayName,
       'owner_avatar': instance.ownerAvatar,
-      'primary_language_name': instance.primaryLanguageName,
-      'primary_language_native_name': instance.primaryLanguageNativeName,
       'completion_percentage': instance.completionPercentage,
     };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) =>
+    json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) =>
+    value == null ? null : toJson(value);
 
 _$CreateProjectRequestImpl _$$CreateProjectRequestImplFromJson(
         Map<String, dynamic> json) =>
@@ -74,7 +84,8 @@ _$CreateProjectRequestImpl _$$CreateProjectRequestImplFromJson(
       description: json['description'] as String?,
       status: json['status'] as String? ?? 'active',
       visibility: json['visibility'] as String? ?? 'private',
-      primaryLanguageCode: json['primaryLanguageCode'] as String?,
+      primaryLanguageCode: _$JsonConverterFromJson<String, LanguageEnum>(
+          json['primaryLanguageCode'], const LanguageEnumConverter().fromJson),
       settings: json['settings'] as Map<String, dynamic>?,
     );
 
@@ -86,7 +97,8 @@ Map<String, dynamic> _$$CreateProjectRequestImplToJson(
       'description': instance.description,
       'status': instance.status,
       'visibility': instance.visibility,
-      'primaryLanguageCode': instance.primaryLanguageCode,
+      'primaryLanguageCode': _$JsonConverterToJson<String, LanguageEnum>(
+          instance.primaryLanguageCode, const LanguageEnumConverter().toJson),
       'settings': instance.settings,
     };
 
@@ -98,7 +110,8 @@ _$UpdateProjectRequestImpl _$$UpdateProjectRequestImplFromJson(
       description: json['description'] as String?,
       status: json['status'] as String?,
       visibility: json['visibility'] as String?,
-      primaryLanguageCode: json['primaryLanguageCode'] as String?,
+      primaryLanguageCode: _$JsonConverterFromJson<String, LanguageEnum>(
+          json['primaryLanguageCode'], const LanguageEnumConverter().fromJson),
       settings: json['settings'] as Map<String, dynamic>?,
     );
 
@@ -110,7 +123,8 @@ Map<String, dynamic> _$$UpdateProjectRequestImplToJson(
       'description': instance.description,
       'status': instance.status,
       'visibility': instance.visibility,
-      'primaryLanguageCode': instance.primaryLanguageCode,
+      'primaryLanguageCode': _$JsonConverterToJson<String, LanguageEnum>(
+          instance.primaryLanguageCode, const LanguageEnumConverter().toJson),
       'settings': instance.settings,
     };
 

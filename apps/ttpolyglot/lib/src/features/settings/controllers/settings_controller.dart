@@ -64,7 +64,7 @@ class SettingsController extends GetxController {
       final settings = await _userSettingsApi.getUserSettings();
 
       // 更新响应式变量
-      _language.value = settings.languageSettings.languageCode;
+      _language.value = settings.languageSettings.languageCode?.code ?? 'zh_CN';
       _autoSave.value = settings.generalSettings.autoSave;
       _notifications.value = settings.generalSettings.notifications;
 

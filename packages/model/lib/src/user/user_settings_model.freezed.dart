@@ -359,7 +359,8 @@ LanguageSettingsModel _$LanguageSettingsModelFromJson(
 mixin _$LanguageSettingsModel {
   /// 应用语言代码
   @JsonKey(name: 'language_code')
-  String get languageCode => throw _privateConstructorUsedError;
+  @LanguageEnumConverter()
+  LanguageEnum? get languageCode => throw _privateConstructorUsedError;
 
   /// Serializes this LanguageSettingsModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -377,7 +378,10 @@ abstract class $LanguageSettingsModelCopyWith<$Res> {
           $Res Function(LanguageSettingsModel) then) =
       _$LanguageSettingsModelCopyWithImpl<$Res, LanguageSettingsModel>;
   @useResult
-  $Res call({@JsonKey(name: 'language_code') String languageCode});
+  $Res call(
+      {@JsonKey(name: 'language_code')
+      @LanguageEnumConverter()
+      LanguageEnum? languageCode});
 }
 
 /// @nodoc
@@ -396,13 +400,13 @@ class _$LanguageSettingsModelCopyWithImpl<$Res,
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? languageCode = null,
+    Object? languageCode = freezed,
   }) {
     return _then(_value.copyWith(
-      languageCode: null == languageCode
+      languageCode: freezed == languageCode
           ? _value.languageCode
           : languageCode // ignore: cast_nullable_to_non_nullable
-              as String,
+              as LanguageEnum?,
     ) as $Val);
   }
 }
@@ -416,7 +420,10 @@ abstract class _$$LanguageSettingsModelImplCopyWith<$Res>
       __$$LanguageSettingsModelImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({@JsonKey(name: 'language_code') String languageCode});
+  $Res call(
+      {@JsonKey(name: 'language_code')
+      @LanguageEnumConverter()
+      LanguageEnum? languageCode});
 }
 
 /// @nodoc
@@ -433,13 +440,13 @@ class __$$LanguageSettingsModelImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? languageCode = null,
+    Object? languageCode = freezed,
   }) {
     return _then(_$LanguageSettingsModelImpl(
-      languageCode: null == languageCode
+      languageCode: freezed == languageCode
           ? _value.languageCode
           : languageCode // ignore: cast_nullable_to_non_nullable
-              as String,
+              as LanguageEnum?,
     ));
   }
 }
@@ -448,7 +455,9 @@ class __$$LanguageSettingsModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$LanguageSettingsModelImpl implements _LanguageSettingsModel {
   const _$LanguageSettingsModelImpl(
-      {@JsonKey(name: 'language_code') this.languageCode = 'zh_CN'});
+      {@JsonKey(name: 'language_code')
+      @LanguageEnumConverter()
+      this.languageCode});
 
   factory _$LanguageSettingsModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$LanguageSettingsModelImplFromJson(json);
@@ -456,7 +465,8 @@ class _$LanguageSettingsModelImpl implements _LanguageSettingsModel {
   /// 应用语言代码
   @override
   @JsonKey(name: 'language_code')
-  final String languageCode;
+  @LanguageEnumConverter()
+  final LanguageEnum? languageCode;
 
   @override
   String toString() {
@@ -495,8 +505,9 @@ class _$LanguageSettingsModelImpl implements _LanguageSettingsModel {
 
 abstract class _LanguageSettingsModel implements LanguageSettingsModel {
   const factory _LanguageSettingsModel(
-          {@JsonKey(name: 'language_code') final String languageCode}) =
-      _$LanguageSettingsModelImpl;
+      {@JsonKey(name: 'language_code')
+      @LanguageEnumConverter()
+      final LanguageEnum? languageCode}) = _$LanguageSettingsModelImpl;
 
   factory _LanguageSettingsModel.fromJson(Map<String, dynamic> json) =
       _$LanguageSettingsModelImpl.fromJson;
@@ -504,7 +515,8 @@ abstract class _LanguageSettingsModel implements LanguageSettingsModel {
   /// 应用语言代码
   @override
   @JsonKey(name: 'language_code')
-  String get languageCode;
+  @LanguageEnumConverter()
+  LanguageEnum? get languageCode;
 
   /// Create a copy of LanguageSettingsModel
   /// with the given fields replaced by the non-null parameter values.
