@@ -279,7 +279,7 @@ class ProjectService extends BaseService {
             visibility, settings, status, members_count
           ) VALUES (
             @name, @slug, @description, @owner_id, @primary_language_id,
-            @visibility, @settings, 'active'
+            @visibility, @settings, 'active', @members_count
           ) RETURNING id
         ''', {
           'name': name,
