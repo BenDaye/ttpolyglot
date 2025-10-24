@@ -63,7 +63,7 @@ class NotificationSettingsApi {
           'isEnabled': isEnabled,
         },
         options: Options(
-          extra: const RequestExtraModel(
+          extra: const ExtraModel(
             showSuccessToast: true,
           ).toJson(),
         ),
@@ -93,7 +93,7 @@ class NotificationSettingsApi {
           'isEnabled': isEnabled,
         },
         options: Options(
-          extra: const RequestExtraModel(
+          extra: const ExtraModel(
             showSuccessToast: true,
           ).toJson(),
         ),
@@ -120,7 +120,7 @@ class NotificationSettingsApi {
           'updates': updates.map((u) => u.toJson()).toList(),
         },
         options: Options(
-          extra: const RequestExtraModel(
+          extra: const ExtraModel(
             showSuccessToast: true,
           ).toJson(),
         ),
@@ -145,7 +145,7 @@ class NotificationSettingsApi {
           if (projectId != null) 'projectId': projectId,
         },
         options: Options(
-          extra: const RequestExtraModel(
+          extra: const ExtraModel(
             showSuccessToast: false, // 不显示成功提示
           ).toJson(),
         ),

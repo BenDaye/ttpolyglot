@@ -20,7 +20,9 @@ LoginResponseModel _$LoginResponseModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$LoginResponseModel {
+  @JsonKey(name: 'user')
   UserInfoModel get user => throw _privateConstructorUsedError;
+  @JsonKey(name: 'tokens')
   TokenInfoModel get tokens => throw _privateConstructorUsedError;
 
   /// Serializes this LoginResponseModel to a JSON map.
@@ -39,7 +41,9 @@ abstract class $LoginResponseModelCopyWith<$Res> {
           LoginResponseModel value, $Res Function(LoginResponseModel) then) =
       _$LoginResponseModelCopyWithImpl<$Res, LoginResponseModel>;
   @useResult
-  $Res call({UserInfoModel user, TokenInfoModel tokens});
+  $Res call(
+      {@JsonKey(name: 'user') UserInfoModel user,
+      @JsonKey(name: 'tokens') TokenInfoModel tokens});
 
   $UserInfoModelCopyWith<$Res> get user;
   $TokenInfoModelCopyWith<$Res> get tokens;
@@ -104,7 +108,9 @@ abstract class _$$LoginResponseModelImplCopyWith<$Res>
       __$$LoginResponseModelImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({UserInfoModel user, TokenInfoModel tokens});
+  $Res call(
+      {@JsonKey(name: 'user') UserInfoModel user,
+      @JsonKey(name: 'tokens') TokenInfoModel tokens});
 
   @override
   $UserInfoModelCopyWith<$Res> get user;
@@ -144,14 +150,18 @@ class __$$LoginResponseModelImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$LoginResponseModelImpl implements _LoginResponseModel {
-  const _$LoginResponseModelImpl({required this.user, required this.tokens});
+  const _$LoginResponseModelImpl(
+      {@JsonKey(name: 'user') required this.user,
+      @JsonKey(name: 'tokens') required this.tokens});
 
   factory _$LoginResponseModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$LoginResponseModelImplFromJson(json);
 
   @override
+  @JsonKey(name: 'user')
   final UserInfoModel user;
   @override
+  @JsonKey(name: 'tokens')
   final TokenInfoModel tokens;
 
   @override
@@ -191,15 +201,18 @@ class _$LoginResponseModelImpl implements _LoginResponseModel {
 
 abstract class _LoginResponseModel implements LoginResponseModel {
   const factory _LoginResponseModel(
-      {required final UserInfoModel user,
-      required final TokenInfoModel tokens}) = _$LoginResponseModelImpl;
+          {@JsonKey(name: 'user') required final UserInfoModel user,
+          @JsonKey(name: 'tokens') required final TokenInfoModel tokens}) =
+      _$LoginResponseModelImpl;
 
   factory _LoginResponseModel.fromJson(Map<String, dynamic> json) =
       _$LoginResponseModelImpl.fromJson;
 
   @override
+  @JsonKey(name: 'user')
   UserInfoModel get user;
   @override
+  @JsonKey(name: 'tokens')
   TokenInfoModel get tokens;
 
   /// Create a copy of LoginResponseModel

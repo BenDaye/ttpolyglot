@@ -9,19 +9,20 @@ class AuthApi {
   /// 注意：登录不使用拦截器的 loading，由 Controller 控制
   Future<LoginResponseModel> login(LoginRequestModel request) async {
     try {
-      final response = await HttpClient.post<Map<String, dynamic>>(
+      final response = await HttpClient.post<LoginResponseModel>(
         '/auth/login',
         data: request.toJson(),
         options: Options(
-          extra: const RequestExtraModel(
+          extra: const ExtraModel(
             showLoading: false, // 关键：登录不使用拦截器 loading
             showErrorToast: true,
           ).toJson(),
         ),
       );
-
-      // response 已经被 ResponseInterceptor 处理，直接获取 data 字段
-      final data = response.data as Map<String, dynamic>;
+      final data = response.data as Map<String, dynamic>?;
+      if (data == null) {
+        throw Exception('登录响应数据为空');
+      }
       return LoginResponseModel.fromJson(data);
     } catch (error, stackTrace) {
       Logger.error('登录请求失败', error: error, stackTrace: stackTrace);
@@ -35,7 +36,7 @@ class AuthApi {
       await HttpClient.post(
         '/auth/logout',
         options: Options(
-          extra: const RequestExtraModel(
+          extra: const ExtraModel(
             showSuccessToast: true,
           ).toJson(),
         ),

@@ -1,16 +1,16 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'api_response_model.dart';
+part of 'base_model.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$ApiResponseModelImpl<T> _$$ApiResponseModelImplFromJson<T>(
+_$BaseModelImpl<T> _$$BaseModelImplFromJson<T>(
   Map<String, dynamic> json,
   T Function(Object? json) fromJsonT,
 ) =>
-    _$ApiResponseModelImpl<T>(
+    _$BaseModelImpl<T>(
       code:
           const DataCodeEnumConverter().fromJson((json['code'] as num).toInt()),
       message: json['message'] as String? ?? "",
@@ -21,8 +21,8 @@ _$ApiResponseModelImpl<T> _$$ApiResponseModelImplFromJson<T>(
       data: _$nullableGenericFromJson(json['data'], fromJsonT),
     );
 
-Map<String, dynamic> _$$ApiResponseModelImplToJson<T>(
-  _$ApiResponseModelImpl<T> instance,
+Map<String, dynamic> _$$BaseModelImplToJson<T>(
+  _$BaseModelImpl<T> instance,
   Object? Function(T value) toJsonT,
 ) =>
     <String, dynamic>{

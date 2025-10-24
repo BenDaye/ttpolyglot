@@ -56,7 +56,7 @@ class UserSettingsController extends BaseController {
 
       final settings = await _userSettingsService.getUserSettings(userId);
 
-      return ResponseUtils.success(
+      return ResponseUtils.success<UserSettingsModel>(
         message: '获取用户设置成功',
         data: settings,
       );
@@ -101,7 +101,7 @@ class UserSettingsController extends BaseController {
 
       final settings = await _userSettingsService.getUserSettings(userId);
 
-      return ResponseUtils.success(
+      return ResponseUtils.success<LanguageSettingsModel>(
         message: '获取语言设置成功',
         data: settings.languageSettings,
       );
@@ -151,7 +151,7 @@ class UserSettingsController extends BaseController {
 
       final settings = await _userSettingsService.getUserSettings(userId);
 
-      return ResponseUtils.success(
+      return ResponseUtils.success<GeneralSettingsModel>(
         message: '获取通用设置成功',
         data: settings.generalSettings,
       );
@@ -182,7 +182,7 @@ class UserSettingsController extends BaseController {
         notifications: notifications,
       );
 
-      return ResponseUtils.success(
+      return ResponseUtils.success<GeneralSettingsModel>(
         message: '更新通用设置成功',
         data: generalSettings,
       );
@@ -203,7 +203,7 @@ class UserSettingsController extends BaseController {
 
       final settings = await _userSettingsService.getUserSettings(userId);
 
-      return ResponseUtils.success(
+      return ResponseUtils.success<TranslationSettingsModel>(
         message: '获取翻译设置成功',
         data: settings.translationSettings,
       );
@@ -255,7 +255,7 @@ class UserSettingsController extends BaseController {
 
       final addedProvider = await _userSettingsService.addTranslationProvider(userId, provider);
 
-      return ResponseUtils.success(
+      return ResponseUtils.success<TranslationProviderConfigModel>(
         message: '添加翻译接口成功',
         data: addedProvider,
       );
@@ -281,7 +281,7 @@ class UserSettingsController extends BaseController {
 
       final updatedProvider = await _userSettingsService.updateTranslationProvider(userId, providerId, provider);
 
-      return ResponseUtils.success(
+      return ResponseUtils.success<TranslationProviderConfigModel>(
         message: '更新翻译接口成功',
         data: updatedProvider,
       );
@@ -322,7 +322,7 @@ class UserSettingsController extends BaseController {
 
       final defaultSettings = await _userSettingsService.resetUserSettings(userId);
 
-      return ResponseUtils.success(
+      return ResponseUtils.success<UserSettingsModel>(
         message: '重置用户设置成功',
         data: defaultSettings,
       );

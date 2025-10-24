@@ -25,51 +25,6 @@ class ResponseUtils {
     return code.value;
   }
 
-  /// 将数据转换为可 JSON 序列化的格式
-  static dynamic _toJsonValue(dynamic data) {
-    if (data == null) {
-      return null;
-    }
-
-    // 如果是基本类型，直接返回
-    if (data is String || data is num || data is bool) {
-      return data;
-    }
-
-    // 处理 DateTime 类型
-    if (data is DateTime) {
-      return data.toUtc().toIso8601String();
-    }
-
-    // 如果是 Map，递归处理每个值
-    if (data is Map) {
-      return data.map((key, value) => MapEntry(key, _toJsonValue(value)));
-    }
-
-    // 如果是 List，递归处理每个元素
-    if (data is List) {
-      return data.map((item) => _toJsonValue(item)).toList();
-    }
-
-    // 如果对象有 toJson 方法，调用它
-    try {
-      final dynamic obj = data;
-      // 尝试调用 toJson 方法
-      return obj.toJson();
-    } catch (error) {
-      // 如果没有 toJson 方法或调用失败，直接返回原数据
-      return data;
-    }
-  }
-
-  /// JSON 编码转换器，处理特殊类型
-  static Object? _jsonEncodable(dynamic value) {
-    if (value is DateTime) {
-      return value.toUtc().toIso8601String();
-    }
-    return value;
-  }
-
   /// 构建成功响应
   static Response success<T>({
     String? message,
@@ -78,7 +33,7 @@ class ResponseUtils {
     Map<String, String>? headers,
   }) {
     final requestId = _uuid.v4();
-    final apiResponse = ApiResponseModel<T>(
+    final apiResponse = BaseModel<T>(
       code: DataCodeEnum.success,
       message: message ?? DataCodeEnum.success.message,
       type: type,
@@ -95,8 +50,7 @@ class ResponseUtils {
       200,
       headers: responseHeaders,
       body: jsonEncode(
-        apiResponse.toJson((data) => _toJsonValue(data)),
-        toEncodable: _jsonEncodable,
+        apiResponse.toJson((data) => Utils.toJsonValue(data)),
       ),
     );
   }
@@ -111,7 +65,7 @@ class ResponseUtils {
   }) {
     code ??= DataCodeEnum.error;
     final requestId = _uuid.v4();
-    final apiResponse = ApiResponseModel<T>(
+    final apiResponse = BaseModel<T>(
       code: code,
       message: message ?? code.message,
       type: type,
@@ -128,8 +82,7 @@ class ResponseUtils {
       _getHttpStatusCode(code),
       headers: responseHeaders,
       body: jsonEncode(
-        apiResponse.toJson((data) => _toJsonValue(data)),
-        toEncodable: _jsonEncodable,
+        apiResponse.toJson((data) => Utils.toJsonValue(data)),
       ),
     );
   }
@@ -140,12 +93,26 @@ class ResponseUtils {
     Map<String, String>? headers,
     DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
   }) {
-    return error<Map<String, dynamic>>(
-      code: exception.code,
+    final requestId = _uuid.v4();
+    final apiResponse = BaseModel<ServerException>(
+      code: DataCodeEnum.error,
       message: exception.message,
-      data: exception.toMap(),
       type: type,
-      headers: headers,
+      data: exception,
+    );
+
+    final responseHeaders = <String, String>{
+      'Content-Type': _contentTypeJson,
+      'X-Request-ID': requestId,
+      ...?headers,
+    };
+
+    return Response(
+      _getHttpStatusCode(exception.code),
+      headers: responseHeaders,
+      body: jsonEncode(
+        apiResponse.toJson((data) => data.toMap()),
+      ),
     );
   }
 
@@ -154,12 +121,26 @@ class ResponseUtils {
     Map<String, String>? headers,
     DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
   }) {
-    return error<Map<String, dynamic>>(
-      code: DataCodeEnum.noContent,
+    final requestId = _uuid.v4();
+    final apiResponse = BaseModel<void>(
+      code: DataCodeEnum.error,
       message: DataCodeEnum.noContent.message,
-      data: {},
       type: type,
-      headers: headers,
+      data: null,
+    );
+
+    final responseHeaders = <String, String>{
+      'Content-Type': _contentTypeJson,
+      'X-Request-ID': requestId,
+      ...?headers,
+    };
+
+    return Response(
+      _getHttpStatusCode(DataCodeEnum.noContent),
+      headers: responseHeaders,
+      body: jsonEncode(
+        apiResponse.toJson((data) => null),
+      ),
     );
   }
 
@@ -201,8 +182,11 @@ class ResponseUtils {
     String? serverName,
     DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
   }) {
-    return success<Map<String, dynamic>>(
+    final requestId = _uuid.v4();
+    final apiResponse = BaseModel<Map<String, dynamic>>(
+      code: DataCodeEnum.success,
       message: DataCodeEnum.success.message,
+      type: type,
       data: {
         'version': version ?? '1.0.0',
         'api_version': apiVersion ?? 'v1',
@@ -210,7 +194,19 @@ class ResponseUtils {
         'environment': ServerConfig.isDevelopment ? 'development' : 'production',
         'timestamp': DateTime.now().toIso8601String(),
       },
-      type: type,
+    );
+
+    final responseHeaders = <String, String>{
+      'Content-Type': _contentTypeJson,
+      'X-Request-ID': requestId,
+    };
+
+    return Response(
+      200,
+      headers: responseHeaders,
+      body: jsonEncode(
+        apiResponse.toJson((data) => data),
+      ),
     );
   }
 
@@ -225,8 +221,11 @@ class ResponseUtils {
       final dbHealthy = await databaseService.isHealthy();
       final redisHealthy = await redisService.isHealthy();
 
-      return success<Map<String, dynamic>>(
+      final requestId = _uuid.v4();
+      final apiResponse = BaseModel<Map<String, dynamic>>(
+        code: DataCodeEnum.success,
         message: DataCodeEnum.success.message,
+        type: type,
         data: {
           'status': dbHealthy && redisHealthy ? 'healthy' : 'degraded',
           'services': {
@@ -236,15 +235,40 @@ class ResponseUtils {
           'timestamp': DateTime.now().toIso8601String(),
           'uptime': DateTime.now().difference(startTime).inSeconds,
         },
-        type: type,
+      );
+
+      final responseHeaders = <String, String>{
+        'Content-Type': _contentTypeJson,
+        'X-Request-ID': requestId,
+      };
+
+      return Response(
+        200,
+        headers: responseHeaders,
+        body: jsonEncode(
+          apiResponse.toJson((data) => data),
+        ),
       );
     } catch (err) {
-      return error<Map<String, dynamic>>(
+      final requestId = _uuid.v4();
+      final apiResponse = BaseModel<void>(
         code: DataCodeEnum.serviceUnavailable,
         message: '状态检查失败',
-        data: {
-          'error': err.toString(),
-        },
+        type: type,
+        data: null,
+      );
+
+      final responseHeaders = <String, String>{
+        'Content-Type': _contentTypeJson,
+        'X-Request-ID': requestId,
+      };
+
+      return Response(
+        503,
+        headers: responseHeaders,
+        body: jsonEncode(
+          apiResponse.toJson((data) => null),
+        ),
       );
     }
   }
@@ -254,13 +278,25 @@ class ResponseUtils {
     required String path,
     DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
   }) {
-    return error<Map<String, dynamic>>(
+    final requestId = _uuid.v4();
+    final apiResponse = BaseModel<void>(
       code: DataCodeEnum.notFound,
       message: '请求的资源不存在',
-      data: {
-        'path': path,
-      },
       type: type,
+      data: null,
+    );
+
+    final responseHeaders = <String, String>{
+      'Content-Type': _contentTypeJson,
+      'X-Request-ID': requestId,
+    };
+
+    return Response(
+      404,
+      headers: responseHeaders,
+      body: jsonEncode(
+        apiResponse.toJson((data) => null),
+      ),
     );
   }
 
@@ -282,20 +318,26 @@ class ResponseUtils {
 
       final isHealthy = healthStatus['status'] == 'healthy';
 
-      if (isHealthy) {
-        return success<Map<String, dynamic>>(
-          message: '系统健康',
-          data: healthStatus,
-          type: type,
-        );
-      } else {
-        return error<Map<String, dynamic>>(
-          code: DataCodeEnum.internalServerError,
-          message: '系统不健康',
-          data: healthStatus,
-          type: type,
-        );
-      }
+      final requestId = _uuid.v4();
+      final apiResponse = BaseModel(
+        code: isHealthy ? DataCodeEnum.success : DataCodeEnum.serviceUnavailable,
+        message: isHealthy ? '系统健康' : '系统不健康',
+        type: type,
+        data: healthStatus,
+      );
+
+      final responseHeaders = <String, String>{
+        'Content-Type': _contentTypeJson,
+        'X-Request-ID': requestId,
+      };
+
+      return Response(
+        _getHttpStatusCode(isHealthy ? DataCodeEnum.success : DataCodeEnum.serviceUnavailable),
+        headers: responseHeaders,
+        body: jsonEncode(
+          apiResponse.toJson((data) => data),
+        ),
+      );
     } catch (err, stackTrace) {
       LoggerUtils.error(
         'healthCheck',
@@ -303,15 +345,23 @@ class ResponseUtils {
         stackTrace: stackTrace,
       );
 
-      return error<Map<String, dynamic>>(
-        code: DataCodeEnum.serviceUnavailable,
+      final requestId = _uuid.v4();
+      final apiResponse = BaseModel<void>(
+        code: DataCodeEnum.internalServerError,
         message: '健康检查失败',
-        data: {
-          'status': 'unhealthy',
-          'error': err.toString(),
-          'timestamp': DateTime.now().toIso8601String(),
-        },
         type: type,
+        data: null,
+      );
+
+      return Response(
+        _getHttpStatusCode(DataCodeEnum.internalServerError),
+        headers: <String, String>{
+          'Content-Type': _contentTypeJson,
+          'X-Request-ID': requestId,
+        },
+        body: jsonEncode(
+          apiResponse.toJson((data) => null),
+        ),
       );
     }
   }
@@ -323,27 +373,29 @@ class ResponseUtils {
   }) async {
     try {
       final isHealthy = await databaseService.isHealthy();
+      final requestId = _uuid.v4();
+      final apiResponse = BaseModel<Map<String, dynamic>>(
+        code: isHealthy ? DataCodeEnum.success : DataCodeEnum.serviceUnavailable,
+        message: isHealthy ? '数据库连接正常' : '数据库连接失败',
+        type: type,
+        data: {
+          'status': isHealthy ? 'healthy' : 'unhealthy',
+          'database': isHealthy ? 'connected' : 'disconnected',
+        },
+      );
 
-      if (isHealthy) {
-        return success<Map<String, dynamic>>(
-          message: '数据库连接正常',
-          data: {
-            'status': 'healthy',
-            'database': 'connected',
-          },
-          type: type,
-        );
-      } else {
-        return error<Map<String, dynamic>>(
-          code: DataCodeEnum.databaseError,
-          message: '数据库连接失败',
-          data: {
-            'status': 'unhealthy',
-            'database': 'disconnected',
-          },
-          type: type,
-        );
-      }
+      final responseHeaders = <String, String>{
+        'Content-Type': _contentTypeJson,
+        'X-Request-ID': requestId,
+      };
+
+      return Response(
+        _getHttpStatusCode(isHealthy ? DataCodeEnum.success : DataCodeEnum.serviceUnavailable),
+        headers: responseHeaders,
+        body: jsonEncode(
+          apiResponse.toJson((data) => data),
+        ),
+      );
     } catch (err, stackTrace) {
       LoggerUtils.error(
         'dbHealthCheck',
@@ -351,14 +403,23 @@ class ResponseUtils {
         stackTrace: stackTrace,
       );
 
-      return error<Map<String, dynamic>>(
+      final requestId = _uuid.v4();
+      final apiResponse = BaseModel<void>(
         code: DataCodeEnum.internalServerError,
         message: '数据库检查出错',
-        data: {
-          'status': 'error',
-          'message': err.toString(),
-        },
         type: type,
+        data: null,
+      );
+
+      return Response(
+        _getHttpStatusCode(DataCodeEnum.internalServerError),
+        headers: <String, String>{
+          'Content-Type': _contentTypeJson,
+          'X-Request-ID': requestId,
+        },
+        body: jsonEncode(
+          apiResponse.toJson((data) => null),
+        ),
       );
     }
   }
@@ -373,32 +434,32 @@ class ResponseUtils {
       final dbHealthy = await databaseService.isHealthy();
       final redisHealthy = await redisService.isHealthy();
 
-      if (dbHealthy && redisHealthy) {
-        return success<Map<String, dynamic>>(
-          message: '服务就绪',
-          data: {
-            'status': 'ready',
-            'services': {
-              'database': true,
-              'redis': true,
-            },
+      final requestId = _uuid.v4();
+      final apiResponse = BaseModel<Map<String, dynamic>>(
+        code: DataCodeEnum.serviceUnavailable,
+        message: '服务未就绪',
+        type: type,
+        data: {
+          'status': 'not_ready',
+          'services': {
+            'database': dbHealthy,
+            'redis': redisHealthy,
           },
-          type: type,
-        );
-      } else {
-        return error<Map<String, dynamic>>(
-          code: DataCodeEnum.serviceUnavailable,
-          message: '服务未就绪',
-          data: {
-            'status': 'not_ready',
-            'services': {
-              'database': dbHealthy,
-              'redis': redisHealthy,
-            },
-          },
-          type: type,
-        );
-      }
+        },
+      );
+
+      final responseHeaders = <String, String>{
+        'Content-Type': _contentTypeJson,
+        'X-Request-ID': requestId,
+      };
+
+      return Response(
+        _getHttpStatusCode(DataCodeEnum.serviceUnavailable),
+        headers: responseHeaders,
+        body: jsonEncode(
+          apiResponse.toJson((data) => data),
+        ),
+      );
     } catch (err, stackTrace) {
       LoggerUtils.error(
         'readyCheck',
@@ -406,14 +467,25 @@ class ResponseUtils {
         stackTrace: stackTrace,
       );
 
-      return error<Map<String, dynamic>>(
+      final requestId = _uuid.v4();
+      final apiResponse = BaseModel<void>(
         code: DataCodeEnum.internalServerError,
         message: '就绪检查出错',
-        data: {
-          'status': 'error',
-          'message': err.toString(),
-        },
         type: type,
+        data: null,
+      );
+
+      final responseHeaders = <String, String>{
+        'Content-Type': _contentTypeJson,
+        'X-Request-ID': requestId,
+      };
+
+      return Response(
+        _getHttpStatusCode(DataCodeEnum.internalServerError),
+        headers: responseHeaders,
+        body: jsonEncode(
+          apiResponse.toJson((data) => null),
+        ),
       );
     }
   }

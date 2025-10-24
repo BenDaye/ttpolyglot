@@ -9,7 +9,7 @@ final class MessageTips {
   static void showSuccessTips({
     required String message,
     required DataMessageTipsEnum type,
-    RequestExtraModel? extra,
+    ExtraModel? extra,
   }) {
     if (extra?.showSuccessToast == false || message.isEmpty) return;
     switch (type) {
@@ -37,7 +37,7 @@ final class MessageTips {
     required String message,
     required DataMessageTipsEnum type,
     DataCodeEnum? status,
-    RequestExtraModel? extra,
+    ExtraModel? extra,
   }) {
     // // 鉴权失败处理
     // if (status == StatusCode.error) {

@@ -11,7 +11,7 @@ class UserSettingsApi {
       final response = await HttpClient.get<Map<String, dynamic>>(
         '/users/me/settings',
         options: Options(
-          extra: const RequestExtraModel(
+          extra: const ExtraModel(
             showLoading: false,
             showErrorToast: true,
           ).toJson(),
@@ -33,7 +33,7 @@ class UserSettingsApi {
         '/users/me/settings',
         data: settings,
         options: Options(
-          extra: const RequestExtraModel(
+          extra: const ExtraModel(
             showSuccessToast: true,
             showErrorToast: true,
           ).toJson(),
@@ -55,7 +55,7 @@ class UserSettingsApi {
         '/users/me/settings/language',
         data: {'language_code': languageCode},
         options: Options(
-          extra: const RequestExtraModel(
+          extra: const ExtraModel(
             showSuccessToast: true,
             showErrorToast: true,
           ).toJson(),
@@ -84,7 +84,7 @@ class UserSettingsApi {
         '/users/me/settings/general',
         data: data,
         options: Options(
-          extra: const RequestExtraModel(
+          extra: const ExtraModel(
             showSuccessToast: true,
             showErrorToast: true,
           ).toJson(),
@@ -108,7 +108,7 @@ class UserSettingsApi {
         '/users/me/settings/translation',
         data: settings.toJson(),
         options: Options(
-          extra: const RequestExtraModel(
+          extra: const ExtraModel(
             showSuccessToast: true,
             showErrorToast: true,
           ).toJson(),
@@ -132,7 +132,7 @@ class UserSettingsApi {
         '/users/me/settings/translation/providers',
         data: provider.toJson(),
         options: Options(
-          extra: const RequestExtraModel(
+          extra: const ExtraModel(
             showSuccessToast: true,
             showErrorToast: true,
           ).toJson(),
@@ -157,7 +157,7 @@ class UserSettingsApi {
         '/users/me/settings/translation/providers/$providerId',
         data: provider.toJson(),
         options: Options(
-          extra: const RequestExtraModel(
+          extra: const ExtraModel(
             showSuccessToast: true,
             showErrorToast: true,
           ).toJson(),
@@ -178,7 +178,7 @@ class UserSettingsApi {
       await HttpClient.delete(
         '/users/me/settings/translation/providers/$providerId',
         options: Options(
-          extra: const RequestExtraModel(
+          extra: const ExtraModel(
             showSuccessToast: true,
             showErrorToast: true,
           ).toJson(),
@@ -196,7 +196,7 @@ class UserSettingsApi {
       final response = await HttpClient.post<Map<String, dynamic>>(
         '/users/me/settings/reset',
         options: Options(
-          extra: const RequestExtraModel(
+          extra: const ExtraModel(
             showSuccessToast: true,
             showErrorToast: true,
           ).toJson(),

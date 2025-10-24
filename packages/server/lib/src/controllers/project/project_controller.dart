@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
 
 import '../base_controller.dart';
@@ -71,8 +72,8 @@ class ProjectController extends BaseController {
         userId: getCurrentUserId(request),
       );
 
-      return ResponseUtils.success(
-        data: projects.toJson((data) => data.toJson()),
+      return ResponseUtils.success<PagerModel<ProjectModel>>(
+        data: projects,
         message: '获取项目列表成功',
       );
     } catch (error, stackTrace) {
@@ -157,7 +158,7 @@ class ProjectController extends BaseController {
 
       LoggerUtils.info('_checkProjectName 检查结果: available=$isAvailable');
 
-      return ResponseUtils.success(
+      return ResponseUtils.success<Map<String, bool>>(
         message: '检查项目名称成功',
         data: {'available': isAvailable},
       );
@@ -182,7 +183,7 @@ class ProjectController extends BaseController {
         return ResponseUtils.error(message: '项目不存在');
       }
 
-      return ResponseUtils.success(message: '获取项目详情成功', data: project);
+      return ResponseUtils.success<ProjectModel>(message: '获取项目详情成功', data: project);
     } catch (error, stackTrace) {
       LoggerUtils.error('获取项目详情失败: $id', error: error, stackTrace: stackTrace);
 
@@ -224,7 +225,7 @@ class ProjectController extends BaseController {
 
       final updatedProject = await _projectService.updateProject(id, updateData, updatedBy: getCurrentUserId(request));
 
-      return ResponseUtils.success(message: '项目信息更新成功', data: updatedProject);
+      return ResponseUtils.success<ProjectModel>(message: '项目信息更新成功', data: updatedProject);
     } catch (error, stackTrace) {
       LoggerUtils.error('更新项目信息失败: $id', error: error, stackTrace: stackTrace);
 
@@ -246,7 +247,7 @@ class ProjectController extends BaseController {
         return ResponseUtils.error(message: '项目ID格式无效');
       }
       await _projectService.deleteProject(id, deletedBy: getCurrentUserId(request));
-      return ResponseUtils.success(message: '项目删除成功');
+      return ResponseUtils.success<ProjectModel>(message: '项目删除成功');
     } catch (error, stackTrace) {
       LoggerUtils.error('删除项目失败: $id', error: error, stackTrace: stackTrace);
 
@@ -268,7 +269,7 @@ class ProjectController extends BaseController {
         return ResponseUtils.error(message: '项目ID格式无效');
       }
       final members = await _projectService.getProjectMembers(id);
-      return ResponseUtils.success(message: '获取项目成员成功', data: {'members': members});
+      return ResponseUtils.success<List<ProjectMemberModel>>(message: '获取项目成员成功', data: members);
     } catch (error, stackTrace) {
       LoggerUtils.error('获取项目成员失败: $id', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(message: '获取项目成员失败');
@@ -300,7 +301,7 @@ class ProjectController extends BaseController {
       await _projectService.addProjectMember(
           projectId: id, userId: userId, roleId: roleId, grantedBy: grantedBy, expiresAt: expiresAt);
 
-      return ResponseUtils.success(message: '项目成员添加成功');
+      return ResponseUtils.success<ProjectMemberModel>(message: '项目成员添加成功');
     } catch (error, stackTrace) {
       LoggerUtils.error('添加项目成员失败: $id', error: error, stackTrace: stackTrace);
 
@@ -323,7 +324,7 @@ class ProjectController extends BaseController {
       }
       ValidatorUtils.validateUuid(userId, 'user_id');
       await _projectService.removeProjectMember(id, userId);
-      return ResponseUtils.success(message: '项目成员删除成功');
+      return ResponseUtils.success<ProjectMemberModel>(message: '项目成员删除成功');
     } catch (error, stackTrace) {
       LoggerUtils.error('移除项目成员失败: $id, user: $userId', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(message: '移除项目成员失败');
@@ -333,7 +334,7 @@ class ProjectController extends BaseController {
   Future<Response> _getProjectStats(Request request) async {
     try {
       final stats = await _projectService.getProjectStats();
-      return ResponseUtils.success(message: '获取项目统计信息成功', data: stats);
+      return ResponseUtils.success<ProjectStatisticsModel>(message: '获取项目统计信息成功', data: stats);
     } catch (error, stackTrace) {
       LoggerUtils.error('获取项目统计信息失败', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(message: '获取统计信息失败');
@@ -348,7 +349,7 @@ class ProjectController extends BaseController {
         return ResponseUtils.error(message: '项目ID格式无效');
       }
       await _projectService.archiveProject(id);
-      return ResponseUtils.success(message: '项目已归档');
+      return ResponseUtils.success<ProjectModel>(message: '项目已归档');
     } catch (error, stackTrace) {
       LoggerUtils.error('归档项目失败: $id', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(message: '归档项目失败');
@@ -363,7 +364,7 @@ class ProjectController extends BaseController {
         return ResponseUtils.error(message: '项目ID格式无效');
       }
       await _projectService.restoreProject(id);
-      return ResponseUtils.success(message: '项目已恢复');
+      return ResponseUtils.success<ProjectModel>(message: '项目已恢复');
     } catch (error, stackTrace) {
       LoggerUtils.error('恢复项目失败: $id', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(message: '恢复项目失败');
@@ -388,7 +389,7 @@ class ProjectController extends BaseController {
       }
 
       await _projectService.updateProjectMemberRole(id, userId, roleId);
-      return ResponseUtils.success(message: '成员角色已更新');
+      return ResponseUtils.success<ProjectMemberModel>(message: '成员角色已更新');
     } catch (error, stackTrace) {
       LoggerUtils.error('更新成员角色失败: $id, user: $userId', error: error, stackTrace: stackTrace);
       if (error is ValidationException) {
@@ -406,7 +407,7 @@ class ProjectController extends BaseController {
         return ResponseUtils.error(message: '项目ID格式无效');
       }
       final languages = await _projectService.getProjectLanguages(id);
-      return ResponseUtils.success(message: '获取项目语言成功', data: languages);
+      return ResponseUtils.success<List<LanguageModel>>(message: '获取项目语言成功', data: languages);
     } catch (error, stackTrace) {
       LoggerUtils.error('获取项目语言失败: $id', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(message: '获取项目语言失败');
@@ -499,7 +500,7 @@ class ProjectController extends BaseController {
         return ResponseUtils.error(message: '项目ID格式无效');
       }
       final stats = await _projectService.getProjectStatistics(id);
-      return ResponseUtils.success(message: '获取项目统计信息成功', data: stats);
+      return ResponseUtils.success<ProjectStatisticsModel>(message: '获取项目统计信息成功', data: stats);
     } catch (error, stackTrace) {
       LoggerUtils.error('获取项目统计信息失败: $id', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(message: '获取项目统计信息失败');
@@ -518,9 +519,9 @@ class ProjectController extends BaseController {
       final limit = int.tryParse(params['limit'] ?? '20') ?? 20;
 
       final activity = await _projectService.getProjectActivity(id, page: page, limit: limit);
-      return ResponseUtils.success(
+      return ResponseUtils.success<PagerModel<TranslationEntryModel>>(
         message: '获取项目活动成功',
-        data: activity.toJson((data) => data.toJson()),
+        data: activity,
       );
     } catch (error, stackTrace) {
       LoggerUtils.error('获取项目活动失败: $id', error: error, stackTrace: stackTrace);

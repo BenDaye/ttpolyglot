@@ -39,13 +39,13 @@ class LanguageController {
 
       final languages = await _languageService.getLanguages(includeInactive: includeInactive);
 
-      return ResponseUtils.success(
+      return ResponseUtils.success<List<LanguageModel>>(
         message: '获取语言列表成功',
-        data: languages.map((lang) => lang.toJson()).toList(),
+        data: languages,
       );
     } catch (error) {
       LoggerUtils.error('获取语言列表失败: error=$error');
-      return ResponseUtils.error(data: '获取语言列表失败: ${error.toString()}');
+      return ResponseUtils.error(message: '获取语言列表失败');
     }
   }
 
@@ -58,18 +58,17 @@ class LanguageController {
 
       if (language == null) {
         return ResponseUtils.error(
-          code: DataCodeEnum.notFound,
-          data: '语言不存在',
+          message: '语言不存在',
         );
       }
 
-      return ResponseUtils.success(
+      return ResponseUtils.success<LanguageModel>(
         message: '获取语言详情成功',
-        data: language.toJson(),
+        data: language,
       );
     } catch (error) {
       LoggerUtils.error('获取语言详情失败: code=$code, error=$error');
-      return ResponseUtils.error(data: '获取语言详情失败: ${error.toString()}');
+      return ResponseUtils.error(message: '获取语言详情失败');
     }
   }
 
@@ -89,7 +88,7 @@ class LanguageController {
       return ResponseUtils.success(message: '刷新语言缓存成功');
     } catch (error) {
       LoggerUtils.error('刷新语言缓存失败: error=$error');
-      return ResponseUtils.error(data: '刷新语言缓存失败: ${error.toString()}');
+      return ResponseUtils.error(message: '刷新语言缓存失败: ${error.toString()}');
     }
   }
 }

@@ -9,26 +9,26 @@ class ErrorInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) {
     // Logger.talker.info('Response Error -> $err');
     // 如果已经处理过了
-    if (err.error is ApiResponseModel) {
+    if (err.error is BaseModel) {
       return super.onError(err, handler);
     }
     // 构造返回错误体
     final result = switch (err.type) {
-      DioExceptionType.connectionTimeout => ApiResponseModel.of(
+      DioExceptionType.connectionTimeout => BaseModel.of(
           DataCodeEnum.connectionTimeout,
         ),
-      DioExceptionType.sendTimeout => ApiResponseModel.of(DataCodeEnum.sendTimeout),
-      DioExceptionType.receiveTimeout => ApiResponseModel.of(
+      DioExceptionType.sendTimeout => BaseModel.of(DataCodeEnum.sendTimeout),
+      DioExceptionType.receiveTimeout => BaseModel.of(
           DataCodeEnum.receiveTimeout,
         ),
-      DioExceptionType.badCertificate => ApiResponseModel.of(
+      DioExceptionType.badCertificate => BaseModel.of(
           DataCodeEnum.badCertificate,
         ),
-      DioExceptionType.badResponse => ApiResponseModel.of(
+      DioExceptionType.badResponse => BaseModel.of(
           DataCodeEnum.fromValue(err.response?.statusCode ?? 400),
         ),
-      DioExceptionType.cancel => ApiResponseModel.of(DataCodeEnum.cancelRequest),
-      DioExceptionType.connectionError => ApiResponseModel.of(
+      DioExceptionType.cancel => BaseModel.of(DataCodeEnum.cancelRequest),
+      DioExceptionType.connectionError => BaseModel.of(
           DataCodeEnum.networkError,
         ),
       DioExceptionType.unknown => _unknown(err),
@@ -38,11 +38,11 @@ class ErrorInterceptor extends Interceptor {
   }
 
   // 处理未知异常
-  ApiResponseModel _unknown(DioException err) {
+  BaseModel _unknown(DioException err) {
     Object? error = err.error;
     if (error is HandshakeException) {
-      return ApiResponseModel.of(DataCodeEnum.domainError);
+      return BaseModel.of(DataCodeEnum.domainError);
     }
-    return ApiResponseModel.of(DataCodeEnum.unknown);
+    return BaseModel.of(DataCodeEnum.unknown);
   }
 }

@@ -21,7 +21,7 @@ class ProjectService extends BaseService {
         super('ProjectService');
 
   /// 获取项目列表
-  Future<ApiResponsePagerModel<ProjectModel>> getProjects({
+  Future<PagerModel<ProjectModel>> getProjects({
     int page = 1,
     int limit = 20,
     String? search,
@@ -108,7 +108,7 @@ class ProjectService extends BaseService {
         return projectData;
       }).toList();
 
-      return ApiResponsePagerModel<ProjectModel>(
+      return PagerModel<ProjectModel>(
         page: page,
         pageSize: limit,
         totalSize: total,
@@ -480,7 +480,7 @@ class ProjectService extends BaseService {
   }
 
   /// 获取项目成员列表
-  Future<List<Map<String, dynamic>>> getProjectMembers(String projectId) async {
+  Future<List<ProjectMemberModel>?> getProjectMembers(String projectId) async {
     try {
       logInfo('获取项目成员: $projectId');
 
@@ -503,10 +503,10 @@ class ProjectService extends BaseService {
 
       final result = await _databaseService.query(sql, {'project_id': projectId});
 
-      return result.map((row) => row.toColumnMap()).toList();
+      return result.isNotEmpty ? result.map((row) => ProjectMemberModel.fromJson(row.toColumnMap())).toList() : null;
     } catch (error, stackTrace) {
       logError('获取项目成员失败: $projectId', error: error, stackTrace: stackTrace);
-      rethrow;
+      return null;
     }
   }
 
@@ -578,7 +578,7 @@ class ProjectService extends BaseService {
   }
 
   /// 获取项目统计信息
-  Future<Map<String, dynamic>> getProjectStats() async {
+  Future<ProjectStatisticsModel> getProjectStats() async {
     try {
       logInfo('获取项目统计信息');
 
@@ -586,7 +586,7 @@ class ProjectService extends BaseService {
       const cacheKey = 'project:stats';
       final cachedStats = await _redisService.getJson(cacheKey);
       if (cachedStats != null) {
-        return cachedStats;
+        return ProjectStatisticsModel.fromJson(cachedStats);
       }
 
       final sql = '''
@@ -603,10 +603,10 @@ class ProjectService extends BaseService {
       ''';
 
       final result = await _databaseService.query(sql);
-      final stats = result.first.toColumnMap();
+      final stats = ProjectStatisticsModel.fromJson(result.first.toColumnMap());
 
       // 缓存统计信息
-      await _redisService.setJson(cacheKey, stats, 3600); // 1小时缓存
+      await _redisService.setJson(cacheKey, stats.toJson(), 3600); // 1小时缓存
 
       return stats;
     } catch (error, stackTrace) {
@@ -749,7 +749,7 @@ class ProjectService extends BaseService {
   }
 
   /// 获取项目语言
-  Future<List<Map<String, dynamic>>> getProjectLanguages(String projectId) async {
+  Future<List<LanguageModel>> getProjectLanguages(String projectId) async {
     try {
       logInfo('获取项目语言: $projectId');
 
@@ -761,7 +761,7 @@ class ProjectService extends BaseService {
         ORDER BY l.sort_index, l.name
       ''', {'project_id': projectId});
 
-      return result.map((row) => row.toColumnMap()).toList();
+      return result.map((row) => LanguageModel.fromJson(row.toColumnMap())).toList();
     } catch (error, stackTrace) {
       logError('获取项目语言失败: $projectId', error: error, stackTrace: stackTrace);
       rethrow;
@@ -852,7 +852,7 @@ class ProjectService extends BaseService {
   }
 
   /// 获取项目统计信息
-  Future<Map<String, dynamic>> getProjectStatistics(String projectId) async {
+  Future<ProjectStatisticsModel?> getProjectStatistics(String projectId) async {
     try {
       logInfo('获取项目统计信息: $projectId');
 
@@ -874,16 +874,17 @@ class ProjectService extends BaseService {
         GROUP BY p.id
       ''', {'project_id': projectId});
 
-      return basicStats.isNotEmpty ? basicStats.first.toColumnMap() : {};
+      return basicStats.isNotEmpty
+          ? ProjectStatisticsModel.fromJson(basicStats.first.toColumnMap())
+          : ProjectStatisticsModel();
     } catch (error, stackTrace) {
       logError('获取项目统计信息失败: $projectId', error: error, stackTrace: stackTrace);
-      rethrow;
+      return null;
     }
   }
 
   /// 获取项目活动日志
-  Future<ApiResponsePagerModel<TranslationEntryModel>> getProjectActivity(String projectId,
-      {int page = 1, int limit = 20}) async {
+  Future<PagerModel<TranslationEntryModel>> getProjectActivity(String projectId, {int page = 1, int limit = 20}) async {
     try {
       logInfo('获取项目活动: $projectId, page=$page, limit=$limit');
 
@@ -908,7 +909,7 @@ class ProjectService extends BaseService {
         'offset': offset,
       });
 
-      return ApiResponsePagerModel<TranslationEntryModel>(
+      return PagerModel<TranslationEntryModel>(
         page: page,
         pageSize: limit,
         totalSize: activities.length,

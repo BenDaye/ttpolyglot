@@ -2,10 +2,14 @@ library ttpolyglot_model;
 
 // 认证模型
 export 'src/auth/auth_models.dart';
+// 通用模型
+export 'src/common/serializable.dart';
 // 转换器
 export 'src/converter/converters.dart';
 // 枚举
 export 'src/enums/enums.dart';
+// 文件模型
+export 'src/file/file_models.dart';
 // 语言模型
 export 'src/language/language_models.dart';
 // 网络模型
@@ -20,3 +24,5 @@ export 'src/system/system_models.dart';
 export 'src/translation/translation_models.dart';
 // 用户模型
 export 'src/user/user_models.dart';
+// 工具模型
+export 'src/utils/utils.dart';

@@ -1,8 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:ttpolyglot_model/src/converter/converters.dart';
-import 'package:ttpolyglot_model/src/language/language_model.dart';
-
-import 'project_member_model.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 part 'project_model.freezed.dart';
 part 'project_model.g.dart';

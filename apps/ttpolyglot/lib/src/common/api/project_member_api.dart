@@ -6,7 +6,7 @@ import 'package:ttpolyglot_model/model.dart';
 /// 项目成员管理 API
 class ProjectMemberApi {
   /// 获取项目成员列表
-  Future<ApiResponsePagerModel<ProjectMemberModel>> getProjectMembers({
+  Future<PagerModel<ProjectMemberModel>> getProjectMembers({
     required int projectId,
     int page = 1,
     int limit = 50,
@@ -33,7 +33,7 @@ class ProjectMemberApi {
       );
 
       final data = response.data as Map<String, dynamic>;
-      return ApiResponsePagerModel<ProjectMemberModel>.fromJson(
+      return PagerModel<ProjectMemberModel>.fromJson(
         data,
         (json) => ProjectMemberModel.fromJson(json as Map<String, dynamic>),
       );
@@ -57,7 +57,7 @@ class ProjectMemberApi {
           'role': role,
         },
         options: Options(
-          extra: const RequestExtraModel(
+          extra: const ExtraModel(
             showSuccessToast: true,
           ).toJson(),
         ),
@@ -79,7 +79,7 @@ class ProjectMemberApi {
       final response = await HttpClient.post<Map<String, dynamic>>(
         '/projects/$projectId/members/accept',
         options: Options(
-          extra: const RequestExtraModel(
+          extra: const ExtraModel(
             showSuccessToast: true,
           ).toJson(),
         ),
@@ -106,7 +106,7 @@ class ProjectMemberApi {
           'role': role,
         },
         options: Options(
-          extra: const RequestExtraModel(
+          extra: const ExtraModel(
             showSuccessToast: true,
           ).toJson(),
         ),
@@ -129,7 +129,7 @@ class ProjectMemberApi {
       await HttpClient.delete(
         '/projects/$projectId/members/$userId',
         options: Options(
-          extra: const RequestExtraModel(
+          extra: const ExtraModel(
             showSuccessToast: true,
           ).toJson(),
         ),

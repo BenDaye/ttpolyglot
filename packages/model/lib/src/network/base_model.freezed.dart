@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'api_response_model.dart';
+part of 'base_model.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -14,38 +14,40 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
-ApiResponseModel<T> _$ApiResponseModelFromJson<T>(
+BaseModel<T> _$BaseModelFromJson<T>(
     Map<String, dynamic> json, T Function(Object?) fromJsonT) {
-  return _ApiResponseModel<T>.fromJson(json, fromJsonT);
+  return _BaseModel<T>.fromJson(json, fromJsonT);
 }
 
 /// @nodoc
-mixin _$ApiResponseModel<T> {
+mixin _$BaseModel<T> {
+// 响应码
   @JsonKey(name: 'code')
   @DataCodeEnumConverter()
   DataCodeEnum get code => throw _privateConstructorUsedError;
-  String get message => throw _privateConstructorUsedError;
+  String get message => throw _privateConstructorUsedError; // 提示类型
   @JsonKey(name: 'type')
   @DataMessageTipsEnumConverter()
-  DataMessageTipsEnum get type => throw _privateConstructorUsedError;
+  DataMessageTipsEnum get type => throw _privateConstructorUsedError; // 数据
+  @JsonKey(name: 'data')
   T? get data => throw _privateConstructorUsedError;
 
-  /// Serializes this ApiResponseModel to a JSON map.
+  /// Serializes this BaseModel to a JSON map.
   Map<String, dynamic> toJson(Object? Function(T) toJsonT) =>
       throw _privateConstructorUsedError;
 
-  /// Create a copy of ApiResponseModel
+  /// Create a copy of BaseModel
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $ApiResponseModelCopyWith<T, ApiResponseModel<T>> get copyWith =>
+  $BaseModelCopyWith<T, BaseModel<T>> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $ApiResponseModelCopyWith<T, $Res> {
-  factory $ApiResponseModelCopyWith(
-          ApiResponseModel<T> value, $Res Function(ApiResponseModel<T>) then) =
-      _$ApiResponseModelCopyWithImpl<T, $Res, ApiResponseModel<T>>;
+abstract class $BaseModelCopyWith<T, $Res> {
+  factory $BaseModelCopyWith(
+          BaseModel<T> value, $Res Function(BaseModel<T>) then) =
+      _$BaseModelCopyWithImpl<T, $Res, BaseModel<T>>;
   @useResult
   $Res call(
       {@JsonKey(name: 'code') @DataCodeEnumConverter() DataCodeEnum code,
@@ -53,20 +55,20 @@ abstract class $ApiResponseModelCopyWith<T, $Res> {
       @JsonKey(name: 'type')
       @DataMessageTipsEnumConverter()
       DataMessageTipsEnum type,
-      T? data});
+      @JsonKey(name: 'data') T? data});
 }
 
 /// @nodoc
-class _$ApiResponseModelCopyWithImpl<T, $Res, $Val extends ApiResponseModel<T>>
-    implements $ApiResponseModelCopyWith<T, $Res> {
-  _$ApiResponseModelCopyWithImpl(this._value, this._then);
+class _$BaseModelCopyWithImpl<T, $Res, $Val extends BaseModel<T>>
+    implements $BaseModelCopyWith<T, $Res> {
+  _$BaseModelCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of ApiResponseModel
+  /// Create a copy of BaseModel
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -98,11 +100,11 @@ class _$ApiResponseModelCopyWithImpl<T, $Res, $Val extends ApiResponseModel<T>>
 }
 
 /// @nodoc
-abstract class _$$ApiResponseModelImplCopyWith<T, $Res>
-    implements $ApiResponseModelCopyWith<T, $Res> {
-  factory _$$ApiResponseModelImplCopyWith(_$ApiResponseModelImpl<T> value,
-          $Res Function(_$ApiResponseModelImpl<T>) then) =
-      __$$ApiResponseModelImplCopyWithImpl<T, $Res>;
+abstract class _$$BaseModelImplCopyWith<T, $Res>
+    implements $BaseModelCopyWith<T, $Res> {
+  factory _$$BaseModelImplCopyWith(
+          _$BaseModelImpl<T> value, $Res Function(_$BaseModelImpl<T>) then) =
+      __$$BaseModelImplCopyWithImpl<T, $Res>;
   @override
   @useResult
   $Res call(
@@ -111,18 +113,18 @@ abstract class _$$ApiResponseModelImplCopyWith<T, $Res>
       @JsonKey(name: 'type')
       @DataMessageTipsEnumConverter()
       DataMessageTipsEnum type,
-      T? data});
+      @JsonKey(name: 'data') T? data});
 }
 
 /// @nodoc
-class __$$ApiResponseModelImplCopyWithImpl<T, $Res>
-    extends _$ApiResponseModelCopyWithImpl<T, $Res, _$ApiResponseModelImpl<T>>
-    implements _$$ApiResponseModelImplCopyWith<T, $Res> {
-  __$$ApiResponseModelImplCopyWithImpl(_$ApiResponseModelImpl<T> _value,
-      $Res Function(_$ApiResponseModelImpl<T>) _then)
+class __$$BaseModelImplCopyWithImpl<T, $Res>
+    extends _$BaseModelCopyWithImpl<T, $Res, _$BaseModelImpl<T>>
+    implements _$$BaseModelImplCopyWith<T, $Res> {
+  __$$BaseModelImplCopyWithImpl(
+      _$BaseModelImpl<T> _value, $Res Function(_$BaseModelImpl<T>) _then)
       : super(_value, _then);
 
-  /// Create a copy of ApiResponseModel
+  /// Create a copy of BaseModel
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -132,7 +134,7 @@ class __$$ApiResponseModelImplCopyWithImpl<T, $Res>
     Object? type = null,
     Object? data = freezed,
   }) {
-    return _then(_$ApiResponseModelImpl<T>(
+    return _then(_$BaseModelImpl<T>(
       code: null == code
           ? _value.code
           : code // ignore: cast_nullable_to_non_nullable
@@ -155,20 +157,21 @@ class __$$ApiResponseModelImplCopyWithImpl<T, $Res>
 
 /// @nodoc
 @JsonSerializable(genericArgumentFactories: true)
-class _$ApiResponseModelImpl<T> extends _ApiResponseModel<T> {
-  const _$ApiResponseModelImpl(
+class _$BaseModelImpl<T> extends _BaseModel<T> {
+  const _$BaseModelImpl(
       {@JsonKey(name: 'code') @DataCodeEnumConverter() required this.code,
       this.message = "",
       @JsonKey(name: 'type')
       @DataMessageTipsEnumConverter()
       this.type = DataMessageTipsEnum.showToast,
-      this.data})
+      @JsonKey(name: 'data') this.data})
       : super._();
 
-  factory _$ApiResponseModelImpl.fromJson(
+  factory _$BaseModelImpl.fromJson(
           Map<String, dynamic> json, T Function(Object?) fromJsonT) =>
-      _$$ApiResponseModelImplFromJson(json, fromJsonT);
+      _$$BaseModelImplFromJson(json, fromJsonT);
 
+// 响应码
   @override
   @JsonKey(name: 'code')
   @DataCodeEnumConverter()
@@ -176,23 +179,26 @@ class _$ApiResponseModelImpl<T> extends _ApiResponseModel<T> {
   @override
   @JsonKey()
   final String message;
+// 提示类型
   @override
   @JsonKey(name: 'type')
   @DataMessageTipsEnumConverter()
   final DataMessageTipsEnum type;
+// 数据
   @override
+  @JsonKey(name: 'data')
   final T? data;
 
   @override
   String toString() {
-    return 'ApiResponseModel<$T>(code: $code, message: $message, type: $type, data: $data)';
+    return 'BaseModel<$T>(code: $code, message: $message, type: $type, data: $data)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$ApiResponseModelImpl<T> &&
+            other is _$BaseModelImpl<T> &&
             (identical(other.code, code) || other.code == code) &&
             (identical(other.message, message) || other.message == message) &&
             (identical(other.type, type) || other.type == type) &&
@@ -204,23 +210,22 @@ class _$ApiResponseModelImpl<T> extends _ApiResponseModel<T> {
   int get hashCode => Object.hash(runtimeType, code, message, type,
       const DeepCollectionEquality().hash(data));
 
-  /// Create a copy of ApiResponseModel
+  /// Create a copy of BaseModel
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$ApiResponseModelImplCopyWith<T, _$ApiResponseModelImpl<T>> get copyWith =>
-      __$$ApiResponseModelImplCopyWithImpl<T, _$ApiResponseModelImpl<T>>(
-          this, _$identity);
+  _$$BaseModelImplCopyWith<T, _$BaseModelImpl<T>> get copyWith =>
+      __$$BaseModelImplCopyWithImpl<T, _$BaseModelImpl<T>>(this, _$identity);
 
   @override
   Map<String, dynamic> toJson(Object? Function(T) toJsonT) {
-    return _$$ApiResponseModelImplToJson<T>(this, toJsonT);
+    return _$$BaseModelImplToJson<T>(this, toJsonT);
   }
 }
 
-abstract class _ApiResponseModel<T> extends ApiResponseModel<T> {
-  const factory _ApiResponseModel(
+abstract class _BaseModel<T> extends BaseModel<T> {
+  const factory _BaseModel(
       {@JsonKey(name: 'code')
       @DataCodeEnumConverter()
       required final DataCodeEnum code,
@@ -228,30 +233,32 @@ abstract class _ApiResponseModel<T> extends ApiResponseModel<T> {
       @JsonKey(name: 'type')
       @DataMessageTipsEnumConverter()
       final DataMessageTipsEnum type,
-      final T? data}) = _$ApiResponseModelImpl<T>;
-  const _ApiResponseModel._() : super._();
+      @JsonKey(name: 'data') final T? data}) = _$BaseModelImpl<T>;
+  const _BaseModel._() : super._();
 
-  factory _ApiResponseModel.fromJson(
+  factory _BaseModel.fromJson(
           Map<String, dynamic> json, T Function(Object?) fromJsonT) =
-      _$ApiResponseModelImpl<T>.fromJson;
+      _$BaseModelImpl<T>.fromJson;
 
+// 响应码
   @override
   @JsonKey(name: 'code')
   @DataCodeEnumConverter()
   DataCodeEnum get code;
   @override
-  String get message;
+  String get message; // 提示类型
   @override
   @JsonKey(name: 'type')
   @DataMessageTipsEnumConverter()
-  DataMessageTipsEnum get type;
+  DataMessageTipsEnum get type; // 数据
   @override
+  @JsonKey(name: 'data')
   T? get data;
 
-  /// Create a copy of ApiResponseModel
+  /// Create a copy of BaseModel
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$ApiResponseModelImplCopyWith<T, _$ApiResponseModelImpl<T>> get copyWith =>
+  _$$BaseModelImplCopyWith<T, _$BaseModelImpl<T>> get copyWith =>
       throw _privateConstructorUsedError;
 }

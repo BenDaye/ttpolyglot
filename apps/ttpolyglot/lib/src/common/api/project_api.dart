@@ -6,7 +6,7 @@ import 'package:ttpolyglot_model/model.dart';
 /// 项目 API
 class ProjectApi {
   /// 获取项目列表
-  Future<ApiResponsePagerModel<ProjectModel>> getProjects({
+  Future<PagerModel<ProjectModel>> getProjects({
     int page = 1,
     int limit = 50,
     String? search,
@@ -33,7 +33,7 @@ class ProjectApi {
         query: queryParams,
       );
 
-      return ApiResponsePagerModel.fromJson(
+      return PagerModel.fromJson(
         response.data as Map<String, dynamic>,
         (json) => ProjectModel.fromJson(json as Map<String, dynamic>),
       );

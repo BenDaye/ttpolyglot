@@ -1,59 +1,8 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
-
-/// 文件上传结果
-class FileUploadResult {
-  final bool success;
-  final String? code;
-  final String? message;
-  final String? filePath;
-  final String? fileName;
-  final String? originalFileName;
-  final int? fileSize;
-  final String? contentType;
-  final String? url;
-
-  const FileUploadResult._({
-    required this.success,
-    this.code,
-    this.message,
-    this.filePath,
-    this.fileName,
-    this.originalFileName,
-    this.fileSize,
-    this.contentType,
-    this.url,
-  });
-
-  factory FileUploadResult.success({
-    required String filePath,
-    required String fileName,
-    required String originalFileName,
-    required int fileSize,
-    required String contentType,
-    required String url,
-  }) {
-    return FileUploadResult._(
-      success: true,
-      filePath: filePath,
-      fileName: fileName,
-      originalFileName: originalFileName,
-      fileSize: fileSize,
-      contentType: contentType,
-      url: url,
-    );
-  }
-
-  factory FileUploadResult.failure(String code, String message) {
-    return FileUploadResult._(
-      success: false,
-      code: code,
-      message: message,
-    );
-  }
-}
 
 /// 文件上传服务
 class FileUploadService extends BaseService {
@@ -64,7 +13,7 @@ class FileUploadService extends BaseService {
         super('FileUploadService');
 
   /// 上传头像
-  Future<FileUploadResult> uploadAvatar({
+  Future<FileModel?> uploadAvatar({
     required String userId,
     required Uint8List fileData,
     required String fileName,
@@ -76,13 +25,13 @@ class FileUploadService extends BaseService {
 
       // 验证文件类型
       if (!_isValidImageType(contentType)) {
-        return FileUploadResult.failure('INVALID_FILE_TYPE', '只支持图片文件');
+        throw FileUploadException(message: '只支持图片文件');
       }
 
       // 验证文件大小
       if (fileData.length > 5 * 1024 * 1024) {
         // 5MB
-        return FileUploadResult.failure('FILE_TOO_LARGE', '文件大小不能超过5MB');
+        throw FileUploadException(message: '文件大小不能超过5MB');
       }
 
       // 创建上传目录
@@ -105,17 +54,20 @@ class FileUploadService extends BaseService {
 
       LoggerUtils.info('头像上传成功: $avatarUrl');
 
-      return FileUploadResult.success(
-        filePath: filePath,
-        fileName: uniqueFileName,
-        originalFileName: fileName,
-        fileSize: fileData.length,
-        contentType: contentType,
-        url: avatarUrl,
+      final fileModel = FileModel(
+        id: uniqueFileName,
+        name: uniqueFileName,
+        path: filePath,
+        size: fileData.length,
+        type: contentType,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       );
+
+      return fileModel;
     } catch (error, stackTrace) {
       LoggerUtils.error('头像上传失败', error: error, stackTrace: stackTrace);
-      return FileUploadResult.failure('UPLOAD_FAILED', '上传失败，请稍后重试');
+      return null;
     }
   }
 

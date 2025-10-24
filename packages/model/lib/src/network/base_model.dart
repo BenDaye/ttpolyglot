@@ -1,33 +1,36 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:ttpolyglot_model/src/common/model.dart';
+import 'package:ttpolyglot_model/src/common/serializable.dart';
 import 'package:ttpolyglot_model/src/enums/enums.dart';
 
-part 'api_response_model.freezed.dart';
-part 'api_response_model.g.dart';
+part 'base_model.freezed.dart';
+part 'base_model.g.dart';
 
 /// 统一 API 响应模型
 @Freezed(genericArgumentFactories: true)
-class ApiResponseModel<T> with _$ApiResponseModel<T> {
-  const ApiResponseModel._();
+class BaseModel<T> with _$BaseModel<T> {
+  const BaseModel._();
 
-  const factory ApiResponseModel({
+  const factory BaseModel({
+    // 响应码
     @JsonKey(name: 'code') @DataCodeEnumConverter() required DataCodeEnum code,
     @Default("") String message,
+    // 提示类型
     @JsonKey(name: 'type')
     @DataMessageTipsEnumConverter()
     @Default(DataMessageTipsEnum.showToast)
     DataMessageTipsEnum type,
-    T? data,
-  }) = _ApiResponseModel<T>;
+    // 数据
+    @JsonKey(name: 'data') T? data,
+  }) = _BaseModel<T>;
 
-  factory ApiResponseModel.fromJson(
+  factory BaseModel.fromJson(
     Map<String, dynamic> json,
     T Function(Object?) fromJsonT,
   ) =>
-      _$ApiResponseModelFromJson(json, fromJsonT);
+      _$BaseModelFromJson(json, fromJsonT);
 
-  factory ApiResponseModel.of(DataCodeEnum code, {DataMessageTipsEnum? type, String? message}) {
-    return ApiResponseModel(
+  factory BaseModel.of(DataCodeEnum code, {DataMessageTipsEnum? type, String? message}) {
+    return BaseModel(
       code: code,
       type: type ?? DataMessageTipsEnum.showToast,
       message: message ?? code.message,
@@ -35,12 +38,10 @@ class ApiResponseModel<T> with _$ApiResponseModel<T> {
     );
   }
 
-  // 成功
   bool get success => code == DataCodeEnum.success;
 
   bool get isArray => !isEmpty && data is Iterable;
 
-  //
   bool get isEmpty => data == null;
 
   int get size => isEmpty ? 0 : (isArray ? (data as Iterable?)?.length ?? 0 : 1);

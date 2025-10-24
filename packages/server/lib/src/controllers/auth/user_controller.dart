@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
 
 import '../base_controller.dart';
@@ -67,8 +68,8 @@ class UserController extends BaseController {
         role: params['role'],
       );
 
-      return ResponseUtils.success(
-        data: users.toJson((data) => data.toJson()),
+      return ResponseUtils.success<PagerModel<UserInfoModel>>(
+        data: users,
         message: '获取用户列表成功',
       );
     } catch (error, stackTrace) {
@@ -355,24 +356,20 @@ class UserController extends BaseController {
         contentType: fileContentType,
       );
 
-      if (!uploadResult.success) {
+      if (uploadResult == null) {
         return ResponseUtils.error(
-          message: uploadResult.message ?? '上传头像失败',
+          message: '上传头像失败',
         );
       }
 
       // 更新用户头像URL
       await _userService.updateUser(userId, {
-        'avatar_url': uploadResult.url,
+        'avatar_url': uploadResult.path,
       });
 
-      return ResponseUtils.success(
+      return ResponseUtils.success<FileModel>(
         message: '头像上传成功',
-        data: {
-          'avatar_url': uploadResult.url,
-          'file_name': uploadResult.fileName,
-          'file_size': uploadResult.fileSize,
-        },
+        data: uploadResult,
       );
     } catch (error, stackTrace) {
       LoggerUtils.error('上传头像失败', error: error, stackTrace: stackTrace);

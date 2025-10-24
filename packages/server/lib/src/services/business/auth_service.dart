@@ -1,32 +1,6 @@
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
 
-/// 认证服务结果辅助类
-class AuthResult {
-  static ApiResponseModel<Map<String, dynamic>> success({
-    String? message,
-    Map<String, dynamic>? data,
-  }) {
-    return ApiResponseModel(
-      code: DataCodeEnum.success,
-      message: message ?? DataCodeEnum.success.message,
-      data: data,
-    );
-  }
-
-  static ApiResponseModel<Map<String, dynamic>> failure({
-    DataCodeEnum code = DataCodeEnum.error,
-    String? message,
-    Map<String, dynamic>? data,
-  }) {
-    return ApiResponseModel(
-      code: code,
-      message: message ?? code.message,
-      data: data,
-    );
-  }
-}
-
 /// 认证服务
 class AuthService extends BaseService {
   final DatabaseService _databaseService;
@@ -51,7 +25,7 @@ class AuthService extends BaseService {
   }
 
   /// 用户注册
-  Future<ApiResponseModel<Map<String, dynamic>>> register({
+  Future<UserInfoModel?> register({
     required String username,
     required String email,
     required String password,
@@ -117,29 +91,22 @@ class AuthService extends BaseService {
       // 存储验证令牌到Redis
       await _redisService.setTempData('email_verification:$userId', verificationToken);
 
-      return AuthResult.success(
-        message: '注册成功，请查收邮箱验证邮件',
-        data: {
-          'user_id': userId,
-          'username': username,
-          'email': email,
-          'email_verification_required': true,
-          'verification_token': verificationToken, // 开发环境返回，生产环境通过邮件发送
-        },
-      );
+      final userInfo = await _userService.getUserById(userId);
+
+      return userInfo!;
     } catch (error, stackTrace) {
       LoggerUtils.error('用户注册失败', error: error, stackTrace: stackTrace);
 
       if (error is ServerException) {
-        return AuthResult.failure(message: error.message);
+        return null;
       }
 
-      return AuthResult.failure(message: '注册失败，请稍后重试');
+      return null;
     }
   }
 
   /// 用户登录
-  Future<ApiResponseModel> login({
+  Future<LoginResponseModel?> login({
     required String emailOrUsername,
     required String password,
     String? deviceId,
@@ -235,31 +202,28 @@ class AuthService extends BaseService {
 
       LoggerUtils.info('用户登录成功: $userId');
 
-      return AuthResult.success(
-        message: '登录成功',
-        data: {
-          'user': fullUserInfo.toJson(),
-          'tokens': {
-            'access_token': accessToken,
-            'refresh_token': refreshToken,
-            'token_type': 'Bearer',
-            'expires_in': ServerConfig.jwtExpireHours * 3600,
-          },
-        },
+      return LoginResponseModel(
+        user: fullUserInfo,
+        tokens: TokenInfoModel(
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+          tokenType: 'Bearer',
+          expiresIn: ServerConfig.jwtExpireHours * 3600,
+        ),
       );
     } catch (error, stackTrace) {
       LoggerUtils.error('用户登录失败: $emailOrUsername', error: error, stackTrace: stackTrace);
 
       if (error is ServerException) {
-        return AuthResult.failure(message: error.message);
+        return null;
       }
 
-      return AuthResult.failure(message: '登录失败，请稍后重试');
+      return null;
     }
   }
 
   /// 刷新令牌
-  Future<ApiResponseModel> refreshToken(String refreshToken) async {
+  Future<TokenInfoModel?> refreshToken(String refreshToken) async {
     try {
       // final logger = LoggerFactory.getLogger('AuthService');
       LoggerUtils.info('刷新令牌');
@@ -310,27 +274,25 @@ class AuthService extends BaseService {
 
       LoggerUtils.info('令牌刷新成功: $userId');
 
-      return AuthResult.success(
-        message: '令牌刷新成功',
-        data: {
-          'access_token': newAccessToken,
-          'token_type': 'Bearer',
-          'expires_in': ServerConfig.jwtExpireHours * 3600,
-        },
+      return TokenInfoModel(
+        accessToken: newAccessToken,
+        refreshToken: refreshToken,
+        tokenType: 'Bearer',
+        expiresIn: ServerConfig.jwtExpireHours * 3600,
       );
     } catch (error, stackTrace) {
       LoggerUtils.error('令牌刷新失败', error: error, stackTrace: stackTrace);
 
       if (error is ServerException) {
-        return AuthResult.failure(message: error.message);
+        return null;
       }
 
-      return AuthResult.failure(message: '令牌刷新失败');
+      return null;
     }
   }
 
   /// 用户登出
-  Future<ApiResponseModel> logout(String accessToken) async {
+  Future<bool?> logout(String accessToken) async {
     try {
       LoggerUtils.info('用户登出');
 
@@ -351,17 +313,15 @@ class AuthService extends BaseService {
 
       LoggerUtils.info('用户登出成功: $userId');
 
-      return AuthResult.success(
-        message: '登出成功',
-      );
+      return true;
     } catch (error, stackTrace) {
       LoggerUtils.error('用户登出失败', error: error, stackTrace: stackTrace);
 
       if (error is ServerException) {
-        return AuthResult.failure(message: error.message);
+        return null;
       }
 
-      return AuthResult.failure(message: '登出失败');
+      return null;
     }
   }
 
@@ -393,12 +353,17 @@ class AuthService extends BaseService {
       return payload;
     } catch (error, stackTrace) {
       LoggerUtils.error('访问令牌验证失败', error: error, stackTrace: stackTrace);
+
+      if (error is ServerException) {
+        return null;
+      }
+
       return null;
     }
   }
 
   /// 邮箱验证
-  Future<ApiResponseModel> verifyEmail(String token) async {
+  Future<bool?> verifyEmail(String token) async {
     try {
       LoggerUtils.info('邮箱验证');
 
@@ -432,30 +397,25 @@ class AuthService extends BaseService {
 
       LoggerUtils.info('邮箱验证成功: $userId');
 
-      return AuthResult.success(
-        message: '邮箱验证成功',
-      );
+      return true;
     } catch (error, stackTrace) {
       LoggerUtils.error('邮箱验证失败', error: error, stackTrace: stackTrace);
 
       if (error is ServerException) {
-        return AuthResult.failure(message: error.message);
+        return null;
       }
 
-      return AuthResult.failure(message: '邮箱验证失败');
+      return null;
     }
   }
 
   /// 忘记密码
-  Future<ApiResponseModel> forgotPassword(String email) async {
+  Future<bool?> forgotPassword(String email) async {
     try {
       LoggerUtils.info('忘记密码请求: $email');
 
       if (!_cryptoUtils.isValidEmail(email)) {
-        return AuthResult.failure(
-          code: DataCodeEnum.validationError,
-          message: '邮箱格式不正确',
-        );
+        return false;
       }
 
       // 查找用户
@@ -466,7 +426,7 @@ class AuthService extends BaseService {
 
       if (userResult.isEmpty) {
         // 为了安全，即使用户不存在也返回成功消息
-        return AuthResult.success(message: '如果该邮箱存在，重置密码邮件已发送');
+        return true;
       }
 
       final user = userResult.first.toColumnMap();
@@ -493,15 +453,15 @@ class AuthService extends BaseService {
         LoggerUtils.warn('密码重置邮件发送失败: $email');
       }
 
-      return AuthResult.success(message: '如果该邮箱存在，重置密码邮件已发送');
+      return true;
     } catch (error, stackTrace) {
       LoggerUtils.error('忘记密码失败', error: error, stackTrace: stackTrace);
-      return AuthResult.failure(message: '请求失败，请稍后重试');
+      return null;
     }
   }
 
   /// 重置密码
-  Future<ApiResponseModel> resetPassword(String token, String newPassword) async {
+  Future<bool?> resetPassword(String token, String newPassword) async {
     try {
       LoggerUtils.info('重置密码');
 
@@ -549,25 +509,23 @@ class AuthService extends BaseService {
 
       LoggerUtils.info('密码重置成功: $userId');
 
-      return AuthResult.success(
-        message: '密码重置成功，请重新登录',
-      );
+      return true;
     } catch (error, stackTrace) {
       LoggerUtils.error('重置密码失败', error: error, stackTrace: stackTrace);
 
       if (error is ServerException) {
-        return AuthResult.failure(message: error.message);
+        return null;
       }
 
-      return AuthResult.failure(message: '重置密码失败');
+      return null;
     }
   }
 
   /// 重发邮箱验证邮件
-  Future<ApiResponseModel> resendVerification(String email) async {
+  Future<bool?> resendVerification(String email) async {
     try {
       if (!_cryptoUtils.isValidEmail(email)) {
-        return AuthResult.failure(code: DataCodeEnum.validationError, message: '邮箱格式不正确');
+        return false;
       }
 
       // 查找用户
@@ -577,12 +535,12 @@ class AuthService extends BaseService {
       );
 
       if (userResult.isEmpty) {
-        return AuthResult.failure(code: DataCodeEnum.noContent, message: '用户不存在');
+        return false;
       }
 
       final user = userResult.first.toColumnMap();
       if (user['is_email_verified'] as bool) {
-        return AuthResult.failure(code: DataCodeEnum.businessError, message: '邮箱已验证');
+        return false;
       }
 
       // 生成新的验证令牌
@@ -605,10 +563,10 @@ class AuthService extends BaseService {
         LoggerUtils.warn('验证邮件发送失败: $email');
       }
 
-      return AuthResult.success(message: '验证邮件已发送到您的邮箱');
+      return true;
     } catch (error, stackTrace) {
       LoggerUtils.error('重发验证邮件失败', error: error, stackTrace: stackTrace);
-      return AuthResult.failure(message: '重发验证邮件失败，请稍后重试');
+      return null;
     }
   }
 

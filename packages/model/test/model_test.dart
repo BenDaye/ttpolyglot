@@ -10,8 +10,8 @@ void main() {
     expect(UserInfoModel, isNotNull);
 
     // 验证网络模型可以导入
-    expect(ApiResponseModel, isNotNull);
-    expect(RequestExtraModel, isNotNull);
+    expect(BaseModel, isNotNull);
+    expect(ExtraModel, isNotNull);
 
     // 验证项目模型可以导入
     expect(ImportRecordModel, isNotNull);

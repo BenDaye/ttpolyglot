@@ -1,7 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:ttpolyglot_model/src/converter/converters.dart';
-import 'package:ttpolyglot_model/src/enums/member_status_enum.dart';
-import 'package:ttpolyglot_model/src/enums/project_role_enum.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 part 'project_member_model.freezed.dart';
 part 'project_member_model.g.dart';

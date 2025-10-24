@@ -19,7 +19,7 @@ class ProjectMemberService extends BaseService {
         super('ProjectMemberService');
 
   /// 获取项目成员列表
-  Future<ApiResponsePagerModel<ProjectMemberModel>> getProjectMembers({
+  Future<PagerModel<ProjectMemberModel>> getProjectMembers({
     required int projectId,
     int page = 1,
     int limit = 50,
@@ -91,7 +91,7 @@ class ProjectMemberService extends BaseService {
         return ProjectMemberModel.fromJson(row.toColumnMap());
       }).toList();
 
-      return ApiResponsePagerModel<ProjectMemberModel>(
+      return PagerModel<ProjectMemberModel>(
         page: page,
         pageSize: limit,
         totalSize: total,

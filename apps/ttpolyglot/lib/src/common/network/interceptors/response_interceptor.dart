@@ -7,7 +7,7 @@ class ResponseInterceptor extends Interceptor {
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     try {
-      final result = ApiResponseModel.fromJson(response.data, (json) => json);
+      final result = BaseModel.fromJson(response.data, (json) => json);
       if (result.code.isSuccess) {
         response.data = result;
         response.statusMessage = result.message;

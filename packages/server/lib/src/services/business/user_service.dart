@@ -26,7 +26,7 @@ class UserService extends BaseService {
   }
 
   /// 获取用户列表
-  Future<ApiResponsePagerModel<UserInfoModel>> getUsers({
+  Future<PagerModel<UserInfoModel>> getUsers({
     int page = 1,
     int limit = 20,
     String? search,
@@ -153,7 +153,7 @@ class UserService extends BaseService {
         return UserInfoModel.fromJson(user);
       }).toList();
 
-      return ApiResponsePagerModel<UserInfoModel>(
+      return PagerModel<UserInfoModel>(
         page: page,
         pageSize: limit,
         totalSize: total,

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
 
 import '../base_controller.dart';
@@ -71,16 +72,13 @@ class AuthController extends BaseController {
         locale: locale,
       );
 
-      if (result.success) {
-        return ResponseUtils.success(
-          message: result.message,
-          data: result.data,
+      if (result != null) {
+        return ResponseUtils.success<UserInfoModel>(
+          message: '用户注册成功',
+          data: result,
         );
       } else {
-        return ResponseUtils.error(
-          code: result.code,
-          message: result.message,
-        );
+        return ResponseUtils.error(message: '用户注册失败');
       }
     } catch (error, stackTrace) {
       LoggerUtils.error('用户注册失败', error: error, stackTrace: stackTrace);
@@ -124,16 +122,13 @@ class AuthController extends BaseController {
         userAgent: userAgent,
       );
 
-      if (result.success) {
-        return ResponseUtils.success(
-          message: result.message,
-          data: result.data,
+      if (result != null) {
+        return ResponseUtils.success<UserInfoModel>(
+          message: '用户登录成功',
+          data: result.user,
         );
       } else {
-        return ResponseUtils.error(
-          code: result.code,
-          message: result.message,
-        );
+        return ResponseUtils.error(message: '用户登录失败');
       }
     } catch (error, stackTrace) {
       LoggerUtils.error('用户登录失败', error: error, stackTrace: stackTrace);
@@ -162,13 +157,10 @@ class AuthController extends BaseController {
       // 调用认证服务
       final result = await _authService.logout(token);
 
-      if (result.success) {
-        return ResponseUtils.success(message: result.message);
+      if (result != null) {
+        return ResponseUtils.success(message: '用户登出成功');
       } else {
-        return ResponseUtils.error(
-          code: result.code,
-          message: result.message,
-        );
+        return ResponseUtils.error(message: '用户登出失败');
       }
     } catch (error, stackTrace) {
       LoggerUtils.error('用户登出失败', error: error, stackTrace: stackTrace);
@@ -192,15 +184,13 @@ class AuthController extends BaseController {
       // 调用认证服务
       final result = await _authService.refreshToken(refreshToken);
 
-      if (result.success) {
-        return ResponseUtils.success(
-          message: result.message,
-          data: result.data,
+      if (result != null) {
+        return ResponseUtils.success<TokenInfoModel>(
+          message: '刷新令牌成功',
+          data: result,
         );
       } else {
-        return ResponseUtils.error(
-          message: result.message,
-        );
+        return ResponseUtils.error(message: '刷新令牌失败');
       }
     } catch (error, stackTrace) {
       LoggerUtils.error('刷新令牌失败', error: error, stackTrace: stackTrace);
@@ -230,13 +220,10 @@ class AuthController extends BaseController {
       // 调用认证服务
       final result = await _authService.forgotPassword(email);
 
-      if (result.success) {
-        return ResponseUtils.success(message: result.message);
+      if (result != null) {
+        return ResponseUtils.success(message: '忘记密码成功');
       } else {
-        return ResponseUtils.error(
-          code: result.code,
-          message: result.message,
-        );
+        return ResponseUtils.error(message: '忘记密码失败');
       }
     } catch (error, stackTrace) {
       LoggerUtils.error('忘记密码失败', error: error, stackTrace: stackTrace);
@@ -267,13 +254,10 @@ class AuthController extends BaseController {
       // 调用认证服务
       final result = await _authService.resetPassword(token, newPassword);
 
-      if (result.success) {
-        return ResponseUtils.success(message: result.message);
+      if (result != null) {
+        return ResponseUtils.success(message: '重置密码成功');
       } else {
-        return ResponseUtils.error(
-          code: result.code,
-          message: result.message,
-        );
+        return ResponseUtils.error(message: '重置密码失败');
       }
     } catch (error, stackTrace) {
       LoggerUtils.error('重置密码失败', error: error, stackTrace: stackTrace);
@@ -303,13 +287,10 @@ class AuthController extends BaseController {
       // 调用认证服务
       final result = await _authService.verifyEmail(token);
 
-      if (result.success) {
-        return ResponseUtils.success(message: result.message);
+      if (result != null) {
+        return ResponseUtils.success(message: '邮箱验证成功');
       } else {
-        return ResponseUtils.error(
-          code: result.code,
-          message: result.message,
-        );
+        return ResponseUtils.error(message: '邮箱验证失败');
       }
     } catch (error, stackTrace) {
       LoggerUtils.error('邮箱验证失败', error: error, stackTrace: stackTrace);
@@ -373,13 +354,10 @@ class AuthController extends BaseController {
 
       final result = await _authService.resendVerification(email);
 
-      if (result.success) {
-        return ResponseUtils.success(message: result.message);
+      if (result != null) {
+        return ResponseUtils.success(message: '重发验证邮件成功');
       } else {
-        return ResponseUtils.error(
-          code: result.code,
-          message: result.message,
-        );
+        return ResponseUtils.error(message: '重发验证邮件失败');
       }
     } catch (error, stackTrace) {
       LoggerUtils.error('重发验证邮件失败', error: error, stackTrace: stackTrace);
