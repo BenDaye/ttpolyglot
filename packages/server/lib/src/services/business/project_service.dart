@@ -276,7 +276,7 @@ class ProjectService extends BaseService {
         final projectResult = await _databaseService.query('''
           INSERT INTO {projects} (
             name, slug, description, owner_id, primary_language_id,
-            visibility, settings, status
+            visibility, settings, status, members_count
           ) VALUES (
             @name, @slug, @description, @owner_id, @primary_language_id,
             @visibility, @settings, 'active'
@@ -289,6 +289,7 @@ class ProjectService extends BaseService {
           'primary_language_id': primaryLanguageId,
           'visibility': visibility,
           'settings': settings != null ? jsonEncode(settings) : '{}',
+          'members_count': 1,
         });
 
         // 数据库返回的 id 可能是 int 或其他数值类型，统一转换为字符串
@@ -326,9 +327,6 @@ class ProjectService extends BaseService {
           }
         }
 
-        // 给项目所有者分配project_owner角色
-        await _assignProjectOwnerRole(projectId, ownerId);
-
         // 创建项目所有者成员记录
         await _databaseService.query('''
           INSERT INTO {project_members} (
@@ -340,13 +338,6 @@ class ProjectService extends BaseService {
           'project_id': projectId,
           'user_id': ownerId,
         });
-
-        // 更新项目成员数量
-        await _databaseService.query('''
-          UPDATE {projects}
-          SET members_count = 1
-          WHERE id = @project_id
-        ''', {'project_id': projectId});
       });
 
       // 清除相关缓存
@@ -642,33 +633,6 @@ class ProjectService extends BaseService {
     }
 
     return slug;
-  }
-
-  Future<void> _assignProjectOwnerRole(String projectId, String ownerId) async {
-    // 查找project_owner角色ID
-    final roleResult =
-        await _databaseService.query('SELECT id FROM {roles} WHERE name = @name LIMIT 1', {'name': 'project_owner'});
-
-    if (roleResult.isEmpty) {
-      throwBusiness('项目所有者角色不存在');
-    }
-
-    // roles.id 是 SERIAL 类型（INTEGER），需要转换为字符串
-    final rawRoleId = roleResult.first[0];
-    final roleId = rawRoleId.toString();
-
-    // 分配角色
-    await _databaseService.query('''
-      INSERT INTO {user_roles} (
-        user_id, role_id, project_id, granted_by
-      ) VALUES (
-        @user_id, @role_id, @project_id, @user_id
-      )
-    ''', {
-      'user_id': ownerId,
-      'role_id': roleId,
-      'project_id': projectId,
-    });
   }
 
   Future<Map<String, dynamic>?> _getUserRoleInProject(String userId, String projectId) async {
