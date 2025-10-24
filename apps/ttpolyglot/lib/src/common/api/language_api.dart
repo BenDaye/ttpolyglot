@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:ttpolyglot/src/common/network/network.dart';
+import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_model/model.dart';
 
 /// 语言 API
@@ -12,12 +13,15 @@ class LanguageApi {
     try {
       log('[getLanguages] 暂时返回默认语言列表', name: 'LanguageApi');
       final response = await HttpClient.get('/languages');
-      final data = response.data as List<dynamic>;
-      final languages = data.map((item) => LanguageModel.fromJson(item as Map<String, dynamic>)).toList();
-      if (languages.isNotEmpty) {
-        return languages;
+      final languages = Utils.toModelArray(
+        response.data,
+        (json) => LanguageModel.fromJson(json),
+      );
+      if (languages == null) {
+        Logger.error('获取语言列表响应数据为空');
+        return LanguageEnum.toArray();
       }
-      return LanguageEnum.toArray();
+      return languages.toList();
     } catch (error, stackTrace) {
       log('[getLanguages]', error: error, stackTrace: stackTrace, name: 'LanguageApi');
       return LanguageEnum.toArray();

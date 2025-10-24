@@ -63,6 +63,10 @@ class AuthService extends GetxService {
 
       final response = await _authApi.login(request);
 
+      if (response == null) {
+        throw Exception('登录响应数据为空');
+      }
+
       // 保存 Token
       await _tokenStorage.saveTokens(
         accessToken: response.tokens.accessToken,
@@ -105,6 +109,10 @@ class AuthService extends GetxService {
 
       final newTokens = await _authApi.refreshToken(oldRefreshToken);
 
+      if (newTokens == null) {
+        throw Exception('刷新 Token 响应数据为空');
+      }
+
       await _tokenStorage.saveTokens(
         accessToken: newTokens.accessToken,
         refreshToken: newTokens.refreshToken,
@@ -123,6 +131,11 @@ class AuthService extends GetxService {
   Future<void> _refreshUserInfo() async {
     try {
       final user = await _authApi.getCurrentUser();
+
+      if (user == null) {
+        throw Exception('获取当前用户响应数据为空');
+      }
+
       _currentUser.value = user;
       await _tokenStorage.saveUserInfo(user);
       Logger.info('用户信息刷新成功: ${user.username}');

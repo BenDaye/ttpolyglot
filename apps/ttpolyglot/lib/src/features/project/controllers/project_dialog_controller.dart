@@ -316,7 +316,7 @@ class ProjectDialogController extends GetxController {
             name,
             excludeProjectId: projectId,
           );
-          if (!isNameAvailable) {
+          if (isNameAvailable == false) {
             _nameError.value = '项目名称已存在';
             _isLoading.value = false;
             return;
@@ -338,7 +338,7 @@ class ProjectDialogController extends GetxController {
       } else {
         // 创建模式：检查项目名称是否可用
         final isNameAvailable = await _projectApi.checkProjectNameAvailable(name);
-        if (!isNameAvailable) {
+        if (isNameAvailable == false) {
           _nameError.value = '项目名称已存在';
           _isLoading.value = false;
           return;

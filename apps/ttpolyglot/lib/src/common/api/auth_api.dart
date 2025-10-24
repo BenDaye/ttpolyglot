@@ -7,7 +7,7 @@ import 'package:ttpolyglot_model/model.dart';
 class AuthApi {
   /// 登录
   /// 注意：登录不使用拦截器的 loading，由 Controller 控制
-  Future<LoginResponseModel> login(LoginRequestModel request) async {
+  Future<LoginResponseModel?> login(LoginRequestModel request) async {
     try {
       final response = await HttpClient.post(
         '/auth/login',
@@ -19,14 +19,18 @@ class AuthApi {
           ).toJson(),
         ),
       );
-      final data = response.data as Map<String, dynamic>?;
-      if (data == null) {
-        throw Exception('登录响应数据为空');
+      final loginResponse = Utils.toModel(
+        response.data,
+        (json) => LoginResponseModel.fromJson(json),
+      );
+      if (loginResponse == null) {
+        Logger.error('登录响应数据为空');
+        return null;
       }
-      return LoginResponseModel.fromJson(data);
+      return loginResponse;
     } catch (error, stackTrace) {
       Logger.error('登录请求失败', error: error, stackTrace: stackTrace);
-      rethrow;
+      return null;
     }
   }
 
@@ -43,36 +47,47 @@ class AuthApi {
       );
     } catch (error, stackTrace) {
       Logger.error('登出请求失败', error: error, stackTrace: stackTrace);
-      rethrow;
     }
   }
 
   /// 刷新 Token
-  Future<TokenInfoModel> refreshToken(String refreshToken) async {
+  Future<TokenInfoModel?> refreshToken(String refreshToken) async {
     try {
       final response = await HttpClient.post<Map<String, dynamic>>(
         '/auth/refresh',
         data: {'refresh_token': refreshToken},
       );
-
-      final data = response.data as Map<String, dynamic>;
-      return TokenInfoModel.fromJson(data);
+      final tokenInfo = Utils.toModel(
+        response.data,
+        (json) => TokenInfoModel.fromJson(json),
+      );
+      if (tokenInfo == null) {
+        Logger.error('刷新 Token 响应数据为空');
+        return null;
+      }
+      return tokenInfo;
     } catch (error, stackTrace) {
       Logger.error('刷新 Token 失败', error: error, stackTrace: stackTrace);
-      rethrow;
+      return null;
     }
   }
 
   /// 获取当前用户
-  Future<UserInfoModel> getCurrentUser() async {
+  Future<UserInfoModel?> getCurrentUser() async {
     try {
       final response = await HttpClient.get<Map<String, dynamic>>('/users/me');
-
-      final data = response.data as Map<String, dynamic>;
-      return UserInfoModel.fromJson(data);
+      final userInfo = Utils.toModel(
+        response.data,
+        (json) => UserInfoModel.fromJson(json),
+      );
+      if (userInfo == null) {
+        Logger.error('获取当前用户响应数据为空');
+        return null;
+      }
+      return userInfo;
     } catch (error, stackTrace) {
       Logger.error('获取当前用户失败', error: error, stackTrace: stackTrace);
-      rethrow;
+      return null;
     }
   }
 }

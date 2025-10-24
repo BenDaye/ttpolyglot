@@ -1,6 +1,7 @@
 final class Utils {
   Utils._();
 
+  /// 将对象转换为 JSON 值
   static dynamic toJsonValue<T>(T data) {
     if (data == null) {
       return null;
@@ -33,7 +34,39 @@ final class Utils {
       return obj.toJson();
     } catch (error) {
       // 如果没有 toJson 方法或调用失败，直接返回原数据
+      print('toJsonValue error: $error');
       return data;
+    }
+  }
+
+  /// 将任意类型转换为 T 泛型
+  static T? toModel<T>(dynamic data, T Function(Map<String, dynamic>)? fromJson) {
+    try {
+      if (data == null) return null;
+      if (data is T) return data;
+
+      if (data is Map<String, dynamic> && fromJson != null) {
+        return fromJson(data);
+      }
+
+      return data;
+    } catch (error) {
+      print('toModel error: $error');
+      return null;
+    }
+  }
+
+  /// 将任意类型转换为 List<T> 泛型
+  static List<T>? toModelArray<T>(dynamic data, T Function(Map<String, dynamic>)? fromJson) {
+    try {
+      if (data == null) return [];
+      if (data is Iterable && fromJson != null) {
+        return data.map((item) => toModel<T>(item, fromJson)).toList() as List<T>;
+      }
+      return data;
+    } catch (error) {
+      print('toModelArray error: $error');
+      return null;
     }
   }
 }

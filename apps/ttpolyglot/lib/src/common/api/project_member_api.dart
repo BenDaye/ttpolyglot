@@ -6,7 +6,7 @@ import 'package:ttpolyglot_model/model.dart';
 /// 项目成员管理 API
 class ProjectMemberApi {
   /// 获取项目成员列表
-  Future<PagerModel<ProjectMemberModel>> getProjectMembers({
+  Future<PagerModel<ProjectMemberModel>?> getProjectMembers({
     required int projectId,
     int page = 1,
     int limit = 50,
@@ -32,11 +32,15 @@ class ProjectMemberApi {
         query: queryParameters,
       );
 
-      final data = response.data as Map<String, dynamic>;
-      return PagerModel<ProjectMemberModel>.fromJson(
-        data,
-        (json) => ProjectMemberModel.fromJson(json as Map<String, dynamic>),
+      final result = Utils.toModel(
+        response.data,
+        (json) => PagerModel.fromJson(json, (data) => ProjectMemberModel.fromJson(data as Map<String, dynamic>)),
       );
+      if (result == null) {
+        Logger.error('获取项目成员列表响应数据为空');
+        return null;
+      }
+      return result;
     } catch (error, stackTrace) {
       Logger.error('[getProjectMembers] 获取项目成员失败', error: error, stackTrace: stackTrace);
       rethrow;
@@ -44,7 +48,7 @@ class ProjectMemberApi {
   }
 
   /// 邀请成员
-  Future<ProjectMemberModel> inviteMember({
+  Future<ProjectMemberModel?> inviteMember({
     required int projectId,
     required String userId,
     String role = 'member',
@@ -63,8 +67,15 @@ class ProjectMemberApi {
         ),
       );
 
-      final data = response.data as Map<String, dynamic>;
-      return ProjectMemberModel.fromJson(data);
+      final result = Utils.toModel(
+        response.data,
+        (json) => ProjectMemberModel.fromJson(json),
+      );
+      if (result == null) {
+        Logger.error('邀请成员响应数据为空');
+        return null;
+      }
+      return result;
     } catch (error, stackTrace) {
       Logger.error('[inviteMember] 邀请成员失败', error: error, stackTrace: stackTrace);
       rethrow;
@@ -72,7 +83,7 @@ class ProjectMemberApi {
   }
 
   /// 接受邀请
-  Future<ProjectMemberModel> acceptInvitation({
+  Future<ProjectMemberModel?> acceptInvitation({
     required int projectId,
   }) async {
     try {
@@ -85,8 +96,15 @@ class ProjectMemberApi {
         ),
       );
 
-      final data = response.data as Map<String, dynamic>;
-      return ProjectMemberModel.fromJson(data);
+      final result = Utils.toModel(
+        response.data,
+        (json) => ProjectMemberModel.fromJson(json),
+      );
+      if (result == null) {
+        Logger.error('接受邀请响应数据为空');
+        return null;
+      }
+      return result;
     } catch (error, stackTrace) {
       Logger.error('[acceptInvitation] 接受邀请失败', error: error, stackTrace: stackTrace);
       rethrow;
@@ -94,7 +112,7 @@ class ProjectMemberApi {
   }
 
   /// 更新成员角色
-  Future<ProjectMemberModel> updateMemberRole({
+  Future<ProjectMemberModel?> updateMemberRole({
     required int projectId,
     required String userId,
     required String role,
@@ -112,8 +130,15 @@ class ProjectMemberApi {
         ),
       );
 
-      final data = response.data as Map<String, dynamic>;
-      return ProjectMemberModel.fromJson(data);
+      final result = Utils.toModel(
+        response.data,
+        (json) => ProjectMemberModel.fromJson(json),
+      );
+      if (result == null) {
+        Logger.error('更新成员角色响应数据为空');
+        return null;
+      }
+      return result;
     } catch (error, stackTrace) {
       Logger.error('[updateMemberRole] 更新成员角色失败', error: error, stackTrace: stackTrace);
       rethrow;
@@ -121,12 +146,12 @@ class ProjectMemberApi {
   }
 
   /// 移除成员
-  Future<void> removeMember({
+  Future<bool?> removeMember({
     required int projectId,
     required String userId,
   }) async {
     try {
-      await HttpClient.delete(
+      final response = await HttpClient.delete(
         '/projects/$projectId/members/$userId',
         options: Options(
           extra: const ExtraModel(
@@ -134,6 +159,16 @@ class ProjectMemberApi {
           ).toJson(),
         ),
       );
+
+      final result = Utils.toModel(
+        response.data,
+        (json) => json['code'] == DataCodeEnum.success,
+      );
+      if (result == null) {
+        Logger.error('移除成员响应数据为空');
+        return null;
+      }
+      return result;
     } catch (error, stackTrace) {
       Logger.error('[removeMember] 移除成员失败', error: error, stackTrace: stackTrace);
       rethrow;
@@ -141,7 +176,7 @@ class ProjectMemberApi {
   }
 
   /// 检查是否为项目成员
-  Future<bool> isMember({
+  Future<bool?> isMember({
     required int projectId,
   }) async {
     try {
@@ -149,16 +184,23 @@ class ProjectMemberApi {
         '/projects/$projectId/members/check',
       );
 
-      final data = response.data as Map<String, dynamic>;
-      return data['is_member'] as bool? ?? false;
+      final result = Utils.toModel(
+        response.data,
+        (json) => json['is_member'] as bool? ?? false,
+      );
+      if (result == null) {
+        Logger.error('检查是否为项目成员响应数据为空');
+        return null;
+      }
+      return result;
     } catch (error, stackTrace) {
       Logger.error('[isMember] 检查成员状态失败', error: error, stackTrace: stackTrace);
-      return false;
+      return null;
     }
   }
 
   /// 获取成员角色
-  Future<String?> getMemberRole({
+  Future<ProjectRoleEnum?> getMemberRole({
     required int projectId,
   }) async {
     try {
@@ -166,8 +208,15 @@ class ProjectMemberApi {
         '/projects/$projectId/members/role',
       );
 
-      final data = response.data as Map<String, dynamic>;
-      return data['role'] as String?;
+      final result = Utils.toModel(
+        response.data,
+        (json) => ProjectRoleEnum.fromValue(json['role'] as String),
+      );
+      if (result == null) {
+        Logger.error('获取成员角色响应数据为空');
+        return null;
+      }
+      return result;
     } catch (error, stackTrace) {
       Logger.error('[getMemberRole] 获取成员角色失败', error: error, stackTrace: stackTrace);
       return null;

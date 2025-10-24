@@ -40,13 +40,11 @@ class NotificationSettingsController extends GetxController {
           projectId: projectId!,
         );
       } else {
-        _settings.value = await _api.getUserNotificationSettings();
+        _settings.value = await _api.getUserNotificationSettings() ?? [];
       }
     } catch (error, stackTrace) {
       Logger.error('[loadSettings] 加载通知设置失败', error: error, stackTrace: stackTrace);
-      Get.snackbar('错误', '加载通知设置失败');
-    } finally {
-      _isLoading.value = false;
+      rethrow;
     }
   }
 

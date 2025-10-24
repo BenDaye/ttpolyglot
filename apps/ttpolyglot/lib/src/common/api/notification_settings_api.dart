@@ -6,23 +6,27 @@ import 'package:ttpolyglot_model/model.dart';
 /// 通知设置 API
 class NotificationSettingsApi {
   /// 获取用户通知设置
-  Future<List<NotificationSettingsModel>> getUserNotificationSettings({
+  Future<List<NotificationSettingsModel>?> getUserNotificationSettings({
     int? projectId,
   }) async {
     try {
       final queryParameters = <String, dynamic>{};
-
       if (projectId != null) {
         queryParameters['projectId'] = projectId;
       }
-
       final response = await HttpClient.get<List<dynamic>>(
         '/notification-settings',
         query: queryParameters,
       );
-
-      final data = response.data as List<dynamic>;
-      return data.map((item) => NotificationSettingsModel.fromJson(item as Map<String, dynamic>)).toList();
+      final result = Utils.toModelArray(
+        response.data,
+        (json) => NotificationSettingsModel.fromJson(json),
+      );
+      if (result == null) {
+        Logger.error('获取语言列表响应数据为空');
+        return null;
+      }
+      return result.toList();
     } catch (error, stackTrace) {
       Logger.error('[getUserNotificationSettings] 获取通知设置失败', error: error, stackTrace: stackTrace);
       rethrow;
@@ -38,8 +42,15 @@ class NotificationSettingsApi {
         '/projects/$projectId/notification-settings',
       );
 
-      final data = response.data as List<dynamic>;
-      return data.map((item) => NotificationSettingsModel.fromJson(item as Map<String, dynamic>)).toList();
+      final result = Utils.toModelArray(
+        response.data,
+        (json) => NotificationSettingsModel.fromJson(json),
+      );
+      if (result == null) {
+        Logger.error('获取项目通知设置响应数据为空');
+        return [];
+      }
+      return result.toList();
     } catch (error, stackTrace) {
       Logger.error('[getProjectNotificationSettings] 获取项目通知设置失败', error: error, stackTrace: stackTrace);
       rethrow;
@@ -47,7 +58,7 @@ class NotificationSettingsApi {
   }
 
   /// 更新通知设置
-  Future<NotificationSettingsModel> updateNotificationSetting({
+  Future<NotificationSettingsModel?> updateNotificationSetting({
     int? projectId,
     required NotificationTypeEnum notificationType,
     required NotificationChannelEnum channel,
@@ -69,8 +80,15 @@ class NotificationSettingsApi {
         ),
       );
 
-      final data = response.data as Map<String, dynamic>;
-      return NotificationSettingsModel.fromJson(data);
+      final result = Utils.toModel(
+        response.data,
+        (json) => NotificationSettingsModel.fromJson(json),
+      );
+      if (result == null) {
+        Logger.error('更新项目通知设置响应数据为空');
+        return null;
+      }
+      return result;
     } catch (error, stackTrace) {
       Logger.error('[updateNotificationSetting] 更新通知设置失败', error: error, stackTrace: stackTrace);
       rethrow;
@@ -78,7 +96,7 @@ class NotificationSettingsApi {
   }
 
   /// 更新项目通知设置
-  Future<NotificationSettingsModel> updateProjectNotificationSetting({
+  Future<NotificationSettingsModel?> updateProjectNotificationSetting({
     required int projectId,
     required NotificationTypeEnum notificationType,
     required NotificationChannelEnum channel,
@@ -99,8 +117,15 @@ class NotificationSettingsApi {
         ),
       );
 
-      final data = response.data as Map<String, dynamic>;
-      return NotificationSettingsModel.fromJson(data);
+      final result = Utils.toModel(
+        response.data,
+        (json) => NotificationSettingsModel.fromJson(json),
+      );
+      if (result == null) {
+        Logger.error('更新项目通知设置响应数据为空');
+        return null;
+      }
+      return result;
     } catch (error, stackTrace) {
       Logger.error('[updateProjectNotificationSetting] 更新项目通知设置失败', error: error, stackTrace: stackTrace);
       rethrow;
@@ -108,7 +133,7 @@ class NotificationSettingsApi {
   }
 
   /// 批量更新通知设置
-  Future<List<NotificationSettingsModel>> batchUpdateNotificationSettings({
+  Future<List<NotificationSettingsModel>?> batchUpdateNotificationSettings({
     int? projectId,
     required List<NotificationSettingUpdate> updates,
   }) async {
@@ -126,8 +151,15 @@ class NotificationSettingsApi {
         ),
       );
 
-      final data = response.data as List<dynamic>;
-      return data.map((item) => NotificationSettingsModel.fromJson(item as Map<String, dynamic>)).toList();
+      final result = Utils.toModelArray(
+        response.data,
+        (json) => NotificationSettingsModel.fromJson(json),
+      );
+      if (result == null) {
+        Logger.error('批量更新通知设置响应数据为空');
+        return null;
+      }
+      return result.toList();
     } catch (error, stackTrace) {
       Logger.error('[batchUpdateNotificationSettings] 批量更新通知设置失败', error: error, stackTrace: stackTrace);
       rethrow;
@@ -177,11 +209,18 @@ class NotificationSettingsApi {
         query: queryParameters,
       );
 
-      final data = response.data as Map<String, dynamic>;
-      return data['isEnabled'] as bool? ?? true;
+      final data = Utils.toModel(
+        response.data,
+        (json) => json['isEnabled'] as bool,
+      );
+      if (data == null) {
+        Logger.error('检查通知是否启用响应数据为空');
+        return false;
+      }
+      return data;
     } catch (error, stackTrace) {
       Logger.error('[isNotificationEnabled] 检查通知状态失败', error: error, stackTrace: stackTrace);
-      return true; // 默认启用
+      return false; // 默认不启用
     }
   }
 }

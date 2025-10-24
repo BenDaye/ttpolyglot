@@ -58,15 +58,11 @@ class ProjectMembersController extends GetxController {
         status: _statusFilter.value,
       );
 
-      _members.value = response.items ?? [];
-      _totalPages.value = response.totalPage;
+      _members.value = response?.items ?? [];
+      _totalPages.value = response?.totalPage ?? 1;
     } catch (error, stackTrace) {
       Logger.error('[loadMembers] 加载成员列表失败', error: error, stackTrace: stackTrace);
-      Get.snackbar('错误', '加载成员列表失败');
-    } finally {
-      if (showLoading) {
-        _isLoading.value = false;
-      }
+      rethrow;
     }
   }
 

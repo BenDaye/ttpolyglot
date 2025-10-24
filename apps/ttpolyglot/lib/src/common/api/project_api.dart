@@ -1,12 +1,13 @@
 import 'dart:developer';
 
 import 'package:ttpolyglot/src/common/network/http_client.dart';
+import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_model/model.dart';
 
 /// 项目 API
 class ProjectApi {
   /// 获取项目列表
-  Future<PagerModel<ProjectModel>> getProjects({
+  Future<PagerModel<ProjectModel>?> getProjects({
     int page = 1,
     int limit = 50,
     String? search,
@@ -33,10 +34,15 @@ class ProjectApi {
         query: queryParams,
       );
 
-      return PagerModel.fromJson(
-        response.data as Map<String, dynamic>,
-        (json) => ProjectModel.fromJson(json as Map<String, dynamic>),
+      final result = Utils.toModel(
+        response.data,
+        (json) => PagerModel.fromJson(json, (data) => ProjectModel.fromJson(data as Map<String, dynamic>)),
       );
+      if (result == null) {
+        Logger.error('获取项目列表响应数据为空');
+        return null;
+      }
+      return result;
     } catch (error, stackTrace) {
       log('[getProjects]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
@@ -44,16 +50,21 @@ class ProjectApi {
   }
 
   /// 获取项目详情
-  Future<ProjectModel> getProject(int projectId) async {
+  Future<ProjectModel?> getProject(int projectId) async {
     try {
       log('[getProject] projectId=$projectId', name: 'ProjectApi');
 
       final response = await HttpClient.get('/projects/$projectId');
 
-      final data = response.data as Map<String, dynamic>;
-      final project = ProjectModel.fromJson(data['data'] as Map<String, dynamic>);
-
-      return project;
+      final result = Utils.toModel(
+        response.data,
+        (json) => ProjectModel.fromJson(json),
+      );
+      if (result == null) {
+        Logger.error('获取项目详情响应数据为空');
+        return null;
+      }
+      return result;
     } catch (error, stackTrace) {
       log('[getProject]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
@@ -95,11 +106,15 @@ class ProjectApi {
       if (data['data'] == null) {
         return null;
       }
-      final project = ProjectModel.fromJson(data['data'] as Map<String, dynamic>);
-
-      log('[createProject] 项目创建成功: id=${data['data']['id']}', name: 'ProjectApi');
-
-      return project;
+      final result = Utils.toModel(
+        response.data,
+        (json) => ProjectModel.fromJson(json),
+      );
+      if (result == null) {
+        Logger.error('创建项目响应数据为空');
+        return null;
+      }
+      return result;
     } catch (error, stackTrace) {
       log('[createProject]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       return null;
@@ -107,7 +122,7 @@ class ProjectApi {
   }
 
   /// 更新项目
-  Future<ProjectModel> updateProject({
+  Future<ProjectModel?> updateProject({
     required int projectId,
     String? name,
     String? description,
@@ -131,12 +146,15 @@ class ProjectApi {
         data: requestData,
       );
 
-      final data = response.data as Map<String, dynamic>;
-      final project = ProjectModel.fromJson(data['data'] as Map<String, dynamic>);
-
-      log('[updateProject] 项目更新成功', name: 'ProjectApi');
-
-      return project;
+      final result = Utils.toModel(
+        response.data,
+        (json) => ProjectModel.fromJson(json),
+      );
+      if (result == null) {
+        Logger.error('更新项目响应数据为空');
+        return null;
+      }
+      return result;
     } catch (error, stackTrace) {
       log('[updateProject]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
@@ -144,13 +162,21 @@ class ProjectApi {
   }
 
   /// 删除项目
-  Future<void> deleteProject(int projectId) async {
+  Future<bool?> deleteProject(int projectId) async {
     try {
       log('[deleteProject] projectId=$projectId', name: 'ProjectApi');
 
-      await HttpClient.delete('/projects/$projectId');
+      final response = await HttpClient.delete('/projects/$projectId');
 
-      log('[deleteProject] 项目删除成功', name: 'ProjectApi');
+      final result = Utils.toModel(
+        response.data,
+        (json) => json['code'] == DataCodeEnum.success,
+      );
+      if (result == null) {
+        Logger.error('删除项目响应数据为空');
+        return null;
+      }
+      return result;
     } catch (error, stackTrace) {
       log('[deleteProject]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
@@ -158,7 +184,7 @@ class ProjectApi {
   }
 
   /// 检查项目名称是否可用
-  Future<bool> checkProjectNameAvailable(String name, {int? excludeProjectId}) async {
+  Future<bool?> checkProjectNameAvailable(String name, {int? excludeProjectId}) async {
     try {
       log('[checkProjectNameAvailable] name=$name', name: 'ProjectApi');
 
@@ -175,11 +201,15 @@ class ProjectApi {
         query: queryParams,
       );
 
-      final data = response.data as Map<String, dynamic>;
-      if (data['available'] == null) {
-        return false;
+      final result = Utils.toModel(
+        response.data,
+        (json) => json['available'] as bool,
+      );
+      if (result == null) {
+        Logger.error('检查项目名称是否可用响应数据为空');
+        return null;
       }
-      return data['available'] == true;
+      return result;
     } catch (error, stackTrace) {
       log('[checkProjectNameAvailable]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
@@ -187,14 +217,21 @@ class ProjectApi {
   }
 
   /// 获取项目统计信息
-  Future<Map<String, dynamic>> getProjectStats(int projectId) async {
+  Future<ProjectStatisticsModel?> getProjectStats(int projectId) async {
     try {
       log('[getProjectStats] projectId=$projectId', name: 'ProjectApi');
 
       final response = await HttpClient.get('/projects/$projectId/stats');
 
-      final data = response.data as Map<String, dynamic>;
-      return data['data'] as Map<String, dynamic>;
+      final result = Utils.toModel(
+        response.data,
+        (json) => ProjectStatisticsModel.fromJson(json),
+      );
+      if (result == null) {
+        Logger.error('获取项目统计信息响应数据为空');
+        return null;
+      }
+      return result;
     } catch (error, stackTrace) {
       log('[getProjectStats]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
@@ -202,18 +239,21 @@ class ProjectApi {
   }
 
   /// 归档项目
-  Future<ProjectModel> archiveProject(int projectId) async {
+  Future<ProjectModel?> archiveProject(int projectId) async {
     try {
       log('[archiveProject] projectId=$projectId', name: 'ProjectApi');
 
       final response = await HttpClient.post('/projects/$projectId/archive');
 
-      final data = response.data as Map<String, dynamic>;
-      final project = ProjectModel.fromJson(data['data'] as Map<String, dynamic>);
-
-      log('[archiveProject] 项目归档成功', name: 'ProjectApi');
-
-      return project;
+      final result = Utils.toModel(
+        response.data,
+        (json) => ProjectModel.fromJson(json),
+      );
+      if (result == null) {
+        Logger.error('归档项目响应数据为空');
+        return null;
+      }
+      return result;
     } catch (error, stackTrace) {
       log('[archiveProject]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
@@ -221,21 +261,24 @@ class ProjectApi {
   }
 
   /// 恢复项目
-  Future<ProjectModel> restoreProject(int projectId) async {
+  Future<ProjectModel?> restoreProject(int projectId) async {
     try {
       log('[restoreProject] projectId=$projectId', name: 'ProjectApi');
 
       final response = await HttpClient.post('/projects/$projectId/restore');
 
-      final data = response.data as Map<String, dynamic>;
-      final project = ProjectModel.fromJson(data['data'] as Map<String, dynamic>);
-
-      log('[restoreProject] 项目恢复成功', name: 'ProjectApi');
-
-      return project;
+      final result = Utils.toModel(
+        response.data,
+        (json) => ProjectModel.fromJson(json),
+      );
+      if (result == null) {
+        Logger.error('恢复项目响应数据为空');
+        return null;
+      }
+      return result;
     } catch (error, stackTrace) {
       log('[restoreProject]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
-      rethrow;
+      return null;
     }
   }
 }
