@@ -30,6 +30,7 @@ mixin _$LocationModel {
   String get region => throw _privateConstructorUsedError;
 
   /// 国家代码
+  @JsonKey(name: 'country_code')
   String get countryCode => throw _privateConstructorUsedError;
 
   /// 时区
@@ -58,7 +59,7 @@ abstract class $LocationModelCopyWith<$Res> {
       {String country,
       String city,
       String region,
-      String countryCode,
+      @JsonKey(name: 'country_code') String countryCode,
       String timezone,
       String isp});
 }
@@ -126,7 +127,7 @@ abstract class _$$LocationModelImplCopyWith<$Res>
       {String country,
       String city,
       String region,
-      String countryCode,
+      @JsonKey(name: 'country_code') String countryCode,
       String timezone,
       String isp});
 }
@@ -187,7 +188,7 @@ class _$LocationModelImpl extends _LocationModel {
       {this.country = '',
       this.city = '',
       this.region = '',
-      this.countryCode = '',
+      @JsonKey(name: 'country_code') this.countryCode = '',
       this.timezone = '',
       this.isp = ''})
       : super._();
@@ -212,7 +213,7 @@ class _$LocationModelImpl extends _LocationModel {
 
   /// 国家代码
   @override
-  @JsonKey()
+  @JsonKey(name: 'country_code')
   final String countryCode;
 
   /// 时区
@@ -271,7 +272,7 @@ abstract class _LocationModel extends LocationModel {
       {final String country,
       final String city,
       final String region,
-      final String countryCode,
+      @JsonKey(name: 'country_code') final String countryCode,
       final String timezone,
       final String isp}) = _$LocationModelImpl;
   const _LocationModel._() : super._();
@@ -293,6 +294,7 @@ abstract class _LocationModel extends LocationModel {
 
   /// 国家代码
   @override
+  @JsonKey(name: 'country_code')
   String get countryCode;
 
   /// 时区

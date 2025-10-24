@@ -19,7 +19,7 @@ class LocationModel with _$LocationModel {
     @Default('') String region,
 
     /// 国家代码
-    @Default('') String countryCode,
+    @JsonKey(name: 'country_code') @Default('') String countryCode,
 
     /// 时区
     @Default('') String timezone,

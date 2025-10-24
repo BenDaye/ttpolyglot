@@ -11,7 +11,7 @@ _$LocationModelImpl _$$LocationModelImplFromJson(Map<String, dynamic> json) =>
       country: json['country'] as String? ?? '',
       city: json['city'] as String? ?? '',
       region: json['region'] as String? ?? '',
-      countryCode: json['countryCode'] as String? ?? '',
+      countryCode: json['country_code'] as String? ?? '',
       timezone: json['timezone'] as String? ?? '',
       isp: json['isp'] as String? ?? '',
     );
@@ -21,7 +21,7 @@ Map<String, dynamic> _$$LocationModelImplToJson(_$LocationModelImpl instance) =>
       'country': instance.country,
       'city': instance.city,
       'region': instance.region,
-      'countryCode': instance.countryCode,
+      'country_code': instance.countryCode,
       'timezone': instance.timezone,
       'isp': instance.isp,
     };
