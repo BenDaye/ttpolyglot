@@ -316,7 +316,7 @@ class MultiLevelCacheService {
       } else if (value is String) {
         jsonValue = value;
       } else {
-        jsonValue = jsonEncode(value);
+        jsonValue = jsonEncode(value, toEncodable: _toEncodable);
       }
 
       final ttlSeconds = ttl?.inSeconds ?? _l2DefaultTtl.inSeconds;
@@ -324,6 +324,14 @@ class MultiLevelCacheService {
     } catch (error) {
       LoggerUtils.error('L2缓存设置失败: $key', error: error);
     }
+  }
+
+  /// JSON 编码转换器，处理特殊类型
+  static Object? _toEncodable(dynamic value) {
+    if (value is DateTime) {
+      return value.toUtc().toIso8601String();
+    }
+    return value;
   }
 
   /// 从L2缓存删除

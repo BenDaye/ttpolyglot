@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:ttpolyglot_model/src/converter/converters.dart';
 
 part 'system_config_model.freezed.dart';
 part 'system_config_model.g.dart';
@@ -50,10 +51,10 @@ class SystemConfigModel with _$SystemConfigModel {
     @JsonKey(name: 'change_reason') String? changeReason,
 
     /// 创建时间
-    @JsonKey(name: 'created_at') DateTime? createdAt,
+    @JsonKey(name: 'created_at') @NullableTimesConverter() DateTime? createdAt,
 
     /// 更新时间
-    @JsonKey(name: 'updated_at') DateTime? updatedAt,
+    @JsonKey(name: 'updated_at') @NullableTimesConverter() DateTime? updatedAt,
   }) = _SystemConfigModel;
 
   const SystemConfigModel._();

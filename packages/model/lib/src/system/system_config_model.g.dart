@@ -23,12 +23,8 @@ _$SystemConfigModelImpl _$$SystemConfigModelImplFromJson(
       isActive: json['is_active'] as bool? ?? true,
       updatedBy: json['updated_by'] as String?,
       changeReason: json['change_reason'] as String?,
-      createdAt: json['created_at'] == null
-          ? null
-          : DateTime.parse(json['created_at'] as String),
-      updatedAt: json['updated_at'] == null
-          ? null
-          : DateTime.parse(json['updated_at'] as String),
+      createdAt: const NullableTimesConverter().fromJson(json['created_at']),
+      updatedAt: const NullableTimesConverter().fromJson(json['updated_at']),
     );
 
 Map<String, dynamic> _$$SystemConfigModelImplToJson(
@@ -48,6 +44,6 @@ Map<String, dynamic> _$$SystemConfigModelImplToJson(
       'is_active': instance.isActive,
       'updated_by': instance.updatedBy,
       'change_reason': instance.changeReason,
-      'created_at': instance.createdAt?.toIso8601String(),
-      'updated_at': instance.updatedAt?.toIso8601String(),
+      'created_at': const NullableTimesConverter().toJson(instance.createdAt),
+      'updated_at': const NullableTimesConverter().toJson(instance.updatedAt),
     };

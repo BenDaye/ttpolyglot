@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:ttpolyglot_model/src/converter/converters.dart';
 import 'package:ttpolyglot_model/src/enums/language_enum.dart';
 
 part 'user_settings_model.freezed.dart';
@@ -18,10 +19,10 @@ class UserSettingsModel with _$UserSettingsModel {
     @JsonKey(name: 'translation_settings') required TranslationSettingsModel translationSettings,
 
     /// 创建时间
-    @JsonKey(name: 'created_at') DateTime? createdAt,
+    @JsonKey(name: 'created_at') @NullableTimesConverter() DateTime? createdAt,
 
     /// 更新时间
-    @JsonKey(name: 'updated_at') DateTime? updatedAt,
+    @JsonKey(name: 'updated_at') @NullableTimesConverter() DateTime? updatedAt,
   }) = _UserSettingsModel;
 
   factory UserSettingsModel.fromJson(Map<String, dynamic> json) => _$UserSettingsModelFromJson(json);

@@ -75,10 +75,12 @@ mixin _$SystemConfigModel {
 
   /// 创建时间
   @JsonKey(name: 'created_at')
+  @NullableTimesConverter()
   DateTime? get createdAt => throw _privateConstructorUsedError;
 
   /// 更新时间
   @JsonKey(name: 'updated_at')
+  @NullableTimesConverter()
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
   /// Serializes this SystemConfigModel to a JSON map.
@@ -112,8 +114,12 @@ abstract class $SystemConfigModelCopyWith<$Res> {
       @JsonKey(name: 'is_active') bool isActive,
       @JsonKey(name: 'updated_by') String? updatedBy,
       @JsonKey(name: 'change_reason') String? changeReason,
-      @JsonKey(name: 'created_at') DateTime? createdAt,
-      @JsonKey(name: 'updated_at') DateTime? updatedAt});
+      @JsonKey(name: 'created_at')
+      @NullableTimesConverter()
+      DateTime? createdAt,
+      @JsonKey(name: 'updated_at')
+      @NullableTimesConverter()
+      DateTime? updatedAt});
 }
 
 /// @nodoc
@@ -240,8 +246,12 @@ abstract class _$$SystemConfigModelImplCopyWith<$Res>
       @JsonKey(name: 'is_active') bool isActive,
       @JsonKey(name: 'updated_by') String? updatedBy,
       @JsonKey(name: 'change_reason') String? changeReason,
-      @JsonKey(name: 'created_at') DateTime? createdAt,
-      @JsonKey(name: 'updated_at') DateTime? updatedAt});
+      @JsonKey(name: 'created_at')
+      @NullableTimesConverter()
+      DateTime? createdAt,
+      @JsonKey(name: 'updated_at')
+      @NullableTimesConverter()
+      DateTime? updatedAt});
 }
 
 /// @nodoc
@@ -361,8 +371,8 @@ class _$SystemConfigModelImpl extends _SystemConfigModel {
       @JsonKey(name: 'is_active') this.isActive = true,
       @JsonKey(name: 'updated_by') this.updatedBy,
       @JsonKey(name: 'change_reason') this.changeReason,
-      @JsonKey(name: 'created_at') this.createdAt,
-      @JsonKey(name: 'updated_at') this.updatedAt})
+      @JsonKey(name: 'created_at') @NullableTimesConverter() this.createdAt,
+      @JsonKey(name: 'updated_at') @NullableTimesConverter() this.updatedAt})
       : super._();
 
   factory _$SystemConfigModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -438,11 +448,13 @@ class _$SystemConfigModelImpl extends _SystemConfigModel {
   /// 创建时间
   @override
   @JsonKey(name: 'created_at')
+  @NullableTimesConverter()
   final DateTime? createdAt;
 
   /// 更新时间
   @override
   @JsonKey(name: 'updated_at')
+  @NullableTimesConverter()
   final DateTime? updatedAt;
 
   @override
@@ -528,23 +540,26 @@ class _$SystemConfigModelImpl extends _SystemConfigModel {
 
 abstract class _SystemConfigModel extends SystemConfigModel {
   const factory _SystemConfigModel(
-          {final String? id,
-          @JsonKey(name: 'config_key') required final String configKey,
-          @JsonKey(name: 'config_value') required final String configValue,
-          @JsonKey(name: 'value_type') final String? valueType,
-          @JsonKey(name: 'default_value') final String? defaultValue,
-          final String? category,
-          @JsonKey(name: 'display_name') final String? displayName,
-          final String? description,
-          @JsonKey(name: 'sort_order') final int? sortOrder,
-          @JsonKey(name: 'is_editable') final bool isEditable,
-          @JsonKey(name: 'is_public') final bool isPublic,
-          @JsonKey(name: 'is_active') final bool isActive,
-          @JsonKey(name: 'updated_by') final String? updatedBy,
-          @JsonKey(name: 'change_reason') final String? changeReason,
-          @JsonKey(name: 'created_at') final DateTime? createdAt,
-          @JsonKey(name: 'updated_at') final DateTime? updatedAt}) =
-      _$SystemConfigModelImpl;
+      {final String? id,
+      @JsonKey(name: 'config_key') required final String configKey,
+      @JsonKey(name: 'config_value') required final String configValue,
+      @JsonKey(name: 'value_type') final String? valueType,
+      @JsonKey(name: 'default_value') final String? defaultValue,
+      final String? category,
+      @JsonKey(name: 'display_name') final String? displayName,
+      final String? description,
+      @JsonKey(name: 'sort_order') final int? sortOrder,
+      @JsonKey(name: 'is_editable') final bool isEditable,
+      @JsonKey(name: 'is_public') final bool isPublic,
+      @JsonKey(name: 'is_active') final bool isActive,
+      @JsonKey(name: 'updated_by') final String? updatedBy,
+      @JsonKey(name: 'change_reason') final String? changeReason,
+      @JsonKey(name: 'created_at')
+      @NullableTimesConverter()
+      final DateTime? createdAt,
+      @JsonKey(name: 'updated_at')
+      @NullableTimesConverter()
+      final DateTime? updatedAt}) = _$SystemConfigModelImpl;
   const _SystemConfigModel._() : super._();
 
   factory _SystemConfigModel.fromJson(Map<String, dynamic> json) =
@@ -620,11 +635,13 @@ abstract class _SystemConfigModel extends SystemConfigModel {
   /// 创建时间
   @override
   @JsonKey(name: 'created_at')
+  @NullableTimesConverter()
   DateTime? get createdAt;
 
   /// 更新时间
   @override
   @JsonKey(name: 'updated_at')
+  @NullableTimesConverter()
   DateTime? get updatedAt;
 
   /// Create a copy of SystemConfigModel

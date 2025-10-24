@@ -2,6 +2,8 @@ library ttpolyglot_model;
 
 // 认证模型
 export 'src/auth/auth_models.dart';
+// 转换器
+export 'src/converter/converters.dart';
 // 枚举
 export 'src/enums/enums.dart';
 // 语言模型

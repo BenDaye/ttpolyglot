@@ -41,8 +41,10 @@ mixin _$UserInfoModel {
   @JsonKey(name: 'is_email_verified')
   bool? get isEmailVerified => throw _privateConstructorUsedError;
   @JsonKey(name: 'email_verified_at')
+  @NullableTimesConverter()
   DateTime? get emailVerifiedAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'last_login_at')
+  @NullableTimesConverter()
   DateTime? get lastLoginAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'last_login_ip')
   String? get lastLoginIp => throw _privateConstructorUsedError;
@@ -51,12 +53,16 @@ mixin _$UserInfoModel {
   @JsonKey(name: 'login_attempts')
   int? get loginAttempts => throw _privateConstructorUsedError;
   @JsonKey(name: 'locked_until')
+  @NullableTimesConverter()
   DateTime? get lockedUntil => throw _privateConstructorUsedError;
   @JsonKey(name: 'password_changed_at')
+  @NullableTimesConverter()
   DateTime? get passwordChangedAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
+  @NullableTimesConverter()
   DateTime? get createdAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'updated_at')
+  @NullableTimesConverter()
   DateTime? get updatedAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'roles')
   List<RoleModel>? get roles => throw _privateConstructorUsedError;
@@ -88,15 +94,27 @@ abstract class $UserInfoModelCopyWith<$Res> {
       @JsonKey(name: 'locale') String? locale,
       @JsonKey(name: 'is_active') bool? isActive,
       @JsonKey(name: 'is_email_verified') bool? isEmailVerified,
-      @JsonKey(name: 'email_verified_at') DateTime? emailVerifiedAt,
-      @JsonKey(name: 'last_login_at') DateTime? lastLoginAt,
+      @JsonKey(name: 'email_verified_at')
+      @NullableTimesConverter()
+      DateTime? emailVerifiedAt,
+      @JsonKey(name: 'last_login_at')
+      @NullableTimesConverter()
+      DateTime? lastLoginAt,
       @JsonKey(name: 'last_login_ip') String? lastLoginIp,
       @JsonKey(name: 'last_login_location') LocationModel? lastLoginLocation,
       @JsonKey(name: 'login_attempts') int? loginAttempts,
-      @JsonKey(name: 'locked_until') DateTime? lockedUntil,
-      @JsonKey(name: 'password_changed_at') DateTime? passwordChangedAt,
-      @JsonKey(name: 'created_at') DateTime? createdAt,
-      @JsonKey(name: 'updated_at') DateTime? updatedAt,
+      @JsonKey(name: 'locked_until')
+      @NullableTimesConverter()
+      DateTime? lockedUntil,
+      @JsonKey(name: 'password_changed_at')
+      @NullableTimesConverter()
+      DateTime? passwordChangedAt,
+      @JsonKey(name: 'created_at')
+      @NullableTimesConverter()
+      DateTime? createdAt,
+      @JsonKey(name: 'updated_at')
+      @NullableTimesConverter()
+      DateTime? updatedAt,
       @JsonKey(name: 'roles') List<RoleModel>? roles});
 
   $LocationModelCopyWith<$Res>? get lastLoginLocation;
@@ -256,15 +274,27 @@ abstract class _$$UserInfoModelImplCopyWith<$Res>
       @JsonKey(name: 'locale') String? locale,
       @JsonKey(name: 'is_active') bool? isActive,
       @JsonKey(name: 'is_email_verified') bool? isEmailVerified,
-      @JsonKey(name: 'email_verified_at') DateTime? emailVerifiedAt,
-      @JsonKey(name: 'last_login_at') DateTime? lastLoginAt,
+      @JsonKey(name: 'email_verified_at')
+      @NullableTimesConverter()
+      DateTime? emailVerifiedAt,
+      @JsonKey(name: 'last_login_at')
+      @NullableTimesConverter()
+      DateTime? lastLoginAt,
       @JsonKey(name: 'last_login_ip') String? lastLoginIp,
       @JsonKey(name: 'last_login_location') LocationModel? lastLoginLocation,
       @JsonKey(name: 'login_attempts') int? loginAttempts,
-      @JsonKey(name: 'locked_until') DateTime? lockedUntil,
-      @JsonKey(name: 'password_changed_at') DateTime? passwordChangedAt,
-      @JsonKey(name: 'created_at') DateTime? createdAt,
-      @JsonKey(name: 'updated_at') DateTime? updatedAt,
+      @JsonKey(name: 'locked_until')
+      @NullableTimesConverter()
+      DateTime? lockedUntil,
+      @JsonKey(name: 'password_changed_at')
+      @NullableTimesConverter()
+      DateTime? passwordChangedAt,
+      @JsonKey(name: 'created_at')
+      @NullableTimesConverter()
+      DateTime? createdAt,
+      @JsonKey(name: 'updated_at')
+      @NullableTimesConverter()
+      DateTime? updatedAt,
       @JsonKey(name: 'roles') List<RoleModel>? roles});
 
   @override
@@ -404,15 +434,21 @@ class _$UserInfoModelImpl implements _UserInfoModel {
       @JsonKey(name: 'locale') this.locale,
       @JsonKey(name: 'is_active') this.isActive,
       @JsonKey(name: 'is_email_verified') this.isEmailVerified,
-      @JsonKey(name: 'email_verified_at') this.emailVerifiedAt,
-      @JsonKey(name: 'last_login_at') this.lastLoginAt,
+      @JsonKey(name: 'email_verified_at')
+      @NullableTimesConverter()
+      this.emailVerifiedAt,
+      @JsonKey(name: 'last_login_at')
+      @NullableTimesConverter()
+      this.lastLoginAt,
       @JsonKey(name: 'last_login_ip') this.lastLoginIp,
       @JsonKey(name: 'last_login_location') this.lastLoginLocation,
       @JsonKey(name: 'login_attempts') this.loginAttempts,
-      @JsonKey(name: 'locked_until') this.lockedUntil,
-      @JsonKey(name: 'password_changed_at') this.passwordChangedAt,
-      @JsonKey(name: 'created_at') this.createdAt,
-      @JsonKey(name: 'updated_at') this.updatedAt,
+      @JsonKey(name: 'locked_until') @NullableTimesConverter() this.lockedUntil,
+      @JsonKey(name: 'password_changed_at')
+      @NullableTimesConverter()
+      this.passwordChangedAt,
+      @JsonKey(name: 'created_at') @NullableTimesConverter() this.createdAt,
+      @JsonKey(name: 'updated_at') @NullableTimesConverter() this.updatedAt,
       @JsonKey(name: 'roles') final List<RoleModel>? roles})
       : _roles = roles;
 
@@ -451,9 +487,11 @@ class _$UserInfoModelImpl implements _UserInfoModel {
   final bool? isEmailVerified;
   @override
   @JsonKey(name: 'email_verified_at')
+  @NullableTimesConverter()
   final DateTime? emailVerifiedAt;
   @override
   @JsonKey(name: 'last_login_at')
+  @NullableTimesConverter()
   final DateTime? lastLoginAt;
   @override
   @JsonKey(name: 'last_login_ip')
@@ -466,15 +504,19 @@ class _$UserInfoModelImpl implements _UserInfoModel {
   final int? loginAttempts;
   @override
   @JsonKey(name: 'locked_until')
+  @NullableTimesConverter()
   final DateTime? lockedUntil;
   @override
   @JsonKey(name: 'password_changed_at')
+  @NullableTimesConverter()
   final DateTime? passwordChangedAt;
   @override
   @JsonKey(name: 'created_at')
+  @NullableTimesConverter()
   final DateTime? createdAt;
   @override
   @JsonKey(name: 'updated_at')
+  @NullableTimesConverter()
   final DateTime? updatedAt;
   final List<RoleModel>? _roles;
   @override
@@ -579,28 +621,40 @@ class _$UserInfoModelImpl implements _UserInfoModel {
 
 abstract class _UserInfoModel implements UserInfoModel {
   const factory _UserInfoModel(
-      {@JsonKey(name: 'username') required final String username,
-      @JsonKey(name: 'email') required final String email,
-      @JsonKey(name: 'email_encrypted') final String? emailEncrypted,
-      @JsonKey(name: 'display_name') final String? displayName,
-      @JsonKey(name: 'avatar_url') final String? avatarUrl,
-      @JsonKey(name: 'phone') final String? phone,
-      @JsonKey(name: 'timezone') final String? timezone,
-      @JsonKey(name: 'locale') final String? locale,
-      @JsonKey(name: 'is_active') final bool? isActive,
-      @JsonKey(name: 'is_email_verified') final bool? isEmailVerified,
-      @JsonKey(name: 'email_verified_at') final DateTime? emailVerifiedAt,
-      @JsonKey(name: 'last_login_at') final DateTime? lastLoginAt,
-      @JsonKey(name: 'last_login_ip') final String? lastLoginIp,
-      @JsonKey(name: 'last_login_location')
-      final LocationModel? lastLoginLocation,
-      @JsonKey(name: 'login_attempts') final int? loginAttempts,
-      @JsonKey(name: 'locked_until') final DateTime? lockedUntil,
-      @JsonKey(name: 'password_changed_at') final DateTime? passwordChangedAt,
-      @JsonKey(name: 'created_at') final DateTime? createdAt,
-      @JsonKey(name: 'updated_at') final DateTime? updatedAt,
-      @JsonKey(name: 'roles')
-      final List<RoleModel>? roles}) = _$UserInfoModelImpl;
+          {@JsonKey(name: 'username') required final String username,
+          @JsonKey(name: 'email') required final String email,
+          @JsonKey(name: 'email_encrypted') final String? emailEncrypted,
+          @JsonKey(name: 'display_name') final String? displayName,
+          @JsonKey(name: 'avatar_url') final String? avatarUrl,
+          @JsonKey(name: 'phone') final String? phone,
+          @JsonKey(name: 'timezone') final String? timezone,
+          @JsonKey(name: 'locale') final String? locale,
+          @JsonKey(name: 'is_active') final bool? isActive,
+          @JsonKey(name: 'is_email_verified') final bool? isEmailVerified,
+          @JsonKey(name: 'email_verified_at')
+          @NullableTimesConverter()
+          final DateTime? emailVerifiedAt,
+          @JsonKey(name: 'last_login_at')
+          @NullableTimesConverter()
+          final DateTime? lastLoginAt,
+          @JsonKey(name: 'last_login_ip') final String? lastLoginIp,
+          @JsonKey(name: 'last_login_location')
+          final LocationModel? lastLoginLocation,
+          @JsonKey(name: 'login_attempts') final int? loginAttempts,
+          @JsonKey(name: 'locked_until')
+          @NullableTimesConverter()
+          final DateTime? lockedUntil,
+          @JsonKey(name: 'password_changed_at')
+          @NullableTimesConverter()
+          final DateTime? passwordChangedAt,
+          @JsonKey(name: 'created_at')
+          @NullableTimesConverter()
+          final DateTime? createdAt,
+          @JsonKey(name: 'updated_at')
+          @NullableTimesConverter()
+          final DateTime? updatedAt,
+          @JsonKey(name: 'roles') final List<RoleModel>? roles}) =
+      _$UserInfoModelImpl;
 
   factory _UserInfoModel.fromJson(Map<String, dynamic> json) =
       _$UserInfoModelImpl.fromJson;
@@ -637,9 +691,11 @@ abstract class _UserInfoModel implements UserInfoModel {
   bool? get isEmailVerified;
   @override
   @JsonKey(name: 'email_verified_at')
+  @NullableTimesConverter()
   DateTime? get emailVerifiedAt;
   @override
   @JsonKey(name: 'last_login_at')
+  @NullableTimesConverter()
   DateTime? get lastLoginAt;
   @override
   @JsonKey(name: 'last_login_ip')
@@ -652,15 +708,19 @@ abstract class _UserInfoModel implements UserInfoModel {
   int? get loginAttempts;
   @override
   @JsonKey(name: 'locked_until')
+  @NullableTimesConverter()
   DateTime? get lockedUntil;
   @override
   @JsonKey(name: 'password_changed_at')
+  @NullableTimesConverter()
   DateTime? get passwordChangedAt;
   @override
   @JsonKey(name: 'created_at')
+  @NullableTimesConverter()
   DateTime? get createdAt;
   @override
   @JsonKey(name: 'updated_at')
+  @NullableTimesConverter()
   DateTime? get updatedAt;
   @override
   @JsonKey(name: 'roles')

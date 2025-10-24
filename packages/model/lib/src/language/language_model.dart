@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:ttpolyglot_model/src/enums/language_enum.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 part 'language_model.freezed.dart';
 part 'language_model.g.dart';
@@ -16,8 +16,8 @@ class LanguageModel with _$LanguageModel {
     @JsonKey(name: 'is_active') @Default(true) bool isActive,
     @JsonKey(name: 'is_rtl') @Default(false) bool isRtl,
     @JsonKey(name: 'sort_order') @Default(0) int sortOrder,
-    @JsonKey(name: 'created_at') required DateTime createdAt,
-    @JsonKey(name: 'updated_at') required DateTime updatedAt,
+    @JsonKey(name: 'created_at') @TimesConverter() required DateTime createdAt,
+    @JsonKey(name: 'updated_at') @TimesConverter() required DateTime updatedAt,
   }) = _LanguageModel;
 
   factory LanguageModel.fromJson(Map<String, dynamic> json) => _$LanguageModelFromJson(json);

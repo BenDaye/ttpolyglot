@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:ttpolyglot_model/src/converter/converters.dart';
 import 'package:ttpolyglot_model/src/enums/language_enum.dart';
 
 part 'translation_entry_model.freezed.dart';
@@ -63,22 +64,22 @@ class TranslationEntryModel with _$TranslationEntryModel {
     @JsonKey(name: 'word_count') int? wordCount,
 
     /// 分配时间
-    @JsonKey(name: 'assigned_at') DateTime? assignedAt,
+    @JsonKey(name: 'assigned_at') @NullableTimesConverter() DateTime? assignedAt,
 
     /// 翻译完成时间
-    @JsonKey(name: 'translated_at') DateTime? translatedAt,
+    @JsonKey(name: 'translated_at') @NullableTimesConverter() DateTime? translatedAt,
 
     /// 审核时间
-    @JsonKey(name: 'reviewed_at') DateTime? reviewedAt,
+    @JsonKey(name: 'reviewed_at') @NullableTimesConverter() DateTime? reviewedAt,
 
     /// 批准时间
-    @JsonKey(name: 'approved_at') DateTime? approvedAt,
+    @JsonKey(name: 'approved_at') @NullableTimesConverter() DateTime? approvedAt,
 
     /// 创建时间
-    @JsonKey(name: 'created_at') DateTime? createdAt,
+    @JsonKey(name: 'created_at') @NullableTimesConverter() DateTime? createdAt,
 
     /// 更新时间
-    @JsonKey(name: 'updated_at') DateTime? updatedAt,
+    @JsonKey(name: 'updated_at') @NullableTimesConverter() DateTime? updatedAt,
   }) = _TranslationEntryModel;
 
   const TranslationEntryModel._();

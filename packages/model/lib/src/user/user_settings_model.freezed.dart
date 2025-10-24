@@ -37,10 +37,12 @@ mixin _$UserSettingsModel {
 
   /// 创建时间
   @JsonKey(name: 'created_at')
+  @NullableTimesConverter()
   DateTime? get createdAt => throw _privateConstructorUsedError;
 
   /// 更新时间
   @JsonKey(name: 'updated_at')
+  @NullableTimesConverter()
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
   /// Serializes this UserSettingsModel to a JSON map.
@@ -65,8 +67,12 @@ abstract class $UserSettingsModelCopyWith<$Res> {
       @JsonKey(name: 'general_settings') GeneralSettingsModel generalSettings,
       @JsonKey(name: 'translation_settings')
       TranslationSettingsModel translationSettings,
-      @JsonKey(name: 'created_at') DateTime? createdAt,
-      @JsonKey(name: 'updated_at') DateTime? updatedAt});
+      @JsonKey(name: 'created_at')
+      @NullableTimesConverter()
+      DateTime? createdAt,
+      @JsonKey(name: 'updated_at')
+      @NullableTimesConverter()
+      DateTime? updatedAt});
 
   $LanguageSettingsModelCopyWith<$Res> get languageSettings;
   $GeneralSettingsModelCopyWith<$Res> get generalSettings;
@@ -165,8 +171,12 @@ abstract class _$$UserSettingsModelImplCopyWith<$Res>
       @JsonKey(name: 'general_settings') GeneralSettingsModel generalSettings,
       @JsonKey(name: 'translation_settings')
       TranslationSettingsModel translationSettings,
-      @JsonKey(name: 'created_at') DateTime? createdAt,
-      @JsonKey(name: 'updated_at') DateTime? updatedAt});
+      @JsonKey(name: 'created_at')
+      @NullableTimesConverter()
+      DateTime? createdAt,
+      @JsonKey(name: 'updated_at')
+      @NullableTimesConverter()
+      DateTime? updatedAt});
 
   @override
   $LanguageSettingsModelCopyWith<$Res> get languageSettings;
@@ -227,8 +237,8 @@ class _$UserSettingsModelImpl implements _UserSettingsModel {
       {@JsonKey(name: 'language_settings') required this.languageSettings,
       @JsonKey(name: 'general_settings') required this.generalSettings,
       @JsonKey(name: 'translation_settings') required this.translationSettings,
-      @JsonKey(name: 'created_at') this.createdAt,
-      @JsonKey(name: 'updated_at') this.updatedAt});
+      @JsonKey(name: 'created_at') @NullableTimesConverter() this.createdAt,
+      @JsonKey(name: 'updated_at') @NullableTimesConverter() this.updatedAt});
 
   factory _$UserSettingsModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserSettingsModelImplFromJson(json);
@@ -251,11 +261,13 @@ class _$UserSettingsModelImpl implements _UserSettingsModel {
   /// 创建时间
   @override
   @JsonKey(name: 'created_at')
+  @NullableTimesConverter()
   final DateTime? createdAt;
 
   /// 更新时间
   @override
   @JsonKey(name: 'updated_at')
+  @NullableTimesConverter()
   final DateTime? updatedAt;
 
   @override
@@ -304,15 +316,18 @@ class _$UserSettingsModelImpl implements _UserSettingsModel {
 
 abstract class _UserSettingsModel implements UserSettingsModel {
   const factory _UserSettingsModel(
-          {@JsonKey(name: 'language_settings')
-          required final LanguageSettingsModel languageSettings,
-          @JsonKey(name: 'general_settings')
-          required final GeneralSettingsModel generalSettings,
-          @JsonKey(name: 'translation_settings')
-          required final TranslationSettingsModel translationSettings,
-          @JsonKey(name: 'created_at') final DateTime? createdAt,
-          @JsonKey(name: 'updated_at') final DateTime? updatedAt}) =
-      _$UserSettingsModelImpl;
+      {@JsonKey(name: 'language_settings')
+      required final LanguageSettingsModel languageSettings,
+      @JsonKey(name: 'general_settings')
+      required final GeneralSettingsModel generalSettings,
+      @JsonKey(name: 'translation_settings')
+      required final TranslationSettingsModel translationSettings,
+      @JsonKey(name: 'created_at')
+      @NullableTimesConverter()
+      final DateTime? createdAt,
+      @JsonKey(name: 'updated_at')
+      @NullableTimesConverter()
+      final DateTime? updatedAt}) = _$UserSettingsModelImpl;
 
   factory _UserSettingsModel.fromJson(Map<String, dynamic> json) =
       _$UserSettingsModelImpl.fromJson;
@@ -335,11 +350,13 @@ abstract class _UserSettingsModel implements UserSettingsModel {
   /// 创建时间
   @override
   @JsonKey(name: 'created_at')
+  @NullableTimesConverter()
   DateTime? get createdAt;
 
   /// 更新时间
   @override
   @JsonKey(name: 'updated_at')
+  @NullableTimesConverter()
   DateTime? get updatedAt;
 
   /// Create a copy of UserSettingsModel

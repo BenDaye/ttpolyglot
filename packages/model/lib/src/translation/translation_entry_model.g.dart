@@ -28,24 +28,13 @@ _$TranslationEntryModelImpl _$$TranslationEntryModelImplFromJson(
       hasIssues: json['has_issues'] as bool? ?? false,
       characterCount: (json['character_count'] as num?)?.toInt(),
       wordCount: (json['word_count'] as num?)?.toInt(),
-      assignedAt: json['assigned_at'] == null
-          ? null
-          : DateTime.parse(json['assigned_at'] as String),
-      translatedAt: json['translated_at'] == null
-          ? null
-          : DateTime.parse(json['translated_at'] as String),
-      reviewedAt: json['reviewed_at'] == null
-          ? null
-          : DateTime.parse(json['reviewed_at'] as String),
-      approvedAt: json['approved_at'] == null
-          ? null
-          : DateTime.parse(json['approved_at'] as String),
-      createdAt: json['created_at'] == null
-          ? null
-          : DateTime.parse(json['created_at'] as String),
-      updatedAt: json['updated_at'] == null
-          ? null
-          : DateTime.parse(json['updated_at'] as String),
+      assignedAt: const NullableTimesConverter().fromJson(json['assigned_at']),
+      translatedAt:
+          const NullableTimesConverter().fromJson(json['translated_at']),
+      reviewedAt: const NullableTimesConverter().fromJson(json['reviewed_at']),
+      approvedAt: const NullableTimesConverter().fromJson(json['approved_at']),
+      createdAt: const NullableTimesConverter().fromJson(json['created_at']),
+      updatedAt: const NullableTimesConverter().fromJson(json['updated_at']),
     );
 
 Map<String, dynamic> _$$TranslationEntryModelImplToJson(
@@ -70,10 +59,11 @@ Map<String, dynamic> _$$TranslationEntryModelImplToJson(
       'has_issues': instance.hasIssues,
       'character_count': instance.characterCount,
       'word_count': instance.wordCount,
-      'assigned_at': instance.assignedAt?.toIso8601String(),
-      'translated_at': instance.translatedAt?.toIso8601String(),
-      'reviewed_at': instance.reviewedAt?.toIso8601String(),
-      'approved_at': instance.approvedAt?.toIso8601String(),
-      'created_at': instance.createdAt?.toIso8601String(),
-      'updated_at': instance.updatedAt?.toIso8601String(),
+      'assigned_at': const NullableTimesConverter().toJson(instance.assignedAt),
+      'translated_at':
+          const NullableTimesConverter().toJson(instance.translatedAt),
+      'reviewed_at': const NullableTimesConverter().toJson(instance.reviewedAt),
+      'approved_at': const NullableTimesConverter().toJson(instance.approvedAt),
+      'created_at': const NullableTimesConverter().toJson(instance.createdAt),
+      'updated_at': const NullableTimesConverter().toJson(instance.updatedAt),
     };

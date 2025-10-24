@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:ttpolyglot_model/src/converter/converters.dart';
 import 'package:ttpolyglot_model/src/language/language_model.dart';
 
 import 'project_member_model.dart';
@@ -25,9 +26,9 @@ class ProjectModel with _$ProjectModel {
     @JsonKey(name: 'is_public') @Default(false) bool isPublic,
     @JsonKey(name: 'is_active') @Default(true) bool isActive,
     @JsonKey(name: 'settings') Map<String, dynamic>? settings,
-    @JsonKey(name: 'last_activity_at') DateTime? lastActivityAt,
-    @JsonKey(name: 'created_at') required DateTime createdAt,
-    @JsonKey(name: 'updated_at') required DateTime updatedAt,
+    @JsonKey(name: 'last_activity_at') @NullableTimesConverter() DateTime? lastActivityAt,
+    @JsonKey(name: 'created_at') @TimesConverter() required DateTime createdAt,
+    @JsonKey(name: 'updated_at') @TimesConverter() required DateTime updatedAt,
     // 扩展字段（从联表查询）
     @JsonKey(name: 'owner_username') String? ownerUsername,
     @JsonKey(name: 'owner_display_name') String? ownerDisplayName,

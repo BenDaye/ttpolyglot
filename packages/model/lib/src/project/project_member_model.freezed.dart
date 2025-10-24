@@ -32,8 +32,10 @@ mixin _$ProjectMemberModel {
   @JsonKey(name: 'invited_by')
   String? get invitedBy => throw _privateConstructorUsedError;
   @JsonKey(name: 'invited_at')
+  @TimesConverter()
   DateTime get invitedAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'joined_at')
+  @NullableTimesConverter()
   DateTime? get joinedAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'status')
   @MemberStatusEnumConverter()
@@ -41,8 +43,10 @@ mixin _$ProjectMemberModel {
   @JsonKey(name: 'is_active')
   bool get isActive => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
+  @TimesConverter()
   DateTime get createdAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'updated_at')
+  @TimesConverter()
   DateTime get updatedAt => throw _privateConstructorUsedError; // 扩展字段（从联表查询）
   @JsonKey(name: 'username')
   String? get username => throw _privateConstructorUsedError;
@@ -79,14 +83,14 @@ abstract class $ProjectMemberModelCopyWith<$Res> {
       @JsonKey(name: 'user_id') String userId,
       @JsonKey(name: 'role') @ProjectRoleEnumConverter() ProjectRoleEnum role,
       @JsonKey(name: 'invited_by') String? invitedBy,
-      @JsonKey(name: 'invited_at') DateTime invitedAt,
-      @JsonKey(name: 'joined_at') DateTime? joinedAt,
+      @JsonKey(name: 'invited_at') @TimesConverter() DateTime invitedAt,
+      @JsonKey(name: 'joined_at') @NullableTimesConverter() DateTime? joinedAt,
       @JsonKey(name: 'status')
       @MemberStatusEnumConverter()
       MemberStatusEnum status,
       @JsonKey(name: 'is_active') bool isActive,
-      @JsonKey(name: 'created_at') DateTime createdAt,
-      @JsonKey(name: 'updated_at') DateTime updatedAt,
+      @JsonKey(name: 'created_at') @TimesConverter() DateTime createdAt,
+      @JsonKey(name: 'updated_at') @TimesConverter() DateTime updatedAt,
       @JsonKey(name: 'username') String? username,
       @JsonKey(name: 'display_name') String? displayName,
       @JsonKey(name: 'avatar_url') String? avatarUrl,
@@ -215,14 +219,14 @@ abstract class _$$ProjectMemberModelImplCopyWith<$Res>
       @JsonKey(name: 'user_id') String userId,
       @JsonKey(name: 'role') @ProjectRoleEnumConverter() ProjectRoleEnum role,
       @JsonKey(name: 'invited_by') String? invitedBy,
-      @JsonKey(name: 'invited_at') DateTime invitedAt,
-      @JsonKey(name: 'joined_at') DateTime? joinedAt,
+      @JsonKey(name: 'invited_at') @TimesConverter() DateTime invitedAt,
+      @JsonKey(name: 'joined_at') @NullableTimesConverter() DateTime? joinedAt,
       @JsonKey(name: 'status')
       @MemberStatusEnumConverter()
       MemberStatusEnum status,
       @JsonKey(name: 'is_active') bool isActive,
-      @JsonKey(name: 'created_at') DateTime createdAt,
-      @JsonKey(name: 'updated_at') DateTime updatedAt,
+      @JsonKey(name: 'created_at') @TimesConverter() DateTime createdAt,
+      @JsonKey(name: 'updated_at') @TimesConverter() DateTime updatedAt,
       @JsonKey(name: 'username') String? username,
       @JsonKey(name: 'display_name') String? displayName,
       @JsonKey(name: 'avatar_url') String? avatarUrl,
@@ -344,14 +348,14 @@ class _$ProjectMemberModelImpl implements _ProjectMemberModel {
       @JsonKey(name: 'user_id') required this.userId,
       @JsonKey(name: 'role') @ProjectRoleEnumConverter() required this.role,
       @JsonKey(name: 'invited_by') this.invitedBy,
-      @JsonKey(name: 'invited_at') required this.invitedAt,
-      @JsonKey(name: 'joined_at') this.joinedAt,
+      @JsonKey(name: 'invited_at') @TimesConverter() required this.invitedAt,
+      @JsonKey(name: 'joined_at') @NullableTimesConverter() this.joinedAt,
       @JsonKey(name: 'status')
       @MemberStatusEnumConverter()
       required this.status,
       @JsonKey(name: 'is_active') this.isActive = true,
-      @JsonKey(name: 'created_at') required this.createdAt,
-      @JsonKey(name: 'updated_at') required this.updatedAt,
+      @JsonKey(name: 'created_at') @TimesConverter() required this.createdAt,
+      @JsonKey(name: 'updated_at') @TimesConverter() required this.updatedAt,
       @JsonKey(name: 'username') this.username,
       @JsonKey(name: 'display_name') this.displayName,
       @JsonKey(name: 'avatar_url') this.avatarUrl,
@@ -380,9 +384,11 @@ class _$ProjectMemberModelImpl implements _ProjectMemberModel {
   final String? invitedBy;
   @override
   @JsonKey(name: 'invited_at')
+  @TimesConverter()
   final DateTime invitedAt;
   @override
   @JsonKey(name: 'joined_at')
+  @NullableTimesConverter()
   final DateTime? joinedAt;
   @override
   @JsonKey(name: 'status')
@@ -393,9 +399,11 @@ class _$ProjectMemberModelImpl implements _ProjectMemberModel {
   final bool isActive;
   @override
   @JsonKey(name: 'created_at')
+  @TimesConverter()
   final DateTime createdAt;
   @override
   @JsonKey(name: 'updated_at')
+  @TimesConverter()
   final DateTime updatedAt;
 // 扩展字段（从联表查询）
   @override
@@ -506,14 +514,22 @@ abstract class _ProjectMemberModel implements ProjectMemberModel {
       @ProjectRoleEnumConverter()
       required final ProjectRoleEnum role,
       @JsonKey(name: 'invited_by') final String? invitedBy,
-      @JsonKey(name: 'invited_at') required final DateTime invitedAt,
-      @JsonKey(name: 'joined_at') final DateTime? joinedAt,
+      @JsonKey(name: 'invited_at')
+      @TimesConverter()
+      required final DateTime invitedAt,
+      @JsonKey(name: 'joined_at')
+      @NullableTimesConverter()
+      final DateTime? joinedAt,
       @JsonKey(name: 'status')
       @MemberStatusEnumConverter()
       required final MemberStatusEnum status,
       @JsonKey(name: 'is_active') final bool isActive,
-      @JsonKey(name: 'created_at') required final DateTime createdAt,
-      @JsonKey(name: 'updated_at') required final DateTime updatedAt,
+      @JsonKey(name: 'created_at')
+      @TimesConverter()
+      required final DateTime createdAt,
+      @JsonKey(name: 'updated_at')
+      @TimesConverter()
+      required final DateTime updatedAt,
       @JsonKey(name: 'username') final String? username,
       @JsonKey(name: 'display_name') final String? displayName,
       @JsonKey(name: 'avatar_url') final String? avatarUrl,
@@ -543,9 +559,11 @@ abstract class _ProjectMemberModel implements ProjectMemberModel {
   String? get invitedBy;
   @override
   @JsonKey(name: 'invited_at')
+  @TimesConverter()
   DateTime get invitedAt;
   @override
   @JsonKey(name: 'joined_at')
+  @NullableTimesConverter()
   DateTime? get joinedAt;
   @override
   @JsonKey(name: 'status')
@@ -556,9 +574,11 @@ abstract class _ProjectMemberModel implements ProjectMemberModel {
   bool get isActive;
   @override
   @JsonKey(name: 'created_at')
+  @TimesConverter()
   DateTime get createdAt;
   @override
   @JsonKey(name: 'updated_at')
+  @TimesConverter()
   DateTime get updatedAt; // 扩展字段（从联表查询）
   @override
   @JsonKey(name: 'username')

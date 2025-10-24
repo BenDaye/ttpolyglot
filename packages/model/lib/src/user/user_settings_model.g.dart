@@ -15,12 +15,8 @@ _$UserSettingsModelImpl _$$UserSettingsModelImplFromJson(
           json['general_settings'] as Map<String, dynamic>),
       translationSettings: TranslationSettingsModel.fromJson(
           json['translation_settings'] as Map<String, dynamic>),
-      createdAt: json['created_at'] == null
-          ? null
-          : DateTime.parse(json['created_at'] as String),
-      updatedAt: json['updated_at'] == null
-          ? null
-          : DateTime.parse(json['updated_at'] as String),
+      createdAt: const NullableTimesConverter().fromJson(json['created_at']),
+      updatedAt: const NullableTimesConverter().fromJson(json['updated_at']),
     );
 
 Map<String, dynamic> _$$UserSettingsModelImplToJson(
@@ -29,8 +25,8 @@ Map<String, dynamic> _$$UserSettingsModelImplToJson(
       'language_settings': instance.languageSettings,
       'general_settings': instance.generalSettings,
       'translation_settings': instance.translationSettings,
-      'created_at': instance.createdAt?.toIso8601String(),
-      'updated_at': instance.updatedAt?.toIso8601String(),
+      'created_at': const NullableTimesConverter().toJson(instance.createdAt),
+      'updated_at': const NullableTimesConverter().toJson(instance.updatedAt),
     };
 
 _$LanguageSettingsModelImpl _$$LanguageSettingsModelImplFromJson(

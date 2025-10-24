@@ -51,10 +51,13 @@ mixin _$ProjectModel {
   @JsonKey(name: 'settings')
   Map<String, dynamic>? get settings => throw _privateConstructorUsedError;
   @JsonKey(name: 'last_activity_at')
+  @NullableTimesConverter()
   DateTime? get lastActivityAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
+  @TimesConverter()
   DateTime get createdAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'updated_at')
+  @TimesConverter()
   DateTime get updatedAt => throw _privateConstructorUsedError; // 扩展字段（从联表查询）
   @JsonKey(name: 'owner_username')
   String? get ownerUsername => throw _privateConstructorUsedError;
@@ -97,9 +100,11 @@ abstract class $ProjectModelCopyWith<$Res> {
       @JsonKey(name: 'is_public') bool isPublic,
       @JsonKey(name: 'is_active') bool isActive,
       @JsonKey(name: 'settings') Map<String, dynamic>? settings,
-      @JsonKey(name: 'last_activity_at') DateTime? lastActivityAt,
-      @JsonKey(name: 'created_at') DateTime createdAt,
-      @JsonKey(name: 'updated_at') DateTime updatedAt,
+      @JsonKey(name: 'last_activity_at')
+      @NullableTimesConverter()
+      DateTime? lastActivityAt,
+      @JsonKey(name: 'created_at') @TimesConverter() DateTime createdAt,
+      @JsonKey(name: 'updated_at') @TimesConverter() DateTime updatedAt,
       @JsonKey(name: 'owner_username') String? ownerUsername,
       @JsonKey(name: 'owner_display_name') String? ownerDisplayName,
       @JsonKey(name: 'owner_avatar') String? ownerAvatar,
@@ -261,9 +266,11 @@ abstract class _$$ProjectModelImplCopyWith<$Res>
       @JsonKey(name: 'is_public') bool isPublic,
       @JsonKey(name: 'is_active') bool isActive,
       @JsonKey(name: 'settings') Map<String, dynamic>? settings,
-      @JsonKey(name: 'last_activity_at') DateTime? lastActivityAt,
-      @JsonKey(name: 'created_at') DateTime createdAt,
-      @JsonKey(name: 'updated_at') DateTime updatedAt,
+      @JsonKey(name: 'last_activity_at')
+      @NullableTimesConverter()
+      DateTime? lastActivityAt,
+      @JsonKey(name: 'created_at') @TimesConverter() DateTime createdAt,
+      @JsonKey(name: 'updated_at') @TimesConverter() DateTime updatedAt,
       @JsonKey(name: 'owner_username') String? ownerUsername,
       @JsonKey(name: 'owner_display_name') String? ownerDisplayName,
       @JsonKey(name: 'owner_avatar') String? ownerAvatar,
@@ -418,9 +425,11 @@ class _$ProjectModelImpl implements _ProjectModel {
       @JsonKey(name: 'is_public') this.isPublic = false,
       @JsonKey(name: 'is_active') this.isActive = true,
       @JsonKey(name: 'settings') final Map<String, dynamic>? settings,
-      @JsonKey(name: 'last_activity_at') this.lastActivityAt,
-      @JsonKey(name: 'created_at') required this.createdAt,
-      @JsonKey(name: 'updated_at') required this.updatedAt,
+      @JsonKey(name: 'last_activity_at')
+      @NullableTimesConverter()
+      this.lastActivityAt,
+      @JsonKey(name: 'created_at') @TimesConverter() required this.createdAt,
+      @JsonKey(name: 'updated_at') @TimesConverter() required this.updatedAt,
       @JsonKey(name: 'owner_username') this.ownerUsername,
       @JsonKey(name: 'owner_display_name') this.ownerDisplayName,
       @JsonKey(name: 'owner_avatar') this.ownerAvatar,
@@ -485,12 +494,15 @@ class _$ProjectModelImpl implements _ProjectModel {
 
   @override
   @JsonKey(name: 'last_activity_at')
+  @NullableTimesConverter()
   final DateTime? lastActivityAt;
   @override
   @JsonKey(name: 'created_at')
+  @TimesConverter()
   final DateTime createdAt;
   @override
   @JsonKey(name: 'updated_at')
+  @TimesConverter()
   final DateTime updatedAt;
 // 扩展字段（从联表查询）
   @override
@@ -618,9 +630,15 @@ abstract class _ProjectModel implements ProjectModel {
       @JsonKey(name: 'is_public') final bool isPublic,
       @JsonKey(name: 'is_active') final bool isActive,
       @JsonKey(name: 'settings') final Map<String, dynamic>? settings,
-      @JsonKey(name: 'last_activity_at') final DateTime? lastActivityAt,
-      @JsonKey(name: 'created_at') required final DateTime createdAt,
-      @JsonKey(name: 'updated_at') required final DateTime updatedAt,
+      @JsonKey(name: 'last_activity_at')
+      @NullableTimesConverter()
+      final DateTime? lastActivityAt,
+      @JsonKey(name: 'created_at')
+      @TimesConverter()
+      required final DateTime createdAt,
+      @JsonKey(name: 'updated_at')
+      @TimesConverter()
+      required final DateTime updatedAt,
       @JsonKey(name: 'owner_username') final String? ownerUsername,
       @JsonKey(name: 'owner_display_name') final String? ownerDisplayName,
       @JsonKey(name: 'owner_avatar') final String? ownerAvatar,
@@ -677,12 +695,15 @@ abstract class _ProjectModel implements ProjectModel {
   Map<String, dynamic>? get settings;
   @override
   @JsonKey(name: 'last_activity_at')
+  @NullableTimesConverter()
   DateTime? get lastActivityAt;
   @override
   @JsonKey(name: 'created_at')
+  @TimesConverter()
   DateTime get createdAt;
   @override
   @JsonKey(name: 'updated_at')
+  @TimesConverter()
   DateTime get updatedAt; // 扩展字段（从联表查询）
   @override
   @JsonKey(name: 'owner_username')

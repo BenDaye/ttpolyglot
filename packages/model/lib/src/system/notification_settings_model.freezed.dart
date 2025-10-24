@@ -37,8 +37,10 @@ mixin _$NotificationSettingsModel {
   @JsonKey(name: 'is_enabled')
   bool get isEnabled => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
+  @TimesConverter()
   DateTime get createdAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'updated_at')
+  @TimesConverter()
   DateTime get updatedAt => throw _privateConstructorUsedError;
 
   /// Serializes this NotificationSettingsModel to a JSON map.
@@ -68,8 +70,8 @@ abstract class $NotificationSettingsModelCopyWith<$Res> {
       @NotificationChannelEnumConverter()
       NotificationChannelEnum channel,
       @JsonKey(name: 'is_enabled') bool isEnabled,
-      @JsonKey(name: 'created_at') DateTime createdAt,
-      @JsonKey(name: 'updated_at') DateTime updatedAt});
+      @JsonKey(name: 'created_at') @TimesConverter() DateTime createdAt,
+      @JsonKey(name: 'updated_at') @TimesConverter() DateTime updatedAt});
 }
 
 /// @nodoc
@@ -154,8 +156,8 @@ abstract class _$$NotificationSettingsModelImplCopyWith<$Res>
       @NotificationChannelEnumConverter()
       NotificationChannelEnum channel,
       @JsonKey(name: 'is_enabled') bool isEnabled,
-      @JsonKey(name: 'created_at') DateTime createdAt,
-      @JsonKey(name: 'updated_at') DateTime updatedAt});
+      @JsonKey(name: 'created_at') @TimesConverter() DateTime createdAt,
+      @JsonKey(name: 'updated_at') @TimesConverter() DateTime updatedAt});
 }
 
 /// @nodoc
@@ -233,8 +235,8 @@ class _$NotificationSettingsModelImpl implements _NotificationSettingsModel {
       @NotificationChannelEnumConverter()
       required this.channel,
       @JsonKey(name: 'is_enabled') this.isEnabled = true,
-      @JsonKey(name: 'created_at') required this.createdAt,
-      @JsonKey(name: 'updated_at') required this.updatedAt});
+      @JsonKey(name: 'created_at') @TimesConverter() required this.createdAt,
+      @JsonKey(name: 'updated_at') @TimesConverter() required this.updatedAt});
 
   factory _$NotificationSettingsModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$NotificationSettingsModelImplFromJson(json);
@@ -261,9 +263,11 @@ class _$NotificationSettingsModelImpl implements _NotificationSettingsModel {
   final bool isEnabled;
   @override
   @JsonKey(name: 'created_at')
+  @TimesConverter()
   final DateTime createdAt;
   @override
   @JsonKey(name: 'updated_at')
+  @TimesConverter()
   final DateTime updatedAt;
 
   @override
@@ -315,19 +319,22 @@ class _$NotificationSettingsModelImpl implements _NotificationSettingsModel {
 
 abstract class _NotificationSettingsModel implements NotificationSettingsModel {
   const factory _NotificationSettingsModel(
-          {@JsonKey(name: 'id') required final int id,
-          @JsonKey(name: 'user_id') required final String userId,
-          @JsonKey(name: 'project_id') final int? projectId,
-          @JsonKey(name: 'notification_type')
-          @NotificationTypeEnumConverter()
-          required final NotificationTypeEnum notificationType,
-          @JsonKey(name: 'channel')
-          @NotificationChannelEnumConverter()
-          required final NotificationChannelEnum channel,
-          @JsonKey(name: 'is_enabled') final bool isEnabled,
-          @JsonKey(name: 'created_at') required final DateTime createdAt,
-          @JsonKey(name: 'updated_at') required final DateTime updatedAt}) =
-      _$NotificationSettingsModelImpl;
+      {@JsonKey(name: 'id') required final int id,
+      @JsonKey(name: 'user_id') required final String userId,
+      @JsonKey(name: 'project_id') final int? projectId,
+      @JsonKey(name: 'notification_type')
+      @NotificationTypeEnumConverter()
+      required final NotificationTypeEnum notificationType,
+      @JsonKey(name: 'channel')
+      @NotificationChannelEnumConverter()
+      required final NotificationChannelEnum channel,
+      @JsonKey(name: 'is_enabled') final bool isEnabled,
+      @JsonKey(name: 'created_at')
+      @TimesConverter()
+      required final DateTime createdAt,
+      @JsonKey(name: 'updated_at')
+      @TimesConverter()
+      required final DateTime updatedAt}) = _$NotificationSettingsModelImpl;
 
   factory _NotificationSettingsModel.fromJson(Map<String, dynamic> json) =
       _$NotificationSettingsModelImpl.fromJson;
@@ -354,9 +361,11 @@ abstract class _NotificationSettingsModel implements NotificationSettingsModel {
   bool get isEnabled;
   @override
   @JsonKey(name: 'created_at')
+  @TimesConverter()
   DateTime get createdAt;
   @override
   @JsonKey(name: 'updated_at')
+  @TimesConverter()
   DateTime get updatedAt;
 
   /// Create a copy of NotificationSettingsModel

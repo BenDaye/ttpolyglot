@@ -16,8 +16,8 @@ _$LanguageModelImpl _$$LanguageModelImplFromJson(Map<String, dynamic> json) =>
       isActive: json['is_active'] as bool? ?? true,
       isRtl: json['is_rtl'] as bool? ?? false,
       sortOrder: (json['sort_order'] as num?)?.toInt() ?? 0,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      createdAt: const TimesConverter().fromJson(json['created_at'] as Object),
+      updatedAt: const TimesConverter().fromJson(json['updated_at'] as Object),
     );
 
 Map<String, dynamic> _$$LanguageModelImplToJson(_$LanguageModelImpl instance) =>
@@ -30,6 +30,6 @@ Map<String, dynamic> _$$LanguageModelImplToJson(_$LanguageModelImpl instance) =>
       'is_active': instance.isActive,
       'is_rtl': instance.isRtl,
       'sort_order': instance.sortOrder,
-      'created_at': instance.createdAt.toIso8601String(),
-      'updated_at': instance.updatedAt.toIso8601String(),
+      'created_at': const TimesConverter().toJson(instance.createdAt),
+      'updated_at': const TimesConverter().toJson(instance.updatedAt),
     };

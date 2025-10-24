@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:ttpolyglot_model/src/converter/converters.dart';
 
 import '../enums/notification_channel_enum.dart';
 import '../enums/notification_type_enum.dart';
@@ -16,8 +17,8 @@ class NotificationSettingsModel with _$NotificationSettingsModel {
     @JsonKey(name: 'notification_type') @NotificationTypeEnumConverter() required NotificationTypeEnum notificationType,
     @JsonKey(name: 'channel') @NotificationChannelEnumConverter() required NotificationChannelEnum channel,
     @JsonKey(name: 'is_enabled') @Default(true) bool isEnabled,
-    @JsonKey(name: 'created_at') required DateTime createdAt,
-    @JsonKey(name: 'updated_at') required DateTime updatedAt,
+    @JsonKey(name: 'created_at') @TimesConverter() required DateTime createdAt,
+    @JsonKey(name: 'updated_at') @TimesConverter() required DateTime updatedAt,
   }) = _NotificationSettingsModel;
 
   factory NotificationSettingsModel.fromJson(Map<String, dynamic> json) => _$NotificationSettingsModelFromJson(json);

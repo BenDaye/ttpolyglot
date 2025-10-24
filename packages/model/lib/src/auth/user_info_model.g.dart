@@ -18,30 +18,22 @@ _$UserInfoModelImpl _$$UserInfoModelImplFromJson(Map<String, dynamic> json) =>
       locale: json['locale'] as String?,
       isActive: json['is_active'] as bool?,
       isEmailVerified: json['is_email_verified'] as bool?,
-      emailVerifiedAt: json['email_verified_at'] == null
-          ? null
-          : DateTime.parse(json['email_verified_at'] as String),
-      lastLoginAt: json['last_login_at'] == null
-          ? null
-          : DateTime.parse(json['last_login_at'] as String),
+      emailVerifiedAt:
+          const NullableTimesConverter().fromJson(json['email_verified_at']),
+      lastLoginAt:
+          const NullableTimesConverter().fromJson(json['last_login_at']),
       lastLoginIp: json['last_login_ip'] as String?,
       lastLoginLocation: json['last_login_location'] == null
           ? null
           : LocationModel.fromJson(
               json['last_login_location'] as Map<String, dynamic>),
       loginAttempts: (json['login_attempts'] as num?)?.toInt(),
-      lockedUntil: json['locked_until'] == null
-          ? null
-          : DateTime.parse(json['locked_until'] as String),
-      passwordChangedAt: json['password_changed_at'] == null
-          ? null
-          : DateTime.parse(json['password_changed_at'] as String),
-      createdAt: json['created_at'] == null
-          ? null
-          : DateTime.parse(json['created_at'] as String),
-      updatedAt: json['updated_at'] == null
-          ? null
-          : DateTime.parse(json['updated_at'] as String),
+      lockedUntil:
+          const NullableTimesConverter().fromJson(json['locked_until']),
+      passwordChangedAt:
+          const NullableTimesConverter().fromJson(json['password_changed_at']),
+      createdAt: const NullableTimesConverter().fromJson(json['created_at']),
+      updatedAt: const NullableTimesConverter().fromJson(json['updated_at']),
       roles: (json['roles'] as List<dynamic>?)
           ?.map((e) => RoleModel.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -59,14 +51,18 @@ Map<String, dynamic> _$$UserInfoModelImplToJson(_$UserInfoModelImpl instance) =>
       'locale': instance.locale,
       'is_active': instance.isActive,
       'is_email_verified': instance.isEmailVerified,
-      'email_verified_at': instance.emailVerifiedAt?.toIso8601String(),
-      'last_login_at': instance.lastLoginAt?.toIso8601String(),
+      'email_verified_at':
+          const NullableTimesConverter().toJson(instance.emailVerifiedAt),
+      'last_login_at':
+          const NullableTimesConverter().toJson(instance.lastLoginAt),
       'last_login_ip': instance.lastLoginIp,
       'last_login_location': instance.lastLoginLocation,
       'login_attempts': instance.loginAttempts,
-      'locked_until': instance.lockedUntil?.toIso8601String(),
-      'password_changed_at': instance.passwordChangedAt?.toIso8601String(),
-      'created_at': instance.createdAt?.toIso8601String(),
-      'updated_at': instance.updatedAt?.toIso8601String(),
+      'locked_until':
+          const NullableTimesConverter().toJson(instance.lockedUntil),
+      'password_changed_at':
+          const NullableTimesConverter().toJson(instance.passwordChangedAt),
+      'created_at': const NullableTimesConverter().toJson(instance.createdAt),
+      'updated_at': const NullableTimesConverter().toJson(instance.updatedAt),
       'roles': instance.roles,
     };

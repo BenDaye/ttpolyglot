@@ -92,26 +92,32 @@ mixin _$TranslationEntryModel {
 
   /// 分配时间
   @JsonKey(name: 'assigned_at')
+  @NullableTimesConverter()
   DateTime? get assignedAt => throw _privateConstructorUsedError;
 
   /// 翻译完成时间
   @JsonKey(name: 'translated_at')
+  @NullableTimesConverter()
   DateTime? get translatedAt => throw _privateConstructorUsedError;
 
   /// 审核时间
   @JsonKey(name: 'reviewed_at')
+  @NullableTimesConverter()
   DateTime? get reviewedAt => throw _privateConstructorUsedError;
 
   /// 批准时间
   @JsonKey(name: 'approved_at')
+  @NullableTimesConverter()
   DateTime? get approvedAt => throw _privateConstructorUsedError;
 
   /// 创建时间
   @JsonKey(name: 'created_at')
+  @NullableTimesConverter()
   DateTime? get createdAt => throw _privateConstructorUsedError;
 
   /// 更新时间
   @JsonKey(name: 'updated_at')
+  @NullableTimesConverter()
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
   /// Serializes this TranslationEntryModel to a JSON map.
@@ -151,12 +157,24 @@ abstract class $TranslationEntryModelCopyWith<$Res> {
       @JsonKey(name: 'has_issues') bool hasIssues,
       @JsonKey(name: 'character_count') int? characterCount,
       @JsonKey(name: 'word_count') int? wordCount,
-      @JsonKey(name: 'assigned_at') DateTime? assignedAt,
-      @JsonKey(name: 'translated_at') DateTime? translatedAt,
-      @JsonKey(name: 'reviewed_at') DateTime? reviewedAt,
-      @JsonKey(name: 'approved_at') DateTime? approvedAt,
-      @JsonKey(name: 'created_at') DateTime? createdAt,
-      @JsonKey(name: 'updated_at') DateTime? updatedAt});
+      @JsonKey(name: 'assigned_at')
+      @NullableTimesConverter()
+      DateTime? assignedAt,
+      @JsonKey(name: 'translated_at')
+      @NullableTimesConverter()
+      DateTime? translatedAt,
+      @JsonKey(name: 'reviewed_at')
+      @NullableTimesConverter()
+      DateTime? reviewedAt,
+      @JsonKey(name: 'approved_at')
+      @NullableTimesConverter()
+      DateTime? approvedAt,
+      @JsonKey(name: 'created_at')
+      @NullableTimesConverter()
+      DateTime? createdAt,
+      @JsonKey(name: 'updated_at')
+      @NullableTimesConverter()
+      DateTime? updatedAt});
 }
 
 /// @nodoc
@@ -331,12 +349,24 @@ abstract class _$$TranslationEntryModelImplCopyWith<$Res>
       @JsonKey(name: 'has_issues') bool hasIssues,
       @JsonKey(name: 'character_count') int? characterCount,
       @JsonKey(name: 'word_count') int? wordCount,
-      @JsonKey(name: 'assigned_at') DateTime? assignedAt,
-      @JsonKey(name: 'translated_at') DateTime? translatedAt,
-      @JsonKey(name: 'reviewed_at') DateTime? reviewedAt,
-      @JsonKey(name: 'approved_at') DateTime? approvedAt,
-      @JsonKey(name: 'created_at') DateTime? createdAt,
-      @JsonKey(name: 'updated_at') DateTime? updatedAt});
+      @JsonKey(name: 'assigned_at')
+      @NullableTimesConverter()
+      DateTime? assignedAt,
+      @JsonKey(name: 'translated_at')
+      @NullableTimesConverter()
+      DateTime? translatedAt,
+      @JsonKey(name: 'reviewed_at')
+      @NullableTimesConverter()
+      DateTime? reviewedAt,
+      @JsonKey(name: 'approved_at')
+      @NullableTimesConverter()
+      DateTime? approvedAt,
+      @JsonKey(name: 'created_at')
+      @NullableTimesConverter()
+      DateTime? createdAt,
+      @JsonKey(name: 'updated_at')
+      @NullableTimesConverter()
+      DateTime? updatedAt});
 }
 
 /// @nodoc
@@ -503,12 +533,14 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
       @JsonKey(name: 'has_issues') this.hasIssues = false,
       @JsonKey(name: 'character_count') this.characterCount,
       @JsonKey(name: 'word_count') this.wordCount,
-      @JsonKey(name: 'assigned_at') this.assignedAt,
-      @JsonKey(name: 'translated_at') this.translatedAt,
-      @JsonKey(name: 'reviewed_at') this.reviewedAt,
-      @JsonKey(name: 'approved_at') this.approvedAt,
-      @JsonKey(name: 'created_at') this.createdAt,
-      @JsonKey(name: 'updated_at') this.updatedAt})
+      @JsonKey(name: 'assigned_at') @NullableTimesConverter() this.assignedAt,
+      @JsonKey(name: 'translated_at')
+      @NullableTimesConverter()
+      this.translatedAt,
+      @JsonKey(name: 'reviewed_at') @NullableTimesConverter() this.reviewedAt,
+      @JsonKey(name: 'approved_at') @NullableTimesConverter() this.approvedAt,
+      @JsonKey(name: 'created_at') @NullableTimesConverter() this.createdAt,
+      @JsonKey(name: 'updated_at') @NullableTimesConverter() this.updatedAt})
       : super._();
 
   factory _$TranslationEntryModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -606,31 +638,37 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
   /// 分配时间
   @override
   @JsonKey(name: 'assigned_at')
+  @NullableTimesConverter()
   final DateTime? assignedAt;
 
   /// 翻译完成时间
   @override
   @JsonKey(name: 'translated_at')
+  @NullableTimesConverter()
   final DateTime? translatedAt;
 
   /// 审核时间
   @override
   @JsonKey(name: 'reviewed_at')
+  @NullableTimesConverter()
   final DateTime? reviewedAt;
 
   /// 批准时间
   @override
   @JsonKey(name: 'approved_at')
+  @NullableTimesConverter()
   final DateTime? approvedAt;
 
   /// 创建时间
   @override
   @JsonKey(name: 'created_at')
+  @NullableTimesConverter()
   final DateTime? createdAt;
 
   /// 更新时间
   @override
   @JsonKey(name: 'updated_at')
+  @NullableTimesConverter()
   final DateTime? updatedAt;
 
   @override
@@ -758,12 +796,23 @@ abstract class _TranslationEntryModel extends TranslationEntryModel {
       @JsonKey(name: 'has_issues') final bool hasIssues,
       @JsonKey(name: 'character_count') final int? characterCount,
       @JsonKey(name: 'word_count') final int? wordCount,
-      @JsonKey(name: 'assigned_at') final DateTime? assignedAt,
-      @JsonKey(name: 'translated_at') final DateTime? translatedAt,
-      @JsonKey(name: 'reviewed_at') final DateTime? reviewedAt,
-      @JsonKey(name: 'approved_at') final DateTime? approvedAt,
-      @JsonKey(name: 'created_at') final DateTime? createdAt,
+      @JsonKey(name: 'assigned_at')
+      @NullableTimesConverter()
+      final DateTime? assignedAt,
+      @JsonKey(name: 'translated_at')
+      @NullableTimesConverter()
+      final DateTime? translatedAt,
+      @JsonKey(name: 'reviewed_at')
+      @NullableTimesConverter()
+      final DateTime? reviewedAt,
+      @JsonKey(name: 'approved_at')
+      @NullableTimesConverter()
+      final DateTime? approvedAt,
+      @JsonKey(name: 'created_at')
+      @NullableTimesConverter()
+      final DateTime? createdAt,
       @JsonKey(name: 'updated_at')
+      @NullableTimesConverter()
       final DateTime? updatedAt}) = _$TranslationEntryModelImpl;
   const _TranslationEntryModel._() : super._();
 
@@ -860,31 +909,37 @@ abstract class _TranslationEntryModel extends TranslationEntryModel {
   /// 分配时间
   @override
   @JsonKey(name: 'assigned_at')
+  @NullableTimesConverter()
   DateTime? get assignedAt;
 
   /// 翻译完成时间
   @override
   @JsonKey(name: 'translated_at')
+  @NullableTimesConverter()
   DateTime? get translatedAt;
 
   /// 审核时间
   @override
   @JsonKey(name: 'reviewed_at')
+  @NullableTimesConverter()
   DateTime? get reviewedAt;
 
   /// 批准时间
   @override
   @JsonKey(name: 'approved_at')
+  @NullableTimesConverter()
   DateTime? get approvedAt;
 
   /// 创建时间
   @override
   @JsonKey(name: 'created_at')
+  @NullableTimesConverter()
   DateTime? get createdAt;
 
   /// 更新时间
   @override
   @JsonKey(name: 'updated_at')
+  @NullableTimesConverter()
   DateTime? get updatedAt;
 
   /// Create a copy of TranslationEntryModel

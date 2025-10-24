@@ -23,11 +23,10 @@ _$ProjectModelImpl _$$ProjectModelImplFromJson(Map<String, dynamic> json) =>
       isPublic: json['is_public'] as bool? ?? false,
       isActive: json['is_active'] as bool? ?? true,
       settings: json['settings'] as Map<String, dynamic>?,
-      lastActivityAt: json['last_activity_at'] == null
-          ? null
-          : DateTime.parse(json['last_activity_at'] as String),
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      lastActivityAt:
+          const NullableTimesConverter().fromJson(json['last_activity_at']),
+      createdAt: const TimesConverter().fromJson(json['created_at'] as Object),
+      updatedAt: const TimesConverter().fromJson(json['updated_at'] as Object),
       ownerUsername: json['owner_username'] as String?,
       ownerDisplayName: json['owner_display_name'] as String?,
       ownerAvatar: json['owner_avatar'] as String?,
@@ -52,9 +51,10 @@ Map<String, dynamic> _$$ProjectModelImplToJson(_$ProjectModelImpl instance) =>
       'is_public': instance.isPublic,
       'is_active': instance.isActive,
       'settings': instance.settings,
-      'last_activity_at': instance.lastActivityAt?.toIso8601String(),
-      'created_at': instance.createdAt.toIso8601String(),
-      'updated_at': instance.updatedAt.toIso8601String(),
+      'last_activity_at':
+          const NullableTimesConverter().toJson(instance.lastActivityAt),
+      'created_at': const TimesConverter().toJson(instance.createdAt),
+      'updated_at': const TimesConverter().toJson(instance.updatedAt),
       'owner_username': instance.ownerUsername,
       'owner_display_name': instance.ownerDisplayName,
       'owner_avatar': instance.ownerAvatar,

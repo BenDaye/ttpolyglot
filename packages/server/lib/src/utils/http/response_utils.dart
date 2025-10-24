@@ -36,9 +36,14 @@ class ResponseUtils {
       return data;
     }
 
-    // 如果是 Map，直接返回
+    // 处理 DateTime 类型
+    if (data is DateTime) {
+      return data.toUtc().toIso8601String();
+    }
+
+    // 如果是 Map，递归处理每个值
     if (data is Map) {
-      return data;
+      return data.map((key, value) => MapEntry(key, _toJsonValue(value)));
     }
 
     // 如果是 List，递归处理每个元素
@@ -55,6 +60,14 @@ class ResponseUtils {
       // 如果没有 toJson 方法或调用失败，直接返回原数据
       return data;
     }
+  }
+
+  /// JSON 编码转换器，处理特殊类型
+  static Object? _jsonEncodable(dynamic value) {
+    if (value is DateTime) {
+      return value.toUtc().toIso8601String();
+    }
+    return value;
   }
 
   /// 构建成功响应
@@ -81,7 +94,10 @@ class ResponseUtils {
     return Response(
       200,
       headers: responseHeaders,
-      body: jsonEncode(apiResponse.toJson((data) => _toJsonValue(data))),
+      body: jsonEncode(
+        apiResponse.toJson((data) => _toJsonValue(data)),
+        toEncodable: _jsonEncodable,
+      ),
     );
   }
 
@@ -111,7 +127,10 @@ class ResponseUtils {
     return Response(
       _getHttpStatusCode(code),
       headers: responseHeaders,
-      body: jsonEncode(apiResponse.toJson((data) => _toJsonValue(data))),
+      body: jsonEncode(
+        apiResponse.toJson((data) => _toJsonValue(data)),
+        toEncodable: _jsonEncodable,
+      ),
     );
   }
 

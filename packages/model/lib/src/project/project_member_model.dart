@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:ttpolyglot_model/src/converter/converters.dart';
 import 'package:ttpolyglot_model/src/enums/member_status_enum.dart';
 import 'package:ttpolyglot_model/src/enums/project_role_enum.dart';
 
@@ -14,12 +15,12 @@ class ProjectMemberModel with _$ProjectMemberModel {
     @JsonKey(name: 'user_id') required String userId,
     @JsonKey(name: 'role') @ProjectRoleEnumConverter() required ProjectRoleEnum role,
     @JsonKey(name: 'invited_by') String? invitedBy,
-    @JsonKey(name: 'invited_at') required DateTime invitedAt,
-    @JsonKey(name: 'joined_at') DateTime? joinedAt,
+    @JsonKey(name: 'invited_at') @TimesConverter() required DateTime invitedAt,
+    @JsonKey(name: 'joined_at') @NullableTimesConverter() DateTime? joinedAt,
     @JsonKey(name: 'status') @MemberStatusEnumConverter() required MemberStatusEnum status,
     @JsonKey(name: 'is_active') @Default(true) bool isActive,
-    @JsonKey(name: 'created_at') required DateTime createdAt,
-    @JsonKey(name: 'updated_at') required DateTime updatedAt,
+    @JsonKey(name: 'created_at') @TimesConverter() required DateTime createdAt,
+    @JsonKey(name: 'updated_at') @TimesConverter() required DateTime updatedAt,
     // 扩展字段（从联表查询）
     @JsonKey(name: 'username') String? username,
     @JsonKey(name: 'display_name') String? displayName,

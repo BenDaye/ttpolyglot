@@ -88,7 +88,15 @@ class RedisService {
 
   /// 设置JSON对象
   Future<void> setJson(String key, Map<String, dynamic> value, [int? ttlSeconds]) async {
-    await set(key, jsonEncode(value), ttlSeconds);
+    await set(key, jsonEncode(value, toEncodable: _toEncodable), ttlSeconds);
+  }
+
+  /// JSON 编码转换器，处理特殊类型
+  static Object? _toEncodable(dynamic value) {
+    if (value is DateTime) {
+      return value.toUtc().toIso8601String();
+    }
+    return value;
   }
 
   /// 获取JSON对象

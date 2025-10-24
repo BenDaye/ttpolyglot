@@ -17,8 +17,8 @@ _$NotificationSettingsModelImpl _$$NotificationSettingsModelImplFromJson(
       channel: const NotificationChannelEnumConverter()
           .fromJson(json['channel'] as String),
       isEnabled: json['is_enabled'] as bool? ?? true,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      createdAt: const TimesConverter().fromJson(json['created_at'] as Object),
+      updatedAt: const TimesConverter().fromJson(json['updated_at'] as Object),
     );
 
 Map<String, dynamic> _$$NotificationSettingsModelImplToJson(
@@ -32,8 +32,8 @@ Map<String, dynamic> _$$NotificationSettingsModelImplToJson(
       'channel':
           const NotificationChannelEnumConverter().toJson(instance.channel),
       'is_enabled': instance.isEnabled,
-      'created_at': instance.createdAt.toIso8601String(),
-      'updated_at': instance.updatedAt.toIso8601String(),
+      'created_at': const TimesConverter().toJson(instance.createdAt),
+      'updated_at': const TimesConverter().toJson(instance.updatedAt),
     };
 
 _$UpdateNotificationSettingsRequestImpl

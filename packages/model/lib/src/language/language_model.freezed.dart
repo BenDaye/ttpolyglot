@@ -38,8 +38,10 @@ mixin _$LanguageModel {
   @JsonKey(name: 'sort_order')
   int get sortOrder => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
+  @TimesConverter()
   DateTime get createdAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'updated_at')
+  @TimesConverter()
   DateTime get updatedAt => throw _privateConstructorUsedError;
 
   /// Serializes this LanguageModel to a JSON map.
@@ -67,8 +69,8 @@ abstract class $LanguageModelCopyWith<$Res> {
       @JsonKey(name: 'is_active') bool isActive,
       @JsonKey(name: 'is_rtl') bool isRtl,
       @JsonKey(name: 'sort_order') int sortOrder,
-      @JsonKey(name: 'created_at') DateTime createdAt,
-      @JsonKey(name: 'updated_at') DateTime updatedAt});
+      @JsonKey(name: 'created_at') @TimesConverter() DateTime createdAt,
+      @JsonKey(name: 'updated_at') @TimesConverter() DateTime updatedAt});
 }
 
 /// @nodoc
@@ -159,8 +161,8 @@ abstract class _$$LanguageModelImplCopyWith<$Res>
       @JsonKey(name: 'is_active') bool isActive,
       @JsonKey(name: 'is_rtl') bool isRtl,
       @JsonKey(name: 'sort_order') int sortOrder,
-      @JsonKey(name: 'created_at') DateTime createdAt,
-      @JsonKey(name: 'updated_at') DateTime updatedAt});
+      @JsonKey(name: 'created_at') @TimesConverter() DateTime createdAt,
+      @JsonKey(name: 'updated_at') @TimesConverter() DateTime updatedAt});
 }
 
 /// @nodoc
@@ -244,8 +246,8 @@ class _$LanguageModelImpl implements _LanguageModel {
       @JsonKey(name: 'is_active') this.isActive = true,
       @JsonKey(name: 'is_rtl') this.isRtl = false,
       @JsonKey(name: 'sort_order') this.sortOrder = 0,
-      @JsonKey(name: 'created_at') required this.createdAt,
-      @JsonKey(name: 'updated_at') required this.updatedAt});
+      @JsonKey(name: 'created_at') @TimesConverter() required this.createdAt,
+      @JsonKey(name: 'updated_at') @TimesConverter() required this.updatedAt});
 
   factory _$LanguageModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$LanguageModelImplFromJson(json);
@@ -277,9 +279,11 @@ class _$LanguageModelImpl implements _LanguageModel {
   final int sortOrder;
   @override
   @JsonKey(name: 'created_at')
+  @TimesConverter()
   final DateTime createdAt;
   @override
   @JsonKey(name: 'updated_at')
+  @TimesConverter()
   final DateTime updatedAt;
 
   @override
@@ -333,19 +337,22 @@ class _$LanguageModelImpl implements _LanguageModel {
 
 abstract class _LanguageModel implements LanguageModel {
   const factory _LanguageModel(
-          {@JsonKey(name: 'id') required final int id,
-          @JsonKey(name: 'code')
-          @LanguageEnumConverter()
-          required final LanguageEnum code,
-          @JsonKey(name: 'name') required final String name,
-          @JsonKey(name: 'native_name') final String? nativeName,
-          @JsonKey(name: 'flag_emoji') final String? flagEmoji,
-          @JsonKey(name: 'is_active') final bool isActive,
-          @JsonKey(name: 'is_rtl') final bool isRtl,
-          @JsonKey(name: 'sort_order') final int sortOrder,
-          @JsonKey(name: 'created_at') required final DateTime createdAt,
-          @JsonKey(name: 'updated_at') required final DateTime updatedAt}) =
-      _$LanguageModelImpl;
+      {@JsonKey(name: 'id') required final int id,
+      @JsonKey(name: 'code')
+      @LanguageEnumConverter()
+      required final LanguageEnum code,
+      @JsonKey(name: 'name') required final String name,
+      @JsonKey(name: 'native_name') final String? nativeName,
+      @JsonKey(name: 'flag_emoji') final String? flagEmoji,
+      @JsonKey(name: 'is_active') final bool isActive,
+      @JsonKey(name: 'is_rtl') final bool isRtl,
+      @JsonKey(name: 'sort_order') final int sortOrder,
+      @JsonKey(name: 'created_at')
+      @TimesConverter()
+      required final DateTime createdAt,
+      @JsonKey(name: 'updated_at')
+      @TimesConverter()
+      required final DateTime updatedAt}) = _$LanguageModelImpl;
 
   factory _LanguageModel.fromJson(Map<String, dynamic> json) =
       _$LanguageModelImpl.fromJson;
@@ -377,9 +384,11 @@ abstract class _LanguageModel implements LanguageModel {
   int get sortOrder;
   @override
   @JsonKey(name: 'created_at')
+  @TimesConverter()
   DateTime get createdAt;
   @override
   @JsonKey(name: 'updated_at')
+  @TimesConverter()
   DateTime get updatedAt;
 
   /// Create a copy of LanguageModel
