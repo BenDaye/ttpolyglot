@@ -123,9 +123,9 @@ class AuthController extends BaseController {
       );
 
       if (result != null) {
-        return ResponseUtils.success<UserInfoModel>(
+        return ResponseUtils.success<LoginResponseModel>(
           message: '用户登录成功',
-          data: result.user,
+          data: result,
         );
       } else {
         return ResponseUtils.error(message: '用户登录失败');
