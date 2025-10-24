@@ -238,7 +238,7 @@ class AuthService extends BaseService {
       return AuthResult.success(
         message: '登录成功',
         data: {
-          'user': fullUserInfo,
+          'user': fullUserInfo.toJson(),
           'tokens': {
             'access_token': accessToken,
             'refresh_token': refreshToken,

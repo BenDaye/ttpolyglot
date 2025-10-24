@@ -235,24 +235,6 @@ class UserService extends BaseService {
       userData.forEach((key, value) {
         if (value == null) {
           serializedData[key] = null;
-        } else if (value is DateTime) {
-          // DateTime转换为ISO8601字符串
-          serializedData[key] = value.toIso8601String();
-        } else if (value.runtimeType.toString().contains('UndecodedBytes')) {
-          // UndecodedBytes（二进制数据）特殊处理
-          if (key == 'last_login_ip') {
-            // IP地址类型，尝试转换为字符串，失败则返回默认值
-            try {
-              final ipString = String.fromCharCodes(value as List<int>);
-              lastLoginIp = ipString.isNotEmpty ? ipString : '';
-              serializedData[key] = lastLoginIp;
-            } catch (e) {
-              serializedData[key] = '';
-            }
-          } else {
-            // 其他二进制数据转换为字符串
-            serializedData[key] = value.toString();
-          }
         } else if (value is List || value is Map || value is String || value is num || value is bool) {
           // 基本类型直接使用
           serializedData[key] = value;
@@ -273,10 +255,10 @@ class UserService extends BaseService {
           serializedData['last_login_location'] = location.toJson();
         } catch (e) {
           // IP地理位置查询失败时使用默认值
-          serializedData['last_login_location'] = null;
+          serializedData['last_login_location'] = const LocationModel().toJson();
         }
       } else {
-        serializedData['last_login_location'] = null;
+        serializedData['last_login_location'] = const LocationModel().toJson();
       }
 
       // 缓存用户信息
