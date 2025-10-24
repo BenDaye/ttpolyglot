@@ -196,6 +196,12 @@ class AuthService extends BaseService {
       final accessTokenHash = _jwtUtils.generateTokenHash(accessToken);
       final refreshTokenHash = _jwtUtils.generateTokenHash(refreshToken);
 
+      // 失效该设备的旧会话（防止重复登录冲突）
+      await _invalidateDeviceSessions(
+        userId: userId,
+        deviceId: deviceId,
+      );
+
       // 创建会话记录
       await _createUserSession(
         userId: userId,
@@ -696,6 +702,32 @@ class AuthService extends BaseService {
       'user_id': userId,
       'ip_address': ipAddress,
     });
+  }
+
+  /// 失效用户在特定设备上的旧会话
+  Future<void> _invalidateDeviceSessions({
+    required String userId,
+    String? deviceId,
+  }) async {
+    try {
+      if (deviceId != null && deviceId.isNotEmpty) {
+        // 失效该设备的所有旧会话
+        await _databaseService.query('''
+          UPDATE {user_sessions} 
+          SET is_active = false
+          WHERE user_id = @user_id 
+            AND device_id = @device_id
+            AND is_active = true
+        ''', {
+          'user_id': userId,
+          'device_id': deviceId,
+        });
+        LoggerUtils.info('已失效用户 $userId 在设备 $deviceId 上的旧会话');
+      }
+    } catch (error, stackTrace) {
+      LoggerUtils.error('失效设备会话失败', error: error, stackTrace: stackTrace);
+      // 不抛出异常，继续登录流程
+    }
   }
 
   Future<void> _createUserSession({

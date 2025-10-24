@@ -273,10 +273,10 @@ class UserService extends BaseService {
           serializedData['last_login_location'] = location.toJson();
         } catch (e) {
           // IP地理位置查询失败时使用默认值
-          serializedData['last_login_location'] = const LocationModel().toJson();
+          serializedData['last_login_location'] = null;
         }
       } else {
-        serializedData['last_login_location'] = const LocationModel().toJson();
+        serializedData['last_login_location'] = null;
       }
 
       // 缓存用户信息

@@ -6,8 +6,6 @@ part 'location_model.g.dart';
 /// 用户位置信息模型（IP地理位置）
 @freezed
 class LocationModel with _$LocationModel {
-  const LocationModel._();
-
   const factory LocationModel({
     /// 国家名称
     @Default('') String country,
@@ -29,7 +27,9 @@ class LocationModel with _$LocationModel {
   }) = _LocationModel;
 
   factory LocationModel.fromJson(Map<String, dynamic> json) => _$LocationModelFromJson(json);
+}
 
+extension LocationModelExtension on LocationModel {
   /// 获取格式化的位置字符串（中国/北京）
   String get locationString => isValid ? '$country/$city' : '未知';
 

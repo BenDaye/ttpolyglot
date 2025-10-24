@@ -183,15 +183,14 @@ class __$$LocationModelImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$LocationModelImpl extends _LocationModel {
+class _$LocationModelImpl implements _LocationModel {
   const _$LocationModelImpl(
       {this.country = '',
       this.city = '',
       this.region = '',
       @JsonKey(name: 'country_code') this.countryCode = '',
       this.timezone = '',
-      this.isp = ''})
-      : super._();
+      this.isp = ''});
 
   factory _$LocationModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$LocationModelImplFromJson(json);
@@ -267,7 +266,7 @@ class _$LocationModelImpl extends _LocationModel {
   }
 }
 
-abstract class _LocationModel extends LocationModel {
+abstract class _LocationModel implements LocationModel {
   const factory _LocationModel(
       {final String country,
       final String city,
@@ -275,7 +274,6 @@ abstract class _LocationModel extends LocationModel {
       @JsonKey(name: 'country_code') final String countryCode,
       final String timezone,
       final String isp}) = _$LocationModelImpl;
-  const _LocationModel._() : super._();
 
   factory _LocationModel.fromJson(Map<String, dynamic> json) =
       _$LocationModelImpl.fromJson;

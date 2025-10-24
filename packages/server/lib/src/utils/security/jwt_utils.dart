@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
@@ -10,13 +11,22 @@ import '../logging/logger_utils.dart';
 class JwtUtils {
   JwtUtils();
 
+  /// 生成唯一的 JWT ID
+  String _generateJti() {
+    final random = Random.secure();
+    final values = List<int>.generate(16, (i) => random.nextInt(256));
+    return base64Url.encode(values).replaceAll('=', '');
+  }
+
   /// 生成访问令牌
   String generateAccessToken(Map<String, dynamic> payload) {
     try {
+      final now = DateTime.now();
       final jwt = JWT({
         ...payload,
-        'iat': DateTime.now().millisecondsSinceEpoch ~/ 1000,
-        'exp': DateTime.now().add(Duration(hours: ServerConfig.jwtExpireHours)).millisecondsSinceEpoch ~/ 1000,
+        'jti': _generateJti(),
+        'iat': now.millisecondsSinceEpoch ~/ 1000,
+        'exp': now.add(Duration(hours: ServerConfig.jwtExpireHours)).millisecondsSinceEpoch ~/ 1000,
         'iss': 'ttpolyglot-server',
         'aud': 'ttpolyglot-client',
         'type': 'access',
@@ -32,10 +42,12 @@ class JwtUtils {
   /// 生成刷新令牌
   String generateRefreshToken(Map<String, dynamic> payload) {
     try {
+      final now = DateTime.now();
       final jwt = JWT({
         ...payload,
-        'iat': DateTime.now().millisecondsSinceEpoch ~/ 1000,
-        'exp': DateTime.now().add(Duration(days: ServerConfig.jwtRefreshExpireDays)).millisecondsSinceEpoch ~/ 1000,
+        'jti': _generateJti(),
+        'iat': now.millisecondsSinceEpoch ~/ 1000,
+        'exp': now.add(Duration(days: ServerConfig.jwtRefreshExpireDays)).millisecondsSinceEpoch ~/ 1000,
         'iss': 'ttpolyglot-server',
         'aud': 'ttpolyglot-client',
         'type': 'refresh',

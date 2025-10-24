@@ -8,7 +8,6 @@ part 'user_info_model.g.dart';
 
 /// 用户信息模型
 @freezed
-@JsonSerializable(explicitToJson: true)
 class UserInfoModel with _$UserInfoModel {
   const factory UserInfoModel({
     @JsonKey(name: 'username') required String username,
