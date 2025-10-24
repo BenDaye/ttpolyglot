@@ -9,7 +9,7 @@ class AuthApi {
   /// 注意：登录不使用拦截器的 loading，由 Controller 控制
   Future<LoginResponseModel> login(LoginRequestModel request) async {
     try {
-      final response = await HttpClient.post<LoginResponseModel>(
+      final response = await HttpClient.post(
         '/auth/login',
         data: request.toJson(),
         options: Options(

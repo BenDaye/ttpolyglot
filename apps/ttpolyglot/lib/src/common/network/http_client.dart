@@ -172,7 +172,7 @@ class HttpClient {
         code: apiResponse.code,
         message: apiResponse.message,
         type: apiResponse.type,
-        data: apiResponse.data as T?,
+        data: apiResponse.data,
       );
       return _successCallback(typedResponse, extra);
     }).catchError((err) {
@@ -185,7 +185,7 @@ class HttpClient {
           code: original.code,
           message: original.message,
           type: original.type,
-          data: original.data as T?,
+          data: original.data,
         );
       } else {
         response = BaseModel.of(DataCodeEnum.unknown, message: err.toString());
