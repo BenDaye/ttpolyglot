@@ -218,7 +218,8 @@ class PermissionService extends BaseService {
         'project_id': projectId,
       });
 
-      final roles = result.map((row) => row[0] as String).toList();
+      // role name 是 VARCHAR 类型，应该返回 String，但为了安全起见使用 toString()
+      final roles = result.map((row) => row[0].toString()).toList();
 
       // 缓存结果
       if (roles.isNotEmpty) {
@@ -254,7 +255,8 @@ class PermissionService extends BaseService {
           AND r.is_active = true
       ''', {'user_id': userId});
 
-      final roles = result.map((row) => row[0] as String).toList();
+      // role name 是 VARCHAR 类型，应该返回 String，但为了安全起见使用 toString()
+      final roles = result.map((row) => row[0].toString()).toList();
 
       // 缓存结果
       if (roles.isNotEmpty) {
@@ -453,7 +455,8 @@ class PermissionService extends BaseService {
         AND rp.is_granted = true
     ''', {'role_name': roleName});
 
-    final permissions = result.map((row) => row[0] as String).toList();
+    // permission name 是 VARCHAR 类型，应该返回 String，但为了安全起见使用 toString()
+    final permissions = result.map((row) => row[0].toString()).toList();
 
     // 缓存结果
     if (permissions.isNotEmpty) {
@@ -512,7 +515,8 @@ class PermissionService extends BaseService {
       ''';
 
       final result = await _databaseService.query(sql, parameters);
-      final grantedPermissions = result.map((row) => row[0] as String).toSet();
+      // permission name 是 VARCHAR 类型，应该返回 String，但为了安全起见使用 toString()
+      final grantedPermissions = result.map((row) => row[0].toString()).toSet();
 
       // 设置结果
       for (final permission in permissions) {

@@ -107,7 +107,9 @@ class NotificationSettingsService extends BaseService {
           'is_enabled': isEnabled,
         });
 
-        settingId = result.first[0] as int;
+        // notification_settings.id 是 SERIAL 类型（INTEGER），需要安全转换
+        final rawSettingId = result.first[0];
+        settingId = (rawSettingId is int) ? rawSettingId : int.parse(rawSettingId.toString());
       }
 
       // 清除缓存

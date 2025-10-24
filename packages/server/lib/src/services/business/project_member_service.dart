@@ -50,7 +50,9 @@ class ProjectMemberService extends BaseService {
       ''';
 
       final countResult = await _databaseService.query(countSql, parameters);
-      final total = countResult.first[0] as int;
+      // COUNT(*) 返回的可能是 int 或 bigint，需要安全转换
+      final totalRaw = countResult.first[0];
+      final total = (totalRaw is int) ? totalRaw : int.parse(totalRaw.toString());
 
       // 获取分页数据
       final offset = (page - 1) * limit;
@@ -144,7 +146,9 @@ class ProjectMemberService extends BaseService {
           'invited_by': invitedBy,
         });
 
-        memberId = result.first[0] as int;
+        // project_members.id 是 SERIAL 类型（INTEGER），需要安全转换
+        final rawMemberId = result.first[0];
+        memberId = (rawMemberId is int) ? rawMemberId : int.parse(rawMemberId.toString());
 
         // 更新项目成员数量
         await _updateProjectMemberCount(projectId);

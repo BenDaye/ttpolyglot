@@ -60,7 +60,9 @@ class UserService extends BaseService {
       ''';
 
       final countResult = await _databaseService.query(countSql, parameters);
-      final total = countResult.first[0] as int;
+      // COUNT(*) 返回的可能是 int 或 bigint，需要安全转换
+      final totalRaw = countResult.first[0];
+      final total = (totalRaw is int) ? totalRaw : int.parse(totalRaw.toString());
 
       // 获取分页数据
       final offset = (page - 1) * limit;
@@ -383,7 +385,9 @@ class UserService extends BaseService {
         throwNotFound('用户不存在');
       }
 
-      final currentPasswordHash = result.first[0] as String;
+      // password_hash 是 CHAR(60) 类型，应该返回 String，但为了安全起见使用 toString()
+      final rawPasswordHash = result.first[0];
+      final currentPasswordHash = rawPasswordHash.toString();
 
       // 验证当前密码
       if (!_cryptoUtils.verifyPassword(currentPassword, currentPasswordHash)) {

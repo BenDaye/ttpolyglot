@@ -66,7 +66,9 @@ class ProjectService extends BaseService {
       ''';
 
       final countResult = await _databaseService.query(countSql, parameters);
-      final total = countResult.first[0] as int;
+      // COUNT(*) 返回的可能是 int 或 bigint，需要安全转换
+      final totalRaw = countResult.first[0];
+      final total = (totalRaw is int) ? totalRaw : int.parse(totalRaw.toString());
 
       // 获取分页数据
       final offset = (page - 1) * limit;
@@ -216,7 +218,9 @@ class ProjectService extends BaseService {
       ''';
 
       final result = await _databaseService.query(sql, parameters);
-      final count = result.first[0] as int;
+      // COUNT(*) 返回的可能是 int 或 bigint，需要安全转换
+      final countRaw = result.first[0];
+      final count = (countRaw is int) ? countRaw : int.parse(countRaw.toString());
 
       return count == 0;
     } catch (error, stackTrace) {
@@ -287,7 +291,9 @@ class ProjectService extends BaseService {
           'settings': settings != null ? jsonEncode(settings) : '{}',
         });
 
-        projectId = (projectResult.first[0] as int).toString();
+        // 数据库返回的 id 可能是 int 或其他数值类型，统一转换为字符串
+        final rawId = projectResult.first[0];
+        projectId = rawId.toString();
 
         // 添加主语言到项目语言列表
         await _databaseService.query('''
@@ -647,7 +653,9 @@ class ProjectService extends BaseService {
       throwBusiness('项目所有者角色不存在');
     }
 
-    final roleId = roleResult.first[0] as String;
+    // roles.id 是 SERIAL 类型（INTEGER），需要转换为字符串
+    final rawRoleId = roleResult.first[0];
+    final roleId = rawRoleId.toString();
 
     // 分配角色
     await _databaseService.query('''

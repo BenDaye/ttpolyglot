@@ -39,7 +39,9 @@ class ConfigService extends BaseService {
         return null;
       }
 
-      final value = result.first[0] as String?;
+      // config_value 是 TEXT 类型，应该返回 String，但为了安全起见使用 toString()
+      final rawValue = result.first[0];
+      final value = rawValue?.toString();
 
       // 缓存配置值
       if (value != null) {
@@ -317,7 +319,8 @@ class ConfigService extends BaseService {
         ORDER BY category
       ''');
 
-      final categories = result.map((row) => row[0] as String).toList();
+      // category 是 VARCHAR 类型，应该返回 String，但为了安全起见使用 toString()
+      final categories = result.map((row) => row[0].toString()).toList();
 
       // 缓存分类列表
       await _redisService.setJson(cacheKey, {'categories': categories}, ServerConfig.cacheConfigTtl);

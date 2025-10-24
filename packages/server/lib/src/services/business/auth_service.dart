@@ -104,7 +104,9 @@ class AuthService extends BaseService {
           'locale': locale ?? 'en-US',
         });
 
-        return result.first[0] as String;
+        // users.id 是 UUID 类型，需要安全转换为字符串
+        final rawUserId = result.first[0];
+        return rawUserId.toString();
       });
 
       LoggerUtils.info('用户注册成功: $userId');
