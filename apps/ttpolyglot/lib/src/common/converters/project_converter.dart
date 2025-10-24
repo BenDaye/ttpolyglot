@@ -11,12 +11,15 @@ class ProjectConverter {
   /// 将 ProjectModel (API) 转换为 Project (Core)
   static Project toProject(ProjectModel model) {
     try {
-      // 构建主语言
-      final languageEnum = model.primaryLanguageCode ?? LanguageEnum.enUS;
+      // 构建主语言 - 通过 ID 查找语言信息
+      final languageModel = _getLanguageById(model.primaryLanguageId);
       final primaryLanguage = Language(
-        code: languageEnum.code,
-        name: languageEnum.name,
-        nativeName: languageEnum.nativeName,
+        id: model.primaryLanguageId,
+        code: languageModel?.code.code ?? LanguageEnum.enUS.code,
+        name: languageModel?.name ?? LanguageEnum.enUS.name,
+        nativeName: languageModel?.nativeName ?? LanguageEnum.enUS.nativeName,
+        isRtl: languageModel?.isRtl ?? false,
+        sortIndex: languageModel?.sortOrder ?? 0,
       );
 
       // 构建项目所有者
@@ -58,7 +61,7 @@ class ProjectConverter {
         ownerId: project.owner.id,
         status: project.isActive ? 'active' : 'inactive',
         visibility: 'private',
-        primaryLanguageCode: LanguageEnum.fromValue(project.primaryLanguage.code),
+        primaryLanguageId: project.primaryLanguage.id,
         createdAt: project.createdAt,
         updatedAt: project.updatedAt,
         isActive: project.isActive,
@@ -69,6 +72,21 @@ class ProjectConverter {
     } catch (error, stackTrace) {
       log('[toProjectModel]', error: error, stackTrace: stackTrace, name: 'ProjectConverter');
       rethrow;
+    }
+  }
+
+  /// 根据语言 ID 获取语言模型
+  static LanguageModel? _getLanguageById(int? languageId) {
+    if (languageId == null) return null;
+
+    try {
+      final presetLanguages = LanguageEnum.toArray();
+      return presetLanguages.firstWhere(
+        (lang) => lang.id == languageId,
+        orElse: () => presetLanguages.first,
+      );
+    } catch (_) {
+      return null;
     }
   }
 
@@ -97,6 +115,7 @@ class ProjectConverter {
     final presetLanguage = _getPresetLanguageByCode(code);
 
     return Language(
+      id: presetLanguage?.id ?? 0,
       code: code,
       name: name ?? presetLanguage?.name ?? code,
       nativeName: nativeName ?? presetLanguage?.nativeName ?? code,
@@ -115,6 +134,7 @@ class ProjectConverter {
     try {
       final model = presetLanguages.firstWhere((lang) => lang.code.code == code);
       return Language(
+        id: model.id,
         code: code,
         name: model.name,
         nativeName: model.nativeName ?? '',

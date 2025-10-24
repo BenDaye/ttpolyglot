@@ -64,7 +64,7 @@ class ProjectApi {
   Future<ProjectModel?> createProject({
     required String name,
     String? description,
-    required String primaryLanguageCode,
+    required int primaryLanguageId,
     String? slug,
     String visibility = 'private',
     Map<String, dynamic>? settings,
@@ -72,14 +72,14 @@ class ProjectApi {
   }) async {
     try {
       log(
-        '[createProject] name=$name, primaryLanguage=$primaryLanguageCode, targetLanguages=$targetLanguageIds',
+        '[createProject] name=$name, primaryLanguageId=$primaryLanguageId, targetLanguages=$targetLanguageIds',
         name: 'ProjectApi',
       );
 
       final requestData = {
         'name': name,
         'description': description,
-        'primary_language_code': primaryLanguageCode,
+        'primary_language_id': primaryLanguageId,
         'slug': slug ?? name.toLowerCase().replaceAll(' ', '-'),
         'visibility': visibility,
         'settings': settings ?? {},

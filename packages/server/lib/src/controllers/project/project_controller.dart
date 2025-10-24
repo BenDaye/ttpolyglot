@@ -87,7 +87,15 @@ class ProjectController extends BaseController {
       final data = jsonDecode(body) as Map<String, dynamic>;
 
       final name = ValidatorUtils.validateString(data['name'], 'name', minLength: 2, maxLength: 100);
-      final primaryLanguageCode = ValidatorUtils.validateString(data['primary_language_code'], 'primary_language_code');
+
+      // 解析主语言ID
+      final primaryLanguageId = data['primary_language_id'];
+      if (primaryLanguageId == null) {
+        return ResponseUtils.error(message: '主语言ID不能为空');
+      }
+      final primaryLanguageIdInt =
+          primaryLanguageId is int ? primaryLanguageId : int.parse(primaryLanguageId.toString());
+
       final ownerId = getCurrentUserId(request);
 
       if (ownerId == null) {
@@ -106,7 +114,7 @@ class ProjectController extends BaseController {
       final project = await _projectService.createProject(
           name: name,
           ownerId: ownerId,
-          primaryLanguageCode: primaryLanguageCode,
+          primaryLanguageId: primaryLanguageIdInt,
           description: data['description'] as String?,
           slug: data['slug'] as String?,
           visibility: ValidatorUtils.validateEnum(data['visibility'], 'visibility', ['public', 'private', 'internal'],

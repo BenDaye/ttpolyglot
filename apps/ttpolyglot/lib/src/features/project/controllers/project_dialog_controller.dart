@@ -306,7 +306,7 @@ class ProjectDialogController extends GetxController {
     try {
       final name = nameController.text.trim();
       final description = descriptionController.text.trim();
-      final primaryLanguageCode = _selectedPrimaryLanguage.value!.code;
+      final primaryLanguageId = _selectedPrimaryLanguage.value!.id;
 
       if (_isEditMode.value) {
         // 编辑模式：检查名称是否与其他项目冲突
@@ -347,9 +347,9 @@ class ProjectDialogController extends GetxController {
         final project = await _projectApi.createProject(
           name: name,
           description: description,
-          primaryLanguageCode: primaryLanguageCode,
+          primaryLanguageId: primaryLanguageId,
           visibility: 'private',
-          targetLanguageIds: _selectedTargetLanguages.map((lang) => lang.id!).toList(),
+          targetLanguageIds: _selectedTargetLanguages.map((lang) => lang.id).whereType<int>().toList(),
         );
 
         if (project == null) {

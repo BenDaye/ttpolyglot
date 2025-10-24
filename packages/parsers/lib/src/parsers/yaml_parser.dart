@@ -139,17 +139,14 @@ class YamlParser implements TranslationParser {
     if (parts.length > 1) {
       final langCode = parts.last;
       return Language(
+        id: Language.supportedLanguages.firstWhere((lang) => lang.code == langCode).id,
         code: langCode,
         name: langCode.toUpperCase(),
         nativeName: langCode,
       );
     }
 
-    return const Language(
-      code: 'en',
-      name: 'English',
-      nativeName: 'English',
-    );
+    return Language.supportedLanguages.first;
   }
 
   /// 解析 YAML 对象

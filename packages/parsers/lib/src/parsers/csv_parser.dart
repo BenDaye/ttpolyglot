@@ -203,17 +203,14 @@ class CsvParser implements TranslationParser {
       // 标准化语言代码格式为 xx-XX
       final standardizedCode = _standardizeLanguageCode(langCode);
       return Language(
+        id: Language.supportedLanguages.firstWhere((lang) => lang.code == standardizedCode).id,
         code: standardizedCode,
         name: standardizedCode.toUpperCase(),
         nativeName: standardizedCode,
       );
     }
 
-    return const Language(
-      code: 'en-US',
-      name: 'English',
-      nativeName: 'English',
-    );
+    return Language.supportedLanguages.first;
   }
 
   /// 标准化语言代码格式为 xx-XX

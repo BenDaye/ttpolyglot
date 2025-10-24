@@ -21,36 +21,44 @@ class ProjectDataInitializer {
         CreateProjectRequest(
           name: 'Flutter App',
           description: '一个跨平台的移动应用项目，支持 iOS 和 Android 平台',
-          primaryLanguage: Language.zhCN,
-          targetLanguages: [Language.enUS, Language.jaJP],
+          primaryLanguage: Language.getLanguageByCode('zh-CN')!,
+          targetLanguages: [Language.getLanguageByCode('en-US')!, Language.getLanguageByCode('ja-JP')!],
           ownerId: 'default-user',
         ),
         CreateProjectRequest(
           name: 'Web Dashboard',
           description: '管理后台系统，提供数据分析和用户管理功能',
-          primaryLanguage: Language.zhCN,
-          targetLanguages: [Language.enUS],
+          primaryLanguage: Language.getLanguageByCode('zh-CN')!,
+          targetLanguages: [Language.getLanguageByCode('en-US')!],
           ownerId: 'default-user',
         ),
         CreateProjectRequest(
           name: 'API Documentation',
           description: 'REST API 文档项目，支持多语言文档生成',
-          primaryLanguage: Language.zhCN,
-          targetLanguages: [Language.enUS, Language.frFR, Language.deDE],
+          primaryLanguage: Language.getLanguageByCode('zh-CN')!,
+          targetLanguages: [
+            Language.getLanguageByCode('en-US')!,
+            Language.getLanguageByCode('fr-FR')!,
+            Language.getLanguageByCode('de-DE')!
+          ],
           ownerId: 'default-user',
         ),
         CreateProjectRequest(
           name: 'E-commerce Platform',
           description: '电商平台项目，包含商品管理、订单处理等功能',
-          primaryLanguage: Language.zhCN,
-          targetLanguages: [Language.enUS, Language.jaJP, Language.frFR],
+          primaryLanguage: Language.getLanguageByCode('zh-CN')!,
+          targetLanguages: [
+            Language.getLanguageByCode('en-US')!,
+            Language.getLanguageByCode('ja-JP')!,
+            Language.getLanguageByCode('fr-FR')!
+          ],
           ownerId: 'default-user',
         ),
         CreateProjectRequest(
           name: 'Marketing Website',
           description: '营销网站项目，用于产品宣传和用户获取',
-          primaryLanguage: Language.zhCN,
-          targetLanguages: [Language.enUS, Language.deDE],
+          primaryLanguage: Language.getLanguageByCode('zh-CN')!,
+          targetLanguages: [Language.getLanguageByCode('en-US')!, Language.getLanguageByCode('de-DE')!],
           ownerId: 'default-user',
         ),
       ];

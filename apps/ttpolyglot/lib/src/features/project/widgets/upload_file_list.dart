@@ -706,7 +706,7 @@ class _UploadFileListState extends State<UploadFileList> {
   Future<Map<String, String>> _parseJsonFile(String content) async {
     try {
       final parser = ParserFactory.getParser(FileFormats.json);
-      final defaultLanguage = const Language(code: 'unknown', name: 'Unknown', nativeName: 'Unknown');
+      final defaultLanguage = Language.supportedLanguages.first;
       final result = await parser.parseString(content, defaultLanguage);
 
       // 将 TranslationEntry 列表转换为 Map<String, String>

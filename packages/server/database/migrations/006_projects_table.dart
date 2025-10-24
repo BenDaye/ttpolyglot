@@ -30,7 +30,7 @@ class Migration006ProjectsTable extends BaseMigration {
           owner_id UUID NOT NULL,
           status VARCHAR(50) DEFAULT 'active',
           visibility VARCHAR(50) DEFAULT 'private',
-          primary_language_code VARCHAR(20),
+          primary_language_id INTEGER,
           total_keys INTEGER DEFAULT 0,
           translated_keys INTEGER DEFAULT 0,
           languages_count INTEGER DEFAULT 0,
@@ -48,7 +48,7 @@ class Migration006ProjectsTable extends BaseMigration {
       await addForeignKey('projects_owner_id', 'projects', 'owner_id', 'users', 'id');
 
       // 创建外键约束（语言）
-      await addForeignKey('projects_primary_language_code', 'projects', 'primary_language_code', 'languages', 'code',
+      await addForeignKey('projects_primary_language_id', 'projects', 'primary_language_id', 'languages', 'id',
           onDelete: 'SET NULL');
 
       // 创建索引
@@ -56,7 +56,7 @@ class Migration006ProjectsTable extends BaseMigration {
       await createIndex('projects_owner_id', 'projects', 'owner_id');
       await createIndex('projects_status', 'projects', 'status');
       await createIndex('projects_visibility', 'projects', 'visibility');
-      await createIndex('projects_primary_language_code', 'projects', 'primary_language_code');
+      await createIndex('projects_primary_language_id', 'projects', 'primary_language_id');
       await createIndex('projects_is_public', 'projects', 'is_public');
       await createIndex('projects_is_active', 'projects', 'is_active');
       await createIndex('projects_last_activity_at', 'projects', 'last_activity_at');
@@ -79,7 +79,7 @@ class Migration006ProjectsTable extends BaseMigration {
       await addColumnComment('projects', 'owner_id', '项目所有者ID，外键关联users表');
       await addColumnComment('projects', 'status', '项目状态：active/archived/paused');
       await addColumnComment('projects', 'visibility', '可见性：private/public/team');
-      await addColumnComment('projects', 'primary_language_code', '主语言代码，外键关联languages表');
+      await addColumnComment('projects', 'primary_language_id', '主语言ID，外键关联languages表');
       await addColumnComment('projects', 'total_keys', '总翻译条目数');
       await addColumnComment('projects', 'translated_keys', '已翻译条目数');
       await addColumnComment('projects', 'languages_count', '语言数量');

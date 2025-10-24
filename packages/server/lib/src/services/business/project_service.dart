@@ -76,7 +76,7 @@ class ProjectService extends BaseService {
       final projectsSql = '''
         SELECT 
           p.id, p.name, p.slug, p.description, p.status, p.visibility,
-          p.primary_language_code, p.total_keys, p.translated_keys, 
+          p.primary_language_id, p.total_keys, p.translated_keys, 
           p.languages_count, p.members_count, p.settings,
           p.last_activity_at, p.created_at, p.updated_at,
           u.username as owner_username,
@@ -134,7 +134,7 @@ class ProjectService extends BaseService {
       final sql = '''
         SELECT 
           p.id, p.name, p.slug, p.description, p.status, p.visibility,
-          p.primary_language_code, p.total_keys, p.translated_keys, 
+          p.primary_language_id, p.total_keys, p.translated_keys, 
           p.languages_count, p.members_count, p.settings,
           p.last_activity_at, p.created_at, p.updated_at,
           u.id as owner_id, u.username as owner_username,
@@ -229,7 +229,7 @@ class ProjectService extends BaseService {
   Future<ProjectModel> createProject({
     required String name,
     required String ownerId,
-    required String primaryLanguageCode,
+    required int primaryLanguageId,
     String? description,
     String? slug,
     String visibility = 'private',
@@ -238,10 +238,10 @@ class ProjectService extends BaseService {
   }) async {
     try {
       logInfo(
-          '创建项目: name: $name, owner: $ownerId, primaryLanguageCode: $primaryLanguageCode, targetLanguages: $targetLanguageIds,  description: $description');
+          '创建项目: name: $name, owner: $ownerId, primaryLanguageId: $primaryLanguageId, targetLanguages: $targetLanguageIds,  description: $description');
 
       // 验证主语言是否存在
-      final languageExists = await _isLanguageExists(primaryLanguageCode);
+      final languageExists = await _isLanguageExistsById(primaryLanguageId);
       if (!languageExists) {
         throwBusiness('指定的主语言不存在');
       }
@@ -271,10 +271,10 @@ class ProjectService extends BaseService {
         // 创建项目
         final projectResult = await _databaseService.query('''
           INSERT INTO {projects} (
-            name, slug, description, owner_id, primary_language_code,
+            name, slug, description, owner_id, primary_language_id,
             visibility, settings, status
           ) VALUES (
-            @name, @slug, @description, @owner_id, @primary_language_code,
+            @name, @slug, @description, @owner_id, @primary_language_id,
             @visibility, @settings, 'active'
           ) RETURNING id
         ''', {
@@ -282,23 +282,12 @@ class ProjectService extends BaseService {
           'slug': finalSlug,
           'description': description,
           'owner_id': ownerId,
-          'primary_language_code': primaryLanguageCode,
+          'primary_language_id': primaryLanguageId,
           'visibility': visibility,
           'settings': settings != null ? jsonEncode(settings) : '{}',
         });
 
         projectId = (projectResult.first[0] as int).toString();
-
-        // 获取主语言的 ID
-        final primaryLanguageResult = await _databaseService.query('''
-          SELECT id FROM {languages} WHERE code = @code AND is_active = true LIMIT 1
-        ''', {'code': primaryLanguageCode});
-
-        if (primaryLanguageResult.isEmpty) {
-          throwBusiness('主语言不存在');
-        }
-
-        final primaryLanguageId = (primaryLanguageResult.first[0] as int);
 
         // 添加主语言到项目语言列表
         await _databaseService.query('''
@@ -309,7 +298,7 @@ class ProjectService extends BaseService {
           )
         ''', {
           'project_id': projectId,
-          'language_id': primaryLanguageId.toString(),
+          'language_id': primaryLanguageId,
         });
 
         // 添加目标语言到项目语言列表
@@ -618,13 +607,6 @@ class ProjectService extends BaseService {
   }
 
   // 私有辅助方法
-
-  Future<bool> _isLanguageExists(String languageCode) async {
-    final result = await _databaseService
-        .query('SELECT 1 FROM {languages} WHERE code = @code AND is_active = true LIMIT 1', {'code': languageCode});
-    return result.isNotEmpty;
-  }
-
   Future<bool> _isLanguageExistsById(int languageId) async {
     final result = await _databaseService
         .query('SELECT 1 FROM {languages} WHERE id = @id AND is_active = true LIMIT 1', {'id': languageId});

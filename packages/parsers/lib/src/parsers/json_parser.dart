@@ -150,6 +150,7 @@ class JsonParser implements TranslationParser {
 
     if (langCodeRegex.hasMatch(fileName)) {
       return Language(
+        id: Language.supportedLanguages.firstWhere((lang) => lang.code == fileName).id,
         code: fileName,
         name: fileName.toUpperCase(),
         nativeName: fileName,
@@ -162,6 +163,7 @@ class JsonParser implements TranslationParser {
       final langCode = parts.last;
       if (langCodeRegex.hasMatch(langCode)) {
         return Language(
+          id: Language.supportedLanguages.firstWhere((lang) => lang.code == langCode).id,
           code: langCode,
           name: langCode.toUpperCase(),
           nativeName: langCode,
@@ -169,11 +171,7 @@ class JsonParser implements TranslationParser {
       }
     }
 
-    return const Language(
-      code: 'en',
-      name: 'English',
-      nativeName: 'English',
-    );
+    return Language.supportedLanguages.first;
   }
 
   /// 解析 JSON 对象

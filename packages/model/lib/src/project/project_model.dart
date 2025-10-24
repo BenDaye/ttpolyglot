@@ -1,5 +1,4 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:ttpolyglot_model/src/enums/language_enum.dart';
 import 'package:ttpolyglot_model/src/language/language_model.dart';
 
 import 'project_member_model.dart';
@@ -18,7 +17,7 @@ class ProjectModel with _$ProjectModel {
     @JsonKey(name: 'owner_id') required String ownerId,
     @JsonKey(name: 'status') required String status,
     @JsonKey(name: 'visibility') required String visibility,
-    @JsonKey(name: 'primary_language_code') @LanguageEnumConverter() LanguageEnum? primaryLanguageCode,
+    @JsonKey(name: 'primary_language_id') required int primaryLanguageId,
     @JsonKey(name: 'total_keys') @Default(0) int totalKeys,
     @JsonKey(name: 'translated_keys') @Default(0) int translatedKeys,
     @JsonKey(name: 'languages_count') @Default(0) int languagesCount,
@@ -48,7 +47,7 @@ class CreateProjectRequest with _$CreateProjectRequest {
     String? description,
     @Default('active') String status,
     @Default('private') String visibility,
-    @LanguageEnumConverter() LanguageEnum? primaryLanguageCode,
+    int? primaryLanguageId,
     Map<String, dynamic>? settings,
   }) = _CreateProjectRequest;
 
@@ -64,7 +63,7 @@ class UpdateProjectRequest with _$UpdateProjectRequest {
     String? description,
     String? status,
     String? visibility,
-    @LanguageEnumConverter() LanguageEnum? primaryLanguageCode,
+    int? primaryLanguageId,
     Map<String, dynamic>? settings,
   }) = _UpdateProjectRequest;
 
