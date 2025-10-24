@@ -229,6 +229,18 @@ class ProjectService extends BaseService {
     }
   }
 
+  /// 序列化 settings，处理 DateTime 等特殊类型
+  String _serializeSettings(Map<String, dynamic>? settings) {
+    if (settings == null) return '{}';
+
+    return jsonEncode(settings, toEncodable: (dynamic value) {
+      if (value is DateTime) {
+        return value.toIso8601String();
+      }
+      return value;
+    });
+  }
+
   /// 创建项目
   Future<ProjectModel> createProject({
     required String name,
@@ -288,7 +300,7 @@ class ProjectService extends BaseService {
           'owner_id': ownerId,
           'primary_language_id': primaryLanguageId,
           'visibility': visibility,
-          'settings': settings != null ? jsonEncode(settings) : '{}',
+          'settings': _serializeSettings(settings),
           'members_count': 1,
         });
 
@@ -827,7 +839,7 @@ class ProjectService extends BaseService {
       ''', {
         'project_id': projectId,
         'language_id': languageId,
-        'settings': jsonEncode(settings),
+        'settings': _serializeSettings(settings),
       });
 
       await _clearProjectCache(projectId);
