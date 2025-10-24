@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:ttpolyglot_model/model.dart';
 
 import '../../config/server_config.dart';
@@ -231,14 +233,25 @@ class ProjectService extends BaseService {
     String? slug,
     String visibility = 'private',
     Map<String, dynamic>? settings,
+    List<String>? targetLanguageCodes,
   }) async {
     try {
-      logInfo('创建项目: $name, owner: $ownerId');
+      logInfo('创建项目: $name, owner: $ownerId, targetLanguages: $targetLanguageCodes');
 
       // 验证主语言是否存在
       final languageExists = await _isLanguageExists(primaryLanguageCode);
       if (!languageExists) {
         throwBusiness('指定的主语言不存在');
+      }
+
+      // 验证目标语言是否存在
+      if (targetLanguageCodes != null && targetLanguageCodes.isNotEmpty) {
+        for (final langCode in targetLanguageCodes) {
+          final exists = await _isLanguageExists(langCode);
+          if (!exists) {
+            throwBusiness('目标语言 $langCode 不存在');
+          }
+        }
       }
 
       // 生成或验证slug
@@ -269,7 +282,7 @@ class ProjectService extends BaseService {
           'owner_id': ownerId,
           'primary_language_code': primaryLanguageCode,
           'visibility': visibility,
-          'settings': settings != null ? settings.toString() : '{}',
+          'settings': settings != null ? jsonEncode(settings) : '{}',
         });
 
         projectId = projectResult.first[0] as String;
@@ -285,6 +298,25 @@ class ProjectService extends BaseService {
           'project_id': projectId,
           'language_code': primaryLanguageCode,
         });
+
+        // 添加目标语言到项目语言列表
+        if (targetLanguageCodes != null && targetLanguageCodes.isNotEmpty) {
+          for (final langCode in targetLanguageCodes) {
+            // 避免重复添加主语言
+            if (langCode != primaryLanguageCode) {
+              await _databaseService.query('''
+                INSERT INTO {project_languages} (
+                  project_id, language_code, is_enabled, is_primary
+                ) VALUES (
+                  @project_id, @language_code, true, false
+                )
+              ''', {
+                'project_id': projectId,
+                'language_code': langCode,
+              });
+            }
+          }
+        }
 
         // 给项目所有者分配project_owner角色
         await _assignProjectOwnerRole(projectId, ownerId);
@@ -822,7 +854,7 @@ class ProjectService extends BaseService {
       ''', {
         'project_id': projectId,
         'language_code': languageCode,
-        'settings': settings.toString(),
+        'settings': jsonEncode(settings),
       });
 
       await _clearProjectCache(projectId);

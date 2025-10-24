@@ -348,6 +348,7 @@ class ProjectDialogController extends GetxController {
           description: description,
           primaryLanguageCode: primaryLanguageCode,
           visibility: 'private',
+          targetLanguageCodes: _selectedTargetLanguages.map((lang) => lang.code).toList(),
         );
 
         if (project == null) {

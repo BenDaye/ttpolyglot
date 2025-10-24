@@ -94,6 +94,15 @@ class ProjectController extends BaseController {
         return ResponseUtils.error(message: '用户信息不存在');
       }
 
+      // 解析目标语言列表
+      List<String>? targetLanguageCodes;
+      if (data.containsKey('target_language_codes') && data['target_language_codes'] != null) {
+        final targetLangs = data['target_language_codes'];
+        if (targetLangs is List) {
+          targetLanguageCodes = targetLangs.map((e) => e.toString()).toList();
+        }
+      }
+
       final project = await _projectService.createProject(
           name: name,
           ownerId: ownerId,
@@ -104,7 +113,8 @@ class ProjectController extends BaseController {
               required: false),
           settings: data.containsKey('settings')
               ? ValidatorUtils.validateJson(data['settings'], 'settings', required: false)
-              : null);
+              : null,
+          targetLanguageCodes: targetLanguageCodes);
 
       return ResponseUtils.success(message: '项目创建成功', data: project);
     } catch (error, stackTrace) {

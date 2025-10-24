@@ -68,9 +68,11 @@ class ProjectApi {
     String? slug,
     String visibility = 'private',
     Map<String, dynamic>? settings,
+    List<String>? targetLanguageCodes,
   }) async {
     try {
-      log('[createProject] name=$name, primaryLanguage=$primaryLanguageCode', name: 'ProjectApi');
+      log('[createProject] name=$name, primaryLanguage=$primaryLanguageCode, targetLanguages=$targetLanguageCodes',
+          name: 'ProjectApi');
 
       final requestData = {
         'name': name,
@@ -79,6 +81,7 @@ class ProjectApi {
         'slug': slug ?? name.toLowerCase().replaceAll(' ', '-'),
         'visibility': visibility,
         'settings': settings ?? {},
+        if (targetLanguageCodes != null && targetLanguageCodes.isNotEmpty) 'target_language_codes': targetLanguageCodes,
       };
 
       final response = await HttpClient.post(
