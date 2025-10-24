@@ -1,11 +1,10 @@
-
-
 import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
+
 import 'base_seed.dart';
 
 /// 种子: 001 - 插入默认角色
 /// 创建时间: 2024-12-26
-/// 描述: 插入默认角色（超级管理员、管理员、项目经理、翻译员、访客）
+/// 描述: 插入默认角色（超级管理员、管理员、项目所有者、项目经理、翻译员、审核员、访客）
 class Seed001InsertDefaultRoles extends BaseSeed {
   @override
   String get name => '001_insert_default_roles';
@@ -34,6 +33,13 @@ class Seed001InsertDefaultRoles extends BaseSeed {
           'name': 'admin',
           'display_name': '管理员',
           'description': '拥有大部分管理权限，可以管理用户和项目',
+          'is_system_role': true,
+          'is_active': true,
+        },
+        {
+          'name': 'project_owner',
+          'display_name': '项目所有者',
+          'description': '项目的创建者和所有者，拥有项目的所有权限，可以管理项目设置、成员和翻译内容',
           'is_system_role': true,
           'is_active': true,
         },
