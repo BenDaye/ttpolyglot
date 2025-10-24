@@ -5,12 +5,16 @@ import 'package:equatable/equatable.dart';
 /// 语言模型
 class Language extends Equatable {
   const Language({
+    this.id,
     required this.code,
     required this.name,
     required this.nativeName,
     this.isRtl = false,
     this.sortIndex = 0,
   });
+
+  /// 语言ID (可选，用于API调用)
+  final int? id;
 
   /// 语言代码 (如: en-US, zh-CN, ja-JP)
   final String code;
@@ -27,7 +31,8 @@ class Language extends Equatable {
   /// 排序索引
   final int sortIndex;
 
-  static const enUS = Language(code: 'en-US', name: 'English (United States)', nativeName: 'English (United States)', sortIndex: 11);
+  static const enUS =
+      Language(code: 'en-US', name: 'English (United States)', nativeName: 'English (United States)', sortIndex: 11);
   static const zhCN = Language(code: 'zh-CN', name: 'Chinese (Simplified)', nativeName: '中文（简体）', sortIndex: 21);
   static const jaJP = Language(code: 'ja-JP', name: 'Japanese', nativeName: '日本語', sortIndex: 31);
   static const koKR = Language(code: 'ko-KR', name: 'Korean', nativeName: '한국어', sortIndex: 41);
@@ -40,7 +45,8 @@ class Language extends Equatable {
   static List<Language> get supportedLanguages => [
         // 英语
         enUS,
-        const Language(code: 'en-GB', name: 'English (United Kingdom)', nativeName: 'English (United Kingdom)', sortIndex: 12),
+        const Language(
+            code: 'en-GB', name: 'English (United Kingdom)', nativeName: 'English (United Kingdom)', sortIndex: 12),
         const Language(code: 'en-AU', name: 'English (Australia)', nativeName: 'English (Australia)', sortIndex: 13),
         const Language(code: 'en-CA', name: 'English (Canada)', nativeName: 'English (Canada)', sortIndex: 14),
 
@@ -80,7 +86,12 @@ class Language extends Equatable {
         const Language(code: 'ru-RU', name: 'Russian', nativeName: 'Русский', sortIndex: 101),
 
         // 阿拉伯语
-        const Language(code: 'ar-SA', name: 'Arabic (Saudi Arabia)', nativeName: 'العربية (السعودية)', isRtl: true, sortIndex: 111),
+        const Language(
+            code: 'ar-SA',
+            name: 'Arabic (Saudi Arabia)',
+            nativeName: 'العربية (السعودية)',
+            isRtl: true,
+            sortIndex: 111),
         const Language(code: 'ar-EG', name: 'Arabic (Egypt)', nativeName: 'العربية (مصر)', isRtl: true, sortIndex: 112),
 
         // 希伯来语
@@ -237,6 +248,7 @@ class Language extends Equatable {
 
   /// 复制并更新语言信息
   Language copyWith({
+    int? id,
     String? code,
     String? name,
     String? nativeName,
@@ -244,6 +256,7 @@ class Language extends Equatable {
     int? sortIndex,
   }) {
     return Language(
+      id: id ?? this.id,
       code: code ?? this.code,
       name: name ?? this.name,
       nativeName: nativeName ?? this.nativeName,
@@ -255,6 +268,7 @@ class Language extends Equatable {
   /// 转换为 JSON
   Map<String, dynamic> toJson() {
     return {
+      if (id != null) 'id': id,
       'code': code,
       'name': name,
       'nativeName': nativeName,
@@ -266,6 +280,7 @@ class Language extends Equatable {
   /// 从 JSON 创建
   factory Language.fromJson(Map<String, dynamic> json) {
     return Language(
+      id: json['id'] as int?,
       code: json['code'] as String,
       name: json['name'] as String,
       nativeName: json['nativeName'] as String,
@@ -275,8 +290,9 @@ class Language extends Equatable {
   }
 
   @override
-  List<Object?> get props => [code, name, nativeName, isRtl, sortIndex];
+  List<Object?> get props => [id, code, name, nativeName, isRtl, sortIndex];
 
   @override
-  String toString() => 'Language(code: $code, name: $name, nativeName: $nativeName, isRtl: $isRtl, sortIndex: $sortIndex)';
+  String toString() =>
+      'Language(code: $code, name: $name, nativeName: $nativeName, isRtl: $isRtl, sortIndex: $sortIndex)';
 }

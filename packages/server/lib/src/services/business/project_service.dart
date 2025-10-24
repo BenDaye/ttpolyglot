@@ -147,17 +147,18 @@ class ProjectService extends BaseService {
           COALESCE(
             json_agg(
               json_build_object(
-                'language_code', pl.language_code,
+                'language_id', pl.language_id,
+                'language_code', l.code,
                 'is_primary', pl.is_primary,
-                'completion_percentage', pl.completion_percentage,
-                'is_enabled', pl.is_enabled
+                'is_active', pl.is_active
               )
-            ) FILTER (WHERE pl.language_code IS NOT NULL), 
+            ) FILTER (WHERE pl.language_id IS NOT NULL), 
             '[]'
           ) as languages
         FROM {projects} p
         LEFT JOIN {users} u ON p.owner_id = u.id
-        LEFT JOIN {project_languages} pl ON p.id = pl.project_id AND pl.is_enabled = true
+        LEFT JOIN {project_languages} pl ON p.id = pl.project_id AND pl.is_active = true
+        LEFT JOIN {languages} l ON pl.language_id = l.id
         WHERE p.id = @project_id
         GROUP BY p.id, u.id
       ''';
@@ -233,10 +234,11 @@ class ProjectService extends BaseService {
     String? slug,
     String visibility = 'private',
     Map<String, dynamic>? settings,
-    List<String>? targetLanguageCodes,
+    List<int>? targetLanguageIds,
   }) async {
     try {
-      logInfo('创建项目: $name, owner: $ownerId, targetLanguages: $targetLanguageCodes');
+      logInfo(
+          '创建项目: name: $name, owner: $ownerId, primaryLanguageCode: $primaryLanguageCode, targetLanguages: $targetLanguageIds,  description: $description');
 
       // 验证主语言是否存在
       final languageExists = await _isLanguageExists(primaryLanguageCode);
@@ -245,11 +247,11 @@ class ProjectService extends BaseService {
       }
 
       // 验证目标语言是否存在
-      if (targetLanguageCodes != null && targetLanguageCodes.isNotEmpty) {
-        for (final langCode in targetLanguageCodes) {
-          final exists = await _isLanguageExists(langCode);
+      if (targetLanguageIds != null && targetLanguageIds.isNotEmpty) {
+        for (final langId in targetLanguageIds) {
+          final exists = await _isLanguageExistsById(langId);
           if (!exists) {
-            throwBusiness('目标语言 $langCode 不存在');
+            throwBusiness('目标语言 ID $langId 不存在');
           }
         }
       }
@@ -285,34 +287,45 @@ class ProjectService extends BaseService {
           'settings': settings != null ? jsonEncode(settings) : '{}',
         });
 
-        projectId = projectResult.first[0] as String;
+        projectId = (projectResult.first[0] as int).toString();
+
+        // 获取主语言的 ID
+        final primaryLanguageResult = await _databaseService.query('''
+          SELECT id FROM {languages} WHERE code = @code AND is_active = true LIMIT 1
+        ''', {'code': primaryLanguageCode});
+
+        if (primaryLanguageResult.isEmpty) {
+          throwBusiness('主语言不存在');
+        }
+
+        final primaryLanguageId = (primaryLanguageResult.first[0] as int);
 
         // 添加主语言到项目语言列表
         await _databaseService.query('''
           INSERT INTO {project_languages} (
-            project_id, language_code, is_enabled, is_primary
+            project_id, language_id, is_primary, is_active
           ) VALUES (
-            @project_id, @language_code, true, true
+            @project_id, @language_id, true, true
           )
         ''', {
           'project_id': projectId,
-          'language_code': primaryLanguageCode,
+          'language_id': primaryLanguageId.toString(),
         });
 
         // 添加目标语言到项目语言列表
-        if (targetLanguageCodes != null && targetLanguageCodes.isNotEmpty) {
-          for (final langCode in targetLanguageCodes) {
+        if (targetLanguageIds != null && targetLanguageIds.isNotEmpty) {
+          for (final langId in targetLanguageIds) {
             // 避免重复添加主语言
-            if (langCode != primaryLanguageCode) {
+            if (langId != primaryLanguageId) {
               await _databaseService.query('''
                 INSERT INTO {project_languages} (
-                  project_id, language_code, is_enabled, is_primary
+                  project_id, language_id, is_primary, is_active
                 ) VALUES (
-                  @project_id, @language_code, true, false
+                  @project_id, @language_id, false, true
                 )
               ''', {
                 'project_id': projectId,
-                'language_code': langCode,
+                'language_id': langId,
               });
             }
           }
@@ -612,6 +625,12 @@ class ProjectService extends BaseService {
     return result.isNotEmpty;
   }
 
+  Future<bool> _isLanguageExistsById(int languageId) async {
+    final result = await _databaseService
+        .query('SELECT 1 FROM {languages} WHERE id = @id AND is_active = true LIMIT 1', {'id': languageId});
+    return result.isNotEmpty;
+  }
+
   Future<bool> _isSlugExists(String slug, [String? excludeProjectId]) async {
     var sql = 'SELECT 1 FROM {projects} WHERE slug = @slug';
     final parameters = <String, dynamic>{'slug': slug};
@@ -769,10 +788,10 @@ class ProjectService extends BaseService {
       logInfo('获取项目语言: $projectId');
 
       final result = await _databaseService.query('''
-        SELECT pl.*, l.name, l.native_name, l.direction, l.is_rtl
+        SELECT pl.*, l.code as language_code, l.name, l.native_name, l.direction, l.is_rtl
         FROM {project_languages} pl
-        JOIN {languages} l ON pl.language_code = l.code
-        WHERE pl.project_id = @project_id AND pl.is_enabled = true
+        JOIN {languages} l ON pl.language_id = l.id
+        WHERE pl.project_id = @project_id AND pl.is_active = true
         ORDER BY l.sort_index, l.name
       ''', {'project_id': projectId});
 
@@ -784,31 +803,31 @@ class ProjectService extends BaseService {
   }
 
   /// 添加项目语言
-  Future<void> addProjectLanguage(String projectId, String languageCode) async {
+  Future<void> addProjectLanguage(String projectId, int languageId) async {
     try {
-      logInfo('添加项目语言: project=$projectId, language=$languageCode');
+      logInfo('添加项目语言: project=$projectId, language=$languageId');
 
       // 检查语言是否存在
-      if (!await _isLanguageExists(languageCode)) {
+      if (!await _isLanguageExistsById(languageId)) {
         throwBusiness('语言不存在');
       }
 
       // 检查是否已存在
       final existing = await _databaseService.query('''
-        SELECT 1 FROM project_languages
-        WHERE project_id = @project_id AND language_code = @language_code
-      ''', {'project_id': projectId, 'language_code': languageCode});
+        SELECT 1 FROM {project_languages}
+        WHERE project_id = @project_id AND language_id = @language_id
+      ''', {'project_id': projectId, 'language_id': languageId});
 
       if (existing.isNotEmpty) {
         throwBusiness('语言已存在于项目中');
       }
 
       await _databaseService.query('''
-        INSERT INTO {project_languages} (project_id, language_code, is_enabled)
-        VALUES (@project_id, @language_code, true)
+        INSERT INTO {project_languages} (project_id, language_id, is_active)
+        VALUES (@project_id, @language_id, true)
       ''', {
         'project_id': projectId,
-        'language_code': languageCode,
+        'language_id': languageId,
       });
 
       await _clearProjectCache(projectId);
@@ -821,16 +840,16 @@ class ProjectService extends BaseService {
   }
 
   /// 移除项目语言
-  Future<void> removeProjectLanguage(String projectId, String languageCode) async {
+  Future<void> removeProjectLanguage(String projectId, int languageId) async {
     try {
-      logInfo('移除项目语言: project=$projectId, language=$languageCode');
+      logInfo('移除项目语言: project=$projectId, language=$languageId');
 
       await _databaseService.query('''
-        DELETE FROM project_languages
-        WHERE project_id = @project_id AND language_code = @language_code
+        DELETE FROM {project_languages}
+        WHERE project_id = @project_id AND language_id = @language_id
       ''', {
         'project_id': projectId,
-        'language_code': languageCode,
+        'language_id': languageId,
       });
 
       await _clearProjectCache(projectId);
@@ -843,17 +862,17 @@ class ProjectService extends BaseService {
   }
 
   /// 更新语言设置
-  Future<void> updateLanguageSettings(String projectId, String languageCode, Map<String, dynamic> settings) async {
+  Future<void> updateLanguageSettings(String projectId, int languageId, Map<String, dynamic> settings) async {
     try {
-      logInfo('更新语言设置: project=$projectId, language=$languageCode');
+      logInfo('更新语言设置: project=$projectId, language=$languageId');
 
       await _databaseService.query('''
-        UPDATE project_languages
+        UPDATE {project_languages}
         SET settings = @settings, updated_at = CURRENT_TIMESTAMP
-        WHERE project_id = @project_id AND language_code = @language_code
+        WHERE project_id = @project_id AND language_id = @language_id
       ''', {
         'project_id': projectId,
-        'language_code': languageCode,
+        'language_id': languageId,
         'settings': jsonEncode(settings),
       });
 
@@ -874,7 +893,7 @@ class ProjectService extends BaseService {
       // 获取基本统计信息
       final basicStats = await _databaseService.query('''
         SELECT
-          COUNT(DISTINCT pl.language_code) as language_count,
+          COUNT(DISTINCT pl.language_id) as language_count,
           COUNT(DISTINCT pm.user_id) as member_count,
           COUNT(te.id) as total_entries,
           COUNT(te.id) FILTER (WHERE te.status = 'completed') as completed_entries,
@@ -882,7 +901,7 @@ class ProjectService extends BaseService {
           COUNT(te.id) FILTER (WHERE te.status = 'approved') as approved_entries,
           COALESCE(AVG(te.quality_score), 0) as avg_quality_score
         FROM {projects} p
-        LEFT JOIN {project_languages} pl ON p.id = pl.project_id AND pl.is_enabled = true
+        LEFT JOIN {project_languages} pl ON p.id = pl.project_id AND pl.is_active = true
         LEFT JOIN {project_members} pm ON p.id = pm.project_id AND pm.status = 'active'
         LEFT JOIN {translation_entries} te ON p.id = te.project_id
         WHERE p.id = @project_id

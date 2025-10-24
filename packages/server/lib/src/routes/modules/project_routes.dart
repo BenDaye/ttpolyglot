@@ -43,8 +43,8 @@ class ProjectRoutes {
     // 项目语言管理
     router.get('/projects/<id>/languages', projectController.getProjectLanguages);
     router.post('/projects/<id>/languages', projectController.addProjectLanguage);
-    router.put('/projects/<id>/languages/<code>', projectController.updateLanguageSettings);
-    router.delete('/projects/<id>/languages/<code>', projectController.removeProjectLanguage);
+    router.put('/projects/<id>/languages/<languageId>', projectController.updateLanguageSettings);
+    router.delete('/projects/<id>/languages/<languageId>', projectController.removeProjectLanguage);
 
     // 项目统计
     router.get('/projects/<id>/statistics', projectController.getProjectStatistics);

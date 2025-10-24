@@ -48,7 +48,7 @@ class ProjectController extends BaseController {
   Future<Response> Function(Request, String) get getProjectLanguages => _getProjectLanguages;
   Future<Response> Function(Request, String) get addProjectLanguage => _addProjectLanguage;
   Future<Response> Function(Request, String, String) get removeProjectLanguage => _removeProjectLanguage;
-  Future<Response> Function(Request, String) get updateLanguageSettings => _updateLanguageSettings;
+  Future<Response> Function(Request, String, String) get updateLanguageSettings => _updateLanguageSettings;
   Future<Response> Function(Request, String) get getProjectStatistics => _getProjectStatistics;
   Future<Response> Function(Request, String) get getProjectActivity => _getProjectActivity;
   Future<Response> Function(Request) get stats => _getProjectStats;
@@ -95,11 +95,11 @@ class ProjectController extends BaseController {
       }
 
       // 解析目标语言列表
-      List<String>? targetLanguageCodes;
-      if (data.containsKey('target_language_codes') && data['target_language_codes'] != null) {
-        final targetLangs = data['target_language_codes'];
+      List<int>? targetLanguageIds;
+      if (data.containsKey('target_language_ids') && data['target_language_ids'] != null) {
+        final targetLangs = data['target_language_ids'];
         if (targetLangs is List) {
-          targetLanguageCodes = targetLangs.map((e) => e.toString()).toList();
+          targetLanguageIds = targetLangs.map((e) => e is int ? e : int.parse(e.toString())).toList();
         }
       }
 
@@ -114,7 +114,7 @@ class ProjectController extends BaseController {
           settings: data.containsKey('settings')
               ? ValidatorUtils.validateJson(data['settings'], 'settings', required: false)
               : null,
-          targetLanguageCodes: targetLanguageCodes);
+          targetLanguageIds: targetLanguageIds);
 
       return ResponseUtils.success(message: '项目创建成功', data: project);
     } catch (error, stackTrace) {
@@ -415,13 +415,15 @@ class ProjectController extends BaseController {
 
       final body = await request.readAsString();
       final data = jsonDecode(body) as Map<String, dynamic>;
-      final languageCode = data['language_code'] as String?;
+      final languageId = data['language_id'];
 
-      if (languageCode == null) {
-        return ResponseUtils.error(message: '语言代码不能为空');
+      if (languageId == null) {
+        return ResponseUtils.error(message: '语言ID不能为空');
       }
 
-      await _projectService.addProjectLanguage(id, languageCode);
+      final languageIdInt = languageId is int ? languageId : int.parse(languageId.toString());
+
+      await _projectService.addProjectLanguage(id, languageIdInt);
       return ResponseUtils.success(message: '语言已添加到项目');
     } catch (error, stackTrace) {
       LoggerUtils.error('添加项目语言失败: $id', error: error, stackTrace: stackTrace);
@@ -433,41 +435,47 @@ class ProjectController extends BaseController {
   }
 
   /// 移除项目语言
-  Future<Response> _removeProjectLanguage(Request request, String id, String languageCode) async {
+  Future<Response> _removeProjectLanguage(Request request, String id, String languageIdStr) async {
     try {
       final projectId = int.tryParse(id);
       if (projectId == null) {
         return ResponseUtils.error(message: '项目ID格式无效');
       }
-      await _projectService.removeProjectLanguage(id, languageCode);
+
+      final languageId = int.tryParse(languageIdStr);
+      if (languageId == null) {
+        return ResponseUtils.error(message: '语言ID格式无效');
+      }
+
+      await _projectService.removeProjectLanguage(id, languageId);
       return ResponseUtils.success(message: '语言已从项目中移除');
     } catch (error, stackTrace) {
-      LoggerUtils.error('移除项目语言失败: $id, language: $languageCode', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('移除项目语言失败: $id, language: $languageIdStr', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(message: '移除项目语言失败');
     }
   }
 
   /// 更新语言设置
-  Future<Response> _updateLanguageSettings(Request request, String id) async {
+  Future<Response> _updateLanguageSettings(Request request, String id, String languageIdStr) async {
     try {
       final projectId = int.tryParse(id);
       if (projectId == null) {
         return ResponseUtils.error(message: '项目ID格式无效');
       }
 
-      final body = await request.readAsString();
-      final data = jsonDecode(body) as Map<String, dynamic>;
-      final languageCode = data['language_code'] as String?;
-      final settings = data['settings'] as Map<String, dynamic>?;
-
-      if (languageCode == null) {
-        return ResponseUtils.error(message: '语言代码不能为空');
+      final languageId = int.tryParse(languageIdStr);
+      if (languageId == null) {
+        return ResponseUtils.error(message: '语言ID格式无效');
       }
 
-      await _projectService.updateLanguageSettings(id, languageCode, settings ?? {});
+      final body = await request.readAsString();
+      final data = jsonDecode(body) as Map<String, dynamic>;
+      final settings = data['settings'] as Map<String, dynamic>?;
+
+      await _projectService.updateLanguageSettings(id, languageId, settings ?? {});
       return ResponseUtils.success(message: '语言设置已更新');
     } catch (error, stackTrace) {
-      LoggerUtils.error('更新语言设置失败: $id', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('更新语言设置失败: $id, language: $languageIdStr', error: error, stackTrace: stackTrace);
       if (error is ValidationException) {
         return ResponseUtils.error(message: error.message);
       }

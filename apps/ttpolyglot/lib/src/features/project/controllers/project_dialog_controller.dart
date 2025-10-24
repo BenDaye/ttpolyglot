@@ -49,6 +49,7 @@ class ProjectDialogController extends GetxController {
   List<Language> _convertToLanguages(List<LanguageModel> models) {
     return models.map((model) {
       return Language(
+        id: model.id,
         code: model.code.code,
         name: model.name,
         nativeName: model.nativeName ?? model.name,
@@ -348,7 +349,7 @@ class ProjectDialogController extends GetxController {
           description: description,
           primaryLanguageCode: primaryLanguageCode,
           visibility: 'private',
-          targetLanguageCodes: _selectedTargetLanguages.map((lang) => lang.code).toList(),
+          targetLanguageIds: _selectedTargetLanguages.map((lang) => lang.id!).toList(),
         );
 
         if (project == null) {
