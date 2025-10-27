@@ -178,6 +178,7 @@ class HttpClient {
     }).catchError((err) {
       // 定义错误类型
       BaseModel<T> response;
+      int? statusCode = 0;
       if (err is DioException && err.error is BaseModel) {
         // 从原始 ApiResponse 中提取信息，重新构造为 BaseModel<T>
         final original = err.error as BaseModel;
@@ -187,11 +188,16 @@ class HttpClient {
           type: original.type,
           data: original.data,
         );
+        statusCode = err.response?.statusCode;
       } else {
         response = BaseModel.of(DataCodeEnum.unknown, message: err.toString());
       }
       // 错误处理
-      throw _failCallback(response, extra);
+      throw _failCallback(
+        response: response,
+        extra: extra,
+        statusCode: statusCode,
+      );
     });
   }
 
@@ -202,11 +208,12 @@ class HttpClient {
   }
 
   // 错误方法
-  static BaseModel<T> _failCallback<T>(BaseModel<T> response, ExtraModel extra) {
+  static BaseModel<T> _failCallback<T>({required BaseModel<T> response, required ExtraModel extra, int? statusCode}) {
     MessageTips.showFailTips(
       message: response.message,
       type: response.type,
       status: response.code,
+      statusCode: statusCode,
       extra: extra,
     );
     return response;

@@ -36,28 +36,31 @@ final class MessageTips {
   static void showFailTips({
     required String message,
     required DataMessageTipsEnum type,
+    int? statusCode,
     DataCodeEnum? status,
     ExtraModel? extra,
   }) {
     // // 鉴权失败处理
-    // if (status == StatusCode.error) {
+    // if (status == DataCodeEnum.unauthorized) {
     //   return;
     // }
     // 其他错误
     if (extra?.showErrorToast == false || message.isEmpty) return;
+    // 错误消息
+    final msg = statusCode != null && statusCode >= 400 ? 'E-$statusCode: $message' : message;
     switch (type) {
       case DataMessageTipsEnum.showDialog:
-        DialogManager.showError(message);
+        DialogManager.showError(msg);
         break;
       case DataMessageTipsEnum.showToast:
-        Toast.showError(message);
+        Toast.showError(msg);
         break;
       case DataMessageTipsEnum.showSnackBar:
         if (Get.context != null) {
           ScaffoldMessenger.of(Get.context!).showSnackBar(
             SnackBar(
               duration: const Duration(seconds: 1),
-              content: Text(message),
+              content: Text(msg),
               backgroundColor: Colors.red,
             ),
           );

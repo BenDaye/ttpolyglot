@@ -31,7 +31,12 @@ enum DataCodeEnum {
   sendTimeout(-1004, '发送超时'),
   connectionTimeout(-1005, '连接超时'),
   receiveTimeout(-1006, '证书过期'),
-  badCertificate(-1007, '接收超时');
+  badCertificate(-1007, '接收超时'),
+
+  // 错误码
+  serverError(500, '服务器错误'),
+  clientError(400, '客户端错误'),
+  redirectError(300, '重定向错误');
 
   final int value;
   final String message;
@@ -43,6 +48,14 @@ enum DataCodeEnum {
 
   /// 根据值获取对应的枚举
   static DataCodeEnum fromValue(int value) {
+    if (value >= 500) {
+      return DataCodeEnum.serverError;
+    } else if (value >= 400) {
+      return DataCodeEnum.clientError;
+    } else if (value >= 300) {
+      return DataCodeEnum.redirectError;
+    }
+    // 其他错误
     return DataCodeEnum.values.firstWhere(
       (code) => code.value == value,
       orElse: () => DataCodeEnum.unknown,
