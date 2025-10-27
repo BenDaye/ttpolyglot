@@ -280,7 +280,6 @@ class _DialogCard extends StatelessWidget {
         minWidth: 280.0,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.circular(8.0),
         boxShadow: const [
           BoxShadow(
@@ -290,70 +289,74 @@ class _DialogCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16.0, 20.0, 16.0, 12.0),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(4.0),
-                  decoration: BoxDecoration(
-                    color: iconColor,
-                    borderRadius: BorderRadius.circular(4.0),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: Colors.white,
-                    size: 20.0,
-                  ),
-                ),
-                const SizedBox(width: 8.0),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 20.0, 16.0, 12.0),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(4.0),
+                    decoration: BoxDecoration(
+                      color: iconColor,
+                      borderRadius: BorderRadius.circular(4.0),
+                    ),
+                    child: Icon(
+                      icon,
+                      color: Colors.white,
+                      size: 20.0,
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 20.0),
-            child: Text(
-              message,
-              style: const TextStyle(
-                fontSize: 14.0,
-                color: Colors.black87,
+                  const SizedBox(width: 8.0),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-          const Divider(height: 1.0),
-          InkWell(
-            onTap: onConfirm,
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(8.0),
-              bottomRight: Radius.circular(8.0),
-            ),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 12.0),
-              child: const Text(
-                '确定',
-                textAlign: TextAlign.center,
-                style: TextStyle(
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 20.0),
+              child: Text(
+                message,
+                style: const TextStyle(
                   fontSize: 14.0,
-                  color: Colors.blue,
-                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
                 ),
               ),
             ),
-          ),
-        ],
+            const Divider(height: 1.0),
+            InkWell(
+              onTap: onConfirm,
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(8.0),
+                bottomRight: Radius.circular(8.0),
+              ),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                child: const Text(
+                  '确定',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    color: Colors.blue,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -384,7 +387,6 @@ class _ConfirmDialogCard extends StatelessWidget {
         minWidth: 280.0,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.circular(8.0),
         boxShadow: const [
           BoxShadow(
@@ -394,79 +396,83 @@ class _ConfirmDialogCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16.0, 20.0, 16.0, 12.0),
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.bold,
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 20.0, 16.0, 12.0),
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 20.0),
-            child: Text(
-              message,
-              style: const TextStyle(
-                fontSize: 14.0,
-                color: Colors.black87,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 20.0),
+              child: Text(
+                message,
+                style: const TextStyle(
+                  fontSize: 14.0,
+                  color: Colors.black87,
+                ),
               ),
             ),
-          ),
-          const Divider(height: 1.0),
-          Row(
-            children: [
-              Expanded(
-                child: InkWell(
-                  onTap: onCancel,
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(8.0),
-                  ),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12.0),
-                    child: Text(
-                      cancelText,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 14.0,
-                        color: Colors.black54,
+            const Divider(height: 1.0),
+            Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: onCancel,
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(8.0),
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12.0),
+                      child: Text(
+                        cancelText,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 14.0,
+                          color: Colors.black54,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              Container(
-                width: 1.0,
-                height: 44.0,
-                color: Colors.grey[300],
-              ),
-              Expanded(
-                child: InkWell(
-                  onTap: onConfirm,
-                  borderRadius: const BorderRadius.only(
-                    bottomRight: Radius.circular(8.0),
-                  ),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12.0),
-                    child: Text(
-                      confirmText,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 14.0,
-                        color: Colors.blue,
-                        fontWeight: FontWeight.w500,
+                Container(
+                  width: 1.0,
+                  height: 44.0,
+                  color: Colors.grey[300],
+                ),
+                Expanded(
+                  child: InkWell(
+                    onTap: onConfirm,
+                    borderRadius: const BorderRadius.only(
+                      bottomRight: Radius.circular(8.0),
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12.0),
+                      child: Text(
+                        confirmText,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 14.0,
+                          color: Colors.blue,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
