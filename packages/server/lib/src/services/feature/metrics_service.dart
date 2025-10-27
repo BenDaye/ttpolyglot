@@ -121,6 +121,13 @@ class MetricsCollector {
   void clearMetric(String name) {
     _metrics.remove(name);
   }
+
+  /// 更新特定指标的值列表
+  void updateMetricValues(String name, List<MetricValue> values) {
+    if (_metrics.containsKey(name)) {
+      _metrics[name] = values;
+    }
+  }
 }
 
 /// 指标服务
@@ -181,15 +188,13 @@ class MetricsService extends BaseService {
   void _cleanupOldMetrics() {
     final cutoffTime = DateTime.now().subtract(Duration(hours: 1));
 
-    for (final metricName in _collector.getAllMetrics().keys) {
+    for (final metricName in _collector.getAllMetrics().keys.toList()) {
       final metrics = _collector.getMetric(metricName);
       final recentMetrics = metrics.where((m) => m.timestamp.isAfter(cutoffTime)).toList();
 
       if (recentMetrics.length != metrics.length) {
-        _collector.clearMetric(metricName);
-        for (final metric in recentMetrics) {
-          _collector.recordMetric(metricName, metric.value, labels: metric.labels);
-        }
+        // 使用公共方法更新指标列表，而不是先清除再记录
+        _collector.updateMetricValues(metricName, recentMetrics);
       }
     }
 

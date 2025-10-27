@@ -63,7 +63,7 @@ final class Utils {
     }
   }
 
-  /// 将任意类型转换为 List<T> 泛型
+  /// 将任意数组类型转换为 T 泛型
   static List<T>? toModelArray<T>(dynamic data, T Function(Map<String, dynamic>)? fromJson) {
     try {
       if (data == null) return [];

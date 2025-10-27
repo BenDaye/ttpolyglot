@@ -1,12 +1,12 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/common/common.dart';
 import 'package:ttpolyglot/src/core/services/translation_service_impl.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 import 'package:ttpolyglot/src/features/projects/projects.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_core/core.dart';
-import 'package:ttpolyglot_model/model.dart';
 
 class ProjectController extends GetxController {
   String projectId;
@@ -20,6 +20,7 @@ class ProjectController extends GetxController {
 
   final TextEditingController _deleteProjectNameTextController = TextEditingController();
   final TranslationServiceImpl _translationService = Get.find<TranslationServiceImpl>();
+  final ProjectApi _projectApi = Get.find<ProjectApi>();
 
   // 响应式项目对象
   final _project = Rxn<Project>();
@@ -107,16 +108,21 @@ class ProjectController extends GetxController {
     _isLoading.value = true;
 
     try {
-      final project = await ProjectsController.getProject(projectId);
-      if (project != null) {
+      // 将 String 类型的 projectId 转换为 int
+      final projectIdInt = int.tryParse(projectId);
+      if (projectIdInt == null) {
+        Logger.error('项目ID格式无效: $projectId');
+        return;
+      }
+
+      // 从 API 获取项目详情
+      final projectModel = await _projectApi.getProject(projectIdInt);
+      if (projectModel != null) {
+        // 将 ProjectModel 转换为 Project
+        final project = ProjectConverter.toProject(projectModel);
+
         Logger.info('项目加载成功: ID=${project.id}, 名称="${project.name}"');
         _project.value = project;
-
-        // 验证项目源语言数据一致性
-        await _validateProjectSourceLanguageConsistency(project);
-
-        // 更新项目最后访问时间
-        await ProjectsController.updateProjectLastAccessed(projectId);
         return;
       }
 
@@ -124,7 +130,7 @@ class ProjectController extends GetxController {
       Get.snackbar('错误', '项目不存在: $projectId');
     } catch (error, stackTrace) {
       Get.snackbar('错误', '加载项目失败: $error');
-      Logger.error('加载项目失败', error: error, stackTrace: stackTrace);
+      Logger.error('[loadProject]', error: error, stackTrace: stackTrace, name: 'ProjectController');
     } finally {
       _isLoading.value = false;
     }
@@ -235,27 +241,6 @@ class ProjectController extends GetxController {
       final newTargetLanguages = _project.value!.targetLanguages.where((lang) => lang.code != language.code).toList();
       await ProjectsController.updateProject(projectId, targetLanguages: newTargetLanguages);
       await refreshProject(); // 刷新项目数据
-    }
-  }
-
-  /// 验证项目源语言数据一致性
-  Future<void> _validateProjectSourceLanguageConsistency(Project project) async {
-    try {
-      // 这里可以集成SourceLanguageValidator进行更详细的验证
-      // 暂时只记录日志，提醒主语言不可修改
-      Logger.info(
-        '项目源语言验证，项目ID: ${project.id}, 主语言: ${project.primaryLanguage.code} (不可修改)',
-      );
-
-      // TODO: 如果需要，可以在这里集成完整的翻译条目验证
-      // 使用 SourceLanguageValidator.validateProjectSourceLanguage()
-    } catch (error, stackTrace) {
-      Logger.error(
-        '验证项目源语言一致性失败',
-        error: error,
-        stackTrace: stackTrace,
-      );
-      // 不阻止项目加载，只是记录错误
     }
   }
 
