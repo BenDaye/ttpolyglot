@@ -59,7 +59,7 @@ final class MessageTips {
           // 执行退出
           await Get.find<AuthService>().logout();
           // 跳转到登录页面
-          await Get.offAllNamed(Routes.signIn);
+          Get.offAllNamed(Routes.signIn);
           // 重置标志
           _isShowingAuthDialog = false;
           return true;
