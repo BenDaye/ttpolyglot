@@ -127,9 +127,7 @@ class ProjectController extends GetxController {
       }
 
       Logger.info('项目不存在: $projectId');
-      Get.snackbar('错误', '项目不存在: $projectId');
     } catch (error, stackTrace) {
-      Get.snackbar('错误', '加载项目失败: $error');
       Logger.error('[loadProject]', error: error, stackTrace: stackTrace, name: 'ProjectController');
     } finally {
       _isLoading.value = false;
