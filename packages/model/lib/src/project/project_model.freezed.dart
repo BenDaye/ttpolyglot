@@ -21,6 +21,7 @@ ProjectModel _$ProjectModelFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$ProjectModel {
   @JsonKey(name: 'id')
+  @FlexibleIntConverter()
   int get id => throw _privateConstructorUsedError;
   @JsonKey(name: 'name')
   String get name => throw _privateConstructorUsedError;
@@ -35,14 +36,19 @@ mixin _$ProjectModel {
   @JsonKey(name: 'visibility')
   String get visibility => throw _privateConstructorUsedError;
   @JsonKey(name: 'primary_language_id')
+  @FlexibleIntConverter()
   int get primaryLanguageId => throw _privateConstructorUsedError;
   @JsonKey(name: 'total_keys')
+  @FlexibleIntConverter()
   int get totalKeys => throw _privateConstructorUsedError;
   @JsonKey(name: 'translated_keys')
+  @FlexibleIntConverter()
   int get translatedKeys => throw _privateConstructorUsedError;
   @JsonKey(name: 'languages_count')
+  @FlexibleIntConverter()
   int get languagesCount => throw _privateConstructorUsedError;
   @JsonKey(name: 'members_count')
+  @FlexibleIntConverter()
   int get membersCount => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_public')
   bool get isPublic => throw _privateConstructorUsedError;
@@ -86,18 +92,24 @@ abstract class $ProjectModelCopyWith<$Res> {
       _$ProjectModelCopyWithImpl<$Res, ProjectModel>;
   @useResult
   $Res call(
-      {@JsonKey(name: 'id') int id,
+      {@JsonKey(name: 'id') @FlexibleIntConverter() int id,
       @JsonKey(name: 'name') String name,
       @JsonKey(name: 'slug') String slug,
       @JsonKey(name: 'description') String? description,
       @JsonKey(name: 'owner_id') String ownerId,
       @JsonKey(name: 'status') String status,
       @JsonKey(name: 'visibility') String visibility,
-      @JsonKey(name: 'primary_language_id') int primaryLanguageId,
-      @JsonKey(name: 'total_keys') int totalKeys,
-      @JsonKey(name: 'translated_keys') int translatedKeys,
-      @JsonKey(name: 'languages_count') int languagesCount,
-      @JsonKey(name: 'members_count') int membersCount,
+      @JsonKey(name: 'primary_language_id')
+      @FlexibleIntConverter()
+      int primaryLanguageId,
+      @JsonKey(name: 'total_keys') @FlexibleIntConverter() int totalKeys,
+      @JsonKey(name: 'translated_keys')
+      @FlexibleIntConverter()
+      int translatedKeys,
+      @JsonKey(name: 'languages_count')
+      @FlexibleIntConverter()
+      int languagesCount,
+      @JsonKey(name: 'members_count') @FlexibleIntConverter() int membersCount,
       @JsonKey(name: 'is_public') bool isPublic,
       @JsonKey(name: 'is_active') bool isActive,
       @JsonKey(name: 'settings') Map<String, dynamic>? settings,
@@ -254,18 +266,24 @@ abstract class _$$ProjectModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {@JsonKey(name: 'id') int id,
+      {@JsonKey(name: 'id') @FlexibleIntConverter() int id,
       @JsonKey(name: 'name') String name,
       @JsonKey(name: 'slug') String slug,
       @JsonKey(name: 'description') String? description,
       @JsonKey(name: 'owner_id') String ownerId,
       @JsonKey(name: 'status') String status,
       @JsonKey(name: 'visibility') String visibility,
-      @JsonKey(name: 'primary_language_id') int primaryLanguageId,
-      @JsonKey(name: 'total_keys') int totalKeys,
-      @JsonKey(name: 'translated_keys') int translatedKeys,
-      @JsonKey(name: 'languages_count') int languagesCount,
-      @JsonKey(name: 'members_count') int membersCount,
+      @JsonKey(name: 'primary_language_id')
+      @FlexibleIntConverter()
+      int primaryLanguageId,
+      @JsonKey(name: 'total_keys') @FlexibleIntConverter() int totalKeys,
+      @JsonKey(name: 'translated_keys')
+      @FlexibleIntConverter()
+      int translatedKeys,
+      @JsonKey(name: 'languages_count')
+      @FlexibleIntConverter()
+      int languagesCount,
+      @JsonKey(name: 'members_count') @FlexibleIntConverter() int membersCount,
       @JsonKey(name: 'is_public') bool isPublic,
       @JsonKey(name: 'is_active') bool isActive,
       @JsonKey(name: 'settings') Map<String, dynamic>? settings,
@@ -415,18 +433,26 @@ class __$$ProjectModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$ProjectModelImpl implements _ProjectModel {
   const _$ProjectModelImpl(
-      {@JsonKey(name: 'id') required this.id,
+      {@JsonKey(name: 'id') @FlexibleIntConverter() required this.id,
       @JsonKey(name: 'name') required this.name,
       @JsonKey(name: 'slug') required this.slug,
       @JsonKey(name: 'description') this.description,
       @JsonKey(name: 'owner_id') required this.ownerId,
       @JsonKey(name: 'status') required this.status,
       @JsonKey(name: 'visibility') required this.visibility,
-      @JsonKey(name: 'primary_language_id') required this.primaryLanguageId,
-      @JsonKey(name: 'total_keys') this.totalKeys = 0,
-      @JsonKey(name: 'translated_keys') this.translatedKeys = 0,
-      @JsonKey(name: 'languages_count') this.languagesCount = 0,
-      @JsonKey(name: 'members_count') this.membersCount = 1,
+      @JsonKey(name: 'primary_language_id')
+      @FlexibleIntConverter()
+      required this.primaryLanguageId,
+      @JsonKey(name: 'total_keys') @FlexibleIntConverter() this.totalKeys = 0,
+      @JsonKey(name: 'translated_keys')
+      @FlexibleIntConverter()
+      this.translatedKeys = 0,
+      @JsonKey(name: 'languages_count')
+      @FlexibleIntConverter()
+      this.languagesCount = 0,
+      @JsonKey(name: 'members_count')
+      @FlexibleIntConverter()
+      this.membersCount = 1,
       @JsonKey(name: 'is_public') this.isPublic = false,
       @JsonKey(name: 'is_active') this.isActive = true,
       @JsonKey(name: 'settings') final Map<String, dynamic>? settings,
@@ -448,6 +474,7 @@ class _$ProjectModelImpl implements _ProjectModel {
 
   @override
   @JsonKey(name: 'id')
+  @FlexibleIntConverter()
   final int id;
   @override
   @JsonKey(name: 'name')
@@ -469,18 +496,23 @@ class _$ProjectModelImpl implements _ProjectModel {
   final String visibility;
   @override
   @JsonKey(name: 'primary_language_id')
+  @FlexibleIntConverter()
   final int primaryLanguageId;
   @override
   @JsonKey(name: 'total_keys')
+  @FlexibleIntConverter()
   final int totalKeys;
   @override
   @JsonKey(name: 'translated_keys')
+  @FlexibleIntConverter()
   final int translatedKeys;
   @override
   @JsonKey(name: 'languages_count')
+  @FlexibleIntConverter()
   final int languagesCount;
   @override
   @JsonKey(name: 'members_count')
+  @FlexibleIntConverter()
   final int membersCount;
   @override
   @JsonKey(name: 'is_public')
@@ -622,7 +654,7 @@ class _$ProjectModelImpl implements _ProjectModel {
 
 abstract class _ProjectModel implements ProjectModel {
   const factory _ProjectModel(
-      {@JsonKey(name: 'id') required final int id,
+      {@JsonKey(name: 'id') @FlexibleIntConverter() required final int id,
       @JsonKey(name: 'name') required final String name,
       @JsonKey(name: 'slug') required final String slug,
       @JsonKey(name: 'description') final String? description,
@@ -630,11 +662,18 @@ abstract class _ProjectModel implements ProjectModel {
       @JsonKey(name: 'status') required final String status,
       @JsonKey(name: 'visibility') required final String visibility,
       @JsonKey(name: 'primary_language_id')
+      @FlexibleIntConverter()
       required final int primaryLanguageId,
-      @JsonKey(name: 'total_keys') final int totalKeys,
-      @JsonKey(name: 'translated_keys') final int translatedKeys,
-      @JsonKey(name: 'languages_count') final int languagesCount,
-      @JsonKey(name: 'members_count') final int membersCount,
+      @JsonKey(name: 'total_keys') @FlexibleIntConverter() final int totalKeys,
+      @JsonKey(name: 'translated_keys')
+      @FlexibleIntConverter()
+      final int translatedKeys,
+      @JsonKey(name: 'languages_count')
+      @FlexibleIntConverter()
+      final int languagesCount,
+      @JsonKey(name: 'members_count')
+      @FlexibleIntConverter()
+      final int membersCount,
       @JsonKey(name: 'is_public') final bool isPublic,
       @JsonKey(name: 'is_active') final bool isActive,
       @JsonKey(name: 'settings') final Map<String, dynamic>? settings,
@@ -659,6 +698,7 @@ abstract class _ProjectModel implements ProjectModel {
 
   @override
   @JsonKey(name: 'id')
+  @FlexibleIntConverter()
   int get id;
   @override
   @JsonKey(name: 'name')
@@ -680,18 +720,23 @@ abstract class _ProjectModel implements ProjectModel {
   String get visibility;
   @override
   @JsonKey(name: 'primary_language_id')
+  @FlexibleIntConverter()
   int get primaryLanguageId;
   @override
   @JsonKey(name: 'total_keys')
+  @FlexibleIntConverter()
   int get totalKeys;
   @override
   @JsonKey(name: 'translated_keys')
+  @FlexibleIntConverter()
   int get translatedKeys;
   @override
   @JsonKey(name: 'languages_count')
+  @FlexibleIntConverter()
   int get languagesCount;
   @override
   @JsonKey(name: 'members_count')
+  @FlexibleIntConverter()
   int get membersCount;
   @override
   @JsonKey(name: 'is_public')
@@ -747,6 +792,7 @@ mixin _$CreateProjectRequest {
   String? get description => throw _privateConstructorUsedError;
   String get status => throw _privateConstructorUsedError;
   String get visibility => throw _privateConstructorUsedError;
+  @FlexibleIntConverter()
   int? get primaryLanguageId => throw _privateConstructorUsedError;
   Map<String, dynamic>? get settings => throw _privateConstructorUsedError;
 
@@ -772,7 +818,7 @@ abstract class $CreateProjectRequestCopyWith<$Res> {
       String? description,
       String status,
       String visibility,
-      int? primaryLanguageId,
+      @FlexibleIntConverter() int? primaryLanguageId,
       Map<String, dynamic>? settings});
 }
 
@@ -847,7 +893,7 @@ abstract class _$$CreateProjectRequestImplCopyWith<$Res>
       String? description,
       String status,
       String visibility,
-      int? primaryLanguageId,
+      @FlexibleIntConverter() int? primaryLanguageId,
       Map<String, dynamic>? settings});
 }
 
@@ -914,7 +960,7 @@ class _$CreateProjectRequestImpl implements _CreateProjectRequest {
       this.description,
       this.status = 'active',
       this.visibility = 'private',
-      this.primaryLanguageId,
+      @FlexibleIntConverter() this.primaryLanguageId,
       final Map<String, dynamic>? settings})
       : _settings = settings;
 
@@ -934,6 +980,7 @@ class _$CreateProjectRequestImpl implements _CreateProjectRequest {
   @JsonKey()
   final String visibility;
   @override
+  @FlexibleIntConverter()
   final int? primaryLanguageId;
   final Map<String, dynamic>? _settings;
   @override
@@ -1004,7 +1051,7 @@ abstract class _CreateProjectRequest implements CreateProjectRequest {
       final String? description,
       final String status,
       final String visibility,
-      final int? primaryLanguageId,
+      @FlexibleIntConverter() final int? primaryLanguageId,
       final Map<String, dynamic>? settings}) = _$CreateProjectRequestImpl;
 
   factory _CreateProjectRequest.fromJson(Map<String, dynamic> json) =
@@ -1021,6 +1068,7 @@ abstract class _CreateProjectRequest implements CreateProjectRequest {
   @override
   String get visibility;
   @override
+  @FlexibleIntConverter()
   int? get primaryLanguageId;
   @override
   Map<String, dynamic>? get settings;
@@ -1044,6 +1092,7 @@ mixin _$UpdateProjectRequest {
   String? get description => throw _privateConstructorUsedError;
   String? get status => throw _privateConstructorUsedError;
   String? get visibility => throw _privateConstructorUsedError;
+  @FlexibleIntConverter()
   int? get primaryLanguageId => throw _privateConstructorUsedError;
   Map<String, dynamic>? get settings => throw _privateConstructorUsedError;
 
@@ -1069,7 +1118,7 @@ abstract class $UpdateProjectRequestCopyWith<$Res> {
       String? description,
       String? status,
       String? visibility,
-      int? primaryLanguageId,
+      @FlexibleIntConverter() int? primaryLanguageId,
       Map<String, dynamic>? settings});
 }
 
@@ -1144,7 +1193,7 @@ abstract class _$$UpdateProjectRequestImplCopyWith<$Res>
       String? description,
       String? status,
       String? visibility,
-      int? primaryLanguageId,
+      @FlexibleIntConverter() int? primaryLanguageId,
       Map<String, dynamic>? settings});
 }
 
@@ -1211,7 +1260,7 @@ class _$UpdateProjectRequestImpl implements _UpdateProjectRequest {
       this.description,
       this.status,
       this.visibility,
-      this.primaryLanguageId,
+      @FlexibleIntConverter() this.primaryLanguageId,
       final Map<String, dynamic>? settings})
       : _settings = settings;
 
@@ -1229,6 +1278,7 @@ class _$UpdateProjectRequestImpl implements _UpdateProjectRequest {
   @override
   final String? visibility;
   @override
+  @FlexibleIntConverter()
   final int? primaryLanguageId;
   final Map<String, dynamic>? _settings;
   @override
@@ -1299,7 +1349,7 @@ abstract class _UpdateProjectRequest implements UpdateProjectRequest {
       final String? description,
       final String? status,
       final String? visibility,
-      final int? primaryLanguageId,
+      @FlexibleIntConverter() final int? primaryLanguageId,
       final Map<String, dynamic>? settings}) = _$UpdateProjectRequestImpl;
 
   factory _UpdateProjectRequest.fromJson(Map<String, dynamic> json) =
@@ -1316,6 +1366,7 @@ abstract class _UpdateProjectRequest implements UpdateProjectRequest {
   @override
   String? get visibility;
   @override
+  @FlexibleIntConverter()
   int? get primaryLanguageId;
   @override
   Map<String, dynamic>? get settings;

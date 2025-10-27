@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_model/src/converter/flexible_double.dart';
+import 'package:ttpolyglot_model/src/converter/flexible_int.dart';
 
 part 'project_model.freezed.dart';
 part 'project_model.g.dart';
@@ -9,18 +10,18 @@ part 'project_model.g.dart';
 @freezed
 class ProjectModel with _$ProjectModel {
   const factory ProjectModel({
-    @JsonKey(name: 'id') required int id,
+    @JsonKey(name: 'id') @FlexibleIntConverter() required int id,
     @JsonKey(name: 'name') required String name,
     @JsonKey(name: 'slug') required String slug,
     @JsonKey(name: 'description') String? description,
     @JsonKey(name: 'owner_id') required String ownerId,
     @JsonKey(name: 'status') required String status,
     @JsonKey(name: 'visibility') required String visibility,
-    @JsonKey(name: 'primary_language_id') required int primaryLanguageId,
-    @JsonKey(name: 'total_keys') @Default(0) int totalKeys,
-    @JsonKey(name: 'translated_keys') @Default(0) int translatedKeys,
-    @JsonKey(name: 'languages_count') @Default(0) int languagesCount,
-    @JsonKey(name: 'members_count') @Default(1) int membersCount,
+    @JsonKey(name: 'primary_language_id') @FlexibleIntConverter() required int primaryLanguageId,
+    @JsonKey(name: 'total_keys') @FlexibleIntConverter() @Default(0) int totalKeys,
+    @JsonKey(name: 'translated_keys') @FlexibleIntConverter() @Default(0) int translatedKeys,
+    @JsonKey(name: 'languages_count') @FlexibleIntConverter() @Default(0) int languagesCount,
+    @JsonKey(name: 'members_count') @FlexibleIntConverter() @Default(1) int membersCount,
     @JsonKey(name: 'is_public') @Default(false) bool isPublic,
     @JsonKey(name: 'is_active') @Default(true) bool isActive,
     @JsonKey(name: 'settings') Map<String, dynamic>? settings,
@@ -46,7 +47,7 @@ class CreateProjectRequest with _$CreateProjectRequest {
     String? description,
     @Default('active') String status,
     @Default('private') String visibility,
-    int? primaryLanguageId,
+    @FlexibleIntConverter() int? primaryLanguageId,
     Map<String, dynamic>? settings,
   }) = _CreateProjectRequest;
 
@@ -62,7 +63,7 @@ class UpdateProjectRequest with _$UpdateProjectRequest {
     String? description,
     String? status,
     String? visibility,
-    int? primaryLanguageId,
+    @FlexibleIntConverter() int? primaryLanguageId,
     Map<String, dynamic>? settings,
   }) = _UpdateProjectRequest;
 

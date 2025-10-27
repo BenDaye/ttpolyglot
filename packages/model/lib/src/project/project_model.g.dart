@@ -8,18 +8,27 @@ part of 'project_model.dart';
 
 _$ProjectModelImpl _$$ProjectModelImplFromJson(Map<String, dynamic> json) =>
     _$ProjectModelImpl(
-      id: (json['id'] as num).toInt(),
+      id: const FlexibleIntConverter().fromJson(json['id']),
       name: json['name'] as String,
       slug: json['slug'] as String,
       description: json['description'] as String?,
       ownerId: json['owner_id'] as String,
       status: json['status'] as String,
       visibility: json['visibility'] as String,
-      primaryLanguageId: (json['primary_language_id'] as num).toInt(),
-      totalKeys: (json['total_keys'] as num?)?.toInt() ?? 0,
-      translatedKeys: (json['translated_keys'] as num?)?.toInt() ?? 0,
-      languagesCount: (json['languages_count'] as num?)?.toInt() ?? 0,
-      membersCount: (json['members_count'] as num?)?.toInt() ?? 1,
+      primaryLanguageId:
+          const FlexibleIntConverter().fromJson(json['primary_language_id']),
+      totalKeys: json['total_keys'] == null
+          ? 0
+          : const FlexibleIntConverter().fromJson(json['total_keys']),
+      translatedKeys: json['translated_keys'] == null
+          ? 0
+          : const FlexibleIntConverter().fromJson(json['translated_keys']),
+      languagesCount: json['languages_count'] == null
+          ? 0
+          : const FlexibleIntConverter().fromJson(json['languages_count']),
+      membersCount: json['members_count'] == null
+          ? 1
+          : const FlexibleIntConverter().fromJson(json['members_count']),
       isPublic: json['is_public'] as bool? ?? false,
       isActive: json['is_active'] as bool? ?? true,
       settings: json['settings'] as Map<String, dynamic>?,
@@ -38,18 +47,22 @@ _$ProjectModelImpl _$$ProjectModelImplFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$$ProjectModelImplToJson(_$ProjectModelImpl instance) =>
     <String, dynamic>{
-      'id': instance.id,
+      'id': const FlexibleIntConverter().toJson(instance.id),
       'name': instance.name,
       'slug': instance.slug,
       'description': instance.description,
       'owner_id': instance.ownerId,
       'status': instance.status,
       'visibility': instance.visibility,
-      'primary_language_id': instance.primaryLanguageId,
-      'total_keys': instance.totalKeys,
-      'translated_keys': instance.translatedKeys,
-      'languages_count': instance.languagesCount,
-      'members_count': instance.membersCount,
+      'primary_language_id':
+          const FlexibleIntConverter().toJson(instance.primaryLanguageId),
+      'total_keys': const FlexibleIntConverter().toJson(instance.totalKeys),
+      'translated_keys':
+          const FlexibleIntConverter().toJson(instance.translatedKeys),
+      'languages_count':
+          const FlexibleIntConverter().toJson(instance.languagesCount),
+      'members_count':
+          const FlexibleIntConverter().toJson(instance.membersCount),
       'is_public': instance.isPublic,
       'is_active': instance.isActive,
       'settings': instance.settings,
@@ -72,7 +85,8 @@ _$CreateProjectRequestImpl _$$CreateProjectRequestImplFromJson(
       description: json['description'] as String?,
       status: json['status'] as String? ?? 'active',
       visibility: json['visibility'] as String? ?? 'private',
-      primaryLanguageId: (json['primaryLanguageId'] as num?)?.toInt(),
+      primaryLanguageId:
+          const FlexibleIntConverter().fromJson(json['primaryLanguageId']),
       settings: json['settings'] as Map<String, dynamic>?,
     );
 
@@ -84,9 +98,16 @@ Map<String, dynamic> _$$CreateProjectRequestImplToJson(
       'description': instance.description,
       'status': instance.status,
       'visibility': instance.visibility,
-      'primaryLanguageId': instance.primaryLanguageId,
+      'primaryLanguageId': _$JsonConverterToJson<dynamic, int>(
+          instance.primaryLanguageId, const FlexibleIntConverter().toJson),
       'settings': instance.settings,
     };
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) =>
+    value == null ? null : toJson(value);
 
 _$UpdateProjectRequestImpl _$$UpdateProjectRequestImplFromJson(
         Map<String, dynamic> json) =>
@@ -96,7 +117,8 @@ _$UpdateProjectRequestImpl _$$UpdateProjectRequestImplFromJson(
       description: json['description'] as String?,
       status: json['status'] as String?,
       visibility: json['visibility'] as String?,
-      primaryLanguageId: (json['primaryLanguageId'] as num?)?.toInt(),
+      primaryLanguageId:
+          const FlexibleIntConverter().fromJson(json['primaryLanguageId']),
       settings: json['settings'] as Map<String, dynamic>?,
     );
 
@@ -108,7 +130,8 @@ Map<String, dynamic> _$$UpdateProjectRequestImplToJson(
       'description': instance.description,
       'status': instance.status,
       'visibility': instance.visibility,
-      'primaryLanguageId': instance.primaryLanguageId,
+      'primaryLanguageId': _$JsonConverterToJson<dynamic, int>(
+          instance.primaryLanguageId, const FlexibleIntConverter().toJson),
       'settings': instance.settings,
     };
 
