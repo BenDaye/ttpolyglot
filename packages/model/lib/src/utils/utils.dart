@@ -35,7 +35,14 @@ final class Utils {
     } catch (error) {
       // 如果没有 toJson 方法或调用失败，直接返回原数据
       print('toJsonValue error: $error');
-      return data;
+      // 如果无参数失败，尝试带参数的 toJson（泛型类型）
+      try {
+        final dynamic obj = data;
+        return obj.toJson((item) => toJsonValue(item));
+      } catch (e) {
+        print('toJsonValue error: $error');
+        return data;
+      }
     }
   }
 

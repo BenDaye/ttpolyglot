@@ -96,6 +96,17 @@ class RedisService {
     if (value is DateTime) {
       return value.toUtc().toIso8601String();
     }
+
+    // 尝试调用 toJson 方法
+    try {
+      final dynamic obj = value;
+      if (obj != null) {
+        return obj.toJson();
+      }
+    } catch (e) {
+      // 如果没有 toJson 方法，继续
+    }
+
     return value;
   }
 
