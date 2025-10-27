@@ -36,7 +36,7 @@ enum DataCodeEnum {
   // 错误码
   serverError(500, '服务器错误'),
   clientError(400, '客户端错误'),
-  redirectError(300, '重定向错误');
+  redirectError(300, '请求重定向');
 
   final int value;
   final String message;
