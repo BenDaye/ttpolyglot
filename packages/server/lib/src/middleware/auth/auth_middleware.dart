@@ -1,6 +1,5 @@
-import 'dart:convert';
-
 import 'package:shelf/shelf.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
 
 /// 认证中间件
@@ -30,24 +29,24 @@ class AuthMiddleware {
           // 获取Authorization头
           final authHeader = request.headers['authorization'];
           if (authHeader == null) {
-            return _unauthorized('认证令牌缺失');
+            return ResponseUtils.error(message: '认证令牌缺失', code: DataCodeEnum.unauthorized);
           }
 
           // 提取Bearer令牌
           final token = _jwtUtils.extractBearerToken(authHeader);
           if (token == null) {
-            return _unauthorized('无效的认证令牌格式');
+            return ResponseUtils.error(message: '无效的认证令牌格式', code: DataCodeEnum.unauthorized);
           }
 
           // 检查令牌黑名单
           if (await _isTokenBlacklisted(token)) {
-            return _unauthorized('令牌已被撤销');
+            return ResponseUtils.error(message: '令牌已被撤销', code: DataCodeEnum.unauthorized);
           }
 
           // 验证令牌（带缓存优化）
           final payload = await _verifyTokenWithCache(token);
           if (payload == null) {
-            return _unauthorized('令牌验证失败');
+            return ResponseUtils.error(message: '令牌验证失败', code: DataCodeEnum.unauthorized);
           }
 
           // 将用户信息添加到请求上下文
@@ -65,7 +64,7 @@ class AuthMiddleware {
         } catch (error, stackTrace) {
           LoggerUtils.error('认证中间件错误', error: error, stackTrace: stackTrace);
 
-          return _unauthorized('认证失败');
+          return ResponseUtils.error(message: '认证失败', code: DataCodeEnum.unauthorized);
         }
       };
     };
@@ -160,12 +159,12 @@ class AuthMiddleware {
         // 检查用户是否为管理员
         final userId = getCurrentUserId(request);
         if (userId == null) {
-          return _unauthorized('用户信息缺失');
+          return ResponseUtils.error(message: '用户信息缺失', code: DataCodeEnum.unauthorized);
         }
 
         final isAdmin = await _checkUserIsAdmin(userId);
         if (!isAdmin) {
-          return _unauthorized('需要管理员权限');
+          return ResponseUtils.error(message: '需要管理员权限', code: DataCodeEnum.unauthorized);
         }
 
         return authResult;
@@ -188,7 +187,7 @@ class AuthMiddleware {
         // 检查用户权限
         final userId = getCurrentUserId(request);
         if (userId == null) {
-          return _unauthorized('用户信息缺失');
+          return ResponseUtils.error(message: '用户信息缺失', code: DataCodeEnum.unauthorized);
         }
 
         // 这里需要注入PermissionService，暂时简化处理
@@ -199,34 +198,12 @@ class AuthMiddleware {
         // );
 
         // if (!hasPermission) {
-        //   return _unauthorized('权限不足');
+        //   return ResponseUtils.error(message: '权限不足', code: DataCodeEnum.unauthorized);
         // }
 
         return authResult;
       };
     };
-  }
-
-  /// 返回未授权响应
-  Response _unauthorized(String message) {
-    final errorResponse = {
-      'error': {
-        'code': 'AUTH_TOKEN_INVALID',
-        'message': message,
-        'metadata': {
-          'timestamp': DateTime.now().toUtc().toIso8601String(),
-        },
-      },
-    };
-
-    return Response(
-      401,
-      headers: {
-        'Content-Type': 'application/json',
-        'WWW-Authenticate': 'Bearer realm="TTPolyglot API"',
-      },
-      body: jsonEncode(errorResponse),
-    );
   }
 
   /// 检查令牌是否在黑名单中

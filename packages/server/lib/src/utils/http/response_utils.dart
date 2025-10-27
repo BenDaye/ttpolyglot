@@ -90,10 +90,8 @@ class ResponseUtils {
   /// 从异常构建错误响应
   static Response fromException(
     ServerException exception, {
-    Map<String, String>? headers,
     DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
   }) {
-    final requestId = _uuid.v4();
     final apiResponse = BaseModel<ServerException>(
       code: DataCodeEnum.error,
       message: exception.message,
@@ -101,19 +99,7 @@ class ResponseUtils {
       data: exception,
     );
 
-    final responseHeaders = <String, String>{
-      'Content-Type': _contentTypeJson,
-      'X-Request-ID': requestId,
-      ...?headers,
-    };
-
-    return Response(
-      _getHttpStatusCode(exception.code),
-      headers: responseHeaders,
-      body: jsonEncode(
-        apiResponse.toJson((data) => data.toMap()),
-      ),
-    );
+    return error(data: apiResponse.toJson((data) => data.toMap()));
   }
 
   /// 构建无内容响应（204）
@@ -121,7 +107,6 @@ class ResponseUtils {
     Map<String, String>? headers,
     DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
   }) {
-    final requestId = _uuid.v4();
     final apiResponse = BaseModel<void>(
       code: DataCodeEnum.error,
       message: DataCodeEnum.noContent.message,
@@ -129,19 +114,7 @@ class ResponseUtils {
       data: null,
     );
 
-    final responseHeaders = <String, String>{
-      'Content-Type': _contentTypeJson,
-      'X-Request-ID': requestId,
-      ...?headers,
-    };
-
-    return Response(
-      _getHttpStatusCode(DataCodeEnum.noContent),
-      headers: responseHeaders,
-      body: jsonEncode(
-        apiResponse.toJson((data) => null),
-      ),
-    );
+    return error(code: DataCodeEnum.noContent, data: apiResponse.toJson((data) => null));
   }
 
   /// 构建创建成功响应
@@ -182,7 +155,6 @@ class ResponseUtils {
     String? serverName,
     DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
   }) {
-    final requestId = _uuid.v4();
     final apiResponse = BaseModel<Map<String, dynamic>>(
       code: DataCodeEnum.success,
       message: DataCodeEnum.success.message,
@@ -196,18 +168,7 @@ class ResponseUtils {
       },
     );
 
-    final responseHeaders = <String, String>{
-      'Content-Type': _contentTypeJson,
-      'X-Request-ID': requestId,
-    };
-
-    return Response(
-      200,
-      headers: responseHeaders,
-      body: jsonEncode(
-        apiResponse.toJson((data) => data),
-      ),
-    );
+    return success(data: apiResponse.toJson((data) => data));
   }
 
   /// 状态信息响应
@@ -221,7 +182,6 @@ class ResponseUtils {
       final dbHealthy = await databaseService.isHealthy();
       final redisHealthy = await redisService.isHealthy();
 
-      final requestId = _uuid.v4();
       final apiResponse = BaseModel<Map<String, dynamic>>(
         code: DataCodeEnum.success,
         message: DataCodeEnum.success.message,
@@ -237,39 +197,9 @@ class ResponseUtils {
         },
       );
 
-      final responseHeaders = <String, String>{
-        'Content-Type': _contentTypeJson,
-        'X-Request-ID': requestId,
-      };
-
-      return Response(
-        200,
-        headers: responseHeaders,
-        body: jsonEncode(
-          apiResponse.toJson((data) => data),
-        ),
-      );
+      return success(data: apiResponse.toJson((data) => data));
     } catch (err) {
-      final requestId = _uuid.v4();
-      final apiResponse = BaseModel<void>(
-        code: DataCodeEnum.serviceUnavailable,
-        message: '状态检查失败',
-        type: type,
-        data: null,
-      );
-
-      final responseHeaders = <String, String>{
-        'Content-Type': _contentTypeJson,
-        'X-Request-ID': requestId,
-      };
-
-      return Response(
-        503,
-        headers: responseHeaders,
-        body: jsonEncode(
-          apiResponse.toJson((data) => null),
-        ),
-      );
+      return error(code: DataCodeEnum.serviceUnavailable, message: '状态检查失败');
     }
   }
 
@@ -278,7 +208,6 @@ class ResponseUtils {
     required String path,
     DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
   }) {
-    final requestId = _uuid.v4();
     final apiResponse = BaseModel<void>(
       code: DataCodeEnum.notFound,
       message: '请求的资源不存在',
@@ -286,18 +215,7 @@ class ResponseUtils {
       data: null,
     );
 
-    final responseHeaders = <String, String>{
-      'Content-Type': _contentTypeJson,
-      'X-Request-ID': requestId,
-    };
-
-    return Response(
-      404,
-      headers: responseHeaders,
-      body: jsonEncode(
-        apiResponse.toJson((data) => null),
-      ),
-    );
+    return error(code: DataCodeEnum.notFound, data: apiResponse.toJson((data) => null));
   }
 
   /// 健康检查端点
@@ -318,7 +236,6 @@ class ResponseUtils {
 
       final isHealthy = healthStatus['status'] == 'healthy';
 
-      final requestId = _uuid.v4();
       final apiResponse = BaseModel(
         code: isHealthy ? DataCodeEnum.success : DataCodeEnum.serviceUnavailable,
         message: isHealthy ? '系统健康' : '系统不健康',
@@ -326,18 +243,7 @@ class ResponseUtils {
         data: healthStatus,
       );
 
-      final responseHeaders = <String, String>{
-        'Content-Type': _contentTypeJson,
-        'X-Request-ID': requestId,
-      };
-
-      return Response(
-        _getHttpStatusCode(isHealthy ? DataCodeEnum.success : DataCodeEnum.serviceUnavailable),
-        headers: responseHeaders,
-        body: jsonEncode(
-          apiResponse.toJson((data) => data),
-        ),
-      );
+      return success(data: apiResponse.toJson((data) => data));
     } catch (err, stackTrace) {
       LoggerUtils.error(
         'healthCheck',
@@ -345,7 +251,6 @@ class ResponseUtils {
         stackTrace: stackTrace,
       );
 
-      final requestId = _uuid.v4();
       final apiResponse = BaseModel<void>(
         code: DataCodeEnum.internalServerError,
         message: '健康检查失败',
@@ -353,16 +258,7 @@ class ResponseUtils {
         data: null,
       );
 
-      return Response(
-        _getHttpStatusCode(DataCodeEnum.internalServerError),
-        headers: <String, String>{
-          'Content-Type': _contentTypeJson,
-          'X-Request-ID': requestId,
-        },
-        body: jsonEncode(
-          apiResponse.toJson((data) => null),
-        ),
-      );
+      return error(code: DataCodeEnum.internalServerError, data: apiResponse.toJson((data) => null));
     }
   }
 
@@ -373,7 +269,6 @@ class ResponseUtils {
   }) async {
     try {
       final isHealthy = await databaseService.isHealthy();
-      final requestId = _uuid.v4();
       final apiResponse = BaseModel<Map<String, dynamic>>(
         code: isHealthy ? DataCodeEnum.success : DataCodeEnum.serviceUnavailable,
         message: isHealthy ? '数据库连接正常' : '数据库连接失败',
@@ -384,18 +279,7 @@ class ResponseUtils {
         },
       );
 
-      final responseHeaders = <String, String>{
-        'Content-Type': _contentTypeJson,
-        'X-Request-ID': requestId,
-      };
-
-      return Response(
-        _getHttpStatusCode(isHealthy ? DataCodeEnum.success : DataCodeEnum.serviceUnavailable),
-        headers: responseHeaders,
-        body: jsonEncode(
-          apiResponse.toJson((data) => data),
-        ),
-      );
+      return success(data: apiResponse.toJson((data) => data));
     } catch (err, stackTrace) {
       LoggerUtils.error(
         'dbHealthCheck',
@@ -403,7 +287,6 @@ class ResponseUtils {
         stackTrace: stackTrace,
       );
 
-      final requestId = _uuid.v4();
       final apiResponse = BaseModel<void>(
         code: DataCodeEnum.internalServerError,
         message: '数据库检查出错',
@@ -411,16 +294,7 @@ class ResponseUtils {
         data: null,
       );
 
-      return Response(
-        _getHttpStatusCode(DataCodeEnum.internalServerError),
-        headers: <String, String>{
-          'Content-Type': _contentTypeJson,
-          'X-Request-ID': requestId,
-        },
-        body: jsonEncode(
-          apiResponse.toJson((data) => null),
-        ),
-      );
+      return error(code: DataCodeEnum.internalServerError, data: apiResponse.toJson((data) => null));
     }
   }
 
@@ -434,7 +308,6 @@ class ResponseUtils {
       final dbHealthy = await databaseService.isHealthy();
       final redisHealthy = await redisService.isHealthy();
 
-      final requestId = _uuid.v4();
       final apiResponse = BaseModel<Map<String, dynamic>>(
         code: DataCodeEnum.serviceUnavailable,
         message: '服务未就绪',
@@ -448,18 +321,7 @@ class ResponseUtils {
         },
       );
 
-      final responseHeaders = <String, String>{
-        'Content-Type': _contentTypeJson,
-        'X-Request-ID': requestId,
-      };
-
-      return Response(
-        _getHttpStatusCode(DataCodeEnum.serviceUnavailable),
-        headers: responseHeaders,
-        body: jsonEncode(
-          apiResponse.toJson((data) => data),
-        ),
-      );
+      return success(data: apiResponse.toJson((data) => data));
     } catch (err, stackTrace) {
       LoggerUtils.error(
         'readyCheck',
@@ -467,7 +329,6 @@ class ResponseUtils {
         stackTrace: stackTrace,
       );
 
-      final requestId = _uuid.v4();
       final apiResponse = BaseModel<void>(
         code: DataCodeEnum.internalServerError,
         message: '就绪检查出错',
@@ -475,18 +336,7 @@ class ResponseUtils {
         data: null,
       );
 
-      final responseHeaders = <String, String>{
-        'Content-Type': _contentTypeJson,
-        'X-Request-ID': requestId,
-      };
-
-      return Response(
-        _getHttpStatusCode(DataCodeEnum.internalServerError),
-        headers: responseHeaders,
-        body: jsonEncode(
-          apiResponse.toJson((data) => null),
-        ),
-      );
+      return error(code: DataCodeEnum.internalServerError, data: apiResponse.toJson((data) => null));
     }
   }
 
@@ -507,25 +357,15 @@ class ResponseUtils {
       // 获取Prometheus格式的指标
       final prometheusMetrics = metricsService.getPrometheusMetrics();
 
-      return Response.ok(
-        prometheusMetrics,
-        headers: {
-          'Content-Type': 'text/plain; version=0.0.4; charset=utf-8',
-        },
-      );
-    } catch (error, stackTrace) {
+      return success(data: prometheusMetrics);
+    } catch (err, stackTrace) {
       LoggerUtils.error(
         'metricsEndpoint',
-        error: error,
+        error: err,
         stackTrace: stackTrace,
       );
 
-      return Response.internalServerError(
-        body: '# 指标获取失败\n',
-        headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
-        },
-      );
+      return error(code: DataCodeEnum.internalServerError, message: '指标获取失败', type: DataMessageTipsEnum.showToast);
     }
   }
 
