@@ -31,7 +31,7 @@ class ProjectModel with _$ProjectModel {
     @JsonKey(name: 'owner_username') String? ownerUsername,
     @JsonKey(name: 'owner_display_name') String? ownerDisplayName,
     @JsonKey(name: 'owner_avatar') String? ownerAvatar,
-    @JsonKey(name: 'completion_percentage') @FlexibleDoubleConverter() double completionPercentage,
+    @JsonKey(name: 'completion_percentage') @FlexibleDoubleConverter() @Default(0.0) double completionPercentage,
   }) = _ProjectModel;
 
   factory ProjectModel.fromJson(Map<String, dynamic> json) => _$ProjectModelFromJson(json);
