@@ -4,7 +4,12 @@ import 'package:flutter/material.dart';
 final class DialogManager {
   DialogManager._();
 
-  static CancelFunc showSuccess(String message, {String? title}) {
+  static CancelFunc showSuccess(
+    String message, {
+    String? title,
+    Future<bool> Function()? onConfirm,
+    Future<bool> Function()? onCancel,
+  }) {
     return BotToast.showAnimationWidget(
       clickClose: false,
       allowClick: false,
@@ -13,8 +18,15 @@ final class DialogManager {
       wrapToastAnimation: (controller, cancel, child) => Stack(
         children: <Widget>[
           GestureDetector(
-            onTap: () {
-              cancel();
+            onTap: () async {
+              if (onCancel != null) {
+                final result = await onCancel.call();
+                if (result) {
+                  cancel();
+                }
+              } else {
+                cancel();
+              }
             },
             child: AnimatedBuilder(
               builder: (_, Widget? child) => Opacity(
@@ -39,7 +51,16 @@ final class DialogManager {
         message: message,
         icon: Icons.check_circle,
         iconColor: Colors.green,
-        onConfirm: cancelFunc,
+        onConfirm: () async {
+          if (onConfirm != null) {
+            final result = await onConfirm.call();
+            if (result) {
+              cancelFunc();
+            }
+          } else {
+            cancelFunc();
+          }
+        },
       ),
       animationDuration: const Duration(milliseconds: 300),
     );
@@ -97,7 +118,12 @@ final class DialogManager {
     );
   }
 
-  static CancelFunc showInfo(String message, {String? title}) {
+  static CancelFunc showInfo(
+    String message, {
+    String? title,
+    Future<bool> Function()? onConfirm,
+    Future<bool> Function()? onCancel,
+  }) {
     return BotToast.showAnimationWidget(
       clickClose: false,
       allowClick: false,
@@ -106,8 +132,15 @@ final class DialogManager {
       wrapToastAnimation: (controller, cancel, child) => Stack(
         children: <Widget>[
           GestureDetector(
-            onTap: () {
-              cancel();
+            onTap: () async {
+              if (onCancel != null) {
+                final result = await onCancel.call();
+                if (result) {
+                  cancel();
+                }
+              } else {
+                cancel();
+              }
             },
             child: AnimatedBuilder(
               builder: (_, Widget? child) => Opacity(
@@ -132,13 +165,27 @@ final class DialogManager {
         message: message,
         icon: Icons.info,
         iconColor: Colors.blue,
-        onConfirm: cancelFunc,
+        onConfirm: () async {
+          if (onConfirm != null) {
+            final result = await onConfirm.call();
+            if (result) {
+              cancelFunc();
+            }
+          } else {
+            cancelFunc();
+          }
+        },
       ),
       animationDuration: const Duration(milliseconds: 300),
     );
   }
 
-  static CancelFunc showWarning(String message, {String? title}) {
+  static CancelFunc showWarning(
+    String message, {
+    String? title,
+    Future<bool> Function()? onConfirm,
+    Future<bool> Function()? onCancel,
+  }) {
     return BotToast.showAnimationWidget(
       clickClose: false,
       allowClick: false,
@@ -147,8 +194,15 @@ final class DialogManager {
       wrapToastAnimation: (controller, cancel, child) => Stack(
         children: <Widget>[
           GestureDetector(
-            onTap: () {
-              cancel();
+            onTap: () async {
+              if (onCancel != null) {
+                final result = await onCancel.call();
+                if (result) {
+                  cancel();
+                }
+              } else {
+                cancel();
+              }
             },
             child: AnimatedBuilder(
               builder: (_, Widget? child) => Opacity(
@@ -173,20 +227,30 @@ final class DialogManager {
         message: message,
         icon: Icons.warning,
         iconColor: Colors.orange,
-        onConfirm: cancelFunc,
+        onConfirm: () async {
+          if (onConfirm != null) {
+            final result = await onConfirm.call();
+            if (result) {
+              cancelFunc();
+            }
+          } else {
+            cancelFunc();
+          }
+        },
       ),
       animationDuration: const Duration(milliseconds: 300),
     );
   }
 
-  static Future<bool> showConfirm(
+  static CancelFunc showConfirm(
     String message, {
     String? title,
     String? confirmText,
     String? cancelText,
-  }) async {
-    bool? result;
-    BotToast.showAnimationWidget(
+    Future<bool> Function()? onConfirm,
+    Future<bool> Function()? onCancel,
+  }) {
+    return BotToast.showAnimationWidget(
       clickClose: false,
       allowClick: false,
       onlyOne: true,
@@ -194,9 +258,15 @@ final class DialogManager {
       wrapToastAnimation: (controller, cancel, child) => Stack(
         children: <Widget>[
           GestureDetector(
-            onTap: () {
-              result = false;
-              cancel();
+            onTap: () async {
+              if (onCancel != null) {
+                final result = await onCancel.call();
+                if (result) {
+                  cancel();
+                }
+              } else {
+                cancel();
+              }
             },
             child: AnimatedBuilder(
               builder: (_, Widget? child) => Opacity(
@@ -221,24 +291,29 @@ final class DialogManager {
         message: message,
         confirmText: confirmText ?? '确定',
         cancelText: cancelText ?? '取消',
-        onConfirm: () {
-          result = true;
-          cancelFunc();
+        onConfirm: () async {
+          if (onConfirm != null) {
+            final result = await onConfirm.call();
+            if (result) {
+              cancelFunc();
+            }
+          } else {
+            cancelFunc();
+          }
         },
-        onCancel: () {
-          result = false;
-          cancelFunc();
+        onCancel: () async {
+          if (onCancel != null) {
+            final result = await onCancel.call();
+            if (result) {
+              cancelFunc();
+            }
+          } else {
+            cancelFunc();
+          }
         },
       ),
       animationDuration: const Duration(milliseconds: 300),
     );
-
-    // 等待对话框关闭
-    await Future.delayed(const Duration(milliseconds: 100));
-    while (result == null) {
-      await Future.delayed(const Duration(milliseconds: 50));
-    }
-    return result!;
   }
 }
 
@@ -274,6 +349,9 @@ class _DialogCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       constraints: const BoxConstraints(
         maxWidth: 280.0,
@@ -281,16 +359,16 @@ class _DialogCard extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8.0),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Colors.black26,
+            color: Colors.black.withOpacity(0.15),
             blurRadius: 10.0,
-            offset: Offset(0.0, 4.0),
+            offset: const Offset(0.0, 4.0),
           ),
         ],
       ),
       child: Material(
-        color: Colors.white,
+        color: theme.dialogBackgroundColor,
         borderRadius: BorderRadius.circular(8.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -315,8 +393,7 @@ class _DialogCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       title,
-                      style: const TextStyle(
-                        fontSize: 16.0,
+                      style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -328,13 +405,10 @@ class _DialogCard extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 20.0),
               child: Text(
                 message,
-                style: const TextStyle(
-                  fontSize: 14.0,
-                  color: Colors.black87,
-                ),
+                style: theme.textTheme.bodyMedium,
               ),
             ),
-            const Divider(height: 1.0),
+            Divider(height: 1.0, color: theme.dividerColor),
             InkWell(
               onTap: onConfirm,
               borderRadius: const BorderRadius.only(
@@ -344,12 +418,11 @@ class _DialogCard extends StatelessWidget {
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 12.0),
-                child: const Text(
+                child: Text(
                   '确定',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14.0,
-                    color: Colors.blue,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: colorScheme.primary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -381,6 +454,9 @@ class _ConfirmDialogCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       constraints: const BoxConstraints(
         maxWidth: 280.0,
@@ -388,16 +464,16 @@ class _ConfirmDialogCard extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8.0),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Colors.black26,
+            color: Colors.black.withOpacity(0.15),
             blurRadius: 10.0,
-            offset: Offset(0.0, 4.0),
+            offset: const Offset(0.0, 4.0),
           ),
         ],
       ),
       child: Material(
-        color: Colors.white,
+        color: theme.dialogBackgroundColor,
         borderRadius: BorderRadius.circular(8.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -406,8 +482,7 @@ class _ConfirmDialogCard extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16.0, 20.0, 16.0, 12.0),
               child: Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 16.0,
+                style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -416,13 +491,10 @@ class _ConfirmDialogCard extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 20.0),
               child: Text(
                 message,
-                style: const TextStyle(
-                  fontSize: 14.0,
-                  color: Colors.black87,
-                ),
+                style: theme.textTheme.bodyMedium,
               ),
             ),
-            const Divider(height: 1.0),
+            Divider(height: 1.0, color: theme.dividerColor),
             Row(
               children: [
                 Expanded(
@@ -436,9 +508,8 @@ class _ConfirmDialogCard extends StatelessWidget {
                       child: Text(
                         cancelText,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 14.0,
-                          color: Colors.black54,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: theme.textTheme.bodySmall?.color,
                         ),
                       ),
                     ),
@@ -447,7 +518,7 @@ class _ConfirmDialogCard extends StatelessWidget {
                 Container(
                   width: 1.0,
                   height: 44.0,
-                  color: Colors.grey[300],
+                  color: theme.dividerColor,
                 ),
                 Expanded(
                   child: InkWell(
@@ -460,9 +531,8 @@ class _ConfirmDialogCard extends StatelessWidget {
                       child: Text(
                         confirmText,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 14.0,
-                          color: Colors.blue,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: colorScheme.primary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
