@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:ttpolyglot_model/model.dart';
+import 'package:ttpolyglot_model/src/converter/flexible_double.dart';
 
 part 'project_model.freezed.dart';
 part 'project_model.g.dart';
@@ -30,7 +31,7 @@ class ProjectModel with _$ProjectModel {
     @JsonKey(name: 'owner_username') String? ownerUsername,
     @JsonKey(name: 'owner_display_name') String? ownerDisplayName,
     @JsonKey(name: 'owner_avatar') String? ownerAvatar,
-    @JsonKey(name: 'completion_percentage') @Default(0.0) double completionPercentage,
+    @JsonKey(name: 'completion_percentage') @FlexibleDoubleConverter() double completionPercentage,
   }) = _ProjectModel;
 
   factory ProjectModel.fromJson(Map<String, dynamic> json) => _$ProjectModelFromJson(json);
