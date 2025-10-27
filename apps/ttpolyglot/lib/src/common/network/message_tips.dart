@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/core/routing/app_pages.dart';
 import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_model/model.dart';
 
@@ -40,10 +41,17 @@ final class MessageTips {
     DataCodeEnum? status,
     ExtraModel? extra,
   }) {
-    // // 鉴权失败处理
-    // if (status == DataCodeEnum.unauthorized) {
-    //   return;
-    // }
+    // 鉴权失败处理
+    if (status == DataCodeEnum.unauthorized) {
+      DialogManager.showError(
+        message,
+        onConfirm: () async {
+          await Get.offAllNamed(Routes.signIn);
+          return true;
+        },
+      );
+      return;
+    }
     // 其他错误
     if (extra?.showErrorToast == false || message.isEmpty) return;
     // 错误消息

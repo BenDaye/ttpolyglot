@@ -45,7 +45,11 @@ final class DialogManager {
     );
   }
 
-  static CancelFunc showError(String message, {String? title}) {
+  static CancelFunc showError(
+    String message, {
+    String? title,
+    Future<bool> Function()? onConfirm,
+  }) {
     return BotToast.showAnimationWidget(
       clickClose: false,
       allowClick: false,
@@ -54,9 +58,7 @@ final class DialogManager {
       wrapToastAnimation: (controller, cancel, child) => Stack(
         children: <Widget>[
           GestureDetector(
-            onTap: () {
-              cancel();
-            },
+            onTap: () {},
             child: AnimatedBuilder(
               builder: (_, Widget? child) => Opacity(
                 opacity: controller.value,
@@ -80,7 +82,16 @@ final class DialogManager {
         message: message,
         icon: Icons.error,
         iconColor: Colors.red,
-        onConfirm: cancelFunc,
+        onConfirm: () async {
+          if (onConfirm != null) {
+            final result = await onConfirm.call();
+            if (result) {
+              cancelFunc();
+            }
+          } else {
+            cancelFunc();
+          }
+        },
       ),
       animationDuration: const Duration(milliseconds: 300),
     );
