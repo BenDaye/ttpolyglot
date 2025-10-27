@@ -102,10 +102,10 @@ class ProjectApi {
         data: requestData,
       );
 
-      final data = response.data as Map<String, dynamic>;
-      if (data['data'] == null) {
+      if (response.data == null) {
         return null;
       }
+
       final result = Utils.toModel(
         response.data,
         (json) => ProjectModel.fromJson(json),
