@@ -286,20 +286,24 @@ class ProjectController extends BaseController {
       final data = jsonDecode(body) as Map<String, dynamic>;
 
       final userId = ValidatorUtils.validateUuid(data['user_id'], 'user_id');
-      final roleId = ValidatorUtils.validateUuid(data['role_id'], 'role_id');
-      final grantedBy = getCurrentUserId(request);
+      final role = data['role'] as String?;
+      final invitedBy = getCurrentUserId(request);
 
-      if (grantedBy == null) {
+      if (invitedBy == null) {
         return ResponseUtils.error(message: '用户信息不存在');
       }
 
-      DateTime? expiresAt;
-      if (data.containsKey('expires_at') && data['expires_at'] != null) {
-        expiresAt = ValidatorUtils.validateDateTime(data['expires_at'], 'expires_at', required: false);
+      if (role == null || role.isEmpty) {
+        return ResponseUtils.error(message: '角色不能为空');
       }
 
-      await _projectService.addProjectMember(
-          projectId: id, userId: userId, roleId: roleId, grantedBy: grantedBy, expiresAt: expiresAt);
+      // 验证角色值是否有效
+      final validRoles = ['owner', 'admin', 'member', 'viewer'];
+      if (!validRoles.contains(role)) {
+        return ResponseUtils.error(message: '无效的角色类型');
+      }
+
+      await _projectService.addProjectMember(projectId: id, userId: userId, role: role, invitedBy: invitedBy);
 
       return ResponseUtils.success<ProjectMemberModel>(message: '项目成员添加成功');
     } catch (error, stackTrace) {
@@ -382,13 +386,19 @@ class ProjectController extends BaseController {
 
       final body = await request.readAsString();
       final data = jsonDecode(body) as Map<String, dynamic>;
-      final roleId = data['role_id'] as String?;
+      final role = data['role'] as String?;
 
-      if (roleId == null) {
-        return ResponseUtils.error(message: '角色ID不能为空');
+      if (role == null || role.isEmpty) {
+        return ResponseUtils.error(message: '角色不能为空');
       }
 
-      await _projectService.updateProjectMemberRole(id, userId, roleId);
+      // 验证角色值是否有效
+      final validRoles = ['owner', 'admin', 'member', 'viewer'];
+      if (!validRoles.contains(role)) {
+        return ResponseUtils.error(message: '无效的角色类型');
+      }
+
+      await _projectService.updateProjectMemberRole(id, userId, role);
       return ResponseUtils.success<ProjectMemberModel>(message: '成员角色已更新');
     } catch (error, stackTrace) {
       LoggerUtils.error('更新成员角色失败: $id, user: $userId', error: error, stackTrace: stackTrace);

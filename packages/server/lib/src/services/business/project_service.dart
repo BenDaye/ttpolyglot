@@ -488,18 +488,17 @@ class ProjectService extends BaseService {
       final sql = '''
         SELECT 
           u.id, u.username, u.display_name, u.avatar_url,
-          ur.granted_at, ur.expires_at,
-          r.name as role_name, r.display_name as role_display_name,
-          p.owner_id = u.id as is_owner
-        FROM {user_roles} ur
-        JOIN {users} u ON ur.user_id = u.id
-        JOIN {roles} r ON ur.role_id = r.id
-        JOIN {projects} p ON ur.project_id = p.id
-        WHERE ur.project_id = @project_id 
-          AND ur.is_active = true 
+          pm.role as role_name, pm.role as role_display_name,
+          pm.joined_at as granted_at,
+          p.owner_id = u.id as is_owner,
+          pm.invited_at, pm.invited_by, pm.status
+        FROM {project_members} pm
+        JOIN {users} u ON pm.user_id = u.id
+        JOIN {projects} p ON pm.project_id = p.id
+        WHERE pm.project_id = @project_id 
+          AND pm.is_active = true 
           AND u.is_active = true
-          AND (ur.expires_at IS NULL OR ur.expires_at > CURRENT_TIMESTAMP)
-        ORDER BY is_owner DESC, ur.granted_at ASC
+        ORDER BY is_owner DESC, pm.joined_at ASC
       ''';
 
       final result = await _databaseService.query(sql, {'project_id': projectId});
@@ -515,12 +514,11 @@ class ProjectService extends BaseService {
   Future<void> addProjectMember({
     required String projectId,
     required String userId,
-    required String roleId,
-    required String grantedBy,
-    DateTime? expiresAt,
+    required String role,
+    required String invitedBy,
   }) async {
     try {
-      logInfo('添加项目成员: $projectId, user: $userId, role: $roleId');
+      logInfo('添加项目成员: $projectId, user: $userId, role: $role');
 
       // 检查用户是否已经是项目成员
       final existingRole = await _getUserRoleInProject(userId, projectId);
@@ -528,19 +526,18 @@ class ProjectService extends BaseService {
         throwBusiness('用户已经是项目成员');
       }
 
-      // 添加角色关联
+      // 添加项目成员
       await _databaseService.query('''
-        INSERT INTO {user_roles} (
-          user_id, role_id, project_id, granted_by, expires_at
+        INSERT INTO {project_members} (
+          project_id, user_id, role, invited_by, joined_at, status
         ) VALUES (
-          @user_id, @role_id, @project_id, @granted_by, @expires_at
+          @project_id, @user_id, @role, @invited_by, CURRENT_TIMESTAMP, 'active'
         )
       ''', {
-        'user_id': userId,
-        'role_id': roleId,
         'project_id': projectId,
-        'granted_by': grantedBy,
-        'expires_at': expiresAt?.toIso8601String(),
+        'user_id': userId,
+        'role': role,
+        'invited_by': invitedBy,
       });
 
       // 更新项目成员数量
@@ -558,10 +555,10 @@ class ProjectService extends BaseService {
     try {
       logInfo('移除项目成员: $projectId, user: $userId');
 
-      // 移除角色关联
+      // 移除项目成员
       await _databaseService.query('''
-        UPDATE {user_roles} 
-        SET is_active = false 
+        UPDATE {project_members} 
+        SET is_active = false, status = 'inactive'
         WHERE project_id = @project_id AND user_id = @user_id
       ''', {
         'project_id': projectId,
@@ -650,13 +647,12 @@ class ProjectService extends BaseService {
 
   Future<Map<String, dynamic>?> _getUserRoleInProject(String userId, String projectId) async {
     final result = await _databaseService.query('''
-      SELECT r.name, r.display_name
-      FROM {user_roles} ur
-      JOIN {roles} r ON ur.role_id = r.id
-      WHERE ur.user_id = @user_id 
-        AND ur.project_id = @project_id 
-        AND ur.is_active = true
-        AND (ur.expires_at IS NULL OR ur.expires_at > CURRENT_TIMESTAMP)
+      SELECT pm.role as name, pm.role as display_name
+      FROM {project_members} pm
+      WHERE pm.user_id = @user_id 
+        AND pm.project_id = @project_id 
+        AND pm.is_active = true
+        AND pm.status = 'active'
       LIMIT 1
     ''', {
       'user_id': userId,
@@ -670,11 +666,11 @@ class ProjectService extends BaseService {
     await _databaseService.query('''
       UPDATE {projects} 
       SET members_count = (
-        SELECT COUNT(DISTINCT ur.user_id)
-        FROM {user_roles} ur
-        WHERE ur.project_id = @project_id 
-          AND ur.is_active = true
-          AND (ur.expires_at IS NULL OR ur.expires_at > CURRENT_TIMESTAMP)
+        SELECT COUNT(DISTINCT pm.user_id)
+        FROM {project_members} pm
+        WHERE pm.project_id = @project_id 
+          AND pm.is_active = true
+          AND pm.status = 'active'
       )
       WHERE id = @project_id
     ''', {'project_id': projectId});
@@ -726,18 +722,18 @@ class ProjectService extends BaseService {
   }
 
   /// 更新项目成员角色
-  Future<void> updateProjectMemberRole(String projectId, String userId, String roleId) async {
+  Future<void> updateProjectMemberRole(String projectId, String userId, String role) async {
     try {
-      logInfo('更新项目成员角色: project=$projectId, user=$userId, role=$roleId');
+      logInfo('更新项目成员角色: project=$projectId, user=$userId, role=$role');
 
       await _databaseService.query('''
-        UPDATE project_members
-        SET role_id = @role_id, updated_at = CURRENT_TIMESTAMP
+        UPDATE {project_members}
+        SET role = @role, updated_at = CURRENT_TIMESTAMP
         WHERE project_id = @project_id AND user_id = @user_id
       ''', {
         'project_id': projectId,
         'user_id': userId,
-        'role_id': roleId,
+        'role': role,
       });
 
       await _clearProjectCache(projectId);
