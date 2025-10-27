@@ -1,6 +1,5 @@
-import 'dart:convert';
-
 import 'package:shelf/shelf.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
 
 /// 权限中间件
@@ -16,12 +15,12 @@ class PermissionMiddleware {
         try {
           // 检查用户是否已认证
           if (!isAuthenticated(request)) {
-            return _forbidden('用户未认证');
+            return ResponseUtils.error(message: '用户未认证', code: DataCodeEnum.unauthorized);
           }
 
           final userId = getCurrentUserId(request);
           if (userId == null) {
-            return _forbidden('无效的用户信息');
+            return ResponseUtils.error(message: '无效的用户信息', code: DataCodeEnum.unauthorized);
           }
 
           // 从路径参数中获取项目ID（如果未明确指定）
@@ -36,7 +35,7 @@ class PermissionMiddleware {
 
           if (!hasPermission) {
             LoggerUtils.warn('权限检查失败: $userId 缺少权限 $permission (项目: $actualProjectId)');
-            return _forbidden('权限不足');
+            return ResponseUtils.error(message: '权限不足', code: DataCodeEnum.unauthorized);
           }
 
           // 将权限信息添加到请求上下文
@@ -54,7 +53,7 @@ class PermissionMiddleware {
             stackTrace: stackTrace,
           );
 
-          return _forbidden('权限检查失败');
+          return ResponseUtils.error(message: '权限检查失败', code: DataCodeEnum.unauthorized);
         }
       };
     };
@@ -67,12 +66,12 @@ class PermissionMiddleware {
         try {
           // 检查用户是否已认证
           if (!isAuthenticated(request)) {
-            return _forbidden('用户未认证');
+            return ResponseUtils.error(message: '用户未认证', code: DataCodeEnum.unauthorized);
           }
 
           final userId = getCurrentUserId(request);
           if (userId == null) {
-            return _forbidden('无效的用户信息');
+            return ResponseUtils.error(message: '无效的用户信息', code: DataCodeEnum.unauthorized);
           }
 
           // 从路径参数中获取项目ID（如果未明确指定）
@@ -88,7 +87,7 @@ class PermissionMiddleware {
 
             if (!hasPermission) {
               LoggerUtils.warn('权限检查失败: $userId 缺少权限 $permission (项目: $actualProjectId)');
-              return _forbidden('权限不足');
+              return ResponseUtils.error(message: '权限不足', code: DataCodeEnum.unauthorized);
             }
           }
 
@@ -107,7 +106,7 @@ class PermissionMiddleware {
             stackTrace: stackTrace,
           );
 
-          return _forbidden('权限检查失败');
+          return ResponseUtils.error(message: '权限检查失败', code: DataCodeEnum.unauthorized);
         }
       };
     };
@@ -120,12 +119,12 @@ class PermissionMiddleware {
         try {
           // 检查用户是否已认证
           if (!isAuthenticated(request)) {
-            return _forbidden('用户未认证');
+            return ResponseUtils.error(message: '用户未认证', code: DataCodeEnum.unauthorized);
           }
 
           final userId = getCurrentUserId(request);
           if (userId == null) {
-            return _forbidden('无效的用户信息');
+            return ResponseUtils.error(message: '无效的用户信息', code: DataCodeEnum.unauthorized);
           }
 
           // 从路径参数中获取项目ID（如果未明确指定）
@@ -151,7 +150,7 @@ class PermissionMiddleware {
 
           if (!hasAnyPermission) {
             LoggerUtils.warn('权限检查失败: $userId 缺少权限 ${permissions.join(' 或 ')} (项目: $actualProjectId)');
-            return _forbidden('权限不足');
+            return ResponseUtils.error(message: '权限不足', code: DataCodeEnum.unauthorized);
           }
 
           // 将权限信息添加到请求上下文
@@ -170,7 +169,7 @@ class PermissionMiddleware {
             stackTrace: stackTrace,
           );
 
-          return _forbidden('权限检查失败');
+          return ResponseUtils.error(message: '权限检查失败', code: DataCodeEnum.unauthorized);
         }
       };
     };
@@ -183,17 +182,17 @@ class PermissionMiddleware {
         try {
           // 检查用户是否已认证
           if (!isAuthenticated(request)) {
-            return _forbidden('用户未认证');
+            return ResponseUtils.error(message: '用户未认证', code: DataCodeEnum.unauthorized);
           }
 
           final userId = getCurrentUserId(request);
           if (userId == null) {
-            return _forbidden('无效的用户信息');
+            return ResponseUtils.error(message: '无效的用户信息', code: DataCodeEnum.internalServerError);
           }
 
           // 注意：项目ID应该在路由级别处理
           // 此方法需要重新设计为接受projectId参数
-          return _internalError('项目所有者检查需要projectId参数');
+          return ResponseUtils.error(message: '项目所有者检查需要projectId参数', code: DataCodeEnum.internalServerError);
         } catch (error, stackTrace) {
           LoggerUtils.error(
             '项目所有者中间件错误',
@@ -201,7 +200,7 @@ class PermissionMiddleware {
             stackTrace: stackTrace,
           );
 
-          return _forbidden('权限检查失败');
+          return ResponseUtils.error(message: '权限检查失败', code: DataCodeEnum.internalServerError);
         }
       };
     };
@@ -214,12 +213,12 @@ class PermissionMiddleware {
         try {
           // 检查用户是否已认证
           if (!isAuthenticated(request)) {
-            return _forbidden('用户未认证');
+            return ResponseUtils.error(message: '用户未认证', code: DataCodeEnum.internalServerError);
           }
 
           final userId = getCurrentUserId(request);
           if (userId == null) {
-            return _forbidden('无效的用户信息');
+            return ResponseUtils.error(message: '无效的用户信息', code: DataCodeEnum.internalServerError);
           }
 
           // 检查是否为超级管理员
@@ -227,7 +226,7 @@ class PermissionMiddleware {
 
           if (!isSuperAdmin) {
             LoggerUtils.warn('超级管理员检查失败: $userId 不是超级管理员');
-            return _forbidden('只有超级管理员可以执行此操作');
+            return ResponseUtils.error(message: '只有超级管理员可以执行此操作', code: DataCodeEnum.internalServerError);
           }
 
           // 将超级管理员信息添加到请求上下文
@@ -244,44 +243,10 @@ class PermissionMiddleware {
             stackTrace: stackTrace,
           );
 
-          return _forbidden('权限检查失败');
+          return ResponseUtils.error(message: '权限检查失败', code: DataCodeEnum.internalServerError);
         }
       };
     };
-  }
-
-  /// 返回内部错误响应
-  Response _internalError(String message) {
-    final errorResponse = {
-      'error': {
-        'code': 'SYSTEM_INTERNAL_ERROR',
-        'message': message,
-        'metadata': {
-          'timestamp': DateTime.now().toUtc().toIso8601String(),
-        },
-      },
-    };
-
-    return Response(500, headers: {'Content-Type': 'application/json'}, body: jsonEncode(errorResponse));
-  }
-
-  /// 返回权限不足响应
-  Response _forbidden(String message) {
-    final errorResponse = {
-      'error': {
-        'code': 'AUTH_PERMISSION_DENIED',
-        'message': message,
-        'metadata': {
-          'timestamp': DateTime.now().toUtc().toIso8601String(),
-        },
-      },
-    };
-
-    return Response(
-      403,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(errorResponse),
-    );
   }
 }
 

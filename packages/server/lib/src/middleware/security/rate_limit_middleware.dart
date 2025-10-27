@@ -1,7 +1,7 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:shelf/shelf.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
 
 /// 速率限制中间件
@@ -156,14 +156,6 @@ class RateLimitMiddleware {
       }
     };
 
-    return Response(
-      429,
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Request-ID': requestId,
-        'Retry-After': (ServerConfig.rateLimitWindowMinutes * 60).toString(),
-      },
-      body: jsonEncode(errorResponse),
-    );
+    return ResponseUtils.error(message: '请求频率过高', code: DataCodeEnum.rateLimitError, data: errorResponse);
   }
 }
