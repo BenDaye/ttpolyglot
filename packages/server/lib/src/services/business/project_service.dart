@@ -123,15 +123,28 @@ class ProjectService extends BaseService {
   }
 
   /// 根据ID获取项目详情
-  Future<ProjectModel?> getProjectById(String projectId, {String? userId}) async {
+  Future<ProjectDetailModel?> getProjectById(String projectId, {String? userId}) async {
     try {
       logInfo('获取项目详情: $projectId');
 
       // 先检查缓存
       final cacheKey = 'project:details:$projectId';
-      final cachedProject = await _redisService.getJson(cacheKey);
-      if (cachedProject != null) {
-        return ProjectModel.fromJson(cachedProject);
+      final cachedProjectDetail = await _redisService.getJson(cacheKey);
+      if (cachedProjectDetail != null) {
+        try {
+          // 验证缓存数据结构
+          if (cachedProjectDetail['project'] != null) {
+            return ProjectDetailModel.fromJson(cachedProjectDetail);
+          } else {
+            // 缓存数据结构无效，删除缓存
+            logInfo('缓存数据结构无效，删除缓存: $cacheKey');
+            await _redisService.delete(cacheKey);
+          }
+        } catch (cacheError, cacheStackTrace) {
+          // 缓存数据解析失败，删除缓存并继续查询数据库
+          logError('缓存数据解析失败', error: cacheError, stackTrace: cacheStackTrace);
+          await _redisService.delete(cacheKey);
+        }
       }
 
       final sql = '''
@@ -146,24 +159,10 @@ class ProjectService extends BaseService {
             WHEN p.total_keys > 0 
             THEN ROUND((p.translated_keys::numeric / p.total_keys * 100), 2)
             ELSE 0 
-          END as completion_percentage,
-          COALESCE(
-            json_agg(
-              json_build_object(
-                'language_id', pl.language_id,
-                'language_code', l.code,
-                'is_primary', pl.is_primary,
-                'is_active', pl.is_active
-              )
-            ) FILTER (WHERE pl.language_id IS NOT NULL), 
-            '[]'
-          ) as languages
+          END as completion_percentage
         FROM {projects} p
         LEFT JOIN {users} u ON p.owner_id = u.id
-        LEFT JOIN {project_languages} pl ON p.id = pl.project_id AND pl.is_active = true
-        LEFT JOIN {languages} l ON pl.language_id = l.id
         WHERE p.id = @project_id
-        GROUP BY p.id, u.id
       ''';
 
       final result = await _databaseService.query(sql, {'project_id': projectId});
@@ -179,21 +178,32 @@ class ProjectService extends BaseService {
         projectData['settings'] = <String, dynamic>{};
       }
 
-      // 解析语言信息 - 已是数组
-      if (projectData['languages'] == null || projectData['languages'] is! List) {
-        projectData['languages'] = [];
-      }
-
       // 如果指定了用户ID，检查用户权限
       if (userId != null) {
         projectData['user_role'] = await _getUserRoleInProject(userId, projectId);
         projectData['is_owner'] = projectData['owner_id'] == userId;
       }
 
-      // 缓存项目信息
-      await _redisService.setJson(cacheKey, projectData, ServerConfig.cacheApiResponseTtl);
+      // 构建项目模型
+      final project = ProjectModel.fromJson(projectData);
 
-      return ProjectModel.fromJson(projectData);
+      // 获取项目语言列表
+      final languages = await getProjectLanguages(projectId);
+
+      // 获取项目成员列表
+      final members = await getProjectMembers(projectId);
+
+      // 组装项目详情模型
+      final projectDetail = ProjectDetailModel(
+        project: project,
+        languages: languages.isNotEmpty ? languages : null,
+        members: members,
+      );
+
+      // 缓存项目详情
+      await _redisService.setJson(cacheKey, projectDetail.toJson(), ServerConfig.cacheApiResponseTtl);
+
+      return projectDetail;
     } catch (error, stackTrace) {
       logError('获取项目详情失败: $projectId', error: error, stackTrace: stackTrace);
       rethrow;
@@ -357,11 +367,11 @@ class ProjectService extends BaseService {
       await _clearProjectCache(projectId);
 
       // 获取创建的项目信息
-      final project = await getProjectById(projectId);
+      final projectDetail = await getProjectById(projectId);
 
       logInfo('项目创建成功: $projectId');
 
-      return project!;
+      return projectDetail!.project;
     } catch (error, stackTrace) {
       logError('创建项目失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
@@ -430,11 +440,11 @@ class ProjectService extends BaseService {
       await _clearProjectCache(projectId);
 
       // 获取更新后的项目信息
-      final updatedProject = await getProjectById(projectId);
+      final updatedProjectDetail = await getProjectById(projectId);
 
       logInfo('项目信息更新成功: $projectId');
 
-      return updatedProject!;
+      return updatedProjectDetail!.project;
     } catch (error, stackTrace) {
       logError('更新项目信息失败: $projectId', error: error, stackTrace: stackTrace);
       rethrow;
@@ -584,7 +594,13 @@ class ProjectService extends BaseService {
       const cacheKey = 'project:stats';
       final cachedStats = await _redisService.getJson(cacheKey);
       if (cachedStats != null) {
-        return ProjectStatisticsModel.fromJson(cachedStats);
+        try {
+          return ProjectStatisticsModel.fromJson(cachedStats);
+        } catch (cacheError, cacheStackTrace) {
+          // 缓存数据解析失败，删除缓存并继续查询数据库
+          logError('缓存数据解析失败', error: cacheError, stackTrace: cacheStackTrace);
+          await _redisService.delete(cacheKey);
+        }
       }
 
       final sql = '''
@@ -751,11 +767,12 @@ class ProjectService extends BaseService {
       logInfo('获取项目语言: $projectId');
 
       final result = await _databaseService.query('''
-        SELECT pl.*, l.code as language_code, l.name, l.native_name, l.direction, l.is_rtl
+        SELECT l.id, l.code, l.name, l.native_name, l.flag_emoji, l.is_active, l.is_rtl, 
+               l.sort_order, l.created_at, l.updated_at
         FROM {project_languages} pl
         JOIN {languages} l ON pl.language_id = l.id
         WHERE pl.project_id = @project_id AND pl.is_active = true
-        ORDER BY l.sort_index, l.name
+        ORDER BY l.sort_order, l.name
       ''', {'project_id': projectId});
 
       return result.map((row) => LanguageModel.fromJson(row.toColumnMap())).toList();

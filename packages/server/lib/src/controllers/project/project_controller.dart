@@ -177,13 +177,13 @@ class ProjectController extends BaseController {
         LoggerUtils.error('_getProjectById: 无效的项目ID格式: $id');
         return ResponseUtils.error(message: '项目ID格式无效');
       }
-      final project = await _projectService.getProjectById(id, userId: getCurrentUserId(request));
+      final projectDetail = await _projectService.getProjectById(id, userId: getCurrentUserId(request));
 
-      if (project == null) {
+      if (projectDetail == null) {
         return ResponseUtils.error(message: '项目不存在');
       }
 
-      return ResponseUtils.success<ProjectModel>(message: '获取项目详情成功', data: project);
+      return ResponseUtils.success<ProjectDetailModel>(message: '获取项目详情成功', data: projectDetail);
     } catch (error, stackTrace) {
       LoggerUtils.error('获取项目详情失败: $id', error: error, stackTrace: stackTrace);
 

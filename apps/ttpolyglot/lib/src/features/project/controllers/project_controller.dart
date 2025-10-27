@@ -116,10 +116,10 @@ class ProjectController extends GetxController {
       }
 
       // 从 API 获取项目详情
-      final projectModel = await _projectApi.getProject(projectIdInt);
-      if (projectModel != null) {
+      final projectDetailModel = await _projectApi.getProject(projectIdInt);
+      if (projectDetailModel != null) {
         // 将 ProjectModel 转换为 Project
-        final project = ProjectConverter.toProject(projectModel);
+        final project = ProjectConverter.toProject(projectDetailModel.project);
 
         Logger.info('项目加载成功: ID=${project.id}, 名称="${project.name}"');
         _project.value = project;

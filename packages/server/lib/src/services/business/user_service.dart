@@ -172,8 +172,14 @@ class UserService extends BaseService {
       final cacheKey = 'user:details:$userId';
       final cachedUser = await _redisService.getJson(cacheKey);
       if (cachedUser != null) {
-        logInfo('从缓存获取用户详情');
-        return UserInfoModel.fromJson(cachedUser);
+        try {
+          logInfo('从缓存获取用户详情');
+          return UserInfoModel.fromJson(cachedUser);
+        } catch (cacheError, cacheStackTrace) {
+          // 缓存数据解析失败，删除缓存并继续查询数据库
+          logError('缓存数据解析失败', error: cacheError, stackTrace: cacheStackTrace);
+          await _redisService.delete(cacheKey);
+        }
       }
 
       final sql = '''

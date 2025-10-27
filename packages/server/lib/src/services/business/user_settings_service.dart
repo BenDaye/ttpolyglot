@@ -28,8 +28,14 @@ class UserSettingsService extends BaseService {
       final cacheKey = 'user:settings:$userId';
       final cachedSettings = await _redisService.getJson(cacheKey);
       if (cachedSettings != null) {
-        logInfo('从缓存获取用户设置');
-        return UserSettingsModel.fromJson(cachedSettings);
+        try {
+          logInfo('从缓存获取用户设置');
+          return UserSettingsModel.fromJson(cachedSettings);
+        } catch (cacheError, cacheStackTrace) {
+          // 缓存数据解析失败，删除缓存并继续查询数据库
+          logError('缓存数据解析失败', error: cacheError, stackTrace: cacheStackTrace);
+          await _redisService.delete(cacheKey);
+        }
       }
 
       // 从数据库获取语言设置和通用设置

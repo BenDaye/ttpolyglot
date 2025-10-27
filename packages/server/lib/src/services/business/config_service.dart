@@ -141,7 +141,13 @@ class ConfigService extends BaseService {
       final cached = await _redisService.getJson(cacheKey);
 
       if (cached != null) {
-        return cached;
+        try {
+          return cached;
+        } catch (cacheError, cacheStackTrace) {
+          // 缓存数据解析失败，删除缓存并继续查询数据库
+          logError('缓存数据解析失败', error: cacheError, stackTrace: cacheStackTrace);
+          await _redisService.delete(cacheKey);
+        }
       }
 
       final configs = await getConfigs(isPublic: true);
@@ -309,7 +315,13 @@ class ConfigService extends BaseService {
       final cached = await _redisService.getJson(cacheKey);
 
       if (cached != null) {
-        return List<String>.from(cached['categories'] ?? []);
+        try {
+          return List<String>.from(cached['categories'] ?? []);
+        } catch (cacheError, cacheStackTrace) {
+          // 缓存数据解析失败，删除缓存并继续查询数据库
+          logError('缓存数据解析失败', error: cacheError, stackTrace: cacheStackTrace);
+          await _redisService.delete(cacheKey);
+        }
       }
 
       final result = await _databaseService.query('''
