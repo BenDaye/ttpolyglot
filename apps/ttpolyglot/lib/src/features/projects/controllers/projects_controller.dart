@@ -95,14 +95,6 @@ class ProjectsController extends GetxController {
         Logger.info('项目列表已更新并缓存');
       } catch (apiError, apiStackTrace) {
         Logger.error('从 API 加载项目失败', error: apiError, stackTrace: apiStackTrace);
-
-        // 如果 API 请求失败且没有缓存，显示错误
-        if (cachedProjects == null || cachedProjects.isEmpty) {
-          Get.snackbar('错误', '加载项目失败: $apiError');
-        } else {
-          // 有缓存数据，只显示警告
-          Logger.warning('使用缓存数据，API 请求失败: $apiError');
-        }
       }
     } catch (error, stackTrace) {
       Logger.error('loadProjects', error: error, stackTrace: stackTrace);

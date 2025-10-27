@@ -9,9 +9,9 @@ part of 'extra_model.dart';
 _$ExtraModelImpl _$$ExtraModelImplFromJson(Map<String, dynamic> json) =>
     _$ExtraModelImpl(
       showLoading: json['show_loading'] as bool? ?? false,
-      showLazyLoading: json['show_lazy_loading'] as bool? ?? false,
+      showLazyLoading: json['show_lazy_loading'] as bool? ?? true,
       showSuccessToast: json['show_success_toast'] as bool? ?? false,
-      showErrorToast: json['show_error_toast'] as bool? ?? false,
+      showErrorToast: json['show_error_toast'] as bool? ?? true,
     );
 
 Map<String, dynamic> _$$ExtraModelImplToJson(_$ExtraModelImpl instance) =>

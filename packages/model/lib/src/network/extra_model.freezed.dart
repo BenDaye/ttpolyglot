@@ -152,9 +152,9 @@ class __$$ExtraModelImplCopyWithImpl<$Res>
 class _$ExtraModelImpl implements _ExtraModel {
   const _$ExtraModelImpl(
       {@JsonKey(name: 'show_loading') this.showLoading = false,
-      @JsonKey(name: 'show_lazy_loading') this.showLazyLoading = false,
+      @JsonKey(name: 'show_lazy_loading') this.showLazyLoading = true,
       @JsonKey(name: 'show_success_toast') this.showSuccessToast = false,
-      @JsonKey(name: 'show_error_toast') this.showErrorToast = false});
+      @JsonKey(name: 'show_error_toast') this.showErrorToast = true});
 
   factory _$ExtraModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$ExtraModelImplFromJson(json);
