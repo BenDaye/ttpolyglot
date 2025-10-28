@@ -34,6 +34,7 @@ class UserRoutes {
     // ⚠️ 重要：更具体的路由必须先注册！
     final userRouter = Router();
     userRouter.get('/', userController.getUsers);
+    userRouter.get('/search', userController.searchUsers);
     // 先注册 /me 相关路由（更具体）
     userRouter.get('/me', userController.getCurrentUser);
     userRouter.put('/me', userController.updateCurrentUser);

@@ -36,6 +36,7 @@ class UserController extends BaseController {
 
   // 公共方法用于路由配置
   Future<Response> Function(Request) get getUsers => _getUsers;
+  Future<Response> Function(Request) get searchUsers => _searchUsers;
   Future<Response> Function(Request) get me => _getCurrentUser;
   Future<Response> Function(Request) get getCurrentUser => _getCurrentUser;
   Future<Response> Function(Request) get updateCurrentUser => _updateCurrentUser;
