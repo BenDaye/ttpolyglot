@@ -74,6 +74,11 @@ mixin _$ProjectModel {
   @FlexibleIntConverter()
   int get membersCount => throw _privateConstructorUsedError;
 
+  /// 项目成员上限
+  @JsonKey(name: 'member_limit')
+  @FlexibleIntConverter()
+  int get memberLimit => throw _privateConstructorUsedError;
+
   /// 项目是否公开
   @JsonKey(name: 'is_public')
   bool get isPublic => throw _privateConstructorUsedError;
@@ -153,6 +158,7 @@ abstract class $ProjectModelCopyWith<$Res> {
       @FlexibleIntConverter()
       int languagesCount,
       @JsonKey(name: 'members_count') @FlexibleIntConverter() int membersCount,
+      @JsonKey(name: 'member_limit') @FlexibleIntConverter() int memberLimit,
       @JsonKey(name: 'is_public') bool isPublic,
       @JsonKey(name: 'is_active') bool isActive,
       @JsonKey(name: 'settings') Map<String, dynamic>? settings,
@@ -196,6 +202,7 @@ class _$ProjectModelCopyWithImpl<$Res, $Val extends ProjectModel>
     Object? translatedKeys = null,
     Object? languagesCount = null,
     Object? membersCount = null,
+    Object? memberLimit = null,
     Object? isPublic = null,
     Object? isActive = null,
     Object? settings = freezed,
@@ -255,6 +262,10 @@ class _$ProjectModelCopyWithImpl<$Res, $Val extends ProjectModel>
       membersCount: null == membersCount
           ? _value.membersCount
           : membersCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      memberLimit: null == memberLimit
+          ? _value.memberLimit
+          : memberLimit // ignore: cast_nullable_to_non_nullable
               as int,
       isPublic: null == isPublic
           ? _value.isPublic
@@ -327,6 +338,7 @@ abstract class _$$ProjectModelImplCopyWith<$Res>
       @FlexibleIntConverter()
       int languagesCount,
       @JsonKey(name: 'members_count') @FlexibleIntConverter() int membersCount,
+      @JsonKey(name: 'member_limit') @FlexibleIntConverter() int memberLimit,
       @JsonKey(name: 'is_public') bool isPublic,
       @JsonKey(name: 'is_active') bool isActive,
       @JsonKey(name: 'settings') Map<String, dynamic>? settings,
@@ -368,6 +380,7 @@ class __$$ProjectModelImplCopyWithImpl<$Res>
     Object? translatedKeys = null,
     Object? languagesCount = null,
     Object? membersCount = null,
+    Object? memberLimit = null,
     Object? isPublic = null,
     Object? isActive = null,
     Object? settings = freezed,
@@ -427,6 +440,10 @@ class __$$ProjectModelImplCopyWithImpl<$Res>
       membersCount: null == membersCount
           ? _value.membersCount
           : membersCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      memberLimit: null == memberLimit
+          ? _value.memberLimit
+          : memberLimit // ignore: cast_nullable_to_non_nullable
               as int,
       isPublic: null == isPublic
           ? _value.isPublic
@@ -496,6 +513,9 @@ class _$ProjectModelImpl implements _ProjectModel {
       @JsonKey(name: 'members_count')
       @FlexibleIntConverter()
       this.membersCount = 1,
+      @JsonKey(name: 'member_limit')
+      @FlexibleIntConverter()
+      this.memberLimit = 10,
       @JsonKey(name: 'is_public') this.isPublic = false,
       @JsonKey(name: 'is_active') this.isActive = true,
       @JsonKey(name: 'settings') final Map<String, dynamic>? settings,
@@ -581,6 +601,12 @@ class _$ProjectModelImpl implements _ProjectModel {
   @FlexibleIntConverter()
   final int membersCount;
 
+  /// 项目成员上限
+  @override
+  @JsonKey(name: 'member_limit')
+  @FlexibleIntConverter()
+  final int memberLimit;
+
   /// 项目是否公开
   @override
   @JsonKey(name: 'is_public')
@@ -646,7 +672,7 @@ class _$ProjectModelImpl implements _ProjectModel {
 
   @override
   String toString() {
-    return 'ProjectModel(id: $id, name: $name, slug: $slug, description: $description, ownerId: $ownerId, status: $status, visibility: $visibility, primaryLanguageId: $primaryLanguageId, totalKeys: $totalKeys, translatedKeys: $translatedKeys, languagesCount: $languagesCount, membersCount: $membersCount, isPublic: $isPublic, isActive: $isActive, settings: $settings, lastActivityAt: $lastActivityAt, createdAt: $createdAt, updatedAt: $updatedAt, ownerUsername: $ownerUsername, ownerDisplayName: $ownerDisplayName, ownerAvatar: $ownerAvatar, completionPercentage: $completionPercentage)';
+    return 'ProjectModel(id: $id, name: $name, slug: $slug, description: $description, ownerId: $ownerId, status: $status, visibility: $visibility, primaryLanguageId: $primaryLanguageId, totalKeys: $totalKeys, translatedKeys: $translatedKeys, languagesCount: $languagesCount, membersCount: $membersCount, memberLimit: $memberLimit, isPublic: $isPublic, isActive: $isActive, settings: $settings, lastActivityAt: $lastActivityAt, createdAt: $createdAt, updatedAt: $updatedAt, ownerUsername: $ownerUsername, ownerDisplayName: $ownerDisplayName, ownerAvatar: $ownerAvatar, completionPercentage: $completionPercentage)';
   }
 
   @override
@@ -673,6 +699,8 @@ class _$ProjectModelImpl implements _ProjectModel {
                 other.languagesCount == languagesCount) &&
             (identical(other.membersCount, membersCount) ||
                 other.membersCount == membersCount) &&
+            (identical(other.memberLimit, memberLimit) ||
+                other.memberLimit == memberLimit) &&
             (identical(other.isPublic, isPublic) ||
                 other.isPublic == isPublic) &&
             (identical(other.isActive, isActive) ||
@@ -710,6 +738,7 @@ class _$ProjectModelImpl implements _ProjectModel {
         translatedKeys,
         languagesCount,
         membersCount,
+        memberLimit,
         isPublic,
         isActive,
         const DeepCollectionEquality().hash(_settings),
@@ -760,6 +789,9 @@ abstract class _ProjectModel implements ProjectModel {
       @JsonKey(name: 'members_count')
       @FlexibleIntConverter()
       final int membersCount,
+      @JsonKey(name: 'member_limit')
+      @FlexibleIntConverter()
+      final int memberLimit,
       @JsonKey(name: 'is_public') final bool isPublic,
       @JsonKey(name: 'is_active') final bool isActive,
       @JsonKey(name: 'settings') final Map<String, dynamic>? settings,
@@ -847,6 +879,12 @@ abstract class _ProjectModel implements ProjectModel {
   @JsonKey(name: 'members_count')
   @FlexibleIntConverter()
   int get membersCount;
+
+  /// 项目成员上限
+  @override
+  @JsonKey(name: 'member_limit')
+  @FlexibleIntConverter()
+  int get memberLimit;
 
   /// 项目是否公开
   @override
@@ -1645,6 +1683,171 @@ abstract class _UpdateProjectRequest implements UpdateProjectRequest {
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$UpdateProjectRequestImplCopyWith<_$UpdateProjectRequestImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+UpdateMemberLimitRequest _$UpdateMemberLimitRequestFromJson(
+    Map<String, dynamic> json) {
+  return _UpdateMemberLimitRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$UpdateMemberLimitRequest {
+  /// 新的成员上限
+  @JsonKey(name: 'member_limit')
+  int get memberLimit => throw _privateConstructorUsedError;
+
+  /// Serializes this UpdateMemberLimitRequest to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of UpdateMemberLimitRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $UpdateMemberLimitRequestCopyWith<UpdateMemberLimitRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $UpdateMemberLimitRequestCopyWith<$Res> {
+  factory $UpdateMemberLimitRequestCopyWith(UpdateMemberLimitRequest value,
+          $Res Function(UpdateMemberLimitRequest) then) =
+      _$UpdateMemberLimitRequestCopyWithImpl<$Res, UpdateMemberLimitRequest>;
+  @useResult
+  $Res call({@JsonKey(name: 'member_limit') int memberLimit});
+}
+
+/// @nodoc
+class _$UpdateMemberLimitRequestCopyWithImpl<$Res,
+        $Val extends UpdateMemberLimitRequest>
+    implements $UpdateMemberLimitRequestCopyWith<$Res> {
+  _$UpdateMemberLimitRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of UpdateMemberLimitRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? memberLimit = null,
+  }) {
+    return _then(_value.copyWith(
+      memberLimit: null == memberLimit
+          ? _value.memberLimit
+          : memberLimit // ignore: cast_nullable_to_non_nullable
+              as int,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$UpdateMemberLimitRequestImplCopyWith<$Res>
+    implements $UpdateMemberLimitRequestCopyWith<$Res> {
+  factory _$$UpdateMemberLimitRequestImplCopyWith(
+          _$UpdateMemberLimitRequestImpl value,
+          $Res Function(_$UpdateMemberLimitRequestImpl) then) =
+      __$$UpdateMemberLimitRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({@JsonKey(name: 'member_limit') int memberLimit});
+}
+
+/// @nodoc
+class __$$UpdateMemberLimitRequestImplCopyWithImpl<$Res>
+    extends _$UpdateMemberLimitRequestCopyWithImpl<$Res,
+        _$UpdateMemberLimitRequestImpl>
+    implements _$$UpdateMemberLimitRequestImplCopyWith<$Res> {
+  __$$UpdateMemberLimitRequestImplCopyWithImpl(
+      _$UpdateMemberLimitRequestImpl _value,
+      $Res Function(_$UpdateMemberLimitRequestImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of UpdateMemberLimitRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? memberLimit = null,
+  }) {
+    return _then(_$UpdateMemberLimitRequestImpl(
+      memberLimit: null == memberLimit
+          ? _value.memberLimit
+          : memberLimit // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$UpdateMemberLimitRequestImpl implements _UpdateMemberLimitRequest {
+  const _$UpdateMemberLimitRequestImpl(
+      {@JsonKey(name: 'member_limit') required this.memberLimit});
+
+  factory _$UpdateMemberLimitRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$UpdateMemberLimitRequestImplFromJson(json);
+
+  /// 新的成员上限
+  @override
+  @JsonKey(name: 'member_limit')
+  final int memberLimit;
+
+  @override
+  String toString() {
+    return 'UpdateMemberLimitRequest(memberLimit: $memberLimit)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$UpdateMemberLimitRequestImpl &&
+            (identical(other.memberLimit, memberLimit) ||
+                other.memberLimit == memberLimit));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, memberLimit);
+
+  /// Create a copy of UpdateMemberLimitRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$UpdateMemberLimitRequestImplCopyWith<_$UpdateMemberLimitRequestImpl>
+      get copyWith => __$$UpdateMemberLimitRequestImplCopyWithImpl<
+          _$UpdateMemberLimitRequestImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$UpdateMemberLimitRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _UpdateMemberLimitRequest implements UpdateMemberLimitRequest {
+  const factory _UpdateMemberLimitRequest(
+          {@JsonKey(name: 'member_limit') required final int memberLimit}) =
+      _$UpdateMemberLimitRequestImpl;
+
+  factory _UpdateMemberLimitRequest.fromJson(Map<String, dynamic> json) =
+      _$UpdateMemberLimitRequestImpl.fromJson;
+
+  /// 新的成员上限
+  @override
+  @JsonKey(name: 'member_limit')
+  int get memberLimit;
+
+  /// Create a copy of UpdateMemberLimitRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$UpdateMemberLimitRequestImplCopyWith<_$UpdateMemberLimitRequestImpl>
       get copyWith => throw _privateConstructorUsedError;
 }
 

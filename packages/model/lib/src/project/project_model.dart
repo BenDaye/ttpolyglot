@@ -44,6 +44,9 @@ class ProjectModel with _$ProjectModel {
     /// 项目成员数
     @JsonKey(name: 'members_count') @FlexibleIntConverter() @Default(1) int membersCount,
 
+    /// 项目成员上限
+    @JsonKey(name: 'member_limit') @FlexibleIntConverter() @Default(10) int memberLimit,
+
     /// 项目是否公开
     @JsonKey(name: 'is_public') @Default(false) bool isPublic,
 
@@ -134,6 +137,17 @@ class UpdateProjectRequest with _$UpdateProjectRequest {
   }) = _UpdateProjectRequest;
 
   factory UpdateProjectRequest.fromJson(Map<String, dynamic> json) => _$UpdateProjectRequestFromJson(json);
+}
+
+/// 更新项目成员上限请求模型
+@freezed
+class UpdateMemberLimitRequest with _$UpdateMemberLimitRequest {
+  const factory UpdateMemberLimitRequest({
+    /// 新的成员上限
+    @JsonKey(name: 'member_limit') required int memberLimit,
+  }) = _UpdateMemberLimitRequest;
+
+  factory UpdateMemberLimitRequest.fromJson(Map<String, dynamic> json) => _$UpdateMemberLimitRequestFromJson(json);
 }
 
 /// 项目详情模型（包含更多关联信息）

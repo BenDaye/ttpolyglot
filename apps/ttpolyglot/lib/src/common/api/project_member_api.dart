@@ -222,4 +222,182 @@ class ProjectMemberApi {
       return null;
     }
   }
+
+  // ========== 邀请链接相关 API ==========
+
+  /// 生成邀请链接
+  Future<ProjectMemberModel?> generateInviteLink({
+    required int projectId,
+    required String role,
+    int? expiresIn,
+    int? maxUses,
+  }) async {
+    try {
+      final response = await HttpClient.post<Map<String, dynamic>>(
+        '/projects/$projectId/invites',
+        data: {
+          'role': role,
+          if (expiresIn != null) 'expires_in': expiresIn,
+          if (maxUses != null) 'max_uses': maxUses,
+        },
+        options: Options(
+          extra: const ExtraModel(
+            showSuccessToast: true,
+          ).toJson(),
+        ),
+      );
+
+      final result = Utils.toModel(
+        response.data,
+        (json) => ProjectMemberModel.fromJson(json),
+      );
+      if (result == null) {
+        Logger.error('生成邀请链接响应数据为空');
+        return null;
+      }
+      return result;
+    } catch (error, stackTrace) {
+      Logger.error('[generateInviteLink] 生成邀请链接失败', error: error, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 获取项目的所有邀请链接
+  Future<List<ProjectMemberModel>?> getProjectInvites(int projectId) async {
+    try {
+      final response = await HttpClient.get<Map<String, dynamic>>(
+        '/projects/$projectId/invites',
+      );
+
+      final result = Utils.toModel(
+        response.data,
+        (json) {
+          final items = json as List;
+          return items.map((item) => ProjectMemberModel.fromJson(item as Map<String, dynamic>)).toList();
+        },
+      );
+      if (result == null) {
+        Logger.error('获取邀请链接列表响应数据为空');
+        return null;
+      }
+      return result;
+    } catch (error, stackTrace) {
+      Logger.error('[getProjectInvites] 获取邀请链接列表失败', error: error, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 获取邀请信息
+  Future<InviteInfoModel?> getInviteInfo(String inviteCode) async {
+    try {
+      final response = await HttpClient.get<Map<String, dynamic>>(
+        '/invites/$inviteCode',
+      );
+
+      final result = Utils.toModel(
+        response.data,
+        (json) => InviteInfoModel.fromJson(json),
+      );
+      if (result == null) {
+        Logger.error('获取邀请信息响应数据为空');
+        return null;
+      }
+      return result;
+    } catch (error, stackTrace) {
+      Logger.error('[getInviteInfo] 获取邀请信息失败', error: error, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 接受邀请（通过邀请码）
+  Future<ProjectMemberModel?> acceptInviteByCode(String inviteCode) async {
+    try {
+      final response = await HttpClient.post<Map<String, dynamic>>(
+        '/invites/$inviteCode/accept',
+        options: Options(
+          extra: const ExtraModel(
+            showSuccessToast: true,
+          ).toJson(),
+        ),
+      );
+
+      final result = Utils.toModel(
+        response.data,
+        (json) => ProjectMemberModel.fromJson(json),
+      );
+      if (result == null) {
+        Logger.error('接受邀请响应数据为空');
+        return null;
+      }
+      return result;
+    } catch (error, stackTrace) {
+      Logger.error('[acceptInviteByCode] 接受邀请失败', error: error, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 撤销邀请链接
+  Future<bool?> revokeInvite({
+    required int projectId,
+    required int inviteId,
+  }) async {
+    try {
+      final response = await HttpClient.delete(
+        '/projects/$projectId/invites/$inviteId',
+        options: Options(
+          extra: const ExtraModel(
+            showSuccessToast: true,
+          ).toJson(),
+        ),
+      );
+
+      final result = Utils.toModel(
+        response.data,
+        (json) => json['code'] == DataCodeEnum.success,
+      );
+      if (result == null) {
+        Logger.error('撤销邀请链接响应数据为空');
+        return null;
+      }
+      return result;
+    } catch (error, stackTrace) {
+      Logger.error('[revokeInvite] 撤销邀请链接失败', error: error, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 直接添加成员
+  Future<ProjectMemberModel?> addMember({
+    required int projectId,
+    required String userId,
+    required String role,
+  }) async {
+    try {
+      final response = await HttpClient.post<Map<String, dynamic>>(
+        '/projects/$projectId/members/add',
+        data: {
+          'user_id': userId,
+          'role': role,
+        },
+        options: Options(
+          extra: const ExtraModel(
+            showSuccessToast: true,
+          ).toJson(),
+        ),
+      );
+
+      final result = Utils.toModel(
+        response.data,
+        (json) => ProjectMemberModel.fromJson(json),
+      );
+      if (result == null) {
+        Logger.error('添加成员响应数据为空');
+        return null;
+      }
+      return result;
+    } catch (error, stackTrace) {
+      Logger.error('[addMember] 添加成员失败', error: error, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
 }

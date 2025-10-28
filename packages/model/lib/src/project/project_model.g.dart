@@ -29,6 +29,9 @@ _$ProjectModelImpl _$$ProjectModelImplFromJson(Map<String, dynamic> json) =>
       membersCount: json['members_count'] == null
           ? 1
           : const FlexibleIntConverter().fromJson(json['members_count']),
+      memberLimit: json['member_limit'] == null
+          ? 10
+          : const FlexibleIntConverter().fromJson(json['member_limit']),
       isPublic: json['is_public'] as bool? ?? false,
       isActive: json['is_active'] as bool? ?? true,
       settings: json['settings'] as Map<String, dynamic>?,
@@ -63,6 +66,7 @@ Map<String, dynamic> _$$ProjectModelImplToJson(_$ProjectModelImpl instance) =>
           const FlexibleIntConverter().toJson(instance.languagesCount),
       'members_count':
           const FlexibleIntConverter().toJson(instance.membersCount),
+      'member_limit': const FlexibleIntConverter().toJson(instance.memberLimit),
       'is_public': instance.isPublic,
       'is_active': instance.isActive,
       'settings': instance.settings,
@@ -133,6 +137,18 @@ Map<String, dynamic> _$$UpdateProjectRequestImplToJson(
       'primary_language_id': _$JsonConverterToJson<dynamic, int>(
           instance.primaryLanguageId, const FlexibleIntConverter().toJson),
       'settings': instance.settings,
+    };
+
+_$UpdateMemberLimitRequestImpl _$$UpdateMemberLimitRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$UpdateMemberLimitRequestImpl(
+      memberLimit: (json['member_limit'] as num).toInt(),
+    );
+
+Map<String, dynamic> _$$UpdateMemberLimitRequestImplToJson(
+        _$UpdateMemberLimitRequestImpl instance) =>
+    <String, dynamic>{
+      'member_limit': instance.memberLimit,
     };
 
 _$ProjectDetailModelImpl _$$ProjectDetailModelImplFromJson(

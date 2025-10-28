@@ -534,4 +534,55 @@ class UserService extends BaseService {
     await _redisService.delete('user:details:$userId');
     await _redisService.delete('user:stats');
   }
+
+  /// 搜索用户（用于添加成员）
+  Future<List<UserSearchResultModel>> searchUsers({
+    required String query,
+    int limit = 10,
+    String? excludeUserId,
+  }) async {
+    return execute(() async {
+      logInfo('搜索用户', context: {'query': query, 'limit': limit});
+
+      if (query.trim().isEmpty) {
+        return [];
+      }
+
+      final parameters = <String, dynamic>{
+        'query': '%${query.trim()}%',
+        'limit': limit,
+      };
+
+      final conditions = <String>['(u.username ILIKE @query OR u.email ILIKE @query OR u.display_name ILIKE @query)'];
+
+      // 排除特定用户
+      if (excludeUserId != null && excludeUserId.isNotEmpty) {
+        conditions.add('u.id != @exclude_user_id');
+        parameters['exclude_user_id'] = excludeUserId;
+      }
+
+      // 只返回活跃用户
+      conditions.add('u.is_active = true');
+
+      final sql = '''
+        SELECT 
+          u.id,
+          u.username,
+          u.display_name,
+          u.email,
+          u.avatar_url
+        FROM {users} u
+        WHERE ${conditions.join(' AND ')}
+        ORDER BY u.username ASC
+        LIMIT @limit
+      ''';
+
+      final result = await _databaseService.query(sql, parameters);
+
+      return result.map((row) {
+        final data = row.toColumnMap();
+        return UserSearchResultModel.fromJson(data);
+      }).toList();
+    }, operationName: 'searchUsers');
+  }
 }

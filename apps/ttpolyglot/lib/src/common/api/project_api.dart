@@ -302,6 +302,34 @@ class ProjectApi {
     }
   }
 
+  /// 更新项目成员上限
+  Future<ProjectModel?> updateMemberLimit({
+    required int projectId,
+    required int memberLimit,
+  }) async {
+    try {
+      log('[updateMemberLimit] projectId=$projectId, memberLimit=$memberLimit', name: 'ProjectApi');
+
+      final response = await HttpClient.put(
+        '/projects/$projectId/member-limit',
+        data: {'member_limit': memberLimit},
+      );
+
+      final result = Utils.toModel(
+        response.data,
+        (json) => ProjectModel.fromJson(json),
+      );
+      if (result == null) {
+        Logger.error('更新成员上限响应数据为空');
+        return null;
+      }
+      return result;
+    } catch (error, stackTrace) {
+      log('[updateMemberLimit]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      rethrow;
+    }
+  }
+
   /// 删除项目语言
   Future<bool> removeProjectLanguage({
     required int projectId,

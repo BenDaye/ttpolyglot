@@ -25,6 +25,7 @@ class UserController extends BaseController {
 
     // 需要认证的路由
     router.get('/', _getUsers);
+    router.get('/search', _searchUsers);
     router.get('/<id>', _getUserById);
     router.put('/<id>', _updateUser);
     router.delete('/<id>', _deleteUser);
@@ -278,6 +279,47 @@ class UserController extends BaseController {
       return ResponseUtils.error(
         message: '更新个人信息失败',
       );
+    }
+  }
+
+  /// 搜索用户
+  Future<Response> _searchUsers(Request request) async {
+    try {
+      final params = request.url.queryParameters;
+      final query = params['q'] ?? params['query'] ?? '';
+      final limitParam = params['limit'] ?? '10';
+      final limit = int.tryParse(limitParam) ?? 10;
+
+      if (query.trim().isEmpty) {
+        return ResponseUtils.success<List<UserSearchResultModel>>(
+          data: [],
+          message: '请输入搜索关键词',
+        );
+      }
+
+      if (limit < 1 || limit > 50) {
+        return ResponseUtils.error(message: '限制参数无效（1-50）');
+      }
+
+      final userId = getCurrentUserId(request);
+      final users = await _userService.searchUsers(
+        query: query,
+        limit: limit,
+        excludeUserId: userId,
+      );
+
+      return ResponseUtils.success<List<UserSearchResultModel>>(
+        data: users,
+        message: '搜索用户成功',
+      );
+    } catch (error, stackTrace) {
+      LoggerUtils.error(
+        '搜索用户失败',
+        error: error,
+        stackTrace: stackTrace,
+      );
+
+      return ResponseUtils.error(message: '搜索用户失败');
     }
   }
 

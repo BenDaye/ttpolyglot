@@ -947,4 +947,76 @@ class ProjectService extends BaseService {
       rethrow;
     }
   }
+
+  /// 更新项目成员上限（仅 Owner）
+  Future<ProjectModel> updateMemberLimit({
+    required String projectId,
+    required String userId,
+    required int newLimit,
+  }) async {
+    try {
+      logInfo('更新项目成员上限: project=$projectId, newLimit=$newLimit');
+
+      // 验证新上限范围
+      if (newLimit < 1 || newLimit > 1000) {
+        throwBusiness('成员上限必须在 1 到 1000 之间');
+      }
+
+      // 检查项目是否存在
+      final project = await getProjectById(projectId);
+      if (project == null) {
+        throwNotFound('项目不存在');
+      }
+
+      // 验证用户是否为项目 Owner
+      final isOwner = await _isUserProjectOwner(projectId, userId);
+      if (!isOwner) {
+        throwBusiness('只有项目所有者可以修改成员上限');
+      }
+
+      // 获取当前成员数
+      final currentMemberCount = project.project.membersCount;
+
+      // 验证新上限不能小于当前成员数
+      if (newLimit < currentMemberCount) {
+        throwBusiness('新上限不能小于当前成员数 ($currentMemberCount)');
+      }
+
+      // 更新成员上限
+      await _databaseService.query('''
+        UPDATE {projects}
+        SET member_limit = @new_limit, updated_at = CURRENT_TIMESTAMP
+        WHERE id = @project_id
+      ''', {
+        'project_id': projectId,
+        'new_limit': newLimit,
+      });
+
+      // 清除缓存
+      await _clearProjectCache(projectId);
+
+      // 获取更新后的项目信息
+      final updatedProject = await getProjectById(projectId);
+
+      logInfo('项目成员上限更新成功: $projectId -> $newLimit');
+
+      return updatedProject!.project;
+    } catch (error, stackTrace) {
+      logError('更新项目成员上限失败: $projectId', error: error, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 检查用户是否为项目 Owner
+  Future<bool> _isUserProjectOwner(String projectId, String userId) async {
+    final result = await _databaseService.query('''
+      SELECT 1 FROM {projects}
+      WHERE id = @project_id AND owner_id = @user_id
+    ''', {
+      'project_id': projectId,
+      'user_id': userId,
+    });
+
+    return result.isNotEmpty;
+  }
 }
