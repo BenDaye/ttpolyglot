@@ -768,11 +768,11 @@ class ProjectService extends BaseService {
 
       final result = await _databaseService.query('''
         SELECT l.id, l.code, l.name, l.native_name, l.flag_emoji, l.is_active, l.is_rtl, 
-               l.sort_order, l.created_at, l.updated_at
+               l.sort_order, l.created_at, l.updated_at, pl.is_primary
         FROM {project_languages} pl
         JOIN {languages} l ON pl.language_id = l.id
         WHERE pl.project_id = @project_id AND pl.is_active = true
-        ORDER BY l.sort_order, l.name
+        ORDER BY pl.is_primary DESC, l.sort_order, l.name
       ''', {'project_id': projectId});
 
       return result.map((row) => LanguageModel.fromJson(row.toColumnMap())).toList();
