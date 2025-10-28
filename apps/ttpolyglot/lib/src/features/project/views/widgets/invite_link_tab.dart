@@ -167,44 +167,39 @@ class InviteLinkTab extends GetView<ProjectMemberInviteController> {
   Widget _buildInviteLinkDisplay(Map<String, dynamic> invite) {
     final url = invite['invite_url'] as String;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('🔗 邀请链接', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12.0),
-            Container(
-              padding: const EdgeInsets.all(12.0),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(4.0),
-              ),
-              child: SelectableText(
-                url,
-                style: const TextStyle(fontSize: 14.0),
-              ),
-            ),
-            const SizedBox(height: 12.0),
-            Row(
-              children: [
-                ElevatedButton.icon(
-                  onPressed: controller.copyInviteLink,
-                  icon: const Icon(Icons.copy, size: 18.0),
-                  label: const Text('复制链接'),
+    return Builder(
+      builder: (context) => Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('🔗 邀请链接', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12.0),
+              Container(
+                padding: const EdgeInsets.all(12.0),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(4.0),
                 ),
-                const SizedBox(width: 8.0),
-                OutlinedButton.icon(
-                  onPressed: () {
-                    // TODO: 实现分享功能（可选）
-                  },
-                  icon: const Icon(Icons.share, size: 18.0),
-                  label: const Text('分享'),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: SelectableText(
+                        url,
+                        style: const TextStyle(fontSize: 14.0),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: controller.copyInviteLink,
+                      icon: const Icon(Icons.copy),
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -213,36 +208,38 @@ class InviteLinkTab extends GetView<ProjectMemberInviteController> {
   Widget _buildQRCode(Map<String, dynamic> invite) {
     final url = invite['invite_url'] as String;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            const Text('📱 邀请二维码', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16.0),
-            Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: Colors.grey[300]!),
-                borderRadius: BorderRadius.circular(8.0),
+    return Builder(
+      builder: (context) => Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              const Text('📱 邀请二维码', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16.0),
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: Theme.of(context).colorScheme.outline),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: QrImageView(
+                  data: url,
+                  version: QrVersions.auto,
+                  size: 200.0,
+                ),
               ),
-              child: QrImageView(
-                data: url,
-                version: QrVersions.auto,
-                size: 200.0,
+              const SizedBox(height: 12.0),
+              Text(
+                '扫描二维码加入项目',
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
-            ),
-            const SizedBox(height: 12.0),
-            Text(
-              '扫描二维码加入项目',
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-            const Text(
-              '（扫码后跳转到上方链接）',
-              style: TextStyle(fontSize: 12.0, color: Colors.grey),
-            ),
-          ],
+              Text(
+                '（扫码后跳转到上方链接）',
+                style: TextStyle(fontSize: 12.0, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -273,14 +270,16 @@ class InviteLinkTab extends GetView<ProjectMemberInviteController> {
   }
 
   Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(color: Colors.grey)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
-        ],
+    return Builder(
+      builder: (context) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
+          ],
+        ),
       ),
     );
   }
