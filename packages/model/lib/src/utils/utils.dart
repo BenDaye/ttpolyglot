@@ -30,19 +30,17 @@ final class Utils {
     // 如果对象有 toJson 方法，调用它
     try {
       final dynamic obj = data;
-      // 尝试调用 toJson 方法
-      return obj.toJson();
-    } catch (error) {
-      // 如果没有 toJson 方法或调用失败，直接返回原数据
-      print('toJsonValue error: $error');
-      // 如果无参数失败，尝试带参数的 toJson（泛型类型）
+      // 先尝试带参数的 toJson（泛型类型，如 PagerModel<T>）
       try {
-        final dynamic obj = data;
         return obj.toJson((item) => toJsonValue(item));
-      } catch (e) {
-        print('toJsonValue error: $error');
-        return data;
+      } catch (_) {
+        // 如果带参数失败，尝试无参数的 toJson
+        return obj.toJson();
       }
+    } catch (error) {
+      // 如果都失败，直接返回原数据
+      // print('toJsonValue error: $error');
+      return data;
     }
   }
 
