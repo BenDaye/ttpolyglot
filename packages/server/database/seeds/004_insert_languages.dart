@@ -22,10 +22,22 @@ class Seed004InsertLanguages extends BaseSeed {
       LoggerUtils.info('开始插入默认语言数据');
 
       // 定义默认语言列表
-      final languages = LanguageEnum.toArray();
+      final languages = LanguageEnum.toArray()
+          .map(
+            (item) => {
+              'code': item.code,
+              'name': item.name,
+              'native_name': item.nativeName,
+              'flag_emoji': item.flagEmoji,
+              'is_active': item.isActive,
+              'is_rtl': item.isRtl,
+              'sort_order': item.sortOrder,
+            },
+          )
+          .toList();
 
       // 插入语言数据
-      await insertData('languages', languages.map((item) => item.toJson()).toList());
+      await insertData('languages', languages);
 
       LoggerUtils.info('默认语言数据插入完成，共 ${languages.length} 种语言');
     } catch (error, stackTrace) {
