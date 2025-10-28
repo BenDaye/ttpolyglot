@@ -56,8 +56,8 @@ class TranslationService extends BaseService {
         }
 
         if (search != null && search.isNotEmpty) {
-          conditions
-              .add('(te.entry_key ILIKE @search OR te.source_text ILIKE @search OR te.target_text ILIKE @search)');
+          conditions.add(
+              '(te.entry_key ILIKE @search OR te.source_text ILIKE @search OR COALESCE(te.target_text, \'\') ILIKE @search)');
           parameters['search'] = '%$search%';
         }
 

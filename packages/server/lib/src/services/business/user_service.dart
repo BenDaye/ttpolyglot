@@ -41,7 +41,8 @@ class UserService extends BaseService {
       final parameters = <String, dynamic>{};
 
       if (search != null && search.isNotEmpty) {
-        conditions.add('(u.username ILIKE @search OR u.email ILIKE @search OR u.display_name ILIKE @search)');
+        conditions
+            .add('(u.username ILIKE @search OR u.email ILIKE @search OR COALESCE(u.display_name, \'\') ILIKE @search)');
         parameters['search'] = '%$search%';
       }
 
@@ -553,7 +554,9 @@ class UserService extends BaseService {
         'limit': limit,
       };
 
-      final conditions = <String>['(u.username ILIKE @query OR u.email ILIKE @query OR u.display_name ILIKE @query)'];
+      final conditions = <String>[
+        '(u.username ILIKE @query OR u.email ILIKE @query OR COALESCE(u.display_name, \'\') ILIKE @query)'
+      ];
 
       // 排除特定用户
       if (excludeUserId != null && excludeUserId.isNotEmpty) {

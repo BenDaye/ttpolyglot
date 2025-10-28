@@ -36,7 +36,7 @@ class ProjectService extends BaseService {
       final parameters = <String, dynamic>{};
 
       if (search != null && search.isNotEmpty) {
-        conditions.add('(p.name ILIKE @search OR p.description ILIKE @search)');
+        conditions.add('(p.name ILIKE @search OR COALESCE(p.description, \'\') ILIKE @search)');
         parameters['search'] = '%$search%';
       }
 
