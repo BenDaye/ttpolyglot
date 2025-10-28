@@ -156,6 +156,15 @@ class ServiceRegistry {
       lifetime: ServiceLifetime.singleton,
     );
 
+    // 注册项目成员服务
+    _container.register<ProjectMemberService>(
+      () => ProjectMemberService(
+        databaseService: _container.get<DatabaseService>(),
+        redisService: _container.get<RedisService>(),
+      ),
+      lifetime: ServiceLifetime.singleton,
+    );
+
     // 注册翻译服务
     _container.register<TranslationService>(
       () => TranslationService(
