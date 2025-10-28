@@ -61,14 +61,15 @@ class HttpClient {
     CancelToken? cancelToken,
     ProgressCallback? onReceiveProgress,
     Duration? delay,
+    ExtraModel? extra,
   }) {
     return _fetch<T>(
       delay,
-      ExtraModel.fromJson(options?.extra ?? {}),
+      extra,
       dio.get<dynamic>(
         path,
         queryParameters: query,
-        options: options,
+        options: options?.copyWith(extra: extra?.toJson() ?? {}),
         cancelToken: cancelToken,
         onReceiveProgress: onReceiveProgress,
       ),
@@ -85,15 +86,16 @@ class HttpClient {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
     Duration? delay,
+    ExtraModel? extra,
   }) {
     return _fetch<T>(
       delay,
-      ExtraModel.fromJson(options?.extra ?? {}),
+      extra,
       dio.post<dynamic>(
         path,
         data: data,
         queryParameters: query,
-        options: options,
+        options: options?.copyWith(extra: extra?.toJson() ?? {}),
         cancelToken: cancelToken,
         onSendProgress: onSendProgress,
         onReceiveProgress: onReceiveProgress,
@@ -111,15 +113,16 @@ class HttpClient {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
     Duration? delay,
+    ExtraModel? extra,
   }) {
     return _fetch<T>(
       delay,
-      ExtraModel.fromJson(options?.extra ?? {}),
+      extra,
       dio.put<dynamic>(
         path,
         data: data,
         queryParameters: query,
-        options: options,
+        options: options?.copyWith(extra: extra?.toJson() ?? {}),
         cancelToken: cancelToken,
         onSendProgress: onSendProgress,
         onReceiveProgress: onReceiveProgress,
@@ -137,15 +140,16 @@ class HttpClient {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
     Duration? delay,
+    ExtraModel? extra,
   }) {
     return _fetch<T>(
       delay,
-      ExtraModel.fromJson(options?.extra ?? {}),
+      extra,
       dio.patch<dynamic>(
         path,
         data: data,
         queryParameters: query,
-        options: options,
+        options: options?.copyWith(extra: extra?.toJson() ?? {}),
         cancelToken: cancelToken,
         onSendProgress: onSendProgress,
         onReceiveProgress: onReceiveProgress,
@@ -161,15 +165,16 @@ class HttpClient {
     Options? options,
     CancelToken? cancelToken,
     Duration? delay,
+    ExtraModel? extra,
   }) {
     return _fetch<T>(
       delay,
-      ExtraModel.fromJson(options?.extra ?? {}),
+      extra,
       dio.delete<dynamic>(
         path,
         data: data,
         queryParameters: query,
-        options: options,
+        options: options?.copyWith(extra: extra?.toJson() ?? {}),
         cancelToken: cancelToken,
       ),
     );
@@ -178,10 +183,11 @@ class HttpClient {
   /// 统一请求处理
   static Future<BaseModel<T>> _fetch<T>(
     Duration? delay,
-    ExtraModel extra,
+    ExtraModel? extra,
     Future<Response<dynamic>> future,
   ) {
     final start = DateTime.now().millisecondsSinceEpoch;
+    final finalExtra = extra ?? ExtraModel.fromJson({});
 
     return future.then<BaseModel<T>>((response) async {
       final current = DateTime.now().millisecondsSinceEpoch - start;
@@ -200,7 +206,7 @@ class HttpClient {
         type: apiResponse.type,
         data: apiResponse.data,
       );
-      return _successCallback(typedResponse, extra);
+      return _successCallback(typedResponse, finalExtra);
     }).catchError((err) {
       // 定义错误类型
       BaseModel<T> response;
@@ -221,7 +227,7 @@ class HttpClient {
       // 错误处理
       throw _failCallback(
         response: response,
-        extra: extra,
+        extra: finalExtra,
         statusCode: statusCode,
       );
     });

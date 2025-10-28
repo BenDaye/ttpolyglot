@@ -10,7 +10,7 @@ class UserApi {
     int limit = 10,
   }) async {
     try {
-      final response = await HttpClient.get<Map<String, dynamic>>(
+      final response = await HttpClient.get<List<dynamic>>(
         '/users/search',
         query: {
           'q': query,
