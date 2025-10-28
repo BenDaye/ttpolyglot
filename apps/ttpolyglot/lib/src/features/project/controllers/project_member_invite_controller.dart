@@ -114,7 +114,10 @@ class ProjectMemberInviteController extends GetxController {
   /// 执行实际的搜索请求
   Future<void> _performSearch(String query) async {
     try {
-      final results = await _userApi.searchUsers(query: query, limit: 10);
+      final results = await _userApi.searchUsers(
+        query: query,
+        limit: 10,
+      );
       _searchResults.assignAll(results ?? []);
     } catch (error, stackTrace) {
       log('[_performSearch]', error: error, stackTrace: stackTrace, name: 'ProjectMemberInviteController');

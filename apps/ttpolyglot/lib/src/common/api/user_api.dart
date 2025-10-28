@@ -15,6 +15,7 @@ class UserApi {
         query: {
           'q': query,
           'limit': limit,
+          // 'include_self': true,
         },
       );
 

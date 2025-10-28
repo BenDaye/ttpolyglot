@@ -168,6 +168,7 @@ class UserController extends BaseController {
       final query = params['q'] ?? params['query'] ?? '';
       final limitParam = params['limit'] ?? '10';
       final limit = int.tryParse(limitParam) ?? 10;
+      final includeSelf = params['include_self'] == 'true';
 
       if (query.trim().isEmpty) {
         return ResponseUtils.success<List<UserSearchResultModel>>(
@@ -184,7 +185,7 @@ class UserController extends BaseController {
       final users = await _userService.searchUsers(
         query: query,
         limit: limit,
-        excludeUserId: userId,
+        excludeUserId: includeSelf ? null : userId,
       );
 
       return ResponseUtils.success<List<UserSearchResultModel>>(
