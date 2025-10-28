@@ -21,6 +21,7 @@ class TTPolyglotServer {
   late final UserService _userService;
   late final UserSettingsService _userSettingsService;
   late final ProjectService _projectService;
+  late final ProjectMemberService _projectMemberService;
   late final PermissionService _permissionService;
   late final FileUploadService _fileUploadService;
   HttpServer? _server;
@@ -35,6 +36,7 @@ class TTPolyglotServer {
     _userService = serviceRegistry.get<UserService>();
     _userSettingsService = serviceRegistry.get<UserSettingsService>();
     _projectService = serviceRegistry.get<ProjectService>();
+    _projectMemberService = serviceRegistry.get<ProjectMemberService>();
     _permissionService = serviceRegistry.get<PermissionService>();
     _fileUploadService = serviceRegistry.get<FileUploadService>();
   }
@@ -149,6 +151,7 @@ class TTPolyglotServer {
       userService: _userService,
       userSettingsService: _userSettingsService,
       projectService: _projectService,
+      projectMemberService: _projectMemberService,
       permissionService: _permissionService,
       fileUploadService: _fileUploadService,
       startTime: _startTime,

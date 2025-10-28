@@ -7,10 +7,12 @@ import '../../services/services.dart';
 /// 项目路由模块
 class ProjectRoutes {
   final ProjectService projectService;
+  final ProjectMemberService projectMemberService;
   final Handler Function(Handler) withAuth;
 
   ProjectRoutes({
     required this.projectService,
+    required this.projectMemberService,
     required this.withAuth,
   });
 
@@ -19,6 +21,9 @@ class ProjectRoutes {
     final router = Router();
     final projectController = ProjectController(
       projectService: projectService,
+    );
+    final projectMemberController = ProjectMemberController(
+      projectMemberService: projectMemberService,
     );
 
     // 项目基本操作
@@ -49,6 +54,12 @@ class ProjectRoutes {
     // 项目统计
     router.get('/projects/<id>/statistics', projectController.getProjectStatistics);
     router.get('/projects/<id>/activity', projectController.getProjectActivity);
+
+    // 项目成员上限
+    router.patch('/projects/<id>/member-limit', projectController.updateMemberLimit);
+
+    // 挂载项目成员邀请相关路由
+    router.mount('/projects', projectMemberController.router.call);
 
     return router;
   }

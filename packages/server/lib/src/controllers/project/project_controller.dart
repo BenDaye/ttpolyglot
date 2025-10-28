@@ -30,6 +30,7 @@ class ProjectController extends BaseController {
     router.get('/<id>/members', _getProjectMembers);
     router.post('/<id>/members', _addProjectMember);
     router.delete('/<id>/members/<userId>', _removeProjectMember);
+    router.patch('/<id>/member-limit', _updateMemberLimit);
     return router;
   }
 
@@ -53,6 +54,7 @@ class ProjectController extends BaseController {
   Future<Response> Function(Request, String) get getProjectStatistics => _getProjectStatistics;
   Future<Response> Function(Request, String) get getProjectActivity => _getProjectActivity;
   Future<Response> Function(Request) get stats => _getProjectStats;
+  Future<Response> Function(Request, String) get updateMemberLimit => _updateMemberLimit;
 
   Future<Response> _getProjects(Request request) async {
     try {
@@ -536,6 +538,59 @@ class ProjectController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('获取项目活动失败: $id', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(message: '获取项目活动失败');
+    }
+  }
+
+  /// 更新项目成员上限
+  Future<Response> _updateMemberLimit(Request request, String id) async {
+    try {
+      final projectId = int.tryParse(id);
+      if (projectId == null) {
+        return ResponseUtils.error(message: '项目ID格式无效');
+      }
+
+      final userId = getCurrentUserId(request);
+      if (userId == null) {
+        return ResponseUtils.error(message: '用户信息不存在');
+      }
+
+      final body = await request.readAsString();
+      final data = jsonDecode(body) as Map<String, dynamic>;
+
+      final memberLimit = data['member_limit'] ?? data['memberLimit'];
+      if (memberLimit == null) {
+        return ResponseUtils.error(message: '成员上限不能为空');
+      }
+
+      final newLimit = memberLimit is int ? memberLimit : int.tryParse(memberLimit.toString());
+      if (newLimit == null) {
+        return ResponseUtils.error(message: '成员上限格式无效');
+      }
+
+      final updatedProject = await _projectService.updateMemberLimit(
+        projectId: id,
+        userId: userId,
+        newLimit: newLimit,
+      );
+
+      return ResponseUtils.success<ProjectModel>(
+        message: '成员上限已更新',
+        data: updatedProject,
+      );
+    } catch (error, stackTrace) {
+      LoggerUtils.error('更新成员上限失败: $id', error: error, stackTrace: stackTrace);
+
+      if (error is ValidationException) {
+        return ResponseUtils.error(message: error.message);
+      }
+      if (error is BusinessException) {
+        return ResponseUtils.error(message: error.message);
+      }
+      if (error is NotFoundException) {
+        return ResponseUtils.error(message: '项目不存在');
+      }
+
+      return ResponseUtils.error(message: '更新成员上限失败');
     }
   }
 }

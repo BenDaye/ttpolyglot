@@ -18,6 +18,7 @@ class ApiRoutes {
   final UserService userService;
   final UserSettingsService userSettingsService;
   final ProjectService projectService;
+  final ProjectMemberService projectMemberService;
   final PermissionService permissionService;
   final FileUploadService fileUploadService;
   final DateTime startTime;
@@ -33,6 +34,7 @@ class ApiRoutes {
     required this.userService,
     required this.userSettingsService,
     required this.projectService,
+    required this.projectMemberService,
     required this.permissionService,
     required this.fileUploadService,
     required this.startTime,
@@ -94,6 +96,7 @@ class ApiRoutes {
     // 项目路由模块（整体应用认证）
     final projectRoutes = ProjectRoutes(
       projectService: projectService,
+      projectMemberService: projectMemberService,
       withAuth: _withAuth,
     );
     _router.mount('/', _withAuth(projectRoutes.configure().call));
