@@ -9,7 +9,7 @@ class ProjectConverter {
   ProjectConverter._();
 
   /// 将 ProjectModel (API) 转换为 Project (Core)
-  static Project toProject(ProjectModel model) {
+  static Project toProject(ProjectModel model, {List<LanguageModel>? languages}) {
     try {
       // 构建主语言 - 通过 ID 查找语言信息
       final languageModel = _getLanguageById(model.primaryLanguageId);
@@ -32,12 +32,30 @@ class ProjectConverter {
         updatedAt: model.updatedAt,
       );
 
+      // 构建目标语言列表（排除主语言）
+      final targetLanguages = <Language>[];
+      if (languages != null) {
+        for (final langModel in languages) {
+          // 排除主语言，只添加目标语言
+          if (langModel.id != model.primaryLanguageId) {
+            targetLanguages.add(Language(
+              id: langModel.id,
+              code: langModel.code.code,
+              name: langModel.name,
+              nativeName: langModel.nativeName ?? langModel.name,
+              isRtl: langModel.isRtl,
+              sortIndex: langModel.sortOrder,
+            ));
+          }
+        }
+      }
+
       return Project(
         id: model.id.toString(), // API 使用 int，Core 使用 String
         name: model.name,
         description: model.description ?? '',
         primaryLanguage: primaryLanguage,
-        targetLanguages: [], // 目标语言需要单独查询或从详情接口获取
+        targetLanguages: targetLanguages,
         owner: owner,
         createdAt: model.createdAt,
         updatedAt: model.updatedAt,
@@ -46,6 +64,19 @@ class ProjectConverter {
       );
     } catch (error, stackTrace) {
       log('[toProject]', error: error, stackTrace: stackTrace, name: 'ProjectConverter');
+      rethrow;
+    }
+  }
+
+  /// 将 ProjectDetailModel 转换为 Project (Core)，包含完整的语言列表
+  static Project toProjectFromDetail(ProjectDetailModel detailModel) {
+    try {
+      return toProject(
+        detailModel.project,
+        languages: detailModel.languages,
+      );
+    } catch (error, stackTrace) {
+      log('[toProjectFromDetail]', error: error, stackTrace: stackTrace, name: 'ProjectConverter');
       rethrow;
     }
   }

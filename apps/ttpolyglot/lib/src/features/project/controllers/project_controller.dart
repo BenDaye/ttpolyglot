@@ -120,8 +120,8 @@ class ProjectController extends GetxController {
       // 从 API 获取项目详情
       final projectDetailModel = await _projectApi.getProject(projectIdInt);
       if (projectDetailModel != null) {
-        // 将 ProjectModel 转换为 Project
-        final project = ProjectConverter.toProject(projectDetailModel.project);
+        // 将 ProjectDetailModel 转换为 Project（包含语言列表）
+        final project = ProjectConverter.toProjectFromDetail(projectDetailModel);
 
         // 保存成员列表
         if (projectDetailModel.members != null) {
@@ -131,7 +131,8 @@ class ProjectController extends GetxController {
           _members.clear();
         }
 
-        Logger.info('项目加载成功: ID=${project.id}, 名称="${project.name}"');
+        Logger.info(
+            '项目加载成功: ID=${project.id}, 名称="${project.name}", 主语言=${project.primaryLanguage.code}, 目标语言=${project.targetLanguages.length} 个');
         _project.value = project;
         return;
       }
