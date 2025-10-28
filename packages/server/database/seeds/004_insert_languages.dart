@@ -25,7 +25,7 @@ class Seed004InsertLanguages extends BaseSeed {
       final languages = LanguageEnum.toArray()
           .map(
             (item) => {
-              'code': item.code,
+              'code': item.code.code,
               'name': item.name,
               'native_name': item.nativeName,
               'flag_emoji': item.flagEmoji,
