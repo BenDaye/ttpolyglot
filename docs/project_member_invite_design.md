@@ -1086,7 +1086,7 @@ class JoinProjectController extends GetxController {
 
 ### Phase 1: 数据库和后端基础（第1-4天）
 
-- [x] TODO 1: 修改 projects 表，添加 member_limit 字段
+- [ ] TODO 1: 修改 projects 表，添加 member_limit 字段
 - [ ] TODO 2: 扩展 project_members 表，添加邀请相关字段（融合邀请功能）
 - [ ] TODO 3: 更新 ProjectModel 和 ProjectMemberModel
 - [ ] TODO 4: 实现用户搜索 API
