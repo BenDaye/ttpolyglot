@@ -10,6 +10,12 @@
 - [权限控制](#权限控制)
 - [成员上限管理](#成员上限管理)
 - [实现步骤](#实现步骤)
+- [邀请链接与二维码统一设计](#邀请链接与二维码统一设计)
+- [依赖包](#依赖包)
+- [安全考虑](#安全考虑)
+- [监控和日志](#监控和日志)
+- [未来扩展](#未来扩展)
+- [附录](#附录)
 
 ---
 
@@ -21,9 +27,17 @@
 
 1. **邀请链接/二维码**（适合外部邀请）
    - 生成唯一的邀请链接
-   - 支持二维码扫描加入
+   - 自动生成对应的二维码
+   - **核心原理**：
+     - ✨ **链接和二维码是同一个 URL 的两种展现形式**
+     - 📋 复制链接分享 → 点击打开加入页面
+     - 📱 扫描二维码 → 跳转到同一个 URL → 打开加入页面
+     - 🔄 两者本质完全相同，只是触发方式不同（手动点击 vs 扫码）
    - 可设置有效期、使用次数、默认角色
-   - 用户点击链接后跳转到加入确认页面
+   - **UI 布局（一体化展示）**：
+     - 🔗 上方：邀请链接文本（可一键复制、分享）
+     - 📱 下方：邀请二维码图片（内容=上方链接，可保存、截图分享）
+     - 💡 说明：扫描二维码后跳转到上方链接
 
 2. **直接添加成员**（适合内部已知用户）
    - 通过用户名/邮箱搜索用户
@@ -31,7 +45,13 @@
    - 支持批量添加多个用户
    - 立即生效，无需用户确认
 
-3. **成员上限管理**
+3. **加入页面** (`/join/:inviteCode`)
+   - 用户点击邀请链接或扫描二维码后打开的独立页面
+   - 显示项目信息、邀请人、将获得的角色等
+   - 提供"接受邀请"和"拒绝"按钮
+   - 处理各种错误状态（过期、已满、无效等）
+
+4. **成员上限管理**
    - 每个项目有独立的成员上限（存储在 `projects.member_limit` 字段）
    - 创建项目时默认上限为 10 人
    - **仅项目所有者（Owner）可以在项目设置中修改上限**（1-1000 人）
@@ -601,6 +621,7 @@ class ProjectMemberInviteController extends GetxController {
   final _maxUses = Rxn<int>();     // 无限
   final _generatedInvite = Rxn<ProjectInvite>();
   final _inviteList = <ProjectInvite>[].obs;
+  final _isGenerating = false.obs;
   
   // 直接添加相关
   final _searchQuery = ''.obs;
@@ -614,24 +635,114 @@ class ProjectMemberInviteController extends GetxController {
   bool get canInvite => currentMemberCount < memberLimit;
   int get remainingSlots => memberLimit - currentMemberCount;
   
-  // 生成邀请链接
-  Future<void> generateInviteLink();
+  // 邀请链接方法
+  Future<void> generateInviteLink();           // 生成邀请链接和二维码
+  void copyInviteLink(String url);             // 复制链接到剪贴板
+  Future<void> saveQRCode();                   // 保存二维码图片
+  Future<void> shareInviteLink();              // 分享邀请链接（可选）
   
-  // 复制链接
-  void copyInviteLink(String url);
-  
-  // 搜索用户
+  // 直接添加方法
   Future<void> searchUsers(String query);
-  
-  // 选择/取消选择用户
   void toggleUserSelection(UserSearchResult user);
-  
-  // 批量添加成员
   Future<void> addSelectedMembers();
   
   // 检查是否可以添加更多成员
   bool canAddMembers(int count) => 
     currentMemberCount + count <= memberLimit;
+}
+```
+
+#### JoinProjectController
+
+处理加入项目页面的逻辑（`/join/:inviteCode`）。
+
+```dart
+class JoinProjectController extends GetxController {
+  final String inviteCode;
+  
+  // 状态
+  final _inviteInfo = Rxn<InviteInfo>();
+  final _isLoading = true.obs;
+  final _error = Rxn<String>();
+  final _isAccepting = false.obs;
+  
+  // Getters
+  InviteInfo? get inviteInfo => _inviteInfo.value;
+  bool get isLoading => _isLoading.value;
+  String? get error => _error.value;
+  bool get isAccepting => _isAccepting.value;
+  
+  bool get isValid => inviteInfo != null && 
+                      !inviteInfo!.isExpired && 
+                      !inviteInfo!.isUsesExhausted &&
+                      inviteInfo!.project.currentMemberCount < inviteInfo!.project.memberLimit;
+  
+  @override
+  void onInit() {
+    super.onInit();
+    loadInviteInfo();
+  }
+  
+  // 加载邀请信息
+  Future<void> loadInviteInfo() async {
+    try {
+      _isLoading.value = true;
+      _error.value = null;
+      
+      final info = await ProjectApi.getInviteInfo(inviteCode);
+      _inviteInfo.value = info;
+    } catch (e, stackTrace) {
+      log('[loadInviteInfo]', error: e, stackTrace: stackTrace, name: 'JoinProjectController');
+      _error.value = _getErrorMessage(e);
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+  
+  // 接受邀请
+  Future<void> acceptInvite() async {
+    if (!isValid) return;
+    
+    try {
+      _isAccepting.value = true;
+      await ProjectApi.acceptInvite(inviteCode);
+      
+      // 成功后跳转到项目页面
+      Get.offNamed('/projects/${inviteInfo!.project.id}');
+      
+      // 显示成功提示
+      Get.snackbar('成功', '你已成功加入项目 ${inviteInfo!.project.name}');
+    } catch (e, stackTrace) {
+      log('[acceptInvite]', error: e, stackTrace: stackTrace, name: 'JoinProjectController');
+      Get.snackbar('失败', _getErrorMessage(e));
+    } finally {
+      _isAccepting.value = false;
+    }
+  }
+  
+  // 拒绝邀请
+  void declineInvite() {
+    Get.back();
+  }
+  
+  String _getErrorMessage(dynamic error) {
+    // 根据错误类型返回友好的错误信息
+    if (error is ApiException) {
+      switch (error.code) {
+        case 404:
+          return '邀请链接不存在或已被撤销';
+        case 403:
+          return '你已经是项目成员';
+        case 410:
+          return '邀请链接已过期';
+        case 423:
+          return '项目成员已达上限';
+        default:
+          return error.message ?? '未知错误';
+      }
+    }
+    return '网络连接失败，请稍后重试';
+  }
 }
 ```
 
@@ -673,6 +784,8 @@ class ProjectMemberInviteController extends GetxController {
 
 ### 2. 邀请成员对话框
 
+对话框支持两种模式，通过顶部的标签页切换：
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  邀请成员到项目                                     ✕   │
@@ -684,6 +797,8 @@ class ProjectMemberInviteController extends GetxController {
 │                                                         │
 │  Tab 1: 邀请链接                                        │
 │  ┌───────────────────────────────────────────────────┐ │
+│  │ 📋 邀请设置                                       │ │
+│  │                                                   │ │
 │  │ 角色权限      [Member      ▼]                    │ │
 │  │                                                   │ │
 │  │ 有效期        [7天          ▼]                   │ │
@@ -695,20 +810,38 @@ class ProjectMemberInviteController extends GetxController {
 │  │ [生成邀请链接]                                    │ │
 │  └───────────────────────────────────────────────────┘ │
 │                                                         │
-│  生成的链接：                                           │
 │  ┌───────────────────────────────────────────────────┐ │
-│  │ 🔗 https://app.ttpolyglot.com/join/a1b2c3...     │ │
+│  │ 🔗 邀请链接                                       │ │
 │  │                                                   │ │
-│  │ [复制链接]  [查看二维码]                         │ │
+│  │ https://app.ttpolyglot.com/join/a1b2c3d4-...     │ │
 │  │                                                   │ │
-│  │ ┌─────────────────┐                              │ │
-│  │ │                 │  ← 二维码                     │ │
-│  │ │    QR CODE      │                              │ │
-│  │ │                 │                              │ │
-│  │ └─────────────────┘                              │ │
+│  │ [📋 复制链接]  [🔗 分享]                         │ │
+│  └───────────────────────────────────────────────────┘ │
+│                                                         │
+│  ┌───────────────────────────────────────────────────┐ │
+│  │ 📱 邀请二维码                                     │ │
+│  │                                                   │ │
+│  │          ┌─────────────────┐                     │ │
+│  │          │                 │                     │ │
+│  │          │                 │                     │ │
+│  │          │    QR CODE      │                     │ │
+│  │          │                 │                     │ │
+│  │          │                 │                     │ │
+│  │          └─────────────────┘                     │ │
+│  │                                                   │ │
+│  │     扫描二维码加入项目                             │ │
+│  │     （扫码后跳转到上方链接）                        │ │
+│  │                                                   │ │
+│  │ [💾 保存二维码]                                   │ │
+│  └───────────────────────────────────────────────────┘ │
+│                                                         │
+│  ┌───────────────────────────────────────────────────┐ │
+│  │ 📊 邀请信息                                       │ │
 │  │                                                   │ │
 │  │ 💡 有效期至: 2025-11-04                           │ │
 │  │ 📊 已使用: 0 / 无限次                             │ │
+│  │ 👥 邀请角色: 成员                                 │ │
+│  │ 📅 创建时间: 2025-10-28 15:30                     │ │
 │  └───────────────────────────────────────────────────┘ │
 │                                                         │
 │  ---                                                    │
@@ -734,6 +867,13 @@ class ProjectMemberInviteController extends GetxController {
 ```
 
 ### 3. 加入项目页面 (/join/:inviteCode)
+
+用户点击邀请链接或扫描二维码后，会打开这个独立页面。
+
+**路由说明：**
+- 链接格式：`https://app.ttpolyglot.com/join/{inviteCode}`
+- 二维码内容：同上链接
+- 点击链接和扫码本质相同，都跳转到此页面
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -777,9 +917,17 @@ class ProjectMemberInviteController extends GetxController {
 
 🚫 邀请链接无效
 该邀请链接不存在或已被撤销
+
+---
+
+ℹ️ 你已经是项目成员
+你已经是该项目的成员，无需重复加入
+[前往项目]
 ```
 
 ### 4. 项目设置 - 成员上限配置
+
+> 注：此部分在项目设置页面中，而非邀请成员对话框
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -958,14 +1106,30 @@ class ProjectMemberInviteController extends GetxController {
 - [ ] TODO 8: 更新前端 Project 和 ProjectMember 模型
 - [ ] TODO 9: 实现 ProjectApi 所有方法（包括邀请相关接口）
 
-### Phase 4: 前端 UI（第10-14天）
+### Phase 4: 前端 UI（第10-15天）
 
-- [ ] TODO 10: 创建邀请成员对话框控制器
-- [ ] TODO 11: 创建邀请链接 Tab UI（包含二维码）
+- [ ] TODO 10: 创建邀请成员对话框控制器（ProjectMemberInviteController）
+- [ ] TODO 11: 创建邀请链接 Tab UI
+  - 邀请设置表单（角色、有效期、使用次数）
+  - 邀请链接展示区（上方，可复制）
+  - 邀请二维码展示区（下方，使用 qr_flutter 生成）
+  - 邀请信息统计卡片
+  - 复制、分享、保存二维码功能
 - [ ] TODO 12: 创建直接添加成员 Tab UI
-- [ ] TODO 13: 更新成员列表页面，显示成员数量和上限
-- [ ] TODO 14: 实现编辑/移除成员功能
-- [ ] **TODO 15: 在项目设置中添加成员上限配置**
+  - 用户搜索表单
+  - 搜索结果列表（支持多选）
+  - 角色选择
+  - 批量添加功能
+- [ ] TODO 13: 创建加入项目页面（JoinProjectView）和控制器（JoinProjectController）
+  - 加载邀请信息
+  - 显示项目详情和权限说明
+  - 接受/拒绝邀请按钮
+  - 错误状态处理（过期、已满、无效、已是成员等）
+  - 成功后跳转到项目页面
+- [ ] TODO 14: 添加 `/join/:inviteCode` 路由
+- [ ] TODO 15: 更新成员列表页面，显示成员数量和上限
+- [ ] TODO 16: 实现编辑/移除成员功能
+- [ ] **TODO 17: 在项目设置中添加成员上限配置**
   - 显示当前配置（上限/成员数/可用名额）
   - 修改成员上限表单（带实时验证）
   - 集成保存功能（调用 updateMemberLimit API）
@@ -974,12 +1138,152 @@ class ProjectMemberInviteController extends GetxController {
     - Admin/Member/Viewer：显示只读信息，禁用编辑功能
     - 显示权限提示："只有项目所有者可以修改成员上限"
   - 友好的错误提示和成功反馈
-- [ ] TODO 16: 创建加入项目页面
 
-### Phase 5: 测试和优化（第15天）
+### Phase 5: 测试和优化（第16天）
 
-- [ ] TODO 17: 集成测试
-- [ ] TODO 18: 优化和完善
+- [ ] TODO 18: 集成测试
+- [ ] TODO 19: 优化和完善
+
+---
+
+## 邀请链接与二维码统一设计
+
+### 1. 核心原理
+
+邀请链接和二维码是同一个邀请机制的两种展现形式：
+
+```
+邀请链接生成
+   ↓
+生成 URL: https://app.ttpolyglot.com/join/{inviteCode}
+   ↓
+   ├─→ 文本链接（可复制、分享）
+   │   用户点击 → 打开加入页面
+   │
+   └─→ 二维码图片（可扫描、保存）
+       用户扫码 → 打开同一个链接 → 加入页面
+```
+
+**关键点：**
+- 链接和二维码指向同一个 URL
+- 两者只是触发方式不同，后续流程完全相同
+- 都需要用户打开链接后在加入页面确认
+
+### 2. 工作流程
+
+**邀请者：**
+```
+1. 在项目成员页面点击"邀请成员"
+   ↓
+2. 切换到"邀请链接" Tab
+   ↓
+3. 设置角色、有效期、使用次数
+   ↓
+4. 点击"生成邀请链接"
+   ↓
+5. 获得：
+   - 邀请链接（上方）：可复制、分享
+   - 邀请二维码（下方）：可保存、截图分享
+```
+
+**被邀请者：**
+```
+方式 A：收到链接
+1. 点击链接
+   ↓
+2. 浏览器/应用打开加入页面 (/join/{inviteCode})
+   ↓
+3. 查看项目信息和角色
+   ↓
+4. 点击"接受邀请"
+   ↓
+5. 成功加入项目
+
+方式 B：收到二维码
+1. 使用手机扫描二维码
+   ↓
+2. 跳转到同一个加入页面
+   ↓
+3-5. 后续流程与方式 A 相同
+```
+
+### 3. UI 布局设计
+
+在邀请链接 Tab 中，采用上下结构：
+
+```
+┌───────────────────────────────────────┐
+│ 📋 邀请设置                            │
+│ [角色] [有效期] [使用次数]             │
+│ [生成邀请链接]                         │
+└───────────────────────────────────────┘
+                 ↓
+┌───────────────────────────────────────┐
+│ 🔗 邀请链接                            │
+│ https://app.ttpolyglot.com/join/...   │
+│ [复制链接] [分享]                      │
+└───────────────────────────────────────┘
+                 ↓
+┌───────────────────────────────────────┐
+│ 📱 邀请二维码                          │
+│      [二维码图片]                      │
+│   扫描后跳转到上方链接                  │
+│ [保存二维码]                           │
+└───────────────────────────────────────┘
+                 ↓
+┌───────────────────────────────────────┐
+│ 📊 邀请信息                            │
+│ 有效期、使用次数、角色等统计            │
+└───────────────────────────────────────┘
+```
+
+### 4. 技术实现
+
+**生成邀请：**
+```dart
+Future<void> generateInviteLink() async {
+  final invite = await ProjectApi.generateInviteLink(
+    projectId: projectId,
+    role: selectedRole,
+    expiresInDays: expiresIn,
+    maxUses: maxUses,
+  );
+  
+  // invite.inviteUrl 是完整链接
+  // 使用 qr_flutter 生成二维码图片
+  // 二维码内容 = invite.inviteUrl
+}
+```
+
+**二维码生成：**
+```dart
+QrImageView(
+  data: invite.inviteUrl,  // 完整链接
+  version: QrVersions.auto,
+  size: 200.0,
+)
+```
+
+**处理加入（/join/:inviteCode 页面）：**
+```dart
+// 无论是点击链接还是扫码，都会打开这个页面
+class JoinProjectView extends StatelessWidget {
+  final String inviteCode;
+  
+  // 1. 加载邀请信息
+  // 2. 显示项目详情
+  // 3. 用户点击"接受邀请"
+  // 4. 调用 API 加入项目
+}
+```
+
+### 5. 优势
+
+✅ **统一原理**：链接和二维码本质相同，降低理解成本  
+✅ **灵活分享**：可以选择复制链接或分享二维码图片  
+✅ **跨平台**：链接适合桌面端，二维码适合移动端  
+✅ **简单实现**：无需复杂的扫码逻辑，只需一个加入页面  
+✅ **用户友好**：无论何种方式，最终都是在清晰的页面上确认加入  
 
 ---
 
@@ -989,16 +1293,20 @@ class ProjectMemberInviteController extends GetxController {
 
 ```yaml
 dependencies:
-  qr_flutter: ^4.1.0           # 生成二维码
-  flutter/services: ^0.0.0     # 复制到剪贴板
-  get: ^4.6.6                  # 状态管理和路由
+  qr_flutter: ^4.1.0           # 生成二维码（必需）
+  flutter/services: ^0.0.0     # 复制到剪贴板（必需）
+  get: ^4.6.6                  # 状态管理和路由（已有）
 ```
 
 **可选：**
 ```yaml
-  mobile_scanner: ^3.5.5       # 扫描二维码
   share_plus: ^7.2.1           # 分享邀请链接
+  path_provider: ^2.1.0        # 保存二维码图片到本地
 ```
+
+**说明：**
+- `mobile_scanner` 不再需要，因为扫码由系统浏览器/手机相机处理
+- 二维码扫描后直接打开链接，无需应用内扫码功能
 
 ### 后端
 
@@ -1107,7 +1415,10 @@ dependencies:
 
 ---
 
-**文档版本：** v1.0  
+**文档版本：** v1.2  
 **最后更新：** 2025-10-28  
 **作者：** TTPolyglot Team
+
+**更新日志：**
+- v1.0 (2025-10-28): 初始版本
 
