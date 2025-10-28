@@ -127,6 +127,32 @@ class HttpClient {
     );
   }
 
+  /// PATCH 请求
+  static Future<BaseModel<T>> patch<T>(
+    String path, {
+    Object? data,
+    Map<String, dynamic>? query,
+    Options? options,
+    CancelToken? cancelToken,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+    Duration? delay,
+  }) {
+    return _fetch<T>(
+      delay,
+      ExtraModel.fromJson(options?.extra ?? {}),
+      dio.patch<dynamic>(
+        path,
+        data: data,
+        queryParameters: query,
+        options: options,
+        cancelToken: cancelToken,
+        onSendProgress: onSendProgress,
+        onReceiveProgress: onReceiveProgress,
+      ),
+    );
+  }
+
   /// DELETE 请求
   static Future<BaseModel<T>> delete<T>(
     String path, {

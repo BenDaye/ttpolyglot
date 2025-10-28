@@ -121,6 +121,12 @@ Future<void> _initializeService() async {
     permanent: true,
   );
 
+  // 注册用户 API
+  Get.put<UserApi>(
+    UserApi(),
+    permanent: true,
+  );
+
   // 注册项目 API
   Get.put<ProjectApi>(
     ProjectApi(),

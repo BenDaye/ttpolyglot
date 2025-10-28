@@ -310,7 +310,7 @@ class ProjectApi {
     try {
       log('[updateMemberLimit] projectId=$projectId, memberLimit=$memberLimit', name: 'ProjectApi');
 
-      final response = await HttpClient.put(
+      final response = await HttpClient.patch(
         '/projects/$projectId/member-limit',
         data: {'member_limit': memberLimit},
       );
