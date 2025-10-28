@@ -20,12 +20,19 @@ TokenInfoModel _$TokenInfoModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$TokenInfoModel {
+  /// 访问令牌
   @JsonKey(name: 'access_token')
   String get accessToken => throw _privateConstructorUsedError;
+
+  /// 刷新令牌
   @JsonKey(name: 'refresh_token')
   String get refreshToken => throw _privateConstructorUsedError;
+
+  /// 令牌类型
   @JsonKey(name: 'token_type')
   String get tokenType => throw _privateConstructorUsedError;
+
+  /// 过期时间
   @JsonKey(name: 'expires_in')
   int get expiresIn => throw _privateConstructorUsedError;
 
@@ -159,15 +166,22 @@ class _$TokenInfoModelImpl implements _TokenInfoModel {
   factory _$TokenInfoModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$TokenInfoModelImplFromJson(json);
 
+  /// 访问令牌
   @override
   @JsonKey(name: 'access_token')
   final String accessToken;
+
+  /// 刷新令牌
   @override
   @JsonKey(name: 'refresh_token')
   final String refreshToken;
+
+  /// 令牌类型
   @override
   @JsonKey(name: 'token_type')
   final String tokenType;
+
+  /// 过期时间
   @override
   @JsonKey(name: 'expires_in')
   final int expiresIn;
@@ -225,15 +239,22 @@ abstract class _TokenInfoModel implements TokenInfoModel {
   factory _TokenInfoModel.fromJson(Map<String, dynamic> json) =
       _$TokenInfoModelImpl.fromJson;
 
+  /// 访问令牌
   @override
   @JsonKey(name: 'access_token')
   String get accessToken;
+
+  /// 刷新令牌
   @override
   @JsonKey(name: 'refresh_token')
   String get refreshToken;
+
+  /// 令牌类型
   @override
   @JsonKey(name: 'token_type')
   String get tokenType;
+
+  /// 过期时间
   @override
   @JsonKey(name: 'expires_in')
   int get expiresIn;

@@ -9,7 +9,7 @@ part of 'translation_entry_model.dart';
 _$TranslationEntryModelImpl _$$TranslationEntryModelImplFromJson(
         Map<String, dynamic> json) =>
     _$TranslationEntryModelImpl(
-      id: json['id'] as String?,
+      id: const FlexibleIntConverter().fromJson(json['id']),
       projectId: json['project_id'] as String,
       entryKey: json['entry_key'] as String,
       languageCode: const LanguageEnumConverter()
@@ -22,7 +22,9 @@ _$TranslationEntryModelImpl _$$TranslationEntryModelImplFromJson(
       reviewerUsername: json['reviewer_username'] as String?,
       contextInfo: json['context_info'] as String?,
       status: json['status'] as String? ?? 'pending',
-      version: (json['version'] as num?)?.toInt() ?? 1,
+      version: json['version'] == null
+          ? 1
+          : const FlexibleIntConverter().fromJson(json['version']),
       qualityScore: (json['quality_score'] as num?)?.toDouble(),
       issues: json['issues'] as String?,
       hasIssues: json['has_issues'] as bool? ?? false,
@@ -40,7 +42,8 @@ _$TranslationEntryModelImpl _$$TranslationEntryModelImplFromJson(
 Map<String, dynamic> _$$TranslationEntryModelImplToJson(
         _$TranslationEntryModelImpl instance) =>
     <String, dynamic>{
-      'id': instance.id,
+      'id': _$JsonConverterToJson<dynamic, int>(
+          instance.id, const FlexibleIntConverter().toJson),
       'project_id': instance.projectId,
       'entry_key': instance.entryKey,
       'language_code':
@@ -53,7 +56,7 @@ Map<String, dynamic> _$$TranslationEntryModelImplToJson(
       'reviewer_username': instance.reviewerUsername,
       'context_info': instance.contextInfo,
       'status': instance.status,
-      'version': instance.version,
+      'version': const FlexibleIntConverter().toJson(instance.version),
       'quality_score': instance.qualityScore,
       'issues': instance.issues,
       'has_issues': instance.hasIssues,
@@ -67,3 +70,9 @@ Map<String, dynamic> _$$TranslationEntryModelImplToJson(
       'created_at': const NullableTimesConverter().toJson(instance.createdAt),
       'updated_at': const NullableTimesConverter().toJson(instance.updatedAt),
     };
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) =>
+    value == null ? null : toJson(value);

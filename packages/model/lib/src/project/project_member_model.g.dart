@@ -54,8 +54,8 @@ Map<String, dynamic> _$$ProjectMemberModelImplToJson(
 _$InviteMemberRequestImpl _$$InviteMemberRequestImplFromJson(
         Map<String, dynamic> json) =>
     _$InviteMemberRequestImpl(
-      projectId: (json['projectId'] as num).toInt(),
-      userId: json['userId'] as String,
+      projectId: (json['project_id'] as num).toInt(),
+      userId: json['user_id'] as String,
       role: json['role'] == null
           ? ProjectRoleEnum.member
           : const ProjectRoleEnumConverter().fromJson(json['role'] as String),
@@ -64,16 +64,16 @@ _$InviteMemberRequestImpl _$$InviteMemberRequestImplFromJson(
 Map<String, dynamic> _$$InviteMemberRequestImplToJson(
         _$InviteMemberRequestImpl instance) =>
     <String, dynamic>{
-      'projectId': instance.projectId,
-      'userId': instance.userId,
+      'project_id': instance.projectId,
+      'user_id': instance.userId,
       'role': const ProjectRoleEnumConverter().toJson(instance.role),
     };
 
 _$UpdateMemberRoleRequestImpl _$$UpdateMemberRoleRequestImplFromJson(
         Map<String, dynamic> json) =>
     _$UpdateMemberRoleRequestImpl(
-      projectId: (json['projectId'] as num).toInt(),
-      userId: json['userId'] as String,
+      projectId: (json['project_id'] as num).toInt(),
+      userId: json['user_id'] as String,
       role: json['role'] == null
           ? ProjectRoleEnum.member
           : const ProjectRoleEnumConverter().fromJson(json['role'] as String),
@@ -82,7 +82,7 @@ _$UpdateMemberRoleRequestImpl _$$UpdateMemberRoleRequestImplFromJson(
 Map<String, dynamic> _$$UpdateMemberRoleRequestImplToJson(
         _$UpdateMemberRoleRequestImpl instance) =>
     <String, dynamic>{
-      'projectId': instance.projectId,
-      'userId': instance.userId,
+      'project_id': instance.projectId,
+      'user_id': instance.userId,
       'role': const ProjectRoleEnumConverter().toJson(instance.role),
     };

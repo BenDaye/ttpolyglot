@@ -20,19 +20,32 @@ FileModel _$FileModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$FileModel {
+  /// 文件ID
   @JsonKey(name: 'id')
   String get id => throw _privateConstructorUsedError;
+
+  /// 文件名称
   @JsonKey(name: 'name')
   String get name => throw _privateConstructorUsedError;
+
+  /// 文件路径
   @JsonKey(name: 'path')
   String get path => throw _privateConstructorUsedError;
+
+  /// 文件大小
   @JsonKey(name: 'size')
   int get size => throw _privateConstructorUsedError;
+
+  /// 文件类型
   @JsonKey(name: 'type')
   String get type => throw _privateConstructorUsedError;
+
+  /// 创建时间
   @JsonKey(name: 'created_at')
   @NullableTimesConverter()
   DateTime? get createdAt => throw _privateConstructorUsedError;
+
+  /// 更新时间
   @JsonKey(name: 'updated_at')
   @NullableTimesConverter()
   DateTime? get updatedAt => throw _privateConstructorUsedError;
@@ -213,25 +226,38 @@ class _$FileModelImpl implements _FileModel {
   factory _$FileModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$FileModelImplFromJson(json);
 
+  /// 文件ID
   @override
   @JsonKey(name: 'id')
   final String id;
+
+  /// 文件名称
   @override
   @JsonKey(name: 'name')
   final String name;
+
+  /// 文件路径
   @override
   @JsonKey(name: 'path')
   final String path;
+
+  /// 文件大小
   @override
   @JsonKey(name: 'size')
   final int size;
+
+  /// 文件类型
   @override
   @JsonKey(name: 'type')
   final String type;
+
+  /// 创建时间
   @override
   @JsonKey(name: 'created_at')
   @NullableTimesConverter()
   final DateTime? createdAt;
+
+  /// 更新时间
   @override
   @JsonKey(name: 'updated_at')
   @NullableTimesConverter()
@@ -296,25 +322,38 @@ abstract class _FileModel implements FileModel {
   factory _FileModel.fromJson(Map<String, dynamic> json) =
       _$FileModelImpl.fromJson;
 
+  /// 文件ID
   @override
   @JsonKey(name: 'id')
   String get id;
+
+  /// 文件名称
   @override
   @JsonKey(name: 'name')
   String get name;
+
+  /// 文件路径
   @override
   @JsonKey(name: 'path')
   String get path;
+
+  /// 文件大小
   @override
   @JsonKey(name: 'size')
   int get size;
+
+  /// 文件类型
   @override
   @JsonKey(name: 'type')
   String get type;
+
+  /// 创建时间
   @override
   @JsonKey(name: 'created_at')
   @NullableTimesConverter()
   DateTime? get createdAt;
+
+  /// 更新时间
   @override
   @JsonKey(name: 'updated_at')
   @NullableTimesConverter()

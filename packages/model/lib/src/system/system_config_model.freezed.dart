@@ -21,7 +21,9 @@ SystemConfigModel _$SystemConfigModelFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$SystemConfigModel {
   /// 配置ID
-  String? get id => throw _privateConstructorUsedError;
+  @JsonKey(name: 'id')
+  @FlexibleIntConverter()
+  int? get id => throw _privateConstructorUsedError;
 
   /// 配置键
   @JsonKey(name: 'config_key')
@@ -40,6 +42,7 @@ mixin _$SystemConfigModel {
   String? get defaultValue => throw _privateConstructorUsedError;
 
   /// 分类
+  @JsonKey(name: 'category')
   String? get category => throw _privateConstructorUsedError;
 
   /// 显示名称
@@ -47,6 +50,7 @@ mixin _$SystemConfigModel {
   String? get displayName => throw _privateConstructorUsedError;
 
   /// 描述
+  @JsonKey(name: 'description')
   String? get description => throw _privateConstructorUsedError;
 
   /// 排序顺序
@@ -100,14 +104,14 @@ abstract class $SystemConfigModelCopyWith<$Res> {
       _$SystemConfigModelCopyWithImpl<$Res, SystemConfigModel>;
   @useResult
   $Res call(
-      {String? id,
+      {@JsonKey(name: 'id') @FlexibleIntConverter() int? id,
       @JsonKey(name: 'config_key') String configKey,
       @JsonKey(name: 'config_value') String configValue,
       @JsonKey(name: 'value_type') String? valueType,
       @JsonKey(name: 'default_value') String? defaultValue,
-      String? category,
+      @JsonKey(name: 'category') String? category,
       @JsonKey(name: 'display_name') String? displayName,
-      String? description,
+      @JsonKey(name: 'description') String? description,
       @JsonKey(name: 'sort_order') int? sortOrder,
       @JsonKey(name: 'is_editable') bool isEditable,
       @JsonKey(name: 'is_public') bool isPublic,
@@ -158,7 +162,7 @@ class _$SystemConfigModelCopyWithImpl<$Res, $Val extends SystemConfigModel>
       id: freezed == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as int?,
       configKey: null == configKey
           ? _value.configKey
           : configKey // ignore: cast_nullable_to_non_nullable
@@ -232,14 +236,14 @@ abstract class _$$SystemConfigModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String? id,
+      {@JsonKey(name: 'id') @FlexibleIntConverter() int? id,
       @JsonKey(name: 'config_key') String configKey,
       @JsonKey(name: 'config_value') String configValue,
       @JsonKey(name: 'value_type') String? valueType,
       @JsonKey(name: 'default_value') String? defaultValue,
-      String? category,
+      @JsonKey(name: 'category') String? category,
       @JsonKey(name: 'display_name') String? displayName,
-      String? description,
+      @JsonKey(name: 'description') String? description,
       @JsonKey(name: 'sort_order') int? sortOrder,
       @JsonKey(name: 'is_editable') bool isEditable,
       @JsonKey(name: 'is_public') bool isPublic,
@@ -288,7 +292,7 @@ class __$$SystemConfigModelImplCopyWithImpl<$Res>
       id: freezed == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as int?,
       configKey: null == configKey
           ? _value.configKey
           : configKey // ignore: cast_nullable_to_non_nullable
@@ -357,14 +361,14 @@ class __$$SystemConfigModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$SystemConfigModelImpl extends _SystemConfigModel {
   const _$SystemConfigModelImpl(
-      {this.id,
+      {@JsonKey(name: 'id') @FlexibleIntConverter() this.id,
       @JsonKey(name: 'config_key') required this.configKey,
       @JsonKey(name: 'config_value') required this.configValue,
       @JsonKey(name: 'value_type') this.valueType,
       @JsonKey(name: 'default_value') this.defaultValue,
-      this.category,
+      @JsonKey(name: 'category') this.category,
       @JsonKey(name: 'display_name') this.displayName,
-      this.description,
+      @JsonKey(name: 'description') this.description,
       @JsonKey(name: 'sort_order') this.sortOrder,
       @JsonKey(name: 'is_editable') this.isEditable = true,
       @JsonKey(name: 'is_public') this.isPublic = false,
@@ -380,7 +384,9 @@ class _$SystemConfigModelImpl extends _SystemConfigModel {
 
   /// 配置ID
   @override
-  final String? id;
+  @JsonKey(name: 'id')
+  @FlexibleIntConverter()
+  final int? id;
 
   /// 配置键
   @override
@@ -404,6 +410,7 @@ class _$SystemConfigModelImpl extends _SystemConfigModel {
 
   /// 分类
   @override
+  @JsonKey(name: 'category')
   final String? category;
 
   /// 显示名称
@@ -413,6 +420,7 @@ class _$SystemConfigModelImpl extends _SystemConfigModel {
 
   /// 描述
   @override
+  @JsonKey(name: 'description')
   final String? description;
 
   /// 排序顺序
@@ -540,14 +548,14 @@ class _$SystemConfigModelImpl extends _SystemConfigModel {
 
 abstract class _SystemConfigModel extends SystemConfigModel {
   const factory _SystemConfigModel(
-      {final String? id,
+      {@JsonKey(name: 'id') @FlexibleIntConverter() final int? id,
       @JsonKey(name: 'config_key') required final String configKey,
       @JsonKey(name: 'config_value') required final String configValue,
       @JsonKey(name: 'value_type') final String? valueType,
       @JsonKey(name: 'default_value') final String? defaultValue,
-      final String? category,
+      @JsonKey(name: 'category') final String? category,
       @JsonKey(name: 'display_name') final String? displayName,
-      final String? description,
+      @JsonKey(name: 'description') final String? description,
       @JsonKey(name: 'sort_order') final int? sortOrder,
       @JsonKey(name: 'is_editable') final bool isEditable,
       @JsonKey(name: 'is_public') final bool isPublic,
@@ -567,7 +575,9 @@ abstract class _SystemConfigModel extends SystemConfigModel {
 
   /// 配置ID
   @override
-  String? get id;
+  @JsonKey(name: 'id')
+  @FlexibleIntConverter()
+  int? get id;
 
   /// 配置键
   @override
@@ -591,6 +601,7 @@ abstract class _SystemConfigModel extends SystemConfigModel {
 
   /// 分类
   @override
+  @JsonKey(name: 'category')
   String? get category;
 
   /// 显示名称
@@ -600,6 +611,7 @@ abstract class _SystemConfigModel extends SystemConfigModel {
 
   /// 描述
   @override
+  @JsonKey(name: 'description')
   String? get description;
 
   /// 排序顺序

@@ -21,24 +21,41 @@ NotificationSettingsModel _$NotificationSettingsModelFromJson(
 
 /// @nodoc
 mixin _$NotificationSettingsModel {
+  /// 通知设置ID
   @JsonKey(name: 'id')
+  @FlexibleIntConverter()
   int get id => throw _privateConstructorUsedError;
+
+  /// 用户ID
   @JsonKey(name: 'user_id')
   String get userId => throw _privateConstructorUsedError;
+
+  /// 项目ID
   @JsonKey(name: 'project_id')
+  @FlexibleIntConverter()
   int? get projectId => throw _privateConstructorUsedError;
+
+  /// 通知类型
   @JsonKey(name: 'notification_type')
   @NotificationTypeEnumConverter()
   NotificationTypeEnum get notificationType =>
       throw _privateConstructorUsedError;
+
+  /// 通知渠道
   @JsonKey(name: 'channel')
   @NotificationChannelEnumConverter()
   NotificationChannelEnum get channel => throw _privateConstructorUsedError;
+
+  /// 是否启用
   @JsonKey(name: 'is_enabled')
   bool get isEnabled => throw _privateConstructorUsedError;
+
+  /// 创建时间
   @JsonKey(name: 'created_at')
   @TimesConverter()
   DateTime get createdAt => throw _privateConstructorUsedError;
+
+  /// 更新时间
   @JsonKey(name: 'updated_at')
   @TimesConverter()
   DateTime get updatedAt => throw _privateConstructorUsedError;
@@ -60,9 +77,9 @@ abstract class $NotificationSettingsModelCopyWith<$Res> {
       _$NotificationSettingsModelCopyWithImpl<$Res, NotificationSettingsModel>;
   @useResult
   $Res call(
-      {@JsonKey(name: 'id') int id,
+      {@JsonKey(name: 'id') @FlexibleIntConverter() int id,
       @JsonKey(name: 'user_id') String userId,
-      @JsonKey(name: 'project_id') int? projectId,
+      @JsonKey(name: 'project_id') @FlexibleIntConverter() int? projectId,
       @JsonKey(name: 'notification_type')
       @NotificationTypeEnumConverter()
       NotificationTypeEnum notificationType,
@@ -146,9 +163,9 @@ abstract class _$$NotificationSettingsModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {@JsonKey(name: 'id') int id,
+      {@JsonKey(name: 'id') @FlexibleIntConverter() int id,
       @JsonKey(name: 'user_id') String userId,
-      @JsonKey(name: 'project_id') int? projectId,
+      @JsonKey(name: 'project_id') @FlexibleIntConverter() int? projectId,
       @JsonKey(name: 'notification_type')
       @NotificationTypeEnumConverter()
       NotificationTypeEnum notificationType,
@@ -225,9 +242,9 @@ class __$$NotificationSettingsModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$NotificationSettingsModelImpl implements _NotificationSettingsModel {
   const _$NotificationSettingsModelImpl(
-      {@JsonKey(name: 'id') required this.id,
+      {@JsonKey(name: 'id') @FlexibleIntConverter() required this.id,
       @JsonKey(name: 'user_id') required this.userId,
-      @JsonKey(name: 'project_id') this.projectId,
+      @JsonKey(name: 'project_id') @FlexibleIntConverter() this.projectId,
       @JsonKey(name: 'notification_type')
       @NotificationTypeEnumConverter()
       required this.notificationType,
@@ -241,30 +258,47 @@ class _$NotificationSettingsModelImpl implements _NotificationSettingsModel {
   factory _$NotificationSettingsModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$NotificationSettingsModelImplFromJson(json);
 
+  /// 通知设置ID
   @override
   @JsonKey(name: 'id')
+  @FlexibleIntConverter()
   final int id;
+
+  /// 用户ID
   @override
   @JsonKey(name: 'user_id')
   final String userId;
+
+  /// 项目ID
   @override
   @JsonKey(name: 'project_id')
+  @FlexibleIntConverter()
   final int? projectId;
+
+  /// 通知类型
   @override
   @JsonKey(name: 'notification_type')
   @NotificationTypeEnumConverter()
   final NotificationTypeEnum notificationType;
+
+  /// 通知渠道
   @override
   @JsonKey(name: 'channel')
   @NotificationChannelEnumConverter()
   final NotificationChannelEnum channel;
+
+  /// 是否启用
   @override
   @JsonKey(name: 'is_enabled')
   final bool isEnabled;
+
+  /// 创建时间
   @override
   @JsonKey(name: 'created_at')
   @TimesConverter()
   final DateTime createdAt;
+
+  /// 更新时间
   @override
   @JsonKey(name: 'updated_at')
   @TimesConverter()
@@ -319,9 +353,9 @@ class _$NotificationSettingsModelImpl implements _NotificationSettingsModel {
 
 abstract class _NotificationSettingsModel implements NotificationSettingsModel {
   const factory _NotificationSettingsModel(
-      {@JsonKey(name: 'id') required final int id,
+      {@JsonKey(name: 'id') @FlexibleIntConverter() required final int id,
       @JsonKey(name: 'user_id') required final String userId,
-      @JsonKey(name: 'project_id') final int? projectId,
+      @JsonKey(name: 'project_id') @FlexibleIntConverter() final int? projectId,
       @JsonKey(name: 'notification_type')
       @NotificationTypeEnumConverter()
       required final NotificationTypeEnum notificationType,
@@ -339,30 +373,47 @@ abstract class _NotificationSettingsModel implements NotificationSettingsModel {
   factory _NotificationSettingsModel.fromJson(Map<String, dynamic> json) =
       _$NotificationSettingsModelImpl.fromJson;
 
+  /// 通知设置ID
   @override
   @JsonKey(name: 'id')
+  @FlexibleIntConverter()
   int get id;
+
+  /// 用户ID
   @override
   @JsonKey(name: 'user_id')
   String get userId;
+
+  /// 项目ID
   @override
   @JsonKey(name: 'project_id')
+  @FlexibleIntConverter()
   int? get projectId;
+
+  /// 通知类型
   @override
   @JsonKey(name: 'notification_type')
   @NotificationTypeEnumConverter()
   NotificationTypeEnum get notificationType;
+
+  /// 通知渠道
   @override
   @JsonKey(name: 'channel')
   @NotificationChannelEnumConverter()
   NotificationChannelEnum get channel;
+
+  /// 是否启用
   @override
   @JsonKey(name: 'is_enabled')
   bool get isEnabled;
+
+  /// 创建时间
   @override
   @JsonKey(name: 'created_at')
   @TimesConverter()
   DateTime get createdAt;
+
+  /// 更新时间
   @override
   @JsonKey(name: 'updated_at')
   @TimesConverter()
@@ -383,15 +434,28 @@ UpdateNotificationSettingsRequest _$UpdateNotificationSettingsRequestFromJson(
 
 /// @nodoc
 mixin _$UpdateNotificationSettingsRequest {
+  /// 用户ID
+  @JsonKey(name: 'user_id')
   String get userId => throw _privateConstructorUsedError;
+
+  /// 项目ID
+  @JsonKey(name: 'project_id')
+  @FlexibleIntConverter()
   int? get projectId => throw _privateConstructorUsedError;
+
+  /// 通知类型
   @JsonKey(name: 'notification_type')
   @NotificationTypeEnumConverter()
   NotificationTypeEnum get notificationType =>
       throw _privateConstructorUsedError;
+
+  /// 通知渠道
   @JsonKey(name: 'channel')
   @NotificationChannelEnumConverter()
   NotificationChannelEnum get channel => throw _privateConstructorUsedError;
+
+  /// 是否启用
+  @JsonKey(name: 'is_enabled')
   bool get isEnabled => throw _privateConstructorUsedError;
 
   /// Serializes this UpdateNotificationSettingsRequest to a JSON map.
@@ -413,15 +477,15 @@ abstract class $UpdateNotificationSettingsRequestCopyWith<$Res> {
           UpdateNotificationSettingsRequest>;
   @useResult
   $Res call(
-      {String userId,
-      int? projectId,
+      {@JsonKey(name: 'user_id') String userId,
+      @JsonKey(name: 'project_id') @FlexibleIntConverter() int? projectId,
       @JsonKey(name: 'notification_type')
       @NotificationTypeEnumConverter()
       NotificationTypeEnum notificationType,
       @JsonKey(name: 'channel')
       @NotificationChannelEnumConverter()
       NotificationChannelEnum channel,
-      bool isEnabled});
+      @JsonKey(name: 'is_enabled') bool isEnabled});
 }
 
 /// @nodoc
@@ -481,15 +545,15 @@ abstract class _$$UpdateNotificationSettingsRequestImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String userId,
-      int? projectId,
+      {@JsonKey(name: 'user_id') String userId,
+      @JsonKey(name: 'project_id') @FlexibleIntConverter() int? projectId,
       @JsonKey(name: 'notification_type')
       @NotificationTypeEnumConverter()
       NotificationTypeEnum notificationType,
       @JsonKey(name: 'channel')
       @NotificationChannelEnumConverter()
       NotificationChannelEnum channel,
-      bool isEnabled});
+      @JsonKey(name: 'is_enabled') bool isEnabled});
 }
 
 /// @nodoc
@@ -543,33 +607,46 @@ class __$$UpdateNotificationSettingsRequestImplCopyWithImpl<$Res>
 class _$UpdateNotificationSettingsRequestImpl
     implements _UpdateNotificationSettingsRequest {
   const _$UpdateNotificationSettingsRequestImpl(
-      {required this.userId,
-      this.projectId,
+      {@JsonKey(name: 'user_id') required this.userId,
+      @JsonKey(name: 'project_id') @FlexibleIntConverter() this.projectId,
       @JsonKey(name: 'notification_type')
       @NotificationTypeEnumConverter()
       required this.notificationType,
       @JsonKey(name: 'channel')
       @NotificationChannelEnumConverter()
       required this.channel,
-      required this.isEnabled});
+      @JsonKey(name: 'is_enabled') required this.isEnabled});
 
   factory _$UpdateNotificationSettingsRequestImpl.fromJson(
           Map<String, dynamic> json) =>
       _$$UpdateNotificationSettingsRequestImplFromJson(json);
 
+  /// 用户ID
   @override
+  @JsonKey(name: 'user_id')
   final String userId;
+
+  /// 项目ID
   @override
+  @JsonKey(name: 'project_id')
+  @FlexibleIntConverter()
   final int? projectId;
+
+  /// 通知类型
   @override
   @JsonKey(name: 'notification_type')
   @NotificationTypeEnumConverter()
   final NotificationTypeEnum notificationType;
+
+  /// 通知渠道
   @override
   @JsonKey(name: 'channel')
   @NotificationChannelEnumConverter()
   final NotificationChannelEnum channel;
+
+  /// 是否启用
   @override
+  @JsonKey(name: 'is_enabled')
   final bool isEnabled;
 
   @override
@@ -618,33 +695,47 @@ class _$UpdateNotificationSettingsRequestImpl
 abstract class _UpdateNotificationSettingsRequest
     implements UpdateNotificationSettingsRequest {
   const factory _UpdateNotificationSettingsRequest(
-      {required final String userId,
-      final int? projectId,
+      {@JsonKey(name: 'user_id') required final String userId,
+      @JsonKey(name: 'project_id') @FlexibleIntConverter() final int? projectId,
       @JsonKey(name: 'notification_type')
       @NotificationTypeEnumConverter()
       required final NotificationTypeEnum notificationType,
       @JsonKey(name: 'channel')
       @NotificationChannelEnumConverter()
       required final NotificationChannelEnum channel,
+      @JsonKey(name: 'is_enabled')
       required final bool isEnabled}) = _$UpdateNotificationSettingsRequestImpl;
 
   factory _UpdateNotificationSettingsRequest.fromJson(
           Map<String, dynamic> json) =
       _$UpdateNotificationSettingsRequestImpl.fromJson;
 
+  /// 用户ID
   @override
+  @JsonKey(name: 'user_id')
   String get userId;
+
+  /// 项目ID
   @override
+  @JsonKey(name: 'project_id')
+  @FlexibleIntConverter()
   int? get projectId;
+
+  /// 通知类型
   @override
   @JsonKey(name: 'notification_type')
   @NotificationTypeEnumConverter()
   NotificationTypeEnum get notificationType;
+
+  /// 通知渠道
   @override
   @JsonKey(name: 'channel')
   @NotificationChannelEnumConverter()
   NotificationChannelEnum get channel;
+
+  /// 是否启用
   @override
+  @JsonKey(name: 'is_enabled')
   bool get isEnabled;
 
   /// Create a copy of UpdateNotificationSettingsRequest
@@ -664,8 +755,17 @@ BatchUpdateNotificationSettingsRequest
 
 /// @nodoc
 mixin _$BatchUpdateNotificationSettingsRequest {
+  /// 用户ID
+  @JsonKey(name: 'user_id')
   String get userId => throw _privateConstructorUsedError;
+
+  /// 项目ID
+  @JsonKey(name: 'project_id')
+  @FlexibleIntConverter()
   int? get projectId => throw _privateConstructorUsedError;
+
+  /// 通知设置更新项
+  @JsonKey(name: 'updates')
   List<NotificationSettingUpdate> get updates =>
       throw _privateConstructorUsedError;
 
@@ -689,7 +789,9 @@ abstract class $BatchUpdateNotificationSettingsRequestCopyWith<$Res> {
           BatchUpdateNotificationSettingsRequest>;
   @useResult
   $Res call(
-      {String userId, int? projectId, List<NotificationSettingUpdate> updates});
+      {@JsonKey(name: 'user_id') String userId,
+      @JsonKey(name: 'project_id') @FlexibleIntConverter() int? projectId,
+      @JsonKey(name: 'updates') List<NotificationSettingUpdate> updates});
 }
 
 /// @nodoc
@@ -739,7 +841,9 @@ abstract class _$$BatchUpdateNotificationSettingsRequestImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String userId, int? projectId, List<NotificationSettingUpdate> updates});
+      {@JsonKey(name: 'user_id') String userId,
+      @JsonKey(name: 'project_id') @FlexibleIntConverter() int? projectId,
+      @JsonKey(name: 'updates') List<NotificationSettingUpdate> updates});
 }
 
 /// @nodoc
@@ -783,8 +887,9 @@ class __$$BatchUpdateNotificationSettingsRequestImplCopyWithImpl<$Res>
 class _$BatchUpdateNotificationSettingsRequestImpl
     implements _BatchUpdateNotificationSettingsRequest {
   const _$BatchUpdateNotificationSettingsRequestImpl(
-      {required this.userId,
-      this.projectId,
+      {@JsonKey(name: 'user_id') required this.userId,
+      @JsonKey(name: 'project_id') @FlexibleIntConverter() this.projectId,
+      @JsonKey(name: 'updates')
       required final List<NotificationSettingUpdate> updates})
       : _updates = updates;
 
@@ -792,12 +897,23 @@ class _$BatchUpdateNotificationSettingsRequestImpl
           Map<String, dynamic> json) =>
       _$$BatchUpdateNotificationSettingsRequestImplFromJson(json);
 
+  /// 用户ID
   @override
+  @JsonKey(name: 'user_id')
   final String userId;
+
+  /// 项目ID
   @override
+  @JsonKey(name: 'project_id')
+  @FlexibleIntConverter()
   final int? projectId;
+
+  /// 通知设置更新项
   final List<NotificationSettingUpdate> _updates;
+
+  /// 通知设置更新项
   @override
+  @JsonKey(name: 'updates')
   List<NotificationSettingUpdate> get updates {
     if (_updates is EqualUnmodifiableListView) return _updates;
     // ignore: implicit_dynamic_type
@@ -847,20 +963,30 @@ class _$BatchUpdateNotificationSettingsRequestImpl
 abstract class _BatchUpdateNotificationSettingsRequest
     implements BatchUpdateNotificationSettingsRequest {
   const factory _BatchUpdateNotificationSettingsRequest(
-          {required final String userId,
-          final int? projectId,
-          required final List<NotificationSettingUpdate> updates}) =
-      _$BatchUpdateNotificationSettingsRequestImpl;
+      {@JsonKey(name: 'user_id') required final String userId,
+      @JsonKey(name: 'project_id') @FlexibleIntConverter() final int? projectId,
+      @JsonKey(name: 'updates')
+      required final List<NotificationSettingUpdate>
+          updates}) = _$BatchUpdateNotificationSettingsRequestImpl;
 
   factory _BatchUpdateNotificationSettingsRequest.fromJson(
           Map<String, dynamic> json) =
       _$BatchUpdateNotificationSettingsRequestImpl.fromJson;
 
+  /// 用户ID
   @override
+  @JsonKey(name: 'user_id')
   String get userId;
+
+  /// 项目ID
   @override
+  @JsonKey(name: 'project_id')
+  @FlexibleIntConverter()
   int? get projectId;
+
+  /// 通知设置更新项
   @override
+  @JsonKey(name: 'updates')
   List<NotificationSettingUpdate> get updates;
 
   /// Create a copy of BatchUpdateNotificationSettingsRequest
@@ -879,13 +1005,19 @@ NotificationSettingUpdate _$NotificationSettingUpdateFromJson(
 
 /// @nodoc
 mixin _$NotificationSettingUpdate {
+  /// 通知类型
   @JsonKey(name: 'notification_type')
   @NotificationTypeEnumConverter()
   NotificationTypeEnum get notificationType =>
       throw _privateConstructorUsedError;
+
+  /// 通知渠道
   @JsonKey(name: 'channel')
   @NotificationChannelEnumConverter()
   NotificationChannelEnum get channel => throw _privateConstructorUsedError;
+
+  /// 是否启用
+  @JsonKey(name: 'is_enabled')
   bool get isEnabled => throw _privateConstructorUsedError;
 
   /// Serializes this NotificationSettingUpdate to a JSON map.
@@ -911,7 +1043,7 @@ abstract class $NotificationSettingUpdateCopyWith<$Res> {
       @JsonKey(name: 'channel')
       @NotificationChannelEnumConverter()
       NotificationChannelEnum channel,
-      bool isEnabled});
+      @JsonKey(name: 'is_enabled') bool isEnabled});
 }
 
 /// @nodoc
@@ -967,7 +1099,7 @@ abstract class _$$NotificationSettingUpdateImplCopyWith<$Res>
       @JsonKey(name: 'channel')
       @NotificationChannelEnumConverter()
       NotificationChannelEnum channel,
-      bool isEnabled});
+      @JsonKey(name: 'is_enabled') bool isEnabled});
 }
 
 /// @nodoc
@@ -1016,20 +1148,26 @@ class _$NotificationSettingUpdateImpl implements _NotificationSettingUpdate {
       @JsonKey(name: 'channel')
       @NotificationChannelEnumConverter()
       required this.channel,
-      required this.isEnabled});
+      @JsonKey(name: 'is_enabled') required this.isEnabled});
 
   factory _$NotificationSettingUpdateImpl.fromJson(Map<String, dynamic> json) =>
       _$$NotificationSettingUpdateImplFromJson(json);
 
+  /// 通知类型
   @override
   @JsonKey(name: 'notification_type')
   @NotificationTypeEnumConverter()
   final NotificationTypeEnum notificationType;
+
+  /// 通知渠道
   @override
   @JsonKey(name: 'channel')
   @NotificationChannelEnumConverter()
   final NotificationChannelEnum channel;
+
+  /// 是否启用
   @override
+  @JsonKey(name: 'is_enabled')
   final bool isEnabled;
 
   @override
@@ -1073,26 +1211,33 @@ class _$NotificationSettingUpdateImpl implements _NotificationSettingUpdate {
 
 abstract class _NotificationSettingUpdate implements NotificationSettingUpdate {
   const factory _NotificationSettingUpdate(
-      {@JsonKey(name: 'notification_type')
-      @NotificationTypeEnumConverter()
-      required final NotificationTypeEnum notificationType,
-      @JsonKey(name: 'channel')
-      @NotificationChannelEnumConverter()
-      required final NotificationChannelEnum channel,
-      required final bool isEnabled}) = _$NotificationSettingUpdateImpl;
+          {@JsonKey(name: 'notification_type')
+          @NotificationTypeEnumConverter()
+          required final NotificationTypeEnum notificationType,
+          @JsonKey(name: 'channel')
+          @NotificationChannelEnumConverter()
+          required final NotificationChannelEnum channel,
+          @JsonKey(name: 'is_enabled') required final bool isEnabled}) =
+      _$NotificationSettingUpdateImpl;
 
   factory _NotificationSettingUpdate.fromJson(Map<String, dynamic> json) =
       _$NotificationSettingUpdateImpl.fromJson;
 
+  /// 通知类型
   @override
   @JsonKey(name: 'notification_type')
   @NotificationTypeEnumConverter()
   NotificationTypeEnum get notificationType;
+
+  /// 通知渠道
   @override
   @JsonKey(name: 'channel')
   @NotificationChannelEnumConverter()
   NotificationChannelEnum get channel;
+
+  /// 是否启用
   @override
+  @JsonKey(name: 'is_enabled')
   bool get isEnabled;
 
   /// Create a copy of NotificationSettingUpdate

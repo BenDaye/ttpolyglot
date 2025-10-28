@@ -10,10 +10,19 @@ class PagerModel<T> with _$PagerModel<T> {
   const PagerModel._();
 
   const factory PagerModel({
+    /// 当前页数
     @JsonKey(name: 'page') required int page,
+
+    /// 每页大小
     @JsonKey(name: 'page_size') required int pageSize,
+
+    /// 总大小
     @JsonKey(name: 'total_size') required int totalSize,
+
+    /// 总页数
     @JsonKey(name: 'total_page') required int totalPage,
+
+    /// 数据
     @JsonKey(name: 'items') List<T>? items,
   }) = _PagerModel<T>;
 

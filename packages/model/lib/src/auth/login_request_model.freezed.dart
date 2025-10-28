@@ -20,8 +20,12 @@ LoginRequestModel _$LoginRequestModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$LoginRequestModel {
+  /// 邮箱或用户名
   @JsonKey(name: 'email_or_username')
   String get emailOrUsername => throw _privateConstructorUsedError;
+
+  /// 密码
+  @JsonKey(name: 'password')
   String get password => throw _privateConstructorUsedError;
 
   /// Serializes this LoginRequestModel to a JSON map.
@@ -42,7 +46,7 @@ abstract class $LoginRequestModelCopyWith<$Res> {
   @useResult
   $Res call(
       {@JsonKey(name: 'email_or_username') String emailOrUsername,
-      String password});
+      @JsonKey(name: 'password') String password});
 }
 
 /// @nodoc
@@ -86,7 +90,7 @@ abstract class _$$LoginRequestModelImplCopyWith<$Res>
   @useResult
   $Res call(
       {@JsonKey(name: 'email_or_username') String emailOrUsername,
-      String password});
+      @JsonKey(name: 'password') String password});
 }
 
 /// @nodoc
@@ -123,15 +127,19 @@ class __$$LoginRequestModelImplCopyWithImpl<$Res>
 class _$LoginRequestModelImpl implements _LoginRequestModel {
   const _$LoginRequestModelImpl(
       {@JsonKey(name: 'email_or_username') required this.emailOrUsername,
-      required this.password});
+      @JsonKey(name: 'password') required this.password});
 
   factory _$LoginRequestModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$LoginRequestModelImplFromJson(json);
 
+  /// 邮箱或用户名
   @override
   @JsonKey(name: 'email_or_username')
   final String emailOrUsername;
+
+  /// 密码
   @override
+  @JsonKey(name: 'password')
   final String password;
 
   @override
@@ -173,17 +181,22 @@ class _$LoginRequestModelImpl implements _LoginRequestModel {
 
 abstract class _LoginRequestModel implements LoginRequestModel {
   const factory _LoginRequestModel(
-      {@JsonKey(name: 'email_or_username')
-      required final String emailOrUsername,
-      required final String password}) = _$LoginRequestModelImpl;
+          {@JsonKey(name: 'email_or_username')
+          required final String emailOrUsername,
+          @JsonKey(name: 'password') required final String password}) =
+      _$LoginRequestModelImpl;
 
   factory _LoginRequestModel.fromJson(Map<String, dynamic> json) =
       _$LoginRequestModelImpl.fromJson;
 
+  /// 邮箱或用户名
   @override
   @JsonKey(name: 'email_or_username')
   String get emailOrUsername;
+
+  /// 密码
   @override
+  @JsonKey(name: 'password')
   String get password;
 
   /// Create a copy of LoginRequestModel

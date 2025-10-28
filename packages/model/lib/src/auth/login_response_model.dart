@@ -8,7 +8,10 @@ part 'login_response_model.g.dart';
 @freezed
 class LoginResponseModel with _$LoginResponseModel {
   const factory LoginResponseModel({
+    /// 用户信息
     @JsonKey(name: 'user') required UserInfoModel user,
+
+    /// 令牌信息
     @JsonKey(name: 'tokens') required TokenInfoModel tokens,
   }) = _LoginResponseModel;
 

@@ -738,6 +738,7 @@ TranslationSettingsModel _$TranslationSettingsModelFromJson(
 /// @nodoc
 mixin _$TranslationSettingsModel {
   /// 翻译接口列表
+  @JsonKey(name: 'providers')
   List<TranslationProviderConfigModel> get providers =>
       throw _privateConstructorUsedError;
 
@@ -766,7 +767,8 @@ abstract class $TranslationSettingsModelCopyWith<$Res> {
       _$TranslationSettingsModelCopyWithImpl<$Res, TranslationSettingsModel>;
   @useResult
   $Res call(
-      {List<TranslationProviderConfigModel> providers,
+      {@JsonKey(name: 'providers')
+      List<TranslationProviderConfigModel> providers,
       @JsonKey(name: 'max_retries') int maxRetries,
       @JsonKey(name: 'timeout_seconds') int timeoutSeconds});
 }
@@ -818,7 +820,8 @@ abstract class _$$TranslationSettingsModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {List<TranslationProviderConfigModel> providers,
+      {@JsonKey(name: 'providers')
+      List<TranslationProviderConfigModel> providers,
       @JsonKey(name: 'max_retries') int maxRetries,
       @JsonKey(name: 'timeout_seconds') int timeoutSeconds});
 }
@@ -863,7 +866,8 @@ class __$$TranslationSettingsModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$TranslationSettingsModelImpl implements _TranslationSettingsModel {
   const _$TranslationSettingsModelImpl(
-      {final List<TranslationProviderConfigModel> providers = const [],
+      {@JsonKey(name: 'providers')
+      final List<TranslationProviderConfigModel> providers = const [],
       @JsonKey(name: 'max_retries') this.maxRetries = 3,
       @JsonKey(name: 'timeout_seconds') this.timeoutSeconds = 30})
       : _providers = providers;
@@ -876,7 +880,7 @@ class _$TranslationSettingsModelImpl implements _TranslationSettingsModel {
 
   /// 翻译接口列表
   @override
-  @JsonKey()
+  @JsonKey(name: 'providers')
   List<TranslationProviderConfigModel> get providers {
     if (_providers is EqualUnmodifiableListView) return _providers;
     // ignore: implicit_dynamic_type
@@ -938,7 +942,8 @@ class _$TranslationSettingsModelImpl implements _TranslationSettingsModel {
 
 abstract class _TranslationSettingsModel implements TranslationSettingsModel {
   const factory _TranslationSettingsModel(
-          {final List<TranslationProviderConfigModel> providers,
+          {@JsonKey(name: 'providers')
+          final List<TranslationProviderConfigModel> providers,
           @JsonKey(name: 'max_retries') final int maxRetries,
           @JsonKey(name: 'timeout_seconds') final int timeoutSeconds}) =
       _$TranslationSettingsModelImpl;
@@ -948,6 +953,7 @@ abstract class _TranslationSettingsModel implements TranslationSettingsModel {
 
   /// 翻译接口列表
   @override
+  @JsonKey(name: 'providers')
   List<TranslationProviderConfigModel> get providers;
 
   /// 最大重试次数
@@ -976,12 +982,15 @@ TranslationProviderConfigModel _$TranslationProviderConfigModelFromJson(
 /// @nodoc
 mixin _$TranslationProviderConfigModel {
   /// 唯一ID
+  @JsonKey(name: 'id')
   String get id => throw _privateConstructorUsedError;
 
   /// 翻译提供商代码 (google/baidu/youdao/custom)
+  @JsonKey(name: 'provider')
   String get provider => throw _privateConstructorUsedError;
 
   /// 自定义名称
+  @JsonKey(name: 'name')
   String? get name => throw _privateConstructorUsedError;
 
   /// App ID
@@ -1019,9 +1028,9 @@ abstract class $TranslationProviderConfigModelCopyWith<$Res> {
           TranslationProviderConfigModel>;
   @useResult
   $Res call(
-      {String id,
-      String provider,
-      String? name,
+      {@JsonKey(name: 'id') String id,
+      @JsonKey(name: 'provider') String provider,
+      @JsonKey(name: 'name') String? name,
       @JsonKey(name: 'app_id') String appId,
       @JsonKey(name: 'app_key') String appKey,
       @JsonKey(name: 'api_url') String? apiUrl,
@@ -1095,9 +1104,9 @@ abstract class _$$TranslationProviderConfigModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String id,
-      String provider,
-      String? name,
+      {@JsonKey(name: 'id') String id,
+      @JsonKey(name: 'provider') String provider,
+      @JsonKey(name: 'name') String? name,
       @JsonKey(name: 'app_id') String appId,
       @JsonKey(name: 'app_key') String appKey,
       @JsonKey(name: 'api_url') String? apiUrl,
@@ -1165,9 +1174,9 @@ class __$$TranslationProviderConfigModelImplCopyWithImpl<$Res>
 class _$TranslationProviderConfigModelImpl
     implements _TranslationProviderConfigModel {
   const _$TranslationProviderConfigModelImpl(
-      {required this.id,
-      required this.provider,
-      this.name,
+      {@JsonKey(name: 'id') this.id = '',
+      @JsonKey(name: 'provider') this.provider = '',
+      @JsonKey(name: 'name') this.name,
       @JsonKey(name: 'app_id') this.appId = '',
       @JsonKey(name: 'app_key') this.appKey = '',
       @JsonKey(name: 'api_url') this.apiUrl,
@@ -1179,14 +1188,17 @@ class _$TranslationProviderConfigModelImpl
 
   /// 唯一ID
   @override
+  @JsonKey(name: 'id')
   final String id;
 
   /// 翻译提供商代码 (google/baidu/youdao/custom)
   @override
+  @JsonKey(name: 'provider')
   final String provider;
 
   /// 自定义名称
   @override
+  @JsonKey(name: 'name')
   final String? name;
 
   /// App ID
@@ -1256,9 +1268,9 @@ class _$TranslationProviderConfigModelImpl
 abstract class _TranslationProviderConfigModel
     implements TranslationProviderConfigModel {
   const factory _TranslationProviderConfigModel(
-          {required final String id,
-          required final String provider,
-          final String? name,
+          {@JsonKey(name: 'id') final String id,
+          @JsonKey(name: 'provider') final String provider,
+          @JsonKey(name: 'name') final String? name,
           @JsonKey(name: 'app_id') final String appId,
           @JsonKey(name: 'app_key') final String appKey,
           @JsonKey(name: 'api_url') final String? apiUrl,
@@ -1270,14 +1282,17 @@ abstract class _TranslationProviderConfigModel
 
   /// 唯一ID
   @override
+  @JsonKey(name: 'id')
   String get id;
 
   /// 翻译提供商代码 (google/baidu/youdao/custom)
   @override
+  @JsonKey(name: 'provider')
   String get provider;
 
   /// 自定义名称
   @override
+  @JsonKey(name: 'name')
   String? get name;
 
   /// App ID

@@ -92,8 +92,8 @@ Map<String, dynamic> _$$TranslationSettingsModelImplToJson(
 _$TranslationProviderConfigModelImpl
     _$$TranslationProviderConfigModelImplFromJson(Map<String, dynamic> json) =>
         _$TranslationProviderConfigModelImpl(
-          id: json['id'] as String,
-          provider: json['provider'] as String,
+          id: json['id'] as String? ?? '',
+          provider: json['provider'] as String? ?? '',
           name: json['name'] as String?,
           appId: json['app_id'] as String? ?? '',
           appKey: json['app_key'] as String? ?? '',

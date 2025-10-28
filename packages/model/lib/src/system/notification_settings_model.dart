@@ -11,13 +11,28 @@ part 'notification_settings_model.g.dart';
 @freezed
 class NotificationSettingsModel with _$NotificationSettingsModel {
   const factory NotificationSettingsModel({
-    @JsonKey(name: 'id') required int id,
+    /// 通知设置ID
+    @JsonKey(name: 'id') @FlexibleIntConverter() required int id,
+
+    /// 用户ID
     @JsonKey(name: 'user_id') required String userId,
-    @JsonKey(name: 'project_id') int? projectId,
+
+    /// 项目ID
+    @JsonKey(name: 'project_id') @FlexibleIntConverter() int? projectId,
+
+    /// 通知类型
     @JsonKey(name: 'notification_type') @NotificationTypeEnumConverter() required NotificationTypeEnum notificationType,
+
+    /// 通知渠道
     @JsonKey(name: 'channel') @NotificationChannelEnumConverter() required NotificationChannelEnum channel,
+
+    /// 是否启用
     @JsonKey(name: 'is_enabled') @Default(true) bool isEnabled,
+
+    /// 创建时间
     @JsonKey(name: 'created_at') @TimesConverter() required DateTime createdAt,
+
+    /// 更新时间
     @JsonKey(name: 'updated_at') @TimesConverter() required DateTime updatedAt,
   }) = _NotificationSettingsModel;
 
@@ -28,11 +43,20 @@ class NotificationSettingsModel with _$NotificationSettingsModel {
 @freezed
 class UpdateNotificationSettingsRequest with _$UpdateNotificationSettingsRequest {
   const factory UpdateNotificationSettingsRequest({
-    required String userId,
-    int? projectId,
+    /// 用户ID
+    @JsonKey(name: 'user_id') required String userId,
+
+    /// 项目ID
+    @JsonKey(name: 'project_id') @FlexibleIntConverter() int? projectId,
+
+    /// 通知类型
     @JsonKey(name: 'notification_type') @NotificationTypeEnumConverter() required NotificationTypeEnum notificationType,
+
+    /// 通知渠道
     @JsonKey(name: 'channel') @NotificationChannelEnumConverter() required NotificationChannelEnum channel,
-    required bool isEnabled,
+
+    /// 是否启用
+    @JsonKey(name: 'is_enabled') required bool isEnabled,
   }) = _UpdateNotificationSettingsRequest;
 
   factory UpdateNotificationSettingsRequest.fromJson(Map<String, dynamic> json) =>
@@ -43,9 +67,14 @@ class UpdateNotificationSettingsRequest with _$UpdateNotificationSettingsRequest
 @freezed
 class BatchUpdateNotificationSettingsRequest with _$BatchUpdateNotificationSettingsRequest {
   const factory BatchUpdateNotificationSettingsRequest({
-    required String userId,
-    int? projectId,
-    required List<NotificationSettingUpdate> updates,
+    /// 用户ID
+    @JsonKey(name: 'user_id') required String userId,
+
+    /// 项目ID
+    @JsonKey(name: 'project_id') @FlexibleIntConverter() int? projectId,
+
+    /// 通知设置更新项
+    @JsonKey(name: 'updates') required List<NotificationSettingUpdate> updates,
   }) = _BatchUpdateNotificationSettingsRequest;
 
   factory BatchUpdateNotificationSettingsRequest.fromJson(Map<String, dynamic> json) =>
@@ -56,9 +85,14 @@ class BatchUpdateNotificationSettingsRequest with _$BatchUpdateNotificationSetti
 @freezed
 class NotificationSettingUpdate with _$NotificationSettingUpdate {
   const factory NotificationSettingUpdate({
+    /// 通知类型
     @JsonKey(name: 'notification_type') @NotificationTypeEnumConverter() required NotificationTypeEnum notificationType,
+
+    /// 通知渠道
     @JsonKey(name: 'channel') @NotificationChannelEnumConverter() required NotificationChannelEnum channel,
-    required bool isEnabled,
+
+    /// 是否启用
+    @JsonKey(name: 'is_enabled') required bool isEnabled,
   }) = _NotificationSettingUpdate;
 
   factory NotificationSettingUpdate.fromJson(Map<String, dynamic> json) => _$NotificationSettingUpdateFromJson(json);

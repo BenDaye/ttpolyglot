@@ -20,57 +20,100 @@ ProjectModel _$ProjectModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$ProjectModel {
+  /// 项目ID
   @JsonKey(name: 'id')
   @FlexibleIntConverter()
   int get id => throw _privateConstructorUsedError;
+
+  /// 项目名称
   @JsonKey(name: 'name')
   String get name => throw _privateConstructorUsedError;
+
+  /// 项目slug
   @JsonKey(name: 'slug')
   String get slug => throw _privateConstructorUsedError;
+
+  /// 项目描述
   @JsonKey(name: 'description')
   String? get description => throw _privateConstructorUsedError;
+
+  /// 项目所有者ID
   @JsonKey(name: 'owner_id')
   String get ownerId => throw _privateConstructorUsedError;
+
+  /// 项目状态
   @JsonKey(name: 'status')
   String get status => throw _privateConstructorUsedError;
+
+  /// 项目可见性
   @JsonKey(name: 'visibility')
   String get visibility => throw _privateConstructorUsedError;
+
+  /// 项目主语言ID
   @JsonKey(name: 'primary_language_id')
   @FlexibleIntConverter()
   int get primaryLanguageId => throw _privateConstructorUsedError;
+
+  /// 项目总键数
   @JsonKey(name: 'total_keys')
   @FlexibleIntConverter()
   int get totalKeys => throw _privateConstructorUsedError;
+
+  /// 项目已翻译键数
   @JsonKey(name: 'translated_keys')
   @FlexibleIntConverter()
   int get translatedKeys => throw _privateConstructorUsedError;
+
+  /// 项目语言数
   @JsonKey(name: 'languages_count')
   @FlexibleIntConverter()
   int get languagesCount => throw _privateConstructorUsedError;
+
+  /// 项目成员数
   @JsonKey(name: 'members_count')
   @FlexibleIntConverter()
   int get membersCount => throw _privateConstructorUsedError;
+
+  /// 项目是否公开
   @JsonKey(name: 'is_public')
   bool get isPublic => throw _privateConstructorUsedError;
+
+  /// 项目是否活跃
   @JsonKey(name: 'is_active')
   bool get isActive => throw _privateConstructorUsedError;
+
+  /// 项目设置
   @JsonKey(name: 'settings')
   Map<String, dynamic>? get settings => throw _privateConstructorUsedError;
+
+  /// 项目最后活动时间
   @JsonKey(name: 'last_activity_at')
   @NullableTimesConverter()
   DateTime? get lastActivityAt => throw _privateConstructorUsedError;
+
+  /// 项目创建时间
   @JsonKey(name: 'created_at')
   @TimesConverter()
   DateTime get createdAt => throw _privateConstructorUsedError;
+
+  /// 项目更新时间
   @JsonKey(name: 'updated_at')
   @TimesConverter()
-  DateTime get updatedAt => throw _privateConstructorUsedError; // 扩展字段（从联表查询）
+  DateTime get updatedAt => throw _privateConstructorUsedError;
+
+  /// 项目所有者用户名
   @JsonKey(name: 'owner_username')
   String? get ownerUsername => throw _privateConstructorUsedError;
+
+  /// 项目所有者显示名称
   @JsonKey(name: 'owner_display_name')
   String? get ownerDisplayName => throw _privateConstructorUsedError;
+
+  /// 项目所有者头像
   @JsonKey(name: 'owner_avatar')
   String? get ownerAvatar => throw _privateConstructorUsedError;
+
+  /// 项目完成百分比
   @JsonKey(name: 'completion_percentage')
   @FlexibleDoubleConverter()
   double get completionPercentage => throw _privateConstructorUsedError;
@@ -472,55 +515,86 @@ class _$ProjectModelImpl implements _ProjectModel {
   factory _$ProjectModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$ProjectModelImplFromJson(json);
 
+  /// 项目ID
   @override
   @JsonKey(name: 'id')
   @FlexibleIntConverter()
   final int id;
+
+  /// 项目名称
   @override
   @JsonKey(name: 'name')
   final String name;
+
+  /// 项目slug
   @override
   @JsonKey(name: 'slug')
   final String slug;
+
+  /// 项目描述
   @override
   @JsonKey(name: 'description')
   final String? description;
+
+  /// 项目所有者ID
   @override
   @JsonKey(name: 'owner_id')
   final String ownerId;
+
+  /// 项目状态
   @override
   @JsonKey(name: 'status')
   final String status;
+
+  /// 项目可见性
   @override
   @JsonKey(name: 'visibility')
   final String visibility;
+
+  /// 项目主语言ID
   @override
   @JsonKey(name: 'primary_language_id')
   @FlexibleIntConverter()
   final int primaryLanguageId;
+
+  /// 项目总键数
   @override
   @JsonKey(name: 'total_keys')
   @FlexibleIntConverter()
   final int totalKeys;
+
+  /// 项目已翻译键数
   @override
   @JsonKey(name: 'translated_keys')
   @FlexibleIntConverter()
   final int translatedKeys;
+
+  /// 项目语言数
   @override
   @JsonKey(name: 'languages_count')
   @FlexibleIntConverter()
   final int languagesCount;
+
+  /// 项目成员数
   @override
   @JsonKey(name: 'members_count')
   @FlexibleIntConverter()
   final int membersCount;
+
+  /// 项目是否公开
   @override
   @JsonKey(name: 'is_public')
   final bool isPublic;
+
+  /// 项目是否活跃
   @override
   @JsonKey(name: 'is_active')
   final bool isActive;
+
+  /// 项目设置
   final Map<String, dynamic>? _settings;
+
+  /// 项目设置
   @override
   @JsonKey(name: 'settings')
   Map<String, dynamic>? get settings {
@@ -531,28 +605,40 @@ class _$ProjectModelImpl implements _ProjectModel {
     return EqualUnmodifiableMapView(value);
   }
 
+  /// 项目最后活动时间
   @override
   @JsonKey(name: 'last_activity_at')
   @NullableTimesConverter()
   final DateTime? lastActivityAt;
+
+  /// 项目创建时间
   @override
   @JsonKey(name: 'created_at')
   @TimesConverter()
   final DateTime createdAt;
+
+  /// 项目更新时间
   @override
   @JsonKey(name: 'updated_at')
   @TimesConverter()
   final DateTime updatedAt;
-// 扩展字段（从联表查询）
+
+  /// 项目所有者用户名
   @override
   @JsonKey(name: 'owner_username')
   final String? ownerUsername;
+
+  /// 项目所有者显示名称
   @override
   @JsonKey(name: 'owner_display_name')
   final String? ownerDisplayName;
+
+  /// 项目所有者头像
   @override
   @JsonKey(name: 'owner_avatar')
   final String? ownerAvatar;
+
+  /// 项目完成百分比
   @override
   @JsonKey(name: 'completion_percentage')
   @FlexibleDoubleConverter()
@@ -696,78 +782,121 @@ abstract class _ProjectModel implements ProjectModel {
   factory _ProjectModel.fromJson(Map<String, dynamic> json) =
       _$ProjectModelImpl.fromJson;
 
+  /// 项目ID
   @override
   @JsonKey(name: 'id')
   @FlexibleIntConverter()
   int get id;
+
+  /// 项目名称
   @override
   @JsonKey(name: 'name')
   String get name;
+
+  /// 项目slug
   @override
   @JsonKey(name: 'slug')
   String get slug;
+
+  /// 项目描述
   @override
   @JsonKey(name: 'description')
   String? get description;
+
+  /// 项目所有者ID
   @override
   @JsonKey(name: 'owner_id')
   String get ownerId;
+
+  /// 项目状态
   @override
   @JsonKey(name: 'status')
   String get status;
+
+  /// 项目可见性
   @override
   @JsonKey(name: 'visibility')
   String get visibility;
+
+  /// 项目主语言ID
   @override
   @JsonKey(name: 'primary_language_id')
   @FlexibleIntConverter()
   int get primaryLanguageId;
+
+  /// 项目总键数
   @override
   @JsonKey(name: 'total_keys')
   @FlexibleIntConverter()
   int get totalKeys;
+
+  /// 项目已翻译键数
   @override
   @JsonKey(name: 'translated_keys')
   @FlexibleIntConverter()
   int get translatedKeys;
+
+  /// 项目语言数
   @override
   @JsonKey(name: 'languages_count')
   @FlexibleIntConverter()
   int get languagesCount;
+
+  /// 项目成员数
   @override
   @JsonKey(name: 'members_count')
   @FlexibleIntConverter()
   int get membersCount;
+
+  /// 项目是否公开
   @override
   @JsonKey(name: 'is_public')
   bool get isPublic;
+
+  /// 项目是否活跃
   @override
   @JsonKey(name: 'is_active')
   bool get isActive;
+
+  /// 项目设置
   @override
   @JsonKey(name: 'settings')
   Map<String, dynamic>? get settings;
+
+  /// 项目最后活动时间
   @override
   @JsonKey(name: 'last_activity_at')
   @NullableTimesConverter()
   DateTime? get lastActivityAt;
+
+  /// 项目创建时间
   @override
   @JsonKey(name: 'created_at')
   @TimesConverter()
   DateTime get createdAt;
+
+  /// 项目更新时间
   @override
   @JsonKey(name: 'updated_at')
   @TimesConverter()
-  DateTime get updatedAt; // 扩展字段（从联表查询）
+  DateTime get updatedAt;
+
+  /// 项目所有者用户名
   @override
   @JsonKey(name: 'owner_username')
   String? get ownerUsername;
+
+  /// 项目所有者显示名称
   @override
   @JsonKey(name: 'owner_display_name')
   String? get ownerDisplayName;
+
+  /// 项目所有者头像
   @override
   @JsonKey(name: 'owner_avatar')
   String? get ownerAvatar;
+
+  /// 项目完成百分比
   @override
   @JsonKey(name: 'completion_percentage')
   @FlexibleDoubleConverter()
@@ -787,13 +916,33 @@ CreateProjectRequest _$CreateProjectRequestFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$CreateProjectRequest {
+  /// 项目名称
+  @JsonKey(name: 'name')
   String get name => throw _privateConstructorUsedError;
+
+  /// 项目slug
+  @JsonKey(name: 'slug')
   String get slug => throw _privateConstructorUsedError;
+
+  /// 项目描述
+  @JsonKey(name: 'description')
   String? get description => throw _privateConstructorUsedError;
+
+  /// 项目状态
+  @JsonKey(name: 'status')
   String get status => throw _privateConstructorUsedError;
+
+  /// 项目可见性
+  @JsonKey(name: 'visibility')
   String get visibility => throw _privateConstructorUsedError;
+
+  /// 项目主语言ID
+  @JsonKey(name: 'primary_language_id')
   @FlexibleIntConverter()
   int? get primaryLanguageId => throw _privateConstructorUsedError;
+
+  /// 项目设置
+  @JsonKey(name: 'settings')
   Map<String, dynamic>? get settings => throw _privateConstructorUsedError;
 
   /// Serializes this CreateProjectRequest to a JSON map.
@@ -813,13 +962,15 @@ abstract class $CreateProjectRequestCopyWith<$Res> {
       _$CreateProjectRequestCopyWithImpl<$Res, CreateProjectRequest>;
   @useResult
   $Res call(
-      {String name,
-      String slug,
-      String? description,
-      String status,
-      String visibility,
-      @FlexibleIntConverter() int? primaryLanguageId,
-      Map<String, dynamic>? settings});
+      {@JsonKey(name: 'name') String name,
+      @JsonKey(name: 'slug') String slug,
+      @JsonKey(name: 'description') String? description,
+      @JsonKey(name: 'status') String status,
+      @JsonKey(name: 'visibility') String visibility,
+      @JsonKey(name: 'primary_language_id')
+      @FlexibleIntConverter()
+      int? primaryLanguageId,
+      @JsonKey(name: 'settings') Map<String, dynamic>? settings});
 }
 
 /// @nodoc
@@ -888,13 +1039,15 @@ abstract class _$$CreateProjectRequestImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String name,
-      String slug,
-      String? description,
-      String status,
-      String visibility,
-      @FlexibleIntConverter() int? primaryLanguageId,
-      Map<String, dynamic>? settings});
+      {@JsonKey(name: 'name') String name,
+      @JsonKey(name: 'slug') String slug,
+      @JsonKey(name: 'description') String? description,
+      @JsonKey(name: 'status') String status,
+      @JsonKey(name: 'visibility') String visibility,
+      @JsonKey(name: 'primary_language_id')
+      @FlexibleIntConverter()
+      int? primaryLanguageId,
+      @JsonKey(name: 'settings') Map<String, dynamic>? settings});
 }
 
 /// @nodoc
@@ -955,35 +1108,57 @@ class __$$CreateProjectRequestImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$CreateProjectRequestImpl implements _CreateProjectRequest {
   const _$CreateProjectRequestImpl(
-      {required this.name,
-      required this.slug,
-      this.description,
-      this.status = 'active',
-      this.visibility = 'private',
-      @FlexibleIntConverter() this.primaryLanguageId,
-      final Map<String, dynamic>? settings})
+      {@JsonKey(name: 'name') required this.name,
+      @JsonKey(name: 'slug') required this.slug,
+      @JsonKey(name: 'description') this.description,
+      @JsonKey(name: 'status') this.status = 'active',
+      @JsonKey(name: 'visibility') this.visibility = 'private',
+      @JsonKey(name: 'primary_language_id')
+      @FlexibleIntConverter()
+      this.primaryLanguageId,
+      @JsonKey(name: 'settings') final Map<String, dynamic>? settings})
       : _settings = settings;
 
   factory _$CreateProjectRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$CreateProjectRequestImplFromJson(json);
 
+  /// 项目名称
   @override
+  @JsonKey(name: 'name')
   final String name;
+
+  /// 项目slug
   @override
+  @JsonKey(name: 'slug')
   final String slug;
+
+  /// 项目描述
   @override
+  @JsonKey(name: 'description')
   final String? description;
+
+  /// 项目状态
   @override
-  @JsonKey()
+  @JsonKey(name: 'status')
   final String status;
+
+  /// 项目可见性
   @override
-  @JsonKey()
+  @JsonKey(name: 'visibility')
   final String visibility;
+
+  /// 项目主语言ID
   @override
+  @JsonKey(name: 'primary_language_id')
   @FlexibleIntConverter()
   final int? primaryLanguageId;
+
+  /// 项目设置
   final Map<String, dynamic>? _settings;
+
+  /// 项目设置
   @override
+  @JsonKey(name: 'settings')
   Map<String, dynamic>? get settings {
     final value = _settings;
     if (value == null) return null;
@@ -1046,31 +1221,54 @@ class _$CreateProjectRequestImpl implements _CreateProjectRequest {
 
 abstract class _CreateProjectRequest implements CreateProjectRequest {
   const factory _CreateProjectRequest(
-      {required final String name,
-      required final String slug,
-      final String? description,
-      final String status,
-      final String visibility,
-      @FlexibleIntConverter() final int? primaryLanguageId,
-      final Map<String, dynamic>? settings}) = _$CreateProjectRequestImpl;
+          {@JsonKey(name: 'name') required final String name,
+          @JsonKey(name: 'slug') required final String slug,
+          @JsonKey(name: 'description') final String? description,
+          @JsonKey(name: 'status') final String status,
+          @JsonKey(name: 'visibility') final String visibility,
+          @JsonKey(name: 'primary_language_id')
+          @FlexibleIntConverter()
+          final int? primaryLanguageId,
+          @JsonKey(name: 'settings') final Map<String, dynamic>? settings}) =
+      _$CreateProjectRequestImpl;
 
   factory _CreateProjectRequest.fromJson(Map<String, dynamic> json) =
       _$CreateProjectRequestImpl.fromJson;
 
+  /// 项目名称
   @override
+  @JsonKey(name: 'name')
   String get name;
+
+  /// 项目slug
   @override
+  @JsonKey(name: 'slug')
   String get slug;
+
+  /// 项目描述
   @override
+  @JsonKey(name: 'description')
   String? get description;
+
+  /// 项目状态
   @override
+  @JsonKey(name: 'status')
   String get status;
+
+  /// 项目可见性
   @override
+  @JsonKey(name: 'visibility')
   String get visibility;
+
+  /// 项目主语言ID
   @override
+  @JsonKey(name: 'primary_language_id')
   @FlexibleIntConverter()
   int? get primaryLanguageId;
+
+  /// 项目设置
   @override
+  @JsonKey(name: 'settings')
   Map<String, dynamic>? get settings;
 
   /// Create a copy of CreateProjectRequest
@@ -1087,13 +1285,33 @@ UpdateProjectRequest _$UpdateProjectRequestFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$UpdateProjectRequest {
+  /// 项目名称
+  @JsonKey(name: 'name')
   String? get name => throw _privateConstructorUsedError;
+
+  /// 项目slug
+  @JsonKey(name: 'slug')
   String? get slug => throw _privateConstructorUsedError;
+
+  /// 项目描述
+  @JsonKey(name: 'description')
   String? get description => throw _privateConstructorUsedError;
+
+  /// 项目状态
+  @JsonKey(name: 'status')
   String? get status => throw _privateConstructorUsedError;
+
+  /// 项目可见性
+  @JsonKey(name: 'visibility')
   String? get visibility => throw _privateConstructorUsedError;
+
+  /// 项目主语言ID
+  @JsonKey(name: 'primary_language_id')
   @FlexibleIntConverter()
   int? get primaryLanguageId => throw _privateConstructorUsedError;
+
+  /// 项目设置
+  @JsonKey(name: 'settings')
   Map<String, dynamic>? get settings => throw _privateConstructorUsedError;
 
   /// Serializes this UpdateProjectRequest to a JSON map.
@@ -1113,13 +1331,15 @@ abstract class $UpdateProjectRequestCopyWith<$Res> {
       _$UpdateProjectRequestCopyWithImpl<$Res, UpdateProjectRequest>;
   @useResult
   $Res call(
-      {String? name,
-      String? slug,
-      String? description,
-      String? status,
-      String? visibility,
-      @FlexibleIntConverter() int? primaryLanguageId,
-      Map<String, dynamic>? settings});
+      {@JsonKey(name: 'name') String? name,
+      @JsonKey(name: 'slug') String? slug,
+      @JsonKey(name: 'description') String? description,
+      @JsonKey(name: 'status') String? status,
+      @JsonKey(name: 'visibility') String? visibility,
+      @JsonKey(name: 'primary_language_id')
+      @FlexibleIntConverter()
+      int? primaryLanguageId,
+      @JsonKey(name: 'settings') Map<String, dynamic>? settings});
 }
 
 /// @nodoc
@@ -1188,13 +1408,15 @@ abstract class _$$UpdateProjectRequestImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String? name,
-      String? slug,
-      String? description,
-      String? status,
-      String? visibility,
-      @FlexibleIntConverter() int? primaryLanguageId,
-      Map<String, dynamic>? settings});
+      {@JsonKey(name: 'name') String? name,
+      @JsonKey(name: 'slug') String? slug,
+      @JsonKey(name: 'description') String? description,
+      @JsonKey(name: 'status') String? status,
+      @JsonKey(name: 'visibility') String? visibility,
+      @JsonKey(name: 'primary_language_id')
+      @FlexibleIntConverter()
+      int? primaryLanguageId,
+      @JsonKey(name: 'settings') Map<String, dynamic>? settings});
 }
 
 /// @nodoc
@@ -1255,33 +1477,57 @@ class __$$UpdateProjectRequestImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$UpdateProjectRequestImpl implements _UpdateProjectRequest {
   const _$UpdateProjectRequestImpl(
-      {this.name,
-      this.slug,
-      this.description,
-      this.status,
-      this.visibility,
-      @FlexibleIntConverter() this.primaryLanguageId,
-      final Map<String, dynamic>? settings})
+      {@JsonKey(name: 'name') this.name,
+      @JsonKey(name: 'slug') this.slug,
+      @JsonKey(name: 'description') this.description,
+      @JsonKey(name: 'status') this.status,
+      @JsonKey(name: 'visibility') this.visibility,
+      @JsonKey(name: 'primary_language_id')
+      @FlexibleIntConverter()
+      this.primaryLanguageId,
+      @JsonKey(name: 'settings') final Map<String, dynamic>? settings})
       : _settings = settings;
 
   factory _$UpdateProjectRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$UpdateProjectRequestImplFromJson(json);
 
+  /// 项目名称
   @override
+  @JsonKey(name: 'name')
   final String? name;
+
+  /// 项目slug
   @override
+  @JsonKey(name: 'slug')
   final String? slug;
+
+  /// 项目描述
   @override
+  @JsonKey(name: 'description')
   final String? description;
+
+  /// 项目状态
   @override
+  @JsonKey(name: 'status')
   final String? status;
+
+  /// 项目可见性
   @override
+  @JsonKey(name: 'visibility')
   final String? visibility;
+
+  /// 项目主语言ID
   @override
+  @JsonKey(name: 'primary_language_id')
   @FlexibleIntConverter()
   final int? primaryLanguageId;
+
+  /// 项目设置
   final Map<String, dynamic>? _settings;
+
+  /// 项目设置
   @override
+  @JsonKey(name: 'settings')
   Map<String, dynamic>? get settings {
     final value = _settings;
     if (value == null) return null;
@@ -1344,31 +1590,54 @@ class _$UpdateProjectRequestImpl implements _UpdateProjectRequest {
 
 abstract class _UpdateProjectRequest implements UpdateProjectRequest {
   const factory _UpdateProjectRequest(
-      {final String? name,
-      final String? slug,
-      final String? description,
-      final String? status,
-      final String? visibility,
-      @FlexibleIntConverter() final int? primaryLanguageId,
-      final Map<String, dynamic>? settings}) = _$UpdateProjectRequestImpl;
+          {@JsonKey(name: 'name') final String? name,
+          @JsonKey(name: 'slug') final String? slug,
+          @JsonKey(name: 'description') final String? description,
+          @JsonKey(name: 'status') final String? status,
+          @JsonKey(name: 'visibility') final String? visibility,
+          @JsonKey(name: 'primary_language_id')
+          @FlexibleIntConverter()
+          final int? primaryLanguageId,
+          @JsonKey(name: 'settings') final Map<String, dynamic>? settings}) =
+      _$UpdateProjectRequestImpl;
 
   factory _UpdateProjectRequest.fromJson(Map<String, dynamic> json) =
       _$UpdateProjectRequestImpl.fromJson;
 
+  /// 项目名称
   @override
+  @JsonKey(name: 'name')
   String? get name;
+
+  /// 项目slug
   @override
+  @JsonKey(name: 'slug')
   String? get slug;
+
+  /// 项目描述
   @override
+  @JsonKey(name: 'description')
   String? get description;
+
+  /// 项目状态
   @override
+  @JsonKey(name: 'status')
   String? get status;
+
+  /// 项目可见性
   @override
+  @JsonKey(name: 'visibility')
   String? get visibility;
+
+  /// 项目主语言ID
   @override
+  @JsonKey(name: 'primary_language_id')
   @FlexibleIntConverter()
   int? get primaryLanguageId;
+
+  /// 项目设置
   @override
+  @JsonKey(name: 'settings')
   Map<String, dynamic>? get settings;
 
   /// Create a copy of UpdateProjectRequest
@@ -1385,8 +1654,16 @@ ProjectDetailModel _$ProjectDetailModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$ProjectDetailModel {
+  /// 项目
+  @JsonKey(name: 'project')
   ProjectModel get project => throw _privateConstructorUsedError;
+
+  /// 项目语言
+  @JsonKey(name: 'languages')
   List<LanguageModel>? get languages => throw _privateConstructorUsedError;
+
+  /// 项目成员
+  @JsonKey(name: 'members')
   List<ProjectMemberModel>? get members => throw _privateConstructorUsedError;
 
   /// Serializes this ProjectDetailModel to a JSON map.
@@ -1406,9 +1683,9 @@ abstract class $ProjectDetailModelCopyWith<$Res> {
       _$ProjectDetailModelCopyWithImpl<$Res, ProjectDetailModel>;
   @useResult
   $Res call(
-      {ProjectModel project,
-      List<LanguageModel>? languages,
-      List<ProjectMemberModel>? members});
+      {@JsonKey(name: 'project') ProjectModel project,
+      @JsonKey(name: 'languages') List<LanguageModel>? languages,
+      @JsonKey(name: 'members') List<ProjectMemberModel>? members});
 
   $ProjectModelCopyWith<$Res> get project;
 }
@@ -1468,9 +1745,9 @@ abstract class _$$ProjectDetailModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {ProjectModel project,
-      List<LanguageModel>? languages,
-      List<ProjectMemberModel>? members});
+      {@JsonKey(name: 'project') ProjectModel project,
+      @JsonKey(name: 'languages') List<LanguageModel>? languages,
+      @JsonKey(name: 'members') List<ProjectMemberModel>? members});
 
   @override
   $ProjectModelCopyWith<$Res> get project;
@@ -1514,19 +1791,26 @@ class __$$ProjectDetailModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$ProjectDetailModelImpl implements _ProjectDetailModel {
   const _$ProjectDetailModelImpl(
-      {required this.project,
-      final List<LanguageModel>? languages,
-      final List<ProjectMemberModel>? members})
+      {@JsonKey(name: 'project') required this.project,
+      @JsonKey(name: 'languages') final List<LanguageModel>? languages,
+      @JsonKey(name: 'members') final List<ProjectMemberModel>? members})
       : _languages = languages,
         _members = members;
 
   factory _$ProjectDetailModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$ProjectDetailModelImplFromJson(json);
 
+  /// 项目
   @override
+  @JsonKey(name: 'project')
   final ProjectModel project;
+
+  /// 项目语言
   final List<LanguageModel>? _languages;
+
+  /// 项目语言
   @override
+  @JsonKey(name: 'languages')
   List<LanguageModel>? get languages {
     final value = _languages;
     if (value == null) return null;
@@ -1535,8 +1819,12 @@ class _$ProjectDetailModelImpl implements _ProjectDetailModel {
     return EqualUnmodifiableListView(value);
   }
 
+  /// 项目成员
   final List<ProjectMemberModel>? _members;
+
+  /// 项目成员
   @override
+  @JsonKey(name: 'members')
   List<ProjectMemberModel>? get members {
     final value = _members;
     if (value == null) return null;
@@ -1588,18 +1876,27 @@ class _$ProjectDetailModelImpl implements _ProjectDetailModel {
 
 abstract class _ProjectDetailModel implements ProjectDetailModel {
   const factory _ProjectDetailModel(
-      {required final ProjectModel project,
-      final List<LanguageModel>? languages,
-      final List<ProjectMemberModel>? members}) = _$ProjectDetailModelImpl;
+          {@JsonKey(name: 'project') required final ProjectModel project,
+          @JsonKey(name: 'languages') final List<LanguageModel>? languages,
+          @JsonKey(name: 'members') final List<ProjectMemberModel>? members}) =
+      _$ProjectDetailModelImpl;
 
   factory _ProjectDetailModel.fromJson(Map<String, dynamic> json) =
       _$ProjectDetailModelImpl.fromJson;
 
+  /// 项目
   @override
+  @JsonKey(name: 'project')
   ProjectModel get project;
+
+  /// 项目语言
   @override
+  @JsonKey(name: 'languages')
   List<LanguageModel>? get languages;
+
+  /// 项目成员
   @override
+  @JsonKey(name: 'members')
   List<ProjectMemberModel>? get members;
 
   /// Create a copy of ProjectDetailModel

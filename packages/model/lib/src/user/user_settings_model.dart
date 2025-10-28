@@ -58,7 +58,7 @@ class GeneralSettingsModel with _$GeneralSettingsModel {
 class TranslationSettingsModel with _$TranslationSettingsModel {
   const factory TranslationSettingsModel({
     /// 翻译接口列表
-    @Default([]) List<TranslationProviderConfigModel> providers,
+    @JsonKey(name: 'providers') @Default([]) List<TranslationProviderConfigModel> providers,
 
     /// 最大重试次数
     @JsonKey(name: 'max_retries') @Default(3) int maxRetries,
@@ -75,13 +75,13 @@ class TranslationSettingsModel with _$TranslationSettingsModel {
 class TranslationProviderConfigModel with _$TranslationProviderConfigModel {
   const factory TranslationProviderConfigModel({
     /// 唯一ID
-    required String id,
+    @JsonKey(name: 'id') @Default('') String id,
 
     /// 翻译提供商代码 (google/baidu/youdao/custom)
-    required String provider,
+    @JsonKey(name: 'provider') @Default('') String provider,
 
     /// 自定义名称
-    String? name,
+    @JsonKey(name: 'name') String? name,
 
     /// App ID
     @JsonKey(name: 'app_id') @Default('') String appId,

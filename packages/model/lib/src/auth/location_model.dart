@@ -8,22 +8,22 @@ part 'location_model.g.dart';
 class LocationModel with _$LocationModel {
   const factory LocationModel({
     /// 国家名称
-    @Default('') String country,
+    @JsonKey(name: 'country') @Default('') String country,
 
     /// 城市
-    @Default('') String city,
+    @JsonKey(name: 'city') @Default('') String city,
 
     /// 省份/地区
-    @Default('') String region,
+    @JsonKey(name: 'region') @Default('') String region,
 
     /// 国家代码
     @JsonKey(name: 'country_code') @Default('') String countryCode,
 
     /// 时区
-    @Default('') String timezone,
+    @JsonKey(name: 'timezone') @Default('') String timezone,
 
     /// ISP运营商
-    @Default('') String isp,
+    @JsonKey(name: 'isp') @Default('') String isp,
   }) = _LocationModel;
 
   factory LocationModel.fromJson(Map<String, dynamic> json) => _$LocationModelFromJson(json);

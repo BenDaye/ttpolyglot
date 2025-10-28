@@ -9,7 +9,7 @@ part 'system_config_model.g.dart';
 class SystemConfigModel with _$SystemConfigModel {
   const factory SystemConfigModel({
     /// 配置ID
-    String? id,
+    @JsonKey(name: 'id') @FlexibleIntConverter() int? id,
 
     /// 配置键
     @JsonKey(name: 'config_key') required String configKey,
@@ -24,13 +24,13 @@ class SystemConfigModel with _$SystemConfigModel {
     @JsonKey(name: 'default_value') String? defaultValue,
 
     /// 分类
-    String? category,
+    @JsonKey(name: 'category') String? category,
 
     /// 显示名称
     @JsonKey(name: 'display_name') String? displayName,
 
     /// 描述
-    String? description,
+    @JsonKey(name: 'description') String? description,
 
     /// 排序顺序
     @JsonKey(name: 'sort_order') int? sortOrder,

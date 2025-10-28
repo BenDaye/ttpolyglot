@@ -21,14 +21,21 @@ BaseModel<T> _$BaseModelFromJson<T>(
 
 /// @nodoc
 mixin _$BaseModel<T> {
-// 响应码
+  /// 响应码
   @JsonKey(name: 'code')
   @DataCodeEnumConverter()
   DataCodeEnum get code => throw _privateConstructorUsedError;
-  String get message => throw _privateConstructorUsedError; // 提示类型
+
+  /// 提示信息
+  @JsonKey(name: 'message')
+  String get message => throw _privateConstructorUsedError;
+
+  /// 提示类型
   @JsonKey(name: 'type')
   @DataMessageTipsEnumConverter()
-  DataMessageTipsEnum get type => throw _privateConstructorUsedError; // 数据
+  DataMessageTipsEnum get type => throw _privateConstructorUsedError;
+
+  /// 数据
   @JsonKey(name: 'data')
   T? get data => throw _privateConstructorUsedError;
 
@@ -51,7 +58,7 @@ abstract class $BaseModelCopyWith<T, $Res> {
   @useResult
   $Res call(
       {@JsonKey(name: 'code') @DataCodeEnumConverter() DataCodeEnum code,
-      String message,
+      @JsonKey(name: 'message') String message,
       @JsonKey(name: 'type')
       @DataMessageTipsEnumConverter()
       DataMessageTipsEnum type,
@@ -109,7 +116,7 @@ abstract class _$$BaseModelImplCopyWith<T, $Res>
   @useResult
   $Res call(
       {@JsonKey(name: 'code') @DataCodeEnumConverter() DataCodeEnum code,
-      String message,
+      @JsonKey(name: 'message') String message,
       @JsonKey(name: 'type')
       @DataMessageTipsEnumConverter()
       DataMessageTipsEnum type,
@@ -160,7 +167,7 @@ class __$$BaseModelImplCopyWithImpl<T, $Res>
 class _$BaseModelImpl<T> extends _BaseModel<T> {
   const _$BaseModelImpl(
       {@JsonKey(name: 'code') @DataCodeEnumConverter() required this.code,
-      this.message = "",
+      @JsonKey(name: 'message') this.message = "",
       @JsonKey(name: 'type')
       @DataMessageTipsEnumConverter()
       this.type = DataMessageTipsEnum.showToast,
@@ -171,20 +178,24 @@ class _$BaseModelImpl<T> extends _BaseModel<T> {
           Map<String, dynamic> json, T Function(Object?) fromJsonT) =>
       _$$BaseModelImplFromJson(json, fromJsonT);
 
-// 响应码
+  /// 响应码
   @override
   @JsonKey(name: 'code')
   @DataCodeEnumConverter()
   final DataCodeEnum code;
+
+  /// 提示信息
   @override
-  @JsonKey()
+  @JsonKey(name: 'message')
   final String message;
-// 提示类型
+
+  /// 提示类型
   @override
   @JsonKey(name: 'type')
   @DataMessageTipsEnumConverter()
   final DataMessageTipsEnum type;
-// 数据
+
+  /// 数据
   @override
   @JsonKey(name: 'data')
   final T? data;
@@ -229,7 +240,7 @@ abstract class _BaseModel<T> extends BaseModel<T> {
       {@JsonKey(name: 'code')
       @DataCodeEnumConverter()
       required final DataCodeEnum code,
-      final String message,
+      @JsonKey(name: 'message') final String message,
       @JsonKey(name: 'type')
       @DataMessageTipsEnumConverter()
       final DataMessageTipsEnum type,
@@ -240,17 +251,24 @@ abstract class _BaseModel<T> extends BaseModel<T> {
           Map<String, dynamic> json, T Function(Object?) fromJsonT) =
       _$BaseModelImpl<T>.fromJson;
 
-// 响应码
+  /// 响应码
   @override
   @JsonKey(name: 'code')
   @DataCodeEnumConverter()
   DataCodeEnum get code;
+
+  /// 提示信息
   @override
-  String get message; // 提示类型
+  @JsonKey(name: 'message')
+  String get message;
+
+  /// 提示类型
   @override
   @JsonKey(name: 'type')
   @DataMessageTipsEnumConverter()
-  DataMessageTipsEnum get type; // 数据
+  DataMessageTipsEnum get type;
+
+  /// 数据
   @override
   @JsonKey(name: 'data')
   T? get data;

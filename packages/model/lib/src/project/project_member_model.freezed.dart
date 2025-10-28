@@ -20,44 +20,73 @@ ProjectMemberModel _$ProjectMemberModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$ProjectMemberModel {
+  /// 成员ID
   @JsonKey(name: 'id')
   int get id => throw _privateConstructorUsedError;
+
+  /// 项目ID
   @JsonKey(name: 'project_id')
   int get projectId => throw _privateConstructorUsedError;
   @JsonKey(name: 'user_id')
   String get userId => throw _privateConstructorUsedError;
+
+  /// 成员角色
   @JsonKey(name: 'role')
   @ProjectRoleEnumConverter()
   ProjectRoleEnum get role => throw _privateConstructorUsedError;
+
+  /// 邀请人ID
   @JsonKey(name: 'invited_by')
   String? get invitedBy => throw _privateConstructorUsedError;
+
+  /// 邀请时间
   @JsonKey(name: 'invited_at')
   @TimesConverter()
   DateTime get invitedAt => throw _privateConstructorUsedError;
+
+  /// 加入时间
   @JsonKey(name: 'joined_at')
   @NullableTimesConverter()
   DateTime? get joinedAt => throw _privateConstructorUsedError;
+
+  /// 成员状态
   @JsonKey(name: 'status')
   @MemberStatusEnumConverter()
   MemberStatusEnum get status => throw _privateConstructorUsedError;
+
+  /// 是否为活跃成员
   @JsonKey(name: 'is_active')
   bool get isActive => throw _privateConstructorUsedError;
+
+  /// 创建时间
   @JsonKey(name: 'created_at')
   @TimesConverter()
   DateTime get createdAt => throw _privateConstructorUsedError;
+
+  /// 更新时间
   @JsonKey(name: 'updated_at')
   @TimesConverter()
   DateTime get updatedAt => throw _privateConstructorUsedError; // 扩展字段（从联表查询）
   @JsonKey(name: 'username')
   String? get username => throw _privateConstructorUsedError;
+
+  /// 显示名称
   @JsonKey(name: 'display_name')
   String? get displayName => throw _privateConstructorUsedError;
+
+  /// 头像URL
   @JsonKey(name: 'avatar_url')
   String? get avatarUrl => throw _privateConstructorUsedError;
+
+  /// 邮箱
   @JsonKey(name: 'email')
   String? get email => throw _privateConstructorUsedError;
+
+  /// 邀请人用户名
   @JsonKey(name: 'inviter_username')
   String? get inviterUsername => throw _privateConstructorUsedError;
+
+  /// 邀请人显示名称
   @JsonKey(name: 'inviter_display_name')
   String? get inviterDisplayName => throw _privateConstructorUsedError;
 
@@ -366,41 +395,60 @@ class _$ProjectMemberModelImpl implements _ProjectMemberModel {
   factory _$ProjectMemberModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$ProjectMemberModelImplFromJson(json);
 
+  /// 成员ID
   @override
   @JsonKey(name: 'id')
   final int id;
+
+  /// 项目ID
   @override
   @JsonKey(name: 'project_id')
   final int projectId;
   @override
   @JsonKey(name: 'user_id')
   final String userId;
+
+  /// 成员角色
   @override
   @JsonKey(name: 'role')
   @ProjectRoleEnumConverter()
   final ProjectRoleEnum role;
+
+  /// 邀请人ID
   @override
   @JsonKey(name: 'invited_by')
   final String? invitedBy;
+
+  /// 邀请时间
   @override
   @JsonKey(name: 'invited_at')
   @TimesConverter()
   final DateTime invitedAt;
+
+  /// 加入时间
   @override
   @JsonKey(name: 'joined_at')
   @NullableTimesConverter()
   final DateTime? joinedAt;
+
+  /// 成员状态
   @override
   @JsonKey(name: 'status')
   @MemberStatusEnumConverter()
   final MemberStatusEnum status;
+
+  /// 是否为活跃成员
   @override
   @JsonKey(name: 'is_active')
   final bool isActive;
+
+  /// 创建时间
   @override
   @JsonKey(name: 'created_at')
   @TimesConverter()
   final DateTime createdAt;
+
+  /// 更新时间
   @override
   @JsonKey(name: 'updated_at')
   @TimesConverter()
@@ -409,18 +457,28 @@ class _$ProjectMemberModelImpl implements _ProjectMemberModel {
   @override
   @JsonKey(name: 'username')
   final String? username;
+
+  /// 显示名称
   @override
   @JsonKey(name: 'display_name')
   final String? displayName;
+
+  /// 头像URL
   @override
   @JsonKey(name: 'avatar_url')
   final String? avatarUrl;
+
+  /// 邮箱
   @override
   @JsonKey(name: 'email')
   final String? email;
+
+  /// 邀请人用户名
   @override
   @JsonKey(name: 'inviter_username')
   final String? inviterUsername;
+
+  /// 邀请人显示名称
   @override
   @JsonKey(name: 'inviter_display_name')
   final String? inviterDisplayName;
@@ -541,41 +599,60 @@ abstract class _ProjectMemberModel implements ProjectMemberModel {
   factory _ProjectMemberModel.fromJson(Map<String, dynamic> json) =
       _$ProjectMemberModelImpl.fromJson;
 
+  /// 成员ID
   @override
   @JsonKey(name: 'id')
   int get id;
+
+  /// 项目ID
   @override
   @JsonKey(name: 'project_id')
   int get projectId;
   @override
   @JsonKey(name: 'user_id')
   String get userId;
+
+  /// 成员角色
   @override
   @JsonKey(name: 'role')
   @ProjectRoleEnumConverter()
   ProjectRoleEnum get role;
+
+  /// 邀请人ID
   @override
   @JsonKey(name: 'invited_by')
   String? get invitedBy;
+
+  /// 邀请时间
   @override
   @JsonKey(name: 'invited_at')
   @TimesConverter()
   DateTime get invitedAt;
+
+  /// 加入时间
   @override
   @JsonKey(name: 'joined_at')
   @NullableTimesConverter()
   DateTime? get joinedAt;
+
+  /// 成员状态
   @override
   @JsonKey(name: 'status')
   @MemberStatusEnumConverter()
   MemberStatusEnum get status;
+
+  /// 是否为活跃成员
   @override
   @JsonKey(name: 'is_active')
   bool get isActive;
+
+  /// 创建时间
   @override
   @JsonKey(name: 'created_at')
   @TimesConverter()
   DateTime get createdAt;
+
+  /// 更新时间
   @override
   @JsonKey(name: 'updated_at')
   @TimesConverter()
@@ -583,18 +660,28 @@ abstract class _ProjectMemberModel implements ProjectMemberModel {
   @override
   @JsonKey(name: 'username')
   String? get username;
+
+  /// 显示名称
   @override
   @JsonKey(name: 'display_name')
   String? get displayName;
+
+  /// 头像URL
   @override
   @JsonKey(name: 'avatar_url')
   String? get avatarUrl;
+
+  /// 邮箱
   @override
   @JsonKey(name: 'email')
   String? get email;
+
+  /// 邀请人用户名
   @override
   @JsonKey(name: 'inviter_username')
   String? get inviterUsername;
+
+  /// 邀请人显示名称
   @override
   @JsonKey(name: 'inviter_display_name')
   String? get inviterDisplayName;
@@ -613,8 +700,15 @@ InviteMemberRequest _$InviteMemberRequestFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$InviteMemberRequest {
+  /// 项目ID
+  @JsonKey(name: 'project_id')
   int get projectId => throw _privateConstructorUsedError;
+
+  /// 用户ID
+  @JsonKey(name: 'user_id')
   String get userId => throw _privateConstructorUsedError;
+
+  /// 成员角色
   @JsonKey(name: 'role')
   @ProjectRoleEnumConverter()
   ProjectRoleEnum get role => throw _privateConstructorUsedError;
@@ -636,8 +730,8 @@ abstract class $InviteMemberRequestCopyWith<$Res> {
       _$InviteMemberRequestCopyWithImpl<$Res, InviteMemberRequest>;
   @useResult
   $Res call(
-      {int projectId,
-      String userId,
+      {@JsonKey(name: 'project_id') int projectId,
+      @JsonKey(name: 'user_id') String userId,
       @JsonKey(name: 'role') @ProjectRoleEnumConverter() ProjectRoleEnum role});
 }
 
@@ -686,8 +780,8 @@ abstract class _$$InviteMemberRequestImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {int projectId,
-      String userId,
+      {@JsonKey(name: 'project_id') int projectId,
+      @JsonKey(name: 'user_id') String userId,
       @JsonKey(name: 'role') @ProjectRoleEnumConverter() ProjectRoleEnum role});
 }
 
@@ -729,8 +823,8 @@ class __$$InviteMemberRequestImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$InviteMemberRequestImpl implements _InviteMemberRequest {
   const _$InviteMemberRequestImpl(
-      {required this.projectId,
-      required this.userId,
+      {@JsonKey(name: 'project_id') required this.projectId,
+      @JsonKey(name: 'user_id') required this.userId,
       @JsonKey(name: 'role')
       @ProjectRoleEnumConverter()
       this.role = ProjectRoleEnum.member});
@@ -738,10 +832,17 @@ class _$InviteMemberRequestImpl implements _InviteMemberRequest {
   factory _$InviteMemberRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$InviteMemberRequestImplFromJson(json);
 
+  /// 项目ID
   @override
+  @JsonKey(name: 'project_id')
   final int projectId;
+
+  /// 用户ID
   @override
+  @JsonKey(name: 'user_id')
   final String userId;
+
+  /// 成员角色
   @override
   @JsonKey(name: 'role')
   @ProjectRoleEnumConverter()
@@ -786,8 +887,8 @@ class _$InviteMemberRequestImpl implements _InviteMemberRequest {
 
 abstract class _InviteMemberRequest implements InviteMemberRequest {
   const factory _InviteMemberRequest(
-      {required final int projectId,
-      required final String userId,
+      {@JsonKey(name: 'project_id') required final int projectId,
+      @JsonKey(name: 'user_id') required final String userId,
       @JsonKey(name: 'role')
       @ProjectRoleEnumConverter()
       final ProjectRoleEnum role}) = _$InviteMemberRequestImpl;
@@ -795,10 +896,17 @@ abstract class _InviteMemberRequest implements InviteMemberRequest {
   factory _InviteMemberRequest.fromJson(Map<String, dynamic> json) =
       _$InviteMemberRequestImpl.fromJson;
 
+  /// 项目ID
   @override
+  @JsonKey(name: 'project_id')
   int get projectId;
+
+  /// 用户ID
   @override
+  @JsonKey(name: 'user_id')
   String get userId;
+
+  /// 成员角色
   @override
   @JsonKey(name: 'role')
   @ProjectRoleEnumConverter()
@@ -819,8 +927,15 @@ UpdateMemberRoleRequest _$UpdateMemberRoleRequestFromJson(
 
 /// @nodoc
 mixin _$UpdateMemberRoleRequest {
+  /// 项目ID
+  @JsonKey(name: 'project_id')
   int get projectId => throw _privateConstructorUsedError;
+
+  /// 用户ID
+  @JsonKey(name: 'user_id')
   String get userId => throw _privateConstructorUsedError;
+
+  /// 成员角色
   @JsonKey(name: 'role')
   @ProjectRoleEnumConverter()
   ProjectRoleEnum get role => throw _privateConstructorUsedError;
@@ -842,8 +957,8 @@ abstract class $UpdateMemberRoleRequestCopyWith<$Res> {
       _$UpdateMemberRoleRequestCopyWithImpl<$Res, UpdateMemberRoleRequest>;
   @useResult
   $Res call(
-      {int projectId,
-      String userId,
+      {@JsonKey(name: 'project_id') int projectId,
+      @JsonKey(name: 'user_id') String userId,
       @JsonKey(name: 'role') @ProjectRoleEnumConverter() ProjectRoleEnum role});
 }
 
@@ -894,8 +1009,8 @@ abstract class _$$UpdateMemberRoleRequestImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {int projectId,
-      String userId,
+      {@JsonKey(name: 'project_id') int projectId,
+      @JsonKey(name: 'user_id') String userId,
       @JsonKey(name: 'role') @ProjectRoleEnumConverter() ProjectRoleEnum role});
 }
 
@@ -939,8 +1054,8 @@ class __$$UpdateMemberRoleRequestImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$UpdateMemberRoleRequestImpl implements _UpdateMemberRoleRequest {
   const _$UpdateMemberRoleRequestImpl(
-      {required this.projectId,
-      required this.userId,
+      {@JsonKey(name: 'project_id') required this.projectId,
+      @JsonKey(name: 'user_id') required this.userId,
       @JsonKey(name: 'role')
       @ProjectRoleEnumConverter()
       this.role = ProjectRoleEnum.member});
@@ -948,10 +1063,17 @@ class _$UpdateMemberRoleRequestImpl implements _UpdateMemberRoleRequest {
   factory _$UpdateMemberRoleRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$UpdateMemberRoleRequestImplFromJson(json);
 
+  /// 项目ID
   @override
+  @JsonKey(name: 'project_id')
   final int projectId;
+
+  /// 用户ID
   @override
+  @JsonKey(name: 'user_id')
   final String userId;
+
+  /// 成员角色
   @override
   @JsonKey(name: 'role')
   @ProjectRoleEnumConverter()
@@ -996,8 +1118,8 @@ class _$UpdateMemberRoleRequestImpl implements _UpdateMemberRoleRequest {
 
 abstract class _UpdateMemberRoleRequest implements UpdateMemberRoleRequest {
   const factory _UpdateMemberRoleRequest(
-      {required final int projectId,
-      required final String userId,
+      {@JsonKey(name: 'project_id') required final int projectId,
+      @JsonKey(name: 'user_id') required final String userId,
       @JsonKey(name: 'role')
       @ProjectRoleEnumConverter()
       final ProjectRoleEnum role}) = _$UpdateMemberRoleRequestImpl;
@@ -1005,10 +1127,17 @@ abstract class _UpdateMemberRoleRequest implements UpdateMemberRoleRequest {
   factory _UpdateMemberRoleRequest.fromJson(Map<String, dynamic> json) =
       _$UpdateMemberRoleRequestImpl.fromJson;
 
+  /// 项目ID
   @override
+  @JsonKey(name: 'project_id')
   int get projectId;
+
+  /// 用户ID
   @override
+  @JsonKey(name: 'user_id')
   String get userId;
+
+  /// 成员角色
   @override
   @JsonKey(name: 'role')
   @ProjectRoleEnumConverter()

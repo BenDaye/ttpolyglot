@@ -21,12 +21,15 @@ LocationModel _$LocationModelFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$LocationModel {
   /// 国家名称
+  @JsonKey(name: 'country')
   String get country => throw _privateConstructorUsedError;
 
   /// 城市
+  @JsonKey(name: 'city')
   String get city => throw _privateConstructorUsedError;
 
   /// 省份/地区
+  @JsonKey(name: 'region')
   String get region => throw _privateConstructorUsedError;
 
   /// 国家代码
@@ -34,9 +37,11 @@ mixin _$LocationModel {
   String get countryCode => throw _privateConstructorUsedError;
 
   /// 时区
+  @JsonKey(name: 'timezone')
   String get timezone => throw _privateConstructorUsedError;
 
   /// ISP运营商
+  @JsonKey(name: 'isp')
   String get isp => throw _privateConstructorUsedError;
 
   /// Serializes this LocationModel to a JSON map.
@@ -56,12 +61,12 @@ abstract class $LocationModelCopyWith<$Res> {
       _$LocationModelCopyWithImpl<$Res, LocationModel>;
   @useResult
   $Res call(
-      {String country,
-      String city,
-      String region,
+      {@JsonKey(name: 'country') String country,
+      @JsonKey(name: 'city') String city,
+      @JsonKey(name: 'region') String region,
       @JsonKey(name: 'country_code') String countryCode,
-      String timezone,
-      String isp});
+      @JsonKey(name: 'timezone') String timezone,
+      @JsonKey(name: 'isp') String isp});
 }
 
 /// @nodoc
@@ -124,12 +129,12 @@ abstract class _$$LocationModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String country,
-      String city,
-      String region,
+      {@JsonKey(name: 'country') String country,
+      @JsonKey(name: 'city') String city,
+      @JsonKey(name: 'region') String region,
       @JsonKey(name: 'country_code') String countryCode,
-      String timezone,
-      String isp});
+      @JsonKey(name: 'timezone') String timezone,
+      @JsonKey(name: 'isp') String isp});
 }
 
 /// @nodoc
@@ -185,29 +190,29 @@ class __$$LocationModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$LocationModelImpl implements _LocationModel {
   const _$LocationModelImpl(
-      {this.country = '',
-      this.city = '',
-      this.region = '',
+      {@JsonKey(name: 'country') this.country = '',
+      @JsonKey(name: 'city') this.city = '',
+      @JsonKey(name: 'region') this.region = '',
       @JsonKey(name: 'country_code') this.countryCode = '',
-      this.timezone = '',
-      this.isp = ''});
+      @JsonKey(name: 'timezone') this.timezone = '',
+      @JsonKey(name: 'isp') this.isp = ''});
 
   factory _$LocationModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$LocationModelImplFromJson(json);
 
   /// 国家名称
   @override
-  @JsonKey()
+  @JsonKey(name: 'country')
   final String country;
 
   /// 城市
   @override
-  @JsonKey()
+  @JsonKey(name: 'city')
   final String city;
 
   /// 省份/地区
   @override
-  @JsonKey()
+  @JsonKey(name: 'region')
   final String region;
 
   /// 国家代码
@@ -217,12 +222,12 @@ class _$LocationModelImpl implements _LocationModel {
 
   /// 时区
   @override
-  @JsonKey()
+  @JsonKey(name: 'timezone')
   final String timezone;
 
   /// ISP运营商
   @override
-  @JsonKey()
+  @JsonKey(name: 'isp')
   final String isp;
 
   @override
@@ -268,26 +273,29 @@ class _$LocationModelImpl implements _LocationModel {
 
 abstract class _LocationModel implements LocationModel {
   const factory _LocationModel(
-      {final String country,
-      final String city,
-      final String region,
+      {@JsonKey(name: 'country') final String country,
+      @JsonKey(name: 'city') final String city,
+      @JsonKey(name: 'region') final String region,
       @JsonKey(name: 'country_code') final String countryCode,
-      final String timezone,
-      final String isp}) = _$LocationModelImpl;
+      @JsonKey(name: 'timezone') final String timezone,
+      @JsonKey(name: 'isp') final String isp}) = _$LocationModelImpl;
 
   factory _LocationModel.fromJson(Map<String, dynamic> json) =
       _$LocationModelImpl.fromJson;
 
   /// 国家名称
   @override
+  @JsonKey(name: 'country')
   String get country;
 
   /// 城市
   @override
+  @JsonKey(name: 'city')
   String get city;
 
   /// 省份/地区
   @override
+  @JsonKey(name: 'region')
   String get region;
 
   /// 国家代码
@@ -297,10 +305,12 @@ abstract class _LocationModel implements LocationModel {
 
   /// 时区
   @override
+  @JsonKey(name: 'timezone')
   String get timezone;
 
   /// ISP运营商
   @override
+  @JsonKey(name: 'isp')
   String get isp;
 
   /// Create a copy of LocationModel

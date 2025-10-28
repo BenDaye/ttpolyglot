@@ -11,15 +11,19 @@ class BaseModel<T> with _$BaseModel<T> {
   const BaseModel._();
 
   const factory BaseModel({
-    // 响应码
+    /// 响应码
     @JsonKey(name: 'code') @DataCodeEnumConverter() required DataCodeEnum code,
-    @Default("") String message,
-    // 提示类型
+
+    /// 提示信息
+    @JsonKey(name: 'message') @Default("") String message,
+
+    /// 提示类型
     @JsonKey(name: 'type')
     @DataMessageTipsEnumConverter()
     @Default(DataMessageTipsEnum.showToast)
     DataMessageTipsEnum type,
-    // 数据
+
+    /// 数据
     @JsonKey(name: 'data') T? data,
   }) = _BaseModel<T>;
 

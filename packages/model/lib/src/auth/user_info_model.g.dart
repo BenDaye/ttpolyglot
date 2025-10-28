@@ -34,8 +34,8 @@ _$UserInfoModelImpl _$$UserInfoModelImplFromJson(Map<String, dynamic> json) =>
           const NullableTimesConverter().fromJson(json['password_changed_at']),
       createdAt: const NullableTimesConverter().fromJson(json['created_at']),
       updatedAt: const NullableTimesConverter().fromJson(json['updated_at']),
-      roles: (json['roles'] as List<dynamic>?)
-          ?.map((e) => RoleModel.fromJson(e as Map<String, dynamic>))
+      roles: (json['roles'] as List<dynamic>)
+          .map((e) => RoleModel.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 

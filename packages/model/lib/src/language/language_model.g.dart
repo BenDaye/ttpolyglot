@@ -18,6 +18,7 @@ _$LanguageModelImpl _$$LanguageModelImplFromJson(Map<String, dynamic> json) =>
       sortOrder: (json['sort_order'] as num?)?.toInt() ?? 0,
       createdAt: const TimesConverter().fromJson(json['created_at'] as Object),
       updatedAt: const TimesConverter().fromJson(json['updated_at'] as Object),
+      isPrimary: json['is_primary'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$$LanguageModelImplToJson(_$LanguageModelImpl instance) =>
@@ -32,4 +33,5 @@ Map<String, dynamic> _$$LanguageModelImplToJson(_$LanguageModelImpl instance) =>
       'sort_order': instance.sortOrder,
       'created_at': const TimesConverter().toJson(instance.createdAt),
       'updated_at': const TimesConverter().toJson(instance.updatedAt),
+      'is_primary': instance.isPrimary,
     };

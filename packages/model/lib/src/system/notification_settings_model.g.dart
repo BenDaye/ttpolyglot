@@ -9,9 +9,9 @@ part of 'notification_settings_model.dart';
 _$NotificationSettingsModelImpl _$$NotificationSettingsModelImplFromJson(
         Map<String, dynamic> json) =>
     _$NotificationSettingsModelImpl(
-      id: (json['id'] as num).toInt(),
+      id: const FlexibleIntConverter().fromJson(json['id']),
       userId: json['user_id'] as String,
-      projectId: (json['project_id'] as num?)?.toInt(),
+      projectId: const FlexibleIntConverter().fromJson(json['project_id']),
       notificationType: const NotificationTypeEnumConverter()
           .fromJson(json['notification_type'] as String),
       channel: const NotificationChannelEnumConverter()
@@ -24,9 +24,10 @@ _$NotificationSettingsModelImpl _$$NotificationSettingsModelImplFromJson(
 Map<String, dynamic> _$$NotificationSettingsModelImplToJson(
         _$NotificationSettingsModelImpl instance) =>
     <String, dynamic>{
-      'id': instance.id,
+      'id': const FlexibleIntConverter().toJson(instance.id),
       'user_id': instance.userId,
-      'project_id': instance.projectId,
+      'project_id': _$JsonConverterToJson<dynamic, int>(
+          instance.projectId, const FlexibleIntConverter().toJson),
       'notification_type': const NotificationTypeEnumConverter()
           .toJson(instance.notificationType),
       'channel':
@@ -36,37 +37,44 @@ Map<String, dynamic> _$$NotificationSettingsModelImplToJson(
       'updated_at': const TimesConverter().toJson(instance.updatedAt),
     };
 
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) =>
+    value == null ? null : toJson(value);
+
 _$UpdateNotificationSettingsRequestImpl
     _$$UpdateNotificationSettingsRequestImplFromJson(
             Map<String, dynamic> json) =>
         _$UpdateNotificationSettingsRequestImpl(
-          userId: json['userId'] as String,
-          projectId: (json['projectId'] as num?)?.toInt(),
+          userId: json['user_id'] as String,
+          projectId: const FlexibleIntConverter().fromJson(json['project_id']),
           notificationType: const NotificationTypeEnumConverter()
               .fromJson(json['notification_type'] as String),
           channel: const NotificationChannelEnumConverter()
               .fromJson(json['channel'] as String),
-          isEnabled: json['isEnabled'] as bool,
+          isEnabled: json['is_enabled'] as bool,
         );
 
 Map<String, dynamic> _$$UpdateNotificationSettingsRequestImplToJson(
         _$UpdateNotificationSettingsRequestImpl instance) =>
     <String, dynamic>{
-      'userId': instance.userId,
-      'projectId': instance.projectId,
+      'user_id': instance.userId,
+      'project_id': _$JsonConverterToJson<dynamic, int>(
+          instance.projectId, const FlexibleIntConverter().toJson),
       'notification_type': const NotificationTypeEnumConverter()
           .toJson(instance.notificationType),
       'channel':
           const NotificationChannelEnumConverter().toJson(instance.channel),
-      'isEnabled': instance.isEnabled,
+      'is_enabled': instance.isEnabled,
     };
 
 _$BatchUpdateNotificationSettingsRequestImpl
     _$$BatchUpdateNotificationSettingsRequestImplFromJson(
             Map<String, dynamic> json) =>
         _$BatchUpdateNotificationSettingsRequestImpl(
-          userId: json['userId'] as String,
-          projectId: (json['projectId'] as num?)?.toInt(),
+          userId: json['user_id'] as String,
+          projectId: const FlexibleIntConverter().fromJson(json['project_id']),
           updates: (json['updates'] as List<dynamic>)
               .map((e) =>
                   NotificationSettingUpdate.fromJson(e as Map<String, dynamic>))
@@ -76,8 +84,9 @@ _$BatchUpdateNotificationSettingsRequestImpl
 Map<String, dynamic> _$$BatchUpdateNotificationSettingsRequestImplToJson(
         _$BatchUpdateNotificationSettingsRequestImpl instance) =>
     <String, dynamic>{
-      'userId': instance.userId,
-      'projectId': instance.projectId,
+      'user_id': instance.userId,
+      'project_id': _$JsonConverterToJson<dynamic, int>(
+          instance.projectId, const FlexibleIntConverter().toJson),
       'updates': instance.updates,
     };
 
@@ -88,7 +97,7 @@ _$NotificationSettingUpdateImpl _$$NotificationSettingUpdateImplFromJson(
           .fromJson(json['notification_type'] as String),
       channel: const NotificationChannelEnumConverter()
           .fromJson(json['channel'] as String),
-      isEnabled: json['isEnabled'] as bool,
+      isEnabled: json['is_enabled'] as bool,
     );
 
 Map<String, dynamic> _$$NotificationSettingUpdateImplToJson(
@@ -98,5 +107,5 @@ Map<String, dynamic> _$$NotificationSettingUpdateImplToJson(
           .toJson(instance.notificationType),
       'channel':
           const NotificationChannelEnumConverter().toJson(instance.channel),
-      'isEnabled': instance.isEnabled,
+      'is_enabled': instance.isEnabled,
     };

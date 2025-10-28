@@ -21,14 +21,23 @@ PagerModel<T> _$PagerModelFromJson<T>(
 
 /// @nodoc
 mixin _$PagerModel<T> {
+  /// 当前页数
   @JsonKey(name: 'page')
   int get page => throw _privateConstructorUsedError;
+
+  /// 每页大小
   @JsonKey(name: 'page_size')
   int get pageSize => throw _privateConstructorUsedError;
+
+  /// 总大小
   @JsonKey(name: 'total_size')
   int get totalSize => throw _privateConstructorUsedError;
+
+  /// 总页数
   @JsonKey(name: 'total_page')
   int get totalPage => throw _privateConstructorUsedError;
+
+  /// 数据
   @JsonKey(name: 'items')
   List<T>? get items => throw _privateConstructorUsedError;
 
@@ -179,19 +188,30 @@ class _$PagerModelImpl<T> extends _PagerModel<T> {
           Map<String, dynamic> json, T Function(Object?) fromJsonT) =>
       _$$PagerModelImplFromJson(json, fromJsonT);
 
+  /// 当前页数
   @override
   @JsonKey(name: 'page')
   final int page;
+
+  /// 每页大小
   @override
   @JsonKey(name: 'page_size')
   final int pageSize;
+
+  /// 总大小
   @override
   @JsonKey(name: 'total_size')
   final int totalSize;
+
+  /// 总页数
   @override
   @JsonKey(name: 'total_page')
   final int totalPage;
+
+  /// 数据
   final List<T>? _items;
+
+  /// 数据
   @override
   @JsonKey(name: 'items')
   List<T>? get items {
@@ -254,18 +274,27 @@ abstract class _PagerModel<T> extends PagerModel<T> {
           Map<String, dynamic> json, T Function(Object?) fromJsonT) =
       _$PagerModelImpl<T>.fromJson;
 
+  /// 当前页数
   @override
   @JsonKey(name: 'page')
   int get page;
+
+  /// 每页大小
   @override
   @JsonKey(name: 'page_size')
   int get pageSize;
+
+  /// 总大小
   @override
   @JsonKey(name: 'total_size')
   int get totalSize;
+
+  /// 总页数
   @override
   @JsonKey(name: 'total_page')
   int get totalPage;
+
+  /// 数据
   @override
   @JsonKey(name: 'items')
   List<T>? get items;

@@ -20,29 +20,52 @@ LanguageModel _$LanguageModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$LanguageModel {
+  /// 语言ID
   @JsonKey(name: 'id')
   int get id => throw _privateConstructorUsedError;
+
+  /// 语言代码
   @JsonKey(name: 'code')
   @LanguageEnumConverter()
   LanguageEnum get code => throw _privateConstructorUsedError;
+
+  /// 语言名称
   @JsonKey(name: 'name')
   String get name => throw _privateConstructorUsedError;
+
+  /// 语言本地名称
   @JsonKey(name: 'native_name')
   String? get nativeName => throw _privateConstructorUsedError;
+
+  /// 语言标志emoji
   @JsonKey(name: 'flag_emoji')
   String? get flagEmoji => throw _privateConstructorUsedError;
+
+  /// 是否为活跃语言
   @JsonKey(name: 'is_active')
   bool get isActive => throw _privateConstructorUsedError;
+
+  ///  是否为从右到左语言
   @JsonKey(name: 'is_rtl')
   bool get isRtl => throw _privateConstructorUsedError;
+
+  /// 排序顺序
   @JsonKey(name: 'sort_order')
   int get sortOrder => throw _privateConstructorUsedError;
+
+  /// 创建时间
   @JsonKey(name: 'created_at')
   @TimesConverter()
   DateTime get createdAt => throw _privateConstructorUsedError;
+
+  /// 更新时间
   @JsonKey(name: 'updated_at')
   @TimesConverter()
   DateTime get updatedAt => throw _privateConstructorUsedError;
+
+  /// 是否为主语言
+  @JsonKey(name: 'is_primary')
+  bool get isPrimary => throw _privateConstructorUsedError;
 
   /// Serializes this LanguageModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -70,7 +93,8 @@ abstract class $LanguageModelCopyWith<$Res> {
       @JsonKey(name: 'is_rtl') bool isRtl,
       @JsonKey(name: 'sort_order') int sortOrder,
       @JsonKey(name: 'created_at') @TimesConverter() DateTime createdAt,
-      @JsonKey(name: 'updated_at') @TimesConverter() DateTime updatedAt});
+      @JsonKey(name: 'updated_at') @TimesConverter() DateTime updatedAt,
+      @JsonKey(name: 'is_primary') bool isPrimary});
 }
 
 /// @nodoc
@@ -98,6 +122,7 @@ class _$LanguageModelCopyWithImpl<$Res, $Val extends LanguageModel>
     Object? sortOrder = null,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? isPrimary = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -140,6 +165,10 @@ class _$LanguageModelCopyWithImpl<$Res, $Val extends LanguageModel>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      isPrimary: null == isPrimary
+          ? _value.isPrimary
+          : isPrimary // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -162,7 +191,8 @@ abstract class _$$LanguageModelImplCopyWith<$Res>
       @JsonKey(name: 'is_rtl') bool isRtl,
       @JsonKey(name: 'sort_order') int sortOrder,
       @JsonKey(name: 'created_at') @TimesConverter() DateTime createdAt,
-      @JsonKey(name: 'updated_at') @TimesConverter() DateTime updatedAt});
+      @JsonKey(name: 'updated_at') @TimesConverter() DateTime updatedAt,
+      @JsonKey(name: 'is_primary') bool isPrimary});
 }
 
 /// @nodoc
@@ -188,6 +218,7 @@ class __$$LanguageModelImplCopyWithImpl<$Res>
     Object? sortOrder = null,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? isPrimary = null,
   }) {
     return _then(_$LanguageModelImpl(
       id: null == id
@@ -230,6 +261,10 @@ class __$$LanguageModelImplCopyWithImpl<$Res>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      isPrimary: null == isPrimary
+          ? _value.isPrimary
+          : isPrimary // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -247,48 +282,73 @@ class _$LanguageModelImpl implements _LanguageModel {
       @JsonKey(name: 'is_rtl') this.isRtl = false,
       @JsonKey(name: 'sort_order') this.sortOrder = 0,
       @JsonKey(name: 'created_at') @TimesConverter() required this.createdAt,
-      @JsonKey(name: 'updated_at') @TimesConverter() required this.updatedAt});
+      @JsonKey(name: 'updated_at') @TimesConverter() required this.updatedAt,
+      @JsonKey(name: 'is_primary') this.isPrimary = false});
 
   factory _$LanguageModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$LanguageModelImplFromJson(json);
 
+  /// 语言ID
   @override
   @JsonKey(name: 'id')
   final int id;
+
+  /// 语言代码
   @override
   @JsonKey(name: 'code')
   @LanguageEnumConverter()
   final LanguageEnum code;
+
+  /// 语言名称
   @override
   @JsonKey(name: 'name')
   final String name;
+
+  /// 语言本地名称
   @override
   @JsonKey(name: 'native_name')
   final String? nativeName;
+
+  /// 语言标志emoji
   @override
   @JsonKey(name: 'flag_emoji')
   final String? flagEmoji;
+
+  /// 是否为活跃语言
   @override
   @JsonKey(name: 'is_active')
   final bool isActive;
+
+  ///  是否为从右到左语言
   @override
   @JsonKey(name: 'is_rtl')
   final bool isRtl;
+
+  /// 排序顺序
   @override
   @JsonKey(name: 'sort_order')
   final int sortOrder;
+
+  /// 创建时间
   @override
   @JsonKey(name: 'created_at')
   @TimesConverter()
   final DateTime createdAt;
+
+  /// 更新时间
   @override
   @JsonKey(name: 'updated_at')
   @TimesConverter()
   final DateTime updatedAt;
 
+  /// 是否为主语言
+  @override
+  @JsonKey(name: 'is_primary')
+  final bool isPrimary;
+
   @override
   String toString() {
-    return 'LanguageModel(id: $id, code: $code, name: $name, nativeName: $nativeName, flagEmoji: $flagEmoji, isActive: $isActive, isRtl: $isRtl, sortOrder: $sortOrder, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'LanguageModel(id: $id, code: $code, name: $name, nativeName: $nativeName, flagEmoji: $flagEmoji, isActive: $isActive, isRtl: $isRtl, sortOrder: $sortOrder, createdAt: $createdAt, updatedAt: $updatedAt, isPrimary: $isPrimary)';
   }
 
   @override
@@ -311,13 +371,15 @@ class _$LanguageModelImpl implements _LanguageModel {
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+                other.updatedAt == updatedAt) &&
+            (identical(other.isPrimary, isPrimary) ||
+                other.isPrimary == isPrimary));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, id, code, name, nativeName,
-      flagEmoji, isActive, isRtl, sortOrder, createdAt, updatedAt);
+      flagEmoji, isActive, isRtl, sortOrder, createdAt, updatedAt, isPrimary);
 
   /// Create a copy of LanguageModel
   /// with the given fields replaced by the non-null parameter values.
@@ -352,44 +414,69 @@ abstract class _LanguageModel implements LanguageModel {
       required final DateTime createdAt,
       @JsonKey(name: 'updated_at')
       @TimesConverter()
-      required final DateTime updatedAt}) = _$LanguageModelImpl;
+      required final DateTime updatedAt,
+      @JsonKey(name: 'is_primary') final bool isPrimary}) = _$LanguageModelImpl;
 
   factory _LanguageModel.fromJson(Map<String, dynamic> json) =
       _$LanguageModelImpl.fromJson;
 
+  /// 语言ID
   @override
   @JsonKey(name: 'id')
   int get id;
+
+  /// 语言代码
   @override
   @JsonKey(name: 'code')
   @LanguageEnumConverter()
   LanguageEnum get code;
+
+  /// 语言名称
   @override
   @JsonKey(name: 'name')
   String get name;
+
+  /// 语言本地名称
   @override
   @JsonKey(name: 'native_name')
   String? get nativeName;
+
+  /// 语言标志emoji
   @override
   @JsonKey(name: 'flag_emoji')
   String? get flagEmoji;
+
+  /// 是否为活跃语言
   @override
   @JsonKey(name: 'is_active')
   bool get isActive;
+
+  ///  是否为从右到左语言
   @override
   @JsonKey(name: 'is_rtl')
   bool get isRtl;
+
+  /// 排序顺序
   @override
   @JsonKey(name: 'sort_order')
   int get sortOrder;
+
+  /// 创建时间
   @override
   @JsonKey(name: 'created_at')
   @TimesConverter()
   DateTime get createdAt;
+
+  /// 更新时间
   @override
   @JsonKey(name: 'updated_at')
   @TimesConverter()
   DateTime get updatedAt;
+
+  /// 是否为主语言
+  @override
+  @JsonKey(name: 'is_primary')
+  bool get isPrimary;
 
   /// Create a copy of LanguageModel
   /// with the given fields replaced by the non-null parameter values.

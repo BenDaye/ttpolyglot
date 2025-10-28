@@ -9,7 +9,7 @@ part 'translation_entry_model.g.dart';
 class TranslationEntryModel with _$TranslationEntryModel {
   const factory TranslationEntryModel({
     /// 条目ID
-    String? id,
+    @JsonKey(name: 'id') @FlexibleIntConverter() int? id,
 
     /// 项目ID
     @JsonKey(name: 'project_id') required String projectId,
@@ -42,16 +42,16 @@ class TranslationEntryModel with _$TranslationEntryModel {
     @JsonKey(name: 'context_info') String? contextInfo,
 
     /// 状态 (pending, completed, reviewing, approved)
-    @Default('pending') String status,
+    @JsonKey(name: 'status') @Default('pending') String status,
 
     /// 版本号
-    @Default(1) int version,
+    @JsonKey(name: 'version') @FlexibleIntConverter() @Default(1) int version,
 
     /// 质量评分
     @JsonKey(name: 'quality_score') double? qualityScore,
 
     /// 问题列表
-    String? issues,
+    @JsonKey(name: 'issues') String? issues,
 
     /// 是否有问题
     @JsonKey(name: 'has_issues') @Default(false) bool hasIssues,

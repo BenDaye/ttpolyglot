@@ -21,19 +21,39 @@ ProjectStatisticsModel _$ProjectStatisticsModelFromJson(
 
 /// @nodoc
 mixin _$ProjectStatisticsModel {
+  /// 项目语言数
   @JsonKey(name: 'language_count')
+  @FlexibleIntConverter()
   int get languageCount => throw _privateConstructorUsedError;
+
+  /// 项目成员数
   @JsonKey(name: 'member_count')
+  @FlexibleIntConverter()
   int get memberCount => throw _privateConstructorUsedError;
+
+  /// 项目总键数
   @JsonKey(name: 'total_entries')
+  @FlexibleIntConverter()
   int get totalEntries => throw _privateConstructorUsedError;
-  @JsonKey(name: 'completed_entries')
-  int get completedEntries => throw _privateConstructorUsedError;
+
+  /// 项目已翻译键数
+  @JsonKey(name: 'translated_entries')
+  @FlexibleIntConverter()
+  int get translatedEntries => throw _privateConstructorUsedError;
+
+  /// 项目审核中键数
   @JsonKey(name: 'reviewing_entries')
+  @FlexibleIntConverter()
   int get reviewingEntries => throw _privateConstructorUsedError;
+
+  /// 项目批准键数
   @JsonKey(name: 'approved_entries')
+  @FlexibleIntConverter()
   int get approvedEntries => throw _privateConstructorUsedError;
+
+  /// 项目平均质量分数
   @JsonKey(name: 'avg_quality_score')
+  @FlexibleDoubleConverter()
   double get avgQualityScore => throw _privateConstructorUsedError;
 
   /// Serializes this ProjectStatisticsModel to a JSON map.
@@ -53,13 +73,23 @@ abstract class $ProjectStatisticsModelCopyWith<$Res> {
       _$ProjectStatisticsModelCopyWithImpl<$Res, ProjectStatisticsModel>;
   @useResult
   $Res call(
-      {@JsonKey(name: 'language_count') int languageCount,
-      @JsonKey(name: 'member_count') int memberCount,
-      @JsonKey(name: 'total_entries') int totalEntries,
-      @JsonKey(name: 'completed_entries') int completedEntries,
-      @JsonKey(name: 'reviewing_entries') int reviewingEntries,
-      @JsonKey(name: 'approved_entries') int approvedEntries,
-      @JsonKey(name: 'avg_quality_score') double avgQualityScore});
+      {@JsonKey(name: 'language_count')
+      @FlexibleIntConverter()
+      int languageCount,
+      @JsonKey(name: 'member_count') @FlexibleIntConverter() int memberCount,
+      @JsonKey(name: 'total_entries') @FlexibleIntConverter() int totalEntries,
+      @JsonKey(name: 'translated_entries')
+      @FlexibleIntConverter()
+      int translatedEntries,
+      @JsonKey(name: 'reviewing_entries')
+      @FlexibleIntConverter()
+      int reviewingEntries,
+      @JsonKey(name: 'approved_entries')
+      @FlexibleIntConverter()
+      int approvedEntries,
+      @JsonKey(name: 'avg_quality_score')
+      @FlexibleDoubleConverter()
+      double avgQualityScore});
 }
 
 /// @nodoc
@@ -81,7 +111,7 @@ class _$ProjectStatisticsModelCopyWithImpl<$Res,
     Object? languageCount = null,
     Object? memberCount = null,
     Object? totalEntries = null,
-    Object? completedEntries = null,
+    Object? translatedEntries = null,
     Object? reviewingEntries = null,
     Object? approvedEntries = null,
     Object? avgQualityScore = null,
@@ -99,9 +129,9 @@ class _$ProjectStatisticsModelCopyWithImpl<$Res,
           ? _value.totalEntries
           : totalEntries // ignore: cast_nullable_to_non_nullable
               as int,
-      completedEntries: null == completedEntries
-          ? _value.completedEntries
-          : completedEntries // ignore: cast_nullable_to_non_nullable
+      translatedEntries: null == translatedEntries
+          ? _value.translatedEntries
+          : translatedEntries // ignore: cast_nullable_to_non_nullable
               as int,
       reviewingEntries: null == reviewingEntries
           ? _value.reviewingEntries
@@ -129,13 +159,23 @@ abstract class _$$ProjectStatisticsModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {@JsonKey(name: 'language_count') int languageCount,
-      @JsonKey(name: 'member_count') int memberCount,
-      @JsonKey(name: 'total_entries') int totalEntries,
-      @JsonKey(name: 'completed_entries') int completedEntries,
-      @JsonKey(name: 'reviewing_entries') int reviewingEntries,
-      @JsonKey(name: 'approved_entries') int approvedEntries,
-      @JsonKey(name: 'avg_quality_score') double avgQualityScore});
+      {@JsonKey(name: 'language_count')
+      @FlexibleIntConverter()
+      int languageCount,
+      @JsonKey(name: 'member_count') @FlexibleIntConverter() int memberCount,
+      @JsonKey(name: 'total_entries') @FlexibleIntConverter() int totalEntries,
+      @JsonKey(name: 'translated_entries')
+      @FlexibleIntConverter()
+      int translatedEntries,
+      @JsonKey(name: 'reviewing_entries')
+      @FlexibleIntConverter()
+      int reviewingEntries,
+      @JsonKey(name: 'approved_entries')
+      @FlexibleIntConverter()
+      int approvedEntries,
+      @JsonKey(name: 'avg_quality_score')
+      @FlexibleDoubleConverter()
+      double avgQualityScore});
 }
 
 /// @nodoc
@@ -156,7 +196,7 @@ class __$$ProjectStatisticsModelImplCopyWithImpl<$Res>
     Object? languageCount = null,
     Object? memberCount = null,
     Object? totalEntries = null,
-    Object? completedEntries = null,
+    Object? translatedEntries = null,
     Object? reviewingEntries = null,
     Object? approvedEntries = null,
     Object? avgQualityScore = null,
@@ -174,9 +214,9 @@ class __$$ProjectStatisticsModelImplCopyWithImpl<$Res>
           ? _value.totalEntries
           : totalEntries // ignore: cast_nullable_to_non_nullable
               as int,
-      completedEntries: null == completedEntries
-          ? _value.completedEntries
-          : completedEntries // ignore: cast_nullable_to_non_nullable
+      translatedEntries: null == translatedEntries
+          ? _value.translatedEntries
+          : translatedEntries // ignore: cast_nullable_to_non_nullable
               as int,
       reviewingEntries: null == reviewingEntries
           ? _value.reviewingEntries
@@ -198,42 +238,76 @@ class __$$ProjectStatisticsModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$ProjectStatisticsModelImpl implements _ProjectStatisticsModel {
   const _$ProjectStatisticsModelImpl(
-      {@JsonKey(name: 'language_count') this.languageCount = 0,
-      @JsonKey(name: 'member_count') this.memberCount = 1,
-      @JsonKey(name: 'total_entries') this.totalEntries = 0,
-      @JsonKey(name: 'completed_entries') this.completedEntries = 0,
-      @JsonKey(name: 'reviewing_entries') this.reviewingEntries = 0,
-      @JsonKey(name: 'approved_entries') this.approvedEntries = 0,
-      @JsonKey(name: 'avg_quality_score') this.avgQualityScore = 0.0});
+      {@JsonKey(name: 'language_count')
+      @FlexibleIntConverter()
+      this.languageCount = 0,
+      @JsonKey(name: 'member_count')
+      @FlexibleIntConverter()
+      this.memberCount = 1,
+      @JsonKey(name: 'total_entries')
+      @FlexibleIntConverter()
+      this.totalEntries = 0,
+      @JsonKey(name: 'translated_entries')
+      @FlexibleIntConverter()
+      this.translatedEntries = 0,
+      @JsonKey(name: 'reviewing_entries')
+      @FlexibleIntConverter()
+      this.reviewingEntries = 0,
+      @JsonKey(name: 'approved_entries')
+      @FlexibleIntConverter()
+      this.approvedEntries = 0,
+      @JsonKey(name: 'avg_quality_score')
+      @FlexibleDoubleConverter()
+      this.avgQualityScore = 0.0});
 
   factory _$ProjectStatisticsModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$ProjectStatisticsModelImplFromJson(json);
 
+  /// 项目语言数
   @override
   @JsonKey(name: 'language_count')
+  @FlexibleIntConverter()
   final int languageCount;
+
+  /// 项目成员数
   @override
   @JsonKey(name: 'member_count')
+  @FlexibleIntConverter()
   final int memberCount;
+
+  /// 项目总键数
   @override
   @JsonKey(name: 'total_entries')
+  @FlexibleIntConverter()
   final int totalEntries;
+
+  /// 项目已翻译键数
   @override
-  @JsonKey(name: 'completed_entries')
-  final int completedEntries;
+  @JsonKey(name: 'translated_entries')
+  @FlexibleIntConverter()
+  final int translatedEntries;
+
+  /// 项目审核中键数
   @override
   @JsonKey(name: 'reviewing_entries')
+  @FlexibleIntConverter()
   final int reviewingEntries;
+
+  /// 项目批准键数
   @override
   @JsonKey(name: 'approved_entries')
+  @FlexibleIntConverter()
   final int approvedEntries;
+
+  /// 项目平均质量分数
   @override
   @JsonKey(name: 'avg_quality_score')
+  @FlexibleDoubleConverter()
   final double avgQualityScore;
 
   @override
   String toString() {
-    return 'ProjectStatisticsModel(languageCount: $languageCount, memberCount: $memberCount, totalEntries: $totalEntries, completedEntries: $completedEntries, reviewingEntries: $reviewingEntries, approvedEntries: $approvedEntries, avgQualityScore: $avgQualityScore)';
+    return 'ProjectStatisticsModel(languageCount: $languageCount, memberCount: $memberCount, totalEntries: $totalEntries, translatedEntries: $translatedEntries, reviewingEntries: $reviewingEntries, approvedEntries: $approvedEntries, avgQualityScore: $avgQualityScore)';
   }
 
   @override
@@ -247,8 +321,8 @@ class _$ProjectStatisticsModelImpl implements _ProjectStatisticsModel {
                 other.memberCount == memberCount) &&
             (identical(other.totalEntries, totalEntries) ||
                 other.totalEntries == totalEntries) &&
-            (identical(other.completedEntries, completedEntries) ||
-                other.completedEntries == completedEntries) &&
+            (identical(other.translatedEntries, translatedEntries) ||
+                other.translatedEntries == translatedEntries) &&
             (identical(other.reviewingEntries, reviewingEntries) ||
                 other.reviewingEntries == reviewingEntries) &&
             (identical(other.approvedEntries, approvedEntries) ||
@@ -264,7 +338,7 @@ class _$ProjectStatisticsModelImpl implements _ProjectStatisticsModel {
       languageCount,
       memberCount,
       totalEntries,
-      completedEntries,
+      translatedEntries,
       reviewingEntries,
       approvedEntries,
       avgQualityScore);
@@ -288,38 +362,71 @@ class _$ProjectStatisticsModelImpl implements _ProjectStatisticsModel {
 
 abstract class _ProjectStatisticsModel implements ProjectStatisticsModel {
   const factory _ProjectStatisticsModel(
-          {@JsonKey(name: 'language_count') final int languageCount,
-          @JsonKey(name: 'member_count') final int memberCount,
-          @JsonKey(name: 'total_entries') final int totalEntries,
-          @JsonKey(name: 'completed_entries') final int completedEntries,
-          @JsonKey(name: 'reviewing_entries') final int reviewingEntries,
-          @JsonKey(name: 'approved_entries') final int approvedEntries,
-          @JsonKey(name: 'avg_quality_score') final double avgQualityScore}) =
-      _$ProjectStatisticsModelImpl;
+      {@JsonKey(name: 'language_count')
+      @FlexibleIntConverter()
+      final int languageCount,
+      @JsonKey(name: 'member_count')
+      @FlexibleIntConverter()
+      final int memberCount,
+      @JsonKey(name: 'total_entries')
+      @FlexibleIntConverter()
+      final int totalEntries,
+      @JsonKey(name: 'translated_entries')
+      @FlexibleIntConverter()
+      final int translatedEntries,
+      @JsonKey(name: 'reviewing_entries')
+      @FlexibleIntConverter()
+      final int reviewingEntries,
+      @JsonKey(name: 'approved_entries')
+      @FlexibleIntConverter()
+      final int approvedEntries,
+      @JsonKey(name: 'avg_quality_score')
+      @FlexibleDoubleConverter()
+      final double avgQualityScore}) = _$ProjectStatisticsModelImpl;
 
   factory _ProjectStatisticsModel.fromJson(Map<String, dynamic> json) =
       _$ProjectStatisticsModelImpl.fromJson;
 
+  /// 项目语言数
   @override
   @JsonKey(name: 'language_count')
+  @FlexibleIntConverter()
   int get languageCount;
+
+  /// 项目成员数
   @override
   @JsonKey(name: 'member_count')
+  @FlexibleIntConverter()
   int get memberCount;
+
+  /// 项目总键数
   @override
   @JsonKey(name: 'total_entries')
+  @FlexibleIntConverter()
   int get totalEntries;
+
+  /// 项目已翻译键数
   @override
-  @JsonKey(name: 'completed_entries')
-  int get completedEntries;
+  @JsonKey(name: 'translated_entries')
+  @FlexibleIntConverter()
+  int get translatedEntries;
+
+  /// 项目审核中键数
   @override
   @JsonKey(name: 'reviewing_entries')
+  @FlexibleIntConverter()
   int get reviewingEntries;
+
+  /// 项目批准键数
   @override
   @JsonKey(name: 'approved_entries')
+  @FlexibleIntConverter()
   int get approvedEntries;
+
+  /// 项目平均质量分数
   @override
   @JsonKey(name: 'avg_quality_score')
+  @FlexibleDoubleConverter()
   double get avgQualityScore;
 
   /// Create a copy of ProjectStatisticsModel

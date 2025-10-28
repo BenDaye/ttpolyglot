@@ -20,8 +20,11 @@ LoginResponseModel _$LoginResponseModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$LoginResponseModel {
+  /// 用户信息
   @JsonKey(name: 'user')
   UserInfoModel get user => throw _privateConstructorUsedError;
+
+  /// 令牌信息
   @JsonKey(name: 'tokens')
   TokenInfoModel get tokens => throw _privateConstructorUsedError;
 
@@ -157,9 +160,12 @@ class _$LoginResponseModelImpl implements _LoginResponseModel {
   factory _$LoginResponseModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$LoginResponseModelImplFromJson(json);
 
+  /// 用户信息
   @override
   @JsonKey(name: 'user')
   final UserInfoModel user;
+
+  /// 令牌信息
   @override
   @JsonKey(name: 'tokens')
   final TokenInfoModel tokens;
@@ -208,9 +214,12 @@ abstract class _LoginResponseModel implements LoginResponseModel {
   factory _LoginResponseModel.fromJson(Map<String, dynamic> json) =
       _$LoginResponseModelImpl.fromJson;
 
+  /// 用户信息
   @override
   @JsonKey(name: 'user')
   UserInfoModel get user;
+
+  /// 令牌信息
   @override
   @JsonKey(name: 'tokens')
   TokenInfoModel get tokens;

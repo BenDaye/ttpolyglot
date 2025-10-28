@@ -7,8 +7,11 @@ part 'login_request_model.g.dart';
 @freezed
 class LoginRequestModel with _$LoginRequestModel {
   const factory LoginRequestModel({
+    /// 邮箱或用户名
     @JsonKey(name: 'email_or_username') required String emailOrUsername,
-    required String password,
+
+    /// 密码
+    @JsonKey(name: 'password') required String password,
   }) = _LoginRequestModel;
 
   factory LoginRequestModel.fromJson(Map<String, dynamic> json) => _$LoginRequestModelFromJson(json);

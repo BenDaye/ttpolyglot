@@ -86,7 +86,7 @@ _$CreateProjectRequestImpl _$$CreateProjectRequestImplFromJson(
       status: json['status'] as String? ?? 'active',
       visibility: json['visibility'] as String? ?? 'private',
       primaryLanguageId:
-          const FlexibleIntConverter().fromJson(json['primaryLanguageId']),
+          const FlexibleIntConverter().fromJson(json['primary_language_id']),
       settings: json['settings'] as Map<String, dynamic>?,
     );
 
@@ -98,7 +98,7 @@ Map<String, dynamic> _$$CreateProjectRequestImplToJson(
       'description': instance.description,
       'status': instance.status,
       'visibility': instance.visibility,
-      'primaryLanguageId': _$JsonConverterToJson<dynamic, int>(
+      'primary_language_id': _$JsonConverterToJson<dynamic, int>(
           instance.primaryLanguageId, const FlexibleIntConverter().toJson),
       'settings': instance.settings,
     };
@@ -118,7 +118,7 @@ _$UpdateProjectRequestImpl _$$UpdateProjectRequestImplFromJson(
       status: json['status'] as String?,
       visibility: json['visibility'] as String?,
       primaryLanguageId:
-          const FlexibleIntConverter().fromJson(json['primaryLanguageId']),
+          const FlexibleIntConverter().fromJson(json['primary_language_id']),
       settings: json['settings'] as Map<String, dynamic>?,
     );
 
@@ -130,7 +130,7 @@ Map<String, dynamic> _$$UpdateProjectRequestImplToJson(
       'description': instance.description,
       'status': instance.status,
       'visibility': instance.visibility,
-      'primaryLanguageId': _$JsonConverterToJson<dynamic, int>(
+      'primary_language_id': _$JsonConverterToJson<dynamic, int>(
           instance.primaryLanguageId, const FlexibleIntConverter().toJson),
       'settings': instance.settings,
     };

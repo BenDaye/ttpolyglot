@@ -20,52 +20,91 @@ UserInfoModel _$UserInfoModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$UserInfoModel {
+  /// 用户名
   @JsonKey(name: 'username')
   String get username => throw _privateConstructorUsedError;
+
+  /// 邮箱
   @JsonKey(name: 'email')
   String get email => throw _privateConstructorUsedError;
+
+  /// 加密邮箱
   @JsonKey(name: 'email_encrypted')
   String? get emailEncrypted => throw _privateConstructorUsedError;
+
+  /// 显示名称
   @JsonKey(name: 'display_name')
   String? get displayName => throw _privateConstructorUsedError;
+
+  /// 头像URL
   @JsonKey(name: 'avatar_url')
   String? get avatarUrl => throw _privateConstructorUsedError;
+
+  /// 手机号
   @JsonKey(name: 'phone')
   String? get phone => throw _privateConstructorUsedError;
+
+  /// 时区
   @JsonKey(name: 'timezone')
   String? get timezone => throw _privateConstructorUsedError;
+
+  /// 语言
   @JsonKey(name: 'locale')
   String? get locale => throw _privateConstructorUsedError;
+
+  /// 是否为活跃用户
   @JsonKey(name: 'is_active')
   bool? get isActive => throw _privateConstructorUsedError;
+
+  /// 是否为邮箱已验证
   @JsonKey(name: 'is_email_verified')
   bool? get isEmailVerified => throw _privateConstructorUsedError;
+
+  /// 邮箱验证时间
   @JsonKey(name: 'email_verified_at')
   @NullableTimesConverter()
   DateTime? get emailVerifiedAt => throw _privateConstructorUsedError;
+
+  /// 最后登录时间
   @JsonKey(name: 'last_login_at')
   @NullableTimesConverter()
   DateTime? get lastLoginAt => throw _privateConstructorUsedError;
+
+  /// 最后登录IP
   @JsonKey(name: 'last_login_ip')
   String? get lastLoginIp => throw _privateConstructorUsedError;
+
+  /// 最后登录位置
   @JsonKey(name: 'last_login_location')
   LocationModel? get lastLoginLocation => throw _privateConstructorUsedError;
+
+  /// 登录尝试次数
   @JsonKey(name: 'login_attempts')
   int? get loginAttempts => throw _privateConstructorUsedError;
+
+  /// 锁定时间
   @JsonKey(name: 'locked_until')
   @NullableTimesConverter()
   DateTime? get lockedUntil => throw _privateConstructorUsedError;
+
+  /// 密码修改时间
   @JsonKey(name: 'password_changed_at')
   @NullableTimesConverter()
   DateTime? get passwordChangedAt => throw _privateConstructorUsedError;
+
+  /// 创建时间
   @JsonKey(name: 'created_at')
   @NullableTimesConverter()
   DateTime? get createdAt => throw _privateConstructorUsedError;
+
+  /// 更新时间
   @JsonKey(name: 'updated_at')
   @NullableTimesConverter()
   DateTime? get updatedAt => throw _privateConstructorUsedError;
+
+  /// 角色
   @JsonKey(name: 'roles')
-  List<RoleModel>? get roles => throw _privateConstructorUsedError;
+  List<RoleModel> get roles => throw _privateConstructorUsedError;
 
   /// Serializes this UserInfoModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -115,7 +154,7 @@ abstract class $UserInfoModelCopyWith<$Res> {
       @JsonKey(name: 'updated_at')
       @NullableTimesConverter()
       DateTime? updatedAt,
-      @JsonKey(name: 'roles') List<RoleModel>? roles});
+      @JsonKey(name: 'roles') List<RoleModel> roles});
 
   $LocationModelCopyWith<$Res>? get lastLoginLocation;
 }
@@ -154,7 +193,7 @@ class _$UserInfoModelCopyWithImpl<$Res, $Val extends UserInfoModel>
     Object? passwordChangedAt = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
-    Object? roles = freezed,
+    Object? roles = null,
   }) {
     return _then(_value.copyWith(
       username: null == username
@@ -233,10 +272,10 @@ class _$UserInfoModelCopyWithImpl<$Res, $Val extends UserInfoModel>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
-      roles: freezed == roles
+      roles: null == roles
           ? _value.roles
           : roles // ignore: cast_nullable_to_non_nullable
-              as List<RoleModel>?,
+              as List<RoleModel>,
     ) as $Val);
   }
 
@@ -295,7 +334,7 @@ abstract class _$$UserInfoModelImplCopyWith<$Res>
       @JsonKey(name: 'updated_at')
       @NullableTimesConverter()
       DateTime? updatedAt,
-      @JsonKey(name: 'roles') List<RoleModel>? roles});
+      @JsonKey(name: 'roles') List<RoleModel> roles});
 
   @override
   $LocationModelCopyWith<$Res>? get lastLoginLocation;
@@ -333,7 +372,7 @@ class __$$UserInfoModelImplCopyWithImpl<$Res>
     Object? passwordChangedAt = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
-    Object? roles = freezed,
+    Object? roles = null,
   }) {
     return _then(_$UserInfoModelImpl(
       username: null == username
@@ -412,10 +451,10 @@ class __$$UserInfoModelImplCopyWithImpl<$Res>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
-      roles: freezed == roles
+      roles: null == roles
           ? _value._roles
           : roles // ignore: cast_nullable_to_non_nullable
-              as List<RoleModel>?,
+              as List<RoleModel>,
     ));
   }
 }
@@ -449,84 +488,123 @@ class _$UserInfoModelImpl implements _UserInfoModel {
       this.passwordChangedAt,
       @JsonKey(name: 'created_at') @NullableTimesConverter() this.createdAt,
       @JsonKey(name: 'updated_at') @NullableTimesConverter() this.updatedAt,
-      @JsonKey(name: 'roles') final List<RoleModel>? roles})
+      @JsonKey(name: 'roles') required final List<RoleModel> roles})
       : _roles = roles;
 
   factory _$UserInfoModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserInfoModelImplFromJson(json);
 
+  /// 用户名
   @override
   @JsonKey(name: 'username')
   final String username;
+
+  /// 邮箱
   @override
   @JsonKey(name: 'email')
   final String email;
+
+  /// 加密邮箱
   @override
   @JsonKey(name: 'email_encrypted')
   final String? emailEncrypted;
+
+  /// 显示名称
   @override
   @JsonKey(name: 'display_name')
   final String? displayName;
+
+  /// 头像URL
   @override
   @JsonKey(name: 'avatar_url')
   final String? avatarUrl;
+
+  /// 手机号
   @override
   @JsonKey(name: 'phone')
   final String? phone;
+
+  /// 时区
   @override
   @JsonKey(name: 'timezone')
   final String? timezone;
+
+  /// 语言
   @override
   @JsonKey(name: 'locale')
   final String? locale;
+
+  /// 是否为活跃用户
   @override
   @JsonKey(name: 'is_active')
   final bool? isActive;
+
+  /// 是否为邮箱已验证
   @override
   @JsonKey(name: 'is_email_verified')
   final bool? isEmailVerified;
+
+  /// 邮箱验证时间
   @override
   @JsonKey(name: 'email_verified_at')
   @NullableTimesConverter()
   final DateTime? emailVerifiedAt;
+
+  /// 最后登录时间
   @override
   @JsonKey(name: 'last_login_at')
   @NullableTimesConverter()
   final DateTime? lastLoginAt;
+
+  /// 最后登录IP
   @override
   @JsonKey(name: 'last_login_ip')
   final String? lastLoginIp;
+
+  /// 最后登录位置
   @override
   @JsonKey(name: 'last_login_location')
   final LocationModel? lastLoginLocation;
+
+  /// 登录尝试次数
   @override
   @JsonKey(name: 'login_attempts')
   final int? loginAttempts;
+
+  /// 锁定时间
   @override
   @JsonKey(name: 'locked_until')
   @NullableTimesConverter()
   final DateTime? lockedUntil;
+
+  /// 密码修改时间
   @override
   @JsonKey(name: 'password_changed_at')
   @NullableTimesConverter()
   final DateTime? passwordChangedAt;
+
+  /// 创建时间
   @override
   @JsonKey(name: 'created_at')
   @NullableTimesConverter()
   final DateTime? createdAt;
+
+  /// 更新时间
   @override
   @JsonKey(name: 'updated_at')
   @NullableTimesConverter()
   final DateTime? updatedAt;
-  final List<RoleModel>? _roles;
+
+  /// 角色
+  final List<RoleModel> _roles;
+
+  /// 角色
   @override
   @JsonKey(name: 'roles')
-  List<RoleModel>? get roles {
-    final value = _roles;
-    if (value == null) return null;
+  List<RoleModel> get roles {
     if (_roles is EqualUnmodifiableListView) return _roles;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(value);
+    return EqualUnmodifiableListView(_roles);
   }
 
   @override
@@ -653,78 +731,117 @@ abstract class _UserInfoModel implements UserInfoModel {
           @JsonKey(name: 'updated_at')
           @NullableTimesConverter()
           final DateTime? updatedAt,
-          @JsonKey(name: 'roles') final List<RoleModel>? roles}) =
+          @JsonKey(name: 'roles') required final List<RoleModel> roles}) =
       _$UserInfoModelImpl;
 
   factory _UserInfoModel.fromJson(Map<String, dynamic> json) =
       _$UserInfoModelImpl.fromJson;
 
+  /// 用户名
   @override
   @JsonKey(name: 'username')
   String get username;
+
+  /// 邮箱
   @override
   @JsonKey(name: 'email')
   String get email;
+
+  /// 加密邮箱
   @override
   @JsonKey(name: 'email_encrypted')
   String? get emailEncrypted;
+
+  /// 显示名称
   @override
   @JsonKey(name: 'display_name')
   String? get displayName;
+
+  /// 头像URL
   @override
   @JsonKey(name: 'avatar_url')
   String? get avatarUrl;
+
+  /// 手机号
   @override
   @JsonKey(name: 'phone')
   String? get phone;
+
+  /// 时区
   @override
   @JsonKey(name: 'timezone')
   String? get timezone;
+
+  /// 语言
   @override
   @JsonKey(name: 'locale')
   String? get locale;
+
+  /// 是否为活跃用户
   @override
   @JsonKey(name: 'is_active')
   bool? get isActive;
+
+  /// 是否为邮箱已验证
   @override
   @JsonKey(name: 'is_email_verified')
   bool? get isEmailVerified;
+
+  /// 邮箱验证时间
   @override
   @JsonKey(name: 'email_verified_at')
   @NullableTimesConverter()
   DateTime? get emailVerifiedAt;
+
+  /// 最后登录时间
   @override
   @JsonKey(name: 'last_login_at')
   @NullableTimesConverter()
   DateTime? get lastLoginAt;
+
+  /// 最后登录IP
   @override
   @JsonKey(name: 'last_login_ip')
   String? get lastLoginIp;
+
+  /// 最后登录位置
   @override
   @JsonKey(name: 'last_login_location')
   LocationModel? get lastLoginLocation;
+
+  /// 登录尝试次数
   @override
   @JsonKey(name: 'login_attempts')
   int? get loginAttempts;
+
+  /// 锁定时间
   @override
   @JsonKey(name: 'locked_until')
   @NullableTimesConverter()
   DateTime? get lockedUntil;
+
+  /// 密码修改时间
   @override
   @JsonKey(name: 'password_changed_at')
   @NullableTimesConverter()
   DateTime? get passwordChangedAt;
+
+  /// 创建时间
   @override
   @JsonKey(name: 'created_at')
   @NullableTimesConverter()
   DateTime? get createdAt;
+
+  /// 更新时间
   @override
   @JsonKey(name: 'updated_at')
   @NullableTimesConverter()
   DateTime? get updatedAt;
+
+  /// 角色
   @override
   @JsonKey(name: 'roles')
-  List<RoleModel>? get roles;
+  List<RoleModel> get roles;
 
   /// Create a copy of UserInfoModel
   /// with the given fields replaced by the non-null parameter values.

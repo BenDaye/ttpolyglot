@@ -20,16 +20,27 @@ RoleModel _$RoleModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$RoleModel {
+  /// 角色ID
   @JsonKey(name: 'role_id')
   int get roleId => throw _privateConstructorUsedError;
+
+  /// 角色名称
   @JsonKey(name: 'role_name')
   String get roleName => throw _privateConstructorUsedError;
+
+  /// 角色显示名称
   @JsonKey(name: 'role_display_name')
   String get roleDisplayName => throw _privateConstructorUsedError;
+
+  /// 是否为系统角色
   @JsonKey(name: 'is_system_role')
   bool get isSystemRole => throw _privateConstructorUsedError;
+
+  /// 分配时间
   @JsonKey(name: 'assigned_at')
   DateTime get assignedAt => throw _privateConstructorUsedError;
+
+  /// 过期时间
   @JsonKey(name: 'expires_at')
   DateTime? get expiresAt => throw _privateConstructorUsedError;
 
@@ -188,21 +199,32 @@ class _$RoleModelImpl implements _RoleModel {
   factory _$RoleModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$RoleModelImplFromJson(json);
 
+  /// 角色ID
   @override
   @JsonKey(name: 'role_id')
   final int roleId;
+
+  /// 角色名称
   @override
   @JsonKey(name: 'role_name')
   final String roleName;
+
+  /// 角色显示名称
   @override
   @JsonKey(name: 'role_display_name')
   final String roleDisplayName;
+
+  /// 是否为系统角色
   @override
   @JsonKey(name: 'is_system_role')
   final bool isSystemRole;
+
+  /// 分配时间
   @override
   @JsonKey(name: 'assigned_at')
   final DateTime assignedAt;
+
+  /// 过期时间
   @override
   @JsonKey(name: 'expires_at')
   final DateTime? expiresAt;
@@ -264,21 +286,32 @@ abstract class _RoleModel implements RoleModel {
   factory _RoleModel.fromJson(Map<String, dynamic> json) =
       _$RoleModelImpl.fromJson;
 
+  /// 角色ID
   @override
   @JsonKey(name: 'role_id')
   int get roleId;
+
+  /// 角色名称
   @override
   @JsonKey(name: 'role_name')
   String get roleName;
+
+  /// 角色显示名称
   @override
   @JsonKey(name: 'role_display_name')
   String get roleDisplayName;
+
+  /// 是否为系统角色
   @override
   @JsonKey(name: 'is_system_role')
   bool get isSystemRole;
+
+  /// 分配时间
   @override
   @JsonKey(name: 'assigned_at')
   DateTime get assignedAt;
+
+  /// 过期时间
   @override
   @JsonKey(name: 'expires_at')
   DateTime? get expiresAt;

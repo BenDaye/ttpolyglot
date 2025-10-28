@@ -22,7 +22,9 @@ TranslationEntryModel _$TranslationEntryModelFromJson(
 /// @nodoc
 mixin _$TranslationEntryModel {
   /// 条目ID
-  String? get id => throw _privateConstructorUsedError;
+  @JsonKey(name: 'id')
+  @FlexibleIntConverter()
+  int? get id => throw _privateConstructorUsedError;
 
   /// 项目ID
   @JsonKey(name: 'project_id')
@@ -66,9 +68,12 @@ mixin _$TranslationEntryModel {
   String? get contextInfo => throw _privateConstructorUsedError;
 
   /// 状态 (pending, completed, reviewing, approved)
+  @JsonKey(name: 'status')
   String get status => throw _privateConstructorUsedError;
 
   /// 版本号
+  @JsonKey(name: 'version')
+  @FlexibleIntConverter()
   int get version => throw _privateConstructorUsedError;
 
   /// 质量评分
@@ -76,6 +81,7 @@ mixin _$TranslationEntryModel {
   double? get qualityScore => throw _privateConstructorUsedError;
 
   /// 问题列表
+  @JsonKey(name: 'issues')
   String? get issues => throw _privateConstructorUsedError;
 
   /// 是否有问题
@@ -137,7 +143,7 @@ abstract class $TranslationEntryModelCopyWith<$Res> {
       _$TranslationEntryModelCopyWithImpl<$Res, TranslationEntryModel>;
   @useResult
   $Res call(
-      {String? id,
+      {@JsonKey(name: 'id') @FlexibleIntConverter() int? id,
       @JsonKey(name: 'project_id') String projectId,
       @JsonKey(name: 'entry_key') String entryKey,
       @JsonKey(name: 'language_code')
@@ -150,10 +156,10 @@ abstract class $TranslationEntryModelCopyWith<$Res> {
       @JsonKey(name: 'reviewer_id') String? reviewerId,
       @JsonKey(name: 'reviewer_username') String? reviewerUsername,
       @JsonKey(name: 'context_info') String? contextInfo,
-      String status,
-      int version,
+      @JsonKey(name: 'status') String status,
+      @JsonKey(name: 'version') @FlexibleIntConverter() int version,
       @JsonKey(name: 'quality_score') double? qualityScore,
-      String? issues,
+      @JsonKey(name: 'issues') String? issues,
       @JsonKey(name: 'has_issues') bool hasIssues,
       @JsonKey(name: 'character_count') int? characterCount,
       @JsonKey(name: 'word_count') int? wordCount,
@@ -222,7 +228,7 @@ class _$TranslationEntryModelCopyWithImpl<$Res,
       id: freezed == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as int?,
       projectId: null == projectId
           ? _value.projectId
           : projectId // ignore: cast_nullable_to_non_nullable
@@ -329,7 +335,7 @@ abstract class _$$TranslationEntryModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String? id,
+      {@JsonKey(name: 'id') @FlexibleIntConverter() int? id,
       @JsonKey(name: 'project_id') String projectId,
       @JsonKey(name: 'entry_key') String entryKey,
       @JsonKey(name: 'language_code')
@@ -342,10 +348,10 @@ abstract class _$$TranslationEntryModelImplCopyWith<$Res>
       @JsonKey(name: 'reviewer_id') String? reviewerId,
       @JsonKey(name: 'reviewer_username') String? reviewerUsername,
       @JsonKey(name: 'context_info') String? contextInfo,
-      String status,
-      int version,
+      @JsonKey(name: 'status') String status,
+      @JsonKey(name: 'version') @FlexibleIntConverter() int version,
       @JsonKey(name: 'quality_score') double? qualityScore,
-      String? issues,
+      @JsonKey(name: 'issues') String? issues,
       @JsonKey(name: 'has_issues') bool hasIssues,
       @JsonKey(name: 'character_count') int? characterCount,
       @JsonKey(name: 'word_count') int? wordCount,
@@ -412,7 +418,7 @@ class __$$TranslationEntryModelImplCopyWithImpl<$Res>
       id: freezed == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as int?,
       projectId: null == projectId
           ? _value.projectId
           : projectId // ignore: cast_nullable_to_non_nullable
@@ -513,7 +519,7 @@ class __$$TranslationEntryModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$TranslationEntryModelImpl extends _TranslationEntryModel {
   const _$TranslationEntryModelImpl(
-      {this.id,
+      {@JsonKey(name: 'id') @FlexibleIntConverter() this.id,
       @JsonKey(name: 'project_id') required this.projectId,
       @JsonKey(name: 'entry_key') required this.entryKey,
       @JsonKey(name: 'language_code')
@@ -526,10 +532,10 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
       @JsonKey(name: 'reviewer_id') this.reviewerId,
       @JsonKey(name: 'reviewer_username') this.reviewerUsername,
       @JsonKey(name: 'context_info') this.contextInfo,
-      this.status = 'pending',
-      this.version = 1,
+      @JsonKey(name: 'status') this.status = 'pending',
+      @JsonKey(name: 'version') @FlexibleIntConverter() this.version = 1,
       @JsonKey(name: 'quality_score') this.qualityScore,
-      this.issues,
+      @JsonKey(name: 'issues') this.issues,
       @JsonKey(name: 'has_issues') this.hasIssues = false,
       @JsonKey(name: 'character_count') this.characterCount,
       @JsonKey(name: 'word_count') this.wordCount,
@@ -548,7 +554,9 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
 
   /// 条目ID
   @override
-  final String? id;
+  @JsonKey(name: 'id')
+  @FlexibleIntConverter()
+  final int? id;
 
   /// 项目ID
   @override
@@ -603,12 +611,13 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
 
   /// 状态 (pending, completed, reviewing, approved)
   @override
-  @JsonKey()
+  @JsonKey(name: 'status')
   final String status;
 
   /// 版本号
   @override
-  @JsonKey()
+  @JsonKey(name: 'version')
+  @FlexibleIntConverter()
   final int version;
 
   /// 质量评分
@@ -618,6 +627,7 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
 
   /// 问题列表
   @override
+  @JsonKey(name: 'issues')
   final String? issues;
 
   /// 是否有问题
@@ -776,7 +786,7 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
 
 abstract class _TranslationEntryModel extends TranslationEntryModel {
   const factory _TranslationEntryModel(
-      {final String? id,
+      {@JsonKey(name: 'id') @FlexibleIntConverter() final int? id,
       @JsonKey(name: 'project_id') required final String projectId,
       @JsonKey(name: 'entry_key') required final String entryKey,
       @JsonKey(name: 'language_code')
@@ -789,10 +799,10 @@ abstract class _TranslationEntryModel extends TranslationEntryModel {
       @JsonKey(name: 'reviewer_id') final String? reviewerId,
       @JsonKey(name: 'reviewer_username') final String? reviewerUsername,
       @JsonKey(name: 'context_info') final String? contextInfo,
-      final String status,
-      final int version,
+      @JsonKey(name: 'status') final String status,
+      @JsonKey(name: 'version') @FlexibleIntConverter() final int version,
       @JsonKey(name: 'quality_score') final double? qualityScore,
-      final String? issues,
+      @JsonKey(name: 'issues') final String? issues,
       @JsonKey(name: 'has_issues') final bool hasIssues,
       @JsonKey(name: 'character_count') final int? characterCount,
       @JsonKey(name: 'word_count') final int? wordCount,
@@ -821,7 +831,9 @@ abstract class _TranslationEntryModel extends TranslationEntryModel {
 
   /// 条目ID
   @override
-  String? get id;
+  @JsonKey(name: 'id')
+  @FlexibleIntConverter()
+  int? get id;
 
   /// 项目ID
   @override
@@ -876,10 +888,13 @@ abstract class _TranslationEntryModel extends TranslationEntryModel {
 
   /// 状态 (pending, completed, reviewing, approved)
   @override
+  @JsonKey(name: 'status')
   String get status;
 
   /// 版本号
   @override
+  @JsonKey(name: 'version')
+  @FlexibleIntConverter()
   int get version;
 
   /// 质量评分
@@ -889,6 +904,7 @@ abstract class _TranslationEntryModel extends TranslationEntryModel {
 
   /// 问题列表
   @override
+  @JsonKey(name: 'issues')
   String? get issues;
 
   /// 是否有问题

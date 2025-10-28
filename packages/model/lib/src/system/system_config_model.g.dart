@@ -9,7 +9,7 @@ part of 'system_config_model.dart';
 _$SystemConfigModelImpl _$$SystemConfigModelImplFromJson(
         Map<String, dynamic> json) =>
     _$SystemConfigModelImpl(
-      id: json['id'] as String?,
+      id: const FlexibleIntConverter().fromJson(json['id']),
       configKey: json['config_key'] as String,
       configValue: json['config_value'] as String,
       valueType: json['value_type'] as String?,
@@ -30,7 +30,8 @@ _$SystemConfigModelImpl _$$SystemConfigModelImplFromJson(
 Map<String, dynamic> _$$SystemConfigModelImplToJson(
         _$SystemConfigModelImpl instance) =>
     <String, dynamic>{
-      'id': instance.id,
+      'id': _$JsonConverterToJson<dynamic, int>(
+          instance.id, const FlexibleIntConverter().toJson),
       'config_key': instance.configKey,
       'config_value': instance.configValue,
       'value_type': instance.valueType,
@@ -47,3 +48,9 @@ Map<String, dynamic> _$$SystemConfigModelImplToJson(
       'created_at': const NullableTimesConverter().toJson(instance.createdAt),
       'updated_at': const NullableTimesConverter().toJson(instance.updatedAt),
     };
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) =>
+    value == null ? null : toJson(value);

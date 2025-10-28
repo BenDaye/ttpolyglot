@@ -20,12 +20,19 @@ ExtraModel _$ExtraModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$ExtraModel {
+  /// 是否显示加载中
   @JsonKey(name: 'show_loading')
   bool get showLoading => throw _privateConstructorUsedError;
+
+  /// 是否显示懒加载
   @JsonKey(name: 'show_lazy_loading')
   bool get showLazyLoading => throw _privateConstructorUsedError;
+
+  /// 是否显示成功提示
   @JsonKey(name: 'show_success_toast')
   bool get showSuccessToast => throw _privateConstructorUsedError;
+
+  /// 是否显示错误提示
   @JsonKey(name: 'show_error_toast')
   bool get showErrorToast => throw _privateConstructorUsedError;
 
@@ -159,15 +166,22 @@ class _$ExtraModelImpl implements _ExtraModel {
   factory _$ExtraModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$ExtraModelImplFromJson(json);
 
+  /// 是否显示加载中
   @override
   @JsonKey(name: 'show_loading')
   final bool showLoading;
+
+  /// 是否显示懒加载
   @override
   @JsonKey(name: 'show_lazy_loading')
   final bool showLazyLoading;
+
+  /// 是否显示成功提示
   @override
   @JsonKey(name: 'show_success_toast')
   final bool showSuccessToast;
+
+  /// 是否显示错误提示
   @override
   @JsonKey(name: 'show_error_toast')
   final bool showErrorToast;
@@ -224,15 +238,22 @@ abstract class _ExtraModel implements ExtraModel {
   factory _ExtraModel.fromJson(Map<String, dynamic> json) =
       _$ExtraModelImpl.fromJson;
 
+  /// 是否显示加载中
   @override
   @JsonKey(name: 'show_loading')
   bool get showLoading;
+
+  /// 是否显示懒加载
   @override
   @JsonKey(name: 'show_lazy_loading')
   bool get showLazyLoading;
+
+  /// 是否显示成功提示
   @override
   @JsonKey(name: 'show_success_toast')
   bool get showSuccessToast;
+
+  /// 是否显示错误提示
   @override
   @JsonKey(name: 'show_error_toast')
   bool get showErrorToast;
