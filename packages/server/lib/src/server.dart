@@ -258,9 +258,7 @@ class TTPolyglotServer {
 
   /// 404处理器
   Response _notFoundHandler(Request request) {
-    return ResponseUtils.notFound(
-      path: request.requestedUri.path,
-    );
+    return ResponseUtils.notFound();
   }
 
   /// 指标端点（Prometheus格式）
