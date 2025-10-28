@@ -93,6 +93,13 @@ class ProjectDialogController extends GetxController {
     }
   }
 
+  /// 等待语言列表加载完成
+  Future<void> _waitForLanguagesLoaded() async {
+    while (_isLoadingLanguages.value) {
+      await Future.delayed(const Duration(milliseconds: 50));
+    }
+  }
+
   /// 显示创建项目弹窗
   static Future<void> showCreateDialog() async {
     final tag = 'project_dialog_controller_${DateTime.now().millisecondsSinceEpoch}_project_create';
@@ -112,6 +119,7 @@ class ProjectDialogController extends GetxController {
   static Future<void> showEditDialog(Project project) async {
     final tag = 'project_dialog_controller_${DateTime.now().millisecondsSinceEpoch}_project_${project.id}';
     final controller = Get.put(ProjectDialogController(), tag: tag);
+    await controller._waitForLanguagesLoaded();
     controller._resetForEdit(project);
     await Get.dialog(
       ProjectDialog(tag: tag),
@@ -128,6 +136,7 @@ class ProjectDialogController extends GetxController {
   static Future<void> showEditTargetLanguagesDialog(Project project) async {
     final tag = 'project_dialog_controller_${DateTime.now().millisecondsSinceEpoch}_project_${project.id}';
     final controller = Get.put(ProjectDialogController(), tag: tag);
+    await controller._waitForLanguagesLoaded();
     controller._resetForEdit(project);
     await Get.dialog(
       ProjectDialog(
@@ -147,6 +156,7 @@ class ProjectDialogController extends GetxController {
   static Future<void> showEditDefaultLanguagesDialog(Project project) async {
     final tag = 'project_dialog_controller_${DateTime.now().millisecondsSinceEpoch}_project_${project.id}';
     final controller = Get.put(ProjectDialogController(), tag: tag);
+    await controller._waitForLanguagesLoaded();
     controller._resetForEdit(project);
     await Get.dialog(
       ProjectDialog(
@@ -166,6 +176,7 @@ class ProjectDialogController extends GetxController {
   static Future<void> showEditNameDialog(Project project) async {
     final tag = 'project_dialog_controller_${DateTime.now().millisecondsSinceEpoch}_project_${project.id}';
     final controller = Get.put(ProjectDialogController(), tag: tag);
+    await controller._waitForLanguagesLoaded();
     controller._resetForEdit(project);
     await Get.dialog(
       ProjectDialog(
@@ -185,6 +196,7 @@ class ProjectDialogController extends GetxController {
   static Future<void> showEditDescriptionDialog(Project project) async {
     final tag = 'project_dialog_controller_${DateTime.now().millisecondsSinceEpoch}_project_${project.id}';
     final controller = Get.put(ProjectDialogController(), tag: tag);
+    await controller._waitForLanguagesLoaded();
     controller._resetForEdit(project);
     await Get.dialog(
       ProjectDialog(

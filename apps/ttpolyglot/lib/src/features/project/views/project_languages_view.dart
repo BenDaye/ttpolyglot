@@ -112,7 +112,6 @@ class ProjectLanguagesView extends StatelessWidget {
                               ElevatedButton.icon(
                                 onPressed: () async {
                                   await ProjectDialogController.showEditTargetLanguagesDialog(project);
-                                  controller.refreshProject();
                                 },
                                 icon: const Icon(Icons.add),
                                 label: const Text('添加语言'),
