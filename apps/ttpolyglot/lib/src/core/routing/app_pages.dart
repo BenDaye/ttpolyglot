@@ -41,6 +41,14 @@ class AppPages {
             middlewares: [EnsureNotAuthenticatedMiddleware()],
           ),
           GetPage(
+            name: _Paths.join,
+            page: () => const JoinProjectView(),
+            binding: BindingsBuilder(() {
+              final inviteCode = Get.parameters['inviteCode']!;
+              Get.put(JoinProjectController(inviteCode: inviteCode));
+            }),
+          ),
+          GetPage(
             name: _Paths.home,
             page: () => const MainShell(),
             bindings: [LayoutBindings()],

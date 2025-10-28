@@ -1,17 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/common/common.dart';
 import 'package:ttpolyglot/src/features/features.dart';
-import 'package:ttpolyglot_model/model.dart';
 
 /// 项目成员管理页面
-class ProjectMembersView extends StatelessWidget {
+class ProjectMembersView extends StatefulWidget {
   const ProjectMembersView({super.key, required this.projectId});
   final String projectId;
 
   @override
+  State<ProjectMembersView> createState() => _ProjectMembersViewState();
+}
+
+class _ProjectMembersViewState extends State<ProjectMembersView> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GetBuilder<ProjectController>(
-      tag: projectId,
+      tag: widget.projectId,
       builder: (controller) {
         return Obx(
           () {
@@ -38,6 +57,11 @@ class ProjectMembersView extends StatelessWidget {
                   ),
                   const SizedBox(height: 24.0),
 
+                  // 成员上限进度卡片
+                  _buildMemberLimitHeader(context, controller),
+
+                  const SizedBox(height: 16.0),
+
                   // 成员列表卡片
                   Card(
                     child: Padding(
@@ -52,13 +76,6 @@ class ProjectMembersView extends StatelessWidget {
                                 '项目成员',
                                 style: Theme.of(context).textTheme.titleLarge,
                               ),
-                              ElevatedButton.icon(
-                                onPressed: () {
-                                  // TODO: 邀请成员功能
-                                },
-                                icon: const Icon(Icons.person_add),
-                                label: const Text('邀请成员'),
-                              ),
                             ],
                           ),
                           const SizedBox(height: 16.0),
@@ -71,11 +88,12 @@ class ProjectMembersView extends StatelessWidget {
 
                             return _buildMemberCard(
                               context,
+                              controller,
                               displayName,
                               email,
                               member.role.displayName,
                               roleColor,
-                              memberId: member.id,
+                              member: member,
                               isOwner: member.role == ProjectRoleEnum.owner,
                             );
                           }),
@@ -156,8 +174,147 @@ class ProjectMembersView extends StatelessWidget {
     }
   }
 
-  Widget _buildMemberCard(BuildContext context, String name, String email, String role, Color roleColor,
-      {bool isOwner = false, int? memberId}) {
+  Widget _buildMemberLimitHeader(BuildContext context, ProjectController controller) {
+    final projectModel = controller.projectObs.value;
+    if (projectModel == null) return const SizedBox.shrink();
+
+    // 从 project 的 raw data 中获取成员数和上限
+    final currentCount = controller.members.length;
+    final limit = 10; // 默认值，实际应该从 projectModel 中获取
+    final percentage = currentCount / limit;
+    final remaining = limit - currentCount;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '📊 项目成员 ($currentCount/$limit)',
+                  style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                ),
+                ElevatedButton.icon(
+                  onPressed: remaining > 0 ? () => _showInviteDialog(context, controller) : null,
+                  icon: const Icon(Icons.person_add, size: 18.0),
+                  label: const Text('邀请成员'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12.0),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4.0),
+              child: LinearProgressIndicator(
+                value: percentage,
+                minHeight: 8.0,
+                backgroundColor: Colors.grey[300],
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  percentage >= 1.0 ? Colors.red : Colors.blue,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8.0),
+            Text(
+              percentage >= 1.0 ? '⚠️ 项目成员已达上限，请先移除部分成员或在设置中提升上限' : '💡 还可以邀请 $remaining 人',
+              style: TextStyle(
+                color: percentage >= 1.0 ? Colors.red : Colors.grey[600],
+                fontSize: 14.0,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showInviteDialog(BuildContext context, ProjectController controller) {
+    final projectIdInt = int.tryParse(widget.projectId);
+    if (projectIdInt == null) return;
+
+    // 创建邀请控制器
+    Get.put(ProjectMemberInviteController(projectId: projectIdInt));
+
+    Get.dialog(
+      Dialog(
+        child: SizedBox(
+          width: 600.0,
+          height: 700.0,
+          child: Column(
+            children: [
+              // 对话框标题
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    const Text(
+                      '邀请成员到项目',
+                      style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: () {
+                        Get.delete<ProjectMemberInviteController>();
+                        Get.back();
+                      },
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1.0),
+
+              // 成员信息提示
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  '📊 当前成员: ${controller.members.length}/10  |  💡 还可以邀请 ${10 - controller.members.length} 人',
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ),
+
+              // Tab 栏
+              TabBar(
+                controller: _tabController,
+                tabs: const [
+                  Tab(text: '邀请链接'),
+                  Tab(text: '直接添加'),
+                ],
+              ),
+
+              // Tab 内容
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: const [
+                    InviteLinkTab(),
+                    AddMemberTab(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ).then((_) {
+      // 对话框关闭后删除控制器并刷新成员列表
+      Get.delete<ProjectMemberInviteController>();
+      controller.refreshProject();
+    });
+  }
+
+  Widget _buildMemberCard(
+    BuildContext context,
+    ProjectController controller,
+    String name,
+    String email,
+    String role,
+    Color roleColor, {
+    required ProjectMemberModel member,
+    bool isOwner = false,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),
       padding: const EdgeInsets.all(16.0),
@@ -230,10 +387,10 @@ class ProjectMembersView extends StatelessWidget {
               onSelected: (value) {
                 switch (value) {
                   case 'edit':
-                    // TODO: 编辑成员权限
+                    _showEditMemberDialog(context, controller, member);
                     break;
                   case 'remove':
-                    // TODO: 移除成员
+                    _showRemoveMemberDialog(context, controller, member);
                     break;
                 }
               },
@@ -310,6 +467,111 @@ class ProjectMembersView extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditMemberDialog(BuildContext context, ProjectController controller, ProjectMemberModel member) {
+    final projectIdInt = int.tryParse(widget.projectId);
+    if (projectIdInt == null) return;
+
+    ProjectRoleEnum selectedRole = member.role;
+
+    Get.dialog(
+      AlertDialog(
+        title: const Text('编辑成员权限'),
+        content: StatefulBuilder(
+          builder: (context, setState) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('成员: ${member.displayName ?? member.username ?? "未知"}'),
+                const SizedBox(height: 16.0),
+                DropdownButtonFormField<ProjectRoleEnum>(
+                  value: selectedRole,
+                  decoration: const InputDecoration(
+                    labelText: '角色权限',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: ProjectRoleEnum.viewer, child: Text('查看者')),
+                    DropdownMenuItem(value: ProjectRoleEnum.member, child: Text('成员')),
+                    DropdownMenuItem(value: ProjectRoleEnum.admin, child: Text('管理员')),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => selectedRole = value);
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('取消'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              try {
+                final projectApi = Get.find<ProjectApi>();
+                await projectApi.updateMemberRole(
+                  projectId: projectIdInt,
+                  userId: member.userId ?? '',
+                  role: selectedRole.name,
+                );
+                Get.back();
+                Get.snackbar('成功', '成员权限已更新');
+                controller.refreshProject();
+              } catch (error) {
+                Get.snackbar('失败', '更新成员权限失败');
+              }
+            },
+            child: const Text('保存'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRemoveMemberDialog(BuildContext context, ProjectController controller, ProjectMemberModel member) {
+    final projectIdInt = int.tryParse(widget.projectId);
+    if (projectIdInt == null) return;
+
+    Get.dialog(
+      AlertDialog(
+        title: const Text('移除成员'),
+        content: Text('确定要移除成员 ${member.displayName ?? member.username ?? "未知"} 吗？\n此操作无法撤销。'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('取消'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () async {
+              try {
+                final projectApi = Get.find<ProjectApi>();
+                await projectApi.removeProjectMember(
+                  projectId: projectIdInt,
+                  userId: member.userId ?? '',
+                );
+                Get.back();
+                Get.snackbar('成功', '成员已移除');
+                controller.refreshProject();
+              } catch (error) {
+                Get.snackbar('失败', '移除成员失败');
+              }
+            },
+            child: const Text('移除'),
           ),
         ],
       ),

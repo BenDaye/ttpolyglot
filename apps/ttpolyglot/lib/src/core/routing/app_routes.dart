@@ -28,6 +28,8 @@ abstract class Routes {
 
   static const signIn = _Paths.signIn;
   static const signUp = _Paths.signUp;
+
+  static String join(String inviteCode) => '/join/$inviteCode';
 }
 
 abstract class _Paths {
@@ -44,4 +46,5 @@ abstract class _Paths {
 
   static const signIn = '/signIn';
   static const signUp = '/signUp';
+  static const join = '/join/:inviteCode';
 }
