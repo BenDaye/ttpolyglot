@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/features/features.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// 项目成员管理页面
 class ProjectMembersView extends StatelessWidget {
@@ -62,45 +63,22 @@ class ProjectMembersView extends StatelessWidget {
                           ),
                           const SizedBox(height: 16.0),
 
-                          // 项目所有者
-                          _buildMemberCard(
-                            context,
-                            project.owner.name,
-                            project.owner.email,
-                            '所有者',
-                            Colors.purple,
-                            isOwner: true,
-                          ),
+                          // 项目成员列表
+                          ...controller.members.map((member) {
+                            final roleColor = _getRoleColor(member.role);
+                            final displayName = member.displayName ?? member.username ?? '未知用户';
+                            final email = member.email ?? '';
 
-                          // 示例成员
-                          _buildMemberCard(
-                            context,
-                            '张三',
-                            'zhangsan@example.com',
-                            '管理员',
-                            Colors.orange,
-                          ),
-                          _buildMemberCard(
-                            context,
-                            '李四',
-                            'lisi@example.com',
-                            '翻译者',
-                            Colors.green,
-                          ),
-                          _buildMemberCard(
-                            context,
-                            '王五',
-                            'wangwu@example.com',
-                            '翻译者',
-                            Colors.green,
-                          ),
-                          _buildMemberCard(
-                            context,
-                            '赵六',
-                            'zhaoliu@example.com',
-                            '翻译者',
-                            Colors.green,
-                          ),
+                            return _buildMemberCard(
+                              context,
+                              displayName,
+                              email,
+                              member.role.displayName,
+                              roleColor,
+                              memberId: member.id,
+                              isOwner: member.role == ProjectRoleEnum.owner,
+                            );
+                          }),
                         ],
                       ),
                     ),
@@ -136,10 +114,17 @@ class ProjectMembersView extends StatelessWidget {
                           ),
                           _buildRoleDescription(
                             context,
-                            '翻译者',
+                            '成员',
                             '可以翻译词条、提交翻译、查看项目进度',
                             Colors.green,
                             Icons.translate,
+                          ),
+                          _buildRoleDescription(
+                            context,
+                            '查看者',
+                            '只能查看项目内容，无法进行编辑或翻译',
+                            Colors.blue,
+                            Icons.visibility,
                           ),
                         ],
                       ),
@@ -157,8 +142,22 @@ class ProjectMembersView extends StatelessWidget {
     );
   }
 
+  /// 根据角色获取颜色
+  Color _getRoleColor(ProjectRoleEnum role) {
+    switch (role) {
+      case ProjectRoleEnum.owner:
+        return Colors.purple;
+      case ProjectRoleEnum.admin:
+        return Colors.orange;
+      case ProjectRoleEnum.member:
+        return Colors.green;
+      case ProjectRoleEnum.viewer:
+        return Colors.blue;
+    }
+  }
+
   Widget _buildMemberCard(BuildContext context, String name, String email, String role, Color roleColor,
-      {bool isOwner = false}) {
+      {bool isOwner = false, int? memberId}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),
       padding: const EdgeInsets.all(16.0),

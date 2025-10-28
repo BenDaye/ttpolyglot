@@ -509,10 +509,14 @@ class ProjectService extends BaseService {
           pm.updated_at,
           u.username,
           u.display_name,
-          u.avatar_url
+          u.avatar_url,
+          u.email,
+          inviter.username as inviter_username,
+          inviter.display_name as inviter_display_name
         FROM {project_members} pm
         JOIN {users} u ON pm.user_id = u.id
         JOIN {projects} p ON pm.project_id = p.id
+        LEFT JOIN {users} inviter ON pm.invited_by = inviter.id
         WHERE pm.project_id = @project_id 
           AND pm.is_active = true 
           AND u.is_active = true

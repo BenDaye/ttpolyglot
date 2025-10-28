@@ -25,11 +25,13 @@ class ProjectController extends GetxController {
   // 响应式项目对象
   final _project = Rxn<Project>();
   final _isLoading = false.obs;
+  final _members = <ProjectMemberModel>[].obs;
 
   // Getters
   Project? get project => _project.value;
   Rxn<Project> get projectObs => _project;
   bool get isLoading => _isLoading.value;
+  List<ProjectMemberModel> get members => _members;
 
   String get title => _project.value?.name ?? '-';
   String get description => _project.value?.description ?? '-';
@@ -120,6 +122,14 @@ class ProjectController extends GetxController {
       if (projectDetailModel != null) {
         // 将 ProjectModel 转换为 Project
         final project = ProjectConverter.toProject(projectDetailModel.project);
+
+        // 保存成员列表
+        if (projectDetailModel.members != null) {
+          _members.value = projectDetailModel.members!;
+          Logger.info('项目成员加载成功: ${projectDetailModel.members!.length} 个成员');
+        } else {
+          _members.clear();
+        }
 
         Logger.info('项目加载成功: ID=${project.id}, 名称="${project.name}"');
         _project.value = project;
