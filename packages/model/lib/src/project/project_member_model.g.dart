@@ -11,7 +11,6 @@ _$ProjectMemberModelImpl _$$ProjectMemberModelImplFromJson(
     _$ProjectMemberModelImpl(
       id: (json['id'] as num).toInt(),
       projectId: (json['project_id'] as num).toInt(),
-      userId: json['user_id'] as String,
       role: const ProjectRoleEnumConverter().fromJson(json['role'] as String),
       invitedBy: json['invited_by'] as String?,
       invitedAt: const TimesConverter().fromJson(json['invited_at'] as Object),
@@ -34,7 +33,6 @@ Map<String, dynamic> _$$ProjectMemberModelImplToJson(
     <String, dynamic>{
       'id': instance.id,
       'project_id': instance.projectId,
-      'user_id': instance.userId,
       'role': const ProjectRoleEnumConverter().toJson(instance.role),
       'invited_by': instance.invitedBy,
       'invited_at': const TimesConverter().toJson(instance.invitedAt),

@@ -114,12 +114,12 @@ class ProjectMemberApi {
   /// 更新成员角色
   Future<ProjectMemberModel?> updateMemberRole({
     required int projectId,
-    required String userId,
+    required int memberId,
     required String role,
   }) async {
     try {
       final response = await HttpClient.put<Map<String, dynamic>>(
-        '/projects/$projectId/members/$userId',
+        '/projects/$projectId/members/$memberId',
         data: {
           'role': role,
         },
@@ -148,11 +148,11 @@ class ProjectMemberApi {
   /// 移除成员
   Future<bool?> removeMember({
     required int projectId,
-    required String userId,
+    required int memberId,
   }) async {
     try {
       final response = await HttpClient.delete(
-        '/projects/$projectId/members/$userId',
+        '/projects/$projectId/members/$memberId',
         options: Options(
           extra: const ExtraModel(
             showSuccessToast: true,

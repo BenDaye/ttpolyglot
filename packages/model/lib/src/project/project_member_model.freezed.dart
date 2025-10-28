@@ -27,8 +27,6 @@ mixin _$ProjectMemberModel {
   /// 项目ID
   @JsonKey(name: 'project_id')
   int get projectId => throw _privateConstructorUsedError;
-  @JsonKey(name: 'user_id')
-  String get userId => throw _privateConstructorUsedError;
 
   /// 成员角色
   @JsonKey(name: 'role')
@@ -109,7 +107,6 @@ abstract class $ProjectMemberModelCopyWith<$Res> {
   $Res call(
       {@JsonKey(name: 'id') int id,
       @JsonKey(name: 'project_id') int projectId,
-      @JsonKey(name: 'user_id') String userId,
       @JsonKey(name: 'role') @ProjectRoleEnumConverter() ProjectRoleEnum role,
       @JsonKey(name: 'invited_by') String? invitedBy,
       @JsonKey(name: 'invited_at') @TimesConverter() DateTime invitedAt,
@@ -145,7 +142,6 @@ class _$ProjectMemberModelCopyWithImpl<$Res, $Val extends ProjectMemberModel>
   $Res call({
     Object? id = null,
     Object? projectId = null,
-    Object? userId = null,
     Object? role = null,
     Object? invitedBy = freezed,
     Object? invitedAt = null,
@@ -170,10 +166,6 @@ class _$ProjectMemberModelCopyWithImpl<$Res, $Val extends ProjectMemberModel>
           ? _value.projectId
           : projectId // ignore: cast_nullable_to_non_nullable
               as int,
-      userId: null == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
-              as String,
       role: null == role
           ? _value.role
           : role // ignore: cast_nullable_to_non_nullable
@@ -245,7 +237,6 @@ abstract class _$$ProjectMemberModelImplCopyWith<$Res>
   $Res call(
       {@JsonKey(name: 'id') int id,
       @JsonKey(name: 'project_id') int projectId,
-      @JsonKey(name: 'user_id') String userId,
       @JsonKey(name: 'role') @ProjectRoleEnumConverter() ProjectRoleEnum role,
       @JsonKey(name: 'invited_by') String? invitedBy,
       @JsonKey(name: 'invited_at') @TimesConverter() DateTime invitedAt,
@@ -279,7 +270,6 @@ class __$$ProjectMemberModelImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? projectId = null,
-    Object? userId = null,
     Object? role = null,
     Object? invitedBy = freezed,
     Object? invitedAt = null,
@@ -304,10 +294,6 @@ class __$$ProjectMemberModelImplCopyWithImpl<$Res>
           ? _value.projectId
           : projectId // ignore: cast_nullable_to_non_nullable
               as int,
-      userId: null == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
-              as String,
       role: null == role
           ? _value.role
           : role // ignore: cast_nullable_to_non_nullable
@@ -374,7 +360,6 @@ class _$ProjectMemberModelImpl implements _ProjectMemberModel {
   const _$ProjectMemberModelImpl(
       {@JsonKey(name: 'id') required this.id,
       @JsonKey(name: 'project_id') required this.projectId,
-      @JsonKey(name: 'user_id') required this.userId,
       @JsonKey(name: 'role') @ProjectRoleEnumConverter() required this.role,
       @JsonKey(name: 'invited_by') this.invitedBy,
       @JsonKey(name: 'invited_at') @TimesConverter() required this.invitedAt,
@@ -404,9 +389,6 @@ class _$ProjectMemberModelImpl implements _ProjectMemberModel {
   @override
   @JsonKey(name: 'project_id')
   final int projectId;
-  @override
-  @JsonKey(name: 'user_id')
-  final String userId;
 
   /// 成员角色
   @override
@@ -485,7 +467,7 @@ class _$ProjectMemberModelImpl implements _ProjectMemberModel {
 
   @override
   String toString() {
-    return 'ProjectMemberModel(id: $id, projectId: $projectId, userId: $userId, role: $role, invitedBy: $invitedBy, invitedAt: $invitedAt, joinedAt: $joinedAt, status: $status, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt, username: $username, displayName: $displayName, avatarUrl: $avatarUrl, email: $email, inviterUsername: $inviterUsername, inviterDisplayName: $inviterDisplayName)';
+    return 'ProjectMemberModel(id: $id, projectId: $projectId, role: $role, invitedBy: $invitedBy, invitedAt: $invitedAt, joinedAt: $joinedAt, status: $status, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt, username: $username, displayName: $displayName, avatarUrl: $avatarUrl, email: $email, inviterUsername: $inviterUsername, inviterDisplayName: $inviterDisplayName)';
   }
 
   @override
@@ -496,7 +478,6 @@ class _$ProjectMemberModelImpl implements _ProjectMemberModel {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.projectId, projectId) ||
                 other.projectId == projectId) &&
-            (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.role, role) || other.role == role) &&
             (identical(other.invitedBy, invitedBy) ||
                 other.invitedBy == invitedBy) &&
@@ -530,7 +511,6 @@ class _$ProjectMemberModelImpl implements _ProjectMemberModel {
       runtimeType,
       id,
       projectId,
-      userId,
       role,
       invitedBy,
       invitedAt,
@@ -567,7 +547,6 @@ abstract class _ProjectMemberModel implements ProjectMemberModel {
   const factory _ProjectMemberModel(
       {@JsonKey(name: 'id') required final int id,
       @JsonKey(name: 'project_id') required final int projectId,
-      @JsonKey(name: 'user_id') required final String userId,
       @JsonKey(name: 'role')
       @ProjectRoleEnumConverter()
       required final ProjectRoleEnum role,
@@ -608,9 +587,6 @@ abstract class _ProjectMemberModel implements ProjectMemberModel {
   @override
   @JsonKey(name: 'project_id')
   int get projectId;
-  @override
-  @JsonKey(name: 'user_id')
-  String get userId;
 
   /// 成员角色
   @override

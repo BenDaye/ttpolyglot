@@ -147,7 +147,7 @@ class ProjectMembersView extends StatelessWidget {
         title: Row(
           children: [
             Text(
-              member.displayName ?? member.username ?? member.userId,
+              member.displayName ?? member.username ?? '',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(width: 8.0),
@@ -196,7 +196,7 @@ class ProjectMembersView extends StatelessWidget {
                       controller.showEditRoleDialog(member);
                       break;
                     case 'remove':
-                      controller.removeMember(member.userId);
+                      controller.removeMember(member.id);
                       break;
                   }
                 },

@@ -13,7 +13,6 @@ class ProjectMemberModel with _$ProjectMemberModel {
 
     /// 项目ID
     @JsonKey(name: 'project_id') required int projectId,
-    @JsonKey(name: 'user_id') required String userId,
 
     /// 成员角色
     @JsonKey(name: 'role') @ProjectRoleEnumConverter() required ProjectRoleEnum role,
