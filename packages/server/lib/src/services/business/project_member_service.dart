@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:ttpolyglot_model/model.dart';
+import 'package:uuid/uuid.dart';
 
 import '../base_service.dart';
 import '../infrastructure/database_service.dart';
@@ -801,8 +802,7 @@ class ProjectMemberService extends BaseService {
 
   /// 生成UUID
   String _generateUuid() {
-    // 使用 Dart 的 UUID 生成库
-    // 这里简化实现，实际应该使用 uuid package
-    return '${DateTime.now().millisecondsSinceEpoch}-${DateTime.now().microsecond}';
+    const uuid = Uuid();
+    return uuid.v4();
   }
 }
