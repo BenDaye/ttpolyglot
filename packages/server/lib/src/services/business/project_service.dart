@@ -497,18 +497,26 @@ class ProjectService extends BaseService {
 
       final sql = '''
         SELECT 
-          u.id, u.username, u.display_name, u.avatar_url,
-          pm.role as role_name, pm.role as role_display_name,
-          pm.joined_at as granted_at,
-          p.owner_id = u.id as is_owner,
-          pm.invited_at, pm.invited_by, pm.status
+          pm.id,
+          pm.project_id,
+          pm.role,
+          pm.invited_by,
+          pm.invited_at,
+          pm.joined_at,
+          pm.status,
+          pm.is_active,
+          pm.created_at,
+          pm.updated_at,
+          u.username,
+          u.display_name,
+          u.avatar_url
         FROM {project_members} pm
         JOIN {users} u ON pm.user_id = u.id
         JOIN {projects} p ON pm.project_id = p.id
         WHERE pm.project_id = @project_id 
           AND pm.is_active = true 
           AND u.is_active = true
-        ORDER BY is_owner DESC, pm.joined_at ASC
+        ORDER BY (p.owner_id = u.id) DESC, pm.joined_at ASC
       ''';
 
       final result = await _databaseService.query(sql, {'project_id': projectId});
