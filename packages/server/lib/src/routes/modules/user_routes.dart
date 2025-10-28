@@ -42,10 +42,6 @@ class UserRoutes {
     userRouter.post('/me/change-password', userController.changePassword);
     // 挂载用户设置路由（在 /me 下）
     userRouter.mount('/me', userSettingsController.router.call);
-    // 后注册 /<id> 路由（更通用）
-    userRouter.get('/<id>', userController.getUser);
-    userRouter.put('/<id>', userController.updateUser);
-    userRouter.delete('/<id>', userController.deleteUser);
 
     // 挂载用户路由并应用认证中间件
     router.mount('/users', withAuth(userRouter.call));

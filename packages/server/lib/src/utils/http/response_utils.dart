@@ -92,14 +92,7 @@ class ResponseUtils {
     ServerException exception, {
     DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
   }) {
-    final apiResponse = BaseModel<ServerException>(
-      code: DataCodeEnum.error,
-      message: exception.message,
-      type: type,
-      data: exception,
-    );
-
-    return error(data: apiResponse.toJson((data) => data.toMap()));
+    return error(data: exception.toString(), type: type);
   }
 
   /// 构建无内容响应（204）
@@ -107,14 +100,11 @@ class ResponseUtils {
     Map<String, String>? headers,
     DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
   }) {
-    final apiResponse = BaseModel<void>(
-      code: DataCodeEnum.error,
-      message: DataCodeEnum.noContent.message,
+    return error(
+      code: DataCodeEnum.noContent,
       type: type,
-      data: null,
+      headers: headers,
     );
-
-    return error(code: DataCodeEnum.noContent, data: apiResponse.toJson((data) => null));
   }
 
   /// 构建创建成功响应
@@ -155,20 +145,15 @@ class ResponseUtils {
     String? serverName,
     DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
   }) {
-    final apiResponse = BaseModel<Map<String, dynamic>>(
-      code: DataCodeEnum.success,
-      message: DataCodeEnum.success.message,
-      type: type,
-      data: {
-        'version': version ?? '1.0.0',
-        'api_version': apiVersion ?? 'v1',
-        'server': serverName ?? 'TTPolyglot Server',
-        'environment': ServerConfig.isDevelopment ? 'development' : 'production',
-        'timestamp': DateTime.now().toIso8601String(),
-      },
-    );
+    final data = {
+      'version': version ?? '1.0.0',
+      'api_version': apiVersion ?? 'v1',
+      'server': serverName ?? 'TTPolyglot Server',
+      'environment': ServerConfig.isDevelopment ? 'development' : 'production',
+      'timestamp': DateTime.now().toIso8601String(),
+    };
 
-    return success(data: apiResponse.toJson((data) => data));
+    return success(data: data);
   }
 
   /// 状态信息响应
@@ -182,22 +167,17 @@ class ResponseUtils {
       final dbHealthy = await databaseService.isHealthy();
       final redisHealthy = await redisService.isHealthy();
 
-      final apiResponse = BaseModel<Map<String, dynamic>>(
-        code: DataCodeEnum.success,
-        message: DataCodeEnum.success.message,
-        type: type,
-        data: {
-          'status': dbHealthy && redisHealthy ? 'healthy' : 'degraded',
-          'services': {
-            'database': dbHealthy ? 'healthy' : 'unhealthy',
-            'redis': redisHealthy ? 'healthy' : 'unhealthy',
-          },
-          'timestamp': DateTime.now().toIso8601String(),
-          'uptime': DateTime.now().difference(startTime).inSeconds,
+      final data = {
+        'status': dbHealthy && redisHealthy ? 'healthy' : 'degraded',
+        'services': {
+          'database': dbHealthy ? 'healthy' : 'unhealthy',
+          'redis': redisHealthy ? 'healthy' : 'unhealthy',
         },
-      );
+        'timestamp': DateTime.now().toIso8601String(),
+        'uptime': DateTime.now().difference(startTime).inSeconds,
+      };
 
-      return success(data: apiResponse.toJson((data) => data));
+      return success(data: data);
     } catch (err) {
       return error(code: DataCodeEnum.serviceUnavailable, message: '状态检查失败');
     }
@@ -205,17 +185,13 @@ class ResponseUtils {
 
   /// 404处理器
   static Response notFound({
-    required String path,
     DataMessageTipsEnum type = DataMessageTipsEnum.showToast,
   }) {
-    final apiResponse = BaseModel<void>(
+    return error(
       code: DataCodeEnum.notFound,
-      message: '请求的资源不存在',
       type: type,
-      data: null,
+      message: '请求的资源不存在',
     );
-
-    return error(code: DataCodeEnum.notFound, data: apiResponse.toJson((data) => null));
   }
 
   /// 健康检查端点
@@ -236,14 +212,7 @@ class ResponseUtils {
 
       final isHealthy = healthStatus['status'] == 'healthy';
 
-      final apiResponse = BaseModel(
-        code: isHealthy ? DataCodeEnum.success : DataCodeEnum.serviceUnavailable,
-        message: isHealthy ? '系统健康' : '系统不健康',
-        type: type,
-        data: healthStatus,
-      );
-
-      return success(data: apiResponse.toJson((data) => data));
+      return success(data: healthStatus, type: type, message: isHealthy ? '系统健康' : '系统不健康');
     } catch (err, stackTrace) {
       LoggerUtils.error(
         'healthCheck',
@@ -251,14 +220,7 @@ class ResponseUtils {
         stackTrace: stackTrace,
       );
 
-      final apiResponse = BaseModel<void>(
-        code: DataCodeEnum.internalServerError,
-        message: '健康检查失败',
-        type: type,
-        data: null,
-      );
-
-      return error(code: DataCodeEnum.internalServerError, data: apiResponse.toJson((data) => null));
+      return error(code: DataCodeEnum.internalServerError, message: '健康检查失败');
     }
   }
 
@@ -269,17 +231,15 @@ class ResponseUtils {
   }) async {
     try {
       final isHealthy = await databaseService.isHealthy();
-      final apiResponse = BaseModel<Map<String, dynamic>>(
-        code: isHealthy ? DataCodeEnum.success : DataCodeEnum.serviceUnavailable,
-        message: isHealthy ? '数据库连接正常' : '数据库连接失败',
-        type: type,
+
+      return success(
         data: {
           'status': isHealthy ? 'healthy' : 'unhealthy',
           'database': isHealthy ? 'connected' : 'disconnected',
         },
+        type: type,
+        message: isHealthy ? '数据库连接正常' : '数据库连接失败',
       );
-
-      return success(data: apiResponse.toJson((data) => data));
     } catch (err, stackTrace) {
       LoggerUtils.error(
         'dbHealthCheck',
@@ -287,14 +247,7 @@ class ResponseUtils {
         stackTrace: stackTrace,
       );
 
-      final apiResponse = BaseModel<void>(
-        code: DataCodeEnum.internalServerError,
-        message: '数据库检查出错',
-        type: type,
-        data: null,
-      );
-
-      return error(code: DataCodeEnum.internalServerError, data: apiResponse.toJson((data) => null));
+      return error(code: DataCodeEnum.internalServerError, message: '数据库检查出错');
     }
   }
 
@@ -308,20 +261,13 @@ class ResponseUtils {
       final dbHealthy = await databaseService.isHealthy();
       final redisHealthy = await redisService.isHealthy();
 
-      final apiResponse = BaseModel<Map<String, dynamic>>(
-        code: DataCodeEnum.serviceUnavailable,
-        message: '服务未就绪',
-        type: type,
-        data: {
-          'status': 'not_ready',
-          'services': {
-            'database': dbHealthy,
-            'redis': redisHealthy,
-          },
+      return success(data: {
+        'status': 'not_ready',
+        'services': {
+          'database': dbHealthy,
+          'redis': redisHealthy,
         },
-      );
-
-      return success(data: apiResponse.toJson((data) => data));
+      }, type: type, message: '服务未就绪');
     } catch (err, stackTrace) {
       LoggerUtils.error(
         'readyCheck',
@@ -329,14 +275,7 @@ class ResponseUtils {
         stackTrace: stackTrace,
       );
 
-      final apiResponse = BaseModel<void>(
-        code: DataCodeEnum.internalServerError,
-        message: '就绪检查出错',
-        type: type,
-        data: null,
-      );
-
-      return error(code: DataCodeEnum.internalServerError, data: apiResponse.toJson((data) => null));
+      return error(code: DataCodeEnum.internalServerError, message: '就绪检查出错');
     }
   }
 

@@ -30,19 +30,12 @@ class UserController extends BaseController {
     router.get('/me', _getCurrentUser);
     router.put('/me', _updateCurrentUser);
     router.post('/me/change-password', _changePassword);
-    // 参数化路由放在最后
-    router.get('/<id>', _getUserById);
-    router.put('/<id>', _updateUser);
-    router.delete('/<id>', _deleteUser);
 
     return router;
   }
 
   // 公共方法用于路由配置
   Future<Response> Function(Request) get getUsers => _getUsers;
-  Future<Response> Function(Request, String) get getUser => _getUserById;
-  Future<Response> Function(Request, String) get updateUser => _updateUser;
-  Future<Response> Function(Request, String) get deleteUser => _deleteUser;
   Future<Response> Function(Request) get me => _getCurrentUser;
   Future<Response> Function(Request) get getCurrentUser => _getCurrentUser;
   Future<Response> Function(Request) get updateCurrentUser => _updateCurrentUser;
@@ -81,123 +74,6 @@ class UserController extends BaseController {
       return ResponseUtils.error(
         message: '获取用户列表失败',
       );
-    }
-  }
-
-  /// 根据ID获取用户详情
-  Future<Response> _getUserById(Request request, String id) async {
-    try {
-      ValidatorUtils.validateUuid(id, 'user_id');
-
-      final user = await _userService.getUserById(id);
-
-      if (user == null) {
-        return ResponseUtils.error(message: '用户不存在');
-      }
-
-      return ResponseUtils.success(
-        message: '获取用户详情成功',
-        data: user,
-      );
-    } catch (error, stackTrace) {
-      LoggerUtils.error('获取用户详情失败: $id', error: error, stackTrace: stackTrace);
-
-      if (error is ValidationException) {
-        return ResponseUtils.error(
-          message: error.message,
-        );
-      }
-
-      return ResponseUtils.error(
-        message: '获取用户详情失败',
-      );
-    }
-  }
-
-  /// 更新用户信息
-  Future<Response> _updateUser(Request request, String id) async {
-    try {
-      ValidatorUtils.validateUuid(id, 'user_id');
-
-      final body = await request.readAsString();
-      final data = jsonDecode(body) as Map<String, dynamic>;
-
-      final updateData = <String, dynamic>{};
-
-      if (data.containsKey('display_name')) {
-        updateData['display_name'] =
-            ValidatorUtils.validateString(data['display_name'], 'display_name', maxLength: 100, required: false);
-      }
-
-      if (data.containsKey('phone')) {
-        updateData['phone'] = ValidatorUtils.validateString(data['phone'], 'phone', maxLength: 20, required: false);
-      }
-
-      if (data.containsKey('avatar_url')) {
-        updateData['avatar_url'] = ValidatorUtils.validateUrl(data['avatar_url'], 'avatar_url', required: false);
-      }
-
-      if (data.containsKey('timezone')) {
-        updateData['timezone'] =
-            ValidatorUtils.validateString(data['timezone'], 'timezone', maxLength: 50, required: false);
-      }
-
-      if (data.containsKey('locale')) {
-        updateData['locale'] = ValidatorUtils.validateString(data['locale'], 'locale', maxLength: 10, required: false);
-      }
-
-      if (data.containsKey('is_active')) {
-        updateData['is_active'] = ValidatorUtils.validateBool(data['is_active'], 'is_active', required: false);
-      }
-
-      final updatedUser = await _userService.updateUser(id, updateData, updatedBy: getCurrentUserId(request));
-
-      return ResponseUtils.success(
-        message: '用户信息更新成功',
-        data: updatedUser,
-      );
-    } catch (error, stackTrace) {
-      LoggerUtils.error('更新用户信息失败: $id', error: error, stackTrace: stackTrace);
-
-      if (error is ValidationException) {
-        return ResponseUtils.error(message: error.message);
-      }
-
-      if (error is BusinessException) {
-        return ResponseUtils.error(message: error.message);
-      }
-
-      return ResponseUtils.error(message: '更新用户信息失败');
-    }
-  }
-
-  /// 删除用户
-  Future<Response> _deleteUser(Request request, String id) async {
-    try {
-      ValidatorUtils.validateUuid(id, 'user_id');
-
-      final currentUserId = getCurrentUserId(request);
-      if (id == currentUserId) {
-        return ResponseUtils.error(
-          message: '不能删除自己的账户',
-        );
-      }
-
-      await _userService.deleteUser(id, deletedBy: currentUserId);
-
-      return ResponseUtils.success(message: '用户删除成功');
-    } catch (error, stackTrace) {
-      LoggerUtils.error('删除用户失败: $id', error: error, stackTrace: stackTrace);
-
-      if (error is ValidationException) {
-        return ResponseUtils.error(message: error.message);
-      }
-
-      if (error is NotFoundException) {
-        return ResponseUtils.error(message: '用户不存在');
-      }
-
-      return ResponseUtils.error(message: '删除用户失败');
     }
   }
 
