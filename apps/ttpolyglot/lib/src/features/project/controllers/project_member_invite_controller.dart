@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/services.dart';
@@ -39,6 +40,7 @@ class ProjectMemberInviteController extends GetxController {
   final _selectedUsers = <UserSearchResultModel>[].obs;
   final _isSearching = false.obs;
   final _isAdding = false.obs;
+  Timer? _searchDebounceTimer;
 
   String get searchQuery => _searchQuery.value;
   List<UserSearchResultModel> get searchResults => _searchResults;
@@ -78,21 +80,44 @@ class ProjectMemberInviteController extends GetxController {
     Get.snackbar('成功', '邀请链接已复制到剪贴板');
   }
 
-  /// 搜索用户
-  Future<void> searchUsers(String query) async {
-    if (query.trim().isEmpty) {
+  /// 搜索用户（带防抖）
+  void searchUsers(String query) {
+    // 取消之前的定时器
+    _searchDebounceTimer?.cancel();
+
+    // 去除前后空格
+    final trimmedQuery = query.trim();
+
+    // 更新搜索关键字
+    _searchQuery.value = trimmedQuery;
+
+    // 如果输入为空，立即清空结果
+    if (trimmedQuery.isEmpty) {
+      _searchResults.clear();
+      _isSearching.value = false;
+      return;
+    }
+
+    // 如果少于2个字符，不搜索
+    if (trimmedQuery.length < 2) {
       _searchResults.clear();
       return;
     }
 
-    try {
-      _isSearching.value = true;
-      _searchQuery.value = query;
+    // 设置防抖定时器（500毫秒）
+    _isSearching.value = true;
+    _searchDebounceTimer = Timer(const Duration(milliseconds: 500), () {
+      _performSearch(trimmedQuery);
+    });
+  }
 
+  /// 执行实际的搜索请求
+  Future<void> _performSearch(String query) async {
+    try {
       final results = await _userApi.searchUsers(query: query, limit: 10);
       _searchResults.assignAll(results ?? []);
     } catch (error, stackTrace) {
-      log('[searchUsers]', error: error, stackTrace: stackTrace, name: 'ProjectMemberInviteController');
+      log('[_performSearch]', error: error, stackTrace: stackTrace, name: 'ProjectMemberInviteController');
       Get.snackbar('失败', '搜索用户失败');
     } finally {
       _isSearching.value = false;
@@ -140,6 +165,8 @@ class ProjectMemberInviteController extends GetxController {
 
   @override
   void onClose() {
+    // 取消防抖定时器
+    _searchDebounceTimer?.cancel();
     // 不需要手动关闭 Rx 变量，GetX 会自动处理
     // 手动关闭会导致 Obx widget 在 dispose 时出现 null check 错误
     super.onClose();

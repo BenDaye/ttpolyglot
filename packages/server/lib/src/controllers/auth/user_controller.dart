@@ -24,14 +24,16 @@ class UserController extends BaseController {
     final router = Router();
 
     // 需要认证的路由
+    // 注意：具体路由必须在参数化路由之前定义
     router.get('/', _getUsers);
     router.get('/search', _searchUsers);
-    router.get('/<id>', _getUserById);
-    router.put('/<id>', _updateUser);
-    router.delete('/<id>', _deleteUser);
     router.get('/me', _getCurrentUser);
     router.put('/me', _updateCurrentUser);
     router.post('/me/change-password', _changePassword);
+    // 参数化路由放在最后
+    router.get('/<id>', _getUserById);
+    router.put('/<id>', _updateUser);
+    router.delete('/<id>', _deleteUser);
 
     return router;
   }

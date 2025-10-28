@@ -57,11 +57,7 @@ class AddMemberTab extends GetView<ProjectMemberInviteController> {
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       ),
-      onChanged: (value) {
-        if (value.length >= 2) {
-          controller.searchUsers(value);
-        }
-      },
+      onChanged: controller.searchUsers,
     );
   }
 
