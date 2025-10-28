@@ -108,7 +108,6 @@ class ProjectsController extends GetxController {
     _searchQuery.value = query;
   }
 
-  /// 创建新项目（已废弃，请使用 ProjectDialogController.showCreateDialog()）
   /// 项目创建现在通过 API 完成，在 ProjectDialogController 中处理
   @Deprecated('Use ProjectDialogController.showCreateDialog() instead')
   static Future<void> createProject({
@@ -121,7 +120,6 @@ class ProjectsController extends GetxController {
     await loadProjects();
   }
 
-  /// 更新项目（已废弃，请使用 ProjectDialogController.showEditDialog()）
   /// 项目更新现在通过 API 完成，在 ProjectDialogController 中处理
   @Deprecated('Use ProjectDialogController.showEditDialog() instead')
   static Future<void> updateProject(

@@ -36,7 +36,6 @@ class Migration006ProjectsTable extends BaseMigration {
           languages_count INTEGER DEFAULT 0,
           members_count INTEGER DEFAULT 1,
           member_limit INTEGER DEFAULT 10 NOT NULL CHECK (member_limit > 0 AND member_limit <= 1000),
-          is_public BOOLEAN DEFAULT false,
           is_active BOOLEAN DEFAULT true,
           settings JSONB,
           last_activity_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
@@ -58,7 +57,6 @@ class Migration006ProjectsTable extends BaseMigration {
       await createIndex('projects_status', 'projects', 'status');
       await createIndex('projects_visibility', 'projects', 'visibility');
       await createIndex('projects_primary_language_id', 'projects', 'primary_language_id');
-      await createIndex('projects_is_public', 'projects', 'is_public');
       await createIndex('projects_is_active', 'projects', 'is_active');
       await createIndex('projects_last_activity_at', 'projects', 'last_activity_at');
       await createIndex('projects_created_at', 'projects', 'created_at');
@@ -86,7 +84,6 @@ class Migration006ProjectsTable extends BaseMigration {
       await addColumnComment('projects', 'languages_count', '语言数量');
       await addColumnComment('projects', 'members_count', '成员数量');
       await addColumnComment('projects', 'member_limit', '成员上限，范围1-1000，默认10');
-      await addColumnComment('projects', 'is_public', '是否公开（废弃，使用visibility）');
       await addColumnComment('projects', 'is_active', '是否激活');
       await addColumnComment('projects', 'settings', '项目设置，JSON格式');
       await addColumnComment('projects', 'last_activity_at', '最后活动时间');
