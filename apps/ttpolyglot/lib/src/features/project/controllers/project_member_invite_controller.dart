@@ -118,7 +118,6 @@ class ProjectMemberInviteController extends GetxController {
       _searchResults.assignAll(results ?? []);
     } catch (error, stackTrace) {
       log('[_performSearch]', error: error, stackTrace: stackTrace, name: 'ProjectMemberInviteController');
-      Get.snackbar('失败', '搜索用户失败');
     } finally {
       _isSearching.value = false;
     }
