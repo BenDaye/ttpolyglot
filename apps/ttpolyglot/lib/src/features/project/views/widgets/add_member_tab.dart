@@ -78,7 +78,7 @@ class AddMemberTab extends GetView<ProjectMemberInviteController> {
             return ListTile(
               leading: CircleAvatar(
                 backgroundImage: user.avatarUrl != null ? NetworkImage(user.avatarUrl!) : null,
-                child: user.avatarUrl == null ? Text(user.username[0].toUpperCase()) : null,
+                child: user.avatarUrl == null && user.username.isNotEmpty ? Text(user.username[0].toUpperCase()) : null,
               ),
               title: Text(user.displayName ?? user.username),
               subtitle: Text(user.email ?? user.username),

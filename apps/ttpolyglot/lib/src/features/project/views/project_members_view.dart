@@ -12,21 +12,7 @@ class ProjectMembersView extends StatefulWidget {
   State<ProjectMembersView> createState() => _ProjectMembersViewState();
 }
 
-class _ProjectMembersViewState extends State<ProjectMembersView> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
+class _ProjectMembersViewState extends State<ProjectMembersView> {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ProjectController>(
@@ -238,70 +224,16 @@ class _ProjectMembersViewState extends State<ProjectMembersView> with SingleTick
     Get.put(ProjectMemberInviteController(projectId: projectIdInt));
 
     Get.dialog(
-      Dialog(
-        child: SizedBox(
-          width: 600.0,
-          height: 700.0,
-          child: Column(
-            children: [
-              // 对话框标题
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    const Text(
-                      '邀请成员到项目',
-                      style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      onPressed: () {
-                        Get.delete<ProjectMemberInviteController>();
-                        Get.back();
-                      },
-                      icon: const Icon(Icons.close),
-                    ),
-                  ],
-                ),
-              ),
-              const Divider(height: 1.0),
-
-              // 成员信息提示
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  '📊 当前成员: ${controller.members.length}/10  |  💡 还可以邀请 ${10 - controller.members.length} 人',
-                  style: TextStyle(color: Colors.grey[600]),
-                ),
-              ),
-
-              // Tab 栏
-              TabBar(
-                controller: _tabController,
-                tabs: const [
-                  Tab(text: '邀请链接'),
-                  Tab(text: '直接添加'),
-                ],
-              ),
-
-              // Tab 内容
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: const [
-                    InviteLinkTab(),
-                    AddMemberTab(),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+      _InviteDialogContent(
+        memberCount: controller.members.length,
       ),
+      barrierDismissible: false,
     ).then((_) {
-      // 对话框关闭后删除控制器并刷新成员列表
-      Get.delete<ProjectMemberInviteController>();
-      controller.refreshProject();
+      // 对话框关闭后延迟删除控制器，确保所有异步操作完成
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.delete<ProjectMemberInviteController>();
+        controller.refreshProject();
+      });
     });
   }
 
@@ -575,6 +507,99 @@ class _ProjectMembersViewState extends State<ProjectMembersView> with SingleTick
           ),
         ],
       ),
+    );
+  }
+}
+
+// 邀请对话框内容
+class _InviteDialogContent extends StatefulWidget {
+  const _InviteDialogContent({required this.memberCount});
+
+  final int memberCount;
+
+  @override
+  State<_InviteDialogContent> createState() => _InviteDialogContentState();
+}
+
+class _InviteDialogContentState extends State<_InviteDialogContent> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GetBuilder<ProjectMemberInviteController>(
+      builder: (controller) {
+        return Dialog(
+          child: SizedBox(
+            width: 600.0,
+            height: 700.0,
+            child: Column(
+              children: [
+                // 对话框标题
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      const Text(
+                        '邀请成员到项目',
+                        style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        onPressed: () {
+                          Get.back();
+                        },
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1.0),
+
+                // 成员信息提示
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    '📊 当前成员: ${widget.memberCount}/10  |  💡 还可以邀请 ${10 - widget.memberCount} 人',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                ),
+
+                // Tab 栏
+                TabBar(
+                  controller: _tabController,
+                  tabs: const [
+                    Tab(text: '邀请链接'),
+                    Tab(text: '直接添加'),
+                  ],
+                ),
+
+                // Tab 内容
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: const [
+                      InviteLinkTab(),
+                      AddMemberTab(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
