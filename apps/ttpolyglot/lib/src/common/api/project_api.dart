@@ -281,4 +281,41 @@ class ProjectApi {
       return null;
     }
   }
+
+  /// 添加项目语言
+  Future<bool> addProjectLanguage({
+    required int projectId,
+    required int languageId,
+  }) async {
+    try {
+      log('[addProjectLanguage] projectId=$projectId, languageId=$languageId', name: 'ProjectApi');
+
+      final response = await HttpClient.post(
+        '/projects/$projectId/languages',
+        data: {'language_id': languageId},
+      );
+
+      return response.code == DataCodeEnum.success;
+    } catch (error, stackTrace) {
+      log('[addProjectLanguage]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      rethrow;
+    }
+  }
+
+  /// 删除项目语言
+  Future<bool> removeProjectLanguage({
+    required int projectId,
+    required int languageId,
+  }) async {
+    try {
+      log('[removeProjectLanguage] projectId=$projectId, languageId=$languageId', name: 'ProjectApi');
+
+      final response = await HttpClient.delete('/projects/$projectId/languages/$languageId');
+
+      return response.code == DataCodeEnum.success;
+    } catch (error, stackTrace) {
+      log('[removeProjectLanguage]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      rethrow;
+    }
+  }
 }

@@ -324,11 +324,16 @@ class ProjectDialogController extends GetxController {
         }
 
         final projectId = int.parse(_editingProject.value!.id);
+
+        // 更新项目基本信息
         await _projectApi.updateProject(
           projectId: projectId,
           name: name,
           description: description,
         );
+
+        // 处理目标语言的变更
+        await _updateTargetLanguages(projectId);
 
         Get.back(closeOverlays: true);
         Get.snackbar('成功', '项目更新成功');
@@ -368,6 +373,47 @@ class ProjectDialogController extends GetxController {
       Get.snackbar('错误', '${_isEditMode.value ? '更新' : '创建'}项目失败: $error');
     } finally {
       _isLoading.value = false;
+    }
+  }
+
+  /// 更新项目目标语言
+  Future<void> _updateTargetLanguages(int projectId) async {
+    if (_editingProject.value == null) return;
+
+    // 获取原有的目标语言列表
+    final originalTargetLanguages = _editingProject.value!.targetLanguages;
+    final originalLanguageIds = originalTargetLanguages.map((lang) => lang.id).whereType<int>().toSet();
+
+    // 获取新选择的目标语言列表
+    final newLanguageIds = _selectedTargetLanguages.map((lang) => lang.id).whereType<int>().toSet();
+
+    // 找出需要添加的语言
+    final languagesToAdd = newLanguageIds.difference(originalLanguageIds);
+
+    // 找出需要删除的语言
+    final languagesToRemove = originalLanguageIds.difference(newLanguageIds);
+
+    try {
+      // 添加新语言
+      for (final languageId in languagesToAdd) {
+        await _projectApi.addProjectLanguage(
+          projectId: projectId,
+          languageId: languageId,
+        );
+        Logger.info('添加语言: $languageId 到项目: $projectId');
+      }
+
+      // 删除移除的语言
+      for (final languageId in languagesToRemove) {
+        await _projectApi.removeProjectLanguage(
+          projectId: projectId,
+          languageId: languageId,
+        );
+        Logger.info('从项目 $projectId 删除语言: $languageId');
+      }
+    } catch (error, stackTrace) {
+      Logger.error('[_updateTargetLanguages]', error: error, stackTrace: stackTrace, name: 'ProjectDialogController');
+      rethrow;
     }
   }
 

@@ -247,9 +247,28 @@ class ProjectController extends GetxController {
     );
 
     if (result == true) {
-      final newTargetLanguages = _project.value!.targetLanguages.where((lang) => lang.code != language.code).toList();
-      await ProjectsController.updateProject(projectId, targetLanguages: newTargetLanguages);
-      await refreshProject(); // 刷新项目数据
+      try {
+        final projectIdInt = int.tryParse(projectId);
+        if (projectIdInt == null) {
+          Get.snackbar('错误', '项目ID无效');
+          return;
+        }
+
+        final success = await _projectApi.removeProjectLanguage(
+          projectId: projectIdInt,
+          languageId: language.id,
+        );
+
+        if (success) {
+          Get.snackbar('成功', '目标语言已删除');
+          await refreshProject(); // 刷新项目数据
+        } else {
+          Get.snackbar('错误', '删除目标语言失败');
+        }
+      } catch (error, stackTrace) {
+        Logger.error('[removeTargetLanguage]', error: error, stackTrace: stackTrace, name: 'ProjectController');
+        Get.snackbar('错误', '删除目标语言失败: $error');
+      }
     }
   }
 
