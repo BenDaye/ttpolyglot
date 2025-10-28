@@ -140,17 +140,8 @@ class ProjectMemberInviteController extends GetxController {
 
   @override
   void onClose() {
-    _currentTab.close();
-    _selectedRole.close();
-    _expiresIn.close();
-    _maxUses.close();
-    _generatedInvite.close();
-    _isGenerating.close();
-    _searchQuery.close();
-    _searchResults.close();
-    _selectedUsers.close();
-    _isSearching.close();
-    _isAdding.close();
+    // 不需要手动关闭 Rx 变量，GetX 会自动处理
+    // 手动关闭会导致 Obx widget 在 dispose 时出现 null check 错误
     super.onClose();
   }
 }

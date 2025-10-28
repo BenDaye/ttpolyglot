@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/common/common.dart';
@@ -229,10 +231,18 @@ class _ProjectMembersViewState extends State<ProjectMembersView> {
       ),
       barrierDismissible: false,
     ).then((_) {
-      // 对话框关闭后延迟删除控制器，确保所有异步操作完成
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Get.delete<ProjectMemberInviteController>();
-        controller.refreshProject();
+      // 对话框关闭后刷新项目数据
+      controller.refreshProject();
+
+      // 延迟删除控制器，确保所有 widget 完全销毁
+      Future.delayed(const Duration(milliseconds: 300), () {
+        try {
+          if (Get.isRegistered<ProjectMemberInviteController>()) {
+            Get.delete<ProjectMemberInviteController>(force: true);
+          }
+        } catch (error, stackTrace) {
+          log('[_showInviteDialog] 删除控制器失败', error: error, stackTrace: stackTrace, name: 'ProjectMembersView');
+        }
       });
     });
   }
