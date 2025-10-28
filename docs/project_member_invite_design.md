@@ -43,6 +43,41 @@
 
 ## 数据库设计
 
+### 设计决策：融合邀请表到成员表
+
+**设计思路：**
+
+原本计划创建独立的 `project_invites` 表来管理邀请链接，但经过重新思考，我们决定将邀请功能直接融合到 `project_members` 表中。这样做有以下优势：
+
+**优势：**
+1. **简化数据结构**：减少一张表，降低数据库复杂度
+2. **统一管理**：成员和邀请都在同一张表，便于查询和管理
+3. **原子性更好**：接受邀请时，只需更新一条记录，而非删除邀请记录+创建成员记录
+4. **减少冗余**：避免 project_id、invited_by、role 等字段重复存储
+
+**实现方式：**
+
+`project_members` 表通过 `user_id` 和 `invite_code` 字段区分两种记录类型：
+
+1. **成员记录**：`user_id` 有值，`invite_code` 为 NULL
+   - 表示已加入项目的成员
+   
+2. **邀请链接记录**：`user_id` 为 NULL，`invite_code` 有值
+   - 表示待使用的邀请链接
+   - 当用户通过邀请链接加入时，会创建新的成员记录，并增加该邀请记录的 `used_count`
+
+**数据约束：**
+
+通过 `CHECK` 约束确保每条记录只能是其中一种类型：
+```sql
+CHECK (
+  (user_id IS NOT NULL AND invite_code IS NULL) OR 
+  (user_id IS NULL AND invite_code IS NOT NULL)
+)
+```
+
+---
+
 ### 1. 修改 `projects` 表
 
 在 `006_projects_table.dart` 中添加 `member_limit` 字段：
@@ -63,60 +98,71 @@ CHECK (member_limit > 0 AND member_limit <= 1000);
 - Owner 可以在项目设置页面中修改此值
 - 修改时需要验证：新上限 >= 当前成员数
 
-### 2. 创建 `project_invites` 表
+### 2. 扩展 `project_members` 表（融合邀请功能）
 
-新建迁移文件：`020_project_invites_table.dart`
+在已有的 `Migration018ProjectMembersTable` 中扩展字段，使其同时支持：
+1. **已加入成员记录**：有 user_id，表示已加入的成员
+2. **邀请链接记录**：user_id 为 NULL，有 invite_code，表示待使用的邀请链接
+
+**扩展字段：**
 
 ```sql
-CREATE TABLE project_invites (
-  id SERIAL PRIMARY KEY,
-  invite_code UUID NOT NULL UNIQUE,
-  project_id INTEGER NOT NULL,
-  invited_by UUID NOT NULL,
-  role VARCHAR(50) DEFAULT 'member',
-  expires_at TIMESTAMPTZ,
-  max_uses INTEGER,
-  used_count INTEGER DEFAULT 0,
-  status VARCHAR(20) DEFAULT 'active',
-  created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-  
-  FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
-  FOREIGN KEY (invited_by) REFERENCES users(id) ON DELETE CASCADE
-);
+-- 在 project_members 表中添加邀请相关字段
+ALTER TABLE project_members 
+  ALTER COLUMN user_id DROP NOT NULL,  -- 改为可为 NULL，邀请链接记录不需要 user_id
+  ADD COLUMN invite_code UUID UNIQUE,  -- 邀请码，仅邀请链接记录有值
+  ADD COLUMN expires_at TIMESTAMPTZ,   -- 过期时间（NULL 表示永久有效）
+  ADD COLUMN max_uses INTEGER,         -- 最大使用次数（NULL 表示无限次）
+  ADD COLUMN used_count INTEGER DEFAULT 0;  -- 已使用次数
 
-CREATE INDEX idx_project_invites_code ON project_invites(invite_code);
-CREATE INDEX idx_project_invites_project_id ON project_invites(project_id);
-CREATE INDEX idx_project_invites_status ON project_invites(status);
-CREATE INDEX idx_project_invites_expires_at ON project_invites(expires_at);
+-- 添加索引
+CREATE INDEX idx_project_members_invite_code ON project_members(invite_code);
+CREATE INDEX idx_project_members_expires_at ON project_members(expires_at);
+
+-- 添加约束：确保记录类型的一致性
+-- 要么是成员记录（有 user_id），要么是邀请链接记录（有 invite_code）
+ALTER TABLE project_members 
+ADD CONSTRAINT project_members_type_check 
+CHECK (
+  (user_id IS NOT NULL AND invite_code IS NULL) OR 
+  (user_id IS NULL AND invite_code IS NOT NULL)
+);
 ```
 
 **字段说明：**
-- `invite_code`: UUID 格式的唯一邀请码
-- `project_id`: 关联的项目 ID
-- `invited_by`: 创建邀请链接的用户 ID
-- `role`: 加入后的默认角色（owner/admin/member/viewer）
+
+**已有字段（调整）：**
+- `user_id`: 用户ID，**改为可为 NULL**。已加入成员有值，邀请链接记录为 NULL
+- `status`: 状态，扩展支持更多值：
+  - 成员记录：`pending`（待确认）、`active`（活跃）、`inactive`（停用）
+  - 邀请链接：`active`（有效）、`expired`（过期）、`revoked`（已撤销）
+
+**新增字段：**
+- `invite_code`: UUID 格式的唯一邀请码，仅邀请链接记录有值
 - `expires_at`: 过期时间（NULL 表示永久有效）
 - `max_uses`: 最大使用次数（NULL 表示无限次）
 - `used_count`: 已使用次数
-- `status`: 状态（active/expired/revoked）
 
-### 3. 创建 `project_invite_logs` 表（可选）
+**数据约束：**
+- 通过 CHECK 约束确保每条记录要么是成员记录（有 user_id），要么是邀请链接记录（有 invite_code）
+- `invite_code` 字段设置 UNIQUE 约束，确保邀请码唯一
+
+### 3. 创建 `project_member_invite_logs` 表（可选）
 
 记录邀请链接的使用历史：
 
 ```sql
-CREATE TABLE project_invite_logs (
+CREATE TABLE project_member_invite_logs (
   id SERIAL PRIMARY KEY,
-  invite_id INTEGER NOT NULL,
-  user_id UUID NOT NULL,
+  member_id INTEGER NOT NULL,  -- 关联 project_members 表中的邀请链接记录
+  user_id UUID NOT NULL,       -- 使用邀请的用户
   accepted BOOLEAN DEFAULT false,
   accepted_at TIMESTAMPTZ,
   ip_address VARCHAR(45),
   user_agent TEXT,
   created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
   
-  FOREIGN KEY (invite_id) REFERENCES project_invites(id) ON DELETE CASCADE,
+  FOREIGN KEY (member_id) REFERENCES project_members(id) ON DELETE CASCADE,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 ```
@@ -893,33 +939,33 @@ class ProjectMemberInviteController extends GetxController {
 ### Phase 1: 数据库和后端基础（第1-4天）
 
 - [x] TODO 1: 修改 projects 表，添加 member_limit 字段
-- [ ] TODO 3: 创建 project_invites 表
-- [ ] TODO 4: 更新 ProjectModel
-- [ ] TODO 6: 实现用户搜索 API
-- [ ] TODO 7: 在添加成员时检查成员上限
-- [ ] TODO 8: 实现更新成员上限 API
+- [ ] TODO 2: 扩展 project_members 表，添加邀请相关字段（融合邀请功能）
+- [ ] TODO 3: 更新 ProjectModel 和 ProjectMemberModel
+- [ ] TODO 4: 实现用户搜索 API
+- [ ] TODO 5: 在添加成员时检查成员上限
+- [ ] TODO 6: 实现更新成员上限 API
 
 ### Phase 2: 邀请链接功能（第5-7天）
 
-- [ ] TODO 5: 实现邀请链接 API
-  - 生成邀请链接
-  - 获取邀请信息
-  - 接受邀请
-  - 撤销邀请
+- [ ] TODO 7: 实现邀请链接 API
+  - 生成邀请链接（在 project_members 表中创建邀请记录）
+  - 获取邀请信息（查询邀请记录）
+  - 接受邀请（更新邀请记录，创建成员记录）
+  - 撤销邀请（更新邀请记录状态为 revoked）
 
 ### Phase 3: 前端数据层（第8-9天）
 
-- [ ] TODO 9: 更新前端 Project 模型
-- [ ] TODO 10: 实现 ProjectApi 所有方法
+- [ ] TODO 8: 更新前端 Project 和 ProjectMember 模型
+- [ ] TODO 9: 实现 ProjectApi 所有方法（包括邀请相关接口）
 
 ### Phase 4: 前端 UI（第10-14天）
 
-- [ ] TODO 11: 创建邀请成员对话框控制器
-- [ ] TODO 12: 创建邀请链接 Tab UI（包含二维码）
-- [ ] TODO 13: 创建直接添加成员 Tab UI
-- [ ] TODO 14: 更新成员列表页面，显示成员数量和上限
-- [ ] TODO 15: 实现编辑/移除成员功能
-- [ ] **TODO 16: 在项目设置中添加成员上限配置**
+- [ ] TODO 10: 创建邀请成员对话框控制器
+- [ ] TODO 11: 创建邀请链接 Tab UI（包含二维码）
+- [ ] TODO 12: 创建直接添加成员 Tab UI
+- [ ] TODO 13: 更新成员列表页面，显示成员数量和上限
+- [ ] TODO 14: 实现编辑/移除成员功能
+- [ ] **TODO 15: 在项目设置中添加成员上限配置**
   - 显示当前配置（上限/成员数/可用名额）
   - 修改成员上限表单（带实时验证）
   - 集成保存功能（调用 updateMemberLimit API）
@@ -928,12 +974,12 @@ class ProjectMemberInviteController extends GetxController {
     - Admin/Member/Viewer：显示只读信息，禁用编辑功能
     - 显示权限提示："只有项目所有者可以修改成员上限"
   - 友好的错误提示和成功反馈
-- [ ] TODO 17: 创建加入项目页面
+- [ ] TODO 16: 创建加入项目页面
 
 ### Phase 5: 测试和优化（第15天）
 
-- [ ] TODO 19: 集成测试
-- [ ] TODO 20: 优化和完善
+- [ ] TODO 17: 集成测试
+- [ ] TODO 18: 优化和完善
 
 ---
 
@@ -1022,30 +1068,41 @@ dependencies:
 ### A. 数据库 ER 图
 
 ```
-┌─────────────┐         ┌──────────────────┐         ┌─────────────┐
-│   users     │         │ project_invites  │         │  projects   │
-├─────────────┤         ├──────────────────┤         ├─────────────┤
-│ id (PK)     │◄────────┤ invited_by (FK)  │────────►│ id (PK)     │
-│ username    │         │ project_id (FK)  │         │ name        │
-│ email       │         │ invite_code      │         │ member_limit│
-└─────────────┘         │ role             │         │ ...         │
-                        │ expires_at       │         └─────────────┘
-                        │ max_uses         │
-                        │ used_count       │
-                        │ status           │
-                        └──────────────────┘
+┌─────────────┐         ┌───────────────────────┐         ┌─────────────┐
+│   users     │         │  project_members      │         │  projects   │
+├─────────────┤         ├───────────────────────┤         ├─────────────┤
+│ id (PK)     │◄────────┤ user_id (FK,nullable) │────────►│ id (PK)     │
+│ username    │         │ project_id (FK)       │         │ name        │
+│ email       │         │ invited_by (FK)       │         │ member_limit│
+└─────────────┘         │ role                  │         │ ...         │
+       ▲                │ invite_code (unique)  │         └─────────────┘
+       │                │ expires_at            │
+       │                │ max_uses              │
+       │                │ used_count            │
+       └────────────────┤ status                │
+        (invited_by)    │ joined_at             │
+                        │ ...                   │
+                        └───────────────────────┘
                                 │
                                 │
                                 ▼
-                   ┌─────────────────────────┐
-                   │ project_invite_logs     │
-                   ├─────────────────────────┤
-                   │ id (PK)                 │
-                   │ invite_id (FK)          │
-                   │ user_id (FK)            │
-                   │ accepted                │
-                   │ accepted_at             │
-                   └─────────────────────────┘
+                   ┌──────────────────────────────┐
+                   │ project_member_invite_logs   │
+                   ├──────────────────────────────┤
+                   │ id (PK)                      │
+                   │ member_id (FK)               │
+                   │ user_id (FK)                 │
+                   │ accepted                     │
+                   │ accepted_at                  │
+                   │ ip_address                   │
+                   │ user_agent                   │
+                   └──────────────────────────────┘
+
+说明：
+- project_members 表同时存储两种记录：
+  1. 成员记录：user_id 有值，invite_code 为 NULL
+  2. 邀请链接记录：user_id 为 NULL，invite_code 有值
+- 通过 CHECK 约束确保每条记录只能是其中一种类型
 ```
 
 ### B. API 响应错误码
