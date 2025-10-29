@@ -31,9 +31,6 @@ class UserInfoModel with _$UserInfoModel {
     /// 时区
     @JsonKey(name: 'timezone') String? timezone,
 
-    /// 语言
-    @JsonKey(name: 'locale') String? locale,
-
     /// 是否为活跃用户
     @JsonKey(name: 'is_active') bool? isActive,
 

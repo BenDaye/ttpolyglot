@@ -167,12 +167,6 @@ class ProfileViewContent extends GetView<ProfileController> {
                             label: '时区',
                             value: user.timezone!,
                           ),
-                        if (user.locale != null)
-                          _InfoItem(
-                            icon: Icons.language_outlined,
-                            label: '语言',
-                            value: user.locale!,
-                          ),
                       ],
                     ),
 

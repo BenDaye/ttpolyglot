@@ -48,10 +48,6 @@ mixin _$UserInfoModel {
   @JsonKey(name: 'timezone')
   String? get timezone => throw _privateConstructorUsedError;
 
-  /// 语言
-  @JsonKey(name: 'locale')
-  String? get locale => throw _privateConstructorUsedError;
-
   /// 是否为活跃用户
   @JsonKey(name: 'is_active')
   bool? get isActive => throw _privateConstructorUsedError;
@@ -130,7 +126,6 @@ abstract class $UserInfoModelCopyWith<$Res> {
       @JsonKey(name: 'avatar_url') String? avatarUrl,
       @JsonKey(name: 'phone') String? phone,
       @JsonKey(name: 'timezone') String? timezone,
-      @JsonKey(name: 'locale') String? locale,
       @JsonKey(name: 'is_active') bool? isActive,
       @JsonKey(name: 'is_email_verified') bool? isEmailVerified,
       @JsonKey(name: 'email_verified_at')
@@ -181,7 +176,6 @@ class _$UserInfoModelCopyWithImpl<$Res, $Val extends UserInfoModel>
     Object? avatarUrl = freezed,
     Object? phone = freezed,
     Object? timezone = freezed,
-    Object? locale = freezed,
     Object? isActive = freezed,
     Object? isEmailVerified = freezed,
     Object? emailVerifiedAt = freezed,
@@ -223,10 +217,6 @@ class _$UserInfoModelCopyWithImpl<$Res, $Val extends UserInfoModel>
       timezone: freezed == timezone
           ? _value.timezone
           : timezone // ignore: cast_nullable_to_non_nullable
-              as String?,
-      locale: freezed == locale
-          ? _value.locale
-          : locale // ignore: cast_nullable_to_non_nullable
               as String?,
       isActive: freezed == isActive
           ? _value.isActive
@@ -310,7 +300,6 @@ abstract class _$$UserInfoModelImplCopyWith<$Res>
       @JsonKey(name: 'avatar_url') String? avatarUrl,
       @JsonKey(name: 'phone') String? phone,
       @JsonKey(name: 'timezone') String? timezone,
-      @JsonKey(name: 'locale') String? locale,
       @JsonKey(name: 'is_active') bool? isActive,
       @JsonKey(name: 'is_email_verified') bool? isEmailVerified,
       @JsonKey(name: 'email_verified_at')
@@ -360,7 +349,6 @@ class __$$UserInfoModelImplCopyWithImpl<$Res>
     Object? avatarUrl = freezed,
     Object? phone = freezed,
     Object? timezone = freezed,
-    Object? locale = freezed,
     Object? isActive = freezed,
     Object? isEmailVerified = freezed,
     Object? emailVerifiedAt = freezed,
@@ -402,10 +390,6 @@ class __$$UserInfoModelImplCopyWithImpl<$Res>
       timezone: freezed == timezone
           ? _value.timezone
           : timezone // ignore: cast_nullable_to_non_nullable
-              as String?,
-      locale: freezed == locale
-          ? _value.locale
-          : locale // ignore: cast_nullable_to_non_nullable
               as String?,
       isActive: freezed == isActive
           ? _value.isActive
@@ -470,7 +454,6 @@ class _$UserInfoModelImpl implements _UserInfoModel {
       @JsonKey(name: 'avatar_url') this.avatarUrl,
       @JsonKey(name: 'phone') this.phone,
       @JsonKey(name: 'timezone') this.timezone,
-      @JsonKey(name: 'locale') this.locale,
       @JsonKey(name: 'is_active') this.isActive,
       @JsonKey(name: 'is_email_verified') this.isEmailVerified,
       @JsonKey(name: 'email_verified_at')
@@ -528,11 +511,6 @@ class _$UserInfoModelImpl implements _UserInfoModel {
   @override
   @JsonKey(name: 'timezone')
   final String? timezone;
-
-  /// 语言
-  @override
-  @JsonKey(name: 'locale')
-  final String? locale;
 
   /// 是否为活跃用户
   @override
@@ -609,7 +587,7 @@ class _$UserInfoModelImpl implements _UserInfoModel {
 
   @override
   String toString() {
-    return 'UserInfoModel(username: $username, email: $email, emailEncrypted: $emailEncrypted, displayName: $displayName, avatarUrl: $avatarUrl, phone: $phone, timezone: $timezone, locale: $locale, isActive: $isActive, isEmailVerified: $isEmailVerified, emailVerifiedAt: $emailVerifiedAt, lastLoginAt: $lastLoginAt, lastLoginIp: $lastLoginIp, lastLoginLocation: $lastLoginLocation, loginAttempts: $loginAttempts, lockedUntil: $lockedUntil, passwordChangedAt: $passwordChangedAt, createdAt: $createdAt, updatedAt: $updatedAt, roles: $roles)';
+    return 'UserInfoModel(username: $username, email: $email, emailEncrypted: $emailEncrypted, displayName: $displayName, avatarUrl: $avatarUrl, phone: $phone, timezone: $timezone, isActive: $isActive, isEmailVerified: $isEmailVerified, emailVerifiedAt: $emailVerifiedAt, lastLoginAt: $lastLoginAt, lastLoginIp: $lastLoginIp, lastLoginLocation: $lastLoginLocation, loginAttempts: $loginAttempts, lockedUntil: $lockedUntil, passwordChangedAt: $passwordChangedAt, createdAt: $createdAt, updatedAt: $updatedAt, roles: $roles)';
   }
 
   @override
@@ -629,7 +607,6 @@ class _$UserInfoModelImpl implements _UserInfoModel {
             (identical(other.phone, phone) || other.phone == phone) &&
             (identical(other.timezone, timezone) ||
                 other.timezone == timezone) &&
-            (identical(other.locale, locale) || other.locale == locale) &&
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive) &&
             (identical(other.isEmailVerified, isEmailVerified) ||
@@ -666,7 +643,6 @@ class _$UserInfoModelImpl implements _UserInfoModel {
         avatarUrl,
         phone,
         timezone,
-        locale,
         isActive,
         isEmailVerified,
         emailVerifiedAt,
@@ -706,7 +682,6 @@ abstract class _UserInfoModel implements UserInfoModel {
           @JsonKey(name: 'avatar_url') final String? avatarUrl,
           @JsonKey(name: 'phone') final String? phone,
           @JsonKey(name: 'timezone') final String? timezone,
-          @JsonKey(name: 'locale') final String? locale,
           @JsonKey(name: 'is_active') final bool? isActive,
           @JsonKey(name: 'is_email_verified') final bool? isEmailVerified,
           @JsonKey(name: 'email_verified_at')
@@ -771,11 +746,6 @@ abstract class _UserInfoModel implements UserInfoModel {
   @override
   @JsonKey(name: 'timezone')
   String? get timezone;
-
-  /// 语言
-  @override
-  @JsonKey(name: 'locale')
-  String? get locale;
 
   /// 是否为活跃用户
   @override
