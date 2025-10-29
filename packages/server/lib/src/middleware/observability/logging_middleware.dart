@@ -46,9 +46,9 @@ Middleware structuredLoggingMiddleware() {
         // 处理请求
         final response = await handler(request);
 
-        // 读取响应体用于日志记录
+        // // 读取响应体用于日志记录
         // dynamic responseData;
-        String? responseBody;
+        // String? responseBody;
 
         // try {
         //   // 读取响应体
@@ -80,7 +80,9 @@ Middleware structuredLoggingMiddleware() {
         );
 
         // 重要：由于响应体只能读取一次，需要创建新的响应对象返回
-        return response.change(body: responseBody ?? '');
+        // return response.change(body: responseBody ?? '');
+
+        return response;
       } catch (error, stackTrace) {
         ServerLogger.error(
           '请求失败',
