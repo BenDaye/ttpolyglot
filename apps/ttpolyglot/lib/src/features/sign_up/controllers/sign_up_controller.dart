@@ -37,18 +37,22 @@ class SignUpController extends GetxController {
     LoggerUtils.info('SignUpController 初始化');
 
     // 监听密码变化，计算密码强度
-    passwordController.addListener(() {
-      _calculatePasswordStrength(passwordController.text);
-    });
+    passwordController.addListener(_onPasswordChanged);
   }
 
   @override
   void onClose() {
+    passwordController.removeListener(_onPasswordChanged);
     usernameController.dispose();
     emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
     super.onClose();
+  }
+
+  /// 密码变化监听
+  void _onPasswordChanged() {
+    _calculatePasswordStrength(passwordController.text);
   }
 
   /// 切换密码显示/隐藏

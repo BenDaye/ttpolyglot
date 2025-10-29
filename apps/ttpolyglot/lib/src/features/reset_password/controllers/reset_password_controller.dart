@@ -48,16 +48,20 @@ class ResetPasswordController extends GetxController {
     developer.log('ResetPasswordController 初始化, token: $token', name: 'ResetPasswordController');
 
     // 监听密码变化，计算密码强度
-    passwordController.addListener(() {
-      _calculatePasswordStrength(passwordController.text);
-    });
+    passwordController.addListener(_onPasswordChanged);
   }
 
   @override
   void onClose() {
+    passwordController.removeListener(_onPasswordChanged);
     passwordController.dispose();
     confirmPasswordController.dispose();
     super.onClose();
+  }
+
+  /// 密码变化监听
+  void _onPasswordChanged() {
+    _calculatePasswordStrength(passwordController.text);
   }
 
   /// 切换密码显示/隐藏

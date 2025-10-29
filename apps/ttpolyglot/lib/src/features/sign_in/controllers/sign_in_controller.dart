@@ -129,9 +129,9 @@ class SignInController extends GetxController {
 
   @override
   void onClose() {
+    LoggerUtils.info('SignInController 销毁');
     emailController.dispose();
     passwordController.dispose();
     super.onClose();
-    LoggerUtils.info('SignInController 销毁');
   }
 }
