@@ -31,6 +31,7 @@ class ProjectController extends BaseController {
     router.post('/<id>/members', _addProjectMember);
     router.delete('/<id>/members/<userId>', _removeProjectMember);
     router.patch('/<id>/member-limit', _updateMemberLimit);
+    router.post('/<id>/transfer-ownership', _transferOwnership);
     return router;
   }
 
@@ -48,6 +49,7 @@ class ProjectController extends BaseController {
   Future<Response> Function(Request, String) get restoreProject => _restoreProject;
   Future<Response> Function(Request, String, String) get updateMemberRole => _updateMemberRole;
   Future<Response> Function(Request, String) get getProjectLanguages => _getProjectLanguages;
+  Future<Response> Function(Request, String) get transferOwnership => _transferOwnership;
   Future<Response> Function(Request, String) get addProjectLanguage => _addProjectLanguage;
   Future<Response> Function(Request, String, String) get removeProjectLanguage => _removeProjectLanguage;
   Future<Response> Function(Request, String, String) get updateLanguageSettings => _updateLanguageSettings;
@@ -370,6 +372,33 @@ class ProjectController extends BaseController {
     } catch (error, stackTrace) {
       ServerLogger.error('更新成员角色失败: $id, user: $userId', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(message: error is ServerException ? error.message : '更新成员角色失败');
+    }
+  }
+
+  /// 转移项目所有权
+  Future<Response> _transferOwnership(Request request, String id) async {
+    try {
+      final projectId = int.tryParse(id);
+      if (projectId == null) {
+        return ResponseUtils.error(message: '项目ID格式无效');
+      }
+
+      final body = await request.readAsString();
+      final data = jsonDecode(body) as Map<String, dynamic>;
+      final newOwnerId = data['new_owner_id'] as String?;
+
+      if (newOwnerId == null || newOwnerId.isEmpty) {
+        return ResponseUtils.error(message: '新所有者ID不能为空');
+      }
+
+      ValidatorUtils.validateUuid(newOwnerId, 'new_owner_id');
+
+      final currentUserId = getCurrentUserId(request);
+      await _projectService.transferProjectOwnership(id, newOwnerId, currentOwnerId: currentUserId);
+      return ResponseUtils.success<ProjectModel>(message: '项目所有权转移成功');
+    } catch (error, stackTrace) {
+      ServerLogger.error('转移项目所有权失败: $id', error: error, stackTrace: stackTrace);
+      return ResponseUtils.error(message: error is ServerException ? error.message : '转移项目所有权失败');
     }
   }
 

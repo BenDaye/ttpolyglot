@@ -171,7 +171,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                             '转移所有权',
                             '将项目所有权转移给其他成员',
                             Icons.transfer_within_a_station,
-                            () {},
+                            controller.transferProjectOwnership,
                           ),
                         ],
                       ),

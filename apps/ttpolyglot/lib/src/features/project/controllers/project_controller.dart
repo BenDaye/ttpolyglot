@@ -292,6 +292,164 @@ class ProjectController extends GetxController {
     }
   }
 
+  /// 转移项目所有权
+  Future<void> transferProjectOwnership() async {
+    if (_project.value == null) return;
+
+    // 只有项目所有者才能转移所有权
+    if (!isCurrentUserOwner) {
+      Get.snackbar('错误', '只有项目所有者才能转移所有权');
+      return;
+    }
+
+    // 显示成员选择对话框
+    final selectedMember = await Get.dialog<ProjectMemberModel>(
+      AlertDialog(
+        title: const Text('转移项目所有权'),
+        content: SizedBox(
+          width: 400.0,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('选择新的项目所有者：'),
+              const SizedBox(height: 16.0),
+              // 成员列表
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 300.0),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _members.where((m) => m.role != ProjectRoleEnum.owner).length,
+                  itemBuilder: (context, index) {
+                    final member = _members.where((m) => m.role != ProjectRoleEnum.owner).toList()[index];
+                    final username = member.username ?? '';
+                    final firstLetter = username.isNotEmpty ? username.substring(0, 1).toUpperCase() : '?';
+                    return ListTile(
+                      leading: CircleAvatar(
+                        child: Text(firstLetter),
+                      ),
+                      title: Text(username.isNotEmpty ? username : '未命名用户'),
+                      subtitle: Text(member.email ?? '无邮箱'),
+                      trailing: Text(_getRoleText(member.role)),
+                      onTap: () => Get.back(result: member),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 16.0),
+              Container(
+                padding: const EdgeInsets.all(12.0),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(4.0),
+                ),
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.warning, color: Colors.orange, size: 20.0),
+                        SizedBox(width: 8.0),
+                        Text(
+                          '注意事项',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.orange,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8.0),
+                    Text(
+                      '• 转移后，您将成为项目管理员\n'
+                      '• 新所有者将拥有所有权限\n'
+                      '• 此操作不可撤销',
+                      style: TextStyle(fontSize: 12.0),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('取消'),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+
+    if (selectedMember == null) return;
+
+    // 二次确认
+    final selectedUsername = selectedMember.username ?? '未命名用户';
+    final confirmed = await Get.dialog<bool>(
+      AlertDialog(
+        title: const Text('确认转移所有权'),
+        content: Text('确定要将项目所有权转移给 $selectedUsername 吗？此操作不可撤销！'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Get.back(result: true),
+            child: const Text('确定转移'),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      final projectIdInt = int.tryParse(projectId);
+      if (projectIdInt == null) {
+        Get.snackbar('错误', '项目ID无效');
+        return;
+      }
+
+      final newOwnerId = selectedMember.userId;
+      if (newOwnerId == null || newOwnerId.isEmpty) {
+        Get.snackbar('错误', '无效的用户ID');
+        return;
+      }
+
+      final success = await _projectApi.transferProjectOwnership(
+        projectId: projectIdInt,
+        newOwnerId: newOwnerId,
+      );
+
+      if (success) {
+        Get.snackbar('成功', '项目所有权已转移给 $selectedUsername');
+        await refreshProject();
+      } else {
+        Get.snackbar('失败', '转移项目所有权失败');
+      }
+    } catch (error, stackTrace) {
+      LoggerUtils.error('[transferProjectOwnership]', error: error, stackTrace: stackTrace, name: 'ProjectController');
+      Get.snackbar('错误', '转移项目所有权失败: $error');
+    }
+  }
+
+  /// 获取角色文本
+  String _getRoleText(ProjectRoleEnum role) {
+    switch (role) {
+      case ProjectRoleEnum.owner:
+        return '所有者';
+      case ProjectRoleEnum.admin:
+        return '管理员';
+      case ProjectRoleEnum.member:
+        return '成员';
+      case ProjectRoleEnum.viewer:
+        return '查看者';
+    }
+  }
+
   Future<void> editProject() async {
     if (_project.value == null) return;
     await ProjectDialogController.showEditDialog(_project.value!);

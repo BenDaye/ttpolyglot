@@ -491,6 +491,26 @@ class ProjectApi {
     }
   }
 
+  /// 转移项目所有权
+  Future<bool> transferProjectOwnership({
+    required int projectId,
+    required String newOwnerId,
+  }) async {
+    try {
+      LoggerUtils.info('[transferProjectOwnership] projectId=$projectId, newOwnerId=$newOwnerId', name: 'ProjectApi');
+
+      final response = await HttpClient.post(
+        '/projects/$projectId/transfer-ownership',
+        data: {'new_owner_id': newOwnerId},
+      );
+
+      return response.code == DataCodeEnum.success;
+    } catch (error, stackTrace) {
+      LoggerUtils.error('[transferProjectOwnership]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      rethrow;
+    }
+  }
+
   /// 删除项目语言
   Future<bool> removeProjectLanguage({
     required int projectId,

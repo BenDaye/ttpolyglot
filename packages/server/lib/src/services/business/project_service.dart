@@ -782,6 +782,72 @@ class ProjectService extends BaseService {
     }
   }
 
+  /// 转移项目所有权
+  Future<void> transferProjectOwnership(String projectId, String newOwnerId, {String? currentOwnerId}) async {
+    try {
+      logInfo('转移项目所有权: project=$projectId, newOwner=$newOwnerId');
+
+      // 检查项目是否存在
+      final project = await getProjectById(projectId);
+      if (project == null) {
+        throwNotFound('项目不存在');
+      }
+
+      // 检查新所有者是否是项目成员
+      final members = await getProjectMembers(projectId);
+      if (members == null || members.isEmpty) {
+        throwBusiness('无法获取项目成员列表');
+      }
+
+      final newOwnerMember = members.where((member) => member.userId == newOwnerId).firstOrNull;
+      if (newOwnerMember == null) {
+        throwBusiness('新所有者不是项目成员');
+      }
+
+      // 在事务中执行转移
+      await _databaseService.transaction(() async {
+        // 将原所有者降为管理员
+        await _databaseService.query('''
+          UPDATE {project_members}
+          SET role = @role, updated_at = CURRENT_TIMESTAMP
+          WHERE project_id = @project_id AND role = 'owner'
+        ''', {
+          'project_id': projectId,
+          'role': 'admin',
+        });
+
+        // 将新成员提升为所有者
+        await _databaseService.query('''
+          UPDATE {project_members}
+          SET role = @role, updated_at = CURRENT_TIMESTAMP
+          WHERE project_id = @project_id AND user_id = @user_id
+        ''', {
+          'project_id': projectId,
+          'user_id': newOwnerId,
+          'role': 'owner',
+        });
+
+        // 更新项目表中的 owner_id 字段
+        await _databaseService.query('''
+          UPDATE {projects}
+          SET owner_id = @owner_id, updated_at = CURRENT_TIMESTAMP
+          WHERE id = @project_id
+        ''', {
+          'project_id': projectId,
+          'owner_id': newOwnerId,
+        });
+      });
+
+      // 清除缓存
+      await _clearProjectCache(projectId);
+
+      logInfo('项目所有权转移成功');
+    } catch (error, stackTrace) {
+      logError('转移项目所有权失败: $projectId', error: error, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
   /// 获取项目语言
   Future<List<LanguageModel>> getProjectLanguages(String projectId) async {
     try {
