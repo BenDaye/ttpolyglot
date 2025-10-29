@@ -8,6 +8,8 @@ environment:
   sdk: ^3.6.1
 
 dependencies:
+  # Talker 日志系统
+  talker: ^4.7.1
   # Freezed 数据类
   freezed_annotation: ^2.4.0
   json_annotation: ^4.9.0
