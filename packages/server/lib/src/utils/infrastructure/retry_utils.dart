@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:ttpolyglot_utils/utils.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// 重试策略
 enum RetryStrategy {
@@ -101,7 +101,7 @@ class RetryUtils {
 
         if (attempt > 1) {
           final duration = DateTime.now().difference(startTime);
-          LoggerUtils.info('重试成功: ${operationName ?? 'operation'} (第${attempt}次尝试, 耗时: ${duration.inMilliseconds}ms)');
+          ServerLogger.info('重试成功: ${operationName ?? 'operation'} (第${attempt}次尝试, 耗时: ${duration.inMilliseconds}ms)');
         }
 
         return result;
@@ -110,14 +110,15 @@ class RetryUtils {
 
         // 检查是否应该重试
         if (config.retryIf != null && !config.retryIf!(error)) {
-          LoggerUtils.warning('错误不可重试: ${operationName ?? 'operation'} - $error', error: error, stackTrace: stackTrace);
+          ServerLogger.warning('错误不可重试: ${operationName ?? 'operation'} - $error',
+              error: error, stackTrace: stackTrace);
           rethrow;
         }
 
         // 如果是最后一次尝试，抛出错误
         if (attempt == config.maxAttempts) {
           final duration = DateTime.now().difference(startTime);
-          LoggerUtils.error('重试失败: ${operationName ?? 'operation'} (${attempt}次尝试, 耗时: ${duration.inMilliseconds}ms)',
+          ServerLogger.error('重试失败: ${operationName ?? 'operation'} (${attempt}次尝试, 耗时: ${duration.inMilliseconds}ms)',
               error: error, stackTrace: stackTrace);
           rethrow;
         }
@@ -125,7 +126,7 @@ class RetryUtils {
         // 计算延迟时间
         final delay = _calculateDelay(config, attempt);
 
-        LoggerUtils.debug(
+        ServerLogger.debug(
             '重试中: ${operationName ?? 'operation'} (第${attempt}次失败, ${delay.inMilliseconds}ms后重试) - $error');
 
         // 等待后重试

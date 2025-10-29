@@ -1,4 +1,4 @@
-import 'package:ttpolyglot_utils/utils.dart';
+import 'package:ttpolyglot_model/src/utils/server_logger.dart';
 
 final class ModelUtils {
   ModelUtils._();
@@ -41,7 +41,7 @@ final class ModelUtils {
       }
     } catch (error, stackTrace) {
       // 如果都失败，直接返回原数据
-      LoggerUtils.error('toJsonValue error:', error: error, stackTrace: stackTrace);
+      ServerLogger.error('toJsonValue error:', error: error, stackTrace: stackTrace);
       return data;
     }
   }
@@ -58,7 +58,7 @@ final class ModelUtils {
 
       return data;
     } catch (error, stackTrace) {
-      LoggerUtils.error('toModel error:', error: error, stackTrace: stackTrace);
+      ServerLogger.error('toModel error:', error: error, stackTrace: stackTrace);
       return null;
     }
   }
@@ -72,7 +72,7 @@ final class ModelUtils {
       }
       return data;
     } catch (error, stackTrace) {
-      LoggerUtils.error('toModelArray error:', error: error, stackTrace: stackTrace);
+      ServerLogger.error('toModelArray error:', error: error, stackTrace: stackTrace);
       return null;
     }
   }

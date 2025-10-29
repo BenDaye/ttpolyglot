@@ -1,5 +1,5 @@
 import 'package:shelf/shelf.dart';
-import 'package:ttpolyglot_utils/utils.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// 结构化日志中间件
 Middleware structuredLoggingMiddleware() {
@@ -8,7 +8,7 @@ Middleware structuredLoggingMiddleware() {
       final startTime = DateTime.now();
 
       // 记录请求开始
-      LoggerUtils.info(
+      ServerLogger.info(
         '收到请求',
         error: {'request': request},
       );
@@ -19,7 +19,7 @@ Middleware structuredLoggingMiddleware() {
 
         // 记录请求完成
         final duration = DateTime.now().difference(startTime);
-        LoggerUtils.info(
+        ServerLogger.info(
           '请求完成',
           error: {'http_status': response.statusCode, 'duration_ms': duration.inMilliseconds},
         );
@@ -28,7 +28,7 @@ Middleware structuredLoggingMiddleware() {
       } catch (error, stackTrace) {
         // 记录请求错误
         final duration = DateTime.now().difference(startTime);
-        LoggerUtils.error(
+        ServerLogger.error(
           '请求失败',
           error: {'duration_ms': duration.inMilliseconds},
           stackTrace: stackTrace,

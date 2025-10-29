@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:bcrypt/bcrypt.dart';
 import 'package:crypto/crypto.dart';
-import 'package:ttpolyglot_utils/utils.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 import '../../config/server_config.dart';
 
@@ -16,7 +16,7 @@ class CryptoUtils {
     try {
       return BCrypt.hashpw(password, BCrypt.gensalt(logRounds: ServerConfig.bcryptRounds));
     } catch (error, stackTrace) {
-      LoggerUtils.error('密码哈希生成失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('密码哈希生成失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -26,7 +26,7 @@ class CryptoUtils {
     try {
       return BCrypt.checkpw(password, hash);
     } catch (error, stackTrace) {
-      LoggerUtils.error('密码验证失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('密码验证失败', error: error, stackTrace: stackTrace);
       return false;
     }
   }
@@ -78,7 +78,7 @@ class CryptoUtils {
 
       return base64.encode(encryptedBytes);
     } catch (error, stackTrace) {
-      LoggerUtils.error('字符串加密失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('字符串加密失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -96,7 +96,7 @@ class CryptoUtils {
 
       return utf8.decode(decryptedBytes);
     } catch (error, stackTrace) {
-      LoggerUtils.error('字符串解密失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('字符串解密失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

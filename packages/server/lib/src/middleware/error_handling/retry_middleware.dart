@@ -1,7 +1,7 @@
 import 'package:shelf/shelf.dart';
 
 import '../../utils/infrastructure/retry_utils.dart';
-import 'package:ttpolyglot_utils/utils.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// 重试中间件
 class RetryMiddleware {
@@ -33,7 +33,7 @@ class RetryMiddleware {
             operationName: 'http_request_${request.method}_${request.url.path}',
           );
         } catch (error, stackTrace) {
-          LoggerUtils.error('重试中间件失败', error: error, stackTrace: stackTrace);
+          ServerLogger.error('重试中间件失败', error: error, stackTrace: stackTrace);
           rethrow;
         }
       };

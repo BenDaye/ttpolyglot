@@ -1,6 +1,5 @@
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
-import 'package:ttpolyglot_utils/utils.dart';
 
 /// 认证服务
 class AuthService extends BaseService {
@@ -35,7 +34,7 @@ class AuthService extends BaseService {
     String? locale,
   }) async {
     try {
-      LoggerUtils.info('用户注册: $username, $email');
+      ServerLogger.info('用户注册: $username, $email');
 
       // 验证输入
       _validateRegistrationInput(username, email, password);
@@ -84,7 +83,7 @@ class AuthService extends BaseService {
         return rawUserId.toString();
       });
 
-      LoggerUtils.info('用户注册成功: $userId');
+      ServerLogger.info('用户注册成功: $userId');
 
       // 生成邮箱验证令牌
       final verificationToken = _jwtUtils.generateEmailVerificationToken(userId, email);
@@ -96,7 +95,7 @@ class AuthService extends BaseService {
 
       return userInfo!;
     } catch (error, stackTrace) {
-      LoggerUtils.error('用户注册失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('用户注册失败', error: error, stackTrace: stackTrace);
 
       if (error is ServerException) {
         return null;
@@ -117,7 +116,7 @@ class AuthService extends BaseService {
     String? userAgent,
   }) async {
     try {
-      LoggerUtils.info('用户登录尝试: $emailOrUsername');
+      ServerLogger.info('用户登录尝试: $emailOrUsername');
 
       // 查找用户
       final user = await _findUserByEmailOrUsername(emailOrUsername);
@@ -201,7 +200,7 @@ class AuthService extends BaseService {
         throwBusiness('获取用户信息失败');
       }
 
-      LoggerUtils.info('用户登录成功: $userId');
+      ServerLogger.info('用户登录成功: $userId');
 
       return LoginResponseModel(
         user: fullUserInfo,
@@ -213,7 +212,7 @@ class AuthService extends BaseService {
         ),
       );
     } catch (error, stackTrace) {
-      LoggerUtils.error('用户登录失败: $emailOrUsername', error: error, stackTrace: stackTrace);
+      ServerLogger.error('用户登录失败: $emailOrUsername', error: error, stackTrace: stackTrace);
 
       if (error is ServerException) {
         return null;
@@ -227,7 +226,7 @@ class AuthService extends BaseService {
   Future<TokenInfoModel?> refreshToken(String refreshToken) async {
     try {
       // final logger = LoggerFactory.getLogger('AuthService');
-      LoggerUtils.info('刷新令牌');
+      ServerLogger.info('刷新令牌');
 
       // 验证刷新令牌
       final payload = _jwtUtils.verifyToken(refreshToken);
@@ -273,7 +272,7 @@ class AuthService extends BaseService {
         'refreshed_at': DateTime.now().toIso8601String(),
       });
 
-      LoggerUtils.info('令牌刷新成功: $userId');
+      ServerLogger.info('令牌刷新成功: $userId');
 
       return TokenInfoModel(
         accessToken: newAccessToken,
@@ -282,7 +281,7 @@ class AuthService extends BaseService {
         expiresIn: ServerConfig.jwtExpireHours * 3600,
       );
     } catch (error, stackTrace) {
-      LoggerUtils.error('令牌刷新失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('令牌刷新失败', error: error, stackTrace: stackTrace);
 
       if (error is ServerException) {
         return null;
@@ -295,7 +294,7 @@ class AuthService extends BaseService {
   /// 用户登出
   Future<bool?> logout(String accessToken) async {
     try {
-      LoggerUtils.info('用户登出');
+      ServerLogger.info('用户登出');
 
       // 验证访问令牌
       final payload = _jwtUtils.verifyToken(accessToken);
@@ -312,11 +311,11 @@ class AuthService extends BaseService {
       // 删除Redis缓存
       await _redisService.deleteUserSession(userId);
 
-      LoggerUtils.info('用户登出成功: $userId');
+      ServerLogger.info('用户登出成功: $userId');
 
       return true;
     } catch (error, stackTrace) {
-      LoggerUtils.error('用户登出失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('用户登出失败', error: error, stackTrace: stackTrace);
 
       if (error is ServerException) {
         return null;
@@ -340,20 +339,20 @@ class AuthService extends BaseService {
       // 检查Redis缓存中的会话
       final session = await _redisService.getUserSession(userId);
       if (session == null) {
-        LoggerUtils.warning('用户会话不存在: $userId');
+        ServerLogger.warning('用户会话不存在: $userId');
         return null;
       }
 
       // 验证令牌哈希
       final accessTokenHash = _jwtUtils.generateTokenHash(accessToken);
       if (session['access_token_hash'] != accessTokenHash) {
-        LoggerUtils.warning('访问令牌哈希不匹配: $userId');
+        ServerLogger.warning('访问令牌哈希不匹配: $userId');
         return null;
       }
 
       return payload;
     } catch (error, stackTrace) {
-      LoggerUtils.error('访问令牌验证失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('访问令牌验证失败', error: error, stackTrace: stackTrace);
 
       if (error is ServerException) {
         return null;
@@ -366,7 +365,7 @@ class AuthService extends BaseService {
   /// 邮箱验证
   Future<bool?> verifyEmail(String token) async {
     try {
-      LoggerUtils.info('邮箱验证');
+      ServerLogger.info('邮箱验证');
 
       // 验证邮箱验证令牌
       final payload = _jwtUtils.verifyEmailVerificationToken(token);
@@ -396,11 +395,11 @@ class AuthService extends BaseService {
       // 删除验证令牌
       await _redisService.delete('temp:email_verification:$userId');
 
-      LoggerUtils.info('邮箱验证成功: $userId');
+      ServerLogger.info('邮箱验证成功: $userId');
 
       return true;
     } catch (error, stackTrace) {
-      LoggerUtils.error('邮箱验证失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('邮箱验证失败', error: error, stackTrace: stackTrace);
 
       if (error is ServerException) {
         return null;
@@ -413,7 +412,7 @@ class AuthService extends BaseService {
   /// 忘记密码
   Future<bool?> forgotPassword(String email) async {
     try {
-      LoggerUtils.info('忘记密码请求: $email');
+      ServerLogger.info('忘记密码请求: $email');
 
       if (!_cryptoUtils.isValidEmail(email)) {
         return false;
@@ -449,14 +448,14 @@ class AuthService extends BaseService {
       );
 
       if (emailSent) {
-        LoggerUtils.info('密码重置邮件发送成功: $email');
+        ServerLogger.info('密码重置邮件发送成功: $email');
       } else {
-        LoggerUtils.warning('密码重置邮件发送失败: $email');
+        ServerLogger.warning('密码重置邮件发送失败: $email');
       }
 
       return true;
     } catch (error, stackTrace) {
-      LoggerUtils.error('忘记密码失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('忘记密码失败', error: error, stackTrace: stackTrace);
       return null;
     }
   }
@@ -464,7 +463,7 @@ class AuthService extends BaseService {
   /// 重置密码
   Future<bool?> resetPassword(String token, String newPassword) async {
     try {
-      LoggerUtils.info('重置密码');
+      ServerLogger.info('重置密码');
 
       // 验证密码重置令牌
       final payload = _jwtUtils.verifyPasswordResetToken(token);
@@ -508,11 +507,11 @@ class AuthService extends BaseService {
       // 删除所有用户会话（强制重新登录）
       await _deleteAllUserSessions(userId);
 
-      LoggerUtils.info('密码重置成功: $userId');
+      ServerLogger.info('密码重置成功: $userId');
 
       return true;
     } catch (error, stackTrace) {
-      LoggerUtils.error('重置密码失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('重置密码失败', error: error, stackTrace: stackTrace);
 
       if (error is ServerException) {
         return null;
@@ -559,14 +558,14 @@ class AuthService extends BaseService {
       );
 
       if (emailSent) {
-        LoggerUtils.info('验证邮件发送成功: $email');
+        ServerLogger.info('验证邮件发送成功: $email');
       } else {
-        LoggerUtils.warning('验证邮件发送失败: $email');
+        ServerLogger.warning('验证邮件发送失败: $email');
       }
 
       return true;
     } catch (error, stackTrace) {
-      LoggerUtils.error('重发验证邮件失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('重发验证邮件失败', error: error, stackTrace: stackTrace);
       return null;
     }
   }
@@ -681,10 +680,10 @@ class AuthService extends BaseService {
           'user_id': userId,
           'device_id': deviceId,
         });
-        LoggerUtils.info('已失效用户 $userId 在设备 $deviceId 上的旧会话');
+        ServerLogger.info('已失效用户 $userId 在设备 $deviceId 上的旧会话');
       }
     } catch (error, stackTrace) {
-      LoggerUtils.error('失效设备会话失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('失效设备会话失败', error: error, stackTrace: stackTrace);
       // 不抛出异常，继续登录流程
     }
   }

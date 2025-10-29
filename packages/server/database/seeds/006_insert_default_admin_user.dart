@@ -1,5 +1,5 @@
 import 'package:bcrypt/bcrypt.dart';
-import 'package:ttpolyglot_utils/utils.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 import 'base_seed.dart';
 
@@ -19,7 +19,7 @@ class Seed006InsertDefaultAdminUser extends BaseSeed {
   @override
   Future<void> run() async {
     try {
-      LoggerUtils.info('开始插入默认管理员用户数据');
+      ServerLogger.info('开始插入默认管理员用户数据');
 
       // 生成密码哈希（密码：123456）
       final passwordHash = BCrypt.hashpw('123456', BCrypt.gensalt(logRounds: 10));
@@ -31,7 +31,7 @@ class Seed006InsertDefaultAdminUser extends BaseSeed {
       );
 
       if (rolesResult.isEmpty) {
-        LoggerUtils.warning('警告：未找到super_admin角色，跳过用户创建');
+        ServerLogger.warning('警告：未找到super_admin角色，跳过用户创建');
         return;
       }
 
@@ -73,12 +73,12 @@ class Seed006InsertDefaultAdminUser extends BaseSeed {
         ];
 
         await insertData('user_roles', userRoles);
-        LoggerUtils.info('已为admin用户分配super_admin角色');
+        ServerLogger.info('已为admin用户分配super_admin角色');
       }
 
-      LoggerUtils.info('默认管理员用户数据插入完成');
+      ServerLogger.info('默认管理员用户数据插入完成');
     } catch (error, stackTrace) {
-      LoggerUtils.error('插入默认管理员用户数据失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('插入默认管理员用户数据失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

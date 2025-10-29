@@ -12,9 +12,6 @@ WORKDIR /app/packages/server
 # 先复制 model 包（server 的依赖）
 COPY packages/model /app/packages/model
 
-# 复制 utils 包（server 的依赖）
-COPY packages/utils /app/packages/utils
-
 # 复制 server 包的配置文件
 COPY packages/server/pubspec.yaml packages/server/pubspec_overrides.yaml ./
 

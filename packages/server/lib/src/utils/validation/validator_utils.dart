@@ -1,5 +1,5 @@
 import 'package:ttpolyglot_server/src/middleware/error_handling/error_handler_middleware.dart';
-import 'package:ttpolyglot_utils/utils.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// 数据验证工具类
 class ValidatorUtils {
@@ -464,7 +464,7 @@ class ValidatorUtils {
         if (error is ValidationException) {
           allErrors.addAll(error.fieldErrors);
         } else {
-          LoggerUtils.error('验证过程中出现未知错误', error: error, stackTrace: stackTrace);
+          ServerLogger.error('验证过程中出现未知错误', error: error, stackTrace: stackTrace);
         }
       }
     }

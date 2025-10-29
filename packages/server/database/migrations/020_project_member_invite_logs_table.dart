@@ -1,4 +1,4 @@
-import 'package:ttpolyglot_utils/utils.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 import 'base_migration.dart';
 
@@ -18,7 +18,7 @@ class Migration020ProjectMemberInviteLogsTable extends BaseMigration {
   @override
   Future<void> up() async {
     try {
-      LoggerUtils.info('开始执行迁移: $name');
+      ServerLogger.info('开始执行迁移: $name');
 
       // 创建项目成员邀请日志表
       await createTable('project_member_invite_logs', '''
@@ -58,9 +58,9 @@ class Migration020ProjectMemberInviteLogsTable extends BaseMigration {
       await addColumnComment('project_member_invite_logs', 'user_agent', '用户代理');
       await addColumnComment('project_member_invite_logs', 'created_at', '创建时间');
 
-      LoggerUtils.info('迁移完成: $name');
+      ServerLogger.info('迁移完成: $name');
     } catch (error, stackTrace) {
-      LoggerUtils.error('迁移失败: $name', error: error, stackTrace: stackTrace);
+      ServerLogger.error('迁移失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -68,14 +68,14 @@ class Migration020ProjectMemberInviteLogsTable extends BaseMigration {
   @override
   Future<void> down() async {
     try {
-      LoggerUtils.info('开始回滚迁移: $name');
+      ServerLogger.info('开始回滚迁移: $name');
 
       // 删除项目成员邀请日志表
       await dropTable('project_member_invite_logs');
 
-      LoggerUtils.info('回滚完成: $name');
+      ServerLogger.info('回滚完成: $name');
     } catch (error, stackTrace) {
-      LoggerUtils.error('回滚失败: $name', error: error, stackTrace: stackTrace);
+      ServerLogger.error('回滚失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:shelf/shelf.dart';
 import 'package:ttpolyglot_model/model.dart';
-import 'package:ttpolyglot_utils/utils.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../config/server_config.dart';
@@ -214,7 +213,7 @@ class ResponseUtils {
 
       return success(data: healthStatus, type: type, message: isHealthy ? '系统健康' : '系统不健康');
     } catch (err, stackTrace) {
-      LoggerUtils.error(
+      ServerLogger.error(
         'healthCheck',
         error: err,
         stackTrace: stackTrace,
@@ -241,7 +240,7 @@ class ResponseUtils {
         message: isHealthy ? '数据库连接正常' : '数据库连接失败',
       );
     } catch (err, stackTrace) {
-      LoggerUtils.error(
+      ServerLogger.error(
         'dbHealthCheck',
         error: err,
         stackTrace: stackTrace,
@@ -269,7 +268,7 @@ class ResponseUtils {
         },
       }, type: type, message: '服务未就绪');
     } catch (err, stackTrace) {
-      LoggerUtils.error(
+      ServerLogger.error(
         'readyCheck',
         error: err,
         stackTrace: stackTrace,
@@ -298,7 +297,7 @@ class ResponseUtils {
 
       return success(data: prometheusMetrics);
     } catch (err, stackTrace) {
-      LoggerUtils.error(
+      ServerLogger.error(
         'metricsEndpoint',
         error: err,
         stackTrace: stackTrace,
@@ -361,7 +360,7 @@ class ResponseUtils {
     } catch (error, stackTrace) {
       healthStatus['status'] = 'unhealthy';
       healthStatus['error'] = error.toString();
-      LoggerUtils.error(
+      ServerLogger.error(
         '_getComprehensiveHealthStatus',
         error: error,
         stackTrace: stackTrace,

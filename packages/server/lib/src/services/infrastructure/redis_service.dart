@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:redis/redis.dart';
-import 'package:ttpolyglot_utils/utils.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 import '../../config/server_config.dart';
 
@@ -33,9 +33,9 @@ class RedisService {
         throw Exception('Redis连接测试失败');
       }
 
-      LoggerUtils.info('Redis连接成功: ${uri.host}:${uri.port}');
+      ServerLogger.info('Redis连接成功: ${uri.host}:${uri.port}');
     } catch (error, stackTrace) {
-      LoggerUtils.error('Redis连接失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('Redis连接失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -56,7 +56,7 @@ class RedisService {
       final result = await _command!.send_object(['PING']);
       return result == 'PONG';
     } catch (error) {
-      LoggerUtils.error('Redis健康检查失败', error: error);
+      ServerLogger.error('Redis健康检查失败', error: error);
       return false;
     }
   }
@@ -70,7 +70,7 @@ class RedisService {
         await command.send_object(['SET', key, value]);
       }
     } catch (error, stackTrace) {
-      LoggerUtils.error('Redis SET操作失败: $key', error: error, stackTrace: stackTrace);
+      ServerLogger.error('Redis SET操作失败: $key', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -81,7 +81,7 @@ class RedisService {
       final result = await command.send_object(['GET', key]);
       return result?.toString();
     } catch (error, stackTrace) {
-      LoggerUtils.error('Redis GET操作失败: $key', error: error, stackTrace: stackTrace);
+      ServerLogger.error('Redis GET操作失败: $key', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -118,7 +118,7 @@ class RedisService {
     try {
       return jsonDecode(result) as Map<String, dynamic>;
     } catch (error) {
-      LoggerUtils.error('JSON解析失败: $key', error: error);
+      ServerLogger.error('JSON解析失败: $key', error: error);
       return null;
     }
   }
@@ -129,7 +129,7 @@ class RedisService {
       final result = await command.send_object(['DEL', key]);
       return result as int;
     } catch (error, stackTrace) {
-      LoggerUtils.error('Redis DELETE操作失败: $key', error: error, stackTrace: stackTrace);
+      ServerLogger.error('Redis DELETE操作失败: $key', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -144,7 +144,7 @@ class RedisService {
       }
       return 0;
     } catch (error, stackTrace) {
-      LoggerUtils.error('Redis批量删除失败: $pattern', error: error, stackTrace: stackTrace);
+      ServerLogger.error('Redis批量删除失败: $pattern', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -155,7 +155,7 @@ class RedisService {
       final result = await command.send_object(['EXISTS', key]);
       return (result as int) > 0;
     } catch (error, stackTrace) {
-      LoggerUtils.error('Redis EXISTS操作失败: $key', error: error, stackTrace: stackTrace);
+      ServerLogger.error('Redis EXISTS操作失败: $key', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -166,7 +166,7 @@ class RedisService {
       final result = await command.send_object(['EXPIRE', key, seconds]);
       return (result as int) == 1;
     } catch (error, stackTrace) {
-      LoggerUtils.error('Redis EXPIRE操作失败: $key', error: error, stackTrace: stackTrace);
+      ServerLogger.error('Redis EXPIRE操作失败: $key', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -177,7 +177,7 @@ class RedisService {
       final result = await command.send_object(['TTL', key]);
       return result as int;
     } catch (error, stackTrace) {
-      LoggerUtils.error('Redis TTL操作失败: $key', error: error, stackTrace: stackTrace);
+      ServerLogger.error('Redis TTL操作失败: $key', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -189,7 +189,7 @@ class RedisService {
           by != null ? await command.send_object(['INCRBY', key, by]) : await command.send_object(['INCR', key]);
       return result as int;
     } catch (error, stackTrace) {
-      LoggerUtils.error('Redis INCREMENT操作失败: $key', error: error, stackTrace: stackTrace);
+      ServerLogger.error('Redis INCREMENT操作失败: $key', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -267,7 +267,7 @@ class RedisService {
     try {
       await deleteByPattern(pattern);
     } catch (error, stackTrace) {
-      LoggerUtils.error('删除匹配模式的键失败: $pattern', error: error, stackTrace: stackTrace);
+      ServerLogger.error('删除匹配模式的键失败: $pattern', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -278,10 +278,10 @@ class RedisService {
         await _connection!.close();
         _connection = null;
         _command = null;
-        LoggerUtils.info('Redis连接已关闭');
+        ServerLogger.info('Redis连接已关闭');
       }
     } catch (error, stackTrace) {
-      LoggerUtils.error('关闭Redis连接时出错', error: error, stackTrace: stackTrace);
+      ServerLogger.error('关闭Redis连接时出错', error: error, stackTrace: stackTrace);
     }
   }
 }

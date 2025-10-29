@@ -5,7 +5,6 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
-import 'package:ttpolyglot_utils/utils.dart';
 
 import '../base_controller.dart';
 
@@ -71,7 +70,7 @@ class UserController extends BaseController {
         message: '获取用户列表成功',
       );
     } catch (error, stackTrace) {
-      LoggerUtils.error('获取用户列表失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('获取用户列表失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(
         message: error is ServerException ? error.message : '获取用户列表失败',
@@ -98,7 +97,7 @@ class UserController extends BaseController {
         data: user,
       );
     } catch (error, stackTrace) {
-      LoggerUtils.error('获取当前用户信息失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('获取当前用户信息失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(message: error is ServerException ? error.message : '获取用户信息失败');
     }
@@ -146,7 +145,7 @@ class UserController extends BaseController {
         data: updatedUser,
       );
     } catch (error, stackTrace) {
-      LoggerUtils.error('更新当前用户信息失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('更新当前用户信息失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(
         message: error is ServerException ? error.message : '更新个人信息失败',
@@ -186,7 +185,7 @@ class UserController extends BaseController {
         message: '搜索用户成功',
       );
     } catch (error, stackTrace) {
-      LoggerUtils.error(
+      ServerLogger.error(
         '搜索用户失败',
         error: error,
         stackTrace: stackTrace,
@@ -216,7 +215,7 @@ class UserController extends BaseController {
 
       return ResponseUtils.success(message: '密码修改成功，请重新登录');
     } catch (error, stackTrace) {
-      LoggerUtils.error('修改密码失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('修改密码失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(
         message: error is ServerException ? error.message : '修改密码失败',
@@ -279,7 +278,7 @@ class UserController extends BaseController {
         data: uploadResult,
       );
     } catch (error, stackTrace) {
-      LoggerUtils.error('上传头像失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('上传头像失败', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(
         message: error is ServerException ? error.message : '上传头像失败',
       );
@@ -297,7 +296,7 @@ class UserController extends BaseController {
       await _userService.updateUser(userId, {'avatar_url': null});
       return ResponseUtils.success(message: '头像删除成功');
     } catch (error, stackTrace) {
-      LoggerUtils.error('删除头像失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('删除头像失败', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(
         message: error is ServerException ? error.message : '删除头像失败',
       );

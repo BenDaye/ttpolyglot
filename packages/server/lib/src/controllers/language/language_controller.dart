@@ -1,7 +1,6 @@
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:ttpolyglot_model/model.dart';
-import 'package:ttpolyglot_utils/utils.dart';
 
 import '../../exceptions/exceptions.dart';
 import '../../services/business/language_service.dart';
@@ -32,7 +31,7 @@ class LanguageController {
   /// 获取所有语言列表
   Future<Response> _getLanguages(Request request) async {
     try {
-      LoggerUtils.info('获取语言列表');
+      ServerLogger.info('获取语言列表');
 
       // 解析查询参数
       final queryParams = request.url.queryParameters;
@@ -45,7 +44,7 @@ class LanguageController {
         data: languages,
       );
     } catch (error) {
-      LoggerUtils.error('获取语言列表失败: error=$error');
+      ServerLogger.error('获取语言列表失败: error=$error');
       return ResponseUtils.error(message: error is ServerException ? error.message : '获取语言列表失败');
     }
   }
@@ -53,7 +52,7 @@ class LanguageController {
   /// 获取单个语言详情
   Future<Response> _getLanguageByCode(Request request, String code) async {
     try {
-      LoggerUtils.info('获取语言详情: code=$code');
+      ServerLogger.info('获取语言详情: code=$code');
 
       final language = await _languageService.getLanguageByCode(code);
 
@@ -68,7 +67,7 @@ class LanguageController {
         data: language,
       );
     } catch (error) {
-      LoggerUtils.error('获取语言详情失败: code=$code, error=$error');
+      ServerLogger.error('获取语言详情失败: code=$code, error=$error');
       return ResponseUtils.error(message: error is ServerException ? error.message : '获取语言详情失败');
     }
   }
@@ -82,13 +81,13 @@ class LanguageController {
       //   return ResponseUtils.error(code: DataCodeEnum.forbidden, data: '需要管理员权限');
       // }
 
-      LoggerUtils.info('刷新语言缓存');
+      ServerLogger.info('刷新语言缓存');
 
       await _languageService.refreshCache();
 
       return ResponseUtils.success(message: '刷新语言缓存成功');
     } catch (error) {
-      LoggerUtils.error('刷新语言缓存失败: error=$error');
+      ServerLogger.error('刷新语言缓存失败: error=$error');
       return ResponseUtils.error(message: error is ServerException ? error.message : '刷新语言缓存失败');
     }
   }

@@ -1,4 +1,4 @@
-import 'package:ttpolyglot_utils/utils.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 import 'base_migration.dart';
 
@@ -18,7 +18,7 @@ class Migration017UserTranslationConfigsTable extends BaseMigration {
   @override
   Future<void> up() async {
     try {
-      LoggerUtils.info('开始执行迁移: $name');
+      ServerLogger.info('开始执行迁移: $name');
 
       // 创建用户翻译配置表
       await createTable('user_translation_configs', '''
@@ -62,9 +62,9 @@ class Migration017UserTranslationConfigsTable extends BaseMigration {
       await addColumnComment('user_translation_configs', 'created_at', '创建时间');
       await addColumnComment('user_translation_configs', 'updated_at', '更新时间');
 
-      LoggerUtils.info('迁移执行成功: $name');
+      ServerLogger.info('迁移执行成功: $name');
     } catch (error, stackTrace) {
-      LoggerUtils.error('迁移执行失败: $name', error: error, stackTrace: stackTrace);
+      ServerLogger.error('迁移执行失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -72,14 +72,14 @@ class Migration017UserTranslationConfigsTable extends BaseMigration {
   @override
   Future<void> down() async {
     try {
-      LoggerUtils.info('开始回滚迁移: $name');
+      ServerLogger.info('开始回滚迁移: $name');
 
       // 删除表
       await dropTable('user_translation_configs');
 
-      LoggerUtils.info('迁移回滚成功: $name');
+      ServerLogger.info('迁移回滚成功: $name');
     } catch (error, stackTrace) {
-      LoggerUtils.error('迁移回滚失败: $name', error: error, stackTrace: stackTrace);
+      ServerLogger.error('迁移回滚失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

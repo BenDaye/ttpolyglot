@@ -1,7 +1,7 @@
 import 'dart:developer' as developer;
 
 import 'package:shelf/shelf.dart';
-import 'package:ttpolyglot_utils/utils.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 import '../exceptions/exceptions.dart';
 import '../utils/http/response_utils.dart';
@@ -102,12 +102,12 @@ abstract class BaseController {
 
   /// 记录信息日志
   void logInfo(String message, {Map<String, dynamic>? context}) {
-    LoggerUtils.info(message, name: 'controller');
+    ServerLogger.info(message, name: 'controller');
   }
 
   /// 记录警告日志
   void logWarn(String message, {Map<String, dynamic>? context}) {
-    LoggerUtils.warning(message, name: 'controller');
+    ServerLogger.warning(message, name: 'controller');
   }
 
   /// 记录错误日志
@@ -117,7 +117,7 @@ abstract class BaseController {
     StackTrace? stackTrace,
     Map<String, dynamic>? context,
   }) {
-    LoggerUtils.error(
+    ServerLogger.error(
       message,
       error: error,
       stackTrace: stackTrace,
@@ -127,6 +127,6 @@ abstract class BaseController {
 
   /// 记录调试日志
   void logDebug(String message, {Map<String, dynamic>? context}) {
-    LoggerUtils.debug(message, name: 'controller');
+    ServerLogger.debug(message, name: 'controller');
   }
 }

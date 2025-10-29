@@ -1,5 +1,5 @@
 import 'package:shelf/shelf.dart';
-import 'package:ttpolyglot_utils/utils.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 import '../../exceptions/exceptions.dart';
 import '../../utils/http/response_utils.dart';
@@ -25,7 +25,7 @@ class ErrorHandlerMiddleware {
   Response _handleError(dynamic error, StackTrace stackTrace, Request request) {
     // 如果是 ServerException，直接使用 ResponseUtils 构建响应
     if (error is ServerException) {
-      LoggerUtils.error(
+      ServerLogger.error(
         '服务器异常: ${error.message}',
         error: error,
         stackTrace: stackTrace,
@@ -37,7 +37,7 @@ class ErrorHandlerMiddleware {
     }
 
     // 记录未知错误日志
-    LoggerUtils.error(
+    ServerLogger.error(
       '未处理的异常',
       error: error,
       stackTrace: stackTrace,

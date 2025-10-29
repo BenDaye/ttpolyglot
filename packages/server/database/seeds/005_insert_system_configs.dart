@@ -1,4 +1,4 @@
-import 'package:ttpolyglot_utils/utils.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'base_seed.dart';
 
 /// 种子: 005 - 插入系统配置
@@ -17,7 +17,7 @@ class Seed005InsertSystemConfigs extends BaseSeed {
   @override
   Future<void> run() async {
     try {
-      LoggerUtils.info('开始插入系统配置数据');
+      ServerLogger.info('开始插入系统配置数据');
 
       // 定义系统配置项
       final configs = [
@@ -371,9 +371,9 @@ class Seed005InsertSystemConfigs extends BaseSeed {
       // 插入系统配置数据
       await insertData('system_configs', configs);
 
-      LoggerUtils.info('系统配置数据插入完成，共 ${configs.length} 项配置');
+      ServerLogger.info('系统配置数据插入完成，共 ${configs.length} 项配置');
     } catch (error, stackTrace) {
-      LoggerUtils.error('插入系统配置数据失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('插入系统配置数据失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

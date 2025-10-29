@@ -24,3 +24,6 @@ export 'src/system/system_models.dart';
 export 'src/translation/translation_models.dart';
 // 用户模型
 export 'src/user/user_models.dart';
+// 工具模型
+export 'src/utils/model_utils.dart';
+export 'src/utils/server_logger.dart';

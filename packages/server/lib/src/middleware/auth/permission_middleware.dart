@@ -1,7 +1,6 @@
 import 'package:shelf/shelf.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
-import 'package:ttpolyglot_utils/utils.dart';
 
 /// 权限中间件
 class PermissionMiddleware {
@@ -35,7 +34,7 @@ class PermissionMiddleware {
           );
 
           if (!hasPermission) {
-            LoggerUtils.warning('权限检查失败: $userId 缺少权限 $permission (项目: $actualProjectId)');
+            ServerLogger.warning('权限检查失败: $userId 缺少权限 $permission (项目: $actualProjectId)');
             return ResponseUtils.error(message: '权限不足', code: DataCodeEnum.unauthorized);
           }
 
@@ -48,7 +47,7 @@ class PermissionMiddleware {
 
           return await handler(updatedRequest);
         } catch (error, stackTrace) {
-          LoggerUtils.error(
+          ServerLogger.error(
             '权限中间件错误',
             error: error,
             stackTrace: stackTrace,
@@ -87,7 +86,7 @@ class PermissionMiddleware {
             );
 
             if (!hasPermission) {
-              LoggerUtils.warning('权限检查失败: $userId 缺少权限 $permission (项目: $actualProjectId)');
+              ServerLogger.warning('权限检查失败: $userId 缺少权限 $permission (项目: $actualProjectId)');
               return ResponseUtils.error(message: '权限不足', code: DataCodeEnum.unauthorized);
             }
           }
@@ -101,7 +100,7 @@ class PermissionMiddleware {
 
           return await handler(updatedRequest);
         } catch (error, stackTrace) {
-          LoggerUtils.error(
+          ServerLogger.error(
             '权限中间件错误',
             error: error,
             stackTrace: stackTrace,
@@ -150,7 +149,7 @@ class PermissionMiddleware {
           }
 
           if (!hasAnyPermission) {
-            LoggerUtils.warning('权限检查失败: $userId 缺少权限 ${permissions.join(' 或 ')} (项目: $actualProjectId)');
+            ServerLogger.warning('权限检查失败: $userId 缺少权限 ${permissions.join(' 或 ')} (项目: $actualProjectId)');
             return ResponseUtils.error(message: '权限不足', code: DataCodeEnum.unauthorized);
           }
 
@@ -164,7 +163,7 @@ class PermissionMiddleware {
 
           return await handler(updatedRequest);
         } catch (error, stackTrace) {
-          LoggerUtils.error(
+          ServerLogger.error(
             '权限中间件错误',
             error: error,
             stackTrace: stackTrace,
@@ -195,7 +194,7 @@ class PermissionMiddleware {
           // 此方法需要重新设计为接受projectId参数
           return ResponseUtils.error(message: '项目所有者检查需要projectId参数', code: DataCodeEnum.internalServerError);
         } catch (error, stackTrace) {
-          LoggerUtils.error(
+          ServerLogger.error(
             '项目所有者中间件错误',
             error: error,
             stackTrace: stackTrace,
@@ -226,7 +225,7 @@ class PermissionMiddleware {
           final isSuperAdmin = await _permissionService.isSuperAdmin(userId);
 
           if (!isSuperAdmin) {
-            LoggerUtils.warning('超级管理员检查失败: $userId 不是超级管理员');
+            ServerLogger.warning('超级管理员检查失败: $userId 不是超级管理员');
             return ResponseUtils.error(message: '只有超级管理员可以执行此操作', code: DataCodeEnum.internalServerError);
           }
 
@@ -238,7 +237,7 @@ class PermissionMiddleware {
 
           return await handler(updatedRequest);
         } catch (error, stackTrace) {
-          LoggerUtils.error(
+          ServerLogger.error(
             '超级管理员中间件错误',
             error: error,
             stackTrace: stackTrace,

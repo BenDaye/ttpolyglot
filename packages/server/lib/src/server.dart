@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart';
-import 'package:ttpolyglot_utils/utils.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 import 'config/server_config.dart';
 import 'di/di.dart';
@@ -45,7 +45,7 @@ class TTPolyglotServer {
   Future<void> start() async {
     try {
       _startTime = DateTime.now();
-      LoggerUtils.info('开始启动服务器');
+      ServerLogger.info('开始启动服务器');
 
       // 第一阶段：注册所有服务
       await serviceRegistry.registerAllServices();
@@ -60,7 +60,7 @@ class TTPolyglotServer {
       await _startHttpServer();
 
       final duration = DateTime.now().difference(_startTime);
-      LoggerUtils.info(
+      ServerLogger.info(
         '服务器启动完成',
         error: {
           'startup_time': duration.inMilliseconds.toDouble(),
@@ -69,7 +69,7 @@ class TTPolyglotServer {
         },
       );
     } catch (error, stackTrace) {
-      LoggerUtils.error(
+      ServerLogger.error(
         '服务器启动失败',
         error: error,
         stackTrace: stackTrace,
@@ -80,7 +80,7 @@ class TTPolyglotServer {
 
   /// 启动HTTP服务器
   Future<void> _startHttpServer() async {
-    LoggerUtils.info('启动HTTP服务器');
+    ServerLogger.info('启动HTTP服务器');
 
     // 创建中间件管道
     final handler = _createHandler();
@@ -92,7 +92,7 @@ class TTPolyglotServer {
       ServerConfig.port,
     );
 
-    LoggerUtils.info(
+    ServerLogger.info(
       'HTTP服务器启动成功',
       error: {
         'url': 'http://${ServerConfig.host}:${ServerConfig.port}',
@@ -105,20 +105,20 @@ class TTPolyglotServer {
   /// 停止服务器
   Future<void> stop() async {
     try {
-      LoggerUtils.info('开始关闭服务器');
+      ServerLogger.info('开始关闭服务器');
 
       // 关闭HTTP服务器
       if (_server != null) {
         await _server!.close();
-        LoggerUtils.info('HTTP服务器已关闭');
+        ServerLogger.info('HTTP服务器已关闭');
       }
 
       // 使用DI容器清理所有服务
       await serviceRegistry.dispose();
 
-      LoggerUtils.info('服务器已优雅关闭');
+      ServerLogger.info('服务器已优雅关闭');
     } catch (error, stackTrace) {
-      LoggerUtils.error(
+      ServerLogger.error(
         '服务器关闭时出错',
         error: error,
         stackTrace: stackTrace,

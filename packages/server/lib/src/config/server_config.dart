@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:dotenv/dotenv.dart';
-import 'package:ttpolyglot_utils/utils.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// 服务器配置类
 class ServerConfig {
@@ -14,15 +14,15 @@ class ServerConfig {
       final envFile = File('.env');
       if (await envFile.exists()) {
         _env.load();
-        LoggerUtils.info('从 .env 文件加载配置完成', name: 'ServerConfig');
+        ServerLogger.info('从 .env 文件加载配置完成', name: 'ServerConfig');
       } else {
         // .env 文件不存在，使用系统环境变量（Docker 容器场景）
-        LoggerUtils.info('未找到 .env 文件，使用系统环境变量', name: 'ServerConfig');
+        ServerLogger.info('未找到 .env 文件，使用系统环境变量', name: 'ServerConfig');
       }
 
-      LoggerUtils.info('配置加载完成', name: 'ServerConfig');
+      ServerLogger.info('配置加载完成', name: 'ServerConfig');
     } catch (error, stackTrace) {
-      LoggerUtils.error('配置加载失败', error: error, stackTrace: stackTrace, name: 'ServerConfig');
+      ServerLogger.error('配置加载失败', error: error, stackTrace: stackTrace, name: 'ServerConfig');
       rethrow;
     }
   }
@@ -39,15 +39,15 @@ class ServerConfig {
 
       for (final field in requiredFields) {
         if (_env[field] == null || _env[field]!.isEmpty) {
-          LoggerUtils.error('缺少必需的配置项: $field', name: 'ServerConfig');
+          ServerLogger.error('缺少必需的配置项: $field', name: 'ServerConfig');
           return false;
         }
       }
 
-      LoggerUtils.info('配置验证通过', name: 'ServerConfig');
+      ServerLogger.info('配置验证通过', name: 'ServerConfig');
       return true;
     } catch (error, stackTrace) {
-      LoggerUtils.error('配置验证失败', error: error, stackTrace: stackTrace, name: 'ServerConfig');
+      ServerLogger.error('配置验证失败', error: error, stackTrace: stackTrace, name: 'ServerConfig');
       return false;
     }
   }

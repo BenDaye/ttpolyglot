@@ -1,6 +1,6 @@
 import 'package:shelf/shelf.dart';
 import 'package:ttpolyglot_server/server.dart';
-import 'package:ttpolyglot_utils/utils.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// 指标中间件
 class MetricsMiddleware {
@@ -31,7 +31,7 @@ class MetricsMiddleware {
           final duration = DateTime.now().difference(startTime).inSeconds.toDouble();
           _recordRequestError(request, error, duration);
 
-          LoggerUtils.error(
+          ServerLogger.error(
             '请求处理错误',
             error: error,
             stackTrace: stackTrace,
@@ -57,7 +57,7 @@ class MetricsMiddleware {
 
     _metricsService.recordHttpRequest(method, path, statusCode, duration);
 
-    LoggerUtils.debug('记录HTTP指标: $method $path $statusCode ${duration}s');
+    ServerLogger.debug('记录HTTP指标: $method $path $statusCode ${duration}s');
   }
 
   /// 记录请求错误
@@ -68,7 +68,7 @@ class MetricsMiddleware {
     // 记录为500错误
     _metricsService.recordHttpRequest(method, path, 500, duration);
 
-    LoggerUtils.debug('记录HTTP错误指标: $method $path 500 ${duration}s');
+    ServerLogger.debug('记录HTTP错误指标: $method $path 500 ${duration}s');
   }
 
   /// 标准化路径（移除动态参数）

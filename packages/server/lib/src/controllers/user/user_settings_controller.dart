@@ -4,7 +4,6 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
-import 'package:ttpolyglot_utils/utils.dart';
 
 import '../base_controller.dart';
 
@@ -62,7 +61,7 @@ class UserSettingsController extends BaseController {
         data: settings,
       );
     } catch (error, stackTrace) {
-      LoggerUtils.error('获取用户设置失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('获取用户设置失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(message: error is ServerException ? error.message : '获取用户设置失败');
     }
@@ -86,7 +85,7 @@ class UserSettingsController extends BaseController {
         data: updatedSettings,
       );
     } catch (error, stackTrace) {
-      LoggerUtils.error('更新用户设置失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('更新用户设置失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(message: error is ServerException ? error.message : '更新用户设置失败');
     }
@@ -107,7 +106,7 @@ class UserSettingsController extends BaseController {
         data: settings.languageSettings,
       );
     } catch (error, stackTrace) {
-      LoggerUtils.error('获取语言设置失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('获取语言设置失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(message: error is ServerException ? error.message : '获取语言设置失败');
     }
@@ -136,7 +135,7 @@ class UserSettingsController extends BaseController {
         data: languageSettings,
       );
     } catch (error, stackTrace) {
-      LoggerUtils.error('更新语言设置失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('更新语言设置失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(message: error is ServerException ? error.message : '更新语言设置失败');
     }
@@ -157,7 +156,7 @@ class UserSettingsController extends BaseController {
         data: settings.generalSettings,
       );
     } catch (error, stackTrace) {
-      LoggerUtils.error('获取通用设置失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('获取通用设置失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(message: error is ServerException ? error.message : '获取通用设置失败');
     }
@@ -188,7 +187,7 @@ class UserSettingsController extends BaseController {
         data: generalSettings,
       );
     } catch (error, stackTrace) {
-      LoggerUtils.error('更新通用设置失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('更新通用设置失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(message: error is ServerException ? error.message : '更新通用设置失败');
     }
@@ -209,7 +208,7 @@ class UserSettingsController extends BaseController {
         data: settings.translationSettings,
       );
     } catch (error, stackTrace) {
-      LoggerUtils.error('获取翻译设置失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('获取翻译设置失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(message: error is ServerException ? error.message : '获取翻译设置失败');
     }
@@ -235,7 +234,7 @@ class UserSettingsController extends BaseController {
         data: updatedSettings,
       );
     } catch (error, stackTrace) {
-      LoggerUtils.error('更新翻译设置失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('更新翻译设置失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(message: error is ServerException ? error.message : '更新翻译设置失败');
     }
@@ -261,7 +260,7 @@ class UserSettingsController extends BaseController {
         data: addedProvider,
       );
     } catch (error, stackTrace) {
-      LoggerUtils.error('添加翻译接口失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('添加翻译接口失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(message: error is ServerException ? error.message : '添加翻译接口失败');
     }
@@ -287,7 +286,7 @@ class UserSettingsController extends BaseController {
         data: updatedProvider,
       );
     } catch (error, stackTrace) {
-      LoggerUtils.error('更新翻译接口失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('更新翻译接口失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(message: error is ServerException ? error.message : '更新翻译接口失败');
     }
@@ -307,7 +306,7 @@ class UserSettingsController extends BaseController {
         message: '删除翻译接口成功',
       );
     } catch (error, stackTrace) {
-      LoggerUtils.error('删除翻译接口失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('删除翻译接口失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(message: error is ServerException ? error.message : '删除翻译接口失败');
     }
@@ -328,7 +327,7 @@ class UserSettingsController extends BaseController {
         data: defaultSettings,
       );
     } catch (error, stackTrace) {
-      LoggerUtils.error('重置用户设置失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('重置用户设置失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(message: error is ServerException ? error.message : '重置用户设置失败');
     }

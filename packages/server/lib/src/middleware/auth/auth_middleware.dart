@@ -1,7 +1,6 @@
 import 'package:shelf/shelf.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
-import 'package:ttpolyglot_utils/utils.dart';
 
 /// 认证中间件
 class AuthMiddleware {
@@ -63,7 +62,7 @@ class AuthMiddleware {
 
           return await handler(updatedRequest);
         } catch (error, stackTrace) {
-          LoggerUtils.error('认证中间件错误', error: error, stackTrace: stackTrace);
+          ServerLogger.error('认证中间件错误', error: error, stackTrace: stackTrace);
 
           return ResponseUtils.error(message: '认证失败', code: DataCodeEnum.unauthorized);
         }
@@ -132,7 +131,7 @@ class AuthMiddleware {
 
           return await handler(updatedRequest);
         } catch (error, stackTrace) {
-          LoggerUtils.error('可选认证中间件错误', error: error, stackTrace: stackTrace);
+          ServerLogger.error('可选认证中间件错误', error: error, stackTrace: stackTrace);
 
           // 出错时标记为未认证，继续处理
           final updatedRequest = request.change(context: {
@@ -215,7 +214,7 @@ class AuthMiddleware {
       final isBlacklisted = await _redisService.get(blacklistKey);
       return isBlacklisted != null;
     } catch (error) {
-      LoggerUtils.error('检查令牌黑名单失败', error: error);
+      ServerLogger.error('检查令牌黑名单失败', error: error);
       return false; // 出错时允许通过，避免误杀
     }
   }
@@ -251,7 +250,7 @@ class AuthMiddleware {
 
       return payload;
     } catch (error) {
-      LoggerUtils.error('令牌验证失败', error: error);
+      ServerLogger.error('令牌验证失败', error: error);
       return null;
     }
   }
@@ -263,7 +262,7 @@ class AuthMiddleware {
       // return await _permissionService.isSuperAdmin(userId);
       return false; // 暂时返回false，需要后续实现
     } catch (error) {
-      LoggerUtils.error('检查管理员权限失败', error: error);
+      ServerLogger.error('检查管理员权限失败', error: error);
       return false;
     }
   }
@@ -298,9 +297,9 @@ class AuthMiddleware {
       _tokenCache.remove(tokenHash);
       _cacheTimestamps.remove(tokenHash);
 
-      LoggerUtils.info('令牌已撤销: $tokenHash');
+      ServerLogger.info('令牌已撤销: $tokenHash');
     } catch (error) {
-      LoggerUtils.error('撤销令牌失败', error: error);
+      ServerLogger.error('撤销令牌失败', error: error);
     }
   }
 
@@ -308,7 +307,7 @@ class AuthMiddleware {
   void clearCache() {
     _tokenCache.clear();
     _cacheTimestamps.clear();
-    LoggerUtils.info('认证缓存已清理');
+    ServerLogger.info('认证缓存已清理');
   }
 }
 

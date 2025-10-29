@@ -1,7 +1,6 @@
 import 'dart:developer' as developer;
 
 import 'package:ttpolyglot_model/model.dart';
-import 'package:ttpolyglot_utils/utils.dart';
 
 import '../exceptions/exceptions.dart';
 
@@ -22,17 +21,17 @@ abstract class BaseService {
     final opName = operationName ?? 'operation';
 
     try {
-      LoggerUtils.debug(
+      ServerLogger.debug(
         '开始执行: $opName',
       );
       final result = await operation();
-      LoggerUtils.debug(
+      ServerLogger.debug(
         '执行成功: $opName',
       );
       return result;
     } on ServerException catch (error, stackTrace) {
       // 服务器异常直接重新抛出
-      LoggerUtils.error(
+      ServerLogger.error(
         '执行失败: $opName - ${error.message}',
         error: error,
         stackTrace: stackTrace,
@@ -40,7 +39,7 @@ abstract class BaseService {
       rethrow;
     } catch (error, stackTrace) {
       // 未知异常，记录日志并根据情况处理
-      LoggerUtils.error(
+      ServerLogger.error(
         '执行出现未知错误: $opName',
         error: error,
         stackTrace: stackTrace,
@@ -70,23 +69,23 @@ abstract class BaseService {
     final opName = operationName ?? 'operation';
 
     try {
-      LoggerUtils.debug(
+      ServerLogger.debug(
         '开始执行: $opName',
       );
       final result = operation();
-      LoggerUtils.debug(
+      ServerLogger.debug(
         '执行成功: $opName',
       );
       return result;
     } on ServerException catch (error, stackTrace) {
-      LoggerUtils.error(
+      ServerLogger.error(
         '执行失败: $opName - ${error.message}',
         error: error,
         stackTrace: stackTrace,
       );
       rethrow;
     } catch (error, stackTrace) {
-      LoggerUtils.error(
+      ServerLogger.error(
         '执行出现未知错误: $opName',
         error: error,
         stackTrace: stackTrace,
@@ -203,21 +202,21 @@ abstract class BaseService {
 
   /// 记录信息日志
   void logInfo(String message, {Map<String, dynamic>? context}) {
-    LoggerUtils.info(
+    ServerLogger.info(
       message,
     );
   }
 
   /// 记录调试日志
   void logDebug(String message, {Map<String, dynamic>? context}) {
-    LoggerUtils.debug(
+    ServerLogger.debug(
       message,
     );
   }
 
   /// 记录警告日志
   void logWarning(String message, {Map<String, dynamic>? context}) {
-    LoggerUtils.warning(
+    ServerLogger.warning(
       message,
     );
   }

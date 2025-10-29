@@ -1,4 +1,4 @@
-import 'package:ttpolyglot_utils/utils.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 import 'base_seed.dart';
 
@@ -18,7 +18,7 @@ class Seed001InsertDefaultRoles extends BaseSeed {
   @override
   Future<void> run() async {
     try {
-      LoggerUtils.info('开始插入默认角色数据');
+      ServerLogger.info('开始插入默认角色数据');
 
       // 定义默认角色
       final roles = [
@@ -76,9 +76,9 @@ class Seed001InsertDefaultRoles extends BaseSeed {
       // 插入角色数据
       await insertData('roles', roles);
 
-      LoggerUtils.info('默认角色数据插入完成');
+      ServerLogger.info('默认角色数据插入完成');
     } catch (error, stackTrace) {
-      LoggerUtils.error('插入默认角色数据失败', error: error, stackTrace: stackTrace);
+      ServerLogger.error('插入默认角色数据失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

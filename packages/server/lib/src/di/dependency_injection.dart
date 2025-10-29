@@ -1,4 +1,4 @@
-import 'package:ttpolyglot_utils/utils.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// 依赖注入容器
 class DIContainer {
@@ -14,21 +14,21 @@ class DIContainer {
   void registerSingleton<T>(T instance) {
     _services[T] = instance;
     _lifetimes[T] = ServiceLifetime.singleton;
-    LoggerUtils.info('注册单例服务: ${T.toString()}');
+    ServerLogger.info('注册单例服务: ${T.toString()}');
   }
 
   /// 注册瞬态服务工厂
   void registerTransient<T>(T Function() factory) {
     _factories[T] = ServiceFactory(factory);
     _lifetimes[T] = ServiceLifetime.transient;
-    LoggerUtils.info('注册瞬态服务: ${T.toString()}');
+    ServerLogger.info('注册瞬态服务: ${T.toString()}');
   }
 
   /// 注册作用域服务工厂
   void registerScoped<T>(T Function() factory) {
     _factories[T] = ServiceFactory(factory);
     _lifetimes[T] = ServiceLifetime.scoped;
-    LoggerUtils.info('注册作用域服务: ${T.toString()}');
+    ServerLogger.info('注册作用域服务: ${T.toString()}');
   }
 
   /// 注册服务（带生命周期）
@@ -104,7 +104,7 @@ class DIContainer {
     _services.clear();
     _factories.clear();
     _lifetimes.clear();
-    LoggerUtils.info('依赖注入容器已清空');
+    ServerLogger.info('依赖注入容器已清空');
   }
 
   /// 移除特定服务
@@ -112,7 +112,7 @@ class DIContainer {
     _services.remove(T);
     _factories.remove(T);
     _lifetimes.remove(T);
-    LoggerUtils.info('移除服务: ${T.toString()}');
+    ServerLogger.info('移除服务: ${T.toString()}');
   }
 
   /// 获取服务统计信息
