@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/features/sign_up/sign_up.dart';
+import 'package:ttpolyglot/src/features/reset_password/reset_password.dart';
 
-/// 注册视图
-class SignUpView extends GetView<SignUpController> {
-  const SignUpView({super.key});
+/// 重置密码视图
+class ResetPasswordView extends GetView<ResetPasswordController> {
+  const ResetPasswordView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('重置密码'),
+      ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -23,7 +26,7 @@ class SignUpView extends GetView<SignUpController> {
                     children: [
                       // Logo 图标
                       Icon(
-                        Icons.person_add_outlined,
+                        Icons.key_outlined,
                         size: 64.0,
                         color: Theme.of(context).primaryColor,
                       ),
@@ -31,7 +34,7 @@ class SignUpView extends GetView<SignUpController> {
 
                       // 标题
                       Text(
-                        '创建账号',
+                        '设置新密码',
                         style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -39,9 +42,9 @@ class SignUpView extends GetView<SignUpController> {
                       ),
                       const SizedBox(height: 8.0),
 
-                      // 副标题
+                      // 说明文字
                       Text(
-                        '加入 TTPolyglot 翻译管理平台',
+                        '请设置您的新密码',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: Colors.grey,
                             ),
@@ -49,49 +52,12 @@ class SignUpView extends GetView<SignUpController> {
                       ),
                       const SizedBox(height: 32.0),
 
-                      // 用户名输入框
-                      TextFormField(
-                        controller: controller.usernameController,
-                        decoration: InputDecoration(
-                          labelText: '用户名',
-                          hintText: '请输入用户名（字母、数字、下划线）',
-                          prefixIcon: const Icon(Icons.person_outline),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          filled: true,
-                          fillColor: Theme.of(context).colorScheme.surface,
-                        ),
-                        textInputAction: TextInputAction.next,
-                        validator: controller.validateUsername,
-                      ),
-                      const SizedBox(height: 16.0),
-
-                      // 邮箱输入框
-                      TextFormField(
-                        controller: controller.emailController,
-                        decoration: InputDecoration(
-                          labelText: '邮箱',
-                          hintText: '请输入邮箱地址',
-                          prefixIcon: const Icon(Icons.email_outlined),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          filled: true,
-                          fillColor: Theme.of(context).colorScheme.surface,
-                        ),
-                        keyboardType: TextInputType.emailAddress,
-                        textInputAction: TextInputAction.next,
-                        validator: controller.validateEmail,
-                      ),
-                      const SizedBox(height: 16.0),
-
-                      // 密码输入框
+                      // 新密码输入框
                       Obx(() => TextFormField(
                             controller: controller.passwordController,
                             obscureText: !controller.showPassword,
                             decoration: InputDecoration(
-                              labelText: '密码',
+                              labelText: '新密码',
                               hintText: '至少8位，包含字母和数字',
                               prefixIcon: const Icon(Icons.lock_outline),
                               suffixIcon: IconButton(
@@ -121,8 +87,8 @@ class SignUpView extends GetView<SignUpController> {
                             controller: controller.confirmPasswordController,
                             obscureText: !controller.showConfirmPassword,
                             decoration: InputDecoration(
-                              labelText: '确认密码',
-                              hintText: '请再次输入密码',
+                              labelText: '确认新密码',
+                              hintText: '请再次输入新密码',
                               prefixIcon: const Icon(Icons.lock_outline),
                               suffixIcon: IconButton(
                                 icon: Icon(
@@ -141,9 +107,9 @@ class SignUpView extends GetView<SignUpController> {
                             ),
                             textInputAction: TextInputAction.done,
                             validator: controller.validateConfirmPassword,
-                            onFieldSubmitted: (_) => controller.register(),
+                            onFieldSubmitted: (_) => controller.resetPassword(),
                           )),
-                      const SizedBox(height: 8.0),
+                      const SizedBox(height: 16.0),
 
                       // 错误提示
                       Obx(() => controller.errorMessage.isNotEmpty
@@ -179,9 +145,9 @@ class SignUpView extends GetView<SignUpController> {
                           : const SizedBox.shrink()),
                       const SizedBox(height: 24.0),
 
-                      // 注册按钮
+                      // 重置密码按钮
                       Obx(() => ElevatedButton(
-                            onPressed: controller.isLoading ? null : controller.register,
+                            onPressed: controller.isLoading ? null : controller.resetPassword,
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 16.0),
                               shape: RoundedRectangleBorder(
@@ -199,7 +165,7 @@ class SignUpView extends GetView<SignUpController> {
                                     ),
                                   )
                                 : const Text(
-                                    '注册',
+                                    '确认重置',
                                     style: TextStyle(
                                       fontSize: 16.0,
                                       fontWeight: FontWeight.w600,
@@ -208,14 +174,13 @@ class SignUpView extends GetView<SignUpController> {
                           )),
                       const SizedBox(height: 16.0),
 
-                      // 已有账号？登录
+                      // 返回登录
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text('已有账号？'),
                           TextButton(
                             onPressed: controller.goToSignIn,
-                            child: const Text('立即登录'),
+                            child: const Text('返回登录'),
                           ),
                         ],
                       ),

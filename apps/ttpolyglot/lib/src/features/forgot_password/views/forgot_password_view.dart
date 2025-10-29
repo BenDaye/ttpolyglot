@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/core/routing/app_pages.dart';
-import 'package:ttpolyglot/src/features/sign_in/sign_in.dart';
+import 'package:ttpolyglot/src/features/forgot_password/forgot_password.dart';
 
-/// 登录视图
-class SignInView extends GetView<SignInController> {
-  const SignInView({super.key});
+/// 忘记密码视图
+class ForgotPasswordView extends GetView<ForgotPasswordController> {
+  const ForgotPasswordView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('忘记密码'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: controller.backToSignIn,
+        ),
+      ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -24,15 +30,15 @@ class SignInView extends GetView<SignInController> {
                     children: [
                       // Logo 图标
                       Icon(
-                        Icons.translate,
+                        Icons.lock_reset_outlined,
                         size: 64.0,
                         color: Theme.of(context).primaryColor,
                       ),
                       const SizedBox(height: 16.0),
 
-                      // 应用标题
+                      // 标题
                       Text(
-                        'TTPolyglot',
+                        '重置密码',
                         style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -40,23 +46,23 @@ class SignInView extends GetView<SignInController> {
                       ),
                       const SizedBox(height: 8.0),
 
-                      // 副标题
+                      // 说明文字
                       Text(
-                        '翻译管理平台',
+                        '请输入您的注册邮箱，我们将发送重置密码的链接到您的邮箱',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: Colors.grey,
                             ),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 48.0),
+                      const SizedBox(height: 32.0),
 
-                      // 用户名/邮箱输入框
+                      // 邮箱输入框
                       TextFormField(
                         controller: controller.emailController,
                         decoration: InputDecoration(
-                          labelText: '用户名或邮箱',
-                          hintText: '请输入用户名或邮箱',
-                          prefixIcon: const Icon(Icons.person_outline),
+                          labelText: '邮箱',
+                          hintText: '请输入注册邮箱',
+                          prefixIcon: const Icon(Icons.email_outlined),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.0),
                           ),
@@ -64,40 +70,15 @@ class SignInView extends GetView<SignInController> {
                           fillColor: Theme.of(context).colorScheme.surface,
                         ),
                         keyboardType: TextInputType.emailAddress,
-                        textInputAction: TextInputAction.next,
+                        textInputAction: TextInputAction.done,
                         validator: controller.validateEmail,
                         onFieldSubmitted: (_) {
-                          // 按回车后聚焦到密码框
+                          if (controller.canResend) {
+                            controller.sendResetEmail();
+                          }
                         },
                       ),
                       const SizedBox(height: 16.0),
-
-                      // 密码输入框
-                      Obx(() => TextFormField(
-                            controller: controller.passwordController,
-                            obscureText: !controller.showPassword,
-                            decoration: InputDecoration(
-                              labelText: '密码',
-                              hintText: '请输入密码',
-                              prefixIcon: const Icon(Icons.lock_outline),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  controller.showPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                                ),
-                                onPressed: controller.togglePasswordVisibility,
-                                tooltip: controller.showPassword ? '隐藏密码' : '显示密码',
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              filled: true,
-                              fillColor: Theme.of(context).colorScheme.surface,
-                            ),
-                            textInputAction: TextInputAction.done,
-                            validator: controller.validatePassword,
-                            onFieldSubmitted: (_) => controller.login(),
-                          )),
-                      const SizedBox(height: 8.0),
 
                       // 错误提示
                       Obx(() => controller.errorMessage.isNotEmpty
@@ -131,11 +112,48 @@ class SignInView extends GetView<SignInController> {
                               ),
                             )
                           : const SizedBox.shrink()),
+
+                      // 成功提示
+                      Obx(() => controller.successMessage.isNotEmpty
+                          ? Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12.0,
+                                vertical: 8.0,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.green.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(8.0),
+                                border: Border.all(
+                                  color: Colors.green,
+                                  width: 1.0,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.check_circle_outline,
+                                    color: Colors.green,
+                                    size: 20.0,
+                                  ),
+                                  const SizedBox(width: 8.0),
+                                  Expanded(
+                                    child: Text(
+                                      controller.successMessage,
+                                      style: const TextStyle(
+                                        color: Colors.green,
+                                        fontSize: 14.0,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : const SizedBox.shrink()),
                       const SizedBox(height: 24.0),
 
-                      // 登录按钮
+                      // 发送按钮
                       Obx(() => ElevatedButton(
-                            onPressed: controller.isLoading ? null : controller.login,
+                            onPressed: controller.canResend ? controller.sendResetEmail : null,
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 16.0),
                               shape: RoundedRectangleBorder(
@@ -152,31 +170,32 @@ class SignInView extends GetView<SignInController> {
                                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                     ),
                                   )
-                                : const Text(
-                                    '登录',
-                                    style: TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
+                                : controller.countdown > 0
+                                    ? Text(
+                                        '${controller.countdown}秒后可重新发送',
+                                        style: const TextStyle(
+                                          fontSize: 16.0,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      )
+                                    : const Text(
+                                        '发送重置邮件',
+                                        style: TextStyle(
+                                          fontSize: 16.0,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
                           )),
                       const SizedBox(height: 16.0),
 
-                      // 其他选项
+                      // 返回登录
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          const Text('想起密码了？'),
                           TextButton(
-                            onPressed: () {
-                              Get.toNamed(Routes.forgotPassword);
-                            },
-                            child: const Text('忘记密码？'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Get.toNamed(Routes.signUp);
-                            },
-                            child: const Text('注册账号'),
+                            onPressed: controller.backToSignIn,
+                            child: const Text('返回登录'),
                           ),
                         ],
                       ),

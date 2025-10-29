@@ -90,4 +90,117 @@ class AuthApi {
       return null;
     }
   }
+
+  /// 注册
+  /// 注意：注册不使用拦截器的 loading，由 Controller 控制
+  Future<UserInfoModel?> register(RegisterRequestModel request) async {
+    try {
+      final response = await HttpClient.post(
+        '/auth/register',
+        data: request.toJson(),
+        options: Options(
+          extra: const ExtraModel(
+            showLoading: false,
+            showErrorToast: true,
+          ).toJson(),
+        ),
+      );
+      final userInfo = ModelUtils.toModel(
+        response.data,
+        (json) => UserInfoModel.fromJson(json),
+      );
+      if (userInfo == null) {
+        LoggerUtils.error('注册响应数据为空');
+        return null;
+      }
+      return userInfo;
+    } catch (error, stackTrace) {
+      LoggerUtils.error('注册请求失败', error: error, stackTrace: stackTrace);
+      return null;
+    }
+  }
+
+  /// 忘记密码
+  Future<bool> forgotPassword(ForgotPasswordRequestModel request) async {
+    try {
+      await HttpClient.post(
+        '/auth/forgot-password',
+        data: request.toJson(),
+        options: Options(
+          extra: const ExtraModel(
+            showLoading: true,
+            showErrorToast: true,
+            showSuccessToast: true,
+          ).toJson(),
+        ),
+      );
+      return true;
+    } catch (error, stackTrace) {
+      LoggerUtils.error('忘记密码请求失败', error: error, stackTrace: stackTrace);
+      return false;
+    }
+  }
+
+  /// 重置密码
+  Future<bool> resetPassword(ResetPasswordRequestModel request) async {
+    try {
+      await HttpClient.post(
+        '/auth/reset-password',
+        data: request.toJson(),
+        options: Options(
+          extra: const ExtraModel(
+            showLoading: true,
+            showErrorToast: true,
+            showSuccessToast: true,
+          ).toJson(),
+        ),
+      );
+      return true;
+    } catch (error, stackTrace) {
+      LoggerUtils.error('重置密码请求失败', error: error, stackTrace: stackTrace);
+      return false;
+    }
+  }
+
+  /// 验证邮箱
+  Future<bool> verifyEmail(VerifyEmailRequestModel request) async {
+    try {
+      await HttpClient.post(
+        '/auth/verify-email',
+        data: request.toJson(),
+        options: Options(
+          extra: const ExtraModel(
+            showLoading: true,
+            showErrorToast: true,
+            showSuccessToast: true,
+          ).toJson(),
+        ),
+      );
+      return true;
+    } catch (error, stackTrace) {
+      LoggerUtils.error('验证邮箱请求失败', error: error, stackTrace: stackTrace);
+      return false;
+    }
+  }
+
+  /// 重发验证邮件
+  Future<bool> resendVerification(ResendVerificationRequestModel request) async {
+    try {
+      await HttpClient.post(
+        '/auth/resend-verification',
+        data: request.toJson(),
+        options: Options(
+          extra: const ExtraModel(
+            showLoading: true,
+            showErrorToast: true,
+            showSuccessToast: true,
+          ).toJson(),
+        ),
+      );
+      return true;
+    } catch (error, stackTrace) {
+      LoggerUtils.error('重发验证邮件请求失败', error: error, stackTrace: stackTrace);
+      return false;
+    }
+  }
 }

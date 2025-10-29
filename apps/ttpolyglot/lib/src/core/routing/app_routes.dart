@@ -28,6 +28,9 @@ abstract class Routes {
 
   static const signIn = _Paths.signIn;
   static const signUp = _Paths.signUp;
+  static const forgotPassword = _Paths.forgotPassword;
+
+  static String resetPassword(String token) => '${_Paths.resetPassword}/$token';
 
   static String join(String inviteCode) => '/join/$inviteCode';
 }
@@ -46,5 +49,7 @@ abstract class _Paths {
 
   static const signIn = '/signIn';
   static const signUp = '/signUp';
+  static const forgotPassword = '/forgotPassword';
+  static const resetPassword = '/resetPassword/:token';
   static const join = '/join/:inviteCode';
 }

@@ -41,6 +41,18 @@ class AppPages {
             middlewares: [EnsureNotAuthenticatedMiddleware()],
           ),
           GetPage(
+            name: _Paths.forgotPassword,
+            page: () => const ForgotPasswordView(),
+            bindings: [ForgotPasswordBinding()],
+            middlewares: [EnsureNotAuthenticatedMiddleware()],
+          ),
+          GetPage(
+            name: _Paths.resetPassword,
+            page: () => const ResetPasswordView(),
+            bindings: [ResetPasswordBinding()],
+            middlewares: [EnsureNotAuthenticatedMiddleware()],
+          ),
+          GetPage(
             name: _Paths.join,
             page: () => const JoinProjectView(),
             binding: BindingsBuilder(() {

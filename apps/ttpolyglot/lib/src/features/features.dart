@@ -1,8 +1,10 @@
 export 'dashboard/dashboard.dart';
+export 'forgot_password/forgot_password.dart';
 export 'join/join.dart';
 export 'profile/profile.dart';
 export 'project/project.dart';
 export 'projects/projects.dart';
+export 'reset_password/reset_password.dart';
 export 'root/root.dart';
 export 'settings/settings.dart';
 export 'sign_in/sign_in.dart';
