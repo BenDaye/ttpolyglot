@@ -25,7 +25,7 @@ class Migration016UserSettingsTable extends BaseMigration {
         CREATE TABLE IF NOT EXISTS {table_name} (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           user_id UUID NOT NULL REFERENCES ${tablePrefix}users(id) ON DELETE CASCADE,
-          language_code VARCHAR(10) DEFAULT 'zh_CN',
+          language_code VARCHAR(10) DEFAULT 'zh-CN',
           auto_save BOOLEAN DEFAULT TRUE,
           notifications BOOLEAN DEFAULT TRUE,
           created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
@@ -49,7 +49,7 @@ class Migration016UserSettingsTable extends BaseMigration {
       await addTableComment('user_settings', '用户设置表，存储用户的语言设置和通用设置');
       await addColumnComment('user_settings', 'id', '设置ID，主键（UUID）');
       await addColumnComment('user_settings', 'user_id', '用户ID，外键关联users表');
-      await addColumnComment('user_settings', 'language_code', '应用语言代码（如: zh_CN, en_US）');
+      await addColumnComment('user_settings', 'language_code', '应用语言代码（如: zh-CN, en-US）');
       await addColumnComment('user_settings', 'auto_save', '是否启用自动保存');
       await addColumnComment('user_settings', 'notifications', '是否启用通知');
       await addColumnComment('user_settings', 'created_at', '创建时间');
