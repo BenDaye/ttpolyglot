@@ -83,6 +83,7 @@ class ProjectService extends BaseService {
           p.languages_count, p.members_count, p.settings,
           p.last_activity_at, p.created_at, p.updated_at,
           u.username as owner_username,
+          u.email as owner_email,
           u.display_name as owner_display_name,
           CASE 
             WHEN p.total_keys > 0 
@@ -154,6 +155,7 @@ class ProjectService extends BaseService {
           p.languages_count, p.members_count, p.settings,
           p.last_activity_at, p.created_at, p.updated_at,
           u.id as owner_id, u.username as owner_username,
+          u.email as owner_email,
           u.display_name as owner_display_name, u.avatar_url as owner_avatar,
           CASE 
             WHEN p.total_keys > 0 

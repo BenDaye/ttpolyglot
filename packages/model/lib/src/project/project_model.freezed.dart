@@ -110,6 +110,10 @@ mixin _$ProjectModel {
   @JsonKey(name: 'owner_username')
   String? get ownerUsername => throw _privateConstructorUsedError;
 
+  /// 项目所有者邮箱
+  @JsonKey(name: 'owner_email')
+  String? get ownerEmail => throw _privateConstructorUsedError;
+
   /// 项目所有者显示名称
   @JsonKey(name: 'owner_display_name')
   String? get ownerDisplayName => throw _privateConstructorUsedError;
@@ -168,6 +172,7 @@ abstract class $ProjectModelCopyWith<$Res> {
       @JsonKey(name: 'created_at') @TimesConverter() DateTime createdAt,
       @JsonKey(name: 'updated_at') @TimesConverter() DateTime updatedAt,
       @JsonKey(name: 'owner_username') String? ownerUsername,
+      @JsonKey(name: 'owner_email') String? ownerEmail,
       @JsonKey(name: 'owner_display_name') String? ownerDisplayName,
       @JsonKey(name: 'owner_avatar') String? ownerAvatar,
       @JsonKey(name: 'completion_percentage')
@@ -210,6 +215,7 @@ class _$ProjectModelCopyWithImpl<$Res, $Val extends ProjectModel>
     Object? createdAt = null,
     Object? updatedAt = null,
     Object? ownerUsername = freezed,
+    Object? ownerEmail = freezed,
     Object? ownerDisplayName = freezed,
     Object? ownerAvatar = freezed,
     Object? completionPercentage = null,
@@ -295,6 +301,10 @@ class _$ProjectModelCopyWithImpl<$Res, $Val extends ProjectModel>
           ? _value.ownerUsername
           : ownerUsername // ignore: cast_nullable_to_non_nullable
               as String?,
+      ownerEmail: freezed == ownerEmail
+          ? _value.ownerEmail
+          : ownerEmail // ignore: cast_nullable_to_non_nullable
+              as String?,
       ownerDisplayName: freezed == ownerDisplayName
           ? _value.ownerDisplayName
           : ownerDisplayName // ignore: cast_nullable_to_non_nullable
@@ -348,6 +358,7 @@ abstract class _$$ProjectModelImplCopyWith<$Res>
       @JsonKey(name: 'created_at') @TimesConverter() DateTime createdAt,
       @JsonKey(name: 'updated_at') @TimesConverter() DateTime updatedAt,
       @JsonKey(name: 'owner_username') String? ownerUsername,
+      @JsonKey(name: 'owner_email') String? ownerEmail,
       @JsonKey(name: 'owner_display_name') String? ownerDisplayName,
       @JsonKey(name: 'owner_avatar') String? ownerAvatar,
       @JsonKey(name: 'completion_percentage')
@@ -388,6 +399,7 @@ class __$$ProjectModelImplCopyWithImpl<$Res>
     Object? createdAt = null,
     Object? updatedAt = null,
     Object? ownerUsername = freezed,
+    Object? ownerEmail = freezed,
     Object? ownerDisplayName = freezed,
     Object? ownerAvatar = freezed,
     Object? completionPercentage = null,
@@ -473,6 +485,10 @@ class __$$ProjectModelImplCopyWithImpl<$Res>
           ? _value.ownerUsername
           : ownerUsername // ignore: cast_nullable_to_non_nullable
               as String?,
+      ownerEmail: freezed == ownerEmail
+          ? _value.ownerEmail
+          : ownerEmail // ignore: cast_nullable_to_non_nullable
+              as String?,
       ownerDisplayName: freezed == ownerDisplayName
           ? _value.ownerDisplayName
           : ownerDisplayName // ignore: cast_nullable_to_non_nullable
@@ -525,6 +541,7 @@ class _$ProjectModelImpl implements _ProjectModel {
       @JsonKey(name: 'created_at') @TimesConverter() required this.createdAt,
       @JsonKey(name: 'updated_at') @TimesConverter() required this.updatedAt,
       @JsonKey(name: 'owner_username') this.ownerUsername,
+      @JsonKey(name: 'owner_email') this.ownerEmail,
       @JsonKey(name: 'owner_display_name') this.ownerDisplayName,
       @JsonKey(name: 'owner_avatar') this.ownerAvatar,
       @JsonKey(name: 'completion_percentage')
@@ -654,6 +671,11 @@ class _$ProjectModelImpl implements _ProjectModel {
   @JsonKey(name: 'owner_username')
   final String? ownerUsername;
 
+  /// 项目所有者邮箱
+  @override
+  @JsonKey(name: 'owner_email')
+  final String? ownerEmail;
+
   /// 项目所有者显示名称
   @override
   @JsonKey(name: 'owner_display_name')
@@ -672,7 +694,7 @@ class _$ProjectModelImpl implements _ProjectModel {
 
   @override
   String toString() {
-    return 'ProjectModel(id: $id, name: $name, slug: $slug, description: $description, ownerId: $ownerId, status: $status, visibility: $visibility, primaryLanguageId: $primaryLanguageId, totalKeys: $totalKeys, translatedKeys: $translatedKeys, languagesCount: $languagesCount, membersCount: $membersCount, memberLimit: $memberLimit, isPublic: $isPublic, isActive: $isActive, settings: $settings, lastActivityAt: $lastActivityAt, createdAt: $createdAt, updatedAt: $updatedAt, ownerUsername: $ownerUsername, ownerDisplayName: $ownerDisplayName, ownerAvatar: $ownerAvatar, completionPercentage: $completionPercentage)';
+    return 'ProjectModel(id: $id, name: $name, slug: $slug, description: $description, ownerId: $ownerId, status: $status, visibility: $visibility, primaryLanguageId: $primaryLanguageId, totalKeys: $totalKeys, translatedKeys: $translatedKeys, languagesCount: $languagesCount, membersCount: $membersCount, memberLimit: $memberLimit, isPublic: $isPublic, isActive: $isActive, settings: $settings, lastActivityAt: $lastActivityAt, createdAt: $createdAt, updatedAt: $updatedAt, ownerUsername: $ownerUsername, ownerEmail: $ownerEmail, ownerDisplayName: $ownerDisplayName, ownerAvatar: $ownerAvatar, completionPercentage: $completionPercentage)';
   }
 
   @override
@@ -714,6 +736,8 @@ class _$ProjectModelImpl implements _ProjectModel {
                 other.updatedAt == updatedAt) &&
             (identical(other.ownerUsername, ownerUsername) ||
                 other.ownerUsername == ownerUsername) &&
+            (identical(other.ownerEmail, ownerEmail) ||
+                other.ownerEmail == ownerEmail) &&
             (identical(other.ownerDisplayName, ownerDisplayName) ||
                 other.ownerDisplayName == ownerDisplayName) &&
             (identical(other.ownerAvatar, ownerAvatar) ||
@@ -746,6 +770,7 @@ class _$ProjectModelImpl implements _ProjectModel {
         createdAt,
         updatedAt,
         ownerUsername,
+        ownerEmail,
         ownerDisplayName,
         ownerAvatar,
         completionPercentage
@@ -805,6 +830,7 @@ abstract class _ProjectModel implements ProjectModel {
       @TimesConverter()
       required final DateTime updatedAt,
       @JsonKey(name: 'owner_username') final String? ownerUsername,
+      @JsonKey(name: 'owner_email') final String? ownerEmail,
       @JsonKey(name: 'owner_display_name') final String? ownerDisplayName,
       @JsonKey(name: 'owner_avatar') final String? ownerAvatar,
       @JsonKey(name: 'completion_percentage')
@@ -923,6 +949,11 @@ abstract class _ProjectModel implements ProjectModel {
   @override
   @JsonKey(name: 'owner_username')
   String? get ownerUsername;
+
+  /// 项目所有者邮箱
+  @override
+  @JsonKey(name: 'owner_email')
+  String? get ownerEmail;
 
   /// 项目所有者显示名称
   @override

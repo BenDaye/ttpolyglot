@@ -68,6 +68,9 @@ class ProjectModel with _$ProjectModel {
     /// 项目所有者用户名
     @JsonKey(name: 'owner_username') String? ownerUsername,
 
+    /// 项目所有者邮箱
+    @JsonKey(name: 'owner_email') String? ownerEmail,
+
     /// 项目所有者显示名称
     @JsonKey(name: 'owner_display_name') String? ownerDisplayName,
 

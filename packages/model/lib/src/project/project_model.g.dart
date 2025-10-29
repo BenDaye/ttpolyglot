@@ -40,6 +40,7 @@ _$ProjectModelImpl _$$ProjectModelImplFromJson(Map<String, dynamic> json) =>
       createdAt: const TimesConverter().fromJson(json['created_at'] as Object),
       updatedAt: const TimesConverter().fromJson(json['updated_at'] as Object),
       ownerUsername: json['owner_username'] as String?,
+      ownerEmail: json['owner_email'] as String?,
       ownerDisplayName: json['owner_display_name'] as String?,
       ownerAvatar: json['owner_avatar'] as String?,
       completionPercentage: json['completion_percentage'] == null
@@ -75,6 +76,7 @@ Map<String, dynamic> _$$ProjectModelImplToJson(_$ProjectModelImpl instance) =>
       'created_at': const TimesConverter().toJson(instance.createdAt),
       'updated_at': const TimesConverter().toJson(instance.updatedAt),
       'owner_username': instance.ownerUsername,
+      'owner_email': instance.ownerEmail,
       'owner_display_name': instance.ownerDisplayName,
       'owner_avatar': instance.ownerAvatar,
       'completion_percentage':

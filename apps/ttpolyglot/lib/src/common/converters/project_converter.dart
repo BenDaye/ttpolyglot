@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_model/model.dart';
 
@@ -25,8 +23,8 @@ class ProjectConverter {
       // 构建项目所有者
       final owner = User(
         id: model.ownerId,
-        email: '${model.ownerUsername ?? 'user'}@example.com',
-        name: model.ownerDisplayName ?? model.ownerUsername ?? 'User',
+        email: model.ownerEmail ?? '',
+        name: model.ownerDisplayName ?? model.ownerUsername ?? '',
         role: UserRole.admin,
         createdAt: model.createdAt,
         updatedAt: model.updatedAt,
@@ -63,7 +61,7 @@ class ProjectConverter {
         lastAccessedAt: model.lastActivityAt,
       );
     } catch (error, stackTrace) {
-      log('[toProject]', error: error, stackTrace: stackTrace, name: 'ProjectConverter');
+      ServerLogger.error('[toProject]', error: error, stackTrace: stackTrace, name: 'ProjectConverter');
       rethrow;
     }
   }
@@ -76,7 +74,7 @@ class ProjectConverter {
         languages: detailModel.languages,
       );
     } catch (error, stackTrace) {
-      log('[toProjectFromDetail]', error: error, stackTrace: stackTrace, name: 'ProjectConverter');
+      ServerLogger.error('[toProjectFromDetail]', error: error, stackTrace: stackTrace, name: 'ProjectConverter');
       rethrow;
     }
   }
@@ -98,10 +96,11 @@ class ProjectConverter {
         isActive: project.isActive,
         lastActivityAt: project.lastAccessedAt,
         ownerUsername: project.owner.email.split('@').first,
+        ownerEmail: project.owner.email,
         ownerDisplayName: project.owner.name,
       );
     } catch (error, stackTrace) {
-      log('[toProjectModel]', error: error, stackTrace: stackTrace, name: 'ProjectConverter');
+      ServerLogger.error('[toProjectModel]', error: error, stackTrace: stackTrace, name: 'ProjectConverter');
       rethrow;
     }
   }
