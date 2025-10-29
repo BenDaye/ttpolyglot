@@ -43,8 +43,8 @@ class ProjectMemberInviteController extends GetxController {
   Timer? _searchDebounceTimer;
 
   String get searchQuery => _searchQuery.value;
-  List<UserSearchResultModel> get searchResults => _searchResults;
-  List<UserSearchResultModel> get selectedUsers => _selectedUsers;
+  List<UserSearchResultModel> get searchResults => _searchResults.toList();
+  List<UserSearchResultModel> get selectedUsers => _selectedUsers.toList();
   bool get isSearching => _isSearching.value;
   bool get isAdding => _isAdding.value;
 

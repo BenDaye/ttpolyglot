@@ -15,25 +15,18 @@ class UserApi {
         query: {
           'q': query,
           'limit': limit,
-          // 'include_self': true,
+          'include_self': true,
         },
       );
 
-      final result = Utils.toModel(
+      final result = Utils.toModelArray<UserSearchResultModel>(
         response.data,
-        (json) {
-          final items = json as List;
-          return items.map((item) => UserSearchResultModel.fromJson(item as Map<String, dynamic>)).toList();
-        },
+        (json) => UserSearchResultModel.fromJson(json),
       );
-      if (result == null) {
-        Logger.error('搜索用户响应数据为空');
-        return null;
-      }
       return result;
     } catch (error, stackTrace) {
       Logger.error('[searchUsers] 搜索用户失败', error: error, stackTrace: stackTrace);
-      rethrow;
+      return null;
     }
   }
 }

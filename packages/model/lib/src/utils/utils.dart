@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 final class Utils {
   Utils._();
 
@@ -37,9 +39,9 @@ final class Utils {
         // 如果带参数失败，尝试无参数的 toJson
         return obj.toJson();
       }
-    } catch (error) {
+    } catch (error, stackTrace) {
       // 如果都失败，直接返回原数据
-      // print('toJsonValue error: $error');
+      developer.log('toJsonValue error:', error: error, stackTrace: stackTrace, name: 'Utils');
       return data;
     }
   }
@@ -55,8 +57,8 @@ final class Utils {
       }
 
       return data;
-    } catch (error) {
-      print('toModel error: $error');
+    } catch (error, stackTrace) {
+      developer.log('toModel error:', error: error, stackTrace: stackTrace, name: 'Utils');
       return null;
     }
   }
@@ -66,11 +68,11 @@ final class Utils {
     try {
       if (data == null) return [];
       if (data is Iterable && fromJson != null) {
-        return data.map((item) => toModel<T>(item, fromJson)).toList() as List<T>;
+        return data.map((item) => toModel<T>(item, fromJson)).whereType<T>().toList();
       }
       return data;
-    } catch (error) {
-      print('toModelArray error: $error');
+    } catch (error, stackTrace) {
+      developer.log('toModelArray error:', error: error, stackTrace: stackTrace, name: 'Utils');
       return null;
     }
   }
