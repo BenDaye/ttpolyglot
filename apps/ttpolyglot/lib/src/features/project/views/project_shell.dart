@@ -28,7 +28,7 @@ class _ProjectShellState extends State<ProjectShell> {
               // 主内容区域
               Obx(
                 () {
-                  if (controller.isLoading) {
+                  if (controller.isLoading && controller.project == null) {
                     return const Center(
                       child: CircularProgressIndicator(),
                     );

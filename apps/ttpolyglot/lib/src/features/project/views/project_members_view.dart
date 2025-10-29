@@ -231,8 +231,10 @@ class _ProjectMembersViewState extends State<ProjectMembersView> {
       ),
       barrierDismissible: false,
     ).then((_) {
-      // 对话框关闭后刷新项目数据
-      controller.refreshProject();
+      // 延迟刷新，确保对话框关闭动画完成
+      Future.delayed(const Duration(milliseconds: 300), () {
+        controller.refreshProject();
+      });
 
       // 延迟删除控制器，确保所有 widget 完全销毁
       Future.delayed(const Duration(milliseconds: 300), () {

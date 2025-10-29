@@ -146,11 +146,15 @@ class ProjectDialogController extends GetxController {
       ),
       barrierDismissible: false,
     );
-    if (Get.isRegistered<ProjectDialogController>(tag: tag)) {
-      Get.delete<ProjectDialogController>(tag: tag);
-    }
 
-    _refreshProject(project.id);
+    // 延迟刷新，确保对话框关闭动画完成
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (Get.isRegistered<ProjectDialogController>(tag: tag)) {
+        Get.delete<ProjectDialogController>(tag: tag);
+      }
+
+      _refreshProject(project.id);
+    });
   }
 
   /// 显示编辑项目主语言弹窗
