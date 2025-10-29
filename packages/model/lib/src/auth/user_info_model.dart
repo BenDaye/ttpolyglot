@@ -28,9 +28,6 @@ class UserInfoModel with _$UserInfoModel {
     /// 手机号
     @JsonKey(name: 'phone') String? phone,
 
-    /// 时区
-    @JsonKey(name: 'timezone') String? timezone,
-
     /// 是否为活跃用户
     @JsonKey(name: 'is_active') bool? isActive,
 

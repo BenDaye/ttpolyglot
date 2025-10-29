@@ -44,10 +44,6 @@ mixin _$UserInfoModel {
   @JsonKey(name: 'phone')
   String? get phone => throw _privateConstructorUsedError;
 
-  /// 时区
-  @JsonKey(name: 'timezone')
-  String? get timezone => throw _privateConstructorUsedError;
-
   /// 是否为活跃用户
   @JsonKey(name: 'is_active')
   bool? get isActive => throw _privateConstructorUsedError;
@@ -125,7 +121,6 @@ abstract class $UserInfoModelCopyWith<$Res> {
       @JsonKey(name: 'display_name') String? displayName,
       @JsonKey(name: 'avatar_url') String? avatarUrl,
       @JsonKey(name: 'phone') String? phone,
-      @JsonKey(name: 'timezone') String? timezone,
       @JsonKey(name: 'is_active') bool? isActive,
       @JsonKey(name: 'is_email_verified') bool? isEmailVerified,
       @JsonKey(name: 'email_verified_at')
@@ -175,7 +170,6 @@ class _$UserInfoModelCopyWithImpl<$Res, $Val extends UserInfoModel>
     Object? displayName = freezed,
     Object? avatarUrl = freezed,
     Object? phone = freezed,
-    Object? timezone = freezed,
     Object? isActive = freezed,
     Object? isEmailVerified = freezed,
     Object? emailVerifiedAt = freezed,
@@ -213,10 +207,6 @@ class _$UserInfoModelCopyWithImpl<$Res, $Val extends UserInfoModel>
       phone: freezed == phone
           ? _value.phone
           : phone // ignore: cast_nullable_to_non_nullable
-              as String?,
-      timezone: freezed == timezone
-          ? _value.timezone
-          : timezone // ignore: cast_nullable_to_non_nullable
               as String?,
       isActive: freezed == isActive
           ? _value.isActive
@@ -299,7 +289,6 @@ abstract class _$$UserInfoModelImplCopyWith<$Res>
       @JsonKey(name: 'display_name') String? displayName,
       @JsonKey(name: 'avatar_url') String? avatarUrl,
       @JsonKey(name: 'phone') String? phone,
-      @JsonKey(name: 'timezone') String? timezone,
       @JsonKey(name: 'is_active') bool? isActive,
       @JsonKey(name: 'is_email_verified') bool? isEmailVerified,
       @JsonKey(name: 'email_verified_at')
@@ -348,7 +337,6 @@ class __$$UserInfoModelImplCopyWithImpl<$Res>
     Object? displayName = freezed,
     Object? avatarUrl = freezed,
     Object? phone = freezed,
-    Object? timezone = freezed,
     Object? isActive = freezed,
     Object? isEmailVerified = freezed,
     Object? emailVerifiedAt = freezed,
@@ -386,10 +374,6 @@ class __$$UserInfoModelImplCopyWithImpl<$Res>
       phone: freezed == phone
           ? _value.phone
           : phone // ignore: cast_nullable_to_non_nullable
-              as String?,
-      timezone: freezed == timezone
-          ? _value.timezone
-          : timezone // ignore: cast_nullable_to_non_nullable
               as String?,
       isActive: freezed == isActive
           ? _value.isActive
@@ -453,7 +437,6 @@ class _$UserInfoModelImpl implements _UserInfoModel {
       @JsonKey(name: 'display_name') this.displayName,
       @JsonKey(name: 'avatar_url') this.avatarUrl,
       @JsonKey(name: 'phone') this.phone,
-      @JsonKey(name: 'timezone') this.timezone,
       @JsonKey(name: 'is_active') this.isActive,
       @JsonKey(name: 'is_email_verified') this.isEmailVerified,
       @JsonKey(name: 'email_verified_at')
@@ -506,11 +489,6 @@ class _$UserInfoModelImpl implements _UserInfoModel {
   @override
   @JsonKey(name: 'phone')
   final String? phone;
-
-  /// 时区
-  @override
-  @JsonKey(name: 'timezone')
-  final String? timezone;
 
   /// 是否为活跃用户
   @override
@@ -587,7 +565,7 @@ class _$UserInfoModelImpl implements _UserInfoModel {
 
   @override
   String toString() {
-    return 'UserInfoModel(username: $username, email: $email, emailEncrypted: $emailEncrypted, displayName: $displayName, avatarUrl: $avatarUrl, phone: $phone, timezone: $timezone, isActive: $isActive, isEmailVerified: $isEmailVerified, emailVerifiedAt: $emailVerifiedAt, lastLoginAt: $lastLoginAt, lastLoginIp: $lastLoginIp, lastLoginLocation: $lastLoginLocation, loginAttempts: $loginAttempts, lockedUntil: $lockedUntil, passwordChangedAt: $passwordChangedAt, createdAt: $createdAt, updatedAt: $updatedAt, roles: $roles)';
+    return 'UserInfoModel(username: $username, email: $email, emailEncrypted: $emailEncrypted, displayName: $displayName, avatarUrl: $avatarUrl, phone: $phone, isActive: $isActive, isEmailVerified: $isEmailVerified, emailVerifiedAt: $emailVerifiedAt, lastLoginAt: $lastLoginAt, lastLoginIp: $lastLoginIp, lastLoginLocation: $lastLoginLocation, loginAttempts: $loginAttempts, lockedUntil: $lockedUntil, passwordChangedAt: $passwordChangedAt, createdAt: $createdAt, updatedAt: $updatedAt, roles: $roles)';
   }
 
   @override
@@ -605,8 +583,6 @@ class _$UserInfoModelImpl implements _UserInfoModel {
             (identical(other.avatarUrl, avatarUrl) ||
                 other.avatarUrl == avatarUrl) &&
             (identical(other.phone, phone) || other.phone == phone) &&
-            (identical(other.timezone, timezone) ||
-                other.timezone == timezone) &&
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive) &&
             (identical(other.isEmailVerified, isEmailVerified) ||
@@ -634,28 +610,26 @@ class _$UserInfoModelImpl implements _UserInfoModel {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hashAll([
-        runtimeType,
-        username,
-        email,
-        emailEncrypted,
-        displayName,
-        avatarUrl,
-        phone,
-        timezone,
-        isActive,
-        isEmailVerified,
-        emailVerifiedAt,
-        lastLoginAt,
-        lastLoginIp,
-        lastLoginLocation,
-        loginAttempts,
-        lockedUntil,
-        passwordChangedAt,
-        createdAt,
-        updatedAt,
-        const DeepCollectionEquality().hash(_roles)
-      ]);
+  int get hashCode => Object.hash(
+      runtimeType,
+      username,
+      email,
+      emailEncrypted,
+      displayName,
+      avatarUrl,
+      phone,
+      isActive,
+      isEmailVerified,
+      emailVerifiedAt,
+      lastLoginAt,
+      lastLoginIp,
+      lastLoginLocation,
+      loginAttempts,
+      lockedUntil,
+      passwordChangedAt,
+      createdAt,
+      updatedAt,
+      const DeepCollectionEquality().hash(_roles));
 
   /// Create a copy of UserInfoModel
   /// with the given fields replaced by the non-null parameter values.
@@ -681,7 +655,6 @@ abstract class _UserInfoModel implements UserInfoModel {
           @JsonKey(name: 'display_name') final String? displayName,
           @JsonKey(name: 'avatar_url') final String? avatarUrl,
           @JsonKey(name: 'phone') final String? phone,
-          @JsonKey(name: 'timezone') final String? timezone,
           @JsonKey(name: 'is_active') final bool? isActive,
           @JsonKey(name: 'is_email_verified') final bool? isEmailVerified,
           @JsonKey(name: 'email_verified_at')
@@ -741,11 +714,6 @@ abstract class _UserInfoModel implements UserInfoModel {
   @override
   @JsonKey(name: 'phone')
   String? get phone;
-
-  /// 时区
-  @override
-  @JsonKey(name: 'timezone')
-  String? get timezone;
 
   /// 是否为活跃用户
   @override

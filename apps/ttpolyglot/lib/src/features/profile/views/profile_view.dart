@@ -156,22 +156,6 @@ class ProfileViewContent extends GetView<ProfileController> {
 
                     const SizedBox(height: 16.0),
 
-                    // 偏好设置卡片
-                    _buildInfoCard(
-                      context,
-                      title: '偏好设置',
-                      items: [
-                        if (user.timezone != null)
-                          _InfoItem(
-                            icon: Icons.access_time_outlined,
-                            label: '时区',
-                            value: user.timezone!,
-                          ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16.0),
-
                     // 账户信息卡片
                     _buildInfoCard(
                       context,

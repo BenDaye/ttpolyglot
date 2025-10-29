@@ -14,7 +14,6 @@ _$UserInfoModelImpl _$$UserInfoModelImplFromJson(Map<String, dynamic> json) =>
       displayName: json['display_name'] as String?,
       avatarUrl: json['avatar_url'] as String?,
       phone: json['phone'] as String?,
-      timezone: json['timezone'] as String?,
       isActive: json['is_active'] as bool?,
       isEmailVerified: json['is_email_verified'] as bool?,
       emailVerifiedAt:
@@ -46,7 +45,6 @@ Map<String, dynamic> _$$UserInfoModelImplToJson(_$UserInfoModelImpl instance) =>
       'display_name': instance.displayName,
       'avatar_url': instance.avatarUrl,
       'phone': instance.phone,
-      'timezone': instance.timezone,
       'is_active': instance.isActive,
       'is_email_verified': instance.isEmailVerified,
       'email_verified_at':

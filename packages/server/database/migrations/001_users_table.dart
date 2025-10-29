@@ -34,7 +34,6 @@ class Migration001UsersTable extends BaseMigration {
           display_name VARCHAR(100),
           avatar_url TEXT,
           phone VARCHAR(20),
-          timezone VARCHAR(50) DEFAULT 'UTC',
           is_active BOOLEAN DEFAULT TRUE,
           is_email_verified BOOLEAN DEFAULT FALSE,
           email_verified_at TIMESTAMPTZ,
@@ -85,7 +84,6 @@ class Migration001UsersTable extends BaseMigration {
       await addColumnComment('users', 'display_name', '显示名称');
       await addColumnComment('users', 'avatar_url', '头像URL');
       await addColumnComment('users', 'phone', '电话号码');
-      await addColumnComment('users', 'timezone', '用户时区');
       await addColumnComment('users', 'is_active', '是否激活');
       await addColumnComment('users', 'is_email_verified', '是否已验证邮箱');
       await addColumnComment('users', 'email_verified_at', '邮箱验证时间');

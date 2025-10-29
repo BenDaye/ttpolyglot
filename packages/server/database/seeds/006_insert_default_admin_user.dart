@@ -44,8 +44,6 @@ class Seed006InsertDefaultAdminUser extends BaseSeed {
           'email': 'admin@ttpolyglot.com',
           'password_hash': passwordHash,
           'display_name': 'Admin User',
-          'timezone': 'UTC',
-          'locale': 'en-US',
           'is_active': true,
           'is_email_verified': true,
         },
@@ -74,6 +72,19 @@ class Seed006InsertDefaultAdminUser extends BaseSeed {
 
         await insertData('user_roles', userRoles);
         ServerLogger.info('已为admin用户分配super_admin角色');
+
+        // 为admin用户创建默认设置
+        final userSettings = [
+          {
+            'user_id': adminUserId,
+            'language_code': 'en-US',
+            'auto_save': true,
+            'notifications': true,
+          },
+        ];
+
+        await insertData('user_settings', userSettings);
+        ServerLogger.info('已为admin用户创建默认设置');
       }
 
       ServerLogger.info('默认管理员用户数据插入完成');
