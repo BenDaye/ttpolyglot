@@ -1,18 +1,21 @@
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ttpolyglot/src/common/api/api.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
 /// 设置页面控制器
 class SettingsController extends GetxController {
   final UserSettingsApi _userSettingsApi = Get.find<UserSettingsApi>();
+  final LanguageApi _languageApi = Get.find<LanguageApi>();
 
   // 响应式变量
   final _isDarkMode = false.obs;
-  final _language = 'zh_CN'.obs;
+  final _language = 'zh-CN'.obs;
   final _autoSave = true.obs;
   final _notifications = true.obs;
   final _isLoading = false.obs;
+  final _languages = <LanguageModel>[].obs;
 
   // Getters
   bool get isDarkMode => _isDarkMode.value;
@@ -20,12 +23,7 @@ class SettingsController extends GetxController {
   bool get autoSave => _autoSave.value;
   bool get notifications => _notifications.value;
   bool get isLoading => _isLoading.value;
-
-  // 语言选项
-  final List<Map<String, String>> languages = [
-    {'code': 'zh_CN', 'name': '中文'},
-    {'code': 'en_US', 'name': 'English'},
-  ];
+  List<LanguageModel> get languages => _languages;
 
   @override
   void onInit() {
@@ -64,9 +62,9 @@ class SettingsController extends GetxController {
       final settings = await _userSettingsApi.getUserSettings();
 
       // 更新响应式变量
-      // 将服务器返回的语言代码格式统一转换为下划线格式（en-US -> en_US）
-      final serverLanguageCode = settings.languageSettings.languageCode?.code ?? 'zh_CN';
-      _language.value = serverLanguageCode.replaceAll('-', '_');
+      // 使用服务器返回的语言代码格式（连字符格式：en-US）
+      final serverLanguageCode = settings.languageSettings.languageCode?.code ?? 'zh-CN';
+      _language.value = serverLanguageCode;
       _autoSave.value = settings.generalSettings.autoSave;
       _notifications.value = settings.generalSettings.notifications;
 
@@ -86,9 +84,8 @@ class SettingsController extends GetxController {
   /// 保存语言设置到服务器
   Future<void> _saveLanguageToServer(String languageCode) async {
     try {
-      // 将下划线格式转换为连字符格式发送给服务器（en_US -> en-US）
-      final serverLanguageCode = languageCode.replaceAll('_', '-');
-      await _userSettingsApi.updateLanguageSettings(serverLanguageCode);
+      // 使用连字符格式发送给服务器（en-US）
+      await _userSettingsApi.updateLanguageSettings(languageCode);
       await _saveSettingsLocal();
       LoggerUtils.info('保存语言设置到服务器成功');
     } catch (error, stackTrace) {
@@ -132,7 +129,7 @@ class SettingsController extends GetxController {
     try {
       final prefs = await SharedPreferences.getInstance();
       _isDarkMode.value = prefs.getBool('isDarkMode') ?? false;
-      _language.value = prefs.getString('language') ?? 'zh_CN';
+      _language.value = prefs.getString('language') ?? 'zh-CN';
       _autoSave.value = prefs.getBool('autoSave') ?? true;
       _notifications.value = prefs.getBool('notifications') ?? true;
     } catch (error, stackTrace) {
@@ -140,10 +137,25 @@ class SettingsController extends GetxController {
     }
   }
 
+  /// 加载语言列表
+  Future<void> _loadLanguages() async {
+    try {
+      final languageList = await _languageApi.getLanguages();
+      _languages.value = languageList;
+      LoggerUtils.info('加载语言列表成功: ${languageList.length} 个语言');
+    } catch (error, stackTrace) {
+      LoggerUtils.error('加载语言列表失败', error: error, stackTrace: stackTrace);
+      // 如果加载失败，使用默认语言列表
+      _languages.value = LanguageEnum.toArray();
+    }
+  }
+
   /// 加载设置（优先从服务器，失败则从本地）
   Future<void> loadSettings() async {
     // 先从本地快速加载
     await _loadSettingsLocal();
+    // 加载语言列表
+    await _loadLanguages();
     // 然后从服务器加载最新数据
     await loadSettingsFromServer();
   }

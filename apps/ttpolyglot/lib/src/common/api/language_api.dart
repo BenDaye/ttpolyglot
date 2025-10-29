@@ -11,7 +11,6 @@ class LanguageApi {
   /// 从API获取语言列表，如果失败则返回默认语言列表
   Future<List<LanguageModel>> getLanguages({bool includeInactive = false}) async {
     try {
-      log('[getLanguages] 暂时返回默认语言列表', name: 'LanguageApi');
       final response = await HttpClient.get('/languages');
       final languages = ModelUtils.toModelArray(
         response.data,
@@ -21,9 +20,10 @@ class LanguageApi {
         LoggerUtils.error('获取语言列表响应数据为空');
         return LanguageEnum.toArray();
       }
+      log('[getLanguages] 从API获取到 ${languages.length} 个语言', name: 'LanguageApi');
       return languages.toList();
     } catch (error, stackTrace) {
-      log('[getLanguages]', error: error, stackTrace: stackTrace, name: 'LanguageApi');
+      log('[getLanguages] API请求失败，返回默认语言列表', error: error, stackTrace: stackTrace, name: 'LanguageApi');
       return LanguageEnum.toArray();
     }
   }

@@ -197,8 +197,8 @@ class _SettingsViewContentState extends State<_SettingsViewContent> {
                   },
                   items: controller.languages.map<DropdownMenuItem<String>>((lang) {
                     return DropdownMenuItem<String>(
-                      value: lang['code'],
-                      child: Text(lang['name']!),
+                      value: lang.code.code,
+                      child: Text(lang.nativeName ?? lang.name),
                     );
                   }).toList(),
                 ),
@@ -271,14 +271,11 @@ class _SettingsViewContentState extends State<_SettingsViewContent> {
   }
 
   String _getLanguageName(String code) {
-    switch (code) {
-      case 'zh_CN':
-        return '中文';
-      case 'en_US':
-        return 'English';
-      default:
-        return '中文';
-    }
+    final controller = Get.find<SettingsController>();
+    final lang = controller.languages.firstWhereOrNull(
+      (lang) => lang.code.code == code,
+    );
+    return lang?.name ?? '中文';
   }
 
   /// 构建翻译设置部分
