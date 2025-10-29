@@ -166,9 +166,9 @@ class _ProjectMembersViewState extends State<ProjectMembersView> {
     final projectModel = controller.projectObs.value;
     if (projectModel == null) return const SizedBox.shrink();
 
-    // 从 project 的 raw data 中获取成员数和上限
+    // 从 projectModel 中获取成员数和上限
     final currentCount = controller.members.length;
-    final limit = 10; // 默认值，实际应该从 projectModel 中获取
+    final limit = controller.projectModel?.memberLimit ?? 10;
     final percentage = currentCount / limit;
     final remaining = limit - currentCount;
 
@@ -580,12 +580,18 @@ class _InviteDialogContentState extends State<_InviteDialogContent> with SingleT
                 const Divider(height: 1.0),
 
                 // 成员信息提示
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    '📊 当前成员: ${widget.memberCount}/10  |  💡 还可以邀请 ${10 - widget.memberCount} 人',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
+                Builder(
+                  builder: (context) {
+                    final projectController = Get.find<ProjectController>(tag: controller.projectId.toString());
+                    final memberLimit = projectController.projectModel?.memberLimit ?? 10;
+                    return Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        '📊 当前成员: ${widget.memberCount}/$memberLimit  |  💡 还可以邀请 ${memberLimit - widget.memberCount} 人',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                    );
+                  },
                 ),
 
                 // Tab 栏

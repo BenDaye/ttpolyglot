@@ -316,10 +316,19 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
             const SizedBox(height: 16.0),
             if (isOwner) ...[
               // Owner 可编辑
-              _buildOwnerMemberLimitEditor(context, controller, currentCount, memberLimit),
+              _buildOwnerMemberLimitEditor(
+                context: context,
+                controller: controller,
+                currentCount: currentCount,
+                memberLimit: memberLimit,
+              ),
             ] else ...[
               // 其他角色只读
-              _buildReadOnlyMemberLimit(context, currentCount, memberLimit),
+              _buildReadOnlyMemberLimit(
+                context: context,
+                currentCount: currentCount,
+                memberLimit: memberLimit,
+              ),
             ],
           ],
         ),
@@ -327,12 +336,12 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
     );
   }
 
-  Widget _buildOwnerMemberLimitEditor(
-    BuildContext context,
-    ProjectController controller,
-    int currentCount,
-    int memberLimit,
-  ) {
+  Widget _buildOwnerMemberLimitEditor({
+    required BuildContext context,
+    required ProjectController controller,
+    required int currentCount,
+    required int memberLimit,
+  }) {
     // 初始化输入框值
     if (_memberLimitController.text.isEmpty) {
       _memberLimitController.text = memberLimit.toString();
@@ -381,7 +390,11 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
     );
   }
 
-  Widget _buildReadOnlyMemberLimit(BuildContext context, int currentCount, int memberLimit) {
+  Widget _buildReadOnlyMemberLimit({
+    required BuildContext context,
+    required int currentCount,
+    required int memberLimit,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
