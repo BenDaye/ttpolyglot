@@ -10,7 +10,7 @@ Middleware structuredLoggingMiddleware() {
       // 构建请求数据信息
       final requestData = <String, dynamic>{
         'method': request.method,
-        'path': request.url.path,
+        // 'path': request.url.path,
         'query_params': request.url.queryParameters,
         'request_id': request.context['request_id'],
       };
@@ -37,7 +37,7 @@ Middleware structuredLoggingMiddleware() {
 
       // 记录请求开始
       ServerLogger.info(
-        '收到请求',
+        '收到请求 path: ${request.url.path}',
         error: requestData,
         name: 'structuredLoggingMiddleware',
       );
@@ -69,7 +69,7 @@ Middleware structuredLoggingMiddleware() {
         // }
 
         ServerLogger.info(
-          '请求完成',
+          '请求完成 path: ${request.url.path}',
           error: {
             'http_status': response.statusCode,
             'request_id': request.context['request_id'],
