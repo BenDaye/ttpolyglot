@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:ttpolyglot/src/common/network/network.dart';
-import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_model/model.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 项目成员管理 API
 class ProjectMemberApi {
@@ -37,12 +37,12 @@ class ProjectMemberApi {
         (json) => PagerModel.fromJson(json, (data) => ProjectMemberModel.fromJson(data as Map<String, dynamic>)),
       );
       if (result == null) {
-        Logger.error('获取项目成员列表响应数据为空');
+        LoggerUtils.error('获取项目成员列表响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      Logger.error('[getProjectMembers] 获取项目成员失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[getProjectMembers] 获取项目成员失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -72,12 +72,12 @@ class ProjectMemberApi {
         (json) => ProjectMemberModel.fromJson(json),
       );
       if (result == null) {
-        Logger.error('邀请成员响应数据为空');
+        LoggerUtils.error('邀请成员响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      Logger.error('[inviteMember] 邀请成员失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[inviteMember] 邀请成员失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -101,12 +101,12 @@ class ProjectMemberApi {
         (json) => ProjectMemberModel.fromJson(json),
       );
       if (result == null) {
-        Logger.error('接受邀请响应数据为空');
+        LoggerUtils.error('接受邀请响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      Logger.error('[acceptInvitation] 接受邀请失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[acceptInvitation] 接受邀请失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -135,12 +135,12 @@ class ProjectMemberApi {
         (json) => ProjectMemberModel.fromJson(json),
       );
       if (result == null) {
-        Logger.error('更新成员角色响应数据为空');
+        LoggerUtils.error('更新成员角色响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      Logger.error('[updateMemberRole] 更新成员角色失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[updateMemberRole] 更新成员角色失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -165,12 +165,12 @@ class ProjectMemberApi {
         (json) => json['code'] == DataCodeEnum.success,
       );
       if (result == null) {
-        Logger.error('移除成员响应数据为空');
+        LoggerUtils.error('移除成员响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      Logger.error('[removeMember] 移除成员失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[removeMember] 移除成员失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -189,12 +189,12 @@ class ProjectMemberApi {
         (json) => json['is_member'] as bool? ?? false,
       );
       if (result == null) {
-        Logger.error('检查是否为项目成员响应数据为空');
+        LoggerUtils.error('检查是否为项目成员响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      Logger.error('[isMember] 检查成员状态失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[isMember] 检查成员状态失败', error: error, stackTrace: stackTrace);
       return null;
     }
   }
@@ -213,12 +213,12 @@ class ProjectMemberApi {
         (json) => ProjectRoleEnum.fromValue(json['role'] as String),
       );
       if (result == null) {
-        Logger.error('获取成员角色响应数据为空');
+        LoggerUtils.error('获取成员角色响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      Logger.error('[getMemberRole] 获取成员角色失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[getMemberRole] 获取成员角色失败', error: error, stackTrace: stackTrace);
       return null;
     }
   }
@@ -252,12 +252,12 @@ class ProjectMemberApi {
         (json) => ProjectMemberModel.fromJson(json),
       );
       if (result == null) {
-        Logger.error('生成邀请链接响应数据为空');
+        LoggerUtils.error('生成邀请链接响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      Logger.error('[generateInviteLink] 生成邀请链接失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[generateInviteLink] 生成邀请链接失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -277,12 +277,12 @@ class ProjectMemberApi {
         },
       );
       if (result == null) {
-        Logger.error('获取邀请链接列表响应数据为空');
+        LoggerUtils.error('获取邀请链接列表响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      Logger.error('[getProjectInvites] 获取邀请链接列表失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[getProjectInvites] 获取邀请链接列表失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -299,12 +299,12 @@ class ProjectMemberApi {
         (json) => InviteInfoModel.fromJson(json),
       );
       if (result == null) {
-        Logger.error('获取邀请信息响应数据为空');
+        LoggerUtils.error('获取邀请信息响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      Logger.error('[getInviteInfo] 获取邀请信息失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[getInviteInfo] 获取邀请信息失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -326,12 +326,12 @@ class ProjectMemberApi {
         (json) => ProjectMemberModel.fromJson(json),
       );
       if (result == null) {
-        Logger.error('接受邀请响应数据为空');
+        LoggerUtils.error('接受邀请响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      Logger.error('[acceptInviteByCode] 接受邀请失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[acceptInviteByCode] 接受邀请失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -356,12 +356,12 @@ class ProjectMemberApi {
         (json) => json['code'] == DataCodeEnum.success,
       );
       if (result == null) {
-        Logger.error('撤销邀请链接响应数据为空');
+        LoggerUtils.error('撤销邀请链接响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      Logger.error('[revokeInvite] 撤销邀请链接失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[revokeInvite] 撤销邀请链接失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -391,12 +391,12 @@ class ProjectMemberApi {
         (json) => ProjectMemberModel.fromJson(json),
       );
       if (result == null) {
-        Logger.error('添加成员响应数据为空');
+        LoggerUtils.error('添加成员响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      Logger.error('[addMember] 添加成员失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[addMember] 添加成员失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

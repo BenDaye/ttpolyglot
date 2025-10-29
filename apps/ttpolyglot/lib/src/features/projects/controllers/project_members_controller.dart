@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/common/api/api.dart';
-import 'package:ttpolyglot_core/core.dart' hide ProjectRole;
 import 'package:ttpolyglot_model/model.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 项目成员管理控制器
 class ProjectMembersController extends GetxController {
@@ -61,7 +61,7 @@ class ProjectMembersController extends GetxController {
       _members.value = response?.items ?? [];
       _totalPages.value = response?.totalPage ?? 1;
     } catch (error, stackTrace) {
-      Logger.error('[loadMembers] 加载成员列表失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[loadMembers] 加载成员列表失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -81,7 +81,7 @@ class ProjectMembersController extends GetxController {
       Get.back(); // 关闭邀请对话框
       await loadMembers(showLoading: false); // 刷新列表
     } catch (error, stackTrace) {
-      Logger.error('[inviteMember] 邀请成员失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[inviteMember] 邀请成员失败', error: error, stackTrace: stackTrace);
       Get.snackbar('错误', '邀请成员失败: $error');
     }
   }
@@ -100,7 +100,7 @@ class ProjectMembersController extends GetxController {
 
       await loadMembers(showLoading: false); // 刷新列表
     } catch (error, stackTrace) {
-      Logger.error('[updateMemberRole] 更新成员角色失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[updateMemberRole] 更新成员角色失败', error: error, stackTrace: stackTrace);
       Get.snackbar('错误', '更新成员角色失败: $error');
     }
   }
@@ -138,7 +138,7 @@ class ProjectMembersController extends GetxController {
 
       await loadMembers(showLoading: false); // 刷新列表
     } catch (error, stackTrace) {
-      Logger.error('[removeMember] 移除成员失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[removeMember] 移除成员失败', error: error, stackTrace: stackTrace);
       Get.snackbar('错误', '移除成员失败: $error');
     }
   }

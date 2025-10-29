@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ttpolyglot/src/common/api/api.dart';
 import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_model/model.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 翻译配置控制器
 class TranslationConfigController extends GetxController {
@@ -119,9 +120,9 @@ class TranslationConfigController extends GetxController {
       // 同时保存到本地缓存
       await _saveConfigLocal();
 
-      Logger.info('从服务器加载翻译配置成功');
+      LoggerUtils.info('从服务器加载翻译配置成功');
     } catch (error, stackTrace) {
-      Logger.error('从服务器加载翻译配置失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('从服务器加载翻译配置失败', error: error, stackTrace: stackTrace);
       // 加载失败时从本地加载
       await _loadConfigLocal();
     } finally {
@@ -154,9 +155,9 @@ class TranslationConfigController extends GetxController {
       await _userSettingsApi.updateTranslationSettings(translationSettings);
       await _saveConfigLocal();
 
-      Logger.info('保存翻译配置到服务器成功');
+      LoggerUtils.info('保存翻译配置到服务器成功');
     } catch (error, stackTrace) {
-      Logger.error('保存翻译配置到服务器失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('保存翻译配置到服务器失败', error: error, stackTrace: stackTrace);
       // 保存失败时仅保存到本地
       await _saveConfigLocal();
     }
@@ -170,7 +171,7 @@ class TranslationConfigController extends GetxController {
       final configJson = jsonEncode(configMap);
       await prefs.setString('translation_config', configJson);
     } catch (error, stackTrace) {
-      Logger.error('保存翻译配置到本地失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('保存翻译配置到本地失败', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -185,7 +186,7 @@ class TranslationConfigController extends GetxController {
         _config.value = loadedConfig;
       }
     } catch (error, stackTrace) {
-      Logger.error('从本地加载翻译配置失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('从本地加载翻译配置失败', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -199,9 +200,9 @@ class TranslationConfigController extends GetxController {
       );
 
       await _saveConfigToServer();
-      Logger.info('重置翻译配置成功');
+      LoggerUtils.info('重置翻译配置成功');
     } catch (error, stackTrace) {
-      Logger.error('重置翻译配置失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('重置翻译配置失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -255,9 +256,9 @@ class TranslationConfigController extends GetxController {
       _config.value = config.copyWith(providers: updatedProviders);
       await _saveConfigLocal();
 
-      Logger.info('添加翻译接口成功');
+      LoggerUtils.info('添加翻译接口成功');
     } catch (error, stackTrace) {
-      Logger.error('添加翻译接口失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('添加翻译接口失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -271,9 +272,9 @@ class TranslationConfigController extends GetxController {
       _config.value = config.copyWith(providers: updatedProviders);
       await _saveConfigLocal();
 
-      Logger.info('删除翻译接口成功');
+      LoggerUtils.info('删除翻译接口成功');
     } catch (error, stackTrace) {
-      Logger.error('删除翻译接口失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('删除翻译接口失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -292,7 +293,7 @@ class TranslationConfigController extends GetxController {
       // 获取现有配置
       final existingProvider = config.getProviderConfigById(id);
       if (existingProvider == null) {
-        Logger.warning('翻译接口不存在: $id');
+        LoggerUtils.warning('翻译接口不存在: $id');
         return;
       }
 
@@ -337,9 +338,9 @@ class TranslationConfigController extends GetxController {
       _config.value = config.copyWith(providers: updatedProviders);
       await _saveConfigLocal();
 
-      Logger.info('更新翻译接口成功');
+      LoggerUtils.info('更新翻译接口成功');
     } catch (error, stackTrace) {
-      Logger.error('更新翻译接口失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('更新翻译接口失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

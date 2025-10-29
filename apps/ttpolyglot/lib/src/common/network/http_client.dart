@@ -5,8 +5,8 @@ import 'package:ttpolyglot/src/common/network/interceptors/loading_interceptor.d
 import 'package:ttpolyglot/src/common/network/interceptors/response_interceptor.dart';
 import 'package:ttpolyglot/src/common/network/interceptors/token_interceptor.dart';
 import 'package:ttpolyglot/src/common/network/message_tips.dart';
-import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_model/model.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// HTTP 客户端（单例）
 class HttpClient {
@@ -35,7 +35,7 @@ class HttpClient {
     // 注册拦截器（顺序很重要！）
     _dio.interceptors.add(LoadingInterceptor()); // Loading 状态
     _dio.interceptors.add(TokenInterceptor()); // Token 注入
-    _dio.interceptors.add(Logger.talkerDioLogger); // 日志记录
+    _dio.interceptors.add(LoggerUtils.talkerDioLogger); // 日志记录
     _dio.interceptors.add(ResponseInterceptor()); // 响应处理
     _dio.interceptors.add(ErrorInterceptor()); // 错误处理
   }

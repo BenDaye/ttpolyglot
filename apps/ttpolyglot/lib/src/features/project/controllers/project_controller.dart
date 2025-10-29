@@ -7,6 +7,7 @@ import 'package:ttpolyglot/src/features/project/project.dart';
 import 'package:ttpolyglot/src/features/projects/projects.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 class ProjectController extends GetxController {
   String projectId;
@@ -89,7 +90,7 @@ class ProjectController extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    Logger.info('ProjectController onReady: $projectId');
+    LoggerUtils.info('ProjectController onReady: $projectId');
     loadProject();
   }
 
@@ -102,18 +103,18 @@ class ProjectController extends GetxController {
   /// 加载项目详情
   Future<void> loadProject() async {
     if (projectId.isEmpty) {
-      Logger.info('项目ID为空，跳过项目加载');
+      LoggerUtils.info('项目ID为空，跳过项目加载');
       return;
     }
 
-    Logger.info('开始加载项目: $projectId');
+    LoggerUtils.info('开始加载项目: $projectId');
     _isLoading.value = true;
 
     try {
       // 将 String 类型的 projectId 转换为 int
       final projectIdInt = int.tryParse(projectId);
       if (projectIdInt == null) {
-        Logger.error('项目ID格式无效: $projectId');
+        LoggerUtils.error('项目ID格式无效: $projectId');
         return;
       }
 
@@ -126,20 +127,20 @@ class ProjectController extends GetxController {
         // 保存成员列表
         if (projectDetailModel.members != null) {
           _members.value = projectDetailModel.members!;
-          Logger.info('项目成员加载成功: ${projectDetailModel.members!.length} 个成员');
+          LoggerUtils.info('项目成员加载成功: ${projectDetailModel.members!.length} 个成员');
         } else {
           _members.clear();
         }
 
-        Logger.info(
+        LoggerUtils.info(
             '项目加载成功: ID=${project.id}, 名称="${project.name}", 主语言=${project.primaryLanguage.code}, 目标语言=${project.targetLanguages.length} 个');
         _project.value = project;
         return;
       }
 
-      Logger.info('项目不存在: $projectId');
+      LoggerUtils.info('项目不存在: $projectId');
     } catch (error, stackTrace) {
-      Logger.error('[loadProject]', error: error, stackTrace: stackTrace, name: 'ProjectController');
+      LoggerUtils.error('[loadProject]', error: error, stackTrace: stackTrace, name: 'ProjectController');
     } finally {
       _isLoading.value = false;
     }
@@ -155,7 +156,7 @@ class ProjectController extends GetxController {
     try {
       return await ProjectsController.getProjectStats(projectId);
     } catch (error, stackTrace) {
-      Logger.error('获取项目统计失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取项目统计失败', error: error, stackTrace: stackTrace);
       return ProjectStats(
         totalEntries: 0,
         completedEntries: 0,
@@ -266,7 +267,7 @@ class ProjectController extends GetxController {
           Get.snackbar('错误', '删除目标语言失败');
         }
       } catch (error, stackTrace) {
-        Logger.error('[removeTargetLanguage]', error: error, stackTrace: stackTrace, name: 'ProjectController');
+        LoggerUtils.error('[removeTargetLanguage]', error: error, stackTrace: stackTrace, name: 'ProjectController');
         Get.snackbar('错误', '删除目标语言失败: $error');
       }
     }
@@ -277,7 +278,7 @@ class ProjectController extends GetxController {
   Future<void> importFiles(Map<String, Language> languageMap, Map<String, Map<String, String>> translationMap) async {
     final startTime = DateTime.now();
     try {
-      Logger.info('开始批量导入翻译文件，设置：覆盖现有翻译=$overrideExisting，自动审核=$autoReview，忽略空值=$ignoreEmpty',
+      LoggerUtils.info('开始批量导入翻译文件，设置：覆盖现有翻译=$overrideExisting，自动审核=$autoReview，忽略空值=$ignoreEmpty',
           name: 'ProjectController');
 
       final allImportedEntries = <TranslationEntry>[];
@@ -299,12 +300,12 @@ class ProjectController extends GetxController {
         final selectedLanguage = languageMap[fileName];
 
         if (selectedLanguage == null) {
-          Logger.info('跳过文件 $fileName：未选择语言');
+          LoggerUtils.info('跳过文件 $fileName：未选择语言');
           totalSkipped += translations.length;
           continue;
         }
 
-        Logger.info('处理文件 $fileName，语言: ${selectedLanguage.code}，条目数: ${translations.length}',
+        LoggerUtils.info('处理文件 $fileName，语言: ${selectedLanguage.code}，条目数: ${translations.length}',
             name: 'ProjectController');
 
         for (final translation in translations.entries) {
@@ -312,14 +313,14 @@ class ProjectController extends GetxController {
           final value = translation.value;
 
           if (key.trim().isEmpty) {
-            Logger.info('跳过空键');
+            LoggerUtils.info('跳过空键');
             totalSkipped++;
             continue;
           }
 
           // 根据"忽略空值"设置处理空值
           if (ignoreEmpty && value.trim().isEmpty) {
-            Logger.info('跳过空值: $key');
+            LoggerUtils.info('跳过空值: $key');
             totalSkipped++;
             continue;
           }
@@ -338,7 +339,7 @@ class ProjectController extends GetxController {
 
       // 处理每个键，为缺少的语言创建翻译条目
       for (final key in allKeys) {
-        Logger.info('处理键: "$key"');
+        LoggerUtils.info('处理键: "$key"');
 
         // 检查该键在每个项目语言中的现有条目
         final existingEntriesForKey = existingEntries.where((entry) => entry.key == key).toList();
@@ -355,7 +356,7 @@ class ProjectController extends GetxController {
 
           if (existingEntryForLanguage.isEmpty) {
             // 该语言的条目不存在，需要创建
-            Logger.info('键 "$key" 缺少语言 "$languageCode" 的条目，将创建新条目');
+            LoggerUtils.info('键 "$key" 缺少语言 "$languageCode" 的条目，将创建新条目');
 
             // 根据"自动审核"设置确定状态
             TranslationStatus entryStatus;
@@ -385,7 +386,7 @@ class ProjectController extends GetxController {
             allImportedEntries.add(newEntry);
           } else if (hasValue && overrideExisting) {
             // 该语言的条目存在，且有值且允许覆盖，需要更新
-            Logger.info('键 "$key" 的语言 "$languageCode" 条目存在，根据配置将覆盖现有翻译');
+            LoggerUtils.info('键 "$key" 的语言 "$languageCode" 条目存在，根据配置将覆盖现有翻译');
 
             TranslationStatus entryStatus;
             if (value.trim().isEmpty) {
@@ -406,7 +407,7 @@ class ProjectController extends GetxController {
             allUpdatedEntries.add(updatedEntry);
           } else if (hasValue && !overrideExisting) {
             // 该语言的条目存在，有值但不允许覆盖，跳过
-            Logger.info('键 "$key" 的语言 "$languageCode" 条目存在，根据配置跳过覆盖');
+            LoggerUtils.info('键 "$key" 的语言 "$languageCode" 条目存在，根据配置跳过覆盖');
             allSkippedEntries.add(key);
             totalSkipped++;
           }
@@ -417,13 +418,13 @@ class ProjectController extends GetxController {
       // 批量创建新条目
       if (allImportedEntries.isNotEmpty) {
         final createdEntries = await _translationService.batchCreateTranslationEntries(allImportedEntries);
-        Logger.info('创建了 ${createdEntries.length} 个新翻译条目');
+        LoggerUtils.info('创建了 ${createdEntries.length} 个新翻译条目');
       }
 
       // 批量更新现有条目
       if (allUpdatedEntries.isNotEmpty) {
         final updatedResult = await _translationService.batchUpdateTranslationEntries(allUpdatedEntries);
-        Logger.info('更新了 ${updatedResult.length} 个现有翻译条目');
+        LoggerUtils.info('更新了 ${updatedResult.length} 个现有翻译条目');
       }
 
       // 清空文件列表
@@ -435,10 +436,10 @@ class ProjectController extends GetxController {
           if (Get.isRegistered<TranslationController>(tag: projectId)) {
             final translationController = Get.find<TranslationController>(tag: projectId);
             await translationController.refreshTranslationEntries();
-            Logger.info('已通知翻译控制器刷新数据');
+            LoggerUtils.info('已通知翻译控制器刷新数据');
           }
         } catch (error, stackTrace) {
-          Logger.error('通知翻译控制器刷新失败', error: error, stackTrace: stackTrace);
+          LoggerUtils.error('通知翻译控制器刷新失败', error: error, stackTrace: stackTrace);
           // 不影响主要流程，继续执行
         }
       }
@@ -507,10 +508,11 @@ class ProjectController extends GetxController {
         success: true,
       );
 
-      Logger.info('导入完成：创建 ${allImportedEntries.length}，更新 ${allUpdatedEntries.length}，跳过 ${allSkippedEntries.length}',
+      LoggerUtils.info(
+          '导入完成：创建 ${allImportedEntries.length}，更新 ${allUpdatedEntries.length}，跳过 ${allSkippedEntries.length}',
           name: 'ProjectController');
     } catch (error, stackTrace) {
-      Logger.error('导入文件失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('导入文件失败', error: error, stackTrace: stackTrace);
 
       // 创建失败记录
       _createImportRecords(
@@ -644,6 +646,6 @@ class ProjectController extends GetxController {
       addImportRecordModel(record);
     }
 
-    Logger.info('已创建导入记录，当前记录数: ${_importRecords.length}');
+    LoggerUtils.info('已创建导入记录，当前记录数: ${_importRecords.length}');
   }
 }

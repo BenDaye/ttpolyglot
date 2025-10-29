@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/storage/storage_provider.dart';
 import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_parsers/parsers.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 翻译服务实现
 class TranslationServiceImpl extends GetxService implements TranslationService {
@@ -18,7 +19,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       await storageProvider.initialize();
       return TranslationServiceImpl(storageProvider.storageService);
     } catch (error, stackTrace) {
-      Logger.error('创建翻译服务失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('创建翻译服务失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -52,7 +53,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
 
       return [...copyEntries, ...result];
     } catch (error, stackTrace) {
-      Logger.error('获取翻译条目失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取翻译条目失败', error: error, stackTrace: stackTrace);
       return [];
     }
   }
@@ -67,7 +68,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       final allEntries = await getTranslationEntries(projectId, includeSourceLanguage: includeSourceLanguage);
       return allEntries.where((entry) => entry.targetLanguage.code == targetLanguage.code).toList();
     } catch (error, stackTrace) {
-      Logger.error('根据语言获取翻译条目失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('根据语言获取翻译条目失败', error: error, stackTrace: stackTrace);
       return [];
     }
   }
@@ -81,7 +82,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       final allEntries = await getTranslationEntries(projectId);
       return allEntries.where((entry) => entry.status == status).toList();
     } catch (error, stackTrace) {
-      Logger.error('根据状态获取翻译条目失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('根据状态获取翻译条目失败', error: error, stackTrace: stackTrace);
       return [];
     }
   }
@@ -94,7 +95,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       await _saveTranslationEntries(entry.projectId, allEntries);
       return entry;
     } catch (error, stackTrace) {
-      Logger.error('创建翻译条目失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('创建翻译条目失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -112,7 +113,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       await _saveTranslationEntries(projectId, allEntries);
       return entries;
     } catch (error, stackTrace) {
-      Logger.error('批量创建翻译条目失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('批量创建翻译条目失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -125,7 +126,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       final entries = TranslationUtils.generateTranslationEntries(request);
       return await batchCreateTranslationEntries(entries);
     } catch (error, stackTrace) {
-      Logger.error('创建翻译键失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('创建翻译键失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -144,7 +145,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       await _saveTranslationEntries(entry.projectId, allEntries);
       return allEntries[index];
     } catch (error, stackTrace) {
-      Logger.error('更新翻译条目失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('更新翻译条目失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -182,9 +183,9 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       }
 
       await _saveTranslationEntries(targetProjectId, filteredEntries);
-      Logger.info('成功删除翻译条目: $entryId 从项目: $targetProjectId');
+      LoggerUtils.info('成功删除翻译条目: $entryId 从项目: $targetProjectId');
     } catch (error, stackTrace) {
-      Logger.error('删除翻译条目失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('删除翻译条目失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -201,9 +202,9 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       }
 
       await _saveTranslationEntries(projectId, filteredEntries);
-      Logger.info('成功删除翻译条目: $entryId 从项目: $projectId');
+      LoggerUtils.info('成功删除翻译条目: $entryId 从项目: $projectId');
     } catch (error, stackTrace) {
-      Logger.error('删除翻译条目失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('删除翻译条目失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -228,7 +229,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       await _saveTranslationEntries(projectId, allEntries);
       return entries;
     } catch (error, stackTrace) {
-      Logger.error('批量更新翻译条目失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('批量更新翻译条目失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -260,7 +261,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
         return matchesQuery && matchesSourceLanguage && matchesTargetLanguage && matchesStatus;
       }).toList();
     } catch (error, stackTrace) {
-      Logger.error('搜索翻译条目失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('搜索翻译条目失败', error: error, stackTrace: stackTrace);
       return [];
     }
   }
@@ -278,7 +279,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
 
       return statusCounts;
     } catch (error, stackTrace) {
-      Logger.error('获取翻译进度失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取翻译进度失败', error: error, stackTrace: stackTrace);
       return {};
     }
   }
@@ -358,7 +359,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
         // 添加保留的条目
         updatedEntries.addAll(entriesToKeep);
 
-        Logger.info('同步翻译键 "$key": 添加 ${languagesToAdd.length} 个语言, 删除 ${languagesToRemove.length} 个语言');
+        LoggerUtils.info('同步翻译键 "$key": 添加 ${languagesToAdd.length} 个语言, 删除 ${languagesToRemove.length} 个语言');
       }
 
       // 按目标语言的 sortIndex 排序
@@ -374,9 +375,9 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       // 保存更新后的翻译条目
       await _saveTranslationEntries(projectId, updatedEntries);
 
-      Logger.info('项目语言同步完成: 共 ${updatedEntries.length} 个翻译条目');
+      LoggerUtils.info('项目语言同步完成: 共 ${updatedEntries.length} 个翻译条目');
     } catch (error, stackTrace) {
-      Logger.error('同步项目语言失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('同步项目语言失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -422,7 +423,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       },
     );
 
-    Logger.info('导出翻译: ${language.code}');
+    LoggerUtils.info('导出翻译: ${language.code}');
 
     return jsonString;
   }
@@ -435,7 +436,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
     TranslationKeyStyle keyStyle = TranslationKeyStyle.nested,
   }) async {
     try {
-      Logger.info('开始导入翻译文件: $filePath, 格式: $format');
+      LoggerUtils.info('开始导入翻译文件: $filePath, 格式: $format');
 
       // 获取解析器
       final parser = ParserFactory.getParser(format);
@@ -444,11 +445,11 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       final parseResult = await parser.parseFile(filePath);
 
       if (parseResult.entries.isEmpty) {
-        Logger.info('文件解析结果为空: $filePath');
+        LoggerUtils.info('文件解析结果为空: $filePath');
         return [];
       }
 
-      Logger.info('解析到 ${parseResult.entries.length} 个翻译条目');
+      LoggerUtils.info('解析到 ${parseResult.entries.length} 个翻译条目');
 
       // 获取现有翻译条目进行冲突检测
       final existingEntries = await getTranslationEntries(projectId);
@@ -471,7 +472,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
         if (existingKeys.contains(entry.key)) {
           // 发现冲突的条目
           conflictEntries.add(entry);
-          Logger.info('发现冲突翻译键: ${entry.key}');
+          LoggerUtils.info('发现冲突翻译键: ${entry.key}');
         } else {
           // 新的条目
           newEntries.add(entry);
@@ -482,26 +483,26 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       if (newEntries.isNotEmpty) {
         final createdEntries = await batchCreateTranslationEntries(newEntries);
         importedEntries.addAll(createdEntries);
-        Logger.info('成功创建 ${createdEntries.length} 个新翻译条目');
+        LoggerUtils.info('成功创建 ${createdEntries.length} 个新翻译条目');
       }
 
       // 处理冲突条目（暂时跳过，后续实现冲突解决机制）
       if (conflictEntries.isNotEmpty) {
-        Logger.info('跳过 ${conflictEntries.length} 个冲突翻译条目（功能待实现）');
+        LoggerUtils.info('跳过 ${conflictEntries.length} 个冲突翻译条目（功能待实现）');
         // TODO: 实现冲突解决机制
       }
 
       // 输出警告信息
       if (parseResult.warnings.isNotEmpty) {
         for (final warning in parseResult.warnings) {
-          Logger.info('解析警告: $warning');
+          LoggerUtils.info('解析警告: $warning');
         }
       }
 
-      Logger.info('导入完成，共导入 ${importedEntries.length} 个翻译条目');
+      LoggerUtils.info('导入完成，共导入 ${importedEntries.length} 个翻译条目');
       return importedEntries;
     } catch (error, stackTrace) {
-      Logger.error('导入翻译文件失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('导入翻译文件失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

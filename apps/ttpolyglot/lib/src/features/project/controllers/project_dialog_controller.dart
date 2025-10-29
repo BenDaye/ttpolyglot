@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:ttpolyglot/src/common/common.dart';
 import 'package:ttpolyglot/src/features/features.dart';
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 项目弹窗控制器
 class ProjectDialogController extends GetxController {
@@ -69,16 +70,16 @@ class ProjectDialogController extends GetxController {
         final apiLanguages = await _languageApi.getLanguages();
         if (apiLanguages.isNotEmpty) {
           _availableLanguages.assignAll(_convertToLanguages(apiLanguages));
-          Logger.info('从 API 加载 ${apiLanguages.length} 个语言');
+          LoggerUtils.info('从 API 加载 ${apiLanguages.length} 个语言');
         } else {
           // API 返回空数据，使用默认语言列表
           final defaultLanguages = LanguageEnum.toArray();
           _availableLanguages.assignAll(_convertToLanguages(defaultLanguages));
-          Logger.warning('API 返回空数据，使用默认语言列表');
+          LoggerUtils.warning('API 返回空数据，使用默认语言列表');
         }
       } catch (error, stackTrace) {
         // API 请求失败，使用默认语言列表
-        Logger.error('从 API 加载语言失败，使用默认语言列表', error: error, stackTrace: stackTrace);
+        LoggerUtils.error('从 API 加载语言失败，使用默认语言列表', error: error, stackTrace: stackTrace);
         final defaultLanguages = LanguageEnum.toArray();
         _availableLanguages.assignAll(_convertToLanguages(defaultLanguages));
       }
@@ -381,7 +382,7 @@ class ProjectDialogController extends GetxController {
         await _refreshProjectsList();
       }
     } catch (error, stackTrace) {
-      Logger.error(_isEditMode.value ? '更新项目失败' : '创建项目失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error(_isEditMode.value ? '更新项目失败' : '创建项目失败', error: error, stackTrace: stackTrace);
       Get.snackbar('错误', '${_isEditMode.value ? '更新' : '创建'}项目失败: $error');
     } finally {
       _isLoading.value = false;
@@ -412,7 +413,7 @@ class ProjectDialogController extends GetxController {
           projectId: projectId,
           languageId: languageId,
         );
-        Logger.info('添加语言: $languageId 到项目: $projectId');
+        LoggerUtils.info('添加语言: $languageId 到项目: $projectId');
       }
 
       // 删除移除的语言
@@ -421,10 +422,11 @@ class ProjectDialogController extends GetxController {
           projectId: projectId,
           languageId: languageId,
         );
-        Logger.info('从项目 $projectId 删除语言: $languageId');
+        LoggerUtils.info('从项目 $projectId 删除语言: $languageId');
       }
     } catch (error, stackTrace) {
-      Logger.error('[_updateTargetLanguages]', error: error, stackTrace: stackTrace, name: 'ProjectDialogController');
+      LoggerUtils.error('[_updateTargetLanguages]',
+          error: error, stackTrace: stackTrace, name: 'ProjectDialogController');
       rethrow;
     }
   }
@@ -436,7 +438,7 @@ class ProjectDialogController extends GetxController {
         await ProjectsController.loadProjects();
       }
     } catch (error, stackTrace) {
-      Logger.error('刷新项目列表失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('刷新项目列表失败', error: error, stackTrace: stackTrace);
     }
   }
 

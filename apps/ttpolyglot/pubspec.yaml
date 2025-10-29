@@ -38,6 +38,7 @@ dependencies:
   ttpolyglot_model: ^1.0.0
   ttpolyglot_parsers: ^1.0.0
   ttpolyglot_translators: ^1.0.0
+  ttpolyglot_utils: ^1.0.0
   universal_platform: ^1.1.0
   uuid: ^4.5.1
   watcher: ^1.1.0

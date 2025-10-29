@@ -1,5 +1,6 @@
 import 'package:ttpolyglot/src/core/services/service.dart';
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 项目数据初始化器
 class ProjectDataInitializer {
@@ -70,9 +71,9 @@ class ProjectDataInitializer {
         await Future.delayed(const Duration(milliseconds: 100));
       }
 
-      Logger.info('示例项目初始化完成');
+      LoggerUtils.info('示例项目初始化完成');
     } catch (error, stackTrace) {
-      Logger.error('初始化示例项目失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('初始化示例项目失败', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -86,7 +87,7 @@ class ProjectDataInitializer {
     try {
       return getPresetLanguages().firstWhere((lang) => lang.code == code);
     } catch (error, stackTrace) {
-      Logger.error('getLanguageByCode', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('getLanguageByCode', error: error, stackTrace: stackTrace);
       return null;
     }
   }

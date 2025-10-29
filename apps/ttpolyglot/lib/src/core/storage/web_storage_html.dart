@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:html' as html;
 
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// Web存储的HTML实现（Web平台）
 class WebStorageImpl {
@@ -13,7 +14,7 @@ class WebStorageImpl {
       html.window.localStorage['test'] = 'test';
       html.window.localStorage.remove('test');
     } catch (error, stackTrace) {
-      Logger.error('initialize', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('initialize', error: error, stackTrace: stackTrace);
       throw Exception('LocalStorage is not available: $error');
     }
   }

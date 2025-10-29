@@ -1,4 +1,5 @@
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 冲突类型
 enum ConflictType {
@@ -136,7 +137,7 @@ class ConflictDetectionService {
     List<TranslationEntry> importedEntries,
   ) async {
     try {
-      Logger.info('开始检测翻译冲突，现有条目: ${existingEntries.length}，导入条目: ${importedEntries.length}');
+      LoggerUtils.info('开始检测翻译冲突，现有条目: ${existingEntries.length}，导入条目: ${importedEntries.length}');
 
       final conflicts = <TranslationConflict>[];
       final newEntries = <TranslationEntry>[];
@@ -167,7 +168,7 @@ class ConflictDetectionService {
           );
 
           conflicts.add(conflict);
-          Logger.info('检测到冲突: ${conflict.key} - ${conflict.conflictTypeDisplayName}');
+          LoggerUtils.info('检测到冲突: ${conflict.key} - ${conflict.conflictTypeDisplayName}');
         }
       }
 
@@ -177,10 +178,10 @@ class ConflictDetectionService {
         summary: _generateSummary(conflicts.length, newEntries.length),
       );
 
-      Logger.info('冲突检测完成: ${result.toString()}');
+      LoggerUtils.info('冲突检测完成: ${result.toString()}');
       return result;
     } catch (error, stackTrace) {
-      Logger.error('冲突检测失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('冲突检测失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -203,7 +204,7 @@ class ConflictDetectionService {
         final resolution = resolutionMap[conflict.key];
         if (resolution == null) {
           // 没有解决方案，跳过
-          Logger.info('跳过未解决的冲突: ${conflict.key}');
+          LoggerUtils.info('跳过未解决的冲突: ${conflict.key}');
           continue;
         }
 
@@ -229,13 +230,13 @@ class ConflictDetectionService {
         }
 
         resolvedEntries.add(resolvedEntry.copyWith(updatedAt: DateTime.now()));
-        Logger.info('解决冲突: ${conflict.key} 使用策略 ${resolution.strategy}');
+        LoggerUtils.info('解决冲突: ${conflict.key} 使用策略 ${resolution.strategy}');
       }
 
-      Logger.info('冲突解决完成，共解决 ${resolvedEntries.length} 个冲突');
+      LoggerUtils.info('冲突解决完成，共解决 ${resolvedEntries.length} 个冲突');
       return resolvedEntries;
     } catch (error, stackTrace) {
-      Logger.error('冲突解决失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('冲突解决失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

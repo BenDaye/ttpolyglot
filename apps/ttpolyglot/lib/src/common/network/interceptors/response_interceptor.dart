@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_model/model.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 响应统一处理拦截器
 class ResponseInterceptor extends Interceptor {
@@ -25,7 +25,7 @@ class ResponseInterceptor extends Interceptor {
         ),
       );
     } catch (error, stackTrace) {
-      Logger.error(
+      LoggerUtils.error(
         'ResponseInterceptor',
         error: error,
         stackTrace: stackTrace,

@@ -1,8 +1,8 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 
-final class Toast {
-  Toast._();
+final class ToastUtils {
+  ToastUtils._();
 
   static BotToastNavigatorObserver botToastObserver() => BotToastNavigatorObserver();
   static TransitionBuilder get botToastInit => BotToastInit();

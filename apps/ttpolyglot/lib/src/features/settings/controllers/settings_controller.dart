@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ttpolyglot/src/common/api/api.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 设置页面控制器
 class SettingsController extends GetxController {
@@ -71,9 +71,9 @@ class SettingsController extends GetxController {
       // 同时保存到本地缓存
       await _saveSettingsLocal();
 
-      Logger.info('从服务器加载设置成功');
+      LoggerUtils.info('从服务器加载设置成功');
     } catch (error, stackTrace) {
-      Logger.error('从服务器加载设置失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('从服务器加载设置失败', error: error, stackTrace: stackTrace);
       // 加载失败时从本地加载
       await _loadSettingsLocal();
     } finally {
@@ -86,9 +86,9 @@ class SettingsController extends GetxController {
     try {
       await _userSettingsApi.updateLanguageSettings(languageCode);
       await _saveSettingsLocal();
-      Logger.info('保存语言设置到服务器成功');
+      LoggerUtils.info('保存语言设置到服务器成功');
     } catch (error, stackTrace) {
-      Logger.error('保存语言设置到服务器失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('保存语言设置到服务器失败', error: error, stackTrace: stackTrace);
       // 保存失败时仅保存到本地
       await _saveSettingsLocal();
     }
@@ -102,9 +102,9 @@ class SettingsController extends GetxController {
         notifications: _notifications.value,
       );
       await _saveSettingsLocal();
-      Logger.info('保存通用设置到服务器成功');
+      LoggerUtils.info('保存通用设置到服务器成功');
     } catch (error, stackTrace) {
-      Logger.error('保存通用设置到服务器失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('保存通用设置到服务器失败', error: error, stackTrace: stackTrace);
       // 保存失败时仅保存到本地
       await _saveSettingsLocal();
     }
@@ -119,7 +119,7 @@ class SettingsController extends GetxController {
       await prefs.setBool('autoSave', _autoSave.value);
       await prefs.setBool('notifications', _notifications.value);
     } catch (error, stackTrace) {
-      Logger.error('保存设置到本地失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('保存设置到本地失败', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -132,7 +132,7 @@ class SettingsController extends GetxController {
       _autoSave.value = prefs.getBool('autoSave') ?? true;
       _notifications.value = prefs.getBool('notifications') ?? true;
     } catch (error, stackTrace) {
-      Logger.error('从本地加载设置失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('从本地加载设置失败', error: error, stackTrace: stackTrace);
     }
   }
 

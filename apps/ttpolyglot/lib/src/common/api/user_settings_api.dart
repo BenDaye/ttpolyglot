@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:ttpolyglot/src/common/network/network.dart';
-import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_model/model.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 用户设置 API
 class UserSettingsApi {
@@ -21,7 +21,7 @@ class UserSettingsApi {
       final data = response.data as Map<String, dynamic>;
       return UserSettingsModel.fromJson(data);
     } catch (error, stackTrace) {
-      Logger.error('获取用户设置失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取用户设置失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -43,7 +43,7 @@ class UserSettingsApi {
       final data = response.data as Map<String, dynamic>;
       return UserSettingsModel.fromJson(data);
     } catch (error, stackTrace) {
-      Logger.error('更新用户设置失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('更新用户设置失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -65,7 +65,7 @@ class UserSettingsApi {
       final data = response.data as Map<String, dynamic>;
       return LanguageSettingsModel.fromJson(data);
     } catch (error, stackTrace) {
-      Logger.error('更新语言设置失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('更新语言设置失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -94,7 +94,7 @@ class UserSettingsApi {
       final responseData = response.data as Map<String, dynamic>;
       return GeneralSettingsModel.fromJson(responseData);
     } catch (error, stackTrace) {
-      Logger.error('更新通用设置失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('更新通用设置失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -118,7 +118,7 @@ class UserSettingsApi {
       final data = response.data as Map<String, dynamic>;
       return TranslationSettingsModel.fromJson(data);
     } catch (error, stackTrace) {
-      Logger.error('更新翻译设置失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('更新翻译设置失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -142,7 +142,7 @@ class UserSettingsApi {
       final data = response.data as Map<String, dynamic>;
       return TranslationProviderConfigModel.fromJson(data);
     } catch (error, stackTrace) {
-      Logger.error('添加翻译接口失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('添加翻译接口失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -167,7 +167,7 @@ class UserSettingsApi {
       final data = response.data as Map<String, dynamic>;
       return TranslationProviderConfigModel.fromJson(data);
     } catch (error, stackTrace) {
-      Logger.error('更新翻译接口失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('更新翻译接口失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -185,7 +185,7 @@ class UserSettingsApi {
         ),
       );
     } catch (error, stackTrace) {
-      Logger.error('删除翻译接口失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('删除翻译接口失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -206,7 +206,7 @@ class UserSettingsApi {
       final data = response.data as Map<String, dynamic>;
       return UserSettingsModel.fromJson(data);
     } catch (error, stackTrace) {
-      Logger.error('重置用户设置失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('重置用户设置失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }

@@ -6,4 +6,5 @@ packages:
   - packages/parsers
   - packages/translators
   - packages/model
+  - packages/utils
   - apps/ttpolyglot

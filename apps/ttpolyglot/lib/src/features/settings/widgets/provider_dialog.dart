@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 import '../controllers/translation_config_controller.dart';
 
@@ -201,7 +202,7 @@ class _ProviderDialogState extends State<ProviderDialog> {
       }
       Get.back();
     } catch (error, stackTrace) {
-      Logger.error('保存翻译接口配置失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('保存翻译接口配置失败', error: error, stackTrace: stackTrace);
       Get.snackbar(
         '错误',
         '保存失败，请重试',

@@ -1,5 +1,6 @@
 import 'package:ttpolyglot/src/core/platform/platform_adapter.dart';
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 import 'filesystem_storage_service.dart';
 import 'web_storage_service.dart';
@@ -49,7 +50,7 @@ class StorageProvider {
       _isInitialized = true;
     } catch (error, stackTrace) {
       _isInitialized = false;
-      Logger.error('initialize', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('initialize', error: error, stackTrace: stackTrace);
       rethrow;
     } finally {
       _isInitializing = false;

@@ -2,7 +2,7 @@ import 'package:cross_file/cross_file.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 class UploadDrop extends StatefulWidget {
   final Widget child;
@@ -25,17 +25,17 @@ class _UploadDropState extends State<UploadDrop> {
   Widget build(BuildContext context) {
     return DropTarget(
       onDragEntered: (details) {
-        Logger.error('文件拖拽进入区域');
+        LoggerUtils.error('文件拖拽进入区域');
         //
         widget.onDragging?.call(true);
       },
       onDragExited: (details) {
-        Logger.error('文件拖拽离开区域');
+        LoggerUtils.error('文件拖拽离开区域');
         //
         widget.onDragging?.call(false);
       },
       onDragDone: (details) async {
-        Logger.error('文件被释放，共${details.files.length}个文件');
+        LoggerUtils.error('文件被释放，共${details.files.length}个文件');
         //
         widget.onDragging?.call(false);
 

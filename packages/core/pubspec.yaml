@@ -13,10 +13,7 @@ dependencies:
 
   # 用于数据模型的相等性比较
   equatable: ^2.0.5
-  
-  # Toast 提示组件
-  bot_toast: ^4.1.3
-
+   
   # 用于 JSON 序列化
   json_annotation: ^4.8.1
 
@@ -27,13 +24,8 @@ dependencies:
   uuid: ^4.0.0
 
   # 用于日期时间处理 - 使用兼容版本
-  intl: ^0.19.0
-
-  # Talker 日志系统
-  talker: ^4.7.1
-  talker_flutter: ^4.7.1
-  talker_dio_logger: ^4.7.1
-
+  intl: ^0.19.0 
+  
 dev_dependencies:
   # 代码质量检查
   lints: ^5.0.0

@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:ttpolyglot/src/common/network/network.dart';
-import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_model/model.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 通知设置 API
 class NotificationSettingsApi {
@@ -23,12 +23,12 @@ class NotificationSettingsApi {
         (json) => NotificationSettingsModel.fromJson(json),
       );
       if (result == null) {
-        Logger.error('获取语言列表响应数据为空');
+        LoggerUtils.error('获取语言列表响应数据为空');
         return null;
       }
       return result.toList();
     } catch (error, stackTrace) {
-      Logger.error('[getUserNotificationSettings] 获取通知设置失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[getUserNotificationSettings] 获取通知设置失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -47,12 +47,12 @@ class NotificationSettingsApi {
         (json) => NotificationSettingsModel.fromJson(json),
       );
       if (result == null) {
-        Logger.error('获取项目通知设置响应数据为空');
+        LoggerUtils.error('获取项目通知设置响应数据为空');
         return [];
       }
       return result.toList();
     } catch (error, stackTrace) {
-      Logger.error('[getProjectNotificationSettings] 获取项目通知设置失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[getProjectNotificationSettings] 获取项目通知设置失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -85,12 +85,12 @@ class NotificationSettingsApi {
         (json) => NotificationSettingsModel.fromJson(json),
       );
       if (result == null) {
-        Logger.error('更新项目通知设置响应数据为空');
+        LoggerUtils.error('更新项目通知设置响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      Logger.error('[updateNotificationSetting] 更新通知设置失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[updateNotificationSetting] 更新通知设置失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -122,12 +122,12 @@ class NotificationSettingsApi {
         (json) => NotificationSettingsModel.fromJson(json),
       );
       if (result == null) {
-        Logger.error('更新项目通知设置响应数据为空');
+        LoggerUtils.error('更新项目通知设置响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      Logger.error('[updateProjectNotificationSetting] 更新项目通知设置失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[updateProjectNotificationSetting] 更新项目通知设置失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -156,12 +156,12 @@ class NotificationSettingsApi {
         (json) => NotificationSettingsModel.fromJson(json),
       );
       if (result == null) {
-        Logger.error('批量更新通知设置响应数据为空');
+        LoggerUtils.error('批量更新通知设置响应数据为空');
         return null;
       }
       return result.toList();
     } catch (error, stackTrace) {
-      Logger.error('[batchUpdateNotificationSettings] 批量更新通知设置失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[batchUpdateNotificationSettings] 批量更新通知设置失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -183,7 +183,7 @@ class NotificationSettingsApi {
         ),
       );
     } catch (error, stackTrace) {
-      Logger.error('[initializeDefaultSettings] 初始化默认设置失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[initializeDefaultSettings] 初始化默认设置失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -214,12 +214,12 @@ class NotificationSettingsApi {
         (json) => json['isEnabled'] as bool,
       );
       if (data == null) {
-        Logger.error('检查通知是否启用响应数据为空');
+        LoggerUtils.error('检查通知是否启用响应数据为空');
         return false;
       }
       return data;
     } catch (error, stackTrace) {
-      Logger.error('[isNotificationEnabled] 检查通知状态失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[isNotificationEnabled] 检查通知状态失败', error: error, stackTrace: stackTrace);
       return false; // 默认不启用
     }
   }

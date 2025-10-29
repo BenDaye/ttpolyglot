@@ -1,8 +1,8 @@
 import 'dart:developer';
 
 import 'package:ttpolyglot/src/common/network/network.dart';
-import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_model/model.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 语言 API
 class LanguageApi {
@@ -18,7 +18,7 @@ class LanguageApi {
         (json) => LanguageModel.fromJson(json),
       );
       if (languages == null) {
-        Logger.error('获取语言列表响应数据为空');
+        LoggerUtils.error('获取语言列表响应数据为空');
         return LanguageEnum.toArray();
       }
       return languages.toList();

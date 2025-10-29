@@ -9,6 +9,7 @@ import 'package:ttpolyglot/src/features/project/widgets/upload_file.dart';
 import 'package:ttpolyglot/src/features/project/widgets/upload_file_list.dart';
 import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_model/model.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 项目导入页面
 class ProjectImportView extends StatefulWidget {
@@ -111,7 +112,7 @@ class _ProjectImportViewState extends State<ProjectImportView> {
                                           mimeType: 'application/json',
                                         );
                                       } catch (error, stackTrace) {
-                                        Logger.error('下载 JSON Demo 失败', error: error, stackTrace: stackTrace);
+                                        LoggerUtils.error('下载 JSON Demo 失败', error: error, stackTrace: stackTrace);
                                       }
                                     },
                                     style: TextButton.styleFrom(
@@ -143,7 +144,7 @@ class _ProjectImportViewState extends State<ProjectImportView> {
                                           mimeType: 'text/csv',
                                         );
                                       } catch (error, stackTrace) {
-                                        Logger.error('下载 CSV Demo 失败', error: error, stackTrace: stackTrace);
+                                        LoggerUtils.error('下载 CSV Demo 失败', error: error, stackTrace: stackTrace);
                                       }
                                     },
                                     style: TextButton.styleFrom(
@@ -182,7 +183,7 @@ class _ProjectImportViewState extends State<ProjectImportView> {
                                           );
                                         }
                                       } catch (error, stackTrace) {
-                                        Logger.error('下载 Excel Demo 失败', error: error, stackTrace: stackTrace);
+                                        LoggerUtils.error('下载 Excel Demo 失败', error: error, stackTrace: stackTrace);
                                       }
                                     },
                                     style: TextButton.styleFrom(
@@ -213,7 +214,7 @@ class _ProjectImportViewState extends State<ProjectImportView> {
                                           mimeType: 'application/json',
                                         );
                                       } catch (error, stackTrace) {
-                                        Logger.error('下载 ARB Demo 失败', error: error, stackTrace: stackTrace);
+                                        LoggerUtils.error('下载 ARB Demo 失败', error: error, stackTrace: stackTrace);
                                       }
                                     },
                                     style: TextButton.styleFrom(
@@ -244,7 +245,7 @@ class _ProjectImportViewState extends State<ProjectImportView> {
                                           mimeType: 'text/plain',
                                         );
                                       } catch (error, stackTrace) {
-                                        Logger.error('下载 PO Demo 失败', error: error, stackTrace: stackTrace);
+                                        LoggerUtils.error('下载 PO Demo 失败', error: error, stackTrace: stackTrace);
                                       }
                                     },
                                     style: TextButton.styleFrom(

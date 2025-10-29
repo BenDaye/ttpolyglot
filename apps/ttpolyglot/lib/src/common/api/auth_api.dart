@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:ttpolyglot/src/common/network/network.dart';
-import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_model/model.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 认证 API
 class AuthApi {
@@ -24,12 +24,12 @@ class AuthApi {
         (json) => LoginResponseModel.fromJson(json),
       );
       if (loginResponse == null) {
-        Logger.error('登录响应数据为空');
+        LoggerUtils.error('登录响应数据为空');
         return null;
       }
       return loginResponse;
     } catch (error, stackTrace) {
-      Logger.error('登录请求失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('登录请求失败', error: error, stackTrace: stackTrace);
       return null;
     }
   }
@@ -46,7 +46,7 @@ class AuthApi {
         ),
       );
     } catch (error, stackTrace) {
-      Logger.error('登出请求失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('登出请求失败', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -62,12 +62,12 @@ class AuthApi {
         (json) => TokenInfoModel.fromJson(json),
       );
       if (tokenInfo == null) {
-        Logger.error('刷新 Token 响应数据为空');
+        LoggerUtils.error('刷新 Token 响应数据为空');
         return null;
       }
       return tokenInfo;
     } catch (error, stackTrace) {
-      Logger.error('刷新 Token 失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('刷新 Token 失败', error: error, stackTrace: stackTrace);
       return null;
     }
   }
@@ -81,12 +81,12 @@ class AuthApi {
         (json) => UserInfoModel.fromJson(json),
       );
       if (userInfo == null) {
-        Logger.error('获取当前用户响应数据为空');
+        LoggerUtils.error('获取当前用户响应数据为空');
         return null;
       }
       return userInfo;
     } catch (error, stackTrace) {
-      Logger.error('获取当前用户失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取当前用户失败', error: error, stackTrace: stackTrace);
       return null;
     }
   }

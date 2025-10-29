@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:dio/dio.dart';
 import 'package:ttpolyglot/src/common/config/app_config.dart';
-import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_model/model.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 final class LoadingInterceptor extends Interceptor {
   CancelFunc? _loadingHideFunc; // 改为私有变量
@@ -16,12 +16,12 @@ final class LoadingInterceptor extends Interceptor {
     _cancelLoading();
     //
     if (extra.showLoading == true) {
-      _loadingHideFunc = Toast.showLoading();
+      _loadingHideFunc = ToastUtils.showInfo('加载中...');
     } else if (extra.showLazyLoading == true) {
       // 设置5秒延迟的定时器
       _loadingTimer = Timer(AppConfig.requestLazyTimeout, () {
         // 如果5秒后请求仍未完成，显示Loading
-        _loadingHideFunc = Toast.showLoading();
+        _loadingHideFunc = ToastUtils.showInfo('加载中...');
       });
     }
     super.onRequest(options, handler);

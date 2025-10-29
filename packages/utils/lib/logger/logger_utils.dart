@@ -8,16 +8,16 @@ import 'package:talker_flutter/talker_flutter.dart';
 /// - Dio 网络请求日志
 /// - 路由导航日志
 /// - 可视化日志查看器
-class Logger {
+class LoggerUtils {
   // 提供一个全局访问点
-  static Logger? _instance;
-  factory Logger() => _instance ??= Logger._();
+  static LoggerUtils? _instance;
+  factory LoggerUtils() => _instance ??= LoggerUtils._();
 
   late final Talker _talker;
-  static Talker get talker => Logger()._talker;
+  static Talker get talker => LoggerUtils()._talker;
 
   // 私有构造函数，初始化 Talker
-  Logger._() {
+  LoggerUtils._() {
     _talker = TalkerFlutter.init(
       settings: TalkerSettings(
         colors: {

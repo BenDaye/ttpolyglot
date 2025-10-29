@@ -9,6 +9,7 @@ import 'package:ttpolyglot/src/features/settings/controllers/translation_config_
 import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_translators/translators.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 批量翻译状态枚举
 enum BatchTranslationStatus {
@@ -601,7 +602,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
           setState(() {
             _selectedProvider = value;
           });
-          Logger.info('选择翻译提供商: ${value.displayName}');
+          LoggerUtils.info('选择翻译提供商: ${value.displayName}');
         }
       },
     );
@@ -680,7 +681,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
           setState(() {
             _selectedSourceEntry = value;
           });
-          Logger.info('选择源语言: ${value.targetLanguage.code} - ${value.targetLanguage.nativeName}',
+          LoggerUtils.info('选择源语言: ${value.targetLanguage.code} - ${value.targetLanguage.nativeName}',
               name: 'BatchTranslationDialog');
         }
       },
@@ -914,7 +915,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
       _startTranslationProcess();
     } catch (error, stackTrace) {
-      Logger.error('批量翻译异常', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('批量翻译异常', error: error, stackTrace: stackTrace);
       _showErrorSnackBar('翻译处理异常: $error');
     }
   }
@@ -1019,7 +1020,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
     try {
       final translationManager = Get.find<TranslationServiceManager>();
 
-      Logger.info('开始翻译Key: "$translationKey" (${targetEntries.length}个目标语言)');
+      LoggerUtils.info('开始翻译Key: "$translationKey" (${targetEntries.length}个目标语言)');
 
       // 按key分组批量翻译，一次性翻译这个key的所有目标语言
       final results = await translationManager.batchTranslateEntries(
@@ -1031,7 +1032,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
       // 检查弹窗是否已关闭，如果已关闭则停止处理
       if (_isDisposed) {
-        Logger.info('弹窗已关闭，停止处理翻译结果');
+        LoggerUtils.info('弹窗已关闭，停止处理翻译结果');
         return;
       }
 
@@ -1042,7 +1043,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
       for (int i = 0; i < results.length; i++) {
         // 再次检查弹窗状态
         if (_isDisposed) {
-          Logger.info('弹窗已关闭，停止处理翻译结果');
+          LoggerUtils.info('弹窗已关闭，停止处理翻译结果');
           return;
         }
 
@@ -1065,18 +1066,18 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
         } else {
           keyFailCount++;
           final errorMessage = result.error ?? '翻译失败';
-          Logger.info('翻译失败: ${entry.key} (${entry.targetLanguage.code}) - $errorMessage');
+          LoggerUtils.info('翻译失败: ${entry.key} (${entry.targetLanguage.code}) - $errorMessage');
         }
       }
 
       _successCount += keySuccessCount;
       _failCount += keyFailCount;
 
-      Logger.info('Key "$translationKey" 翻译完成: 成功 $keySuccessCount 个，失败 $keyFailCount 个');
+      LoggerUtils.info('Key "$translationKey" 翻译完成: 成功 $keySuccessCount 个，失败 $keyFailCount 个');
     } catch (error, stackTrace) {
       // 如果是取消异常，更新状态为取消
       if (error is CancelException) {
-        Logger.info('翻译被取消: $error');
+        LoggerUtils.info('翻译被取消: $error');
         _shouldStop = true;
         if (!_isDisposed && mounted) {
           setState(() {
@@ -1087,7 +1088,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
       }
 
       _failCount += targetEntries.length;
-      Logger.error('翻译Key异常', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('翻译Key异常', error: error, stackTrace: stackTrace);
     } finally {
       // 确保无论成功还是失败都重置翻译状态
       _isTranslating = false;
@@ -1153,7 +1154,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
       _showInfoSnackBar('当前进度已保存');
     } catch (error, stackTrace) {
-      Logger.error('保存进度失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('保存进度失败', error: error, stackTrace: stackTrace);
       _showErrorSnackBar('保存进度失败: $error');
     }
   }

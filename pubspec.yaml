@@ -9,3 +9,4 @@ dev_dependencies:
 workspace:
   - packages/core
   - packages/model
+  - packages/utils

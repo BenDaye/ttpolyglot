@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 文件系统存储服务实现（桌面端）
 class FileSystemStorageServiceImpl extends FileSystemStorageService {
@@ -50,7 +51,7 @@ class FileSystemStorageServiceImpl extends FileSystemStorageService {
     try {
       return await file.readAsString(encoding: utf8);
     } catch (error, stackTrace) {
-      Logger.error('Error reading file for key $key', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('Error reading file for key $key', error: error, stackTrace: stackTrace);
       return null;
     }
   }

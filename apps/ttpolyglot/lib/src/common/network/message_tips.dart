@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/common/common.dart';
 import 'package:ttpolyglot/src/core/routing/app_pages.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 final class MessageTips {
   MessageTips._();
@@ -18,10 +18,10 @@ final class MessageTips {
     if (extra?.showSuccessToast == false || message.isEmpty) return;
     switch (type) {
       case DataMessageTipsEnum.showDialog:
-        DialogManager.showSuccess(message);
+        DialogUtils.showSuccess(message);
         break;
       case DataMessageTipsEnum.showToast:
-        Toast.showSuccess(message);
+        ToastUtils.showSuccess(message);
         break;
       case DataMessageTipsEnum.showSnackBar:
         if (Get.context != null) {
@@ -53,7 +53,7 @@ final class MessageTips {
       // 标记正在显示鉴权弹窗
       _isShowingAuthDialog = true;
       // 其他路由
-      DialogManager.showError(
+      DialogUtils.showError(
         message,
         onConfirm: () async {
           // 执行退出
@@ -73,10 +73,10 @@ final class MessageTips {
     final msg = statusCode != null && statusCode >= 400 ? 'E-$statusCode: $message' : message;
     switch (type) {
       case DataMessageTipsEnum.showDialog:
-        DialogManager.showError(msg);
+        DialogUtils.showError(msg);
         break;
       case DataMessageTipsEnum.showToast:
-        Toast.showError(msg);
+        ToastUtils.showError(msg);
         break;
       case DataMessageTipsEnum.showSnackBar:
         if (Get.context != null) {

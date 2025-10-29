@@ -7,7 +7,7 @@ import 'package:ttpolyglot/src/common/common.dart';
 class ErrorInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    // Logger.talker.info('Response Error -> $err');
+    // LoggerUtils.talker.info('Response Error -> $err');
     // 如果已经处理过了
     if (err.error is BaseModel) {
       return super.onError(err, handler);

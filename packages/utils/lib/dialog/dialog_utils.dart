@@ -1,8 +1,8 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 
-final class DialogManager {
-  DialogManager._();
+final class DialogUtils {
+  DialogUtils._();
 
   static CancelFunc showSuccess(
     String message, {

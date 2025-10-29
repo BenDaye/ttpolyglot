@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/common/api/api.dart';
-import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_model/model.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 通知设置控制器
 class NotificationSettingsController extends GetxController {
@@ -43,7 +43,7 @@ class NotificationSettingsController extends GetxController {
         _settings.value = await _api.getUserNotificationSettings() ?? [];
       }
     } catch (error, stackTrace) {
-      Logger.error('[loadSettings] 加载通知设置失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[loadSettings] 加载通知设置失败', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -77,7 +77,7 @@ class NotificationSettingsController extends GetxController {
         _settings.refresh();
       }
     } catch (error, stackTrace) {
-      Logger.error('[updateSetting] 更新通知设置失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[updateSetting] 更新通知设置失败', error: error, stackTrace: stackTrace);
       Get.snackbar('错误', '更新通知设置失败');
       rethrow;
     }
@@ -98,7 +98,7 @@ class NotificationSettingsController extends GetxController {
 
       Get.snackbar('成功', '通知设置已保存');
     } catch (error, stackTrace) {
-      Logger.error('[batchUpdateSettings] 批量更新通知设置失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[batchUpdateSettings] 批量更新通知设置失败', error: error, stackTrace: stackTrace);
       Get.snackbar('错误', '保存通知设置失败');
     } finally {
       _isSaving.value = false;
@@ -111,7 +111,7 @@ class NotificationSettingsController extends GetxController {
       await _api.initializeDefaultSettings(projectId: projectId);
       await loadSettings();
     } catch (error, stackTrace) {
-      Logger.error('[initializeDefaultSettings] 初始化默认设置失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[initializeDefaultSettings] 初始化默认设置失败', error: error, stackTrace: stackTrace);
       Get.snackbar('错误', '初始化默认设置失败');
     }
   }

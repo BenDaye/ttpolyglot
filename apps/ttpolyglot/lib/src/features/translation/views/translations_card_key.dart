@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ttpolyglot/src/core/services/translation_service_manager.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 class TranslationsCardByKey extends StatefulWidget {
   const TranslationsCardByKey({
@@ -428,7 +429,7 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
         } else {
           failCount++;
           failedEntries.add(entry);
-          Logger.error('翻译失败: ${entry.key} - ${result.error}');
+          LoggerUtils.error('翻译失败: ${entry.key} - ${result.error}');
         }
       }
 
@@ -453,7 +454,7 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
         });
       }
     } catch (error, stackTrace) {
-      Logger.error('翻译处理异常', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('翻译处理异常', error: error, stackTrace: stackTrace);
       if (context.mounted) {
         _showErrorSnackBar(context, '翻译处理异常: $error');
       }

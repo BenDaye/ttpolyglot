@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/common/common.dart';
 import 'package:ttpolyglot/src/core/routing/app_pages.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 登录控制器
 class SignInController extends GetxController {
@@ -28,7 +28,7 @@ class SignInController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    Logger.info('SignInController 初始化');
+    LoggerUtils.info('SignInController 初始化');
   }
 
   /// 切换密码显示/隐藏
@@ -62,7 +62,7 @@ class SignInController extends GetxController {
   Future<void> login() async {
     // 防止重复提交
     if (_isLoading.value) {
-      Logger.error('登录请求进行中，忽略重复提交');
+      LoggerUtils.error('登录请求进行中，忽略重复提交');
       return;
     }
 
@@ -73,7 +73,7 @@ class SignInController extends GetxController {
     if (formKey.currentState?.validate() != true) {
       // 启用自动验证，让用户看到错误提示
       _autoValidate.value = true;
-      Logger.error('表单验证失败');
+      LoggerUtils.error('表单验证失败');
       return;
     }
 
@@ -132,6 +132,6 @@ class SignInController extends GetxController {
     emailController.dispose();
     passwordController.dispose();
     super.onClose();
-    Logger.info('SignInController 销毁');
+    LoggerUtils.info('SignInController 销毁');
   }
 }

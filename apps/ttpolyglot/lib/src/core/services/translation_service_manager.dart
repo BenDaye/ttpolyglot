@@ -4,6 +4,7 @@ import 'package:ttpolyglot/src/core/routing/app_pages.dart';
 import 'package:ttpolyglot/src/features/settings/controllers/translation_config_controller.dart';
 import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_translators/translators.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 翻译服务管理器
 class TranslationServiceManager extends GetxService {
@@ -25,7 +26,7 @@ class TranslationServiceManager extends GetxService {
     final initStartTime = DateTime.now();
     if (!controller.isInitialized) {
       if (DateTime.now().difference(initStartTime).inSeconds > 10) {
-        Logger.warning('等待翻译配置初始化超时');
+        LoggerUtils.warning('等待翻译配置初始化超时');
         return false;
       }
       await Future.delayed(const Duration(milliseconds: 50));
@@ -35,7 +36,7 @@ class TranslationServiceManager extends GetxService {
     final loadStartTime = DateTime.now();
     while (controller.isLoading) {
       if (DateTime.now().difference(loadStartTime).inSeconds > 5) {
-        Logger.warning('等待翻译配置加载超时');
+        LoggerUtils.warning('等待翻译配置加载超时');
         return false;
       }
       await Future.delayed(const Duration(milliseconds: 50));
@@ -58,7 +59,7 @@ class TranslationServiceManager extends GetxService {
     final initStartTime = DateTime.now();
     while (!controller.isInitialized) {
       if (DateTime.now().difference(initStartTime).inSeconds > 10) {
-        Logger.warning('等待翻译配置初始化超时');
+        LoggerUtils.warning('等待翻译配置初始化超时');
         return false;
       }
       await Future.delayed(const Duration(milliseconds: 50));
@@ -68,7 +69,7 @@ class TranslationServiceManager extends GetxService {
     final loadStartTime = DateTime.now();
     while (controller.isLoading) {
       if (DateTime.now().difference(loadStartTime).inSeconds > 5) {
-        Logger.warning('等待翻译配置加载超时');
+        LoggerUtils.warning('等待翻译配置加载超时');
         return false;
       }
       await Future.delayed(const Duration(milliseconds: 50));
@@ -132,7 +133,7 @@ class TranslationServiceManager extends GetxService {
             .toList();
       }
 
-      Logger.info('开始批量翻译 ${entries.length} 个条目，使用 ${selectedProvider.displayName}');
+      LoggerUtils.info('开始批量翻译 ${entries.length} 个条目，使用 ${selectedProvider.displayName}');
 
       // 使用批量翻译API
       final result = await TranslationApiService.translateBatchTexts(
@@ -153,7 +154,7 @@ class TranslationServiceManager extends GetxService {
               ))
           .toList();
     } catch (error, stackTrace) {
-      Logger.error('批量翻译条目异常', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('批量翻译条目异常', error: error, stackTrace: stackTrace);
 
       // 返回所有条目的失败结果
       return entries

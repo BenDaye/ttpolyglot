@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ttpolyglot/src/core/services/service.dart';
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 class ProjectExportController extends GetxController {
   final String projectId;
@@ -49,7 +50,7 @@ class ProjectExportController extends GetxController {
       Get.snackbar('成功', 'JSON翻译文件导出成功');
       return savePath;
     } catch (error, stackTrace) {
-      Logger.error('exportTranslationsShortcutJson', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('exportTranslationsShortcutJson', error: error, stackTrace: stackTrace);
       Get.snackbar('错误', '导出JSON翻译文件失败: $error');
       return null;
     }
@@ -85,7 +86,7 @@ class ProjectExportController extends GetxController {
       Get.snackbar('成功', 'CSV翻译文件导出成功');
       return savePath;
     } catch (error, stackTrace) {
-      Logger.error('exportTranslationsShortcutCsv', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('exportTranslationsShortcutCsv', error: error, stackTrace: stackTrace);
       Get.snackbar('错误', '导出CSV翻译文件失败: $error');
       return null;
     }
@@ -121,7 +122,7 @@ class ProjectExportController extends GetxController {
       Get.snackbar('成功', 'Excel翻译文件导出成功');
       return savePath;
     } catch (error, stackTrace) {
-      Logger.error('exportTranslationsShortcutExcel', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('exportTranslationsShortcutExcel', error: error, stackTrace: stackTrace);
       Get.snackbar('错误', '导出Excel翻译文件失败: $error');
       return null;
     }
@@ -157,7 +158,7 @@ class ProjectExportController extends GetxController {
       Get.snackbar('成功', 'ARB翻译文件导出成功');
       return savePath;
     } catch (error, stackTrace) {
-      Logger.error('exportTranslationsShortcutArb', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('exportTranslationsShortcutArb', error: error, stackTrace: stackTrace);
       Get.snackbar('错误', '导出ARB翻译文件失败: $error');
       return null;
     }
@@ -193,7 +194,7 @@ class ProjectExportController extends GetxController {
       Get.snackbar('成功', 'PO翻译文件导出成功');
       return savePath;
     } catch (error, stackTrace) {
-      Logger.error('exportTranslationsShortcutPo', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('exportTranslationsShortcutPo', error: error, stackTrace: stackTrace);
       Get.snackbar('错误', '导出PO翻译文件失败: $error');
       return null;
     }
@@ -300,7 +301,7 @@ class ProjectExportController extends GetxController {
 
       return null;
     } catch (error, stackTrace) {
-      Logger.error('自定义导出失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('自定义导出失败', error: error, stackTrace: stackTrace);
       Get.snackbar('错误', '自定义导出失败: $error');
       return null;
     } finally {
@@ -403,7 +404,7 @@ class ProjectExportController extends GetxController {
 
       return savePath;
     } catch (error, stackTrace) {
-      Logger.error('exportTranslationsWithHistory', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('exportTranslationsWithHistory', error: error, stackTrace: stackTrace);
 
       // 导出失败时保存失败记录
       final historyItem = ExportHistoryItem(

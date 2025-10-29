@@ -1,8 +1,6 @@
-import 'dart:developer';
-
 import 'package:ttpolyglot/src/common/network/http_client.dart';
-import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_model/model.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 项目 API
 class ProjectApi {
@@ -14,7 +12,7 @@ class ProjectApi {
     String? status,
   }) async {
     try {
-      log('[getProjects] page=$page, limit=$limit, search=$search, status=$status', name: 'ProjectApi');
+      LoggerUtils.info('[getProjects] page=$page, limit=$limit, search=$search, status=$status', name: 'ProjectApi');
 
       final queryParams = <String, dynamic>{
         'page': page,
@@ -39,12 +37,12 @@ class ProjectApi {
         (json) => PagerModel.fromJson(json, (data) => ProjectModel.fromJson(data as Map<String, dynamic>)),
       );
       if (result == null) {
-        Logger.error('获取项目列表响应数据为空');
+        LoggerUtils.error('获取项目列表响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      log('[getProjects]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      LoggerUtils.error('[getProjects]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
     }
   }
@@ -52,7 +50,7 @@ class ProjectApi {
   /// 获取项目详情
   Future<ProjectDetailModel?> getProject(int projectId) async {
     try {
-      log('[getProject] projectId=$projectId', name: 'ProjectApi');
+      LoggerUtils.info('[getProject] projectId=$projectId', name: 'ProjectApi');
 
       final response = await HttpClient.get('/projects/$projectId');
 
@@ -61,12 +59,12 @@ class ProjectApi {
         (json) => ProjectDetailModel.fromJson(json),
       );
       if (result == null) {
-        Logger.error('获取项目详情响应数据为空');
+        LoggerUtils.error('获取项目详情响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      log('[getProject]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      LoggerUtils.error('[getProject]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
     }
   }
@@ -82,7 +80,7 @@ class ProjectApi {
     List<int>? targetLanguageIds,
   }) async {
     try {
-      log(
+      LoggerUtils.info(
         '[createProject] name=$name, primaryLanguageId=$primaryLanguageId, targetLanguages=$targetLanguageIds',
         name: 'ProjectApi',
       );
@@ -111,12 +109,12 @@ class ProjectApi {
         (json) => ProjectModel.fromJson(json),
       );
       if (result == null) {
-        Logger.error('创建项目响应数据为空');
+        LoggerUtils.error('创建项目响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      log('[createProject]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      LoggerUtils.error('[createProject]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       return null;
     }
   }
@@ -131,7 +129,7 @@ class ProjectApi {
     Map<String, dynamic>? settings,
   }) async {
     try {
-      log('[updateProject] projectId=$projectId', name: 'ProjectApi');
+      LoggerUtils.info('[updateProject] projectId=$projectId', name: 'ProjectApi');
 
       final requestData = <String, dynamic>{};
 
@@ -151,12 +149,12 @@ class ProjectApi {
         (json) => ProjectModel.fromJson(json),
       );
       if (result == null) {
-        Logger.error('更新项目响应数据为空');
+        LoggerUtils.error('更新项目响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      log('[updateProject]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      LoggerUtils.error('[updateProject]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
     }
   }
@@ -164,7 +162,7 @@ class ProjectApi {
   /// 删除项目
   Future<bool?> deleteProject(int projectId) async {
     try {
-      log('[deleteProject] projectId=$projectId', name: 'ProjectApi');
+      LoggerUtils.info('[deleteProject] projectId=$projectId', name: 'ProjectApi');
 
       final response = await HttpClient.delete('/projects/$projectId');
 
@@ -173,12 +171,12 @@ class ProjectApi {
         (json) => json['code'] == DataCodeEnum.success,
       );
       if (result == null) {
-        Logger.error('删除项目响应数据为空');
+        LoggerUtils.error('删除项目响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      log('[deleteProject]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      LoggerUtils.error('[deleteProject]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
     }
   }
@@ -186,7 +184,7 @@ class ProjectApi {
   /// 检查项目名称是否可用
   Future<bool?> checkProjectNameAvailable(String name, {int? excludeProjectId}) async {
     try {
-      log('[checkProjectNameAvailable] name=$name', name: 'ProjectApi');
+      LoggerUtils.info('[checkProjectNameAvailable] name=$name', name: 'ProjectApi');
 
       final queryParams = <String, dynamic>{
         'name': name,
@@ -206,12 +204,12 @@ class ProjectApi {
         (json) => json['available'] as bool,
       );
       if (result == null) {
-        Logger.error('检查项目名称是否可用响应数据为空');
+        LoggerUtils.error('检查项目名称是否可用响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      log('[checkProjectNameAvailable]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      LoggerUtils.error('[checkProjectNameAvailable]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
     }
   }
@@ -219,7 +217,7 @@ class ProjectApi {
   /// 获取项目统计信息
   Future<ProjectStatisticsModel?> getProjectStats(int projectId) async {
     try {
-      log('[getProjectStats] projectId=$projectId', name: 'ProjectApi');
+      LoggerUtils.info('[getProjectStats] projectId=$projectId', name: 'ProjectApi');
 
       final response = await HttpClient.get('/projects/$projectId/stats');
 
@@ -228,12 +226,12 @@ class ProjectApi {
         (json) => ProjectStatisticsModel.fromJson(json),
       );
       if (result == null) {
-        Logger.error('获取项目统计信息响应数据为空');
+        LoggerUtils.error('获取项目统计信息响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      log('[getProjectStats]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      LoggerUtils.error('[getProjectStats]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
     }
   }
@@ -241,7 +239,7 @@ class ProjectApi {
   /// 归档项目
   Future<ProjectModel?> archiveProject(int projectId) async {
     try {
-      log('[archiveProject] projectId=$projectId', name: 'ProjectApi');
+      LoggerUtils.info('[archiveProject] projectId=$projectId', name: 'ProjectApi');
 
       final response = await HttpClient.post('/projects/$projectId/archive');
 
@@ -250,12 +248,12 @@ class ProjectApi {
         (json) => ProjectModel.fromJson(json),
       );
       if (result == null) {
-        Logger.error('归档项目响应数据为空');
+        LoggerUtils.error('归档项目响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      log('[archiveProject]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      LoggerUtils.error('[archiveProject]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
     }
   }
@@ -263,7 +261,7 @@ class ProjectApi {
   /// 恢复项目
   Future<ProjectModel?> restoreProject(int projectId) async {
     try {
-      log('[restoreProject] projectId=$projectId', name: 'ProjectApi');
+      LoggerUtils.info('[restoreProject] projectId=$projectId', name: 'ProjectApi');
 
       final response = await HttpClient.post('/projects/$projectId/restore');
 
@@ -272,12 +270,12 @@ class ProjectApi {
         (json) => ProjectModel.fromJson(json),
       );
       if (result == null) {
-        Logger.error('恢复项目响应数据为空');
+        LoggerUtils.error('恢复项目响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      log('[restoreProject]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      LoggerUtils.error('[restoreProject]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       return null;
     }
   }
@@ -288,7 +286,7 @@ class ProjectApi {
     required int languageId,
   }) async {
     try {
-      log('[addProjectLanguage] projectId=$projectId, languageId=$languageId', name: 'ProjectApi');
+      LoggerUtils.info('[addProjectLanguage] projectId=$projectId, languageId=$languageId', name: 'ProjectApi');
 
       final response = await HttpClient.post(
         '/projects/$projectId/languages',
@@ -297,7 +295,7 @@ class ProjectApi {
 
       return response.code == DataCodeEnum.success;
     } catch (error, stackTrace) {
-      log('[addProjectLanguage]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      LoggerUtils.error('[addProjectLanguage]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
     }
   }
@@ -308,7 +306,7 @@ class ProjectApi {
     required int memberLimit,
   }) async {
     try {
-      log('[updateMemberLimit] projectId=$projectId, memberLimit=$memberLimit', name: 'ProjectApi');
+      LoggerUtils.info('[updateMemberLimit] projectId=$projectId, memberLimit=$memberLimit', name: 'ProjectApi');
 
       final response = await HttpClient.patch(
         '/projects/$projectId/member-limit',
@@ -320,12 +318,12 @@ class ProjectApi {
         (json) => ProjectModel.fromJson(json),
       );
       if (result == null) {
-        Logger.error('更新成员上限响应数据为空');
+        LoggerUtils.error('更新成员上限响应数据为空');
         return null;
       }
       return result;
     } catch (error, stackTrace) {
-      log('[updateMemberLimit]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      LoggerUtils.error('[updateMemberLimit]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
     }
   }
@@ -340,7 +338,7 @@ class ProjectApi {
     int? maxUses,
   }) async {
     try {
-      log('[generateInviteLink] projectId=$projectId, role=$role', name: 'ProjectApi');
+      LoggerUtils.info('[generateInviteLink] projectId=$projectId, role=$role', name: 'ProjectApi');
 
       final response = await HttpClient.post(
         '/projects/$projectId/invites',
@@ -353,7 +351,7 @@ class ProjectApi {
 
       return response.data as Map<String, dynamic>?;
     } catch (error, stackTrace) {
-      log('[generateInviteLink]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      LoggerUtils.error('[generateInviteLink]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
     }
   }
@@ -361,7 +359,7 @@ class ProjectApi {
   /// 获取项目的所有邀请链接
   Future<List<ProjectMemberModel>?> getProjectInvites(int projectId) async {
     try {
-      log('[getProjectInvites] projectId=$projectId', name: 'ProjectApi');
+      LoggerUtils.info('[getProjectInvites] projectId=$projectId', name: 'ProjectApi');
 
       final response = await HttpClient.get('/projects/$projectId/invites');
 
@@ -371,7 +369,7 @@ class ProjectApi {
       );
       return result;
     } catch (error, stackTrace) {
-      log('[getProjectInvites]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      LoggerUtils.error('[getProjectInvites]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
     }
   }
@@ -382,13 +380,13 @@ class ProjectApi {
     required int inviteId,
   }) async {
     try {
-      log('[revokeInvite] projectId=$projectId, inviteId=$inviteId', name: 'ProjectApi');
+      LoggerUtils.info('[revokeInvite] projectId=$projectId, inviteId=$inviteId', name: 'ProjectApi');
 
       final response = await HttpClient.delete('/projects/$projectId/invites/$inviteId');
 
       return response.code == DataCodeEnum.success;
     } catch (error, stackTrace) {
-      log('[revokeInvite]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      LoggerUtils.error('[revokeInvite]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
     }
   }
@@ -396,7 +394,7 @@ class ProjectApi {
   /// 获取邀请信息（公开接口，无需认证）
   Future<InviteInfoModel?> getInviteInfo(String inviteCode) async {
     try {
-      log('[getInviteInfo] inviteCode=$inviteCode', name: 'ProjectApi');
+      LoggerUtils.info('[getInviteInfo] inviteCode=$inviteCode', name: 'ProjectApi');
 
       final response = await HttpClient.get('/projects/invites/$inviteCode/info');
 
@@ -406,7 +404,7 @@ class ProjectApi {
       );
       return result;
     } catch (error, stackTrace) {
-      log('[getInviteInfo]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      LoggerUtils.error('[getInviteInfo]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
     }
   }
@@ -414,7 +412,7 @@ class ProjectApi {
   /// 接受邀请
   Future<ProjectMemberModel?> acceptInvite(String inviteCode) async {
     try {
-      log('[acceptInvite] inviteCode=$inviteCode', name: 'ProjectApi');
+      LoggerUtils.info('[acceptInvite] inviteCode=$inviteCode', name: 'ProjectApi');
 
       final response = await HttpClient.post('/projects/invites/$inviteCode/accept');
 
@@ -424,7 +422,7 @@ class ProjectApi {
       );
       return result;
     } catch (error, stackTrace) {
-      log('[acceptInvite]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      LoggerUtils.error('[acceptInvite]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
     }
   }
@@ -438,7 +436,7 @@ class ProjectApi {
     required String role,
   }) async {
     try {
-      log('[addProjectMember] projectId=$projectId, userId=$userId, role=$role', name: 'ProjectApi');
+      LoggerUtils.info('[addProjectMember] projectId=$projectId, userId=$userId, role=$role', name: 'ProjectApi');
 
       final response = await HttpClient.post(
         '/projects/$projectId/members',
@@ -450,7 +448,7 @@ class ProjectApi {
 
       return response.code == DataCodeEnum.success;
     } catch (error, stackTrace) {
-      log('[addProjectMember]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      LoggerUtils.error('[addProjectMember]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
     }
   }
@@ -461,13 +459,13 @@ class ProjectApi {
     required String userId,
   }) async {
     try {
-      log('[removeProjectMember] projectId=$projectId, userId=$userId', name: 'ProjectApi');
+      LoggerUtils.info('[removeProjectMember] projectId=$projectId, userId=$userId', name: 'ProjectApi');
 
       final response = await HttpClient.delete('/projects/$projectId/members/$userId');
 
       return response.code == DataCodeEnum.success;
     } catch (error, stackTrace) {
-      log('[removeProjectMember]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      LoggerUtils.error('[removeProjectMember]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
     }
   }
@@ -479,7 +477,7 @@ class ProjectApi {
     required String role,
   }) async {
     try {
-      log('[updateMemberRole] projectId=$projectId, userId=$userId, role=$role', name: 'ProjectApi');
+      LoggerUtils.info('[updateMemberRole] projectId=$projectId, userId=$userId, role=$role', name: 'ProjectApi');
 
       final response = await HttpClient.put(
         '/projects/$projectId/members/$userId',
@@ -488,7 +486,7 @@ class ProjectApi {
 
       return response.code == DataCodeEnum.success;
     } catch (error, stackTrace) {
-      log('[updateMemberRole]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      LoggerUtils.error('[updateMemberRole]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
     }
   }
@@ -499,13 +497,13 @@ class ProjectApi {
     required int languageId,
   }) async {
     try {
-      log('[removeProjectLanguage] projectId=$projectId, languageId=$languageId', name: 'ProjectApi');
+      LoggerUtils.info('[removeProjectLanguage] projectId=$projectId, languageId=$languageId', name: 'ProjectApi');
 
       final response = await HttpClient.delete('/projects/$projectId/languages/$languageId');
 
       return response.code == DataCodeEnum.success;
     } catch (error, stackTrace) {
-      log('[removeProjectLanguage]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      LoggerUtils.error('[removeProjectLanguage]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
       rethrow;
     }
   }

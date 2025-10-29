@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/services/service.dart';
 import 'package:ttpolyglot/src/features/features.dart';
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 翻译控制器
 ///
@@ -45,19 +46,19 @@ class TranslationController extends GetxController {
     try {
       await loadTranslationEntries();
     } catch (error, stackTrace) {
-      Logger.error('初始化翻译服务失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('初始化翻译服务失败', error: error, stackTrace: stackTrace);
     }
   }
 
   /// 当项目语言配置发生变化时，由外部调用此方法刷新数据
   Future<void> onProjectLanguageChanged() async {
-    Logger.info('项目语言配置已变化，刷新翻译条目...');
+    LoggerUtils.info('项目语言配置已变化，刷新翻译条目...');
 
     try {
       await loadTranslationEntries();
-      Logger.info('翻译条目刷新完成');
+      LoggerUtils.info('翻译条目刷新完成');
     } catch (error, stackTrace) {
-      Logger.error('刷新翻译条目失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('刷新翻译条目失败', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -70,7 +71,7 @@ class TranslationController extends GetxController {
       _translationEntries.assignAll(entries);
       _applyFilters();
     } catch (error, stackTrace) {
-      Logger.error('加载翻译条目失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('加载翻译条目失败', error: error, stackTrace: stackTrace);
     } finally {
       _isLoading.value = false;
     }
@@ -133,7 +134,7 @@ class TranslationController extends GetxController {
       Get.snackbar('成功', '翻译键创建成功');
     } catch (error, stackTrace) {
       Get.snackbar('错误', '创建翻译键失败: $error');
-      Logger.error('创建翻译键失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('创建翻译键失败', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -156,7 +157,7 @@ class TranslationController extends GetxController {
       if (isShowSnackbar) {
         Get.snackbar('错误', '更新翻译条目失败: $error');
       }
-      Logger.error('更新翻译条目失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('更新翻译条目失败', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -186,7 +187,7 @@ class TranslationController extends GetxController {
       }
     } catch (error, stackTrace) {
       Get.snackbar('错误', '批量更新翻译条目失败: $error');
-      Logger.error('批量更新翻译条目失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('批量更新翻译条目失败', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -229,7 +230,7 @@ class TranslationController extends GetxController {
       }
     } catch (error, stackTrace) {
       Get.snackbar('错误', '删除翻译条目失败: $error');
-      Logger.error('删除翻译条目失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('删除翻译条目失败', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -267,7 +268,7 @@ class TranslationController extends GetxController {
       }
     } catch (error, stackTrace) {
       Get.snackbar('错误', '批量删除翻译条目失败: $error');
-      Logger.error('批量删除翻译条目失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('批量删除翻译条目失败', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -335,7 +336,7 @@ class TranslationController extends GetxController {
     try {
       return await _translationService.getTranslationProgress(projectId);
     } catch (error, stackTrace) {
-      Logger.error('获取翻译进度失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取翻译进度失败', error: error, stackTrace: stackTrace);
       return {};
     }
   }
@@ -467,7 +468,7 @@ class TranslationController extends GetxController {
       final project = await ProjectsController.getProject(projectId);
       return project?.primaryLanguage;
     } catch (error, stackTrace) {
-      Logger.error('获取项目默认语言失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('获取项目默认语言失败', error: error, stackTrace: stackTrace);
       return null;
     }
   }
