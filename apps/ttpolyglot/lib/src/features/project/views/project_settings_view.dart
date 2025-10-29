@@ -65,9 +65,9 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                           _buildSettingItem(
                             context,
                             '项目状态',
-                            project.isActive ? '激活' : '停用',
+                            _getStatusText(controller.projectModel?.status ?? 'active'),
                             Icons.toggle_on,
-                            () {},
+                            () => ProjectDialogController.showEditStatusDialog(project),
                           ),
                           _buildSettingItem(
                             context,
@@ -464,5 +464,19 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
 
     // 暂时返回 true 以便测试
     return true;
+  }
+
+  /// 获取状态文本
+  String _getStatusText(String status) {
+    switch (status) {
+      case 'active':
+        return '激活';
+      case 'archived':
+        return '已归档';
+      case 'suspended':
+        return '已暂停';
+      default:
+        return '未知';
+    }
   }
 }

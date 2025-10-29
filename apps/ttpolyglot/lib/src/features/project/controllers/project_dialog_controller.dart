@@ -217,6 +217,75 @@ class ProjectDialogController extends GetxController {
     _refreshProject(project.id);
   }
 
+  /// 显示编辑项目状态弹窗
+  static Future<void> showEditStatusDialog(Project project) async {
+    try {
+      // 获取当前状态
+      final projectIdInt = int.tryParse(project.id);
+      if (projectIdInt == null) {
+        Get.snackbar('错误', '项目ID无效');
+        return;
+      }
+
+      final projectApi = Get.find<ProjectApi>();
+
+      // 显示状态选择对话框
+      final result = await Get.dialog<String>(
+        AlertDialog(
+          title: const Text('修改项目状态'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text('激活'),
+                subtitle: const Text('项目正常运行，可以进行所有操作'),
+                leading: const Icon(Icons.check_circle, color: Colors.green),
+                onTap: () => Get.back(result: 'active'),
+              ),
+              ListTile(
+                title: const Text('归档'),
+                subtitle: const Text('项目已归档，成员只能查看不能修改'),
+                leading: const Icon(Icons.archive, color: Colors.orange),
+                onTap: () => Get.back(result: 'archived'),
+              ),
+              ListTile(
+                title: const Text('暂停'),
+                subtitle: const Text('项目已暂停，所有成员均不能访问'),
+                leading: const Icon(Icons.pause_circle, color: Colors.red),
+                onTap: () => Get.back(result: 'suspended'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: const Text('取消'),
+            ),
+          ],
+        ),
+      );
+
+      if (result != null) {
+        // 调用 API 更新状态
+        final updatedProject = await projectApi.updateProject(
+          projectId: projectIdInt,
+          status: result,
+        );
+
+        if (updatedProject != null) {
+          Get.snackbar('成功', '项目状态已更新');
+          _refreshProject(project.id);
+        } else {
+          Get.snackbar('失败', '更新项目状态失败');
+        }
+      }
+    } catch (error, stackTrace) {
+      LoggerUtils.error('[showEditStatusDialog]',
+          error: error, stackTrace: stackTrace, name: 'ProjectDialogController');
+      Get.snackbar('错误', '更新项目状态失败: $error');
+    }
+  }
+
   /// 刷新项目数据
   static void _refreshProject(String projectId) {
     if (Get.isRegistered<ProjectController>(tag: projectId)) {
