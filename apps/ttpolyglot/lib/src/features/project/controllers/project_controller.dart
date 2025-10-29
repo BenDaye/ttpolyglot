@@ -22,6 +22,7 @@ class ProjectController extends GetxController {
   final TextEditingController _deleteProjectNameTextController = TextEditingController();
   final TranslationServiceImpl _translationService = Get.find<TranslationServiceImpl>();
   final ProjectApi _projectApi = Get.find<ProjectApi>();
+  final NotificationSettingsApi _notificationSettingsApi = Get.find<NotificationSettingsApi>();
 
   // 响应式项目对象
   final _project = Rxn<Project>();
@@ -29,12 +30,25 @@ class ProjectController extends GetxController {
   final _isLoading = false.obs;
   final _members = <ProjectMemberModel>[].obs;
 
+  // 通知设置
+  final _notificationSettings = <NotificationSettingsModel>[].obs;
+  final _isLoadingNotificationSettings = false.obs;
+
   // Getters
   Project? get project => _project.value;
   ProjectModel? get projectModel => _projectModel.value; // 用于访问 memberLimit 等信息
   Rxn<Project> get projectObs => _project;
   bool get isLoading => _isLoading.value;
   List<ProjectMemberModel> get members => _members;
+  List<NotificationSettingsModel> get notificationSettings => _notificationSettings;
+  bool get isLoadingNotificationSettings => _isLoadingNotificationSettings.value;
+
+  /// 检查当前用户是否是项目所有者
+  bool get isCurrentUserOwner {
+    final currentUsername = Get.find<AuthService>().currentUser?.username;
+    final ownerUsername = _projectModel.value?.ownerUsername;
+    return currentUsername != null && ownerUsername != null && currentUsername == ownerUsername;
+  }
 
   String get title => _project.value?.name ?? '-';
   String get description => _project.value?.description ?? '-';
@@ -94,6 +108,7 @@ class ProjectController extends GetxController {
     super.onReady();
     LoggerUtils.info('ProjectController onReady: $projectId');
     loadProject();
+    loadNotificationSettings();
   }
 
   @override
@@ -173,6 +188,58 @@ class ProjectController extends GetxController {
         lastUpdated: DateTime.now(),
       );
     }
+  }
+
+  /// 加载通知设置
+  Future<void> loadNotificationSettings() async {
+    final projectIdInt = int.tryParse(projectId);
+    if (projectIdInt == null) return;
+
+    _isLoadingNotificationSettings.value = true;
+    try {
+      final settings = await _notificationSettingsApi.getProjectNotificationSettings(
+        projectId: projectIdInt,
+      );
+      _notificationSettings.value = settings;
+      LoggerUtils.info('通知设置加载成功: ${settings.length} 条', name: 'ProjectController');
+    } catch (error, stackTrace) {
+      LoggerUtils.error('[loadNotificationSettings]', error: error, stackTrace: stackTrace, name: 'ProjectController');
+    } finally {
+      _isLoadingNotificationSettings.value = false;
+    }
+  }
+
+  /// 更新通知设置
+  Future<void> updateNotificationSetting({
+    required NotificationTypeEnum notificationType,
+    required NotificationChannelEnum channel,
+    required bool isEnabled,
+  }) async {
+    final projectIdInt = int.tryParse(projectId);
+    if (projectIdInt == null) return;
+
+    try {
+      await _notificationSettingsApi.updateProjectNotificationSetting(
+        projectId: projectIdInt,
+        notificationType: notificationType,
+        channel: channel,
+        isEnabled: isEnabled,
+      );
+
+      // 重新加载通知设置
+      await loadNotificationSettings();
+    } catch (error, stackTrace) {
+      LoggerUtils.error('[updateNotificationSetting]', error: error, stackTrace: stackTrace, name: 'ProjectController');
+      rethrow;
+    }
+  }
+
+  /// 检查通知设置是否启用
+  bool isNotificationEnabled(NotificationTypeEnum notificationType, NotificationChannelEnum channel) {
+    final setting = _notificationSettings.firstWhereOrNull(
+      (s) => s.notificationType == notificationType && s.channel == channel,
+    );
+    return setting?.isEnabled ?? true; // 默认启用
   }
 
   Future<void> deleteProject() async {

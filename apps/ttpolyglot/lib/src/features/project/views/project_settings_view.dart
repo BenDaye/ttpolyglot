@@ -133,42 +133,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                   const SizedBox(height: 16.0),
 
                   // 通知设置卡片
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '通知设置',
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: 16.0),
-                          _buildSwitchItem(
-                            context,
-                            '邮件通知',
-                            '重要事件发生时发送邮件通知',
-                            true,
-                            (value) {},
-                          ),
-                          _buildSwitchItem(
-                            context,
-                            '翻译完成通知',
-                            '翻译完成时通知项目成员',
-                            true,
-                            (value) {},
-                          ),
-                          _buildSwitchItem(
-                            context,
-                            '新成员加入通知',
-                            '新成员加入时通知管理员',
-                            true,
-                            (value) {},
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  _buildNotificationSettings(context, controller),
 
                   const SizedBox(height: 16.0),
 
@@ -284,9 +249,6 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
     final currentCount = controller.members.length;
     final memberLimit = controller.projectModel?.memberLimit ?? 10;
 
-    // 检查当前用户是否是 Owner
-    final isOwner = _isCurrentUserOwner(controller);
-
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -300,7 +262,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                   ),
             ),
             const SizedBox(height: 16.0),
-            if (isOwner) ...[
+            if (controller.isCurrentUserOwner) ...[
               // Owner 可编辑
               _buildOwnerMemberLimitEditor(
                 context: context,
@@ -413,6 +375,100 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
     );
   }
 
+  Widget _buildNotificationSettings(BuildContext context, ProjectController controller) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '通知设置',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 16.0),
+            Obx(() {
+              if (controller.isLoadingNotificationSettings) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              final emailEnabled = controller.isNotificationEnabled(
+                NotificationTypeEnum.projectUpdated,
+                NotificationChannelEnum.email,
+              );
+              final translationCompletedEnabled = controller.isNotificationEnabled(
+                NotificationTypeEnum.translationUpdated,
+                NotificationChannelEnum.email,
+              );
+              final memberJoinedEnabled = controller.isNotificationEnabled(
+                NotificationTypeEnum.memberJoined,
+                NotificationChannelEnum.email,
+              );
+
+              return Column(
+                children: [
+                  _buildSwitchItem(
+                    context,
+                    '邮件通知',
+                    '重要事件发生时发送邮件通知',
+                    emailEnabled,
+                    (value) => _updateNotificationSetting(
+                      controller,
+                      NotificationTypeEnum.projectUpdated,
+                      NotificationChannelEnum.email,
+                      value,
+                    ),
+                  ),
+                  _buildSwitchItem(
+                    context,
+                    '翻译完成通知',
+                    '翻译完成时通知项目成员',
+                    translationCompletedEnabled,
+                    (value) => _updateNotificationSetting(
+                      controller,
+                      NotificationTypeEnum.translationUpdated,
+                      NotificationChannelEnum.email,
+                      value,
+                    ),
+                  ),
+                  _buildSwitchItem(
+                    context,
+                    '新成员加入通知',
+                    '新成员加入时通知管理员',
+                    memberJoinedEnabled,
+                    (value) => _updateNotificationSetting(
+                      controller,
+                      NotificationTypeEnum.memberJoined,
+                      NotificationChannelEnum.email,
+                      value,
+                    ),
+                  ),
+                ],
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _updateNotificationSetting(
+    ProjectController controller,
+    NotificationTypeEnum notificationType,
+    NotificationChannelEnum channel,
+    bool isEnabled,
+  ) async {
+    try {
+      await controller.updateNotificationSetting(
+        notificationType: notificationType,
+        channel: channel,
+        isEnabled: isEnabled,
+      );
+    } catch (error) {
+      Get.snackbar('失败', '更新通知设置失败');
+    }
+  }
+
   Future<void> _updateMemberLimit(ProjectController controller, int currentCount) async {
     final newLimit = int.tryParse(_memberLimitController.text);
     if (newLimit == null || newLimit < 1 || newLimit > 1000) {
@@ -440,16 +496,6 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
     } catch (error) {
       Get.snackbar('失败', '更新成员上限失败');
     }
-  }
-
-  bool _isCurrentUserOwner(ProjectController controller) {
-    // TODO: 实际应该从 AuthService 获取当前用户ID并与项目所有者ID比较
-    // final currentUserId = Get.find<AuthService>().currentUser?.id;
-    // final project = controller.project;
-    // return project?.ownerId == currentUserId;
-
-    // 暂时返回 true 以便测试
-    return true;
   }
 
   /// 获取状态文本
