@@ -25,11 +25,13 @@ class ProjectController extends GetxController {
 
   // 响应式项目对象
   final _project = Rxn<Project>();
+  final _projectModel = Rxn<ProjectModel>(); // 保存 API 模型，包含 memberLimit 等额外信息
   final _isLoading = false.obs;
   final _members = <ProjectMemberModel>[].obs;
 
   // Getters
   Project? get project => _project.value;
+  ProjectModel? get projectModel => _projectModel.value; // 用于访问 memberLimit 等信息
   Rxn<Project> get projectObs => _project;
   bool get isLoading => _isLoading.value;
   List<ProjectMemberModel> get members => _members;
@@ -121,6 +123,9 @@ class ProjectController extends GetxController {
       // 从 API 获取项目详情
       final projectDetailModel = await _projectApi.getProject(projectIdInt);
       if (projectDetailModel != null) {
+        // 保存 ProjectModel，用于访问 memberLimit 等 API 层信息
+        _projectModel.value = projectDetailModel.project;
+
         // 将 ProjectDetailModel 转换为 Project（包含语言列表）
         final project = ProjectConverter.toProjectFromDetail(projectDetailModel);
 

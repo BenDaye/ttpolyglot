@@ -294,9 +294,9 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
   }
 
   Widget _buildMemberLimitSettings(BuildContext context, ProjectController controller) {
-    // 假设从 controller 获取当前成员数和上限
+    // 从 controller 获取当前成员数和上限
     final currentCount = controller.members.length;
-    final memberLimit = 10; // 默认值，实际应该从 project model 中获取
+    final memberLimit = controller.projectModel?.memberLimit ?? 10;
 
     // 检查当前用户是否是 Owner
     final isOwner = _isCurrentUserOwner(controller);
@@ -328,7 +328,11 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
   }
 
   Widget _buildOwnerMemberLimitEditor(
-      BuildContext context, ProjectController controller, int currentCount, int memberLimit) {
+    BuildContext context,
+    ProjectController controller,
+    int currentCount,
+    int memberLimit,
+  ) {
     // 初始化输入框值
     if (_memberLimitController.text.isEmpty) {
       _memberLimitController.text = memberLimit.toString();
