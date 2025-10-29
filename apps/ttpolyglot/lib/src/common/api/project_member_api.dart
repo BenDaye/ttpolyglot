@@ -32,7 +32,7 @@ class ProjectMemberApi {
         query: queryParameters,
       );
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => PagerModel.fromJson(json, (data) => ProjectMemberModel.fromJson(data as Map<String, dynamic>)),
       );
@@ -67,7 +67,7 @@ class ProjectMemberApi {
         ),
       );
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => ProjectMemberModel.fromJson(json),
       );
@@ -96,7 +96,7 @@ class ProjectMemberApi {
         ),
       );
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => ProjectMemberModel.fromJson(json),
       );
@@ -130,7 +130,7 @@ class ProjectMemberApi {
         ),
       );
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => ProjectMemberModel.fromJson(json),
       );
@@ -160,7 +160,7 @@ class ProjectMemberApi {
         ),
       );
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => json['code'] == DataCodeEnum.success,
       );
@@ -184,7 +184,7 @@ class ProjectMemberApi {
         '/projects/$projectId/members/check',
       );
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => json['is_member'] as bool? ?? false,
       );
@@ -208,7 +208,7 @@ class ProjectMemberApi {
         '/projects/$projectId/members/role',
       );
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => ProjectRoleEnum.fromValue(json['role'] as String),
       );
@@ -247,7 +247,7 @@ class ProjectMemberApi {
         ),
       );
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => ProjectMemberModel.fromJson(json),
       );
@@ -269,7 +269,7 @@ class ProjectMemberApi {
         '/projects/$projectId/invites',
       );
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) {
           final items = json as List;
@@ -294,7 +294,7 @@ class ProjectMemberApi {
         '/invites/$inviteCode',
       );
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => InviteInfoModel.fromJson(json),
       );
@@ -321,7 +321,7 @@ class ProjectMemberApi {
         ),
       );
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => ProjectMemberModel.fromJson(json),
       );
@@ -351,7 +351,7 @@ class ProjectMemberApi {
         ),
       );
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => json['code'] == DataCodeEnum.success,
       );
@@ -386,7 +386,7 @@ class ProjectMemberApi {
         ),
       );
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => ProjectMemberModel.fromJson(json),
       );

@@ -3,9 +3,9 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 import '../../config/server_config.dart';
-import '../logging/logger_utils.dart';
 
 /// JWT 工具类
 class JwtUtils {
@@ -70,7 +70,7 @@ class JwtUtils {
 
       // 检查必要字段
       if (!payload.containsKey('user_id') || !payload.containsKey('exp')) {
-        LoggerUtils.warn('JWT令牌缺少必要字段');
+        LoggerUtils.warning('JWT令牌缺少必要字段');
         return null;
       }
 
@@ -78,16 +78,16 @@ class JwtUtils {
       final exp = payload['exp'] as int;
       final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       if (exp <= now) {
-        LoggerUtils.warn('JWT令牌已过期');
+        LoggerUtils.warning('JWT令牌已过期');
         return null;
       }
 
       return payload;
     } on JWTExpiredException {
-      LoggerUtils.warn('JWT令牌已过期');
+      LoggerUtils.warning('JWT令牌已过期');
       return null;
     } on JWTException catch (error) {
-      LoggerUtils.warn('JWT验证失败', error: error);
+      LoggerUtils.warning('JWT验证失败', error: error);
       return null;
     } catch (error, stackTrace) {
       LoggerUtils.error('JWT验证出错', error: error, stackTrace: stackTrace);
@@ -159,7 +159,7 @@ class JwtUtils {
 
       // 检查令牌用途
       if (payload['purpose'] != 'password_reset') {
-        LoggerUtils.warn('无效的密码重置令牌用途');
+        LoggerUtils.warning('无效的密码重置令牌用途');
         return null;
       }
 
@@ -200,7 +200,7 @@ class JwtUtils {
 
       // 检查令牌用途
       if (payload['purpose'] != 'email_verification') {
-        LoggerUtils.warn('无效的邮箱验证令牌用途');
+        LoggerUtils.warning('无效的邮箱验证令牌用途');
         return null;
       }
 

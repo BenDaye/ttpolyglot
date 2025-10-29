@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 文件上传服务
 class FileUploadService extends BaseService {
@@ -84,7 +85,7 @@ class FileUploadService extends BaseService {
         return true;
       }
 
-      LoggerUtils.warn('头像文件不存在: $filePath');
+      LoggerUtils.warning('头像文件不存在: $filePath');
       return false;
     } catch (error, stackTrace) {
       LoggerUtils.error('删除头像失败', error: error, stackTrace: stackTrace);

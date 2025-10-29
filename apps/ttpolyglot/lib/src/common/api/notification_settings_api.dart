@@ -18,7 +18,7 @@ class NotificationSettingsApi {
         '/notification-settings',
         query: queryParameters,
       );
-      final result = Utils.toModelArray(
+      final result = ModelUtils.toModelArray(
         response.data,
         (json) => NotificationSettingsModel.fromJson(json),
       );
@@ -42,7 +42,7 @@ class NotificationSettingsApi {
         '/projects/$projectId/notification-settings',
       );
 
-      final result = Utils.toModelArray(
+      final result = ModelUtils.toModelArray(
         response.data,
         (json) => NotificationSettingsModel.fromJson(json),
       );
@@ -80,7 +80,7 @@ class NotificationSettingsApi {
         ),
       );
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => NotificationSettingsModel.fromJson(json),
       );
@@ -117,7 +117,7 @@ class NotificationSettingsApi {
         ),
       );
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => NotificationSettingsModel.fromJson(json),
       );
@@ -151,7 +151,7 @@ class NotificationSettingsApi {
         ),
       );
 
-      final result = Utils.toModelArray(
+      final result = ModelUtils.toModelArray(
         response.data,
         (json) => NotificationSettingsModel.fromJson(json),
       );
@@ -209,7 +209,7 @@ class NotificationSettingsApi {
         query: queryParameters,
       );
 
-      final data = Utils.toModel(
+      final data = ModelUtils.toModel(
         response.data,
         (json) => json['isEnabled'] as bool,
       );

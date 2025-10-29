@@ -1,6 +1,7 @@
 import 'package:shelf/shelf.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 权限中间件
 class PermissionMiddleware {
@@ -34,7 +35,7 @@ class PermissionMiddleware {
           );
 
           if (!hasPermission) {
-            LoggerUtils.warn('权限检查失败: $userId 缺少权限 $permission (项目: $actualProjectId)');
+            LoggerUtils.warning('权限检查失败: $userId 缺少权限 $permission (项目: $actualProjectId)');
             return ResponseUtils.error(message: '权限不足', code: DataCodeEnum.unauthorized);
           }
 
@@ -86,7 +87,7 @@ class PermissionMiddleware {
             );
 
             if (!hasPermission) {
-              LoggerUtils.warn('权限检查失败: $userId 缺少权限 $permission (项目: $actualProjectId)');
+              LoggerUtils.warning('权限检查失败: $userId 缺少权限 $permission (项目: $actualProjectId)');
               return ResponseUtils.error(message: '权限不足', code: DataCodeEnum.unauthorized);
             }
           }
@@ -149,7 +150,7 @@ class PermissionMiddleware {
           }
 
           if (!hasAnyPermission) {
-            LoggerUtils.warn('权限检查失败: $userId 缺少权限 ${permissions.join(' 或 ')} (项目: $actualProjectId)');
+            LoggerUtils.warning('权限检查失败: $userId 缺少权限 ${permissions.join(' 或 ')} (项目: $actualProjectId)');
             return ResponseUtils.error(message: '权限不足', code: DataCodeEnum.unauthorized);
           }
 
@@ -225,7 +226,7 @@ class PermissionMiddleware {
           final isSuperAdmin = await _permissionService.isSuperAdmin(userId);
 
           if (!isSuperAdmin) {
-            LoggerUtils.warn('超级管理员检查失败: $userId 不是超级管理员');
+            LoggerUtils.warning('超级管理员检查失败: $userId 不是超级管理员');
             return ResponseUtils.error(message: '只有超级管理员可以执行此操作', code: DataCodeEnum.internalServerError);
           }
 

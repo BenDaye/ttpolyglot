@@ -1,6 +1,7 @@
 import 'dart:convert';
 
-import '../../utils/logging/logger_utils.dart';
+import 'package:ttpolyglot_utils/utils.dart';
+
 import 'redis_service.dart';
 
 /// 多级缓存服务

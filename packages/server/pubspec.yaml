@@ -9,7 +9,8 @@ environment:
 dependencies:
   # 内部包依赖
   ttpolyglot_model: ^1.0.0
-  
+  ttpolyglot_utils: ^1.0.0
+
   # HTTP 服务器框架
   shelf: ^1.4.1
   shelf_router: ^1.1.4

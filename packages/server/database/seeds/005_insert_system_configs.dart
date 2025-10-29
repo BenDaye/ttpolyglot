@@ -1,6 +1,4 @@
-
-
-import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 import 'base_seed.dart';
 
 /// 种子: 005 - 插入系统配置

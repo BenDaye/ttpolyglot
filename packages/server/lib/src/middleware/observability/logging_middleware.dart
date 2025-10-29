@@ -1,6 +1,5 @@
 import 'package:shelf/shelf.dart';
-
-import '../../utils/logging/logger_utils.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 结构化日志中间件
 Middleware structuredLoggingMiddleware() {
@@ -11,7 +10,7 @@ Middleware structuredLoggingMiddleware() {
       // 记录请求开始
       LoggerUtils.info(
         '收到请求',
-        context: LogContext.fromRequest(request),
+        error: {'request': request},
       );
 
       try {
@@ -22,13 +21,7 @@ Middleware structuredLoggingMiddleware() {
         final duration = DateTime.now().difference(startTime);
         LoggerUtils.info(
           '请求完成',
-          context: LogContext.fromRequest(
-            request,
-            extra: {
-              'http_status': response.statusCode,
-              'duration_ms': duration.inMilliseconds,
-            },
-          ),
+          error: {'http_status': response.statusCode, 'duration_ms': duration.inMilliseconds},
         );
 
         return response;
@@ -37,14 +30,8 @@ Middleware structuredLoggingMiddleware() {
         final duration = DateTime.now().difference(startTime);
         LoggerUtils.error(
           '请求失败',
-          error: error,
+          error: {'duration_ms': duration.inMilliseconds},
           stackTrace: stackTrace,
-          context: LogContext.fromRequest(
-            request,
-            extra: {
-              'duration_ms': duration.inMilliseconds,
-            },
-          ),
         );
         rethrow;
       }

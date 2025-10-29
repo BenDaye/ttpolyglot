@@ -2,12 +2,12 @@ import 'dart:convert';
 
 import 'package:shelf/shelf.dart';
 import 'package:ttpolyglot_model/model.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../config/server_config.dart';
 import '../../middleware/error_handling/error_handler_middleware.dart';
 import '../../services/services.dart';
-import '../logging/logger_utils.dart';
 
 /// API响应构建器
 /// 提供统一的响应格式构建方法
@@ -50,7 +50,7 @@ class ResponseUtils {
       200,
       headers: responseHeaders,
       body: jsonEncode(
-        apiResponse.toJson((data) => Utils.toJsonValue(data)),
+        apiResponse.toJson((data) => ModelUtils.toJsonValue(data)),
       ),
     );
   }
@@ -82,7 +82,7 @@ class ResponseUtils {
       _getHttpStatusCode(code),
       headers: responseHeaders,
       body: jsonEncode(
-        apiResponse.toJson((data) => Utils.toJsonValue(data)),
+        apiResponse.toJson((data) => ModelUtils.toJsonValue(data)),
       ),
     );
   }

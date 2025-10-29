@@ -1,7 +1,7 @@
 import 'package:postgres/postgres.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 import '../../config/server_config.dart';
-import '../../utils/logging/logger_utils.dart';
 
 /// 数据库服务类
 class DatabaseService {
@@ -63,7 +63,7 @@ class DatabaseService {
       final result = await _connection!.execute('SELECT 1');
       return result.isNotEmpty;
     } catch (error) {
-      LoggerUtils.warn('数据库健康检查失败', error: error);
+      LoggerUtils.warning('数据库健康检查失败', error: error);
       return false;
     }
   }
@@ -97,8 +97,7 @@ class DatabaseService {
         return await connection.execute(processedSql);
       }
     } catch (error, stackTrace) {
-      LoggerUtils.error('数据库查询失败: $sql',
-          error: error, stackTrace: stackTrace, context: LogContext.simple({'sql': sql}));
+      LoggerUtils.error('数据库查询失败: $sql', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -109,7 +108,7 @@ class DatabaseService {
   /// 开始事务
   Future<void> beginTransaction() async {
     if (_inTransaction) {
-      LoggerUtils.warn('尝试开启事务，但已在事务中。跳过 BEGIN。');
+      LoggerUtils.warning('尝试开启事务，但已在事务中。跳过 BEGIN。');
       return;
     }
     await connection.execute('BEGIN');
@@ -120,7 +119,7 @@ class DatabaseService {
   /// 提交事务
   Future<void> commitTransaction() async {
     if (!_inTransaction) {
-      LoggerUtils.warn('尝试提交事务，但不在事务中。跳过 COMMIT。');
+      LoggerUtils.warning('尝试提交事务，但不在事务中。跳过 COMMIT。');
       return;
     }
     await connection.execute('COMMIT');
@@ -131,7 +130,7 @@ class DatabaseService {
   /// 回滚事务
   Future<void> rollbackTransaction() async {
     if (!_inTransaction) {
-      LoggerUtils.warn('尝试回滚事务，但不在事务中。跳过 ROLLBACK。');
+      LoggerUtils.warning('尝试回滚事务，但不在事务中。跳过 ROLLBACK。');
       return;
     }
     await connection.execute('ROLLBACK');

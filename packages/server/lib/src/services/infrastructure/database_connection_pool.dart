@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:postgres/postgres.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 import '../../config/server_config.dart';
-import '../../utils/logging/logger_utils.dart';
 
 /// 数据库连接池
 class DatabaseConnectionPool {
@@ -104,7 +104,7 @@ class DatabaseConnectionPool {
           LoggerUtils.debug('连接已释放到池中: ${_activeConnections}/${_totalConnections}');
         } else {
           _totalConnections--;
-          LoggerUtils.warn('连接不健康，已移除: ${_activeConnections}/${_totalConnections}');
+          LoggerUtils.warning('连接不健康，已移除: ${_activeConnections}/${_totalConnections}');
         }
 
         // 处理等待队列
@@ -321,7 +321,7 @@ class DatabaseConnectionPool {
     }
 
     if (unhealthyConnections.isNotEmpty) {
-      LoggerUtils.warn('移除不健康连接: ${unhealthyConnections.length}个');
+      LoggerUtils.warning('移除不健康连接: ${unhealthyConnections.length}个');
     }
   }
 

@@ -13,7 +13,7 @@ class LanguageApi {
     try {
       log('[getLanguages] 暂时返回默认语言列表', name: 'LanguageApi');
       final response = await HttpClient.get('/languages');
-      final languages = Utils.toModelArray(
+      final languages = ModelUtils.toModelArray(
         response.data,
         (json) => LanguageModel.fromJson(json),
       );

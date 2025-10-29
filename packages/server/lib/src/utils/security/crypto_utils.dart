@@ -3,9 +3,9 @@ import 'dart:math';
 
 import 'package:bcrypt/bcrypt.dart';
 import 'package:crypto/crypto.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 import '../../config/server_config.dart';
-import '../logging/logger_utils.dart';
 
 /// 加密工具类
 class CryptoUtils {

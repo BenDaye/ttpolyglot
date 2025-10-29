@@ -1,6 +1,5 @@
 import 'package:ttpolyglot_server/src/middleware/error_handling/error_handler_middleware.dart';
-
-import '../logging/logger_utils.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 数据验证工具类
 class ValidatorUtils {

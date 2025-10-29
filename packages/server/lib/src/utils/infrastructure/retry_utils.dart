@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:math' hide log;
+import 'dart:math';
 
-import '../logging/logger_utils.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 重试策略
 enum RetryStrategy {
@@ -110,7 +110,7 @@ class RetryUtils {
 
         // 检查是否应该重试
         if (config.retryIf != null && !config.retryIf!(error)) {
-          LoggerUtils.warn('错误不可重试: ${operationName ?? 'operation'} - $error', error: error, stackTrace: stackTrace);
+          LoggerUtils.warning('错误不可重试: ${operationName ?? 'operation'} - $error', error: error, stackTrace: stackTrace);
           rethrow;
         }
 

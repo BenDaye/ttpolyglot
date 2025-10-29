@@ -1,6 +1,7 @@
+import 'package:ttpolyglot_utils/utils.dart';
+
 import '../config/server_config.dart';
 import '../services/services.dart';
-import '../utils/logging/logger_utils.dart';
 import 'dependency_injection.dart';
 
 /// 服务注册器

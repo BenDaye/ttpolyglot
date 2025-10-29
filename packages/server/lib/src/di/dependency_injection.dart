@@ -1,4 +1,4 @@
-import '../utils/logging/logger_utils.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 依赖注入容器
 class DIContainer {

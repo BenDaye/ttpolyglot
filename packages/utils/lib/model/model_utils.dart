@@ -1,7 +1,7 @@
-import 'dart:developer' as developer;
+import 'package:ttpolyglot_utils/utils.dart';
 
-final class Utils {
-  Utils._();
+final class ModelUtils {
+  ModelUtils._();
 
   /// 将对象转换为 JSON 值
   static dynamic toJsonValue<T>(T data) {
@@ -41,7 +41,7 @@ final class Utils {
       }
     } catch (error, stackTrace) {
       // 如果都失败，直接返回原数据
-      developer.log('toJsonValue error:', error: error, stackTrace: stackTrace, name: 'Utils');
+      LoggerUtils.error('toJsonValue error:', error: error, stackTrace: stackTrace);
       return data;
     }
   }
@@ -58,7 +58,7 @@ final class Utils {
 
       return data;
     } catch (error, stackTrace) {
-      developer.log('toModel error:', error: error, stackTrace: stackTrace, name: 'Utils');
+      LoggerUtils.error('toModel error:', error: error, stackTrace: stackTrace);
       return null;
     }
   }
@@ -72,7 +72,7 @@ final class Utils {
       }
       return data;
     } catch (error, stackTrace) {
-      developer.log('toModelArray error:', error: error, stackTrace: stackTrace, name: 'Utils');
+      LoggerUtils.error('toModelArray error:', error: error, stackTrace: stackTrace);
       return null;
     }
   }

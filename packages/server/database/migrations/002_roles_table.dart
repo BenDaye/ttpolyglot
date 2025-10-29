@@ -1,6 +1,5 @@
+import 'package:ttpolyglot_utils/utils.dart';
 
-
-import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
 import 'base_migration.dart';
 
 /// 迁移: 002 - 创建角色表

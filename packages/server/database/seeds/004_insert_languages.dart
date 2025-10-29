@@ -1,5 +1,5 @@
 import 'package:ttpolyglot_model/model.dart';
-import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 import 'base_seed.dart';
 

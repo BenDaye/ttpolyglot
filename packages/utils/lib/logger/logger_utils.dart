@@ -32,60 +32,55 @@ class LoggerUtils {
   // ========== 常用日志方法 ==========
 
   /// 记录调试信息
-  static void debug(dynamic message, {String? name}) {
-    talker.debug(message);
+  static void debug(dynamic message, {String? name, Object? error, StackTrace? stackTrace}) {
+    talker.debug('${name != null && name.isNotEmpty ? '$name: ' : ''}$message', error, stackTrace);
   }
 
   /// 记录普通信息
-  static void info(dynamic message, {String? name}) {
-    talker.info(message);
+  static void info(dynamic message, {String? name, Object? error, StackTrace? stackTrace}) {
+    talker.info('${name != null && name.isNotEmpty ? '$name: ' : ''}$message', error, stackTrace);
   }
 
   /// 记录警告信息
-  static void warning(dynamic message, {String? name}) {
-    talker.warning(message);
+  static void warning(dynamic message, {String? name, Object? error, StackTrace? stackTrace}) {
+    talker.warning('${name != null && name.isNotEmpty ? '$name: ' : ''}$message', error, stackTrace);
   }
 
   /// 记录错误信息
   static void error(
     dynamic message, {
+    String? name,
     Object? error,
     StackTrace? stackTrace,
-    String? name,
   }) {
-    if (error != null || stackTrace != null) {
-      talker.error(message, error, stackTrace);
-    } else {
-      talker.error(message);
-    }
+    talker.error('${name != null && name.isNotEmpty ? '$name: ' : ''}$message', error, stackTrace);
   }
 
   /// 记录严重错误信息
   static void critical(
     dynamic message, {
+    String? name,
     Object? error,
     StackTrace? stackTrace,
-    String? name,
   }) {
-    talker.critical(message, error, stackTrace);
+    talker.critical('${name != null && name.isNotEmpty ? '$name: ' : ''}$message', error, stackTrace);
   }
 
   /// 记录详细日志（verbose）
-  static void verbose(dynamic message, {String? name}) {
-    talker.verbose(message);
+  static void verbose(dynamic message, {String? name, Object? error, StackTrace? stackTrace}) {
+    talker.verbose('${name != null && name.isNotEmpty ? '$name: ' : ''}$message', error, stackTrace);
   }
 
   /// 自定义日志
   static void log(
     dynamic message, {
+    LogLevel logLevel = LogLevel.info,
+    String? name,
     Object? error,
     StackTrace? stackTrace,
-    String? name,
   }) {
-    talker.log(message);
-    if (error != null) {
-      talker.error('Error details', error, stackTrace);
-    }
+    talker.log('${name != null && name.isNotEmpty ? '$name: ' : ''}$message',
+        logLevel: logLevel, exception: error, stackTrace: stackTrace);
   }
 
   // ========== UI 相关 ==========

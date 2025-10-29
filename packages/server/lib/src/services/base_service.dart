@@ -1,9 +1,9 @@
 import 'dart:developer' as developer;
 
 import 'package:ttpolyglot_model/model.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 import '../exceptions/exceptions.dart';
-import '../utils/logging/logger_utils.dart';
 
 /// 服务基类
 /// 提供统一的日志记录和错误处理机制
@@ -22,9 +22,13 @@ abstract class BaseService {
     final opName = operationName ?? 'operation';
 
     try {
-      LoggerUtils.debug('开始执行: $opName', context: _buildContext(context));
+      LoggerUtils.debug(
+        '开始执行: $opName',
+      );
       final result = await operation();
-      LoggerUtils.debug('执行成功: $opName', context: _buildContext(context));
+      LoggerUtils.debug(
+        '执行成功: $opName',
+      );
       return result;
     } on ServerException catch (error, stackTrace) {
       // 服务器异常直接重新抛出
@@ -32,7 +36,6 @@ abstract class BaseService {
         '执行失败: $opName - ${error.message}',
         error: error,
         stackTrace: stackTrace,
-        context: _buildContext(context),
       );
       rethrow;
     } catch (error, stackTrace) {
@@ -41,7 +44,6 @@ abstract class BaseService {
         '执行出现未知错误: $opName',
         error: error,
         stackTrace: stackTrace,
-        context: _buildContext(context),
       );
 
       // 如果提供了错误处理函数，使用它
@@ -68,16 +70,19 @@ abstract class BaseService {
     final opName = operationName ?? 'operation';
 
     try {
-      LoggerUtils.debug('开始执行: $opName', context: _buildContext(context));
+      LoggerUtils.debug(
+        '开始执行: $opName',
+      );
       final result = operation();
-      LoggerUtils.debug('执行成功: $opName', context: _buildContext(context));
+      LoggerUtils.debug(
+        '执行成功: $opName',
+      );
       return result;
     } on ServerException catch (error, stackTrace) {
       LoggerUtils.error(
         '执行失败: $opName - ${error.message}',
         error: error,
         stackTrace: stackTrace,
-        context: _buildContext(context),
       );
       rethrow;
     } catch (error, stackTrace) {
@@ -85,7 +90,6 @@ abstract class BaseService {
         '执行出现未知错误: $opName',
         error: error,
         stackTrace: stackTrace,
-        context: _buildContext(context),
       );
 
       if (onError != null) {
@@ -197,30 +201,25 @@ abstract class BaseService {
     );
   }
 
-  /// 构建日志上下文
-  LogContext _buildContext(Map<String, dynamic>? context) {
-    final logContext = LogContext();
-    if (context != null) {
-      for (final entry in context.entries) {
-        logContext.field(entry.key, entry.value);
-      }
-    }
-    return logContext;
-  }
-
   /// 记录信息日志
   void logInfo(String message, {Map<String, dynamic>? context}) {
-    LoggerUtils.info(message, context: _buildContext(context));
+    LoggerUtils.info(
+      message,
+    );
   }
 
   /// 记录调试日志
   void logDebug(String message, {Map<String, dynamic>? context}) {
-    LoggerUtils.debug(message, context: _buildContext(context));
+    LoggerUtils.debug(
+      message,
+    );
   }
 
   /// 记录警告日志
   void logWarning(String message, {Map<String, dynamic>? context}) {
-    LoggerUtils.warn(message, context: _buildContext(context));
+    LoggerUtils.warning(
+      message,
+    );
   }
 
   /// 记录错误日志

@@ -1,10 +1,10 @@
 import 'dart:developer' as developer;
 
 import 'package:shelf/shelf.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 import '../exceptions/exceptions.dart';
 import '../utils/http/response_utils.dart';
-import '../utils/logging/logger_utils.dart';
 
 /// 控制器基类
 /// 提供统一的请求处理、错误处理和日志记录机制
@@ -102,12 +102,12 @@ abstract class BaseController {
 
   /// 记录信息日志
   void logInfo(String message, {Map<String, dynamic>? context}) {
-    LoggerUtils.info(message, context: LogContext({'controller': controllerName, ...?context}));
+    LoggerUtils.info(message, name: 'controller');
   }
 
   /// 记录警告日志
   void logWarn(String message, {Map<String, dynamic>? context}) {
-    LoggerUtils.warn(message, context: LogContext({'controller': controllerName, ...?context}));
+    LoggerUtils.warning(message, name: 'controller');
   }
 
   /// 记录错误日志
@@ -121,12 +121,12 @@ abstract class BaseController {
       message,
       error: error,
       stackTrace: stackTrace,
-      context: LogContext({'controller': controllerName, ...?context}),
+      name: 'controller',
     );
   }
 
   /// 记录调试日志
   void logDebug(String message, {Map<String, dynamic>? context}) {
-    LoggerUtils.debug(message, context: LogContext({'controller': controllerName, ...?context}));
+    LoggerUtils.debug(message, name: 'controller');
   }
 }

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as path;
 import 'package:ttpolyglot_server/server.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 import 'migrations/base_migration.dart';
 import 'seeds/base_seed.dart';
@@ -297,7 +298,7 @@ class MigrationService {
           final owner = lockInfo.first[0];
           final lockedAt = lockInfo.first[1];
           final expiresAtTime = lockInfo.first[2];
-          LoggerUtils.warn('迁移锁已被占用: $owner (锁定于: $lockedAt, 过期时间: $expiresAtTime)');
+          LoggerUtils.warning('迁移锁已被占用: $owner (锁定于: $lockedAt, 过期时间: $expiresAtTime)');
         }
         return false;
       }
@@ -345,7 +346,7 @@ class MigrationService {
       if (result.isNotEmpty) {
         LoggerUtils.debug('迁移锁已续期至: $newExpiresAt');
       } else {
-        LoggerUtils.warn('续期失败：锁可能已被其他进程获取');
+        LoggerUtils.warning('续期失败：锁可能已被其他进程获取');
       }
     } catch (error, stackTrace) {
       LoggerUtils.error('续期迁移锁失败', error: error, stackTrace: stackTrace);
@@ -452,7 +453,7 @@ class MigrationService {
       ''', {'name': migrationName});
 
       if (existingRecord.isNotEmpty) {
-        LoggerUtils.warn('迁移记录已存在，跳过执行: $migrationName');
+        LoggerUtils.warning('迁移记录已存在，跳过执行: $migrationName');
         return;
       }
 
@@ -712,7 +713,7 @@ class MigrationService {
             .query('DELETE FROM $tableName WHERE migration_name = @name', {'name': migrationName});
 
         if (result.isEmpty) {
-          LoggerUtils.warn('未找到迁移记录: $migrationName');
+          LoggerUtils.warning('未找到迁移记录: $migrationName');
         } else {
           LoggerUtils.info('迁移回滚成功: $migrationName');
         }
@@ -1355,7 +1356,7 @@ class MigrationService {
       LoggerUtils.info('执行数据库备份');
 
       if (ServerConfig.isDevelopment) {
-        LoggerUtils.warn('备份功能仅在生产环境中使用');
+        LoggerUtils.warning('备份功能仅在生产环境中使用');
         return '';
       }
 
@@ -1521,7 +1522,7 @@ class MigrationService {
         await file.delete();
         LoggerUtils.info('备份文件已删除: $backupPath');
       } else {
-        LoggerUtils.warn('备份文件不存在: $backupPath');
+        LoggerUtils.warning('备份文件不存在: $backupPath');
       }
     } catch (error, stackTrace) {
       LoggerUtils.error('删除备份文件失败: $backupPath', error: error, stackTrace: stackTrace);

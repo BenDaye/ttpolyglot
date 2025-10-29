@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 import 'config/server_config.dart';
 import 'di/di.dart';
@@ -10,7 +11,6 @@ import 'middleware/middleware.dart';
 import 'routes/api_routes.dart';
 import 'services/services.dart';
 import 'utils/http/response_utils.dart';
-import 'utils/logging/logger_utils.dart';
 
 /// TTPolyglot 服务器主类
 class TTPolyglotServer {
@@ -62,19 +62,17 @@ class TTPolyglotServer {
       final duration = DateTime.now().difference(_startTime);
       LoggerUtils.info(
         '服务器启动完成',
-        context: LogContext.simple({
+        error: {
           'startup_time': duration.inMilliseconds.toDouble(),
           'host': ServerConfig.host,
           'port': ServerConfig.port,
-        }),
+        },
       );
     } catch (error, stackTrace) {
       LoggerUtils.error(
         '服务器启动失败',
-        context: LogContext.simple({
-          'error': error.toString(),
-          'stack_trace': stackTrace.toString(),
-        }),
+        error: error,
+        stackTrace: stackTrace,
       );
       rethrow;
     }
@@ -96,11 +94,11 @@ class TTPolyglotServer {
 
     LoggerUtils.info(
       'HTTP服务器启动成功',
-      context: LogContext.simple({
+      error: {
         'url': 'http://${ServerConfig.host}:${ServerConfig.port}',
         'host': ServerConfig.host,
         'port': ServerConfig.port,
-      }),
+      },
     );
   }
 
@@ -122,10 +120,8 @@ class TTPolyglotServer {
     } catch (error, stackTrace) {
       LoggerUtils.error(
         '服务器关闭时出错',
-        context: LogContext.simple({
-          'error': error.toString(),
-          'stack_trace': stackTrace.toString(),
-        }),
+        error: error,
+        stackTrace: stackTrace,
       );
     }
   }

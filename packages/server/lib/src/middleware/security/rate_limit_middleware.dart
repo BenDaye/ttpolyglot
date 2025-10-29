@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:shelf/shelf.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 速率限制中间件
 class RateLimitMiddleware {
@@ -87,7 +88,7 @@ class RateLimitMiddleware {
 
       return true;
     } catch (error, stackTrace) {
-      LoggerUtils.warn('速率限制Redis操作失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.warning('速率限制Redis操作失败', error: error, stackTrace: stackTrace);
       // 如果Redis操作失败，允许请求通过
       return true;
     }
@@ -112,7 +113,7 @@ class RateLimitMiddleware {
         'resetTime': resetTime.millisecondsSinceEpoch ~/ 1000,
       };
     } catch (error, stackTrace) {
-      LoggerUtils.warn('获取速率限制信息失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.warning('获取速率限制信息失败', error: error, stackTrace: stackTrace);
       return {
         'limit': ServerConfig.rateLimitRequests,
         'remaining': ServerConfig.rateLimitRequests,
@@ -133,7 +134,7 @@ class RateLimitMiddleware {
         'X-RateLimit-Reset': rateLimitInfo['resetTime'].toString(),
       });
     } catch (error, stackTrace) {
-      LoggerUtils.warn('添加速率限制响应头失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.warning('添加速率限制响应头失败', error: error, stackTrace: stackTrace);
       return response;
     }
   }

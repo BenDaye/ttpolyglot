@@ -1,6 +1,7 @@
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 import 'package:ttpolyglot_server/server.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 邮件服务
 class EmailService extends BaseService {
@@ -15,7 +16,7 @@ class EmailService extends BaseService {
     LoggerUtils.info('发送邮箱验证邮件: $to');
     try {
       if (!_isEmailConfigured()) {
-        LoggerUtils.warn('邮件服务未配置，跳过发送');
+        LoggerUtils.warning('邮件服务未配置，跳过发送');
         return false;
       }
 
@@ -48,7 +49,7 @@ class EmailService extends BaseService {
     LoggerUtils.info('发送密码重置邮件: $to');
     try {
       if (!_isEmailConfigured()) {
-        LoggerUtils.warn('邮件服务未配置，跳过发送');
+        LoggerUtils.warning('邮件服务未配置，跳过发送');
         return false;
       }
 
@@ -81,7 +82,7 @@ class EmailService extends BaseService {
     LoggerUtils.info('发送忘记密码邮件: $to');
     try {
       if (!_isEmailConfigured()) {
-        LoggerUtils.warn('邮件服务未配置，跳过发送');
+        LoggerUtils.warning('邮件服务未配置，跳过发送');
         return false;
       }
 

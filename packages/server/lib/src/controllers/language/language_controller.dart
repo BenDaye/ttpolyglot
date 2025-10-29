@@ -1,7 +1,7 @@
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:ttpolyglot_model/model.dart';
-import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 import '../../exceptions/exceptions.dart';
 import '../../services/business/language_service.dart';

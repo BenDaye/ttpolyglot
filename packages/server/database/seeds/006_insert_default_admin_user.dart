@@ -1,7 +1,5 @@
-
-
-import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
 import 'package:bcrypt/bcrypt.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 import 'base_seed.dart';
 
@@ -33,7 +31,7 @@ class Seed006InsertDefaultAdminUser extends BaseSeed {
       );
 
       if (rolesResult.isEmpty) {
-        LoggerUtils.warn('警告：未找到super_admin角色，跳过用户创建');
+        LoggerUtils.warning('警告：未找到super_admin角色，跳过用户创建');
         return;
       }
 

@@ -1,6 +1,6 @@
 import 'package:postgres/postgres.dart';
 import 'package:ttpolyglot_server/src/config/server_config.dart';
-import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 种子数据基础类
 /// 创建时间: 2024-12-26
@@ -91,7 +91,7 @@ abstract class BaseSeed {
 
       // 如果所有数据都被跳过，可能是表没有唯一约束
       if (insertedCount == 0 && skippedCount == dataList.length) {
-        LoggerUtils.warn('⚠️  警告：所有数据都被跳过，请确认表 $fullTableName 是否有正确的唯一约束');
+        LoggerUtils.warning('⚠️  警告：所有数据都被跳过，请确认表 $fullTableName 是否有正确的唯一约束');
       }
     } catch (error, stackTrace) {
       // 检查是否是缺少唯一约束导致的错误

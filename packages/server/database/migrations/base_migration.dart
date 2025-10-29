@@ -1,6 +1,6 @@
 import 'package:postgres/postgres.dart';
 import 'package:ttpolyglot_server/src/config/server_config.dart';
-import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 迁移基础类
 /// 创建时间: 2024-12-26

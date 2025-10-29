@@ -32,7 +32,7 @@ class ProjectApi {
         query: queryParams,
       );
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => PagerModel.fromJson(json, (data) => ProjectModel.fromJson(data as Map<String, dynamic>)),
       );
@@ -54,7 +54,7 @@ class ProjectApi {
 
       final response = await HttpClient.get('/projects/$projectId');
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => ProjectDetailModel.fromJson(json),
       );
@@ -104,7 +104,7 @@ class ProjectApi {
         return null;
       }
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => ProjectModel.fromJson(json),
       );
@@ -144,7 +144,7 @@ class ProjectApi {
         data: requestData,
       );
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => ProjectModel.fromJson(json),
       );
@@ -166,7 +166,7 @@ class ProjectApi {
 
       final response = await HttpClient.delete('/projects/$projectId');
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => json['code'] == DataCodeEnum.success,
       );
@@ -199,7 +199,7 @@ class ProjectApi {
         query: queryParams,
       );
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => json['available'] as bool,
       );
@@ -221,7 +221,7 @@ class ProjectApi {
 
       final response = await HttpClient.get('/projects/$projectId/stats');
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => ProjectStatisticsModel.fromJson(json),
       );
@@ -243,7 +243,7 @@ class ProjectApi {
 
       final response = await HttpClient.post('/projects/$projectId/archive');
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => ProjectModel.fromJson(json),
       );
@@ -265,7 +265,7 @@ class ProjectApi {
 
       final response = await HttpClient.post('/projects/$projectId/restore');
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => ProjectModel.fromJson(json),
       );
@@ -313,7 +313,7 @@ class ProjectApi {
         data: {'member_limit': memberLimit},
       );
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => ProjectModel.fromJson(json),
       );
@@ -363,7 +363,7 @@ class ProjectApi {
 
       final response = await HttpClient.get('/projects/$projectId/invites');
 
-      final result = Utils.toModelArray(
+      final result = ModelUtils.toModelArray(
         response.data,
         (json) => ProjectMemberModel.fromJson(json),
       );
@@ -398,7 +398,7 @@ class ProjectApi {
 
       final response = await HttpClient.get('/projects/invites/$inviteCode/info');
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => InviteInfoModel.fromJson(json),
       );
@@ -416,7 +416,7 @@ class ProjectApi {
 
       final response = await HttpClient.post('/projects/invites/$inviteCode/accept');
 
-      final result = Utils.toModel(
+      final result = ModelUtils.toModel(
         response.data,
         (json) => ProjectMemberModel.fromJson(json),
       );

@@ -19,7 +19,7 @@ class AuthApi {
           ).toJson(),
         ),
       );
-      final loginResponse = Utils.toModel(
+      final loginResponse = ModelUtils.toModel(
         response.data,
         (json) => LoginResponseModel.fromJson(json),
       );
@@ -57,7 +57,7 @@ class AuthApi {
         '/auth/refresh',
         data: {'refresh_token': refreshToken},
       );
-      final tokenInfo = Utils.toModel(
+      final tokenInfo = ModelUtils.toModel(
         response.data,
         (json) => TokenInfoModel.fromJson(json),
       );
@@ -76,7 +76,7 @@ class AuthApi {
   Future<UserInfoModel?> getCurrentUser() async {
     try {
       final response = await HttpClient.get<Map<String, dynamic>>('/users/me');
-      final userInfo = Utils.toModel(
+      final userInfo = ModelUtils.toModel(
         response.data,
         (json) => UserInfoModel.fromJson(json),
       );

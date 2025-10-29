@@ -18,7 +18,7 @@ class UserApi {
         },
       );
 
-      final result = Utils.toModelArray<UserSearchResultModel>(
+      final result = ModelUtils.toModelArray<UserSearchResultModel>(
         response.data,
         (json) => UserSearchResultModel.fromJson(json),
       );

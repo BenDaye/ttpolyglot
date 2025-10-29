@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:ttpolyglot_server/server.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 import './migration_service.dart';
 import './migrations/001_users_table.dart';

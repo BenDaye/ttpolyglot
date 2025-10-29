@@ -1,5 +1,6 @@
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 /// 认证服务
 class AuthService extends BaseService {
@@ -339,14 +340,14 @@ class AuthService extends BaseService {
       // 检查Redis缓存中的会话
       final session = await _redisService.getUserSession(userId);
       if (session == null) {
-        LoggerUtils.warn('用户会话不存在: $userId');
+        LoggerUtils.warning('用户会话不存在: $userId');
         return null;
       }
 
       // 验证令牌哈希
       final accessTokenHash = _jwtUtils.generateTokenHash(accessToken);
       if (session['access_token_hash'] != accessTokenHash) {
-        LoggerUtils.warn('访问令牌哈希不匹配: $userId');
+        LoggerUtils.warning('访问令牌哈希不匹配: $userId');
         return null;
       }
 
@@ -450,7 +451,7 @@ class AuthService extends BaseService {
       if (emailSent) {
         LoggerUtils.info('密码重置邮件发送成功: $email');
       } else {
-        LoggerUtils.warn('密码重置邮件发送失败: $email');
+        LoggerUtils.warning('密码重置邮件发送失败: $email');
       }
 
       return true;
@@ -560,7 +561,7 @@ class AuthService extends BaseService {
       if (emailSent) {
         LoggerUtils.info('验证邮件发送成功: $email');
       } else {
-        LoggerUtils.warn('验证邮件发送失败: $email');
+        LoggerUtils.warning('验证邮件发送失败: $email');
       }
 
       return true;

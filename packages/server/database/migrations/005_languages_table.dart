@@ -1,6 +1,4 @@
-
-
-import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 import 'base_migration.dart';
 
 /// 迁移: 005 - 创建语言表

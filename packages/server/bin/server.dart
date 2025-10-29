@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:ttpolyglot_server/server.dart';
+import 'package:ttpolyglot_utils/utils.dart';
 
 void main(List<String> args) async {
   try {
