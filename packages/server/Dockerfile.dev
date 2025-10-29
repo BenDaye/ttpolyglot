@@ -23,6 +23,9 @@ RUN mkdir -p /app/data /app/logs /app/uploads
 # 先复制 model 包（server 的依赖）
 COPY packages/model /app/packages/model
 
+# 复制 utils 包（server 的依赖）
+COPY packages/utils /app/packages/utils
+
 # 复制 pubspec 文件
 COPY packages/server/pubspec.yaml packages/server/pubspec_overrides.yaml ./
 
