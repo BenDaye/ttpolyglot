@@ -64,7 +64,9 @@ class SettingsController extends GetxController {
       final settings = await _userSettingsApi.getUserSettings();
 
       // 更新响应式变量
-      _language.value = settings.languageSettings.languageCode?.code ?? 'zh_CN';
+      // 将服务器返回的语言代码格式统一转换为下划线格式（en-US -> en_US）
+      final serverLanguageCode = settings.languageSettings.languageCode?.code ?? 'zh_CN';
+      _language.value = serverLanguageCode.replaceAll('-', '_');
       _autoSave.value = settings.generalSettings.autoSave;
       _notifications.value = settings.generalSettings.notifications;
 
@@ -84,7 +86,9 @@ class SettingsController extends GetxController {
   /// 保存语言设置到服务器
   Future<void> _saveLanguageToServer(String languageCode) async {
     try {
-      await _userSettingsApi.updateLanguageSettings(languageCode);
+      // 将下划线格式转换为连字符格式发送给服务器（en_US -> en-US）
+      final serverLanguageCode = languageCode.replaceAll('_', '-');
+      await _userSettingsApi.updateLanguageSettings(serverLanguageCode);
       await _saveSettingsLocal();
       LoggerUtils.info('保存语言设置到服务器成功');
     } catch (error, stackTrace) {

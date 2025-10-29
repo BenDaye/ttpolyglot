@@ -127,13 +127,6 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                             true,
                             (value) {},
                           ),
-                          _buildSwitchItem(
-                            context,
-                            '自动批准翻译',
-                            '新翻译无需审核自动生效',
-                            false,
-                            (value) {},
-                          ),
                         ],
                       ),
                     ),
