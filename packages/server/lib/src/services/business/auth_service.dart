@@ -30,8 +30,7 @@ class AuthService extends BaseService {
     required String email,
     required String password,
     String? displayName,
-    String? timezone,
-    String? locale,
+    String? languageCode,
   }) async {
     try {
       ServerLogger.info('用户注册: $username, $email');
@@ -64,23 +63,35 @@ class AuthService extends BaseService {
         final result = await _databaseService.query('''
           INSERT INTO {users} (
             username, email, password_hash, display_name, 
-            timezone, locale, is_active, is_email_verified
+            is_active, is_email_verified
           ) VALUES (
             @username, @email, @password_hash, @display_name,
-            @timezone, @locale, true, false
+            true, false
           ) RETURNING id
         ''', {
           'username': username,
           'email': email,
           'password_hash': passwordHash,
           'display_name': displayName ?? username,
-          'timezone': timezone ?? 'UTC',
-          'locale': locale ?? 'en-US',
         });
 
         // users.id 是 UUID 类型，需要安全转换为字符串
         final rawUserId = result.first[0];
-        return rawUserId.toString();
+        final userIdStr = rawUserId.toString();
+
+        // 创建用户默认设置
+        await _databaseService.query('''
+          INSERT INTO {user_settings} (
+            user_id, language_code, auto_save, notifications
+          ) VALUES (
+            @user_id, @language_code, true, true
+          )
+        ''', {
+          'user_id': userIdStr,
+          'language_code': languageCode ?? 'zh-CN',
+        });
+
+        return userIdStr;
       });
 
       ServerLogger.info('用户注册成功: $userId');
@@ -599,7 +610,7 @@ class AuthService extends BaseService {
   Future<Map<String, dynamic>?> _findUserByEmailOrUsername(String emailOrUsername) async {
     final result = await _databaseService.query('''
       SELECT id, username, email, password_hash, display_name, avatar_url,
-             timezone, locale, is_active, is_email_verified, locked_until
+             is_active, is_email_verified, locked_until
       FROM {users} 
       WHERE (email = @identifier OR username = @identifier) AND is_active = true
       LIMIT 1
@@ -611,7 +622,7 @@ class AuthService extends BaseService {
   Future<Map<String, dynamic>?> _findUserById(String userId) async {
     final result = await _databaseService.query('''
       SELECT id, username, email, display_name, avatar_url,
-             timezone, locale, is_active, is_email_verified
+             is_active, is_email_verified
       FROM {users} 
       WHERE id = @user_id AND is_active = true
       LIMIT 1

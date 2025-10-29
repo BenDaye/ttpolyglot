@@ -129,15 +129,6 @@ class UserController extends BaseController {
         updateData['avatar_url'] = ValidatorUtils.validateUrl(data['avatar_url'], 'avatar_url', required: false);
       }
 
-      if (data.containsKey('timezone')) {
-        updateData['timezone'] =
-            ValidatorUtils.validateString(data['timezone'], 'timezone', maxLength: 50, required: false);
-      }
-
-      if (data.containsKey('locale')) {
-        updateData['locale'] = ValidatorUtils.validateString(data['locale'], 'locale', maxLength: 10, required: false);
-      }
-
       final updatedUser = await _userService.updateUser(userId, updateData, updatedBy: userId);
 
       return ResponseUtils.success(

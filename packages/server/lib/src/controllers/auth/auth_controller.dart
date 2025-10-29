@@ -59,8 +59,7 @@ class AuthController extends BaseController {
 
       // 可选字段
       final displayName = data['display_name'] as String?;
-      final timezone = data['timezone'] as String?;
-      final locale = data['locale'] as String?;
+      final languageCode = data['language_code'] as String?;
 
       // 调用认证服务
       final result = await _authService.register(
@@ -68,8 +67,7 @@ class AuthController extends BaseController {
         email: email,
         password: password,
         displayName: displayName,
-        timezone: timezone,
-        locale: locale,
+        languageCode: languageCode,
       );
 
       if (result != null) {

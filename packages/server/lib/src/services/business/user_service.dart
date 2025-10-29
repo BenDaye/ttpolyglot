@@ -73,7 +73,7 @@ class UserService extends BaseService {
       final usersSql = '''
         SELECT 
           u.id, u.username, u.email, u.display_name, u.avatar_url,
-          u.phone, u.timezone, u.locale,
+          u.phone,
           u.is_active, u.is_email_verified,
           u.last_login_at, 
           COALESCE(HOST(u.last_login_ip)::text, '') as last_login_ip,
@@ -186,7 +186,7 @@ class UserService extends BaseService {
       final sql = '''
         SELECT 
           u.id, u.username, u.email, u.display_name, u.avatar_url,
-          u.phone, u.timezone, u.locale,
+          u.phone,
           u.is_active, u.is_email_verified, u.email_verified_at,
           u.last_login_at, 
           COALESCE(HOST(u.last_login_ip)::text, '') as last_login_ip,
@@ -298,8 +298,6 @@ class UserService extends BaseService {
         'display_name': 'display_name',
         'phone': 'phone',
         'avatar_url': 'avatar_url',
-        'timezone': 'timezone',
-        'locale': 'locale',
         'is_active': 'is_active',
       };
 
