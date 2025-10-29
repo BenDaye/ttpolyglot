@@ -83,11 +83,7 @@ class AuthController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('用户注册失败', error: error, stackTrace: stackTrace);
 
-      if (error is ValidationException) {
-        return ResponseUtils.error(message: '用户注册参数验证失败');
-      }
-
-      return ResponseUtils.error(message: '注册失败，请稍后重试');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '注册失败，请稍后重试');
     }
   }
 
@@ -133,12 +129,8 @@ class AuthController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('用户登录失败', error: error, stackTrace: stackTrace);
 
-      if (error is ValidationException) {
-        return ResponseUtils.error(message: '用户登录参数验证失败');
-      }
-
       return ResponseUtils.error(
-        message: '登录失败，请稍后重试',
+        message: error is ServerException ? error.message : '登录失败，请稍后重试',
       );
     }
   }
@@ -166,7 +158,7 @@ class AuthController extends BaseController {
       LoggerUtils.error('用户登出失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(
-        message: '登出失败，请稍后重试',
+        message: error is ServerException ? error.message : '登出失败，请稍后重试',
       );
     }
   }
@@ -195,14 +187,8 @@ class AuthController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('刷新令牌失败', error: error, stackTrace: stackTrace);
 
-      if (error is ValidationException) {
-        return ResponseUtils.error(
-          message: '令牌刷新参数验证失败',
-        );
-      }
-
       return ResponseUtils.error(
-        message: '令牌刷新失败',
+        message: error is ServerException ? error.message : '令牌刷新失败',
       );
     }
   }
@@ -228,14 +214,8 @@ class AuthController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('忘记密码失败', error: error, stackTrace: stackTrace);
 
-      if (error is ValidationException) {
-        return ResponseUtils.error(
-          message: '忘记密码参数验证失败',
-        );
-      }
-
       return ResponseUtils.error(
-        message: '请求失败，请稍后重试',
+        message: error is ServerException ? error.message : '请求失败，请稍后重试',
       );
     }
   }
@@ -262,14 +242,8 @@ class AuthController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('重置密码失败', error: error, stackTrace: stackTrace);
 
-      if (error is ValidationException) {
-        return ResponseUtils.error(
-          message: '重置密码参数验证失败',
-        );
-      }
-
       return ResponseUtils.error(
-        message: '重置失败，请稍后重试',
+        message: error is ServerException ? error.message : '重置失败，请稍后重试',
       );
     }
   }
@@ -295,14 +269,8 @@ class AuthController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('邮箱验证失败', error: error, stackTrace: stackTrace);
 
-      if (error is ValidationException) {
-        return ResponseUtils.error(
-          message: '邮箱验证参数验证失败',
-        );
-      }
-
       return ResponseUtils.error(
-        message: '验证失败，请稍后重试',
+        message: error is ServerException ? error.message : '验证失败，请稍后重试',
       );
     }
   }
@@ -334,7 +302,7 @@ class AuthController extends BaseController {
       LoggerUtils.error('获取当前用户信息失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(
-        message: '获取用户信息失败',
+        message: error is ServerException ? error.message : '获取用户信息失败',
       );
     }
   }
@@ -363,7 +331,7 @@ class AuthController extends BaseController {
       LoggerUtils.error('重发验证邮件失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(
-        message: '重发验证邮件失败，请稍后重试',
+        message: error is ServerException ? error.message : '重发验证邮件失败，请稍后重试',
       );
     }
   }

@@ -63,7 +63,7 @@ class UserSettingsController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('获取用户设置失败', error: error, stackTrace: stackTrace);
 
-      return ResponseUtils.error(message: '获取用户设置失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '获取用户设置失败');
     }
   }
 
@@ -87,7 +87,7 @@ class UserSettingsController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('更新用户设置失败', error: error, stackTrace: stackTrace);
 
-      return ResponseUtils.error(message: '更新用户设置失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '更新用户设置失败');
     }
   }
 
@@ -108,7 +108,7 @@ class UserSettingsController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('获取语言设置失败', error: error, stackTrace: stackTrace);
 
-      return ResponseUtils.error(message: '获取语言设置失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '获取语言设置失败');
     }
   }
 
@@ -137,7 +137,7 @@ class UserSettingsController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('更新语言设置失败', error: error, stackTrace: stackTrace);
 
-      return ResponseUtils.error(message: '更新语言设置失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '更新语言设置失败');
     }
   }
 
@@ -158,7 +158,7 @@ class UserSettingsController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('获取通用设置失败', error: error, stackTrace: stackTrace);
 
-      return ResponseUtils.error(message: '获取通用设置失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '获取通用设置失败');
     }
   }
 
@@ -189,7 +189,7 @@ class UserSettingsController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('更新通用设置失败', error: error, stackTrace: stackTrace);
 
-      return ResponseUtils.error(message: '更新通用设置失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '更新通用设置失败');
     }
   }
 
@@ -210,7 +210,7 @@ class UserSettingsController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('获取翻译设置失败', error: error, stackTrace: stackTrace);
 
-      return ResponseUtils.error(message: '获取翻译设置失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '获取翻译设置失败');
     }
   }
 
@@ -236,7 +236,7 @@ class UserSettingsController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('更新翻译设置失败', error: error, stackTrace: stackTrace);
 
-      return ResponseUtils.error(message: '更新翻译设置失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '更新翻译设置失败');
     }
   }
 
@@ -262,7 +262,7 @@ class UserSettingsController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('添加翻译接口失败', error: error, stackTrace: stackTrace);
 
-      return ResponseUtils.error(message: '添加翻译接口失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '添加翻译接口失败');
     }
   }
 
@@ -288,7 +288,7 @@ class UserSettingsController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('更新翻译接口失败', error: error, stackTrace: stackTrace);
 
-      return ResponseUtils.error(message: '更新翻译接口失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '更新翻译接口失败');
     }
   }
 
@@ -308,7 +308,7 @@ class UserSettingsController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('删除翻译接口失败', error: error, stackTrace: stackTrace);
 
-      return ResponseUtils.error(message: '删除翻译接口失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '删除翻译接口失败');
     }
   }
 
@@ -329,7 +329,7 @@ class UserSettingsController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('重置用户设置失败', error: error, stackTrace: stackTrace);
 
-      return ResponseUtils.error(message: '重置用户设置失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '重置用户设置失败');
     }
   }
 }

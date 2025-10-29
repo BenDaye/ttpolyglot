@@ -93,17 +93,7 @@ class ProjectMemberController extends BaseController {
     } catch (error, stackTrace) {
       log('[_generateInvite]', error: error, stackTrace: stackTrace, name: 'ProjectMemberController');
 
-      if (error is ValidationException) {
-        return ResponseUtils.error(message: error.message);
-      }
-      if (error is BusinessException) {
-        return ResponseUtils.error(message: error.message);
-      }
-      if (error is NotFoundException) {
-        return ResponseUtils.error(message: '项目不存在');
-      }
-
-      return ResponseUtils.error(message: '生成邀请链接失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '生成邀请链接失败');
     }
   }
 
@@ -123,7 +113,7 @@ class ProjectMemberController extends BaseController {
       );
     } catch (error, stackTrace) {
       log('[_getProjectInvites]', error: error, stackTrace: stackTrace, name: 'ProjectMemberController');
-      return ResponseUtils.error(message: '获取邀请链接列表失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '获取邀请链接列表失败');
     }
   }
 
@@ -149,11 +139,7 @@ class ProjectMemberController extends BaseController {
     } catch (error, stackTrace) {
       log('[_revokeInvite]', error: error, stackTrace: stackTrace, name: 'ProjectMemberController');
 
-      if (error is NotFoundException) {
-        return ResponseUtils.error(message: '邀请链接不存在');
-      }
-
-      return ResponseUtils.error(message: '撤销邀请链接失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '撤销邀请链接失败');
     }
   }
 
@@ -172,7 +158,7 @@ class ProjectMemberController extends BaseController {
       );
     } catch (error, stackTrace) {
       log('[_getInviteInfo]', error: error, stackTrace: stackTrace, name: 'ProjectMemberController');
-      return ResponseUtils.error(message: '获取邀请信息失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '获取邀请信息失败');
     }
   }
 
@@ -196,14 +182,7 @@ class ProjectMemberController extends BaseController {
     } catch (error, stackTrace) {
       log('[_acceptInvite]', error: error, stackTrace: stackTrace, name: 'ProjectMemberController');
 
-      if (error is NotFoundException) {
-        return ResponseUtils.error(message: '邀请链接不存在或已失效');
-      }
-      if (error is BusinessException) {
-        return ResponseUtils.error(message: error.message);
-      }
-
-      return ResponseUtils.error(message: '接受邀请失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '接受邀请失败');
     }
   }
 

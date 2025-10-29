@@ -74,9 +74,9 @@ abstract class BaseController {
       );
 
       return result;
-    } on ValidationException catch (error, stackTrace) {
+    } on ServerException catch (error, stackTrace) {
       developer.log(
-        '验证错误',
+        error.message,
         error: error,
         stackTrace: stackTrace,
         name: controllerName,
@@ -84,50 +84,7 @@ abstract class BaseController {
 
       return ResponseUtils.error(
         message: error.message,
-      );
-    } on NotFoundException catch (error, stackTrace) {
-      developer.log(
-        '资源不存在',
-        error: error,
-        stackTrace: stackTrace,
-        name: controllerName,
-      );
-
-      return ResponseUtils.error(
-        message: error.message,
-      );
-    } on BusinessException catch (error, stackTrace) {
-      developer.log(
-        '业务错误',
-        error: error,
-        stackTrace: stackTrace,
-        name: controllerName,
-      );
-
-      return ResponseUtils.error(
-        message: error.message,
-      );
-    } on AuthenticationException catch (error, stackTrace) {
-      developer.log(
-        '认证失败',
-        error: error,
-        stackTrace: stackTrace,
-        name: controllerName,
-      );
-
-      return ResponseUtils.error(
-        message: error.message,
-      );
-    } on AuthorizationException catch (error, stackTrace) {
-      developer.log(
-        '授权失败',
-        error: error,
-        stackTrace: stackTrace,
-        name: controllerName,
-      );
-
-      return ResponseUtils.error(
-        message: error.message,
+        code: error.code,
       );
     } catch (error, stackTrace) {
       developer.log(

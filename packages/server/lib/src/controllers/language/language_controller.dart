@@ -3,6 +3,7 @@ import 'package:shelf_router/shelf_router.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/src/utils/logging/logger_utils.dart';
 
+import '../../exceptions/exceptions.dart';
 import '../../services/business/language_service.dart';
 import '../../utils/http/response_utils.dart';
 
@@ -45,7 +46,7 @@ class LanguageController {
       );
     } catch (error) {
       LoggerUtils.error('获取语言列表失败: error=$error');
-      return ResponseUtils.error(message: '获取语言列表失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '获取语言列表失败');
     }
   }
 
@@ -68,7 +69,7 @@ class LanguageController {
       );
     } catch (error) {
       LoggerUtils.error('获取语言详情失败: code=$code, error=$error');
-      return ResponseUtils.error(message: '获取语言详情失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '获取语言详情失败');
     }
   }
 
@@ -88,7 +89,7 @@ class LanguageController {
       return ResponseUtils.success(message: '刷新语言缓存成功');
     } catch (error) {
       LoggerUtils.error('刷新语言缓存失败: error=$error');
-      return ResponseUtils.error(message: '刷新语言缓存失败: ${error.toString()}');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '刷新语言缓存失败');
     }
   }
 }

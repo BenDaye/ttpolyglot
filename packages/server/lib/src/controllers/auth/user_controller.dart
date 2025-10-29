@@ -73,7 +73,7 @@ class UserController extends BaseController {
       LoggerUtils.error('获取用户列表失败', error: error, stackTrace: stackTrace);
 
       return ResponseUtils.error(
-        message: '获取用户列表失败',
+        message: error is ServerException ? error.message : '获取用户列表失败',
       );
     }
   }
@@ -99,7 +99,7 @@ class UserController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('获取当前用户信息失败', error: error, stackTrace: stackTrace);
 
-      return ResponseUtils.error(message: '获取用户信息失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '获取用户信息失败');
     }
   }
 
@@ -147,16 +147,8 @@ class UserController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('更新当前用户信息失败', error: error, stackTrace: stackTrace);
 
-      if (error is ValidationException) {
-        return ResponseUtils.error(message: error.message);
-      }
-
-      if (error is BusinessException) {
-        return ResponseUtils.error(message: error.message);
-      }
-
       return ResponseUtils.error(
-        message: '更新个人信息失败',
+        message: error is ServerException ? error.message : '更新个人信息失败',
       );
     }
   }
@@ -199,7 +191,7 @@ class UserController extends BaseController {
         stackTrace: stackTrace,
       );
 
-      return ResponseUtils.error(message: '搜索用户失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '搜索用户失败');
     }
   }
 
@@ -225,16 +217,8 @@ class UserController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('修改密码失败', error: error, stackTrace: stackTrace);
 
-      if (error is ValidationException) {
-        return ResponseUtils.error(message: error.message);
-      }
-
-      if (error is BusinessException) {
-        return ResponseUtils.error(message: error.message);
-      }
-
       return ResponseUtils.error(
-        message: '修改密码失败',
+        message: error is ServerException ? error.message : '修改密码失败',
       );
     }
   }
@@ -296,7 +280,7 @@ class UserController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('上传头像失败', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(
-        message: '上传头像失败',
+        message: error is ServerException ? error.message : '上传头像失败',
       );
     }
   }
@@ -314,7 +298,7 @@ class UserController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('删除头像失败', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(
-        message: '删除头像失败',
+        message: error is ServerException ? error.message : '删除头像失败',
       );
     }
   }

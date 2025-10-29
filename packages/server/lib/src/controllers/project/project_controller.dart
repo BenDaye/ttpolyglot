@@ -80,7 +80,7 @@ class ProjectController extends BaseController {
       );
     } catch (error, stackTrace) {
       LoggerUtils.error('获取项目列表失败', error: error, stackTrace: stackTrace);
-      return ResponseUtils.error(message: '获取项目列表失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '获取项目列表失败');
     }
   }
 
@@ -130,15 +130,7 @@ class ProjectController extends BaseController {
       return ResponseUtils.success(message: '项目创建成功', data: project);
     } catch (error, stackTrace) {
       LoggerUtils.error('创建项目失败', error: error, stackTrace: stackTrace);
-
-      if (error is ValidationException) {
-        return ResponseUtils.error(message: error.message);
-      }
-      if (error is BusinessException) {
-        return ResponseUtils.error(message: error.message);
-      }
-
-      return ResponseUtils.error(message: '创建项目失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '创建项目失败');
     }
   }
 
@@ -166,7 +158,7 @@ class ProjectController extends BaseController {
       );
     } catch (error, stackTrace) {
       LoggerUtils.error('检查项目名称失败', error: error, stackTrace: stackTrace);
-      return ResponseUtils.error(message: '检查项目名称失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '检查项目名称失败');
     }
   }
 
@@ -188,12 +180,7 @@ class ProjectController extends BaseController {
       return ResponseUtils.success<ProjectDetailModel>(message: '获取项目详情成功', data: projectDetail);
     } catch (error, stackTrace) {
       LoggerUtils.error('获取项目详情失败: $id', error: error, stackTrace: stackTrace);
-
-      if (error is ValidationException) {
-        return ResponseUtils.error(message: error.message);
-      }
-
-      return ResponseUtils.error(message: '获取项目详情失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '获取项目详情失败');
     }
   }
 
@@ -231,14 +218,7 @@ class ProjectController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('更新项目信息失败: $id', error: error, stackTrace: stackTrace);
 
-      if (error is ValidationException) {
-        return ResponseUtils.error(message: error.message);
-      }
-      if (error is BusinessException) {
-        return ResponseUtils.error(message: error.message);
-      }
-
-      return ResponseUtils.error(message: '更新项目信息失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '更新项目信息失败');
     }
   }
 
@@ -253,14 +233,7 @@ class ProjectController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('删除项目失败: $id', error: error, stackTrace: stackTrace);
 
-      if (error is ValidationException) {
-        return ResponseUtils.error(message: error.message);
-      }
-      if (error is NotFoundException) {
-        return ResponseUtils.error(message: '项目不存在');
-      }
-
-      return ResponseUtils.error(message: '删除项目失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '删除项目失败');
     }
   }
 
@@ -274,7 +247,7 @@ class ProjectController extends BaseController {
       return ResponseUtils.success<List<ProjectMemberModel>>(message: '获取项目成员成功', data: members);
     } catch (error, stackTrace) {
       LoggerUtils.error('获取项目成员失败: $id', error: error, stackTrace: stackTrace);
-      return ResponseUtils.error(message: '获取项目成员失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '获取项目成员失败');
     }
   }
 
@@ -310,15 +283,7 @@ class ProjectController extends BaseController {
       return ResponseUtils.success<ProjectMemberModel>(message: '项目成员添加成功');
     } catch (error, stackTrace) {
       LoggerUtils.error('添加项目成员失败: $id', error: error, stackTrace: stackTrace);
-
-      if (error is ValidationException) {
-        return ResponseUtils.error(message: error.message);
-      }
-      if (error is BusinessException) {
-        return ResponseUtils.error(message: error.message);
-      }
-
-      return ResponseUtils.error(message: '添加项目成员失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '添加项目成员失败');
     }
   }
 
@@ -333,7 +298,7 @@ class ProjectController extends BaseController {
       return ResponseUtils.success<ProjectMemberModel>(message: '项目成员删除成功');
     } catch (error, stackTrace) {
       LoggerUtils.error('移除项目成员失败: $id, user: $userId', error: error, stackTrace: stackTrace);
-      return ResponseUtils.error(message: '移除项目成员失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '移除项目成员失败');
     }
   }
 
@@ -343,7 +308,7 @@ class ProjectController extends BaseController {
       return ResponseUtils.success<ProjectStatisticsModel>(message: '获取项目统计信息成功', data: stats);
     } catch (error, stackTrace) {
       LoggerUtils.error('获取项目统计信息失败', error: error, stackTrace: stackTrace);
-      return ResponseUtils.error(message: '获取统计信息失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '获取统计信息失败');
     }
   }
 
@@ -358,7 +323,7 @@ class ProjectController extends BaseController {
       return ResponseUtils.success<ProjectModel>(message: '项目已归档');
     } catch (error, stackTrace) {
       LoggerUtils.error('归档项目失败: $id', error: error, stackTrace: stackTrace);
-      return ResponseUtils.error(message: '归档项目失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '归档项目失败');
     }
   }
 
@@ -373,7 +338,7 @@ class ProjectController extends BaseController {
       return ResponseUtils.success<ProjectModel>(message: '项目已恢复');
     } catch (error, stackTrace) {
       LoggerUtils.error('恢复项目失败: $id', error: error, stackTrace: stackTrace);
-      return ResponseUtils.error(message: '恢复项目失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '恢复项目失败');
     }
   }
 
@@ -404,10 +369,7 @@ class ProjectController extends BaseController {
       return ResponseUtils.success<ProjectMemberModel>(message: '成员角色已更新');
     } catch (error, stackTrace) {
       LoggerUtils.error('更新成员角色失败: $id, user: $userId', error: error, stackTrace: stackTrace);
-      if (error is ValidationException) {
-        return ResponseUtils.error(message: error.message);
-      }
-      return ResponseUtils.error(message: '更新成员角色失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '更新成员角色失败');
     }
   }
 
@@ -422,7 +384,7 @@ class ProjectController extends BaseController {
       return ResponseUtils.success<List<LanguageModel>>(message: '获取项目语言成功', data: languages);
     } catch (error, stackTrace) {
       LoggerUtils.error('获取项目语言失败: $id', error: error, stackTrace: stackTrace);
-      return ResponseUtils.error(message: '获取项目语言失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '获取项目语言失败');
     }
   }
 
@@ -451,7 +413,7 @@ class ProjectController extends BaseController {
       if (error is ValidationException) {
         return ResponseUtils.error(message: error.message);
       }
-      return ResponseUtils.error(message: '添加项目语言失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '添加项目语言失败');
     }
   }
 
@@ -472,7 +434,7 @@ class ProjectController extends BaseController {
       return ResponseUtils.success(message: '语言已从项目中移除');
     } catch (error, stackTrace) {
       LoggerUtils.error('移除项目语言失败: $id, language: $languageIdStr', error: error, stackTrace: stackTrace);
-      return ResponseUtils.error(message: '移除项目语言失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '移除项目语言失败');
     }
   }
 
@@ -500,7 +462,7 @@ class ProjectController extends BaseController {
       if (error is ValidationException) {
         return ResponseUtils.error(message: error.message);
       }
-      return ResponseUtils.error(message: '更新语言设置失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '更新语言设置失败');
     }
   }
 
@@ -515,7 +477,7 @@ class ProjectController extends BaseController {
       return ResponseUtils.success<ProjectStatisticsModel>(message: '获取项目统计信息成功', data: stats);
     } catch (error, stackTrace) {
       LoggerUtils.error('获取项目统计信息失败: $id', error: error, stackTrace: stackTrace);
-      return ResponseUtils.error(message: '获取项目统计信息失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '获取项目统计信息失败');
     }
   }
 
@@ -537,7 +499,7 @@ class ProjectController extends BaseController {
       );
     } catch (error, stackTrace) {
       LoggerUtils.error('获取项目活动失败: $id', error: error, stackTrace: stackTrace);
-      return ResponseUtils.error(message: '获取项目活动失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '获取项目活动失败');
     }
   }
 
@@ -580,17 +542,7 @@ class ProjectController extends BaseController {
     } catch (error, stackTrace) {
       LoggerUtils.error('更新成员上限失败: $id', error: error, stackTrace: stackTrace);
 
-      if (error is ValidationException) {
-        return ResponseUtils.error(message: error.message);
-      }
-      if (error is BusinessException) {
-        return ResponseUtils.error(message: error.message);
-      }
-      if (error is NotFoundException) {
-        return ResponseUtils.error(message: '项目不存在');
-      }
-
-      return ResponseUtils.error(message: '更新成员上限失败');
+      return ResponseUtils.error(message: error is ServerException ? error.message : '更新成员上限失败');
     }
   }
 }
