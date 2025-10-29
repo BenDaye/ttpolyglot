@@ -8,7 +8,6 @@ class SignInBinding extends Bindings {
     // 注册登录控制器
     Get.lazyPut<SignInController>(
       () => SignInController(),
-      fenix: true,
     );
   }
 }

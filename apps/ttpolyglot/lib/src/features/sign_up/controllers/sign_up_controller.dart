@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/common/common.dart';
-import 'package:ttpolyglot/src/core/routing/app_pages.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
 /// 注册控制器
@@ -191,8 +190,8 @@ class SignUpController extends GetxController {
         borderRadius: 8.0,
       );
 
-      // 跳转到登录页面
-      Get.offAllNamed(Routes.signIn);
+      // 返回登录页面
+      Get.back();
     } catch (error) {
       // 提取错误信息
       String message = '注册失败，请稍后重试';
@@ -215,7 +214,7 @@ class SignUpController extends GetxController {
 
   /// 跳转到登录页
   void goToSignIn() {
-    Get.offAllNamed(Routes.signIn);
+    Get.back();
   }
 
   /// 清空表单
