@@ -483,13 +483,13 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
     bool isEnabled,
   ) async {
     final key = _getNotificationKey(notificationType, channel);
-    
+
     // 防止重复调用 - 如果当前设置正在更新中，直接返回
     if (_updatingNotifications.contains(key)) {
       log('[_updateNotificationSetting] 防止重复调用: $key', name: 'ProjectSettingsView');
       return;
     }
-    
+
     log('[_updateNotificationSetting] 开始更新: $key, isEnabled: $isEnabled', name: 'ProjectSettingsView');
     _updatingNotifications.add(key);
     try {
