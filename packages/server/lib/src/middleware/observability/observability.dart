@@ -2,5 +2,4 @@
 library observability;
 
 export 'logging_middleware.dart';
-export 'metrics_middleware.dart';
 export 'request_id_middleware.dart';

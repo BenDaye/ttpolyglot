@@ -167,21 +167,19 @@ class TTPolyglotServer {
     return Pipeline()
         // 1. 请求ID生成（最早，为后续中间件提供追踪）
         .addMiddleware(RequestIdMiddleware().handler)
-        // 2. 指标收集（记录所有请求指标）
-        .addMiddleware(metricsMiddleware(metricsService: serviceRegistry.get<MetricsService>()))
-        // 3. 结构化日志（记录详细请求信息）
+        // 2. 结构化日志（记录详细请求信息）
         .addMiddleware(structuredLoggingMiddleware())
-        // 4. CORS处理（处理跨域，避免后续中间件处理被拒绝的请求）
+        // 3. CORS处理（处理跨域，避免后续中间件处理被拒绝的请求）
         .addMiddleware(corsMiddleware(allowedOrigins: ServerConfig.corsOrigins))
-        // 5. 速率限制（早期拒绝，保护系统资源）
+        // 4. 速率限制（早期拒绝，保护系统资源）
         .addMiddleware(RateLimitMiddleware(_redisService).handler)
-        // 6. 请求大小限制（防止大请求消耗资源）
+        // 5. 请求大小限制（防止大请求消耗资源）
         .addMiddleware(_createRequestSizeLimitMiddleware())
-        // 7. 安全头设置（增强安全性）
+        // 6. 安全头设置（增强安全性）
         .addMiddleware(_createSecurityHeadersMiddleware())
-        // 8. 重试机制（处理临时失败）
+        // 7. 重试机制（处理临时失败）
         .addMiddleware(retryMiddleware())
-        // 9. 错误处理（最后，捕获所有错误）
+        // 8. 错误处理（最后，捕获所有错误）
         .addMiddleware(ErrorHandlerMiddleware().handler);
   }
 
