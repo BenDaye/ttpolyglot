@@ -566,8 +566,8 @@ class ProjectService extends BaseService {
       await _updateProjectMemberCount(projectId);
 
       logInfo('项目成员添加成功: $projectId, user: $userId');
-    } catch (error, stackTrace) {
-      logError('添加项目成员失败: $projectId, user: $userId', error: error, stackTrace: stackTrace);
+    } catch (error) {
+      logError('添加项目成员失败: $projectId, user: $userId', error: error);
       rethrow;
     }
   }
