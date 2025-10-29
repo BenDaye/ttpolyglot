@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/common/common.dart';
@@ -14,11 +16,16 @@ class ProjectSettingsView extends StatefulWidget {
 
 class _ProjectSettingsViewState extends State<ProjectSettingsView> {
   final TextEditingController _memberLimitController = TextEditingController();
+  final _updatingNotifications = <String>{}.obs;
 
   @override
   void dispose() {
     _memberLimitController.dispose();
     super.dispose();
+  }
+
+  String _getNotificationKey(NotificationTypeEnum type, NotificationChannelEnum channel) {
+    return '${type.name}_${channel.name}';
   }
 
   @override
@@ -207,7 +214,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
     String title,
     String subtitle,
     bool value,
-    ValueChanged<bool> onChanged,
+    ValueChanged<bool>? onChanged,
   ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),
@@ -405,6 +412,17 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                 NotificationChannelEnum.email,
               );
 
+              // 检查每个设置是否正在更新
+              final emailUpdating = _updatingNotifications.contains(
+                _getNotificationKey(NotificationTypeEnum.projectUpdated, NotificationChannelEnum.email),
+              );
+              final translationUpdating = _updatingNotifications.contains(
+                _getNotificationKey(NotificationTypeEnum.translationUpdated, NotificationChannelEnum.email),
+              );
+              final memberUpdating = _updatingNotifications.contains(
+                _getNotificationKey(NotificationTypeEnum.memberJoined, NotificationChannelEnum.email),
+              );
+
               return Column(
                 children: [
                   _buildSwitchItem(
@@ -412,36 +430,42 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                     '邮件通知',
                     '重要事件发生时发送邮件通知',
                     emailEnabled,
-                    (value) => _updateNotificationSetting(
-                      controller,
-                      NotificationTypeEnum.projectUpdated,
-                      NotificationChannelEnum.email,
-                      value,
-                    ),
+                    emailUpdating
+                        ? null
+                        : (value) => _updateNotificationSetting(
+                              controller,
+                              NotificationTypeEnum.projectUpdated,
+                              NotificationChannelEnum.email,
+                              value,
+                            ),
                   ),
                   _buildSwitchItem(
                     context,
                     '翻译完成通知',
                     '翻译完成时通知项目成员',
                     translationCompletedEnabled,
-                    (value) => _updateNotificationSetting(
-                      controller,
-                      NotificationTypeEnum.translationUpdated,
-                      NotificationChannelEnum.email,
-                      value,
-                    ),
+                    translationUpdating
+                        ? null
+                        : (value) => _updateNotificationSetting(
+                              controller,
+                              NotificationTypeEnum.translationUpdated,
+                              NotificationChannelEnum.email,
+                              value,
+                            ),
                   ),
                   _buildSwitchItem(
                     context,
                     '新成员加入通知',
                     '新成员加入时通知管理员',
                     memberJoinedEnabled,
-                    (value) => _updateNotificationSetting(
-                      controller,
-                      NotificationTypeEnum.memberJoined,
-                      NotificationChannelEnum.email,
-                      value,
-                    ),
+                    memberUpdating
+                        ? null
+                        : (value) => _updateNotificationSetting(
+                              controller,
+                              NotificationTypeEnum.memberJoined,
+                              NotificationChannelEnum.email,
+                              value,
+                            ),
                   ),
                 ],
               );
@@ -458,14 +482,28 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
     NotificationChannelEnum channel,
     bool isEnabled,
   ) async {
+    final key = _getNotificationKey(notificationType, channel);
+    
+    // 防止重复调用 - 如果当前设置正在更新中，直接返回
+    if (_updatingNotifications.contains(key)) {
+      log('[_updateNotificationSetting] 防止重复调用: $key', name: 'ProjectSettingsView');
+      return;
+    }
+    
+    log('[_updateNotificationSetting] 开始更新: $key, isEnabled: $isEnabled', name: 'ProjectSettingsView');
+    _updatingNotifications.add(key);
     try {
       await controller.updateNotificationSetting(
         notificationType: notificationType,
         channel: channel,
         isEnabled: isEnabled,
       );
-    } catch (error) {
+      log('[_updateNotificationSetting] 更新成功: $key', name: 'ProjectSettingsView');
+    } catch (error, stackTrace) {
+      log('[_updateNotificationSetting] 更新失败', error: error, stackTrace: stackTrace, name: 'ProjectSettingsView');
       Get.snackbar('失败', '更新通知设置失败');
+    } finally {
+      _updatingNotifications.remove(key);
     }
   }
 
