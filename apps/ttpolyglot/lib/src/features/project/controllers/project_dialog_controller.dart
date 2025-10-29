@@ -286,6 +286,75 @@ class ProjectDialogController extends GetxController {
     }
   }
 
+  /// 显示编辑项目可见性弹窗
+  static Future<void> showEditVisibilityDialog(Project project) async {
+    try {
+      // 获取当前可见性
+      final projectIdInt = int.tryParse(project.id);
+      if (projectIdInt == null) {
+        Get.snackbar('错误', '项目ID无效');
+        return;
+      }
+
+      final projectApi = Get.find<ProjectApi>();
+
+      // 显示可见性选择对话框
+      final result = await Get.dialog<String>(
+        AlertDialog(
+          title: const Text('修改项目可见性'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text('私有'),
+                subtitle: const Text('仅项目成员可见，需要邀请才能加入'),
+                leading: const Icon(Icons.lock, color: Colors.blue),
+                onTap: () => Get.back(result: 'private'),
+              ),
+              ListTile(
+                title: const Text('团队'),
+                subtitle: const Text('团队成员可见，团队内用户可申请加入'),
+                leading: const Icon(Icons.group, color: Colors.orange),
+                onTap: () => Get.back(result: 'internal'),
+              ),
+              ListTile(
+                title: const Text('公开'),
+                subtitle: const Text('所有人可见，任何人都可申请加入'),
+                leading: const Icon(Icons.public, color: Colors.green),
+                onTap: () => Get.back(result: 'public'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: const Text('取消'),
+            ),
+          ],
+        ),
+      );
+
+      if (result != null) {
+        // 调用 API 更新可见性
+        final updatedProject = await projectApi.updateProject(
+          projectId: projectIdInt,
+          visibility: result,
+        );
+
+        if (updatedProject != null) {
+          Get.snackbar('成功', '项目可见性已更新');
+          _refreshProject(project.id);
+        } else {
+          Get.snackbar('失败', '更新项目可见性失败');
+        }
+      }
+    } catch (error, stackTrace) {
+      LoggerUtils.error('[showEditVisibilityDialog]',
+          error: error, stackTrace: stackTrace, name: 'ProjectDialogController');
+      Get.snackbar('错误', '更新项目可见性失败: $error');
+    }
+  }
+
   /// 刷新项目数据
   static void _refreshProject(String projectId) {
     if (Get.isRegistered<ProjectController>(tag: projectId)) {

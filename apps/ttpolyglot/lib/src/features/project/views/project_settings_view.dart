@@ -113,19 +113,12 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                           const SizedBox(height: 16.0),
-                          _buildSwitchItem(
+                          _buildSettingItem(
                             context,
-                            '公开项目',
-                            '允许其他用户查看项目信息',
-                            false,
-                            (value) {},
-                          ),
-                          _buildSwitchItem(
-                            context,
-                            '允许申请加入',
-                            '用户可以申请加入项目',
-                            true,
-                            (value) {},
+                            '可见性',
+                            _getVisibilityText(controller.projectModel?.visibility ?? 'private'),
+                            Icons.visibility,
+                            () => ProjectDialogController.showEditVisibilityDialog(project),
                           ),
                         ],
                       ),
@@ -468,6 +461,20 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
         return '已归档';
       case 'suspended':
         return '已暂停';
+      default:
+        return '未知';
+    }
+  }
+
+  /// 获取可见性文本
+  String _getVisibilityText(String visibility) {
+    switch (visibility) {
+      case 'private':
+        return '私有';
+      case 'internal':
+        return '团队';
+      case 'public':
+        return '公开';
       default:
         return '未知';
     }
