@@ -693,7 +693,8 @@ class ProjectService extends BaseService {
   }
 
   Future<void> _updateProjectMemberCount(String projectId) async {
-    await _databaseService.query('''
+    try {
+      await _databaseService.query('''
       UPDATE {projects} 
       SET members_count = (
         SELECT COUNT(DISTINCT pm.user_id)
@@ -704,6 +705,12 @@ class ProjectService extends BaseService {
       )
       WHERE id = @project_id
     ''', {'project_id': projectId});
+
+      await _clearProjectCache(projectId);
+    } catch (error, stackTrace) {
+      logError('更新项目成员数量失败: $projectId', error: error, stackTrace: stackTrace);
+      rethrow;
+    }
   }
 
   Future<void> _clearProjectCache(String projectId) async {
