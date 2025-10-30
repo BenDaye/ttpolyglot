@@ -20,14 +20,28 @@ class ProjectsController extends GetxController {
   // 响应式项目列表
   final _projects = <Project>[].obs;
   final _isLoading = false.obs;
+  final _isLoadingMore = false.obs;
   final _searchQuery = ''.obs;
   final _selectedProjectId = ''.obs;
+
+  // 分页相关状态
+  final _currentPage = 1.obs;
+  final _totalPage = 1.obs;
+  final _pageSize = 50.obs;
+  final _totalSize = 0.obs;
 
   // Getters
   List<Project> get projects => _projects;
   bool get isLoading => _isLoading.value;
+  bool get isLoadingMore => _isLoadingMore.value;
   String get searchQuery => _searchQuery.value;
   String get selectedProjectId => _selectedProjectId.value;
+
+  // 分页信息 Getters
+  int get currentPage => _currentPage.value;
+  int get totalPage => _totalPage.value;
+  int get totalSize => _totalSize.value;
+  bool get hasNextPage => _currentPage.value < _totalPage.value;
 
   // 过滤后的项目列表
   List<Project> get filteredProjects {
@@ -65,40 +79,58 @@ class ProjectsController extends GetxController {
   }
 
   /// 加载项目列表（缓存优先策略）
-  static Future<void> loadProjects() async {
+  static Future<void> loadProjects({bool refresh = false}) async {
     final controller = instance;
 
     try {
       controller._isLoading.value = true;
 
-      // 第一步：先尝试从缓存加载
-      final cachedProjects = await controller._cacheService.getCachedProjects();
-      if (cachedProjects != null && cachedProjects.isNotEmpty) {
-        LoggerUtils.info('从缓存加载 ${cachedProjects.length} 个项目');
-        // 转换 ProjectModel 到 Project
-        final projects = cachedProjects.map((model) => ProjectConverter.toProject(model)).toList();
-        controller._projects.assignAll(projects);
-        controller._isLoading.value = false;
+      // 如果是刷新，重置页码
+      if (refresh) {
+        controller._currentPage.value = 1;
       }
 
-      // 第二步：同时从 API 获取最新数据
+      // 第一步：先尝试从缓存加载（仅第一页时）
+      if (controller._currentPage.value == 1) {
+        final cachedProjects = await controller._cacheService.getCachedProjects();
+        if (cachedProjects != null && cachedProjects.isNotEmpty) {
+          LoggerUtils.info('从缓存加载 ${cachedProjects.length} 个项目');
+          // 转换 ProjectModel 到 Project
+          final projects = cachedProjects.map((model) => ProjectConverter.toProject(model)).toList();
+          controller._projects.assignAll(projects);
+          controller._isLoading.value = false;
+        }
+      }
+
+      // 第二步：从 API 获取第一页数据
       try {
-        final apiProjects = await controller._projectApi.getProjects();
-        LoggerUtils.info('从 API 获取 ${apiProjects?.items?.length} 个项目');
+        final apiProjects = await controller._projectApi.getProjects(
+          page: 1,
+          limit: controller._pageSize.value,
+        );
 
-        // 更新缓存
-        await controller._cacheService.cacheProjects(apiProjects?.items ?? []);
+        if (apiProjects != null) {
+          LoggerUtils.info('从 API 获取 ${apiProjects.items?.length} 个项目');
 
-        // 转换并更新界面
-        final projects = apiProjects?.items?.map((model) => ProjectConverter.toProject(model)).toList() ?? [];
-        controller._projects.assignAll(projects);
+          // 更新分页信息
+          controller._currentPage.value = apiProjects.page;
+          controller._totalPage.value = apiProjects.totalPage;
+          controller._totalSize.value = apiProjects.totalSize;
 
-        LoggerUtils.info('项目列表已更新并缓存');
+          // 更新缓存
+          await controller._cacheService.cacheProjects(apiProjects.items ?? []);
+
+          // 转换并更新界面
+          final projects = apiProjects.items?.map((model) => ProjectConverter.toProject(model)).toList() ?? [];
+          controller._projects.assignAll(projects);
+
+          LoggerUtils.info('项目列表已更新并缓存，当前页: ${apiProjects.page}/${apiProjects.totalPage}');
+        }
       } catch (apiError, apiStackTrace) {
         LoggerUtils.error('从 API 加载项目失败', error: apiError, stackTrace: apiStackTrace);
       }
     } catch (error, stackTrace) {
-      LoggerUtils.error('loadProjects', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('[loadProjects]', error: error, stackTrace: stackTrace, name: 'ProjectsController');
     } finally {
       controller._isLoading.value = false;
     }
@@ -243,9 +275,48 @@ class ProjectsController extends GetxController {
     }
   }
 
+  /// 加载更多项目
+  static Future<void> loadMoreProjects() async {
+    final controller = instance;
+
+    // 如果已在加载或没有下一页，直接返回
+    if (controller._isLoadingMore.value || !controller.hasNextPage) {
+      return;
+    }
+
+    try {
+      controller._isLoadingMore.value = true;
+
+      final nextPage = controller._currentPage.value + 1;
+      LoggerUtils.info('加载更多项目，页码: $nextPage');
+
+      final apiProjects = await controller._projectApi.getProjects(
+        page: nextPage,
+        limit: controller._pageSize.value,
+      );
+
+      if (apiProjects != null && apiProjects.items != null) {
+        // 更新分页信息
+        controller._currentPage.value = apiProjects.page;
+        controller._totalPage.value = apiProjects.totalPage;
+        controller._totalSize.value = apiProjects.totalSize;
+
+        // 将新数据追加到现有列表
+        final newProjects = apiProjects.items!.map((model) => ProjectConverter.toProject(model)).toList();
+        controller._projects.addAll(newProjects);
+
+        LoggerUtils.info('加载了 ${newProjects.length} 个项目，当前页: ${apiProjects.page}/${apiProjects.totalPage}');
+      }
+    } catch (error, stackTrace) {
+      LoggerUtils.error('[loadMoreProjects]', error: error, stackTrace: stackTrace, name: 'ProjectsController');
+    } finally {
+      controller._isLoadingMore.value = false;
+    }
+  }
+
   /// 刷新项目列表
   static Future<void> refreshProjects() async {
-    await loadProjects();
+    await loadProjects(refresh: true);
   }
 
   /// 设置选中的项目ID
@@ -303,6 +374,11 @@ class ProjectsController extends GetxController {
       controller._isLoading.value = true;
       final projects = await controller._projectService.searchProjects(query);
       controller._projects.assignAll(projects);
+
+      // 重置分页状态，因为搜索结果不支持分页
+      controller._currentPage.value = 1;
+      controller._totalPage.value = 1;
+      controller._totalSize.value = projects.length;
     } catch (error, stackTrace) {
       Get.snackbar('错误', '搜索项目失败: $error');
       LoggerUtils.error('搜索项目失败', error: error, stackTrace: stackTrace);

@@ -136,13 +136,13 @@ class ProjectsSidebar extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.folder_open, size: 64, color: Colors.grey),
-                const SizedBox(height: 16),
+                const Icon(Icons.folder_open, size: 64.0, color: Colors.grey),
+                const SizedBox(height: 16.0),
                 Text(
                   controller.searchQuery.isEmpty ? '暂无项目' : '未找到匹配的项目',
-                  style: const TextStyle(fontSize: 18, color: Colors.grey),
+                  style: const TextStyle(fontSize: 18.0, color: Colors.grey),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 16.0),
               ],
             ),
           );
@@ -151,9 +151,31 @@ class ProjectsSidebar extends StatelessWidget {
         return RefreshIndicator(
           onRefresh: ProjectsController.refreshProjects,
           child: ListView.builder(
-            itemCount: projects.length,
+            itemCount: projects.length + (controller.hasNextPage ? 1 : 0),
             itemBuilder: (context, index) {
+              // 最后一项显示加载指示器
+
+              if (index == projects.length) {
+                return Obx(
+                  () => controller.isLoadingMore
+                      ? const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                );
+              }
+
               final project = projects[index];
+
+              // 当渲染到倒数第一项且有下一页时，触发加载
+              if (index == projects.length - 1 && controller.hasNextPage) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  ProjectsController.loadMoreProjects();
+                });
+              }
               return Obx(
                 () => _buildProjectCard(
                   project,

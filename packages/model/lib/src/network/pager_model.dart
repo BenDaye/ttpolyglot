@@ -43,4 +43,10 @@ class PagerModel<T> with _$PagerModel<T> {
     }
     return <R>[converter(items as Map<String, dynamic>)];
   }
+
+  // 是否还有下一页
+  bool get hasNextPage => page < totalPage;
+
+  // 是否还有上一页
+  bool get hasPreviousPage => page > 1;
 }
