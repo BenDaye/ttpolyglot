@@ -107,11 +107,11 @@ class ProjectService extends BaseService {
         SELECT 
           pl.project_id,
           l.id, l.code, l.name, l.native_name, l.flag_emoji, l.is_active, l.is_rtl, 
-          l.sort_order, l.created_at, l.updated_at, pl.is_primary
+          l.sort_order, l.created_at, l.updated_at
         FROM {project_languages} pl
         JOIN {languages} l ON pl.language_id = l.id
         WHERE pl.project_id = ANY(@project_ids) AND pl.is_active = true
-        ORDER BY pl.project_id, pl.is_primary DESC, l.sort_order, l.name
+        ORDER BY pl.project_id, l.sort_order, l.name
       ''';
 
       final languagesResult = await _databaseService.query(languagesSql, {'project_ids': projectIds});
@@ -379,9 +379,9 @@ class ProjectService extends BaseService {
         // 添加主语言到项目语言列表
         await _databaseService.query('''
           INSERT INTO {project_languages} (
-            project_id, language_id, is_primary, is_active
+            project_id, language_id, is_active
           ) VALUES (
-            @project_id, @language_id, true, true
+            @project_id, @language_id, true
           )
         ''', {
           'project_id': projectId,
@@ -395,9 +395,9 @@ class ProjectService extends BaseService {
             if (langId != primaryLanguageId) {
               await _databaseService.query('''
                 INSERT INTO {project_languages} (
-                  project_id, language_id, is_primary, is_active
+                  project_id, language_id, is_active
                 ) VALUES (
-                  @project_id, @language_id, false, true
+                  @project_id, @language_id, true
                 )
               ''', {
                 'project_id': projectId,
@@ -901,11 +901,11 @@ class ProjectService extends BaseService {
 
       final result = await _databaseService.query('''
         SELECT l.id, l.code, l.name, l.native_name, l.flag_emoji, l.is_active, l.is_rtl, 
-               l.sort_order, l.created_at, l.updated_at, pl.is_primary
+               l.sort_order, l.created_at, l.updated_at
         FROM {project_languages} pl
         JOIN {languages} l ON pl.language_id = l.id
         WHERE pl.project_id = @project_id AND pl.is_active = true
-        ORDER BY pl.is_primary DESC, l.sort_order, l.name
+        ORDER BY l.sort_order, l.name
       ''', {'project_id': projectId});
 
       return result.map((row) => LanguageModel.fromJson(row.toColumnMap())).toList();
