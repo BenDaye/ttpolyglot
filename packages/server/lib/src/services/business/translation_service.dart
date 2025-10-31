@@ -491,11 +491,6 @@ class TranslationService extends BaseService {
             FROM translation_entries
             WHERE project_id = @project_id AND status IN ('completed', 'reviewing', 'approved')
           ),
-          languages_count = (
-            SELECT COUNT(DISTINCT language_code)
-            FROM project_languages
-            WHERE project_id = @project_id AND is_enabled = true
-          ),
           last_activity_at = CURRENT_TIMESTAMP
         WHERE id = @project_id
       ''', {'project_id': projectId});

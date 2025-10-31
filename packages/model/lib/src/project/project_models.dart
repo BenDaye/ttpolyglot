@@ -3,5 +3,4 @@ library;
 
 export 'project_member_model.dart';
 export 'project_model.dart';
-export 'project_model_extension.dart';
 export 'project_statistics_model.dart';

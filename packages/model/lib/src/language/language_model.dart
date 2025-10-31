@@ -37,9 +37,6 @@ class LanguageModel with _$LanguageModel {
 
     /// 更新时间
     @JsonKey(name: 'updated_at') @TimesConverter() required DateTime updatedAt,
-
-    /// 是否为主语言
-    @JsonKey(name: 'is_primary') @Default(false) bool isPrimary,
   }) = _LanguageModel;
 
   factory LanguageModel.fromJson(Map<String, dynamic> json) => _$LanguageModelFromJson(json);

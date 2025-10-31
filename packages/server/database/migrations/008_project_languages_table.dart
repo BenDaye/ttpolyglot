@@ -1,4 +1,5 @@
 import 'package:ttpolyglot_model/model.dart';
+
 import 'base_migration.dart';
 
 /// 迁移: 008 - 创建项目语言关联表
@@ -25,7 +26,6 @@ class Migration008ProjectLanguagesTable extends BaseMigration {
           id SERIAL PRIMARY KEY,
           project_id INTEGER NOT NULL,
           language_id INTEGER NOT NULL,
-          is_primary BOOLEAN DEFAULT false,
           is_active BOOLEAN DEFAULT true,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           UNIQUE(project_id, language_id)
@@ -39,7 +39,6 @@ class Migration008ProjectLanguagesTable extends BaseMigration {
       // 创建索引
       await createIndex('project_languages_project_id', 'project_languages', 'project_id');
       await createIndex('project_languages_language_id', 'project_languages', 'language_id');
-      await createIndex('project_languages_is_primary', 'project_languages', 'is_primary');
       await createIndex('project_languages_is_active', 'project_languages', 'is_active');
 
       // 添加表注释
@@ -47,7 +46,6 @@ class Migration008ProjectLanguagesTable extends BaseMigration {
       await addColumnComment('project_languages', 'id', '关联ID，主键');
       await addColumnComment('project_languages', 'project_id', '项目ID，外键关联projects表');
       await addColumnComment('project_languages', 'language_id', '语言ID，外键关联languages表');
-      await addColumnComment('project_languages', 'is_primary', '是否为主要语言');
       await addColumnComment('project_languages', 'is_active', '是否激活');
       await addColumnComment('project_languages', 'created_at', '创建时间');
 

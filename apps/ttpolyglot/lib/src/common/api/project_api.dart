@@ -48,7 +48,7 @@ class ProjectApi {
   }
 
   /// 获取项目详情
-  Future<ProjectDetailModel?> getProject(int projectId) async {
+  Future<ProjectModel?> getProject(int projectId) async {
     try {
       LoggerUtils.info('[getProject] projectId=$projectId', name: 'ProjectApi');
 
@@ -56,7 +56,7 @@ class ProjectApi {
 
       final result = ModelUtils.toModel(
         response.data,
-        (json) => ProjectDetailModel.fromJson(json),
+        (json) => ProjectModel.fromJson(json),
       );
       if (result == null) {
         LoggerUtils.error('获取项目详情响应数据为空');

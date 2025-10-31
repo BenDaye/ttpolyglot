@@ -7,44 +7,39 @@ class ProjectConverter {
   ProjectConverter._();
 
   /// 将 ProjectModel (API) 转换为 Project (Core)
-  static Project toProject(ProjectModel model, {List<LanguageModel>? languages}) {
+  static Project toProject(ProjectModel model) {
     try {
-      // 构建主语言 - 通过 ID 查找语言信息
-      final languageModel = _getLanguageById(model.primaryLanguageId);
       final primaryLanguage = Language(
         id: model.primaryLanguageId,
-        code: languageModel?.code.code ?? LanguageEnum.enUS.code,
-        name: languageModel?.name ?? LanguageEnum.enUS.name,
-        nativeName: languageModel?.nativeName ?? LanguageEnum.enUS.nativeName,
-        isRtl: languageModel?.isRtl ?? false,
-        sortIndex: languageModel?.sortOrder ?? 0,
+        code: model.primaryLanguage.code.code,
+        name: model.primaryLanguage.name,
+        nativeName: model.primaryLanguage.nativeName ?? model.primaryLanguage.name,
+        isRtl: model.primaryLanguage.isRtl,
+        sortIndex: model.primaryLanguage.sortOrder,
       );
 
-      // 构建项目所有者
       final owner = User(
         id: model.ownerId,
-        email: model.ownerEmail ?? '',
-        name: model.ownerDisplayName ?? model.ownerUsername ?? '',
+        email: model.owner.email ?? '',
+        name: model.owner.displayName ?? model.owner.username ?? '',
         role: UserRole.admin,
-        createdAt: model.createdAt,
-        updatedAt: model.updatedAt,
+        createdAt: model.owner.createdAt,
+        updatedAt: model.owner.updatedAt,
       );
 
       // 构建目标语言列表（排除主语言）
       final targetLanguages = <Language>[];
-      if (languages != null) {
-        for (final langModel in languages) {
-          // 排除主语言，只添加目标语言
-          if (langModel.id != model.primaryLanguageId) {
-            targetLanguages.add(Language(
-              id: langModel.id,
-              code: langModel.code.code,
-              name: langModel.name,
-              nativeName: langModel.nativeName ?? langModel.name,
-              isRtl: langModel.isRtl,
-              sortIndex: langModel.sortOrder,
-            ));
-          }
+      for (final langModel in model.languages) {
+        // 排除主语言，只添加目标语言
+        if (langModel.id != model.primaryLanguageId) {
+          targetLanguages.add(Language(
+            id: langModel.id,
+            code: langModel.code.code,
+            name: langModel.name,
+            nativeName: langModel.nativeName ?? langModel.name,
+            isRtl: langModel.isRtl,
+            sortIndex: langModel.sortOrder,
+          ));
         }
       }
 
@@ -66,22 +61,53 @@ class ProjectConverter {
     }
   }
 
-  /// 将 ProjectDetailModel 转换为 Project (Core)，包含完整的语言列表
-  static Project toProjectFromDetail(ProjectDetailModel detailModel) {
-    try {
-      return toProject(
-        detailModel.project,
-        languages: detailModel.languages,
-      );
-    } catch (error, stackTrace) {
-      ServerLogger.error('[toProjectFromDetail]', error: error, stackTrace: stackTrace, name: 'ProjectConverter');
-      rethrow;
-    }
-  }
-
   /// 将 Project (Core) 转换为 ProjectModel (API)
-  static ProjectModel toProjectModel(Project project) {
+  /// 注意：这个方法不会填充完整的 languages 和 members 列表，
+  /// 需要从 API 返回时才能获取完整数据
+  static ProjectModel toProjectModel(
+    Project project, {
+    List<LanguageModel>? languages,
+    List<ProjectMemberModel>? members,
+  }) {
     try {
+      // 构建语言列表（如果没有提供，则使用默认空列表）
+      final projectLanguages = languages ??
+          [
+            // 至少包含主语言
+            LanguageModel(
+              id: project.primaryLanguage.id,
+              code: LanguageEnum.fromValue(project.primaryLanguage.code),
+              name: project.primaryLanguage.name,
+              nativeName: project.primaryLanguage.nativeName,
+              isRtl: project.primaryLanguage.isRtl,
+              sortOrder: project.primaryLanguage.sortIndex,
+              isActive: true,
+              createdAt: project.createdAt,
+              updatedAt: project.updatedAt,
+            ),
+          ];
+
+      // 构建成员列表（如果没有提供，则使用默认空列表）
+      final projectMembers = members ??
+          [
+            // 至少包含所有者
+            ProjectMemberModel(
+              id: 0,
+              projectId: int.parse(project.id),
+              userId: project.owner.id,
+              role: ProjectRoleEnum.owner,
+              username: project.owner.email.split('@').first,
+              displayName: project.owner.name,
+              email: project.owner.email,
+              status: MemberStatusEnum.active,
+              isActive: true,
+              invitedAt: project.createdAt,
+              joinedAt: project.createdAt,
+              createdAt: project.createdAt,
+              updatedAt: project.updatedAt,
+            ),
+          ];
+
       return ProjectModel(
         id: int.parse(project.id), // Core 使用 String，API 使用 int
         name: project.name,
@@ -95,28 +121,12 @@ class ProjectConverter {
         updatedAt: project.updatedAt,
         isActive: project.isActive,
         lastActivityAt: project.lastAccessedAt,
-        ownerUsername: project.owner.email.split('@').first,
-        ownerEmail: project.owner.email,
-        ownerDisplayName: project.owner.name,
+        languages: projectLanguages,
+        members: projectMembers,
       );
     } catch (error, stackTrace) {
       ServerLogger.error('[toProjectModel]', error: error, stackTrace: stackTrace, name: 'ProjectConverter');
       rethrow;
-    }
-  }
-
-  /// 根据语言 ID 获取语言模型
-  static LanguageModel? _getLanguageById(int? languageId) {
-    if (languageId == null) return null;
-
-    try {
-      final presetLanguages = LanguageEnum.toArray();
-      return presetLanguages.firstWhere(
-        (lang) => lang.id == languageId,
-        orElse: () => presetLanguages.first,
-      );
-    } catch (_) {
-      return null;
     }
   }
 

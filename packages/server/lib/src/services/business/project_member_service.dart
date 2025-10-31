@@ -392,16 +392,10 @@ class ProjectMemberService extends BaseService {
     return ProjectMemberModel.fromJson(result.first.toColumnMap());
   }
 
-  /// 更新项目成员数量
+  /// 更新项目成员数量（已废弃，数据库不再维护成员计数）
   Future<void> _updateProjectMemberCount(int projectId) async {
-    await _databaseService.query('''
-      UPDATE {projects}
-      SET members_count = (
-        SELECT COUNT(*) FROM {project_members}
-        WHERE project_id = @project_id AND status = 'active'
-      )
-      WHERE id = @project_id
-    ''', {'project_id': projectId});
+    // 清除缓存即可，成员数量通过关联查询获取
+    await _clearProjectMemberCache(projectId);
   }
 
   /// 清除项目成员缓存
@@ -493,7 +487,10 @@ class ProjectMemberService extends BaseService {
           p.id as project_id,
           p.name as project_name,
           p.description as project_description,
-          p.members_count as current_member_count,
+          (SELECT COUNT(*) FROM {project_members} pm2 
+           WHERE pm2.project_id = p.id 
+             AND pm2.status = 'active' 
+             AND pm2.user_id IS NOT NULL) as current_member_count,
           p.member_limit,
           u.id as inviter_id,
           u.username as inviter_username,
@@ -782,9 +779,14 @@ class ProjectMemberService extends BaseService {
   /// 检查项目成员上限
   Future<void> _checkMemberLimit(int projectId) async {
     final result = await _databaseService.query('''
-      SELECT members_count, member_limit
-      FROM {projects}
-      WHERE id = @project_id
+      SELECT 
+        (SELECT COUNT(*) FROM {project_members} pm 
+         WHERE pm.project_id = p.id 
+           AND pm.status = 'active' 
+           AND pm.user_id IS NOT NULL) as members_count,
+        p.member_limit
+      FROM {projects} p
+      WHERE p.id = @project_id
     ''', {'project_id': projectId});
 
     if (result.isEmpty) {

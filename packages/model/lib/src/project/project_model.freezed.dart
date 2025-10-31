@@ -64,26 +64,12 @@ mixin _$ProjectModel {
   @FlexibleIntConverter()
   int get translatedKeys => throw _privateConstructorUsedError;
 
-  /// 项目语言数
-  @JsonKey(name: 'languages_count')
-  @FlexibleIntConverter()
-  int get languagesCount => throw _privateConstructorUsedError;
-
-  /// 项目成员数
-  @JsonKey(name: 'members_count')
-  @FlexibleIntConverter()
-  int get membersCount => throw _privateConstructorUsedError;
-
   /// 项目成员上限
   @JsonKey(name: 'member_limit')
   @FlexibleIntConverter()
   int get memberLimit => throw _privateConstructorUsedError;
 
-  /// 项目是否公开
-  @JsonKey(name: 'is_public')
-  bool get isPublic => throw _privateConstructorUsedError;
-
-  /// 项目是否活跃
+  /// 是否激活
   @JsonKey(name: 'is_active')
   bool get isActive => throw _privateConstructorUsedError;
 
@@ -106,26 +92,13 @@ mixin _$ProjectModel {
   @TimesConverter()
   DateTime get updatedAt => throw _privateConstructorUsedError;
 
-  /// 项目所有者用户名
-  @JsonKey(name: 'owner_username')
-  String? get ownerUsername => throw _privateConstructorUsedError;
+  /// 项目语言
+  @JsonKey(name: 'languages')
+  List<LanguageModel> get languages => throw _privateConstructorUsedError;
 
-  /// 项目所有者邮箱
-  @JsonKey(name: 'owner_email')
-  String? get ownerEmail => throw _privateConstructorUsedError;
-
-  /// 项目所有者显示名称
-  @JsonKey(name: 'owner_display_name')
-  String? get ownerDisplayName => throw _privateConstructorUsedError;
-
-  /// 项目所有者头像
-  @JsonKey(name: 'owner_avatar')
-  String? get ownerAvatar => throw _privateConstructorUsedError;
-
-  /// 项目完成百分比
-  @JsonKey(name: 'completion_percentage')
-  @FlexibleDoubleConverter()
-  double get completionPercentage => throw _privateConstructorUsedError;
+  /// 项目成员
+  @JsonKey(name: 'members')
+  List<ProjectMemberModel> get members => throw _privateConstructorUsedError;
 
   /// Serializes this ProjectModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -158,12 +131,7 @@ abstract class $ProjectModelCopyWith<$Res> {
       @JsonKey(name: 'translated_keys')
       @FlexibleIntConverter()
       int translatedKeys,
-      @JsonKey(name: 'languages_count')
-      @FlexibleIntConverter()
-      int languagesCount,
-      @JsonKey(name: 'members_count') @FlexibleIntConverter() int membersCount,
       @JsonKey(name: 'member_limit') @FlexibleIntConverter() int memberLimit,
-      @JsonKey(name: 'is_public') bool isPublic,
       @JsonKey(name: 'is_active') bool isActive,
       @JsonKey(name: 'settings') Map<String, dynamic>? settings,
       @JsonKey(name: 'last_activity_at')
@@ -171,13 +139,8 @@ abstract class $ProjectModelCopyWith<$Res> {
       DateTime? lastActivityAt,
       @JsonKey(name: 'created_at') @TimesConverter() DateTime createdAt,
       @JsonKey(name: 'updated_at') @TimesConverter() DateTime updatedAt,
-      @JsonKey(name: 'owner_username') String? ownerUsername,
-      @JsonKey(name: 'owner_email') String? ownerEmail,
-      @JsonKey(name: 'owner_display_name') String? ownerDisplayName,
-      @JsonKey(name: 'owner_avatar') String? ownerAvatar,
-      @JsonKey(name: 'completion_percentage')
-      @FlexibleDoubleConverter()
-      double completionPercentage});
+      @JsonKey(name: 'languages') List<LanguageModel> languages,
+      @JsonKey(name: 'members') List<ProjectMemberModel> members});
 }
 
 /// @nodoc
@@ -205,20 +168,14 @@ class _$ProjectModelCopyWithImpl<$Res, $Val extends ProjectModel>
     Object? primaryLanguageId = null,
     Object? totalKeys = null,
     Object? translatedKeys = null,
-    Object? languagesCount = null,
-    Object? membersCount = null,
     Object? memberLimit = null,
-    Object? isPublic = null,
     Object? isActive = null,
     Object? settings = freezed,
     Object? lastActivityAt = freezed,
     Object? createdAt = null,
     Object? updatedAt = null,
-    Object? ownerUsername = freezed,
-    Object? ownerEmail = freezed,
-    Object? ownerDisplayName = freezed,
-    Object? ownerAvatar = freezed,
-    Object? completionPercentage = null,
+    Object? languages = null,
+    Object? members = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -261,22 +218,10 @@ class _$ProjectModelCopyWithImpl<$Res, $Val extends ProjectModel>
           ? _value.translatedKeys
           : translatedKeys // ignore: cast_nullable_to_non_nullable
               as int,
-      languagesCount: null == languagesCount
-          ? _value.languagesCount
-          : languagesCount // ignore: cast_nullable_to_non_nullable
-              as int,
-      membersCount: null == membersCount
-          ? _value.membersCount
-          : membersCount // ignore: cast_nullable_to_non_nullable
-              as int,
       memberLimit: null == memberLimit
           ? _value.memberLimit
           : memberLimit // ignore: cast_nullable_to_non_nullable
               as int,
-      isPublic: null == isPublic
-          ? _value.isPublic
-          : isPublic // ignore: cast_nullable_to_non_nullable
-              as bool,
       isActive: null == isActive
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
@@ -297,26 +242,14 @@ class _$ProjectModelCopyWithImpl<$Res, $Val extends ProjectModel>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      ownerUsername: freezed == ownerUsername
-          ? _value.ownerUsername
-          : ownerUsername // ignore: cast_nullable_to_non_nullable
-              as String?,
-      ownerEmail: freezed == ownerEmail
-          ? _value.ownerEmail
-          : ownerEmail // ignore: cast_nullable_to_non_nullable
-              as String?,
-      ownerDisplayName: freezed == ownerDisplayName
-          ? _value.ownerDisplayName
-          : ownerDisplayName // ignore: cast_nullable_to_non_nullable
-              as String?,
-      ownerAvatar: freezed == ownerAvatar
-          ? _value.ownerAvatar
-          : ownerAvatar // ignore: cast_nullable_to_non_nullable
-              as String?,
-      completionPercentage: null == completionPercentage
-          ? _value.completionPercentage
-          : completionPercentage // ignore: cast_nullable_to_non_nullable
-              as double,
+      languages: null == languages
+          ? _value.languages
+          : languages // ignore: cast_nullable_to_non_nullable
+              as List<LanguageModel>,
+      members: null == members
+          ? _value.members
+          : members // ignore: cast_nullable_to_non_nullable
+              as List<ProjectMemberModel>,
     ) as $Val);
   }
 }
@@ -344,12 +277,7 @@ abstract class _$$ProjectModelImplCopyWith<$Res>
       @JsonKey(name: 'translated_keys')
       @FlexibleIntConverter()
       int translatedKeys,
-      @JsonKey(name: 'languages_count')
-      @FlexibleIntConverter()
-      int languagesCount,
-      @JsonKey(name: 'members_count') @FlexibleIntConverter() int membersCount,
       @JsonKey(name: 'member_limit') @FlexibleIntConverter() int memberLimit,
-      @JsonKey(name: 'is_public') bool isPublic,
       @JsonKey(name: 'is_active') bool isActive,
       @JsonKey(name: 'settings') Map<String, dynamic>? settings,
       @JsonKey(name: 'last_activity_at')
@@ -357,13 +285,8 @@ abstract class _$$ProjectModelImplCopyWith<$Res>
       DateTime? lastActivityAt,
       @JsonKey(name: 'created_at') @TimesConverter() DateTime createdAt,
       @JsonKey(name: 'updated_at') @TimesConverter() DateTime updatedAt,
-      @JsonKey(name: 'owner_username') String? ownerUsername,
-      @JsonKey(name: 'owner_email') String? ownerEmail,
-      @JsonKey(name: 'owner_display_name') String? ownerDisplayName,
-      @JsonKey(name: 'owner_avatar') String? ownerAvatar,
-      @JsonKey(name: 'completion_percentage')
-      @FlexibleDoubleConverter()
-      double completionPercentage});
+      @JsonKey(name: 'languages') List<LanguageModel> languages,
+      @JsonKey(name: 'members') List<ProjectMemberModel> members});
 }
 
 /// @nodoc
@@ -389,20 +312,14 @@ class __$$ProjectModelImplCopyWithImpl<$Res>
     Object? primaryLanguageId = null,
     Object? totalKeys = null,
     Object? translatedKeys = null,
-    Object? languagesCount = null,
-    Object? membersCount = null,
     Object? memberLimit = null,
-    Object? isPublic = null,
     Object? isActive = null,
     Object? settings = freezed,
     Object? lastActivityAt = freezed,
     Object? createdAt = null,
     Object? updatedAt = null,
-    Object? ownerUsername = freezed,
-    Object? ownerEmail = freezed,
-    Object? ownerDisplayName = freezed,
-    Object? ownerAvatar = freezed,
-    Object? completionPercentage = null,
+    Object? languages = null,
+    Object? members = null,
   }) {
     return _then(_$ProjectModelImpl(
       id: null == id
@@ -445,22 +362,10 @@ class __$$ProjectModelImplCopyWithImpl<$Res>
           ? _value.translatedKeys
           : translatedKeys // ignore: cast_nullable_to_non_nullable
               as int,
-      languagesCount: null == languagesCount
-          ? _value.languagesCount
-          : languagesCount // ignore: cast_nullable_to_non_nullable
-              as int,
-      membersCount: null == membersCount
-          ? _value.membersCount
-          : membersCount // ignore: cast_nullable_to_non_nullable
-              as int,
       memberLimit: null == memberLimit
           ? _value.memberLimit
           : memberLimit // ignore: cast_nullable_to_non_nullable
               as int,
-      isPublic: null == isPublic
-          ? _value.isPublic
-          : isPublic // ignore: cast_nullable_to_non_nullable
-              as bool,
       isActive: null == isActive
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
@@ -481,33 +386,21 @@ class __$$ProjectModelImplCopyWithImpl<$Res>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      ownerUsername: freezed == ownerUsername
-          ? _value.ownerUsername
-          : ownerUsername // ignore: cast_nullable_to_non_nullable
-              as String?,
-      ownerEmail: freezed == ownerEmail
-          ? _value.ownerEmail
-          : ownerEmail // ignore: cast_nullable_to_non_nullable
-              as String?,
-      ownerDisplayName: freezed == ownerDisplayName
-          ? _value.ownerDisplayName
-          : ownerDisplayName // ignore: cast_nullable_to_non_nullable
-              as String?,
-      ownerAvatar: freezed == ownerAvatar
-          ? _value.ownerAvatar
-          : ownerAvatar // ignore: cast_nullable_to_non_nullable
-              as String?,
-      completionPercentage: null == completionPercentage
-          ? _value.completionPercentage
-          : completionPercentage // ignore: cast_nullable_to_non_nullable
-              as double,
+      languages: null == languages
+          ? _value._languages
+          : languages // ignore: cast_nullable_to_non_nullable
+              as List<LanguageModel>,
+      members: null == members
+          ? _value._members
+          : members // ignore: cast_nullable_to_non_nullable
+              as List<ProjectMemberModel>,
     ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$ProjectModelImpl implements _ProjectModel {
+class _$ProjectModelImpl extends _ProjectModel {
   const _$ProjectModelImpl(
       {@JsonKey(name: 'id') @FlexibleIntConverter() required this.id,
       @JsonKey(name: 'name') required this.name,
@@ -523,16 +416,9 @@ class _$ProjectModelImpl implements _ProjectModel {
       @JsonKey(name: 'translated_keys')
       @FlexibleIntConverter()
       this.translatedKeys = 0,
-      @JsonKey(name: 'languages_count')
-      @FlexibleIntConverter()
-      this.languagesCount = 0,
-      @JsonKey(name: 'members_count')
-      @FlexibleIntConverter()
-      this.membersCount = 1,
       @JsonKey(name: 'member_limit')
       @FlexibleIntConverter()
       this.memberLimit = 10,
-      @JsonKey(name: 'is_public') this.isPublic = false,
       @JsonKey(name: 'is_active') this.isActive = true,
       @JsonKey(name: 'settings') final Map<String, dynamic>? settings,
       @JsonKey(name: 'last_activity_at')
@@ -540,14 +426,13 @@ class _$ProjectModelImpl implements _ProjectModel {
       this.lastActivityAt,
       @JsonKey(name: 'created_at') @TimesConverter() required this.createdAt,
       @JsonKey(name: 'updated_at') @TimesConverter() required this.updatedAt,
-      @JsonKey(name: 'owner_username') this.ownerUsername,
-      @JsonKey(name: 'owner_email') this.ownerEmail,
-      @JsonKey(name: 'owner_display_name') this.ownerDisplayName,
-      @JsonKey(name: 'owner_avatar') this.ownerAvatar,
-      @JsonKey(name: 'completion_percentage')
-      @FlexibleDoubleConverter()
-      this.completionPercentage = 0.0})
-      : _settings = settings;
+      @JsonKey(name: 'languages') required final List<LanguageModel> languages,
+      @JsonKey(name: 'members')
+      required final List<ProjectMemberModel> members})
+      : _settings = settings,
+        _languages = languages,
+        _members = members,
+        super._();
 
   factory _$ProjectModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$ProjectModelImplFromJson(json);
@@ -606,30 +491,13 @@ class _$ProjectModelImpl implements _ProjectModel {
   @FlexibleIntConverter()
   final int translatedKeys;
 
-  /// 项目语言数
-  @override
-  @JsonKey(name: 'languages_count')
-  @FlexibleIntConverter()
-  final int languagesCount;
-
-  /// 项目成员数
-  @override
-  @JsonKey(name: 'members_count')
-  @FlexibleIntConverter()
-  final int membersCount;
-
   /// 项目成员上限
   @override
   @JsonKey(name: 'member_limit')
   @FlexibleIntConverter()
   final int memberLimit;
 
-  /// 项目是否公开
-  @override
-  @JsonKey(name: 'is_public')
-  final bool isPublic;
-
-  /// 项目是否活跃
+  /// 是否激活
   @override
   @JsonKey(name: 'is_active')
   final bool isActive;
@@ -666,35 +534,33 @@ class _$ProjectModelImpl implements _ProjectModel {
   @TimesConverter()
   final DateTime updatedAt;
 
-  /// 项目所有者用户名
-  @override
-  @JsonKey(name: 'owner_username')
-  final String? ownerUsername;
+  /// 项目语言
+  final List<LanguageModel> _languages;
 
-  /// 项目所有者邮箱
+  /// 项目语言
   @override
-  @JsonKey(name: 'owner_email')
-  final String? ownerEmail;
+  @JsonKey(name: 'languages')
+  List<LanguageModel> get languages {
+    if (_languages is EqualUnmodifiableListView) return _languages;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_languages);
+  }
 
-  /// 项目所有者显示名称
-  @override
-  @JsonKey(name: 'owner_display_name')
-  final String? ownerDisplayName;
+  /// 项目成员
+  final List<ProjectMemberModel> _members;
 
-  /// 项目所有者头像
+  /// 项目成员
   @override
-  @JsonKey(name: 'owner_avatar')
-  final String? ownerAvatar;
-
-  /// 项目完成百分比
-  @override
-  @JsonKey(name: 'completion_percentage')
-  @FlexibleDoubleConverter()
-  final double completionPercentage;
+  @JsonKey(name: 'members')
+  List<ProjectMemberModel> get members {
+    if (_members is EqualUnmodifiableListView) return _members;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_members);
+  }
 
   @override
   String toString() {
-    return 'ProjectModel(id: $id, name: $name, slug: $slug, description: $description, ownerId: $ownerId, status: $status, visibility: $visibility, primaryLanguageId: $primaryLanguageId, totalKeys: $totalKeys, translatedKeys: $translatedKeys, languagesCount: $languagesCount, membersCount: $membersCount, memberLimit: $memberLimit, isPublic: $isPublic, isActive: $isActive, settings: $settings, lastActivityAt: $lastActivityAt, createdAt: $createdAt, updatedAt: $updatedAt, ownerUsername: $ownerUsername, ownerEmail: $ownerEmail, ownerDisplayName: $ownerDisplayName, ownerAvatar: $ownerAvatar, completionPercentage: $completionPercentage)';
+    return 'ProjectModel(id: $id, name: $name, slug: $slug, description: $description, ownerId: $ownerId, status: $status, visibility: $visibility, primaryLanguageId: $primaryLanguageId, totalKeys: $totalKeys, translatedKeys: $translatedKeys, memberLimit: $memberLimit, isActive: $isActive, settings: $settings, lastActivityAt: $lastActivityAt, createdAt: $createdAt, updatedAt: $updatedAt, languages: $languages, members: $members)';
   }
 
   @override
@@ -717,14 +583,8 @@ class _$ProjectModelImpl implements _ProjectModel {
                 other.totalKeys == totalKeys) &&
             (identical(other.translatedKeys, translatedKeys) ||
                 other.translatedKeys == translatedKeys) &&
-            (identical(other.languagesCount, languagesCount) ||
-                other.languagesCount == languagesCount) &&
-            (identical(other.membersCount, membersCount) ||
-                other.membersCount == membersCount) &&
             (identical(other.memberLimit, memberLimit) ||
                 other.memberLimit == memberLimit) &&
-            (identical(other.isPublic, isPublic) ||
-                other.isPublic == isPublic) &&
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive) &&
             const DeepCollectionEquality().equals(other._settings, _settings) &&
@@ -734,47 +594,33 @@ class _$ProjectModelImpl implements _ProjectModel {
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
                 other.updatedAt == updatedAt) &&
-            (identical(other.ownerUsername, ownerUsername) ||
-                other.ownerUsername == ownerUsername) &&
-            (identical(other.ownerEmail, ownerEmail) ||
-                other.ownerEmail == ownerEmail) &&
-            (identical(other.ownerDisplayName, ownerDisplayName) ||
-                other.ownerDisplayName == ownerDisplayName) &&
-            (identical(other.ownerAvatar, ownerAvatar) ||
-                other.ownerAvatar == ownerAvatar) &&
-            (identical(other.completionPercentage, completionPercentage) ||
-                other.completionPercentage == completionPercentage));
+            const DeepCollectionEquality()
+                .equals(other._languages, _languages) &&
+            const DeepCollectionEquality().equals(other._members, _members));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hashAll([
-        runtimeType,
-        id,
-        name,
-        slug,
-        description,
-        ownerId,
-        status,
-        visibility,
-        primaryLanguageId,
-        totalKeys,
-        translatedKeys,
-        languagesCount,
-        membersCount,
-        memberLimit,
-        isPublic,
-        isActive,
-        const DeepCollectionEquality().hash(_settings),
-        lastActivityAt,
-        createdAt,
-        updatedAt,
-        ownerUsername,
-        ownerEmail,
-        ownerDisplayName,
-        ownerAvatar,
-        completionPercentage
-      ]);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      name,
+      slug,
+      description,
+      ownerId,
+      status,
+      visibility,
+      primaryLanguageId,
+      totalKeys,
+      translatedKeys,
+      memberLimit,
+      isActive,
+      const DeepCollectionEquality().hash(_settings),
+      lastActivityAt,
+      createdAt,
+      updatedAt,
+      const DeepCollectionEquality().hash(_languages),
+      const DeepCollectionEquality().hash(_members));
 
   /// Create a copy of ProjectModel
   /// with the given fields replaced by the non-null parameter values.
@@ -792,7 +638,7 @@ class _$ProjectModelImpl implements _ProjectModel {
   }
 }
 
-abstract class _ProjectModel implements ProjectModel {
+abstract class _ProjectModel extends ProjectModel {
   const factory _ProjectModel(
       {@JsonKey(name: 'id') @FlexibleIntConverter() required final int id,
       @JsonKey(name: 'name') required final String name,
@@ -808,16 +654,9 @@ abstract class _ProjectModel implements ProjectModel {
       @JsonKey(name: 'translated_keys')
       @FlexibleIntConverter()
       final int translatedKeys,
-      @JsonKey(name: 'languages_count')
-      @FlexibleIntConverter()
-      final int languagesCount,
-      @JsonKey(name: 'members_count')
-      @FlexibleIntConverter()
-      final int membersCount,
       @JsonKey(name: 'member_limit')
       @FlexibleIntConverter()
       final int memberLimit,
-      @JsonKey(name: 'is_public') final bool isPublic,
       @JsonKey(name: 'is_active') final bool isActive,
       @JsonKey(name: 'settings') final Map<String, dynamic>? settings,
       @JsonKey(name: 'last_activity_at')
@@ -829,13 +668,10 @@ abstract class _ProjectModel implements ProjectModel {
       @JsonKey(name: 'updated_at')
       @TimesConverter()
       required final DateTime updatedAt,
-      @JsonKey(name: 'owner_username') final String? ownerUsername,
-      @JsonKey(name: 'owner_email') final String? ownerEmail,
-      @JsonKey(name: 'owner_display_name') final String? ownerDisplayName,
-      @JsonKey(name: 'owner_avatar') final String? ownerAvatar,
-      @JsonKey(name: 'completion_percentage')
-      @FlexibleDoubleConverter()
-      final double completionPercentage}) = _$ProjectModelImpl;
+      @JsonKey(name: 'languages') required final List<LanguageModel> languages,
+      @JsonKey(name: 'members')
+      required final List<ProjectMemberModel> members}) = _$ProjectModelImpl;
+  const _ProjectModel._() : super._();
 
   factory _ProjectModel.fromJson(Map<String, dynamic> json) =
       _$ProjectModelImpl.fromJson;
@@ -894,30 +730,13 @@ abstract class _ProjectModel implements ProjectModel {
   @FlexibleIntConverter()
   int get translatedKeys;
 
-  /// 项目语言数
-  @override
-  @JsonKey(name: 'languages_count')
-  @FlexibleIntConverter()
-  int get languagesCount;
-
-  /// 项目成员数
-  @override
-  @JsonKey(name: 'members_count')
-  @FlexibleIntConverter()
-  int get membersCount;
-
   /// 项目成员上限
   @override
   @JsonKey(name: 'member_limit')
   @FlexibleIntConverter()
   int get memberLimit;
 
-  /// 项目是否公开
-  @override
-  @JsonKey(name: 'is_public')
-  bool get isPublic;
-
-  /// 项目是否活跃
+  /// 是否激活
   @override
   @JsonKey(name: 'is_active')
   bool get isActive;
@@ -945,31 +764,15 @@ abstract class _ProjectModel implements ProjectModel {
   @TimesConverter()
   DateTime get updatedAt;
 
-  /// 项目所有者用户名
+  /// 项目语言
   @override
-  @JsonKey(name: 'owner_username')
-  String? get ownerUsername;
+  @JsonKey(name: 'languages')
+  List<LanguageModel> get languages;
 
-  /// 项目所有者邮箱
+  /// 项目成员
   @override
-  @JsonKey(name: 'owner_email')
-  String? get ownerEmail;
-
-  /// 项目所有者显示名称
-  @override
-  @JsonKey(name: 'owner_display_name')
-  String? get ownerDisplayName;
-
-  /// 项目所有者头像
-  @override
-  @JsonKey(name: 'owner_avatar')
-  String? get ownerAvatar;
-
-  /// 项目完成百分比
-  @override
-  @JsonKey(name: 'completion_percentage')
-  @FlexibleDoubleConverter()
-  double get completionPercentage;
+  @JsonKey(name: 'members')
+  List<ProjectMemberModel> get members;
 
   /// Create a copy of ProjectModel
   /// with the given fields replaced by the non-null parameter values.
@@ -1880,263 +1683,4 @@ abstract class _UpdateMemberLimitRequest implements UpdateMemberLimitRequest {
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$UpdateMemberLimitRequestImplCopyWith<_$UpdateMemberLimitRequestImpl>
       get copyWith => throw _privateConstructorUsedError;
-}
-
-ProjectDetailModel _$ProjectDetailModelFromJson(Map<String, dynamic> json) {
-  return _ProjectDetailModel.fromJson(json);
-}
-
-/// @nodoc
-mixin _$ProjectDetailModel {
-  /// 项目
-  @JsonKey(name: 'project')
-  ProjectModel get project => throw _privateConstructorUsedError;
-
-  /// 项目语言
-  @JsonKey(name: 'languages')
-  List<LanguageModel>? get languages => throw _privateConstructorUsedError;
-
-  /// 项目成员
-  @JsonKey(name: 'members')
-  List<ProjectMemberModel>? get members => throw _privateConstructorUsedError;
-
-  /// Serializes this ProjectDetailModel to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of ProjectDetailModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $ProjectDetailModelCopyWith<ProjectDetailModel> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $ProjectDetailModelCopyWith<$Res> {
-  factory $ProjectDetailModelCopyWith(
-          ProjectDetailModel value, $Res Function(ProjectDetailModel) then) =
-      _$ProjectDetailModelCopyWithImpl<$Res, ProjectDetailModel>;
-  @useResult
-  $Res call(
-      {@JsonKey(name: 'project') ProjectModel project,
-      @JsonKey(name: 'languages') List<LanguageModel>? languages,
-      @JsonKey(name: 'members') List<ProjectMemberModel>? members});
-
-  $ProjectModelCopyWith<$Res> get project;
-}
-
-/// @nodoc
-class _$ProjectDetailModelCopyWithImpl<$Res, $Val extends ProjectDetailModel>
-    implements $ProjectDetailModelCopyWith<$Res> {
-  _$ProjectDetailModelCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of ProjectDetailModel
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? project = null,
-    Object? languages = freezed,
-    Object? members = freezed,
-  }) {
-    return _then(_value.copyWith(
-      project: null == project
-          ? _value.project
-          : project // ignore: cast_nullable_to_non_nullable
-              as ProjectModel,
-      languages: freezed == languages
-          ? _value.languages
-          : languages // ignore: cast_nullable_to_non_nullable
-              as List<LanguageModel>?,
-      members: freezed == members
-          ? _value.members
-          : members // ignore: cast_nullable_to_non_nullable
-              as List<ProjectMemberModel>?,
-    ) as $Val);
-  }
-
-  /// Create a copy of ProjectDetailModel
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $ProjectModelCopyWith<$Res> get project {
-    return $ProjectModelCopyWith<$Res>(_value.project, (value) {
-      return _then(_value.copyWith(project: value) as $Val);
-    });
-  }
-}
-
-/// @nodoc
-abstract class _$$ProjectDetailModelImplCopyWith<$Res>
-    implements $ProjectDetailModelCopyWith<$Res> {
-  factory _$$ProjectDetailModelImplCopyWith(_$ProjectDetailModelImpl value,
-          $Res Function(_$ProjectDetailModelImpl) then) =
-      __$$ProjectDetailModelImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call(
-      {@JsonKey(name: 'project') ProjectModel project,
-      @JsonKey(name: 'languages') List<LanguageModel>? languages,
-      @JsonKey(name: 'members') List<ProjectMemberModel>? members});
-
-  @override
-  $ProjectModelCopyWith<$Res> get project;
-}
-
-/// @nodoc
-class __$$ProjectDetailModelImplCopyWithImpl<$Res>
-    extends _$ProjectDetailModelCopyWithImpl<$Res, _$ProjectDetailModelImpl>
-    implements _$$ProjectDetailModelImplCopyWith<$Res> {
-  __$$ProjectDetailModelImplCopyWithImpl(_$ProjectDetailModelImpl _value,
-      $Res Function(_$ProjectDetailModelImpl) _then)
-      : super(_value, _then);
-
-  /// Create a copy of ProjectDetailModel
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? project = null,
-    Object? languages = freezed,
-    Object? members = freezed,
-  }) {
-    return _then(_$ProjectDetailModelImpl(
-      project: null == project
-          ? _value.project
-          : project // ignore: cast_nullable_to_non_nullable
-              as ProjectModel,
-      languages: freezed == languages
-          ? _value._languages
-          : languages // ignore: cast_nullable_to_non_nullable
-              as List<LanguageModel>?,
-      members: freezed == members
-          ? _value._members
-          : members // ignore: cast_nullable_to_non_nullable
-              as List<ProjectMemberModel>?,
-    ));
-  }
-}
-
-/// @nodoc
-@JsonSerializable()
-class _$ProjectDetailModelImpl implements _ProjectDetailModel {
-  const _$ProjectDetailModelImpl(
-      {@JsonKey(name: 'project') required this.project,
-      @JsonKey(name: 'languages') final List<LanguageModel>? languages,
-      @JsonKey(name: 'members') final List<ProjectMemberModel>? members})
-      : _languages = languages,
-        _members = members;
-
-  factory _$ProjectDetailModelImpl.fromJson(Map<String, dynamic> json) =>
-      _$$ProjectDetailModelImplFromJson(json);
-
-  /// 项目
-  @override
-  @JsonKey(name: 'project')
-  final ProjectModel project;
-
-  /// 项目语言
-  final List<LanguageModel>? _languages;
-
-  /// 项目语言
-  @override
-  @JsonKey(name: 'languages')
-  List<LanguageModel>? get languages {
-    final value = _languages;
-    if (value == null) return null;
-    if (_languages is EqualUnmodifiableListView) return _languages;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(value);
-  }
-
-  /// 项目成员
-  final List<ProjectMemberModel>? _members;
-
-  /// 项目成员
-  @override
-  @JsonKey(name: 'members')
-  List<ProjectMemberModel>? get members {
-    final value = _members;
-    if (value == null) return null;
-    if (_members is EqualUnmodifiableListView) return _members;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(value);
-  }
-
-  @override
-  String toString() {
-    return 'ProjectDetailModel(project: $project, languages: $languages, members: $members)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$ProjectDetailModelImpl &&
-            (identical(other.project, project) || other.project == project) &&
-            const DeepCollectionEquality()
-                .equals(other._languages, _languages) &&
-            const DeepCollectionEquality().equals(other._members, _members));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      project,
-      const DeepCollectionEquality().hash(_languages),
-      const DeepCollectionEquality().hash(_members));
-
-  /// Create a copy of ProjectDetailModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$ProjectDetailModelImplCopyWith<_$ProjectDetailModelImpl> get copyWith =>
-      __$$ProjectDetailModelImplCopyWithImpl<_$ProjectDetailModelImpl>(
-          this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$ProjectDetailModelImplToJson(
-      this,
-    );
-  }
-}
-
-abstract class _ProjectDetailModel implements ProjectDetailModel {
-  const factory _ProjectDetailModel(
-          {@JsonKey(name: 'project') required final ProjectModel project,
-          @JsonKey(name: 'languages') final List<LanguageModel>? languages,
-          @JsonKey(name: 'members') final List<ProjectMemberModel>? members}) =
-      _$ProjectDetailModelImpl;
-
-  factory _ProjectDetailModel.fromJson(Map<String, dynamic> json) =
-      _$ProjectDetailModelImpl.fromJson;
-
-  /// 项目
-  @override
-  @JsonKey(name: 'project')
-  ProjectModel get project;
-
-  /// 项目语言
-  @override
-  @JsonKey(name: 'languages')
-  List<LanguageModel>? get languages;
-
-  /// 项目成员
-  @override
-  @JsonKey(name: 'members')
-  List<ProjectMemberModel>? get members;
-
-  /// Create a copy of ProjectDetailModel
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$ProjectDetailModelImplCopyWith<_$ProjectDetailModelImpl> get copyWith =>
-      throw _privateConstructorUsedError;
 }

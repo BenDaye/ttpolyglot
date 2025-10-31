@@ -63,10 +63,6 @@ mixin _$LanguageModel {
   @TimesConverter()
   DateTime get updatedAt => throw _privateConstructorUsedError;
 
-  /// 是否为主语言
-  @JsonKey(name: 'is_primary')
-  bool get isPrimary => throw _privateConstructorUsedError;
-
   /// Serializes this LanguageModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
@@ -93,8 +89,7 @@ abstract class $LanguageModelCopyWith<$Res> {
       @JsonKey(name: 'is_rtl') bool isRtl,
       @JsonKey(name: 'sort_order') int sortOrder,
       @JsonKey(name: 'created_at') @TimesConverter() DateTime createdAt,
-      @JsonKey(name: 'updated_at') @TimesConverter() DateTime updatedAt,
-      @JsonKey(name: 'is_primary') bool isPrimary});
+      @JsonKey(name: 'updated_at') @TimesConverter() DateTime updatedAt});
 }
 
 /// @nodoc
@@ -122,7 +117,6 @@ class _$LanguageModelCopyWithImpl<$Res, $Val extends LanguageModel>
     Object? sortOrder = null,
     Object? createdAt = null,
     Object? updatedAt = null,
-    Object? isPrimary = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -165,10 +159,6 @@ class _$LanguageModelCopyWithImpl<$Res, $Val extends LanguageModel>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      isPrimary: null == isPrimary
-          ? _value.isPrimary
-          : isPrimary // ignore: cast_nullable_to_non_nullable
-              as bool,
     ) as $Val);
   }
 }
@@ -191,8 +181,7 @@ abstract class _$$LanguageModelImplCopyWith<$Res>
       @JsonKey(name: 'is_rtl') bool isRtl,
       @JsonKey(name: 'sort_order') int sortOrder,
       @JsonKey(name: 'created_at') @TimesConverter() DateTime createdAt,
-      @JsonKey(name: 'updated_at') @TimesConverter() DateTime updatedAt,
-      @JsonKey(name: 'is_primary') bool isPrimary});
+      @JsonKey(name: 'updated_at') @TimesConverter() DateTime updatedAt});
 }
 
 /// @nodoc
@@ -218,7 +207,6 @@ class __$$LanguageModelImplCopyWithImpl<$Res>
     Object? sortOrder = null,
     Object? createdAt = null,
     Object? updatedAt = null,
-    Object? isPrimary = null,
   }) {
     return _then(_$LanguageModelImpl(
       id: null == id
@@ -261,10 +249,6 @@ class __$$LanguageModelImplCopyWithImpl<$Res>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
-      isPrimary: null == isPrimary
-          ? _value.isPrimary
-          : isPrimary // ignore: cast_nullable_to_non_nullable
-              as bool,
     ));
   }
 }
@@ -282,8 +266,7 @@ class _$LanguageModelImpl implements _LanguageModel {
       @JsonKey(name: 'is_rtl') this.isRtl = false,
       @JsonKey(name: 'sort_order') this.sortOrder = 0,
       @JsonKey(name: 'created_at') @TimesConverter() required this.createdAt,
-      @JsonKey(name: 'updated_at') @TimesConverter() required this.updatedAt,
-      @JsonKey(name: 'is_primary') this.isPrimary = false});
+      @JsonKey(name: 'updated_at') @TimesConverter() required this.updatedAt});
 
   factory _$LanguageModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$LanguageModelImplFromJson(json);
@@ -341,14 +324,9 @@ class _$LanguageModelImpl implements _LanguageModel {
   @TimesConverter()
   final DateTime updatedAt;
 
-  /// 是否为主语言
-  @override
-  @JsonKey(name: 'is_primary')
-  final bool isPrimary;
-
   @override
   String toString() {
-    return 'LanguageModel(id: $id, code: $code, name: $name, nativeName: $nativeName, flagEmoji: $flagEmoji, isActive: $isActive, isRtl: $isRtl, sortOrder: $sortOrder, createdAt: $createdAt, updatedAt: $updatedAt, isPrimary: $isPrimary)';
+    return 'LanguageModel(id: $id, code: $code, name: $name, nativeName: $nativeName, flagEmoji: $flagEmoji, isActive: $isActive, isRtl: $isRtl, sortOrder: $sortOrder, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -371,15 +349,13 @@ class _$LanguageModelImpl implements _LanguageModel {
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt) &&
-            (identical(other.isPrimary, isPrimary) ||
-                other.isPrimary == isPrimary));
+                other.updatedAt == updatedAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, id, code, name, nativeName,
-      flagEmoji, isActive, isRtl, sortOrder, createdAt, updatedAt, isPrimary);
+      flagEmoji, isActive, isRtl, sortOrder, createdAt, updatedAt);
 
   /// Create a copy of LanguageModel
   /// with the given fields replaced by the non-null parameter values.
@@ -414,8 +390,7 @@ abstract class _LanguageModel implements LanguageModel {
       required final DateTime createdAt,
       @JsonKey(name: 'updated_at')
       @TimesConverter()
-      required final DateTime updatedAt,
-      @JsonKey(name: 'is_primary') final bool isPrimary}) = _$LanguageModelImpl;
+      required final DateTime updatedAt}) = _$LanguageModelImpl;
 
   factory _LanguageModel.fromJson(Map<String, dynamic> json) =
       _$LanguageModelImpl.fromJson;
@@ -472,11 +447,6 @@ abstract class _LanguageModel implements LanguageModel {
   @JsonKey(name: 'updated_at')
   @TimesConverter()
   DateTime get updatedAt;
-
-  /// 是否为主语言
-  @override
-  @JsonKey(name: 'is_primary')
-  bool get isPrimary;
 
   /// Create a copy of LanguageModel
   /// with the given fields replaced by the non-null parameter values.

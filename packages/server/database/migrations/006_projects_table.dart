@@ -33,8 +33,6 @@ class Migration006ProjectsTable extends BaseMigration {
           primary_language_id INTEGER,
           total_keys INTEGER DEFAULT 0,
           translated_keys INTEGER DEFAULT 0,
-          languages_count INTEGER DEFAULT 0,
-          members_count INTEGER DEFAULT 1,
           member_limit INTEGER DEFAULT 10 NOT NULL CHECK (member_limit > 0 AND member_limit <= 1000),
           is_active BOOLEAN DEFAULT true,
           settings JSONB,
@@ -81,8 +79,6 @@ class Migration006ProjectsTable extends BaseMigration {
       await addColumnComment('projects', 'primary_language_id', '主语言ID，外键关联languages表');
       await addColumnComment('projects', 'total_keys', '总翻译条目数');
       await addColumnComment('projects', 'translated_keys', '已翻译条目数');
-      await addColumnComment('projects', 'languages_count', '语言数量');
-      await addColumnComment('projects', 'members_count', '成员数量');
       await addColumnComment('projects', 'member_limit', '成员上限，范围1-1000，默认10');
       await addColumnComment('projects', 'is_active', '是否激活');
       await addColumnComment('projects', 'settings', '项目设置，JSON格式');

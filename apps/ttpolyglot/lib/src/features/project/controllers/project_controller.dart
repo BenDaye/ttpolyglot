@@ -46,7 +46,7 @@ class ProjectController extends GetxController {
   /// 检查当前用户是否是项目所有者
   bool get isCurrentUserOwner {
     final currentUsername = Get.find<AuthService>().currentUser?.username;
-    final ownerUsername = _projectModel.value?.ownerUsername;
+    final ownerUsername = _projectModel.value?.owner.username;
     return currentUsername != null && ownerUsername != null && currentUsername == ownerUsername;
   }
 
@@ -136,21 +136,17 @@ class ProjectController extends GetxController {
       }
 
       // 从 API 获取项目详情
-      final projectDetailModel = await _projectApi.getProject(projectIdInt);
-      if (projectDetailModel != null) {
+      final projectModel = await _projectApi.getProject(projectIdInt);
+      if (projectModel != null) {
         // 保存 ProjectModel，用于访问 memberLimit 等 API 层信息
-        _projectModel.value = projectDetailModel.project;
+        _projectModel.value = projectModel;
 
-        // 将 ProjectDetailModel 转换为 Project（包含语言列表）
-        final project = ProjectConverter.toProjectFromDetail(projectDetailModel);
+        // 将 ProjectModel 转换为 Project（包含语言列表）
+        final project = ProjectConverter.toProject(projectModel);
 
         // 保存成员列表
-        if (projectDetailModel.members != null) {
-          _members.value = projectDetailModel.members!;
-          LoggerUtils.info('项目成员加载成功: ${projectDetailModel.members!.length} 个成员');
-        } else {
-          _members.clear();
-        }
+        _members.value = projectModel.members;
+        LoggerUtils.info('项目成员加载成功: ${projectModel.members.length} 个成员');
 
         LoggerUtils.info(
             '项目加载成功: ID=${project.id}, 名称="${project.name}", 主语言=${project.primaryLanguage.code}, 目标语言=${project.targetLanguages.length} 个');

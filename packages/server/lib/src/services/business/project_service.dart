@@ -78,20 +78,10 @@ class ProjectService extends BaseService {
       final projectsSql = '''
         SELECT 
           p.id, p.name, p.slug, p.description, p.status, p.visibility,
-          p.owner_id,
-          p.primary_language_id, p.total_keys, p.translated_keys, 
-          p.languages_count, p.members_count, p.member_limit, p.settings,
-          p.last_activity_at, p.created_at, p.updated_at,
-          u.username as owner_username,
-          u.email as owner_email,
-          u.display_name as owner_display_name,
-          CASE 
-            WHEN p.total_keys > 0 
-            THEN ROUND((p.translated_keys::numeric / p.total_keys * 100), 2)
-            ELSE 0 
-          END as completion_percentage
+          p.owner_id, p.primary_language_id, p.total_keys, p.translated_keys, 
+          p.member_limit, p.is_active, p.settings,
+          p.last_activity_at, p.created_at, p.updated_at
         FROM {projects} p
-        LEFT JOIN {users} u ON p.owner_id = u.id
         ${conditions.isNotEmpty ? 'WHERE ${conditions.join(' AND ')}' : ''}
         ORDER BY p.last_activity_at DESC
         LIMIT @limit OFFSET @offset
@@ -99,7 +89,85 @@ class ProjectService extends BaseService {
 
       final projectsResult = await _databaseService.query(projectsSql, parameters);
 
-      final projects = projectsResult.map((row) {
+      if (projectsResult.isEmpty) {
+        return PagerModel<ProjectModel>(
+          page: page,
+          pageSize: limit,
+          totalSize: total,
+          totalPage: 0,
+          items: [],
+        );
+      }
+
+      // 收集所有项目ID
+      final projectIds = projectsResult.map((row) => row.toColumnMap()['id'].toString()).toList();
+
+      // 批量获取所有项目的语言
+      final languagesSql = '''
+        SELECT 
+          pl.project_id,
+          l.id, l.code, l.name, l.native_name, l.flag_emoji, l.is_active, l.is_rtl, 
+          l.sort_order, l.created_at, l.updated_at, pl.is_primary
+        FROM {project_languages} pl
+        JOIN {languages} l ON pl.language_id = l.id
+        WHERE pl.project_id = ANY(@project_ids) AND pl.is_active = true
+        ORDER BY pl.project_id, pl.is_primary DESC, l.sort_order, l.name
+      ''';
+
+      final languagesResult = await _databaseService.query(languagesSql, {'project_ids': projectIds});
+
+      // 按项目ID分组语言
+      final languagesByProject = <String, List<LanguageModel>>{};
+      for (final row in languagesResult) {
+        final data = row.toColumnMap();
+        final projectId = data['project_id'].toString();
+        languagesByProject.putIfAbsent(projectId, () => []);
+        languagesByProject[projectId]!.add(LanguageModel.fromJson(data));
+      }
+
+      // 批量获取所有项目的成员
+      final membersSql = '''
+        SELECT 
+          pm.project_id,
+          pm.id,
+          pm.user_id,
+          pm.role,
+          pm.invited_by,
+          pm.invited_at,
+          pm.joined_at,
+          pm.status,
+          pm.is_active,
+          pm.created_at,
+          pm.updated_at,
+          u.username,
+          u.display_name,
+          u.avatar_url,
+          u.email,
+          inviter.username as inviter_username,
+          inviter.display_name as inviter_display_name
+        FROM {project_members} pm
+        JOIN {users} u ON pm.user_id = u.id
+        LEFT JOIN {users} inviter ON pm.invited_by = inviter.id
+        WHERE pm.project_id = ANY(@project_ids) 
+          AND pm.is_active = true 
+          AND u.is_active = true
+        ORDER BY pm.project_id, pm.joined_at ASC
+      ''';
+
+      final membersResult = await _databaseService.query(membersSql, {'project_ids': projectIds});
+
+      // 按项目ID分组成员
+      final membersByProject = <String, List<ProjectMemberModel>>{};
+      for (final row in membersResult) {
+        final data = row.toColumnMap();
+        final projectId = data['project_id'].toString();
+        membersByProject.putIfAbsent(projectId, () => []);
+        membersByProject[projectId]!.add(ProjectMemberModel.fromJson(data));
+      }
+
+      // 组装项目数据
+      final projects = <Map<String, dynamic>>[];
+      for (final row in projectsResult) {
         final projectData = row.toColumnMap();
 
         // 解析设置信息 - JSONB 字段已自动解析为 Map
@@ -107,8 +175,14 @@ class ProjectService extends BaseService {
           projectData['settings'] = <String, dynamic>{};
         }
 
-        return projectData;
-      }).toList();
+        final projectId = projectData['id'].toString();
+
+        // 添加语言和成员
+        projectData['languages'] = (languagesByProject[projectId] ?? []).map((lang) => lang.toJson()).toList();
+        projectData['members'] = (membersByProject[projectId] ?? []).map((member) => member.toJson()).toList();
+
+        projects.add(projectData);
+      }
 
       return PagerModel<ProjectModel>(
         page: page,
@@ -124,18 +198,18 @@ class ProjectService extends BaseService {
   }
 
   /// 根据ID获取项目详情
-  Future<ProjectDetailModel?> getProjectById(String projectId, {String? userId}) async {
+  Future<ProjectModel?> getProjectById(String projectId, {String? userId}) async {
     try {
       logInfo('获取项目详情: $projectId');
 
       // 先检查缓存
       final cacheKey = 'project:details:$projectId';
-      final cachedProjectDetail = await _redisService.getJson(cacheKey);
-      if (cachedProjectDetail != null) {
+      final cachedProject = await _redisService.getJson(cacheKey);
+      if (cachedProject != null) {
         try {
           // 验证缓存数据结构
-          if (cachedProjectDetail['project'] != null) {
-            return ProjectDetailModel.fromJson(cachedProjectDetail);
+          if (cachedProject['id'] != null) {
+            return ProjectModel.fromJson(cachedProject);
           } else {
             // 缓存数据结构无效，删除缓存
             logInfo('缓存数据结构无效，删除缓存: $cacheKey');
@@ -151,19 +225,10 @@ class ProjectService extends BaseService {
       final sql = '''
         SELECT 
           p.id, p.name, p.slug, p.description, p.status, p.visibility,
-          p.primary_language_id, p.total_keys, p.translated_keys, 
-          p.languages_count, p.members_count, p.member_limit, p.settings,
-          p.last_activity_at, p.created_at, p.updated_at,
-          u.id as owner_id, u.username as owner_username,
-          u.email as owner_email,
-          u.display_name as owner_display_name, u.avatar_url as owner_avatar,
-          CASE 
-            WHEN p.total_keys > 0 
-            THEN ROUND((p.translated_keys::numeric / p.total_keys * 100), 2)
-            ELSE 0 
-          END as completion_percentage
+          p.owner_id, p.primary_language_id, p.total_keys, p.translated_keys, 
+          p.member_limit, p.is_active, p.settings,
+          p.last_activity_at, p.created_at, p.updated_at
         FROM {projects} p
-        LEFT JOIN {users} u ON p.owner_id = u.id
         WHERE p.id = @project_id
       ''';
 
@@ -180,32 +245,23 @@ class ProjectService extends BaseService {
         projectData['settings'] = <String, dynamic>{};
       }
 
-      // 如果指定了用户ID，检查用户权限
-      if (userId != null) {
-        projectData['user_role'] = await _getUserRoleInProject(userId, projectId);
-        projectData['is_owner'] = projectData['owner_id'] == userId;
-      }
-
-      // 构建项目模型
-      final project = ProjectModel.fromJson(projectData);
-
       // 获取项目语言列表
       final languages = await getProjectLanguages(projectId);
 
       // 获取项目成员列表
       final members = await getProjectMembers(projectId);
 
-      // 组装项目详情模型
-      final projectDetail = ProjectDetailModel(
-        project: project,
-        languages: languages.isNotEmpty ? languages : null,
-        members: members,
-      );
+      // 添加语言和成员到项目数据
+      projectData['languages'] = languages.map((lang) => lang.toJson()).toList();
+      projectData['members'] = (members ?? []).map((member) => member.toJson()).toList();
+
+      // 构建项目模型
+      final project = ProjectModel.fromJson(projectData);
 
       // 缓存项目详情
-      await _redisService.setJson(cacheKey, projectDetail.toJson(), ServerConfig.cacheApiResponseTtl);
+      await _redisService.setJson(cacheKey, project.toJson(), ServerConfig.cacheApiResponseTtl);
 
-      return projectDetail;
+      return project;
     } catch (error, stackTrace) {
       logError('获取项目详情失败: $projectId', error: error, stackTrace: stackTrace);
       rethrow;
@@ -301,10 +357,10 @@ class ProjectService extends BaseService {
         final projectResult = await _databaseService.query('''
           INSERT INTO {projects} (
             name, slug, description, owner_id, primary_language_id,
-            visibility, settings, status, members_count
+            visibility, settings, status
           ) VALUES (
             @name, @slug, @description, @owner_id, @primary_language_id,
-            @visibility, @settings, 'active', @members_count
+            @visibility, @settings, 'active'
           ) RETURNING id
         ''', {
           'name': name,
@@ -314,7 +370,6 @@ class ProjectService extends BaseService {
           'primary_language_id': primaryLanguageId,
           'visibility': visibility,
           'settings': _serializeSettings(settings),
-          'members_count': 1,
         });
 
         // 数据库返回的 id 可能是 int 或其他数值类型，统一转换为字符串
@@ -369,11 +424,11 @@ class ProjectService extends BaseService {
       await _clearProjectCache(projectId);
 
       // 获取创建的项目信息
-      final projectDetail = await getProjectById(projectId);
+      final project = await getProjectById(projectId);
 
       logInfo('项目创建成功: $projectId');
 
-      return projectDetail!.project;
+      return project!;
     } catch (error, stackTrace) {
       logError('创建项目失败: $name', error: error, stackTrace: stackTrace);
       rethrow;
@@ -442,11 +497,11 @@ class ProjectService extends BaseService {
       await _clearProjectCache(projectId);
 
       // 获取更新后的项目信息
-      final updatedProjectDetail = await getProjectById(projectId);
+      final updatedProject = await getProjectById(projectId);
 
       logInfo('项目信息更新成功: $projectId');
 
-      return updatedProjectDetail!.project;
+      return updatedProject!;
     } catch (error, stackTrace) {
       logError('更新项目信息失败: $projectId', error: error, stackTrace: stackTrace);
       rethrow;
@@ -501,6 +556,7 @@ class ProjectService extends BaseService {
         SELECT 
           pm.id,
           pm.project_id,
+          pm.user_id,
           pm.role,
           pm.invited_by,
           pm.invited_at,
@@ -692,23 +748,13 @@ class ProjectService extends BaseService {
     return result.isNotEmpty ? result.first.toColumnMap() : null;
   }
 
+  /// 更新项目成员数量（已废弃，数据库不再维护成员计数）
   Future<void> _updateProjectMemberCount(String projectId) async {
     try {
-      await _databaseService.query('''
-      UPDATE {projects} 
-      SET members_count = (
-        SELECT COUNT(DISTINCT pm.user_id)
-        FROM {project_members} pm
-        WHERE pm.project_id = @project_id 
-          AND pm.is_active = true
-          AND pm.status = 'active'
-      )
-      WHERE id = @project_id
-    ''', {'project_id': projectId});
-
+      // 清除缓存即可，成员数量通过关联查询获取
       await _clearProjectCache(projectId);
     } catch (error, stackTrace) {
-      logError('更新项目成员数量失败: $projectId', error: error, stackTrace: stackTrace);
+      logError('清除项目缓存失败: $projectId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -1050,7 +1096,7 @@ class ProjectService extends BaseService {
       }
 
       // 获取当前成员数
-      final currentMemberCount = project.project.membersCount;
+      final currentMemberCount = project.members.length;
 
       // 验证新上限不能小于当前成员数
       if (newLimit < currentMemberCount) {
@@ -1075,7 +1121,7 @@ class ProjectService extends BaseService {
 
       logInfo('项目成员上限更新成功: $projectId -> $newLimit');
 
-      return updatedProject!.project;
+      return updatedProject!;
     } catch (error, stackTrace) {
       logError('更新项目成员上限失败: $projectId', error: error, stackTrace: stackTrace);
       rethrow;

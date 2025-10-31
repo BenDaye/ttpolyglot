@@ -179,7 +179,7 @@ class ProjectController extends BaseController {
         return ResponseUtils.error(message: '项目不存在');
       }
 
-      return ResponseUtils.success<ProjectDetailModel>(message: '获取项目详情成功', data: projectDetail);
+      return ResponseUtils.success<ProjectModel>(message: '获取项目详情成功', data: projectDetail);
     } catch (error, stackTrace) {
       ServerLogger.error('获取项目详情失败: $id', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(message: error is ServerException ? error.message : '获取项目详情失败');
