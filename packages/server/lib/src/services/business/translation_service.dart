@@ -12,7 +12,7 @@ class TranslationService extends BaseService {
   })  : _databaseService = databaseService,
         super('TranslationService');
 
-  /// 获取翻译条目
+  /// 获取翻译条目（传统分页，保留向后兼容）
   Future<Map<String, dynamic>> getTranslationEntries({
     required String projectId,
     String? languageCode,
@@ -32,7 +32,7 @@ class TranslationService extends BaseService {
         });
 
         // 构建查询条件
-        final conditions = <String>['te.project_id = @project_id'];
+        final conditions = <String>['te.project_id = @project_id', 'te.is_deleted = false'];
         final parameters = <String, dynamic>{'project_id': projectId};
 
         if (languageCode != null && languageCode.isNotEmpty) {
@@ -46,12 +46,12 @@ class TranslationService extends BaseService {
         }
 
         if (translatorId != null && translatorId.isNotEmpty) {
-          conditions.add('te.translator_id = @translator_id');
+          conditions.add('te.translated_by = @translator_id');
           parameters['translator_id'] = translatorId;
         }
 
         if (reviewerId != null && reviewerId.isNotEmpty) {
-          conditions.add('te.reviewer_id = @reviewer_id');
+          conditions.add('te.reviewed_by = @reviewer_id');
           parameters['reviewer_id'] = reviewerId;
         }
 
@@ -83,10 +83,10 @@ class TranslationService extends BaseService {
           u_translator.username as translator_username,
           u_reviewer.username as reviewer_username
         FROM {translation_entries} te
-        LEFT JOIN {users} u_translator ON te.translator_id = u_translator.id
-        LEFT JOIN {users} u_reviewer ON te.reviewer_id = u_reviewer.id
+        LEFT JOIN {users} u_translator ON te.translated_by = u_translator.id
+        LEFT JOIN {users} u_reviewer ON te.reviewed_by = u_reviewer.id
         WHERE ${conditions.join(' AND ')}
-        ORDER BY te.updated_at DESC
+        ORDER BY te.updated_at DESC, te.id DESC
         LIMIT @limit OFFSET @offset
       ''';
 
@@ -105,6 +105,112 @@ class TranslationService extends BaseService {
         };
       },
       operationName: 'getTranslationEntries',
+    );
+  }
+
+  /// 获取翻译条目（游标分页，性能优化版）
+  ///
+  /// 使用游标分页替代传统OFFSET分页，在大数据量下性能更好
+  /// cursor 格式："{id}_{updated_at_iso8601}"
+  Future<Map<String, dynamic>> getTranslationEntriesCursor({
+    required String projectId,
+    String? cursor,
+    int limit = 50,
+    String? status,
+    int? targetLanguageId,
+    String? search,
+  }) async {
+    return execute(
+      () async {
+        logInfo('获取翻译条目（游标分页）', context: {
+          'project_id': projectId,
+          'cursor': cursor,
+          'limit': limit,
+        });
+
+        // 构建查询条件
+        final conditions = <String>['te.project_id = @project_id', 'te.is_deleted = false'];
+        final parameters = <String, dynamic>{
+          'project_id': projectId,
+          'limit': limit + 1, // 多查询1条用于判断是否有下一页
+        };
+
+        // 解析游标
+        int? lastId;
+        DateTime? lastUpdatedAt;
+        if (cursor != null && cursor.isNotEmpty) {
+          final parts = cursor.split('_');
+          if (parts.length >= 2) {
+            lastId = int.tryParse(parts[0]);
+            lastUpdatedAt = DateTime.tryParse(parts.sublist(1).join('_'));
+
+            if (lastId != null && lastUpdatedAt != null) {
+              // 使用复合条件进行游标分页
+              conditions.add('(te.updated_at, te.id) < (@last_updated_at, @last_id)');
+              parameters['last_updated_at'] = lastUpdatedAt;
+              parameters['last_id'] = lastId;
+            }
+          }
+        }
+
+        // 其他过滤条件
+        if (status != null && status.isNotEmpty && status != 'all') {
+          conditions.add('te.status = @status');
+          parameters['status'] = status;
+        }
+
+        if (targetLanguageId != null) {
+          conditions.add('te.target_language_id = @target_language_id');
+          parameters['target_language_id'] = targetLanguageId;
+        }
+
+        // 全文搜索（使用优化的索引）
+        if (search != null && search.isNotEmpty) {
+          conditions.add('''to_tsvector('simple', coalesce(te.source_text, '') || ' ' || coalesce(te.target_text, ''))
+               @@ plainto_tsquery('simple', @search)''');
+          parameters['search'] = search;
+        }
+
+        final sql = '''
+        SELECT
+          te.*,
+          u_translator.username as translator_username,
+          u_reviewer.username as reviewer_username
+        FROM {translation_entries} te
+        LEFT JOIN {users} u_translator ON te.translated_by = u_translator.id
+        LEFT JOIN {users} u_reviewer ON te.reviewed_by = u_reviewer.id
+        WHERE ${conditions.join(' AND ')}
+        ORDER BY te.updated_at DESC, te.id DESC
+        LIMIT @limit
+      ''';
+
+        final result = await _databaseService.query(sql, parameters);
+
+        // 判断是否有下一页
+        final hasNextPage = result.length > limit;
+        final entries = hasNextPage ? result.take(limit).toList() : result;
+
+        // 生成下一页的游标
+        String? nextCursor;
+        if (hasNextPage && entries.isNotEmpty) {
+          final lastEntry = entries.last.toColumnMap();
+          final id = lastEntry['id'];
+          final updatedAt = lastEntry['updated_at'] as DateTime;
+          nextCursor = '${id}_${updatedAt.toIso8601String()}';
+        }
+
+        final entriesData = entries.map((row) => row.toColumnMap()).toList();
+
+        return {
+          'entries': entriesData,
+          'cursor': {
+            'nextCursor': nextCursor,
+            'hasNextPage': hasNextPage,
+            'limit': limit,
+          },
+        };
+      },
+      operationName: 'getTranslationEntriesCursor',
     );
   }
 

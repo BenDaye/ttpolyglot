@@ -4,47 +4,77 @@ import 'package:ttpolyglot_model/model.dart';
 part 'translation_entry_model.freezed.dart';
 part 'translation_entry_model.g.dart';
 
-/// 翻译条目数据传输对象
+/// 翻译条目数据传输对象（优化版）
 @freezed
 class TranslationEntryModel with _$TranslationEntryModel {
   const factory TranslationEntryModel({
     /// 条目ID
     @JsonKey(name: 'id') @FlexibleIntConverter() int? id,
 
+    /// UUID（用于分布式场景）
+    @JsonKey(name: 'uuid') String? uuid,
+
     /// 项目ID
     @JsonKey(name: 'project_id') required String projectId,
 
-    /// 条目键
+    /// 原始键名
+    @JsonKey(name: 'key') String? key,
+
+    /// 条目键（优化字段）
     @JsonKey(name: 'entry_key') required String entryKey,
 
-    /// 语言代码
-    @JsonKey(name: 'language_code') @LanguageEnumConverter() required LanguageEnum languageCode,
+    /// 源语言ID
+    @JsonKey(name: 'source_language_id') @FlexibleIntConverter() int? sourceLanguageId,
+
+    /// 目标语言ID
+    @JsonKey(name: 'target_language_id') @FlexibleIntConverter() int? targetLanguageId,
+
+    /// 语言代码（保留兼容性，建议使用 sourceLanguageId 和 targetLanguageId）
+    @JsonKey(name: 'language_code') @LanguageEnumConverter() LanguageEnum? languageCode,
 
     /// 源文本
     @JsonKey(name: 'source_text') String? sourceText,
 
+    /// 源文本哈希值
+    @JsonKey(name: 'source_text_hash') String? sourceTextHash,
+
     /// 目标文本
     @JsonKey(name: 'target_text') String? targetText,
 
-    /// 翻译者ID
-    @JsonKey(name: 'translator_id') String? translatorId,
+    /// 目标文本哈希值
+    @JsonKey(name: 'target_text_hash') String? targetTextHash,
 
-    /// 翻译者用户名
+    /// 状态 (pending, completed, reviewing, approved)
+    @JsonKey(name: 'status') @Default('pending') String status,
+
+    /// 源文本字符数
+    @JsonKey(name: 'source_char_count') @FlexibleIntConverter() @Default(0) int sourceCharCount,
+
+    /// 目标文本字符数
+    @JsonKey(name: 'target_char_count') @FlexibleIntConverter() @Default(0) int targetCharCount,
+
+    /// 源文本单词数
+    @JsonKey(name: 'source_word_count') @FlexibleIntConverter() @Default(0) int sourceWordCount,
+
+    /// 目标文本单词数
+    @JsonKey(name: 'target_word_count') @FlexibleIntConverter() @Default(0) int targetWordCount,
+
+    /// 翻译者ID
+    @JsonKey(name: 'translated_by') String? translatedBy,
+
+    /// 翻译者用户名（关联查询字段）
     @JsonKey(name: 'translator_username') String? translatorUsername,
 
     /// 审核者ID
-    @JsonKey(name: 'reviewer_id') String? reviewerId,
+    @JsonKey(name: 'reviewed_by') String? reviewedBy,
 
-    /// 审核者用户名
+    /// 审核者用户名（关联查询字段）
     @JsonKey(name: 'reviewer_username') String? reviewerUsername,
 
     /// 上下文信息
     @JsonKey(name: 'context_info') String? contextInfo,
 
-    /// 状态 (pending, completed, reviewing, approved)
-    @JsonKey(name: 'status') @Default('pending') String status,
-
-    /// 版本号
+    /// 版本号（乐观锁）
     @JsonKey(name: 'version') @FlexibleIntConverter() @Default(1) int version,
 
     /// 质量评分
@@ -56,11 +86,26 @@ class TranslationEntryModel with _$TranslationEntryModel {
     /// 是否有问题
     @JsonKey(name: 'has_issues') @Default(false) bool hasIssues,
 
-    /// 字符数
+    /// 字符数（保留兼容性）
     @JsonKey(name: 'character_count') int? characterCount,
 
-    /// 单词数
+    /// 单词数（保留兼容性）
     @JsonKey(name: 'word_count') int? wordCount,
+
+    /// 翻译者ID（保留兼容性）
+    @JsonKey(name: 'translator_id') String? translatorId,
+
+    /// 审核者ID（保留兼容性）
+    @JsonKey(name: 'reviewer_id') String? reviewerId,
+
+    /// 是否软删除
+    @JsonKey(name: 'is_deleted') @Default(false) bool isDeleted,
+
+    /// 删除时间
+    @JsonKey(name: 'deleted_at') @NullableTimesConverter() DateTime? deletedAt,
+
+    /// 删除者ID
+    @JsonKey(name: 'deleted_by') String? deletedBy,
 
     /// 分配时间
     @JsonKey(name: 'assigned_at') @NullableTimesConverter() DateTime? assignedAt,
