@@ -25,21 +25,25 @@ class Migration019NotificationSettingsTable extends BaseMigration {
         CREATE TABLE IF NOT EXISTS {table_name} (
           id SERIAL PRIMARY KEY,
           user_id UUID NOT NULL,
+          project_id INTEGER,
           notification_type VARCHAR(100) NOT NULL,
           channel VARCHAR(50) NOT NULL,
           is_enabled BOOLEAN DEFAULT true,
           created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-          UNIQUE(user_id, notification_type, channel)
+          UNIQUE(user_id, project_id, notification_type, channel)
         );
       ''');
 
       // 创建外键约束
       await addForeignKey('notification_settings_user_id', 'notification_settings', 'user_id', 'users', 'id',
           onDelete: 'CASCADE');
+      await addForeignKey('notification_settings_project_id', 'notification_settings', 'project_id', 'projects', 'id',
+          onDelete: 'CASCADE');
 
       // 创建索引
       await createIndex('notification_settings_user_id', 'notification_settings', 'user_id');
+      await createIndex('notification_settings_project_id', 'notification_settings', 'project_id');
       await createIndex('notification_settings_notification_type', 'notification_settings', 'notification_type');
       await createIndex('notification_settings_channel', 'notification_settings', 'channel');
       await createIndex('notification_settings_is_enabled', 'notification_settings', 'is_enabled');
@@ -56,6 +60,7 @@ class Migration019NotificationSettingsTable extends BaseMigration {
       await addTableComment('notification_settings', '通知设置表，存储用户的通知偏好设置');
       await addColumnComment('notification_settings', 'id', '设置ID，主键');
       await addColumnComment('notification_settings', 'user_id', '用户ID，外键关联users表');
+      await addColumnComment('notification_settings', 'project_id', '项目ID，外键关联projects表，NULL表示全局设置');
       await addColumnComment('notification_settings', 'notification_type', '通知类型：project.created/member.invited等');
       await addColumnComment('notification_settings', 'channel', '通知渠道：email/in_app');
       await addColumnComment('notification_settings', 'is_enabled', '是否启用');
