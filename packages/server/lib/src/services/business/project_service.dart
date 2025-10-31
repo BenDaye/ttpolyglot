@@ -79,7 +79,7 @@ class ProjectService extends BaseService {
         SELECT 
           p.id, p.name, p.slug, p.description, p.status, p.visibility,
           p.owner_id, p.primary_language_id, p.total_keys, p.translated_keys, 
-          p.member_limit, p.is_active, p.settings,
+          p.member_limit, p.is_active,
           p.last_activity_at, p.created_at, p.updated_at
         FROM {projects} p
         ${conditions.isNotEmpty ? 'WHERE ${conditions.join(' AND ')}' : ''}
@@ -170,11 +170,6 @@ class ProjectService extends BaseService {
       for (final row in projectsResult) {
         final projectData = row.toColumnMap();
 
-        // 解析设置信息 - JSONB 字段已自动解析为 Map
-        if (projectData['settings'] == null || projectData['settings'] is! Map) {
-          projectData['settings'] = <String, dynamic>{};
-        }
-
         final projectId = projectData['id'].toString();
 
         // 添加语言和成员
@@ -226,7 +221,7 @@ class ProjectService extends BaseService {
         SELECT 
           p.id, p.name, p.slug, p.description, p.status, p.visibility,
           p.owner_id, p.primary_language_id, p.total_keys, p.translated_keys, 
-          p.member_limit, p.is_active, p.settings,
+          p.member_limit, p.is_active,
           p.last_activity_at, p.created_at, p.updated_at
         FROM {projects} p
         WHERE p.id = @project_id
@@ -239,11 +234,6 @@ class ProjectService extends BaseService {
       }
 
       final projectData = result.first.toColumnMap();
-
-      // 解析设置信息 - JSONB 字段已自动解析为 Map
-      if (projectData['settings'] == null || projectData['settings'] is! Map) {
-        projectData['settings'] = <String, dynamic>{};
-      }
 
       // 获取项目语言列表
       final languages = await getProjectLanguages(projectId);
@@ -318,7 +308,6 @@ class ProjectService extends BaseService {
     String? description,
     String? slug,
     String visibility = 'private',
-    Map<String, dynamic>? settings,
     List<int>? targetLanguageIds,
   }) async {
     try {
@@ -357,10 +346,10 @@ class ProjectService extends BaseService {
         final projectResult = await _databaseService.query('''
           INSERT INTO {projects} (
             name, slug, description, owner_id, primary_language_id,
-            visibility, settings, status
+            visibility, status
           ) VALUES (
             @name, @slug, @description, @owner_id, @primary_language_id,
-            @visibility, @settings, 'active'
+            @visibility, 'active'
           ) RETURNING id
         ''', {
           'name': name,
@@ -369,7 +358,6 @@ class ProjectService extends BaseService {
           'owner_id': ownerId,
           'primary_language_id': primaryLanguageId,
           'visibility': visibility,
-          'settings': _serializeSettings(settings),
         });
 
         // 数据库返回的 id 可能是 int 或其他数值类型，统一转换为字符串
@@ -456,7 +444,6 @@ class ProjectService extends BaseService {
         'description': 'description',
         'status': 'status',
         'visibility': 'visibility',
-        'settings': 'settings',
       };
 
       for (final entry in allowedFields.entries) {

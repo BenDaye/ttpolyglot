@@ -73,10 +73,6 @@ mixin _$ProjectModel {
   @JsonKey(name: 'is_active')
   bool get isActive => throw _privateConstructorUsedError;
 
-  /// 项目设置
-  @JsonKey(name: 'settings')
-  Map<String, dynamic>? get settings => throw _privateConstructorUsedError;
-
   /// 项目最后活动时间
   @JsonKey(name: 'last_activity_at')
   @NullableTimesConverter()
@@ -133,7 +129,6 @@ abstract class $ProjectModelCopyWith<$Res> {
       int translatedKeys,
       @JsonKey(name: 'member_limit') @FlexibleIntConverter() int memberLimit,
       @JsonKey(name: 'is_active') bool isActive,
-      @JsonKey(name: 'settings') Map<String, dynamic>? settings,
       @JsonKey(name: 'last_activity_at')
       @NullableTimesConverter()
       DateTime? lastActivityAt,
@@ -170,7 +165,6 @@ class _$ProjectModelCopyWithImpl<$Res, $Val extends ProjectModel>
     Object? translatedKeys = null,
     Object? memberLimit = null,
     Object? isActive = null,
-    Object? settings = freezed,
     Object? lastActivityAt = freezed,
     Object? createdAt = null,
     Object? updatedAt = null,
@@ -226,10 +220,6 @@ class _$ProjectModelCopyWithImpl<$Res, $Val extends ProjectModel>
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
               as bool,
-      settings: freezed == settings
-          ? _value.settings
-          : settings // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>?,
       lastActivityAt: freezed == lastActivityAt
           ? _value.lastActivityAt
           : lastActivityAt // ignore: cast_nullable_to_non_nullable
@@ -279,7 +269,6 @@ abstract class _$$ProjectModelImplCopyWith<$Res>
       int translatedKeys,
       @JsonKey(name: 'member_limit') @FlexibleIntConverter() int memberLimit,
       @JsonKey(name: 'is_active') bool isActive,
-      @JsonKey(name: 'settings') Map<String, dynamic>? settings,
       @JsonKey(name: 'last_activity_at')
       @NullableTimesConverter()
       DateTime? lastActivityAt,
@@ -314,7 +303,6 @@ class __$$ProjectModelImplCopyWithImpl<$Res>
     Object? translatedKeys = null,
     Object? memberLimit = null,
     Object? isActive = null,
-    Object? settings = freezed,
     Object? lastActivityAt = freezed,
     Object? createdAt = null,
     Object? updatedAt = null,
@@ -370,10 +358,6 @@ class __$$ProjectModelImplCopyWithImpl<$Res>
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
               as bool,
-      settings: freezed == settings
-          ? _value._settings
-          : settings // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>?,
       lastActivityAt: freezed == lastActivityAt
           ? _value.lastActivityAt
           : lastActivityAt // ignore: cast_nullable_to_non_nullable
@@ -420,7 +404,6 @@ class _$ProjectModelImpl extends _ProjectModel {
       @FlexibleIntConverter()
       this.memberLimit = 10,
       @JsonKey(name: 'is_active') this.isActive = true,
-      @JsonKey(name: 'settings') final Map<String, dynamic>? settings,
       @JsonKey(name: 'last_activity_at')
       @NullableTimesConverter()
       this.lastActivityAt,
@@ -429,8 +412,7 @@ class _$ProjectModelImpl extends _ProjectModel {
       @JsonKey(name: 'languages') required final List<LanguageModel> languages,
       @JsonKey(name: 'members')
       required final List<ProjectMemberModel> members})
-      : _settings = settings,
-        _languages = languages,
+      : _languages = languages,
         _members = members,
         super._();
 
@@ -502,20 +484,6 @@ class _$ProjectModelImpl extends _ProjectModel {
   @JsonKey(name: 'is_active')
   final bool isActive;
 
-  /// 项目设置
-  final Map<String, dynamic>? _settings;
-
-  /// 项目设置
-  @override
-  @JsonKey(name: 'settings')
-  Map<String, dynamic>? get settings {
-    final value = _settings;
-    if (value == null) return null;
-    if (_settings is EqualUnmodifiableMapView) return _settings;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableMapView(value);
-  }
-
   /// 项目最后活动时间
   @override
   @JsonKey(name: 'last_activity_at')
@@ -560,7 +528,7 @@ class _$ProjectModelImpl extends _ProjectModel {
 
   @override
   String toString() {
-    return 'ProjectModel(id: $id, name: $name, slug: $slug, description: $description, ownerId: $ownerId, status: $status, visibility: $visibility, primaryLanguageId: $primaryLanguageId, totalKeys: $totalKeys, translatedKeys: $translatedKeys, memberLimit: $memberLimit, isActive: $isActive, settings: $settings, lastActivityAt: $lastActivityAt, createdAt: $createdAt, updatedAt: $updatedAt, languages: $languages, members: $members)';
+    return 'ProjectModel(id: $id, name: $name, slug: $slug, description: $description, ownerId: $ownerId, status: $status, visibility: $visibility, primaryLanguageId: $primaryLanguageId, totalKeys: $totalKeys, translatedKeys: $translatedKeys, memberLimit: $memberLimit, isActive: $isActive, lastActivityAt: $lastActivityAt, createdAt: $createdAt, updatedAt: $updatedAt, languages: $languages, members: $members)';
   }
 
   @override
@@ -587,7 +555,6 @@ class _$ProjectModelImpl extends _ProjectModel {
                 other.memberLimit == memberLimit) &&
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive) &&
-            const DeepCollectionEquality().equals(other._settings, _settings) &&
             (identical(other.lastActivityAt, lastActivityAt) ||
                 other.lastActivityAt == lastActivityAt) &&
             (identical(other.createdAt, createdAt) ||
@@ -615,7 +582,6 @@ class _$ProjectModelImpl extends _ProjectModel {
       translatedKeys,
       memberLimit,
       isActive,
-      const DeepCollectionEquality().hash(_settings),
       lastActivityAt,
       createdAt,
       updatedAt,
@@ -658,7 +624,6 @@ abstract class _ProjectModel extends ProjectModel {
       @FlexibleIntConverter()
       final int memberLimit,
       @JsonKey(name: 'is_active') final bool isActive,
-      @JsonKey(name: 'settings') final Map<String, dynamic>? settings,
       @JsonKey(name: 'last_activity_at')
       @NullableTimesConverter()
       final DateTime? lastActivityAt,
@@ -741,11 +706,6 @@ abstract class _ProjectModel extends ProjectModel {
   @JsonKey(name: 'is_active')
   bool get isActive;
 
-  /// 项目设置
-  @override
-  @JsonKey(name: 'settings')
-  Map<String, dynamic>? get settings;
-
   /// 项目最后活动时间
   @override
   @JsonKey(name: 'last_activity_at')
@@ -813,10 +773,6 @@ mixin _$CreateProjectRequest {
   @FlexibleIntConverter()
   int? get primaryLanguageId => throw _privateConstructorUsedError;
 
-  /// 项目设置
-  @JsonKey(name: 'settings')
-  Map<String, dynamic>? get settings => throw _privateConstructorUsedError;
-
   /// Serializes this CreateProjectRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
@@ -841,8 +797,7 @@ abstract class $CreateProjectRequestCopyWith<$Res> {
       @JsonKey(name: 'visibility') String visibility,
       @JsonKey(name: 'primary_language_id')
       @FlexibleIntConverter()
-      int? primaryLanguageId,
-      @JsonKey(name: 'settings') Map<String, dynamic>? settings});
+      int? primaryLanguageId});
 }
 
 /// @nodoc
@@ -867,7 +822,6 @@ class _$CreateProjectRequestCopyWithImpl<$Res,
     Object? status = null,
     Object? visibility = null,
     Object? primaryLanguageId = freezed,
-    Object? settings = freezed,
   }) {
     return _then(_value.copyWith(
       name: null == name
@@ -894,10 +848,6 @@ class _$CreateProjectRequestCopyWithImpl<$Res,
           ? _value.primaryLanguageId
           : primaryLanguageId // ignore: cast_nullable_to_non_nullable
               as int?,
-      settings: freezed == settings
-          ? _value.settings
-          : settings // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>?,
     ) as $Val);
   }
 }
@@ -918,8 +868,7 @@ abstract class _$$CreateProjectRequestImplCopyWith<$Res>
       @JsonKey(name: 'visibility') String visibility,
       @JsonKey(name: 'primary_language_id')
       @FlexibleIntConverter()
-      int? primaryLanguageId,
-      @JsonKey(name: 'settings') Map<String, dynamic>? settings});
+      int? primaryLanguageId});
 }
 
 /// @nodoc
@@ -941,7 +890,6 @@ class __$$CreateProjectRequestImplCopyWithImpl<$Res>
     Object? status = null,
     Object? visibility = null,
     Object? primaryLanguageId = freezed,
-    Object? settings = freezed,
   }) {
     return _then(_$CreateProjectRequestImpl(
       name: null == name
@@ -968,10 +916,6 @@ class __$$CreateProjectRequestImplCopyWithImpl<$Res>
           ? _value.primaryLanguageId
           : primaryLanguageId // ignore: cast_nullable_to_non_nullable
               as int?,
-      settings: freezed == settings
-          ? _value._settings
-          : settings // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>?,
     ));
   }
 }
@@ -987,9 +931,7 @@ class _$CreateProjectRequestImpl implements _CreateProjectRequest {
       @JsonKey(name: 'visibility') this.visibility = 'private',
       @JsonKey(name: 'primary_language_id')
       @FlexibleIntConverter()
-      this.primaryLanguageId,
-      @JsonKey(name: 'settings') final Map<String, dynamic>? settings})
-      : _settings = settings;
+      this.primaryLanguageId});
 
   factory _$CreateProjectRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$CreateProjectRequestImplFromJson(json);
@@ -1025,23 +967,9 @@ class _$CreateProjectRequestImpl implements _CreateProjectRequest {
   @FlexibleIntConverter()
   final int? primaryLanguageId;
 
-  /// 项目设置
-  final Map<String, dynamic>? _settings;
-
-  /// 项目设置
-  @override
-  @JsonKey(name: 'settings')
-  Map<String, dynamic>? get settings {
-    final value = _settings;
-    if (value == null) return null;
-    if (_settings is EqualUnmodifiableMapView) return _settings;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableMapView(value);
-  }
-
   @override
   String toString() {
-    return 'CreateProjectRequest(name: $name, slug: $slug, description: $description, status: $status, visibility: $visibility, primaryLanguageId: $primaryLanguageId, settings: $settings)';
+    return 'CreateProjectRequest(name: $name, slug: $slug, description: $description, status: $status, visibility: $visibility, primaryLanguageId: $primaryLanguageId)';
   }
 
   @override
@@ -1057,21 +985,13 @@ class _$CreateProjectRequestImpl implements _CreateProjectRequest {
             (identical(other.visibility, visibility) ||
                 other.visibility == visibility) &&
             (identical(other.primaryLanguageId, primaryLanguageId) ||
-                other.primaryLanguageId == primaryLanguageId) &&
-            const DeepCollectionEquality().equals(other._settings, _settings));
+                other.primaryLanguageId == primaryLanguageId));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      name,
-      slug,
-      description,
-      status,
-      visibility,
-      primaryLanguageId,
-      const DeepCollectionEquality().hash(_settings));
+  int get hashCode => Object.hash(runtimeType, name, slug, description, status,
+      visibility, primaryLanguageId);
 
   /// Create a copy of CreateProjectRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -1093,16 +1013,14 @@ class _$CreateProjectRequestImpl implements _CreateProjectRequest {
 
 abstract class _CreateProjectRequest implements CreateProjectRequest {
   const factory _CreateProjectRequest(
-          {@JsonKey(name: 'name') required final String name,
-          @JsonKey(name: 'slug') required final String slug,
-          @JsonKey(name: 'description') final String? description,
-          @JsonKey(name: 'status') final String status,
-          @JsonKey(name: 'visibility') final String visibility,
-          @JsonKey(name: 'primary_language_id')
-          @FlexibleIntConverter()
-          final int? primaryLanguageId,
-          @JsonKey(name: 'settings') final Map<String, dynamic>? settings}) =
-      _$CreateProjectRequestImpl;
+      {@JsonKey(name: 'name') required final String name,
+      @JsonKey(name: 'slug') required final String slug,
+      @JsonKey(name: 'description') final String? description,
+      @JsonKey(name: 'status') final String status,
+      @JsonKey(name: 'visibility') final String visibility,
+      @JsonKey(name: 'primary_language_id')
+      @FlexibleIntConverter()
+      final int? primaryLanguageId}) = _$CreateProjectRequestImpl;
 
   factory _CreateProjectRequest.fromJson(Map<String, dynamic> json) =
       _$CreateProjectRequestImpl.fromJson;
@@ -1137,11 +1055,6 @@ abstract class _CreateProjectRequest implements CreateProjectRequest {
   @JsonKey(name: 'primary_language_id')
   @FlexibleIntConverter()
   int? get primaryLanguageId;
-
-  /// 项目设置
-  @override
-  @JsonKey(name: 'settings')
-  Map<String, dynamic>? get settings;
 
   /// Create a copy of CreateProjectRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -1182,10 +1095,6 @@ mixin _$UpdateProjectRequest {
   @FlexibleIntConverter()
   int? get primaryLanguageId => throw _privateConstructorUsedError;
 
-  /// 项目设置
-  @JsonKey(name: 'settings')
-  Map<String, dynamic>? get settings => throw _privateConstructorUsedError;
-
   /// Serializes this UpdateProjectRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
@@ -1210,8 +1119,7 @@ abstract class $UpdateProjectRequestCopyWith<$Res> {
       @JsonKey(name: 'visibility') String? visibility,
       @JsonKey(name: 'primary_language_id')
       @FlexibleIntConverter()
-      int? primaryLanguageId,
-      @JsonKey(name: 'settings') Map<String, dynamic>? settings});
+      int? primaryLanguageId});
 }
 
 /// @nodoc
@@ -1236,7 +1144,6 @@ class _$UpdateProjectRequestCopyWithImpl<$Res,
     Object? status = freezed,
     Object? visibility = freezed,
     Object? primaryLanguageId = freezed,
-    Object? settings = freezed,
   }) {
     return _then(_value.copyWith(
       name: freezed == name
@@ -1263,10 +1170,6 @@ class _$UpdateProjectRequestCopyWithImpl<$Res,
           ? _value.primaryLanguageId
           : primaryLanguageId // ignore: cast_nullable_to_non_nullable
               as int?,
-      settings: freezed == settings
-          ? _value.settings
-          : settings // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>?,
     ) as $Val);
   }
 }
@@ -1287,8 +1190,7 @@ abstract class _$$UpdateProjectRequestImplCopyWith<$Res>
       @JsonKey(name: 'visibility') String? visibility,
       @JsonKey(name: 'primary_language_id')
       @FlexibleIntConverter()
-      int? primaryLanguageId,
-      @JsonKey(name: 'settings') Map<String, dynamic>? settings});
+      int? primaryLanguageId});
 }
 
 /// @nodoc
@@ -1310,7 +1212,6 @@ class __$$UpdateProjectRequestImplCopyWithImpl<$Res>
     Object? status = freezed,
     Object? visibility = freezed,
     Object? primaryLanguageId = freezed,
-    Object? settings = freezed,
   }) {
     return _then(_$UpdateProjectRequestImpl(
       name: freezed == name
@@ -1337,10 +1238,6 @@ class __$$UpdateProjectRequestImplCopyWithImpl<$Res>
           ? _value.primaryLanguageId
           : primaryLanguageId // ignore: cast_nullable_to_non_nullable
               as int?,
-      settings: freezed == settings
-          ? _value._settings
-          : settings // ignore: cast_nullable_to_non_nullable
-              as Map<String, dynamic>?,
     ));
   }
 }
@@ -1356,9 +1253,7 @@ class _$UpdateProjectRequestImpl implements _UpdateProjectRequest {
       @JsonKey(name: 'visibility') this.visibility,
       @JsonKey(name: 'primary_language_id')
       @FlexibleIntConverter()
-      this.primaryLanguageId,
-      @JsonKey(name: 'settings') final Map<String, dynamic>? settings})
-      : _settings = settings;
+      this.primaryLanguageId});
 
   factory _$UpdateProjectRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$UpdateProjectRequestImplFromJson(json);
@@ -1394,23 +1289,9 @@ class _$UpdateProjectRequestImpl implements _UpdateProjectRequest {
   @FlexibleIntConverter()
   final int? primaryLanguageId;
 
-  /// 项目设置
-  final Map<String, dynamic>? _settings;
-
-  /// 项目设置
-  @override
-  @JsonKey(name: 'settings')
-  Map<String, dynamic>? get settings {
-    final value = _settings;
-    if (value == null) return null;
-    if (_settings is EqualUnmodifiableMapView) return _settings;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableMapView(value);
-  }
-
   @override
   String toString() {
-    return 'UpdateProjectRequest(name: $name, slug: $slug, description: $description, status: $status, visibility: $visibility, primaryLanguageId: $primaryLanguageId, settings: $settings)';
+    return 'UpdateProjectRequest(name: $name, slug: $slug, description: $description, status: $status, visibility: $visibility, primaryLanguageId: $primaryLanguageId)';
   }
 
   @override
@@ -1426,21 +1307,13 @@ class _$UpdateProjectRequestImpl implements _UpdateProjectRequest {
             (identical(other.visibility, visibility) ||
                 other.visibility == visibility) &&
             (identical(other.primaryLanguageId, primaryLanguageId) ||
-                other.primaryLanguageId == primaryLanguageId) &&
-            const DeepCollectionEquality().equals(other._settings, _settings));
+                other.primaryLanguageId == primaryLanguageId));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      name,
-      slug,
-      description,
-      status,
-      visibility,
-      primaryLanguageId,
-      const DeepCollectionEquality().hash(_settings));
+  int get hashCode => Object.hash(runtimeType, name, slug, description, status,
+      visibility, primaryLanguageId);
 
   /// Create a copy of UpdateProjectRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -1462,16 +1335,14 @@ class _$UpdateProjectRequestImpl implements _UpdateProjectRequest {
 
 abstract class _UpdateProjectRequest implements UpdateProjectRequest {
   const factory _UpdateProjectRequest(
-          {@JsonKey(name: 'name') final String? name,
-          @JsonKey(name: 'slug') final String? slug,
-          @JsonKey(name: 'description') final String? description,
-          @JsonKey(name: 'status') final String? status,
-          @JsonKey(name: 'visibility') final String? visibility,
-          @JsonKey(name: 'primary_language_id')
-          @FlexibleIntConverter()
-          final int? primaryLanguageId,
-          @JsonKey(name: 'settings') final Map<String, dynamic>? settings}) =
-      _$UpdateProjectRequestImpl;
+      {@JsonKey(name: 'name') final String? name,
+      @JsonKey(name: 'slug') final String? slug,
+      @JsonKey(name: 'description') final String? description,
+      @JsonKey(name: 'status') final String? status,
+      @JsonKey(name: 'visibility') final String? visibility,
+      @JsonKey(name: 'primary_language_id')
+      @FlexibleIntConverter()
+      final int? primaryLanguageId}) = _$UpdateProjectRequestImpl;
 
   factory _UpdateProjectRequest.fromJson(Map<String, dynamic> json) =
       _$UpdateProjectRequestImpl.fromJson;
@@ -1506,11 +1377,6 @@ abstract class _UpdateProjectRequest implements UpdateProjectRequest {
   @JsonKey(name: 'primary_language_id')
   @FlexibleIntConverter()
   int? get primaryLanguageId;
-
-  /// 项目设置
-  @override
-  @JsonKey(name: 'settings')
-  Map<String, dynamic>? get settings;
 
   /// Create a copy of UpdateProjectRequest
   /// with the given fields replaced by the non-null parameter values.

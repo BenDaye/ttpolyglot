@@ -46,9 +46,6 @@ class ProjectModel with _$ProjectModel {
     /// 是否激活
     @JsonKey(name: 'is_active') @Default(true) bool isActive,
 
-    /// 项目设置
-    @JsonKey(name: 'settings') Map<String, dynamic>? settings,
-
     /// 项目最后活动时间
     @JsonKey(name: 'last_activity_at') @NullableTimesConverter() DateTime? lastActivityAt,
 
@@ -95,9 +92,6 @@ class CreateProjectRequest with _$CreateProjectRequest {
 
     /// 项目主语言ID
     @JsonKey(name: 'primary_language_id') @FlexibleIntConverter() int? primaryLanguageId,
-
-    /// 项目设置
-    @JsonKey(name: 'settings') Map<String, dynamic>? settings,
   }) = _CreateProjectRequest;
 
   factory CreateProjectRequest.fromJson(Map<String, dynamic> json) => _$CreateProjectRequestFromJson(json);
@@ -124,9 +118,6 @@ class UpdateProjectRequest with _$UpdateProjectRequest {
 
     /// 项目主语言ID
     @JsonKey(name: 'primary_language_id') @FlexibleIntConverter() int? primaryLanguageId,
-
-    /// 项目设置
-    @JsonKey(name: 'settings') Map<String, dynamic>? settings,
   }) = _UpdateProjectRequest;
 
   factory UpdateProjectRequest.fromJson(Map<String, dynamic> json) => _$UpdateProjectRequestFromJson(json);

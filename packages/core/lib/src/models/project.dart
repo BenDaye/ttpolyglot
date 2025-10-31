@@ -3,89 +3,6 @@ import 'package:equatable/equatable.dart';
 import 'language.dart';
 import 'user.dart';
 
-/// 项目设置
-class ProjectSettings extends Equatable {
-  const ProjectSettings({
-    this.autoSync = false,
-    this.allowEmptyTranslations = false,
-    this.requireReview = false,
-    this.maxKeyLength = 100,
-    this.keyPattern = r'^[a-zA-Z][a-zA-Z0-9._-]*$',
-    this.customFields = const {},
-  });
-
-  /// 是否自动同步
-  final bool autoSync;
-
-  /// 是否允许空翻译
-  final bool allowEmptyTranslations;
-
-  /// 是否需要审核
-  final bool requireReview;
-
-  /// 键名最大长度
-  final int maxKeyLength;
-
-  /// 键名格式规则
-  final String keyPattern;
-
-  /// 自定义字段
-  final Map<String, dynamic> customFields;
-
-  /// 复制并更新设置
-  ProjectSettings copyWith({
-    bool? autoSync,
-    bool? allowEmptyTranslations,
-    bool? requireReview,
-    int? maxKeyLength,
-    String? keyPattern,
-    Map<String, dynamic>? customFields,
-  }) {
-    return ProjectSettings(
-      autoSync: autoSync ?? this.autoSync,
-      allowEmptyTranslations: allowEmptyTranslations ?? this.allowEmptyTranslations,
-      requireReview: requireReview ?? this.requireReview,
-      maxKeyLength: maxKeyLength ?? this.maxKeyLength,
-      keyPattern: keyPattern ?? this.keyPattern,
-      customFields: customFields ?? this.customFields,
-    );
-  }
-
-  /// 转换为 JSON
-  Map<String, dynamic> toJson() {
-    return {
-      'autoSync': autoSync,
-      'allowEmptyTranslations': allowEmptyTranslations,
-      'requireReview': requireReview,
-      'maxKeyLength': maxKeyLength,
-      'keyPattern': keyPattern,
-      'customFields': customFields,
-    };
-  }
-
-  /// 从 JSON 创建
-  factory ProjectSettings.fromJson(Map<String, dynamic> json) {
-    return ProjectSettings(
-      autoSync: json['autoSync'] as bool? ?? false,
-      allowEmptyTranslations: json['allowEmptyTranslations'] as bool? ?? false,
-      requireReview: json['requireReview'] as bool? ?? false,
-      maxKeyLength: json['maxKeyLength'] as int? ?? 100,
-      keyPattern: json['keyPattern'] as String? ?? r'^[a-zA-Z][a-zA-Z0-9._-]*$',
-      customFields: json['customFields'] as Map<String, dynamic>? ?? const {},
-    );
-  }
-
-  @override
-  List<Object?> get props => [
-        autoSync,
-        allowEmptyTranslations,
-        requireReview,
-        maxKeyLength,
-        keyPattern,
-        customFields,
-      ];
-}
-
 /// 翻译项目模型
 ///
 /// 项目使用固定主语言设计，主语言在项目创建时设定且不可修改。
@@ -102,7 +19,6 @@ class Project extends Equatable {
     required this.updatedAt,
     this.isActive = true,
     this.lastAccessedAt,
-    this.settings,
   });
 
   /// 项目唯一标识
@@ -138,9 +54,6 @@ class Project extends Equatable {
   /// 最后访问时间
   final DateTime? lastAccessedAt;
 
-  /// 项目设置
-  final ProjectSettings? settings;
-
   /// 获取所有语言（包括主语言和目标语言）
   ///
   /// 返回列表的第一个元素始终是主语言，后续为目标语言。
@@ -161,7 +74,6 @@ class Project extends Equatable {
     DateTime? updatedAt,
     bool? isActive,
     DateTime? lastAccessedAt,
-    ProjectSettings? settings,
   }) {
     return Project(
       id: id ?? this.id,
@@ -174,7 +86,6 @@ class Project extends Equatable {
       updatedAt: updatedAt ?? this.updatedAt,
       isActive: isActive ?? this.isActive,
       lastAccessedAt: lastAccessedAt ?? this.lastAccessedAt,
-      settings: settings ?? this.settings,
     );
   }
 
@@ -191,7 +102,6 @@ class Project extends Equatable {
       'updatedAt': updatedAt.toIso8601String(),
       'isActive': isActive,
       'lastAccessedAt': lastAccessedAt?.toIso8601String(),
-      'settings': settings?.toJson(),
     };
   }
 
@@ -222,7 +132,6 @@ class Project extends Equatable {
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       isActive: json['isActive'] as bool? ?? true,
       lastAccessedAt: json['lastAccessedAt'] != null ? DateTime.parse(json['lastAccessedAt'] as String) : null,
-      settings: json['settings'] != null ? ProjectSettings.fromJson(json['settings'] as Map<String, dynamic>) : null,
     );
   }
 
@@ -238,7 +147,6 @@ class Project extends Equatable {
         updatedAt,
         isActive,
         lastAccessedAt,
-        settings,
       ];
 
   @override

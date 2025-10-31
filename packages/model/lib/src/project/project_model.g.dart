@@ -27,7 +27,6 @@ _$ProjectModelImpl _$$ProjectModelImplFromJson(Map<String, dynamic> json) =>
           ? 10
           : const FlexibleIntConverter().fromJson(json['member_limit']),
       isActive: json['is_active'] as bool? ?? true,
-      settings: json['settings'] as Map<String, dynamic>?,
       lastActivityAt:
           const NullableTimesConverter().fromJson(json['last_activity_at']),
       createdAt: const TimesConverter().fromJson(json['created_at'] as Object),
@@ -56,7 +55,6 @@ Map<String, dynamic> _$$ProjectModelImplToJson(_$ProjectModelImpl instance) =>
           const FlexibleIntConverter().toJson(instance.translatedKeys),
       'member_limit': const FlexibleIntConverter().toJson(instance.memberLimit),
       'is_active': instance.isActive,
-      'settings': instance.settings,
       'last_activity_at':
           const NullableTimesConverter().toJson(instance.lastActivityAt),
       'created_at': const TimesConverter().toJson(instance.createdAt),
@@ -75,7 +73,6 @@ _$CreateProjectRequestImpl _$$CreateProjectRequestImplFromJson(
       visibility: json['visibility'] as String? ?? 'private',
       primaryLanguageId:
           const FlexibleIntConverter().fromJson(json['primary_language_id']),
-      settings: json['settings'] as Map<String, dynamic>?,
     );
 
 Map<String, dynamic> _$$CreateProjectRequestImplToJson(
@@ -88,7 +85,6 @@ Map<String, dynamic> _$$CreateProjectRequestImplToJson(
       'visibility': instance.visibility,
       'primary_language_id': _$JsonConverterToJson<dynamic, int>(
           instance.primaryLanguageId, const FlexibleIntConverter().toJson),
-      'settings': instance.settings,
     };
 
 Json? _$JsonConverterToJson<Json, Value>(
@@ -107,7 +103,6 @@ _$UpdateProjectRequestImpl _$$UpdateProjectRequestImplFromJson(
       visibility: json['visibility'] as String?,
       primaryLanguageId:
           const FlexibleIntConverter().fromJson(json['primary_language_id']),
-      settings: json['settings'] as Map<String, dynamic>?,
     );
 
 Map<String, dynamic> _$$UpdateProjectRequestImplToJson(
@@ -120,7 +115,6 @@ Map<String, dynamic> _$$UpdateProjectRequestImplToJson(
       'visibility': instance.visibility,
       'primary_language_id': _$JsonConverterToJson<dynamic, int>(
           instance.primaryLanguageId, const FlexibleIntConverter().toJson),
-      'settings': instance.settings,
     };
 
 _$UpdateMemberLimitRequestImpl _$$UpdateMemberLimitRequestImplFromJson(

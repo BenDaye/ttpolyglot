@@ -124,9 +124,6 @@ class ProjectController extends BaseController {
           slug: data['slug'] as String?,
           visibility: ValidatorUtils.validateEnum(data['visibility'], 'visibility', ['public', 'private', 'internal'],
               required: false),
-          settings: data.containsKey('settings')
-              ? ValidatorUtils.validateJson(data['settings'], 'settings', required: false)
-              : null,
           targetLanguageIds: targetLanguageIds);
 
       return ResponseUtils.success(message: '项目创建成功', data: project);
