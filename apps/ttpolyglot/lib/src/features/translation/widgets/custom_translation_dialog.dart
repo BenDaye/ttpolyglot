@@ -210,8 +210,17 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
   Widget _buildProviderSelector({
     required List<TranslationProviderConfig> list,
   }) {
+    // 去重，确保 items 唯一
+    final providers = _distinctProviders(list);
+    // 将外部选中的 provider 映射为当前列表中的同一实例，避免 value 不在 items 中
+    final mappedValue = _selectedProvider == null
+        ? null
+        : providers.firstWhereOrNull(
+            (p) => p.provider == _selectedProvider!.provider && p.displayName == _selectedProvider!.displayName,
+          );
+
     return DropdownButtonFormField<TranslationProviderConfig>(
-      value: _selectedProvider,
+      value: mappedValue,
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20.0),
         labelText: '请选择翻译接口',
@@ -241,7 +250,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
           ),
         ),
       ),
-      items: list.map((provider) {
+      items: providers.map((provider) {
         return DropdownMenuItem<TranslationProviderConfig>(
           value: provider,
           child: SizedBox(
@@ -282,6 +291,19 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
         }
       },
     );
+  }
+
+  /// 根据 provider 标识去重
+  List<TranslationProviderConfig> _distinctProviders(List<TranslationProviderConfig> list) {
+    final seen = <String>{};
+    final result = <TranslationProviderConfig>[];
+    for (final p in list) {
+      final key = '${p.provider.name}::${p.displayName}';
+      if (seen.add(key)) {
+        result.add(p);
+      }
+    }
+    return result;
   }
 
   /// 构建源语言选择器
