@@ -33,7 +33,7 @@ class TranslationRoutes {
     router.delete('/projects/<projectId>/translations/<entryId>', translationController.deleteTranslation);
 
     // 批量操作
-    router.post('/projects/<projectId>/translations/batch', translationController.batchOperations);
+    router.post('/projects/<projectId>/translations/batch', translationController.batchCreate);
     router.delete('/projects/<projectId>/translations/batch', translationController.batchDelete);
     router.post('/projects/<projectId>/translations/batch/translate', translationController.batchTranslate);
     router.post('/projects/<projectId>/translations/batch/approve', translationController.batchApprove);

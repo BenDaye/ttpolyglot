@@ -12,6 +12,80 @@ class TranslationService extends BaseService {
   })  : _databaseService = databaseService,
         super('TranslationService');
 
+  /// 批量创建翻译条目
+  Future<List<TranslationEntryModel>> batchCreateTranslations({
+    required String projectId,
+    required List<Map<String, dynamic>> items,
+  }) async {
+    return execute<List<TranslationEntryModel>>(
+      () async {
+        logInfo('批量创建翻译条目', context: {'project_id': projectId, 'count': items.length});
+
+        final created = <TranslationEntryModel>[];
+
+        await _databaseService.transaction(() async {
+          for (final raw in items) {
+            final data = Map<String, dynamic>.from(raw);
+            final entryKey = (data['entry_key'] ?? data['key'])?.toString();
+            final languageCode = (data['language_code'] ?? data['target_language'] ?? data['lang'])?.toString();
+            final sourceText = data['source_text']?.toString();
+            final targetText = data['target_text']?.toString();
+            final translatorId = data['translator_id']?.toString();
+            final contextInfo = data['context_info']?.toString() ?? data['context']?.toString();
+
+            if (entryKey == null || entryKey.trim().isEmpty) {
+              throwBusiness('entry_key 不能为空');
+            }
+            if (languageCode == null || languageCode.trim().isEmpty) {
+              throwBusiness('language_code 不能为空');
+            }
+
+            // 幂等检查：若已存在则跳过或报错，这里选择跳过并取现有记录
+            final existing = await _databaseService.query('''
+              SELECT * FROM {translation_entries}
+              WHERE project_id = @project_id AND entry_key = @entry_key AND language_code = @language_code
+            ''', {
+              'project_id': projectId,
+              'entry_key': entryKey,
+              'language_code': languageCode,
+            });
+
+            if (existing.isNotEmpty) {
+              created.add(TranslationEntryModel.fromJson(existing.first.toColumnMap()));
+              continue;
+            }
+
+            final result = await _databaseService.query('''
+              INSERT INTO {translation_entries} (
+                project_id, entry_key, language_code, source_text, target_text,
+                translator_id, context_info, status, version
+              ) VALUES (
+                @project_id, @entry_key, @language_code, @source_text, @target_text,
+                @translator_id, @context_info, 'pending', 1
+              )
+              RETURNING *
+            ''', {
+              'project_id': projectId,
+              'entry_key': entryKey,
+              'language_code': languageCode,
+              'source_text': sourceText,
+              'target_text': targetText,
+              'translator_id': translatorId,
+              'context_info': contextInfo,
+            });
+
+            created.add(TranslationEntryModel.fromJson(result.first.toColumnMap()));
+          }
+        });
+
+        await _updateProjectStats(projectId);
+        logInfo('批量创建翻译成功', context: {'count': created.length});
+        return created;
+      },
+      operationName: 'batchCreateTranslations',
+    );
+  }
+
   /// 获取翻译条目（传统分页，保留向后兼容）
   Future<Map<String, dynamic>> getTranslationEntries({
     required String projectId,

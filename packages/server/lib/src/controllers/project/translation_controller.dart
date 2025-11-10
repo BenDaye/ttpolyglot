@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:shelf/shelf.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
 
 import '../base_controller.dart';
@@ -7,11 +10,13 @@ import '../base_controller.dart';
 class TranslationController extends BaseController {
   final DatabaseService databaseService;
   final RedisService redisService;
+  final TranslationService _translationService;
 
   TranslationController({
     required this.databaseService,
     required this.redisService,
-  }) : super('TranslationController');
+  })  : _translationService = TranslationService(databaseService: databaseService),
+        super('TranslationController');
 
   Future<Response> getTranslations(Request request) async {
     return ResponseUtils.success(message: '获取翻译列表功能待实现');
@@ -40,6 +45,57 @@ class TranslationController extends BaseController {
   Future<Response> batchOperations(Request request) async {
     return ResponseUtils.success(message: '批量操作功能待实现');
   }
+
+  /// POST /api/v1/projects/<projectId>/translations/batch
+  Future<Response> _batchCreateTranslations(Request request, String projectId) async {
+    try {
+      final body = await request.readAsString();
+      final data = jsonDecode(body) as Map<String, dynamic>? ?? <String, dynamic>{};
+      final rawItems = data['items'];
+
+      if (rawItems == null || rawItems is! List || rawItems.isEmpty) {
+        return ResponseUtils.error(message: 'items 不能为空');
+      }
+
+      // 规范化为 Map<String, dynamic>
+      final items = rawItems
+          .map((e) => e is Map ? e.map((k, v) => MapEntry(k.toString(), v)) : <String, dynamic>{})
+          .cast<Map<String, dynamic>>()
+          .toList();
+
+      // 基本校验：entry_key 与 language_code
+      for (final item in items) {
+        final entryKey = item['entry_key'] ?? item['key'];
+        final languageCode = item['language_code'] ?? item['target_language'] ?? item['lang'];
+        if (entryKey == null || entryKey.toString().trim().isEmpty) {
+          return ResponseUtils.error(message: 'entry_key 不能为空');
+        }
+        if (languageCode == null || languageCode.toString().trim().isEmpty) {
+          return ResponseUtils.error(message: 'language_code 不能为空');
+        }
+      }
+
+      final created = await _translationService.batchCreateTranslations(
+        projectId: projectId,
+        items: items,
+      );
+
+      return ResponseUtils.success<List<TranslationEntryModel>>(
+        message: '批量创建翻译成功',
+        data: created,
+      );
+    } catch (error, stackTrace) {
+      ServerLogger.error(
+        'batchCreateTranslations',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return ResponseUtils.error(message: '批量创建翻译失败');
+    }
+  }
+
+  // 暴露用于路由绑定的方法引用
+  Future<Response> Function(Request, String) get batchCreate => _batchCreateTranslations;
 
   Future<Response> batchDelete(Request request) async {
     return ResponseUtils.success(message: '批量删除功能待实现');
