@@ -32,7 +32,7 @@ class ProjectApi {
         query: queryParams,
       );
 
-      final result = ModelUtils.toModel(
+      final result = ModelUtils.toModel<PagerModel<ProjectModel>>(
         response.data,
         (json) => PagerModel.fromJson(json, (data) => ProjectModel.fromJson(data as Map<String, dynamic>)),
       );

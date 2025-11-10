@@ -32,7 +32,7 @@ class ProjectMemberApi {
         query: queryParameters,
       );
 
-      final result = ModelUtils.toModel(
+      final result = ModelUtils.toModel<PagerModel<ProjectMemberModel>>(
         response.data,
         (json) => PagerModel.fromJson(json, (data) => ProjectMemberModel.fromJson(data as Map<String, dynamic>)),
       );

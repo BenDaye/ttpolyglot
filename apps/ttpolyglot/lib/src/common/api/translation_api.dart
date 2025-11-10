@@ -2,12 +2,11 @@ import 'dart:developer';
 
 import 'package:ttpolyglot/src/common/network/http_client.dart';
 import 'package:ttpolyglot_model/model.dart';
-import 'package:ttpolyglot_utils/utils.dart';
 
 /// 翻译 API
 class TranslationApi {
-  /// 获取翻译条目列表（支持 Map 返回或直接数组返回）
-  Future<Map<String, dynamic>?> getTranslations({
+  /// 获取翻译条目列表
+  Future<PagerModel<TranslationEntryModel>?> getTranslations({
     required String projectId,
     String? languageCode,
     String? status,
@@ -33,16 +32,11 @@ class TranslationApi {
         query: queryParams,
       );
 
-      // 服务器可能返回 { entries: [...], pagination: {...} }
-      final result = ModelUtils.toModel<Map<String, dynamic>>(
+      // 转换为 PagerModel
+      return ModelUtils.toModel<PagerModel<TranslationEntryModel>>(
         response.data,
-        (json) => json,
+        (json) => PagerModel.fromJson(json, (data) => TranslationEntryModel.fromJson(data as Map<String, dynamic>)),
       );
-      if (result == null) {
-        LoggerUtils.error('获取翻译条目响应数据为空');
-        return null;
-      }
-      return result;
     } catch (error, stackTrace) {
       log('[getTranslations]', error: error, stackTrace: stackTrace, name: 'TranslationApi');
       rethrow;
