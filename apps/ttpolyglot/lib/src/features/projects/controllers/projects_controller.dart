@@ -437,10 +437,40 @@ class ProjectsController extends GetxController {
     final controller = instance;
 
     try {
-      return await controller._projectService.getProject(projectId);
+      final cachedProject = controller._projects.firstWhereOrNull((project) => project.id == projectId);
+      if (cachedProject != null) {
+        return cachedProject;
+      }
+
+      final storageProject = await controller._projectService.getProject(projectId);
+      if (storageProject != null) {
+        _cacheProjectLocally(controller, storageProject);
+        return storageProject;
+      }
+
+      final projectIdInt = int.tryParse(projectId);
+      if (projectIdInt != null) {
+        final apiProject = await controller._projectApi.getProject(projectIdInt);
+        if (apiProject != null) {
+          final project = ProjectConverter.toProject(apiProject);
+          _cacheProjectLocally(controller, project);
+          return project;
+        }
+      }
+
+      return null;
     } catch (error, stackTrace) {
       LoggerUtils.error('获取项目详情失败', error: error, stackTrace: stackTrace);
       return null;
+    }
+  }
+
+  static void _cacheProjectLocally(ProjectsController controller, Project project) {
+    final index = controller._projects.indexWhere((item) => item.id == project.id);
+    if (index != -1) {
+      controller._projects[index] = project;
+    } else {
+      controller._projects.add(project);
     }
   }
 
