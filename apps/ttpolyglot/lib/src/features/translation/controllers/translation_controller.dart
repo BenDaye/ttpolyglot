@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/services/service.dart';
+import 'package:ttpolyglot/src/core/services/translation_sync_service.dart';
 import 'package:ttpolyglot/src/features/features.dart';
 import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_utils/utils.dart';
@@ -367,6 +368,18 @@ class TranslationController extends GetxController {
   /// 获取可用的状态列表
   List<TranslationStatus> get availableStatuses {
     return TranslationStatus.values;
+  }
+
+  /// 手动触发同步待入库的变更（网络恢复后调用）
+  Future<void> syncPendingOperations() async {
+    try {
+      await TranslationSyncService.instance.init();
+      await TranslationSyncService.instance.drain(projectId);
+      Get.snackbar('同步完成', '所有待入库的变更已同步到服务器');
+    } catch (error, stackTrace) {
+      Get.snackbar('同步失败', '请稍后重试: $error');
+      LoggerUtils.error('同步待入库变更失败', error: error, stackTrace: stackTrace);
+    }
   }
 
   /// 按翻译键分组条目

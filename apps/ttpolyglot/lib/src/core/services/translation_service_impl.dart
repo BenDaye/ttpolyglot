@@ -1,14 +1,21 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/common/api/translation_api.dart';
+import 'package:ttpolyglot/src/common/config/app_config.dart';
+import 'package:ttpolyglot/src/common/converters/translation_converter.dart';
+import 'package:ttpolyglot/src/core/services/translation_sync_service.dart';
 import 'package:ttpolyglot/src/core/storage/storage_provider.dart';
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_parsers/parsers.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
 /// 翻译服务实现
 class TranslationServiceImpl extends GetxService implements TranslationService {
   final StorageService _storageService;
+  final TranslationApi _translationApi = TranslationApi();
 
   TranslationServiceImpl(this._storageService);
 
@@ -30,6 +37,41 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
     bool includeSourceLanguage = false,
   }) async {
     try {
+      // 优先从服务器获取
+      if (AppConfig.useServerForTranslations) {
+        try {
+          final res = await _translationApi.getTranslations(projectId: projectId, page: 1, limit: 1000);
+          if (res != null) {
+            final raw = (res['entries'] ?? res) as dynamic;
+            final list = ModelUtils.toModelArray<TranslationEntryModel>(
+              raw,
+              (json) => TranslationEntryModel.fromJson(json),
+            );
+            if (list != null) {
+              final items = list.map((m) => TranslationConverter.toCore(m)).toList();
+              if (!includeSourceLanguage) return items;
+              if (items.isEmpty) return [];
+              final copyLanguageCode = items.first.targetLanguage.code;
+              final copyEntries = items
+                  .where((item) => item.targetLanguage.code == copyLanguageCode)
+                  .map(
+                    (item) => item.copyWith(
+                      id: item.id.replaceAll(item.targetLanguage.code, item.sourceLanguage.code),
+                      targetLanguage: item.sourceLanguage,
+                      targetText: item.sourceText,
+                      status: TranslationStatus.completed,
+                    ),
+                  )
+                  .toList();
+              return [...copyEntries, ...items];
+            }
+          }
+        } catch (error, stackTrace) {
+          log('[getTranslationEntries_api_fallback]',
+              error: error, stackTrace: stackTrace, name: 'TranslationServiceImpl');
+        }
+      }
+
       final entriesJson = await _storageService.read('projects.$projectId.translations');
       if (entriesJson == null) return [];
 
@@ -90,10 +132,37 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
   @override
   Future<TranslationEntry> createTranslationEntry(TranslationEntry entry) async {
     try {
+      // API 优先
+      if (AppConfig.useServerForTranslations) {
+        try {
+          final payload = TranslationConverter.toCreatePayload(entry);
+          final created = await _translationApi.createTranslation(
+            projectId: entry.projectId,
+            data: payload,
+          );
+          if (created != null) {
+            return TranslationConverter.toCore(created);
+          }
+        } catch (error, stackTrace) {
+          log('[createTranslationEntry_api_fallback]',
+              error: error, stackTrace: stackTrace, name: 'TranslationServiceImpl');
+        }
+      }
+
+      // 本地回退
       final allEntries = await getTranslationEntries(entry.projectId);
-      allEntries.add(entry);
-      await _saveTranslationEntries(entry.projectId, allEntries);
-      return entry;
+      final updated = List<TranslationEntry>.from(allEntries)..add(entry);
+      await _saveTranslationEntries(entry.projectId, updated);
+      // 入队待同步
+      try {
+        await TranslationSyncService.instance.init();
+        await TranslationSyncService.instance.enqueue(
+          projectId: entry.projectId,
+          opType: 'create',
+          payload: TranslationConverter.toCreatePayload(entry),
+        );
+      } catch (_) {}
+      return entry.copyWith(updatedAt: DateTime.now());
     } catch (error, stackTrace) {
       LoggerUtils.error('创建翻译条目失败', error: error, stackTrace: stackTrace);
       rethrow;
@@ -123,8 +192,35 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
     CreateTranslationKeyRequest request,
   ) async {
     try {
-      final entries = TranslationUtils.generateTranslationEntries(request);
-      return await batchCreateTranslationEntries(entries);
+      // API 优先（批量创建）
+      if (AppConfig.useServerForTranslations) {
+        try {
+          final generated = TranslationUtils.generateTranslationEntries(request);
+          final payload = generated.map((e) => TranslationConverter.toCreatePayload(e)).toList();
+          final created = await _translationApi.batchCreateTranslations(projectId: request.projectId, items: payload);
+          if (created != null) {
+            return created.map((m) => TranslationConverter.toCore(m)).toList();
+          }
+        } catch (error, stackTrace) {
+          log('[createTranslationKey_api_fallback]',
+              error: error, stackTrace: stackTrace, name: 'TranslationServiceImpl');
+        }
+      }
+
+      final entries = TranslationUtils.generateTranslationEntries(request); // 本地回退
+      final created = await batchCreateTranslationEntries(entries);
+      // 入队待同步（批量）
+      try {
+        await TranslationSyncService.instance.init();
+        await TranslationSyncService.instance.enqueue(
+          projectId: request.projectId,
+          opType: 'batchCreate',
+          payload: {
+            'items': created.map((e) => TranslationConverter.toCreatePayload(e)).toList(),
+          },
+        );
+      } catch (_) {}
+      return created;
     } catch (error, stackTrace) {
       LoggerUtils.error('创建翻译键失败', error: error, stackTrace: stackTrace);
       rethrow;
@@ -134,16 +230,53 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
   @override
   Future<TranslationEntry> updateTranslationEntry(TranslationEntry entry) async {
     try {
+      // API 优先
+      if (AppConfig.useServerForTranslations) {
+        try {
+          final updated = await _translationApi.updateTranslation(
+            projectId: entry.projectId,
+            entryId: entry.id,
+            data: {
+              'target_text': entry.targetText,
+              'status': entry.status.name,
+              if (entry.context != null) 'context_info': entry.context,
+            },
+          );
+          if (updated != null) {
+            return TranslationConverter.toCore(updated);
+          }
+        } catch (error, stackTrace) {
+          log('[updateTranslationEntry_api_fallback]',
+              error: error, stackTrace: stackTrace, name: 'TranslationServiceImpl');
+        }
+      }
+
+      // 本地回退
       final allEntries = await getTranslationEntries(entry.projectId);
       final index = allEntries.indexWhere((e) => e.id == entry.id);
-
       if (index == -1) {
         throw Exception('翻译条目不存在: ${entry.id}');
       }
-
-      allEntries[index] = entry.copyWith(updatedAt: DateTime.now());
+      final updatedLocal = entry.copyWith(updatedAt: DateTime.now());
+      allEntries[index] = updatedLocal;
       await _saveTranslationEntries(entry.projectId, allEntries);
-      return allEntries[index];
+      // 入队待同步
+      try {
+        await TranslationSyncService.instance.init();
+        await TranslationSyncService.instance.enqueue(
+          projectId: entry.projectId,
+          opType: 'update',
+          payload: {
+            'entry_id': entry.id,
+            'data': {
+              'target_text': entry.targetText,
+              'status': entry.status.name,
+              if (entry.context != null) 'context_info': entry.context,
+            },
+          },
+        );
+      } catch (_) {}
+      return updatedLocal;
     } catch (error, stackTrace) {
       LoggerUtils.error('更新翻译条目失败', error: error, stackTrace: stackTrace);
       rethrow;
@@ -194,15 +327,38 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
   @override
   Future<void> deleteTranslationEntryFromProject(String projectId, String entryId) async {
     try {
+      // API 优先
+      if (AppConfig.useServerForTranslations) {
+        try {
+          final ok = await _translationApi.deleteTranslation(projectId: projectId, entryId: entryId);
+          if (ok) {
+            return;
+          }
+        } catch (error, stackTrace) {
+          log('[deleteTranslationEntryFromProject_api_fallback]',
+              error: error, stackTrace: stackTrace, name: 'TranslationServiceImpl');
+        }
+      }
+
+      // 本地回退
       final allEntries = await getTranslationEntries(projectId);
       final filteredEntries = allEntries.where((e) => e.id != entryId).toList();
-
       if (filteredEntries.length == allEntries.length) {
         throw Exception('翻译条目不存在: $entryId');
       }
-
       await _saveTranslationEntries(projectId, filteredEntries);
       LoggerUtils.info('成功删除翻译条目: $entryId 从项目: $projectId');
+      // 入队待同步
+      try {
+        await TranslationSyncService.instance.init();
+        await TranslationSyncService.instance.enqueue(
+          projectId: projectId,
+          opType: 'delete',
+          payload: {
+            'entry_id': entryId,
+          },
+        );
+      } catch (_) {}
     } catch (error, stackTrace) {
       LoggerUtils.error('删除翻译条目失败', error: error, stackTrace: stackTrace);
       rethrow;
@@ -243,6 +399,24 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
     TranslationStatus? status,
   }) async {
     try {
+      // API 优先
+      if (AppConfig.useServerForTranslations) {
+        try {
+          final models = await _translationApi.searchTranslations(
+            projectId: projectId,
+            query: query,
+            status: status?.name,
+            languageCode: targetLanguage?.code,
+          );
+          if (models != null) {
+            return models.map((m) => TranslationConverter.toCore(m)).toList();
+          }
+        } catch (error, stackTrace) {
+          log('[searchTranslationEntries_api_fallback]',
+              error: error, stackTrace: stackTrace, name: 'TranslationServiceImpl');
+        }
+      }
+
       final allEntries = await getTranslationEntries(projectId);
 
       return allEntries.where((entry) {

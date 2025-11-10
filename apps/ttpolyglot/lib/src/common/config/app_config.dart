@@ -24,4 +24,11 @@ class AppConfig {
   static const int requestTimeThreshold = 1000; // 最小请求时间（毫秒）
   static const int pageSize = 20; // 分页大小
   static const Duration requestLazyTimeout = Duration(seconds: 5); // 延迟显示 Loading 的时间
+
+  /// 翻译数据写入策略：是否优先使用服务器
+  static bool get useServerForTranslations {
+    // 允许通过编译期常量开关
+    const value = bool.fromEnvironment('USE_SERVER_FOR_TRANSLATIONS', defaultValue: true);
+    return value;
+  }
 }

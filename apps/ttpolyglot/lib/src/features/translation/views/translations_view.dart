@@ -111,6 +111,15 @@ class ProjectTranslationsView extends StatelessWidget {
             icon: const Icon(Icons.refresh),
             tooltip: '刷新',
           ),
+
+          const SizedBox(width: 8.0),
+
+          // 同步待入库变更（离线->在线）
+          IconButton(
+            onPressed: () => controller.syncPendingOperations(),
+            icon: const Icon(Icons.sync),
+            tooltip: '同步待入库变更',
+          ),
         ],
       ),
     );
