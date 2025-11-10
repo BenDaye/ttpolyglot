@@ -42,12 +42,10 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
         try {
           final res = await _translationApi.getTranslations(projectId: projectId, page: 1, limit: 1000);
           if (res != null) {
-            final raw = (res['entries'] ?? res) as dynamic;
-            final list = ModelUtils.toModelArray<TranslationEntryModel>(
-              raw,
+            final list = res.toArray<TranslationEntryModel>(
               (json) => TranslationEntryModel.fromJson(json),
             );
-            if (list != null) {
+            if (list.isNotEmpty) {
               final items = list.map((m) => TranslationConverter.toCore(m)).toList();
               if (!includeSourceLanguage) return items;
               if (items.isEmpty) return [];
