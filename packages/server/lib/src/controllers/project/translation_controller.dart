@@ -50,10 +50,15 @@ class TranslationController extends BaseController {
   Future<Response> _batchCreateTranslations(Request request, String projectId) async {
     try {
       final body = await request.readAsString();
-      final data = jsonDecode(body) as Map<String, dynamic>? ?? <String, dynamic>{};
-      final rawItems = data['items'];
+      final decoded = jsonDecode(body);
+      List<dynamic>? rawItems;
+      if (decoded is Map<String, dynamic>) {
+        rawItems = decoded['items'] as List<dynamic>?;
+      } else if (decoded is List) {
+        rawItems = decoded;
+      }
 
-      if (rawItems == null || rawItems is! List || rawItems.isEmpty) {
+      if (rawItems == null || rawItems.isEmpty) {
         return ResponseUtils.error(message: 'items 不能为空');
       }
 

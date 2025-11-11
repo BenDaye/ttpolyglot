@@ -192,7 +192,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
         // 选择翻译接口
         Obx(
           () {
-            _selectedProvider ??= TranslationConfigController.instance.config.defaultProvider;
+            // 不再在这里设置 _selectedProvider，而是在 _buildProviderSelector 中通过 id 匹配
             return _buildProviderSelector(
               list: TranslationConfigController.instance.config.providers,
             );
@@ -534,8 +534,38 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
   Widget _buildProviderSelector({
     required List<TranslationProviderConfig> list,
   }) {
+    // 通过 id 匹配找到正确的 provider 对象，避免对象引用不匹配的问题
+    TranslationProviderConfig? matchedProvider;
+    if (_selectedProvider != null) {
+      matchedProvider = list.firstWhereOrNull(
+        (p) => p.id == _selectedProvider!.id,
+      );
+    }
+
+    // 如果没有匹配的，使用默认的或列表中的第一个
+    if (matchedProvider == null && list.isNotEmpty) {
+      final defaultProvider = TranslationConfigController.instance.config.defaultProvider;
+      if (defaultProvider != null) {
+        matchedProvider = list.firstWhereOrNull(
+          (p) => p.id == defaultProvider.id,
+        );
+      }
+      matchedProvider ??= list.first;
+
+      // 在下一帧更新 _selectedProvider，避免在 build 方法中直接修改状态
+      if (_selectedProvider?.id != matchedProvider.id) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() {
+              _selectedProvider = matchedProvider;
+            });
+          }
+        });
+      }
+    }
+
     return DropdownButtonFormField<TranslationProviderConfig>(
-      value: _selectedProvider,
+      value: matchedProvider,
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20.0),
         labelText: '请选择翻译接口',
