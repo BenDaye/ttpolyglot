@@ -135,8 +135,6 @@ class XxxRoutes {
 - 批量更新配置
 - 重置配置
 
-**特点**：部分路由公开（如 `/configs/public`），其他需要认证
-
 ### 文件路由 (file_routes.dart)
 
 处理文件管理相关的路由：

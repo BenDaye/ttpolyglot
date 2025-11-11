@@ -24,18 +24,15 @@ class ConfigRoutes {
       redisService: redisService,
     );
 
-    // 公开路由（无需认证）
     router.get('/configs/public', configController.getPublicConfigs);
-
-    // 需要认证的路由
-    router.get('/configs', withAuth(configController.getConfigs));
-    router.get('/configs/<key>', withAuth(configController.getConfig));
-    router.put('/configs/<key>', withAuth(configController.updateConfig));
-    router.post('/configs', withAuth(configController.createConfig));
-    router.delete('/configs/<key>', withAuth(configController.deleteConfig));
-    router.get('/configs/categories', withAuth(configController.getConfigCategories));
-    router.post('/configs/batch', withAuth(configController.batchUpdateConfigs));
-    router.post('/configs/reset/<key>', withAuth(configController.resetConfig));
+    router.get('/configs', configController.getConfigs);
+    router.get('/configs/<key>', configController.getConfig);
+    router.put('/configs/<key>', configController.updateConfig);
+    router.post('/configs', configController.createConfig);
+    router.delete('/configs/<key>', configController.deleteConfig);
+    router.get('/configs/categories', configController.getConfigCategories);
+    router.post('/configs/batch', configController.batchUpdateConfigs);
+    router.post('/configs/reset/<key>', configController.resetConfig);
 
     return router;
   }

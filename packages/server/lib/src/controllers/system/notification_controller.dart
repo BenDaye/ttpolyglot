@@ -22,23 +22,151 @@ class NotificationController extends BaseController {
   }
 
   Future<Response> getNotifications(Request request) async {
-    return ResponseUtils.success(message: '获取通知列表功能待实现');
+    return execute(
+      () async {
+        final userId = getCurrentUserId(request);
+        if (userId == null) {
+          return ResponseUtils.error(message: '未授权访问');
+        }
+
+        final params = request.url.queryParameters;
+        final page = int.tryParse(params['page'] ?? '1') ?? 1;
+        final limit = int.tryParse(params['limit'] ?? '20') ?? 20;
+        final isRead = params['is_read'] == 'true' ? true : (params['is_read'] == 'false' ? false : null);
+
+        final conditions = <String>['user_id = @user_id'];
+        final parameters = <String, dynamic>{
+          'user_id': userId,
+          'limit': limit,
+          'offset': (page - 1) * limit,
+        };
+
+        if (isRead != null) {
+          conditions.add('is_read = @is_read');
+          parameters['is_read'] = isRead;
+        }
+
+        final sql = '''
+          SELECT * FROM {notifications}
+          WHERE ${conditions.join(' AND ')}
+          ORDER BY created_at DESC
+          LIMIT @limit OFFSET @offset
+        ''';
+
+        final result = await databaseService.query(sql, parameters);
+
+        // 获取总数
+        final countSql = '''
+          SELECT COUNT(*) FROM {notifications}
+          WHERE ${conditions.join(' AND ')}
+        ''';
+        final countResult = await databaseService.query(countSql, {
+          'user_id': userId,
+          if (isRead != null) 'is_read': isRead,
+        });
+        final total =
+            (countResult.first[0] is int) ? countResult.first[0] as int : int.parse(countResult.first[0].toString());
+
+        final notifications = result.map((row) => row.toColumnMap()).toList();
+
+        return ResponseUtils.success(
+          message: '获取通知列表成功',
+          data: {
+            'notifications': notifications,
+            'pagination': {
+              'page': page,
+              'limit': limit,
+              'total': total,
+              'pages': (total / limit).ceil(),
+            },
+          },
+        );
+      },
+      operationName: 'getNotifications',
+    );
   }
 
-  Future<Response> getNotification(Request request) async {
-    return ResponseUtils.success(message: '获取通知详情功能待实现');
+  Future<Response> getNotification(Request request, String id) async {
+    return execute(
+      () async {
+        final userId = getCurrentUserId(request);
+        if (userId == null) {
+          return ResponseUtils.error(message: '未授权访问');
+        }
+
+        final result = await databaseService.query(
+          'SELECT * FROM {notifications} WHERE id = @id AND user_id = @user_id',
+          {'id': id, 'user_id': userId},
+        );
+
+        if (result.isEmpty) {
+          return ResponseUtils.error(message: '通知不存在');
+        }
+
+        return ResponseUtils.success(
+          message: '获取通知详情成功',
+          data: result.first.toColumnMap(),
+        );
+      },
+      operationName: 'getNotification',
+    );
   }
 
-  Future<Response> markAsRead(Request request) async {
-    return ResponseUtils.success(message: '标记为已读功能待实现');
+  Future<Response> markAsRead(Request request, String id) async {
+    return execute(
+      () async {
+        final userId = getCurrentUserId(request);
+        if (userId == null) {
+          return ResponseUtils.error(message: '未授权访问');
+        }
+
+        await databaseService.query(
+          'UPDATE {notifications} SET is_read = true, read_at = CURRENT_TIMESTAMP WHERE id = @id AND user_id = @user_id',
+          {'id': id, 'user_id': userId},
+        );
+
+        return ResponseUtils.success(message: '标记为已读成功');
+      },
+      operationName: 'markAsRead',
+    );
   }
 
   Future<Response> markAllAsRead(Request request) async {
-    return ResponseUtils.success(message: '标记全部为已读功能待实现');
+    return execute(
+      () async {
+        final userId = getCurrentUserId(request);
+        if (userId == null) {
+          return ResponseUtils.error(message: '未授权访问');
+        }
+
+        await databaseService.query(
+          'UPDATE {notifications} SET is_read = true, read_at = CURRENT_TIMESTAMP WHERE user_id = @user_id AND is_read = false',
+          {'user_id': userId},
+        );
+
+        return ResponseUtils.success(message: '标记全部为已读成功');
+      },
+      operationName: 'markAllAsRead',
+    );
   }
 
-  Future<Response> deleteNotification(Request request) async {
-    return ResponseUtils.success(message: '删除通知功能待实现');
+  Future<Response> deleteNotification(Request request, String id) async {
+    return execute(
+      () async {
+        final userId = getCurrentUserId(request);
+        if (userId == null) {
+          return ResponseUtils.error(message: '未授权访问');
+        }
+
+        await databaseService.query(
+          'DELETE FROM {notifications} WHERE id = @id AND user_id = @user_id',
+          {'id': id, 'user_id': userId},
+        );
+
+        return ResponseUtils.success(message: '删除通知成功');
+      },
+      operationName: 'deleteNotification',
+    );
   }
 
   // 通知设置相关方法
