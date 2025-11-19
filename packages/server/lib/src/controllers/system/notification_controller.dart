@@ -272,8 +272,7 @@ class NotificationController extends BaseController {
           '[batchUpdateNotificationSettings] userId=$userId, projectId=$projectId, updates count=${updatesJson.length}');
 
       // 将 JSON 转换为 NotificationSettingUpdate 对象
-      final updates =
-          updatesJson.map((json) => NotificationSettingUpdate.fromJson(json as Map<String, dynamic>)).toList();
+      final updates = updatesJson.map((json) => NotificationSettingUpdate.fromJson(json)).toList();
 
       // 批量更新通知设置
       final updatedSettings = await _notificationSettingsService.batchUpdateNotificationSettings(

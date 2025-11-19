@@ -34,7 +34,7 @@ class LanguageService extends BaseService {
         try {
           final List<dynamic> cachedList = jsonDecode(cached) as List<dynamic>;
           logInfo('从缓存获取语言列表成功', context: {'count': cachedList.length});
-          return cachedList.map((item) => LanguageModel.fromJson(item as Map<String, dynamic>)).toList();
+          return cachedList.map((item) => LanguageModel.fromJson(item)).toList();
         } catch (e) {
           logWarning('缓存数据解析失败', context: {'error': e.toString()});
         }
@@ -97,7 +97,7 @@ class LanguageService extends BaseService {
       if (cached != null && cached.isNotEmpty) {
         try {
           logInfo('从缓存获取语言详情成功', context: {'code': code});
-          return LanguageModel.fromJson(jsonDecode(cached) as Map<String, dynamic>);
+          return LanguageModel.fromJson(jsonDecode(cached));
         } catch (e) {
           logWarning('缓存数据解析失败', context: {'error': e.toString()});
         }

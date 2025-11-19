@@ -74,8 +74,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       if (entriesJson == null) return [];
 
       final entriesData = jsonDecode(entriesJson) as List<dynamic>;
-      List<TranslationEntry> result =
-          entriesData.map((data) => TranslationEntry.fromJson(data as Map<String, dynamic>)).toList();
+      List<TranslationEntry> result = entriesData.map((data) => TranslationEntry.fromJson(data)).toList();
 
       if (!includeSourceLanguage) return result;
 

@@ -32,7 +32,7 @@ class ProjectCacheService {
       }
 
       final jsonList = jsonDecode(cachedData) as List<dynamic>;
-      final projects = jsonList.map((json) => ProjectModel.fromJson(json as Map<String, dynamic>)).toList();
+      final projects = jsonList.map((json) => ProjectModel.fromJson(json)).toList();
 
       log('[getCachedProjects] 从缓存读取 ${projects.length} 个项目', name: 'ProjectCacheService');
       return projects;

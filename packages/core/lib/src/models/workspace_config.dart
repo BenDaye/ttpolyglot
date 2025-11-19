@@ -73,10 +73,10 @@ class WorkspaceConfig extends Equatable {
   factory WorkspaceConfig.fromJson(Map<String, dynamic> json) {
     return WorkspaceConfig(
       version: json['version'] as String,
-      user: User.fromJson(json['user'] as Map<String, dynamic>),
+      user: User.fromJson(json['user']),
       currentProjectId: json['currentProjectId'] as String?,
       preferences: json['preferences'] != null
-          ? WorkspacePreferences.fromJson(json['preferences'] as Map<String, dynamic>)
+          ? WorkspacePreferences.fromJson(json['preferences'])
           : const WorkspacePreferences(),
       recentProjects: (json['recentProjects'] as List<dynamic>?)?.map((id) => id as String).toList() ?? const [],
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt'] as String) : null,

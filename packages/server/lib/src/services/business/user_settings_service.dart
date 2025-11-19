@@ -86,8 +86,7 @@ class UserSettingsService extends BaseService {
             final providersList =
                 providersJson is String ? jsonDecode(providersJson) as List<dynamic> : providersJson as List<dynamic>;
 
-            providers =
-                providersList.map((p) => TranslationProviderConfigModel.fromJson(p as Map<String, dynamic>)).toList();
+            providers = providersList.map((p) => TranslationProviderConfigModel.fromJson(p)).toList();
           } catch (error, stackTrace) {
             logError(
               '解析翻译配置失败',

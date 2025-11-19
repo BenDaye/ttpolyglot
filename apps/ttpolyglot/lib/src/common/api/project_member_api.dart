@@ -273,7 +273,7 @@ class ProjectMemberApi {
         response.data,
         (json) {
           final items = json as List;
-          return items.map((item) => ProjectMemberModel.fromJson(item as Map<String, dynamic>)).toList();
+          return items.map((item) => ProjectMemberModel.fromJson(item)).toList();
         },
       );
       if (result == null) {

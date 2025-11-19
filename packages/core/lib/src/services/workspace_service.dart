@@ -127,8 +127,7 @@ class WorkspaceStatus {
       isInitialized: json['isInitialized'] as bool,
       version: json['version'] as String,
       projectCount: json['projectCount'] as int,
-      currentProject:
-          json['currentProject'] != null ? Project.fromJson(json['currentProject'] as Map<String, dynamic>) : null,
+      currentProject: json['currentProject'] != null ? Project.fromJson(json['currentProject']) : null,
       lastAccessed: DateTime.parse(json['lastAccessed'] as String),
     );
   }
