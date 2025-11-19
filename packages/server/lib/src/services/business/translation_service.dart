@@ -87,7 +87,7 @@ class TranslationService extends BaseService {
   }
 
   /// 获取翻译条目（传统分页，保留向后兼容）
-  Future<Map<String, dynamic>> getTranslationEntries({
+  Future<PagerModel<TranslationEntryModel>> getTranslationEntries({
     required String projectId,
     String? languageCode,
     String? status,
@@ -168,15 +168,13 @@ class TranslationService extends BaseService {
 
         final entries = result.map((row) => row.toColumnMap()).toList();
 
-        return {
-          'entries': entries,
-          'pagination': {
-            'page': page,
-            'limit': limit,
-            'total': total,
-            'pages': (total / limit).ceil(),
-          },
-        };
+        return PagerModel<TranslationEntryModel>(
+          page: page,
+          pageSize: limit,
+          totalSize: total,
+          totalPage: (total / limit).ceil(),
+          items: entries.map((row) => TranslationEntryModel.fromJson(row)).toList(),
+        );
       },
       operationName: 'getTranslationEntries',
     );

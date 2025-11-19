@@ -30,7 +30,7 @@ class TranslationController extends BaseController {
         final reviewerId = params['reviewer_id'];
         final search = params['search'];
 
-        if (page < 1 || limit < 1 || limit > 100) {
+        if (page < 1 || limit < 1 || limit > 1000) {
           throw ValidationException(message: '分页参数无效');
         }
 
@@ -45,7 +45,7 @@ class TranslationController extends BaseController {
           search: search,
         );
 
-        return ResponseUtils.success(
+        return ResponseUtils.success<PagerModel<TranslationEntryModel>>(
           message: '获取翻译列表成功',
           data: result,
         );
