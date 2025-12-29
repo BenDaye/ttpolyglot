@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/routing/app_pages.dart';
 import 'package:ttpolyglot/src/features/settings/controllers/translation_config_controller.dart';
 import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_translators/translators.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
@@ -11,6 +12,25 @@ class TranslationServiceManager extends GetxService {
   static TranslationServiceManager get instance => Get.isRegistered<TranslationServiceManager>()
       ? Get.find<TranslationServiceManager>()
       : Get.put(TranslationServiceManager());
+
+  /// 将 Language 转换为 LanguageEnum
+  static LanguageEnum? _languageToLanguageEnum(Language? language) {
+    if (language == null) return null;
+    return LanguageEnum.fromValue(language.code);
+  }
+
+  /// 将 TranslationProviderConfig 转换为 TranslationProviderConfigModel
+  static TranslationProviderConfigModel _providerConfigToModel(TranslationProviderConfig config) {
+    return TranslationProviderConfigModel(
+      id: config.id,
+      provider: config.provider.code,
+      name: config.name,
+      appId: config.appId,
+      appKey: config.appKey,
+      apiUrl: config.apiUrl,
+      isDefault: config.isDefault,
+    );
+  }
 
   /// 检查翻译配置是否完整
   bool get hasValidConfig {
@@ -100,8 +120,8 @@ class TranslationServiceManager extends GetxService {
                   success: false,
                   translatedText: '',
                   error: '请先配置翻译接口',
-                  sourceLanguage: entry.sourceLanguage,
-                  targetLanguage: entry.targetLanguage,
+                  sourceLanguage: _languageToLanguageEnum(entry.sourceLanguage),
+                  targetLanguage: _languageToLanguageEnum(entry.targetLanguage),
                 ))
             .toList();
       }
@@ -114,8 +134,8 @@ class TranslationServiceManager extends GetxService {
                   success: false,
                   translatedText: '',
                   error: '没有可用的翻译接口',
-                  sourceLanguage: entry.sourceLanguage,
-                  targetLanguage: entry.targetLanguage,
+                  sourceLanguage: _languageToLanguageEnum(entry.sourceLanguage),
+                  targetLanguage: _languageToLanguageEnum(entry.targetLanguage),
                 ))
             .toList();
       }
@@ -127,8 +147,8 @@ class TranslationServiceManager extends GetxService {
                   success: false,
                   translatedText: '',
                   error: '${selectedProvider.displayName} 配置不完整',
-                  sourceLanguage: entry.sourceLanguage,
-                  targetLanguage: entry.targetLanguage,
+                  sourceLanguage: _languageToLanguageEnum(entry.sourceLanguage),
+                  targetLanguage: _languageToLanguageEnum(entry.targetLanguage),
                 ))
             .toList();
       }
@@ -138,9 +158,9 @@ class TranslationServiceManager extends GetxService {
       // 使用批量翻译API
       final result = await TranslationApiService.translateBatchTexts(
         sourceText: sourceEntries.targetText,
-        sourceLanguage: sourceEntries.targetLanguage,
-        targetLanguages: entries.map((e) => e.targetLanguage).toSet().toList(),
-        config: selectedProvider,
+        sourceLanguage: _languageToLanguageEnum(sourceEntries.targetLanguage)!,
+        targetLanguages: entries.map((e) => _languageToLanguageEnum(e.targetLanguage)!).toSet().toList(),
+        config: _providerConfigToModel(selectedProvider),
         cancelToken: cancelToken,
       );
 
@@ -148,7 +168,7 @@ class TranslationServiceManager extends GetxService {
           .map((item) => TranslationResult(
                 success: item.success,
                 translatedText: item.translatedText,
-                sourceLanguage: sourceEntries.sourceLanguage,
+                sourceLanguage: _languageToLanguageEnum(sourceEntries.sourceLanguage),
                 targetLanguage: item.targetLanguage,
                 error: item.error,
               ))
@@ -161,8 +181,8 @@ class TranslationServiceManager extends GetxService {
           .map((entry) => TranslationResult(
                 success: false,
                 translatedText: '',
-                sourceLanguage: entry.sourceLanguage,
-                targetLanguage: entry.targetLanguage,
+                sourceLanguage: _languageToLanguageEnum(entry.sourceLanguage),
+                targetLanguage: _languageToLanguageEnum(entry.targetLanguage),
                 error: '批量翻译异常: $error',
               ))
           .toList();

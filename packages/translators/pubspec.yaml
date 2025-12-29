@@ -11,7 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   crypto: ^3.0.3
-  ttpolyglot_core: ^1.0.0
+  ttpolyglot_model: ^1.0.0
 
 dev_dependencies:
   flutter_test:

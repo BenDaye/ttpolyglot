@@ -4,7 +4,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// 取消令牌，用于中止翻译请求
 class CancelToken {
@@ -49,11 +49,11 @@ class CancelException implements Exception {
 /// 翻译API服务
 class TranslationApiService {
   /// 翻译文本
-  static Future<TranslationResult> translateText({
+  static Future<TranslationResult?> translateText({
     required String text,
-    required Language sourceLanguage,
-    required Language targetLanguage,
-    required TranslationProviderConfig config,
+    required LanguageEnum sourceLanguage,
+    required LanguageEnum targetLanguage,
+    required TranslationProviderConfigModel config,
     String? context,
     CancelToken? cancelToken,
   }) async {
@@ -62,7 +62,7 @@ class TranslationApiService {
       cancelToken?.throwIfCancelled();
 
       switch (config.provider) {
-        case TranslationProvider.baidu:
+        case 'baidu':
           return await _translateWithBaidu(
             text: text,
             sourceLanguage: sourceLanguage,
@@ -71,7 +71,7 @@ class TranslationApiService {
             context: context,
             cancelToken: cancelToken,
           );
-        case TranslationProvider.youdao:
+        case 'youdao':
           return await _translateWithYoudao(
             text: text,
             sourceLanguage: sourceLanguage,
@@ -80,7 +80,7 @@ class TranslationApiService {
             context: context,
             cancelToken: cancelToken,
           );
-        case TranslationProvider.google:
+        case 'google':
           return await _translateWithGoogle(
             text: text,
             sourceLanguage: sourceLanguage,
@@ -89,7 +89,7 @@ class TranslationApiService {
             context: context,
             cancelToken: cancelToken,
           );
-        case TranslationProvider.custom:
+        case 'custom':
           return await _translateWithCustom(
             text: text,
             sourceLanguage: sourceLanguage,
@@ -99,13 +99,10 @@ class TranslationApiService {
             cancelToken: cancelToken,
           );
       }
+      return null;
     } catch (error, stackTrace) {
       log('翻译失败', error: error, stackTrace: stackTrace, name: 'TranslationApiService');
-      return TranslationResult(
-        success: false,
-        translatedText: '',
-        error: error.toString(),
-      );
+      return null;
     }
   }
 
@@ -113,9 +110,9 @@ class TranslationApiService {
   /// 支持将多个文本翻译到多个目标语言
   static Future<BatchTranslationResult> translateBatchTexts({
     required String sourceText,
-    required Language sourceLanguage,
-    required List<Language> targetLanguages,
-    required TranslationProviderConfig config,
+    required LanguageEnum sourceLanguage,
+    required List<LanguageEnum> targetLanguages,
+    required TranslationProviderConfigModel config,
     String? context,
     CancelToken? cancelToken,
   }) async {
@@ -124,7 +121,7 @@ class TranslationApiService {
       cancelToken?.throwIfCancelled();
 
       // 对于自定义翻译提供商，使用专门的批量翻译方法
-      if (config.provider == TranslationProvider.custom) {
+      if (config.provider == 'custom') {
         return await _translateBatchWithCustom(
           sourceText: sourceText,
           sourceLanguage: sourceLanguage,
@@ -135,7 +132,7 @@ class TranslationApiService {
       }
 
       // 对于其他翻译提供商，逐个翻译
-      final List<Future<TranslationResult>> translationFutures = [];
+      final List<Future<TranslationResult?>> translationFutures = [];
       for (final targetLanguage in targetLanguages) {
         // 在添加每个翻译任务前检查是否被取消
         cancelToken?.throwIfCancelled();
@@ -172,7 +169,7 @@ class TranslationApiService {
       }
 
       return BatchTranslationResult(
-        success: results.every((result) => result.success),
+        success: results.every((result) => result?.success ?? false),
         items: items,
         sourceLanguage: sourceLanguage,
       );
@@ -205,9 +202,9 @@ class TranslationApiService {
   /// 百度翻译API
   static Future<TranslationResult> _translateWithBaidu({
     required String text,
-    required Language sourceLanguage,
-    required Language targetLanguage,
-    required TranslationProviderConfig config,
+    required LanguageEnum sourceLanguage,
+    required LanguageEnum targetLanguage,
+    required TranslationProviderConfigModel config,
     String? context,
     CancelToken? cancelToken,
   }) async {
@@ -225,8 +222,8 @@ class TranslationApiService {
 
       final requestBody = {
         'q': text,
-        'from': _convertLanguageCode(sourceLanguage.code, TranslationProvider.baidu),
-        'to': _convertLanguageCode(targetLanguage.code, TranslationProvider.baidu),
+        'from': _convertLanguageCode(sourceLanguage.code, 'baidu'),
+        'to': _convertLanguageCode(targetLanguage.code, 'baidu'),
         'appid': appId,
         'salt': salt,
         'sign': sign,
@@ -277,9 +274,9 @@ class TranslationApiService {
   /// 有道翻译API
   static Future<TranslationResult> _translateWithYoudao({
     required String text,
-    required Language sourceLanguage,
-    required Language targetLanguage,
-    required TranslationProviderConfig config,
+    required LanguageEnum sourceLanguage,
+    required LanguageEnum targetLanguage,
+    required TranslationProviderConfigModel config,
     String? context,
     CancelToken? cancelToken,
   }) async {
@@ -297,8 +294,8 @@ class TranslationApiService {
 
       final requestBody = {
         'q': text,
-        'from': _convertLanguageCode(sourceLanguage.code, TranslationProvider.youdao),
-        'to': _convertLanguageCode(targetLanguage.code, TranslationProvider.youdao),
+        'from': _convertLanguageCode(sourceLanguage.code, 'youdao'),
+        'to': _convertLanguageCode(targetLanguage.code, 'youdao'),
         'appKey': appId,
         'salt': salt,
         'sign': sign,
@@ -351,9 +348,9 @@ class TranslationApiService {
   /// 谷歌翻译API（使用免费接口）
   static Future<TranslationResult> _translateWithGoogle({
     required String text,
-    required Language sourceLanguage,
-    required Language targetLanguage,
-    required TranslationProviderConfig config,
+    required LanguageEnum sourceLanguage,
+    required LanguageEnum targetLanguage,
+    required TranslationProviderConfigModel config,
     String? context,
     CancelToken? cancelToken,
   }) async {
@@ -363,8 +360,8 @@ class TranslationApiService {
 
       final url = 'https://translate.googleapis.com/translate_a/single?'
           'client=gtx&'
-          'sl=${_convertLanguageCode(sourceLanguage.code, TranslationProvider.google)}&'
-          'tl=${_convertLanguageCode(targetLanguage.code, TranslationProvider.google)}&'
+          'sl=${_convertLanguageCode(sourceLanguage.code, 'google')}&'
+          'tl=${_convertLanguageCode(targetLanguage.code, 'google')}&'
           'dt=t&q=${Uri.encodeComponent(text)}';
 
       final response = await _makeHttpRequest(
@@ -405,9 +402,9 @@ class TranslationApiService {
   /// 自定义翻译API
   static Future<TranslationResult> _translateWithCustom({
     required String text,
-    required Language sourceLanguage,
-    required Language targetLanguage,
-    required TranslationProviderConfig config,
+    required LanguageEnum sourceLanguage,
+    required LanguageEnum targetLanguage,
+    required TranslationProviderConfigModel config,
     String? context,
     CancelToken? cancelToken,
   }) async {
@@ -485,16 +482,22 @@ class TranslationApiService {
   }
 
   /// 转换语言代码
-  static String _convertLanguageCode(String languageCode, TranslationProvider provider) {
-    switch (provider) {
-      case TranslationProvider.baidu:
-        return _convertToBaiduLanguageCode(languageCode);
-      case TranslationProvider.youdao:
-        return _convertToYoudaoLanguageCode(languageCode);
-      case TranslationProvider.google:
-        return _convertToGoogleLanguageCode(languageCode);
-      case TranslationProvider.custom:
-        return _convertToCustomLanguageCode(languageCode);
+  static String? _convertLanguageCode(String languageCode, String provider) {
+    try {
+      switch (provider) {
+        case 'baidu':
+          return _convertToBaiduLanguageCode(languageCode);
+        case 'youdao':
+          return _convertToYoudaoLanguageCode(languageCode);
+        case 'google':
+          return _convertToGoogleLanguageCode(languageCode);
+        case 'custom':
+          return _convertToCustomLanguageCode(languageCode);
+      }
+      return null;
+    } catch (error, stackTrace) {
+      log('转换语言代码失败', error: error, stackTrace: stackTrace, name: 'TranslationApiService');
+      return null;
     }
   }
 
@@ -724,9 +727,9 @@ class TranslationApiService {
   /// 自定义翻译API批量翻译（内部方法）
   static Future<BatchTranslationResult> _translateBatchWithCustom({
     required String sourceText,
-    required Language sourceLanguage,
-    required List<Language> targetLanguages,
-    required TranslationProviderConfig config,
+    required LanguageEnum sourceLanguage,
+    required List<LanguageEnum> targetLanguages,
+    required TranslationProviderConfigModel config,
     CancelToken? cancelToken,
   }) async {
     try {
@@ -832,7 +835,7 @@ class TranslationApiService {
   static List<TranslationItem> _parseCustomBatchResponse(
     List<dynamic> responseData,
     String originalText,
-    List<Language> targetLanguages,
+    List<LanguageEnum> targetLanguages,
   ) {
     final items = <TranslationItem>[];
 
@@ -875,7 +878,7 @@ class TranslationApiService {
   /// 创建失败的翻译项列表
   static List<TranslationItem> _createFailedItems(
     String sourceText,
-    List<Language> targetLanguages,
+    List<LanguageEnum> targetLanguages,
     String error,
   ) {
     final items = <TranslationItem>[];
@@ -911,10 +914,10 @@ class TranslationResult {
   final String translatedText;
 
   /// 源语言
-  final Language? sourceLanguage;
+  final LanguageEnum? sourceLanguage;
 
   /// 目标语言
-  final Language? targetLanguage;
+  final LanguageEnum? targetLanguage;
 
   /// 错误信息
   final String? error;
@@ -937,7 +940,7 @@ class TranslationItem {
   final String translatedText;
 
   /// 目标语言
-  final Language targetLanguage;
+  final LanguageEnum targetLanguage;
 
   /// 是否成功
   final bool success;
@@ -962,7 +965,7 @@ class BatchTranslationResult {
   final List<TranslationItem> items;
 
   /// 源语言
-  final Language? sourceLanguage;
+  final LanguageEnum? sourceLanguage;
 
   /// 整体错误信息（如果有）
   final String? error;
