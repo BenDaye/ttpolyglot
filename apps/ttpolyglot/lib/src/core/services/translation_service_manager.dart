@@ -92,13 +92,15 @@ class TranslationServiceManager extends GetxService {
       // 检查配置（异步等待配置加载完成）
       if (!await hasValidConfigAsync()) {
         return entries
-            .map((entry) => TranslationResult(
-                  success: false,
-                  translatedText: '',
-                  error: '请先配置翻译接口',
-                  sourceLanguage: entry.sourceLanguage,
-                  targetLanguage: entry.targetLanguage,
-                ))
+            .map(
+              (entry) => TranslationResult(
+                success: false,
+                translatedText: '',
+                error: '请先配置翻译接口',
+                sourceLanguage: entry.sourceLanguage,
+                targetLanguage: entry.targetLanguage,
+              ),
+            )
             .toList();
       }
 
@@ -106,26 +108,30 @@ class TranslationServiceManager extends GetxService {
       final selectedProvider = provider ?? defaultProvider;
       if (selectedProvider == null) {
         return entries
-            .map((entry) => TranslationResult(
-                  success: false,
-                  translatedText: '',
-                  error: '没有可用的翻译接口',
-                  sourceLanguage: entry.sourceLanguage,
-                  targetLanguage: entry.targetLanguage,
-                ))
+            .map(
+              (entry) => TranslationResult(
+                success: false,
+                translatedText: '',
+                error: '没有可用的翻译接口',
+                sourceLanguage: entry.sourceLanguage,
+                targetLanguage: entry.targetLanguage,
+              ),
+            )
             .toList();
       }
 
       // 验证提供商配置
       if (!selectedProvider.isDefault) {
         return entries
-            .map((entry) => TranslationResult(
-                  success: false,
-                  translatedText: '',
-                  error: '${selectedProvider.name} 配置不完整',
-                  sourceLanguage: entry.sourceLanguage,
-                  targetLanguage: entry.targetLanguage,
-                ))
+            .map(
+              (entry) => TranslationResult(
+                success: false,
+                translatedText: '',
+                error: '${selectedProvider.name} 配置不完整',
+                sourceLanguage: entry.sourceLanguage,
+                targetLanguage: entry.targetLanguage,
+              ),
+            )
             .toList();
       }
 
@@ -141,26 +147,30 @@ class TranslationServiceManager extends GetxService {
       );
 
       return result.items
-          .map((item) => TranslationResult(
-                success: item.success,
-                translatedText: item.translatedText,
-                sourceLanguage: sourceEntries.sourceLanguage,
-                targetLanguage: item.targetLanguage,
-                error: item.error,
-              ))
+          .map(
+            (item) => TranslationResult(
+              success: item.success,
+              translatedText: item.translatedText,
+              sourceLanguage: sourceEntries.sourceLanguage,
+              targetLanguage: item.targetLanguage,
+              error: item.error,
+            ),
+          )
           .toList();
     } catch (error, stackTrace) {
       LoggerUtils.error('批量翻译条目异常', error: error, stackTrace: stackTrace);
 
       // 返回所有条目的失败结果
       return entries
-          .map((entry) => TranslationResult(
-                success: false,
-                translatedText: '',
-                sourceLanguage: entry.sourceLanguage,
-                targetLanguage: entry.targetLanguage,
-                error: '批量翻译异常: $error',
-              ))
+          .map(
+            (entry) => TranslationResult(
+              success: false,
+              translatedText: '',
+              sourceLanguage: entry.sourceLanguage,
+              targetLanguage: entry.targetLanguage,
+              error: '批量翻译异常: $error',
+            ),
+          )
           .toList();
     }
   }

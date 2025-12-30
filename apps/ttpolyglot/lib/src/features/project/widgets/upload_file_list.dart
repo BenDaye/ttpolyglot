@@ -442,12 +442,16 @@ class _UploadFileListState extends State<UploadFileList> {
     for (final entry in languageNameMap.entries) {
       if (fileNameLower.contains(entry.key)) {
         final targetCode = entry.value;
-        final matchedLanguage = widget.languages.firstWhereOrNull((lang) =>
-            lang.code.toLowerCase() == targetCode.toLowerCase() ||
-            lang.code.toLowerCase().startsWith('${targetCode.toLowerCase()}-'));
+        final matchedLanguage = widget.languages.firstWhereOrNull(
+          (lang) =>
+              lang.code.toLowerCase() == targetCode.toLowerCase() ||
+              lang.code.toLowerCase().startsWith('${targetCode.toLowerCase()}-'),
+        );
         if (matchedLanguage != null) {
-          LoggerUtils.info('语言名称匹配: ${matchedLanguage.nativeName} (${matchedLanguage.code}) 通过关键词: ${entry.key}',
-              name: 'UploadFileList');
+          LoggerUtils.info(
+            '语言名称匹配: ${matchedLanguage.nativeName} (${matchedLanguage.code}) 通过关键词: ${entry.key}',
+            name: 'UploadFileList',
+          );
           return matchedLanguage;
         }
       }
@@ -475,12 +479,16 @@ class _UploadFileListState extends State<UploadFileList> {
           extractedCode = extractedCode.replaceAll('\$$i', match.group(i) ?? '');
         }
 
-        final matchedLanguage = widget.languages.firstWhereOrNull((lang) =>
-            lang.code.toLowerCase() == extractedCode.toLowerCase() ||
-            lang.code.toLowerCase().startsWith('${extractedCode.toLowerCase()}-'));
+        final matchedLanguage = widget.languages.firstWhereOrNull(
+          (lang) =>
+              lang.code.toLowerCase() == extractedCode.toLowerCase() ||
+              lang.code.toLowerCase().startsWith('${extractedCode.toLowerCase()}-'),
+        );
         if (matchedLanguage != null) {
-          LoggerUtils.info('特殊模式匹配: ${matchedLanguage.nativeName} (${matchedLanguage.code}) 提取代码: $extractedCode',
-              name: 'UploadFileList');
+          LoggerUtils.info(
+            '特殊模式匹配: ${matchedLanguage.nativeName} (${matchedLanguage.code}) 提取代码: $extractedCode',
+            name: 'UploadFileList',
+          );
           return matchedLanguage;
         }
       }
@@ -675,18 +683,20 @@ class _UploadFileListState extends State<UploadFileList> {
       // 将翻译转换为TranslationEntryModel格式以便冲突检测
       final importedEntries = <TranslationEntryModel>[];
       for (final entry in translations.entries) {
-        importedEntries.add(TranslationEntryModel(
-          uuid: DateTime.now().millisecondsSinceEpoch.toString(),
-          projectId: 'temp',
-          entryKey: entry.key,
-          sourceLanguage: language,
-          targetLanguage: language,
-          sourceText: entry.value,
-          targetText: entry.value,
-          status: TranslationStatusEnum.completed,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        ));
+        importedEntries.add(
+          TranslationEntryModel(
+            uuid: DateTime.now().millisecondsSinceEpoch.toString(),
+            projectId: 'temp',
+            entryKey: entry.key,
+            sourceLanguage: language,
+            targetLanguage: language,
+            sourceText: entry.value,
+            targetText: entry.value,
+            status: TranslationStatusEnum.completed,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+        );
       }
 
       // 模拟冲突检测结果（实际应该调用ConflictDetectionService）

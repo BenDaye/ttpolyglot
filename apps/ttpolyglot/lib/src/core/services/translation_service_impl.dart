@@ -65,8 +65,12 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
             }
           }
         } catch (error, stackTrace) {
-          log('[getTranslationEntries_api_fallback]',
-              error: error, stackTrace: stackTrace, name: 'TranslationServiceImpl');
+          log(
+            '[getTranslationEntries_api_fallback]',
+            error: error,
+            stackTrace: stackTrace,
+            name: 'TranslationServiceImpl',
+          );
         }
       }
 
@@ -140,8 +144,12 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
             return TranslationEntryModel.fromJson(created as Map<String, dynamic>);
           }
         } catch (error, stackTrace) {
-          log('[createTranslationEntryModel_api_fallback]',
-              error: error, stackTrace: stackTrace, name: 'TranslationServiceImpl');
+          log(
+            '[createTranslationEntryModel_api_fallback]',
+            error: error,
+            stackTrace: stackTrace,
+            name: 'TranslationServiceImpl',
+          );
         }
       }
 
@@ -208,8 +216,12 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
             return created.map((m) => TranslationEntryModel.fromJson(m as Map<String, dynamic>)).toList();
           }
         } catch (error, stackTrace) {
-          log('[createTranslationKey_api_fallback]',
-              error: error, stackTrace: stackTrace, name: 'TranslationServiceImpl');
+          log(
+            '[createTranslationKey_api_fallback]',
+            error: error,
+            stackTrace: stackTrace,
+            name: 'TranslationServiceImpl',
+          );
         }
       }
 
@@ -262,8 +274,12 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
             return TranslationEntryModel.fromJson(updated as Map<String, dynamic>);
           }
         } catch (error, stackTrace) {
-          log('[updateTranslationEntryModel_api_fallback]',
-              error: error, stackTrace: stackTrace, name: 'TranslationServiceImpl');
+          log(
+            '[updateTranslationEntryModel_api_fallback]',
+            error: error,
+            stackTrace: stackTrace,
+            name: 'TranslationServiceImpl',
+          );
         }
       }
 
@@ -351,8 +367,12 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
             return;
           }
         } catch (error, stackTrace) {
-          log('[deleteTranslationEntryModelFromProject_api_fallback]',
-              error: error, stackTrace: stackTrace, name: 'TranslationServiceImpl');
+          log(
+            '[deleteTranslationEntryModelFromProject_api_fallback]',
+            error: error,
+            stackTrace: stackTrace,
+            name: 'TranslationServiceImpl',
+          );
         }
       }
 
@@ -427,8 +447,12 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
             return models.map((m) => TranslationEntryModel.fromJson(m as Map<String, dynamic>)).toList();
           }
         } catch (error, stackTrace) {
-          log('[searchTranslationEntries_api_fallback]',
-              error: error, stackTrace: stackTrace, name: 'TranslationServiceImpl');
+          log(
+            '[searchTranslationEntries_api_fallback]',
+            error: error,
+            stackTrace: stackTrace,
+            name: 'TranslationServiceImpl',
+          );
         }
       }
 
@@ -704,7 +728,9 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
 
   @override
   Future<List<TranslationEntryModel>> batchAutoTranslate(
-      List<TranslationEntryModel> entries, String translationProvider) async {
+    List<TranslationEntryModel> entries,
+    String translationProvider,
+  ) async {
     throw UnimplementedError('batchAutoTranslate not implemented');
   }
 

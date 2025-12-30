@@ -397,9 +397,11 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
       final List<TranslationEntryModel> translateEntries = [];
       for (final entry in widget.translationEntries) {
         if (entry.targetLanguage.code == selectedSourceLanguage.code) continue;
-        translateEntries.add(entry.copyWith(
-          sourceText: entriesToTranslate.targetText,
-        ));
+        translateEntries.add(
+          entry.copyWith(
+            sourceText: entriesToTranslate.targetText,
+          ),
+        );
       }
 
       // 批量翻译
@@ -421,11 +423,13 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
         final entry = translateEntries[i];
         if (result.success) {
           successCount++;
-          updatedEntries.add(entry.copyWith(
-            targetText: result.translatedText,
-            status: TranslationStatusEnum.completed,
-            updatedAt: DateTime.now(),
-          ));
+          updatedEntries.add(
+            entry.copyWith(
+              targetText: result.translatedText,
+              status: TranslationStatusEnum.completed,
+              updatedAt: DateTime.now(),
+            ),
+          );
         } else {
           failCount++;
           failedEntries.add(entry);
@@ -443,7 +447,10 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
         // 如果有失败的翻译，显示详细信息
         if (failCount > 0) {
           _showFailedTranslationsDialog(
-              context, failedEntries, results.where((r) => !r.success).map((r) => r.error ?? '未知错误').toList());
+            context,
+            failedEntries,
+            results.where((r) => !r.success).map((r) => r.error ?? '未知错误').toList(),
+          );
         }
       }
 

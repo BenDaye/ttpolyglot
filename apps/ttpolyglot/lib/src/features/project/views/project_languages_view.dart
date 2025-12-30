@@ -119,16 +119,16 @@ class ProjectLanguagesView extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 16.0),
-                          ...project.languages
-                              .where((lang) => lang.id != project.primaryLanguageId)
-                              .map((lang) => _buildLanguageCard(
-                                    context,
-                                    lang.code,
-                                    isPrimary: false,
-                                    onDelete: (language) {
-                                      controller.removeTargetLanguage(language);
-                                    },
-                                  )),
+                          ...project.languages.where((lang) => lang.id != project.primaryLanguageId).map(
+                                (lang) => _buildLanguageCard(
+                                  context,
+                                  lang.code,
+                                  isPrimary: false,
+                                  onDelete: (language) {
+                                    controller.removeTargetLanguage(language);
+                                  },
+                                ),
+                              ),
                         ],
                       ),
                     ),

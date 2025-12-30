@@ -481,11 +481,15 @@ class ProjectController extends GetxController {
   /// 导入内容到项目中
   /// 这种设计确保了所有翻译都基于相同的源语言，提高了数据一致性。
   Future<void> importFiles(
-      Map<String, LanguageModel> languageMap, Map<String, Map<String, String>> translationMap) async {
+    Map<String, LanguageModel> languageMap,
+    Map<String, Map<String, String>> translationMap,
+  ) async {
     final startTime = DateTime.now();
     try {
-      LoggerUtils.info('开始批量导入翻译文件，设置：覆盖现有翻译=$overrideExisting，自动审核=$autoReview，忽略空值=$ignoreEmpty',
-          name: 'ProjectController');
+      LoggerUtils.info(
+        '开始批量导入翻译文件，设置：覆盖现有翻译=$overrideExisting，自动审核=$autoReview，忽略空值=$ignoreEmpty',
+        name: 'ProjectController',
+      );
 
       final allImportedEntries = <TranslationEntryModel>[];
       final allSkippedEntries = <String>[];
@@ -511,8 +515,10 @@ class ProjectController extends GetxController {
           continue;
         }
 
-        LoggerUtils.info('处理文件 $fileName，语言: ${selectedLanguage.code}，条目数: ${translations.length}',
-            name: 'ProjectController');
+        LoggerUtils.info(
+          '处理文件 $fileName，语言: ${selectedLanguage.code}，条目数: ${translations.length}',
+          name: 'ProjectController',
+        );
 
         for (final translation in translations.entries) {
           final key = translation.key;
@@ -552,13 +558,13 @@ class ProjectController extends GetxController {
 
         // 为每个项目语言检查是否需要创建或更新条目
         for (final language in allProjectLanguages) {
-          final languageCode = language.code.code;
-          final hasValue = keyValueMap[key]?.containsKey(languageCode) ?? false;
-          final value = keyValueMap[key]?[languageCode] ?? '';
+          final languageCode = language.code;
+          final hasValue = keyValueMap[key]?.containsKey(languageCode.code) ?? false;
+          final value = keyValueMap[key]?[languageCode.code] ?? '';
 
           // 查找该语言的现有条目
           final existingEntryForLanguage =
-              existingEntriesForKey.where((entry) => entry.targetLanguage.code == languageCode).toList();
+              existingEntriesForKey.where((entry) => entry.targetLanguage == languageCode).toList();
 
           if (existingEntryForLanguage.isEmpty) {
             // 该语言的条目不存在，需要创建
@@ -716,8 +722,9 @@ class ProjectController extends GetxController {
       );
 
       LoggerUtils.info(
-          '导入完成：创建 ${allImportedEntries.length}，更新 ${allUpdatedEntries.length}，跳过 ${allSkippedEntries.length}',
-          name: 'ProjectController');
+        '导入完成：创建 ${allImportedEntries.length}，更新 ${allUpdatedEntries.length}，跳过 ${allSkippedEntries.length}',
+        name: 'ProjectController',
+      );
     } catch (error, stackTrace) {
       LoggerUtils.error('导入文件失败', error: error, stackTrace: stackTrace);
 

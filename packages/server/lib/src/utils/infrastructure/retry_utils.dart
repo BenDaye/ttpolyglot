@@ -101,7 +101,7 @@ class RetryUtils {
 
         if (attempt > 1) {
           final duration = DateTime.now().difference(startTime);
-          ServerLogger.info('重试成功: ${operationName ?? 'operation'} (第${attempt}次尝试, 耗时: ${duration.inMilliseconds}ms)');
+          ServerLogger.info('重试成功: ${operationName ?? 'operation'} (第$attempt次尝试, 耗时: ${duration.inMilliseconds}ms)');
         }
 
         return result;
@@ -118,7 +118,7 @@ class RetryUtils {
         // 如果是最后一次尝试，抛出错误
         if (attempt == config.maxAttempts) {
           final duration = DateTime.now().difference(startTime);
-          ServerLogger.error('重试失败: ${operationName ?? 'operation'} (${attempt}次尝试, 耗时: ${duration.inMilliseconds}ms)',
+          ServerLogger.error('重试失败: ${operationName ?? 'operation'} ($attempt次尝试, 耗时: ${duration.inMilliseconds}ms)',
               error: error, stackTrace: stackTrace);
           rethrow;
         }
@@ -243,7 +243,7 @@ class RetryUtils {
     return retry(
       operation,
       config: RetryConfig.database.copyWith(
-        retryIf: (error) => _isDatabaseRetryableError(error),
+        retryIf: (error) => _isDatabaseRetryError(error),
       ),
       operationName: operationName ?? 'database_operation',
     );
@@ -257,7 +257,7 @@ class RetryUtils {
     return retry(
       operation,
       config: RetryConfig.redis.copyWith(
-        retryIf: (error) => _isRedisRetryableError(error),
+        retryIf: (error) => _isRedisRetryError(error),
       ),
       operationName: operationName ?? 'redis_operation',
     );
@@ -271,7 +271,7 @@ class RetryUtils {
     return retry(
       operation,
       config: RetryConfig.http.copyWith(
-        retryIf: (error) => _isHttpRetryableError(error),
+        retryIf: (error) => _isHttpRetryError(error),
       ),
       operationName: operationName ?? 'http_request',
     );
@@ -285,14 +285,14 @@ class RetryUtils {
     return retry(
       operation,
       config: RetryConfig.externalApi.copyWith(
-        retryIf: (error) => _isExternalApiRetryableError(error),
+        retryIf: (error) => _isExternalApiRetryError(error),
       ),
       operationName: operationName ?? 'external_api',
     );
   }
 
   /// 判断数据库错误是否可重试
-  static bool _isDatabaseRetryableError(dynamic error) {
+  static bool _isDatabaseRetryError(dynamic error) {
     final errorString = error.toString().toLowerCase();
 
     // 连接相关错误
@@ -312,7 +312,7 @@ class RetryUtils {
   }
 
   /// 判断Redis错误是否可重试
-  static bool _isRedisRetryableError(dynamic error) {
+  static bool _isRedisRetryError(dynamic error) {
     final errorString = error.toString().toLowerCase();
 
     // 连接相关错误
@@ -327,7 +327,7 @@ class RetryUtils {
   }
 
   /// 判断HTTP错误是否可重试
-  static bool _isHttpRetryableError(dynamic error) {
+  static bool _isHttpRetryError(dynamic error) {
     final errorString = error.toString().toLowerCase();
 
     // 网络相关错误
@@ -350,7 +350,7 @@ class RetryUtils {
   }
 
   /// 判断外部API错误是否可重试
-  static bool _isExternalApiRetryableError(dynamic error) {
+  static bool _isExternalApiRetryError(dynamic error) {
     final errorString = error.toString().toLowerCase();
 
     // 网络相关错误

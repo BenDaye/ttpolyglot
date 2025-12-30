@@ -49,7 +49,7 @@ class _UploadDropState extends State<UploadDrop> {
             path: item.path,
             bytes: bytes,
           );
-        }));
+        }).toList());
 
         widget.onDrop?.call(platformFiles);
       },

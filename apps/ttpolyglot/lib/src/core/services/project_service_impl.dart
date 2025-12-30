@@ -80,7 +80,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
 
       for (final projectId in projectIds) {
         final project = await getProject(projectId);
-        if (project != null && project.owner.id == userId) {
+        if (project != null && project.ownerId == userId) {
           projects.add(project);
         }
       }
@@ -208,8 +208,9 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
   @override
   Future<bool> isProjectNameAvailable(String name, {String? excludeProjectId}) async {
     final projects = await getAllProjects();
-    return !projects
-        .any((project) => project.name.toLowerCase() == name.toLowerCase() && project.id != excludeProjectId);
+    return !projects.any(
+      (project) => project.name.toLowerCase() == name.toLowerCase() && project.id.toString() != excludeProjectId,
+    );
   }
 
   @override

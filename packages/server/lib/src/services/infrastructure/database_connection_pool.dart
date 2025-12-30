@@ -48,7 +48,7 @@ class DatabaseConnectionPool {
       // 启动清理定时器
       _startCleanupTimer();
 
-      ServerLogger.info('数据库连接池初始化完成: ${_availableConnections.length}/${_maxConnections}');
+      ServerLogger.info('数据库连接池初始化完成: ${_availableConnections.length}/$_maxConnections');
     } catch (error, stackTrace) {
       ServerLogger.error('数据库连接池初始化失败', error: error, stackTrace: stackTrace);
       rethrow;
@@ -65,7 +65,7 @@ class DatabaseConnectionPool {
         _activeConnections++;
         _poolHits++;
 
-        ServerLogger.debug('从连接池获取连接: ${_activeConnections}/${_totalConnections}');
+        ServerLogger.debug('从连接池获取连接: $_activeConnections/$_totalConnections');
         return connection;
       }
 
@@ -78,7 +78,7 @@ class DatabaseConnectionPool {
         _activeConnections++;
         _totalConnections++;
 
-        ServerLogger.debug('创建新连接: ${_activeConnections}/${_totalConnections}');
+        ServerLogger.debug('创建新连接: $_activeConnections/$_totalConnections');
         return connection;
       }
 
@@ -101,10 +101,10 @@ class DatabaseConnectionPool {
         // 检查连接是否健康
         if (await _isConnectionHealthy(connection)) {
           _availableConnections.add(connection);
-          ServerLogger.debug('连接已释放到池中: ${_activeConnections}/${_totalConnections}');
+          ServerLogger.debug('连接已释放到池中: $_activeConnections/$_totalConnections');
         } else {
           _totalConnections--;
-          ServerLogger.warning('连接不健康，已移除: ${_activeConnections}/${_totalConnections}');
+          ServerLogger.warning('连接不健康，已移除: $_activeConnections/$_totalConnections');
         }
 
         // 处理等待队列
@@ -164,10 +164,10 @@ class DatabaseConnectionPool {
       'pool_hits': _poolHits,
       'pool_misses': _poolMisses,
       'hit_rate':
-          _poolHits + _poolMisses > 0 ? (_poolHits / (_poolHits + _poolMisses) * 100).toStringAsFixed(2) + '%' : '0%',
+          _poolHits + _poolMisses > 0 ? '${(_poolHits / (_poolHits + _poolMisses) * 100).toStringAsFixed(2)}%' : '0%',
       'connection_errors': _connectionErrors,
       'utilization':
-          _totalConnections > 0 ? (_activeConnections / _totalConnections * 100).toStringAsFixed(2) + '%' : '0%',
+          _totalConnections > 0 ? '${(_activeConnections / _totalConnections * 100).toStringAsFixed(2)}%' : '0%',
     };
   }
 

@@ -120,7 +120,7 @@ class TranslationApiService {
       cancelToken?.throwIfCancelled();
 
       // 对于自定义翻译提供商，使用专门的批量翻译方法
-      if (config.provider == 'custom') {
+      if (config.provider == TranslationProviderEnum.custom) {
         return await _translateBatchWithCustom(
           sourceText: sourceText,
           sourceLanguage: sourceLanguage,

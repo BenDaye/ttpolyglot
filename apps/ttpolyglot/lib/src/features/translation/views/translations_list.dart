@@ -89,8 +89,10 @@ class TranslationsList extends StatelessWidget {
                       child: TranslationsCardByKey(
                         translationKey: key,
                         translationEntries: entries,
-                        onDeleteAllEntries: (
-                            {required String key, required List<TranslationEntryModel> entries}) async {
+                        onDeleteAllEntries: ({
+                          required String key,
+                          required List<TranslationEntryModel> entries,
+                        }) async {
                           _deleteTranslationKey(context, controller: controller, key: key, entries: entries);
                         },
                         onEditEntry: ({required TranslationEntryModel entry}) {

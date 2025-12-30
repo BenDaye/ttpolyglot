@@ -709,8 +709,10 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
           setState(() {
             _selectedSourceEntry = value;
           });
-          LoggerUtils.info('选择源语言: ${value.targetLanguage.code} - ${value.targetLanguage.nativeName}',
-              name: 'BatchTranslationDialog');
+          LoggerUtils.info(
+            '选择源语言: ${value.targetLanguage.code} - ${value.targetLanguage.nativeName}',
+            name: 'BatchTranslationDialog',
+          );
         }
       },
     );
@@ -989,9 +991,11 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
         // 如果不覆盖且已有翻译，则跳过
         if (!_isOverride && entry.targetText.trim().isNotEmpty) continue;
 
-        targetEntries.add(entry.copyWith(
-          sourceText: sourceEntry.targetText,
-        ));
+        targetEntries.add(
+          entry.copyWith(
+            sourceText: sourceEntry.targetText,
+          ),
+        );
       }
 
       // 如果这个key有需要翻译的目标语言，添加到待处理列表

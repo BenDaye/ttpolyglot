@@ -437,7 +437,10 @@ class _SettingsViewContentState extends State<_SettingsViewContent> {
 
   /// 构建单个翻译接口项
   Widget _buildProviderItem(
-      BuildContext context, TranslationConfigController controller, TranslationProviderConfigModel config) {
+    BuildContext context,
+    TranslationConfigController controller,
+    TranslationProviderConfigModel config,
+  ) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12.0),
       shape: RoundedRectangleBorder(

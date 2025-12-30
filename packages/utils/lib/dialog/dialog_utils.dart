@@ -361,7 +361,7 @@ class _DialogCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(8.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 10.0,
             offset: const Offset(0.0, 4.0),
           ),
@@ -466,7 +466,7 @@ class _ConfirmDialogCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(8.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 10.0,
             offset: const Offset(0.0, 4.0),
           ),

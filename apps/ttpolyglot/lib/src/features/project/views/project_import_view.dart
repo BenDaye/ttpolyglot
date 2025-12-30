@@ -421,27 +421,33 @@ class _ProjectImportViewState extends State<ProjectImportView> {
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 16.0),
-                      Obx(() => _buildOptionItem(
-                            context,
-                            '覆盖现有翻译',
-                            '如果词条已存在，是否覆盖现有翻译',
-                            controller.overrideExisting,
-                            controller.setOverrideExisting,
-                          )),
-                      Obx(() => _buildOptionItem(
-                            context,
-                            '自动审核',
-                            '导入的翻译自动标记为已审核',
-                            controller.autoReview,
-                            controller.setAutoReview,
-                          )),
-                      Obx(() => _buildOptionItem(
-                            context,
-                            '忽略空值',
-                            '跳过空的翻译内容',
-                            controller.ignoreEmpty,
-                            controller.setIgnoreEmpty,
-                          )),
+                      Obx(
+                        () => _buildOptionItem(
+                          context,
+                          '覆盖现有翻译',
+                          '如果词条已存在，是否覆盖现有翻译',
+                          controller.overrideExisting,
+                          controller.setOverrideExisting,
+                        ),
+                      ),
+                      Obx(
+                        () => _buildOptionItem(
+                          context,
+                          '自动审核',
+                          '导入的翻译自动标记为已审核',
+                          controller.autoReview,
+                          controller.setAutoReview,
+                        ),
+                      ),
+                      Obx(
+                        () => _buildOptionItem(
+                          context,
+                          '忽略空值',
+                          '跳过空的翻译内容',
+                          controller.ignoreEmpty,
+                          controller.setIgnoreEmpty,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -571,14 +577,16 @@ class _ProjectImportViewState extends State<ProjectImportView> {
 
                           return Column(
                             children: historyList
-                                .map((item) => _buildImportHistoryItemModel(
-                                      context,
-                                      item.filename,
-                                      item.description,
-                                      _formatImportTime(item.timestamp),
-                                      item.success,
-                                      item: item,
-                                    ))
+                                .map(
+                                  (item) => _buildImportHistoryItemModel(
+                                    context,
+                                    item.filename,
+                                    item.description,
+                                    _formatImportTime(item.timestamp),
+                                    item.success,
+                                    item: item,
+                                  ),
+                                )
                                 .toList(),
                           );
                         },

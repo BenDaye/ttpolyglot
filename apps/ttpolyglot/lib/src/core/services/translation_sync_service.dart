@@ -81,12 +81,14 @@ class TranslationSyncService extends GetxService {
   }) async {
     try {
       final queue = await _loadQueue(projectId);
-      queue.add(_PendingOp(
-        opType: opType,
-        projectId: projectId,
-        payload: payload,
-        createdAt: DateTime.now(),
-      ));
+      queue.add(
+        _PendingOp(
+          opType: opType,
+          projectId: projectId,
+          payload: payload,
+          createdAt: DateTime.now(),
+        ),
+      );
       await _saveQueue(projectId, queue);
       log('[enqueue] $opType queued (${queue.length})', name: 'TranslationSyncService');
     } catch (error, stackTrace) {

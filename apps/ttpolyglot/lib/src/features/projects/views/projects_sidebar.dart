@@ -184,7 +184,7 @@ class ProjectsSidebar extends StatelessWidget {
                   onTap: (project) {
                     ProjectsController.setSelectedProjectId(project.id.toString());
                   },
-                  isSelected: controller.selectedProjectId == project.id,
+                  isSelected: controller.selectedProjectId == project.id.toString(),
                 ),
               );
             },

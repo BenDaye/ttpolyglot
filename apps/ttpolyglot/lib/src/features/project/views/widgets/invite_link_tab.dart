@@ -20,16 +20,18 @@ class InviteLinkTab extends GetView<ProjectMemberInviteController> {
           const SizedBox(height: 24.0),
 
           // 生成按钮
-          Obx(() => ElevatedButton(
-                onPressed: controller.isGenerating ? null : controller.generateInviteLink,
-                child: controller.isGenerating
-                    ? const SizedBox(
-                        width: 16.0,
-                        height: 16.0,
-                        child: CircularProgressIndicator(strokeWidth: 2.0),
-                      )
-                    : const Text('生成邀请链接'),
-              )),
+          Obx(
+            () => ElevatedButton(
+              onPressed: controller.isGenerating ? null : controller.generateInviteLink,
+              child: controller.isGenerating
+                  ? const SizedBox(
+                      width: 16.0,
+                      height: 16.0,
+                      child: CircularProgressIndicator(strokeWidth: 2.0),
+                    )
+                  : const Text('生成邀请链接'),
+            ),
+          ),
 
           const SizedBox(height: 24.0),
 
@@ -85,21 +87,23 @@ class InviteLinkTab extends GetView<ProjectMemberInviteController> {
       children: [
         const Text('角色权限'),
         const SizedBox(height: 8.0),
-        Obx(() => DropdownButtonFormField<ProjectRoleEnum>(
-              value: controller.selectedRole,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-              ),
-              items: const [
-                DropdownMenuItem(value: ProjectRoleEnum.viewer, child: Text('查看者 - 只能查看')),
-                DropdownMenuItem(value: ProjectRoleEnum.member, child: Text('成员 - 可以翻译')),
-                DropdownMenuItem(value: ProjectRoleEnum.admin, child: Text('管理员 - 可以管理')),
-              ],
-              onChanged: (value) {
-                if (value != null) controller.setRole(value);
-              },
-            )),
+        Obx(
+          () => DropdownButtonFormField<ProjectRoleEnum>(
+            value: controller.selectedRole,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            ),
+            items: const [
+              DropdownMenuItem(value: ProjectRoleEnum.viewer, child: Text('查看者 - 只能查看')),
+              DropdownMenuItem(value: ProjectRoleEnum.member, child: Text('成员 - 可以翻译')),
+              DropdownMenuItem(value: ProjectRoleEnum.admin, child: Text('管理员 - 可以管理')),
+            ],
+            onChanged: (value) {
+              if (value != null) controller.setRole(value);
+            },
+          ),
+        ),
       ],
     );
   }
@@ -110,26 +114,28 @@ class InviteLinkTab extends GetView<ProjectMemberInviteController> {
       children: [
         const Text('有效期'),
         const SizedBox(height: 8.0),
-        Obx(() => Wrap(
-              spacing: 8.0,
-              children: [
-                ChoiceChip(
-                  label: const Text('7天'),
-                  selected: controller.expiresIn == 7,
-                  onSelected: (_) => controller.setExpiresIn(7),
-                ),
-                ChoiceChip(
-                  label: const Text('30天'),
-                  selected: controller.expiresIn == 30,
-                  onSelected: (_) => controller.setExpiresIn(30),
-                ),
-                ChoiceChip(
-                  label: const Text('永久'),
-                  selected: controller.expiresIn == null,
-                  onSelected: (_) => controller.setExpiresIn(null),
-                ),
-              ],
-            )),
+        Obx(
+          () => Wrap(
+            spacing: 8.0,
+            children: [
+              ChoiceChip(
+                label: const Text('7天'),
+                selected: controller.expiresIn == 7,
+                onSelected: (_) => controller.setExpiresIn(7),
+              ),
+              ChoiceChip(
+                label: const Text('30天'),
+                selected: controller.expiresIn == 30,
+                onSelected: (_) => controller.setExpiresIn(30),
+              ),
+              ChoiceChip(
+                label: const Text('永久'),
+                selected: controller.expiresIn == null,
+                onSelected: (_) => controller.setExpiresIn(null),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -140,26 +146,28 @@ class InviteLinkTab extends GetView<ProjectMemberInviteController> {
       children: [
         const Text('使用次数'),
         const SizedBox(height: 8.0),
-        Obx(() => Wrap(
-              spacing: 8.0,
-              children: [
-                ChoiceChip(
-                  label: const Text('1次'),
-                  selected: controller.maxUses == 1,
-                  onSelected: (_) => controller.setMaxUses(1),
-                ),
-                ChoiceChip(
-                  label: const Text('10次'),
-                  selected: controller.maxUses == 10,
-                  onSelected: (_) => controller.setMaxUses(10),
-                ),
-                ChoiceChip(
-                  label: const Text('无限'),
-                  selected: controller.maxUses == null,
-                  onSelected: (_) => controller.setMaxUses(null),
-                ),
-              ],
-            )),
+        Obx(
+          () => Wrap(
+            spacing: 8.0,
+            children: [
+              ChoiceChip(
+                label: const Text('1次'),
+                selected: controller.maxUses == 1,
+                onSelected: (_) => controller.setMaxUses(1),
+              ),
+              ChoiceChip(
+                label: const Text('10次'),
+                selected: controller.maxUses == 10,
+                onSelected: (_) => controller.setMaxUses(10),
+              ),
+              ChoiceChip(
+                label: const Text('无限'),
+                selected: controller.maxUses == null,
+                onSelected: (_) => controller.setMaxUses(null),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }

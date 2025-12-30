@@ -317,7 +317,7 @@ class UserSettingsService extends BaseService {
 
       // 如果设为默认，先取消其他默认设置
       if (provider.isDefault) {
-        providers.forEach((p) {
+        providers.map((p) {
           if (p.isDefault) {
             providers[providers.indexOf(p)] = TranslationProviderConfigModel(
               id: p.id,

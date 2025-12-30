@@ -123,7 +123,8 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                                       onTap: () async {
                                         try {
                                           final savePath = await ProjectExportController.exportTranslationsShortcutJson(
-                                              widget.projectId);
+                                            widget.projectId,
+                                          );
                                           final filename = savePath != null
                                               ? savePath.split('/').last
                                               : 'translations_${DateTime.now().millisecondsSinceEpoch}.json';
@@ -164,7 +165,8 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                                       onTap: () async {
                                         try {
                                           final savePath = await ProjectExportController.exportTranslationsShortcutCsv(
-                                              widget.projectId);
+                                            widget.projectId,
+                                          );
                                           final filename = savePath != null
                                               ? savePath.split('/').last
                                               : 'translations_${DateTime.now().millisecondsSinceEpoch}.csv';
@@ -206,7 +208,8 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                                         try {
                                           final savePath =
                                               await ProjectExportController.exportTranslationsShortcutExcel(
-                                                  widget.projectId);
+                                            widget.projectId,
+                                          );
                                           final filename = savePath != null
                                               ? savePath.split('/').last
                                               : 'translations_${DateTime.now().millisecondsSinceEpoch}.xlsx';
@@ -247,7 +250,8 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                                       onTap: () async {
                                         try {
                                           final savePath = await ProjectExportController.exportTranslationsShortcutArb(
-                                              widget.projectId);
+                                            widget.projectId,
+                                          );
                                           final filename = savePath != null
                                               ? savePath.split('/').last
                                               : 'translations_${DateTime.now().millisecondsSinceEpoch}.arb';
@@ -288,7 +292,8 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                                       onTap: () async {
                                         try {
                                           final savePath = await ProjectExportController.exportTranslationsShortcutPo(
-                                              widget.projectId);
+                                            widget.projectId,
+                                          );
                                           final filename = savePath != null
                                               ? savePath.split('/').last
                                               : 'translations_${DateTime.now().millisecondsSinceEpoch}.po';
@@ -881,10 +886,12 @@ class _ProjectExportViewState extends State<ProjectExportView> {
 
                               return Column(
                                 children: historyList
-                                    .map((item) => _buildExportHistoryItem(
-                                          context,
-                                          item,
-                                        ))
+                                    .map(
+                                      (item) => _buildExportHistoryItem(
+                                        context,
+                                        item,
+                                      ),
+                                    )
                                     .toList(),
                               );
                             },
@@ -1071,28 +1078,28 @@ class _ProjectExportViewState extends State<ProjectExportView> {
         'value': 'csv',
         'icon': Icons.table_chart,
         'description': '适合批量编辑',
-        'color': const Color(0xFF2196F3)
+        'color': const Color(0xFF2196F3),
       },
       {
         'label': 'Excel',
         'value': 'excel',
         'icon': Icons.table_view,
         'description': '适合数据分析',
-        'color': const Color(0xFF4CAF50)
+        'color': const Color(0xFF4CAF50),
       },
       {
         'label': 'ARB',
         'value': 'arb',
         'icon': Icons.flutter_dash,
         'description': 'Flutter ARB格式',
-        'color': const Color(0xFF673AB7)
+        'color': const Color(0xFF673AB7),
       },
       {
         'label': 'PO',
         'value': 'po',
         'icon': Icons.language,
         'description': 'GNU PO格式',
-        'color': const Color(0xFF009688)
+        'color': const Color(0xFF009688),
       },
     ];
 

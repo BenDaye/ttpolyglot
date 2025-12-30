@@ -171,29 +171,31 @@ class JoinProjectView extends GetView<JoinProjectController> {
   }
 
   Widget _buildActions() {
-    return Obx(() => Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: controller.isAccepting ? null : controller.declineInvite,
-                child: const Text('拒绝'),
-              ),
+    return Obx(
+      () => Row(
+        children: [
+          Expanded(
+            child: OutlinedButton(
+              onPressed: controller.isAccepting ? null : controller.declineInvite,
+              child: const Text('拒绝'),
             ),
-            const SizedBox(width: 16.0),
-            Expanded(
-              child: ElevatedButton(
-                onPressed: controller.isAccepting ? null : controller.acceptInvite,
-                child: controller.isAccepting
-                    ? const SizedBox(
-                        width: 16.0,
-                        height: 16.0,
-                        child: CircularProgressIndicator(strokeWidth: 2.0),
-                      )
-                    : const Text('接受邀请'),
-              ),
+          ),
+          const SizedBox(width: 16.0),
+          Expanded(
+            child: ElevatedButton(
+              onPressed: controller.isAccepting ? null : controller.acceptInvite,
+              child: controller.isAccepting
+                  ? const SizedBox(
+                      width: 16.0,
+                      height: 16.0,
+                      child: CircularProgressIndicator(strokeWidth: 2.0),
+                    )
+                  : const Text('接受邀请'),
             ),
-          ],
-        ));
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildExpiredState() {

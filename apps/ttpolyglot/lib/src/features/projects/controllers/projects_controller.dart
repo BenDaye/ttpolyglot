@@ -178,7 +178,7 @@ class ProjectsController extends GetxController {
       await controller._cacheService.removeCachedProject(projectIdInt);
 
       // 从本地列表中删除
-      controller._projects.removeWhere((project) => project.id == projectId);
+      controller._projects.removeWhere((project) => project.id.toString() == projectId);
 
       // 如果删除的是当前选中项目，清除选中状态
       if (controller._selectedProjectId.value == projectId) {
@@ -201,7 +201,7 @@ class ProjectsController extends GetxController {
       final updatedProject = await controller._projectService.toggleProjectStatus(projectId, isActive: isActive);
 
       // 更新本地列表
-      final index = controller._projects.indexWhere((p) => p.id == projectId);
+      final index = controller._projects.indexWhere((p) => p.id.toString() == projectId);
       if (index != -1) {
         controller._projects[index] = updatedProject;
       }
@@ -221,7 +221,7 @@ class ProjectsController extends GetxController {
     List<LanguageEnum>? newTargetLanguages,
   ) {
     // 检查默认语言是否变化
-    if (newPrimaryLanguage != null && currentProject.primaryLanguage.code != newPrimaryLanguage.code) {
+    if (newPrimaryLanguage != null && currentProject.primaryLanguage.code != newPrimaryLanguage) {
       return true;
     }
 
@@ -328,7 +328,7 @@ class ProjectsController extends GetxController {
       return;
     }
 
-    final project = controller._projects.firstWhereOrNull((project) => project.id == id);
+    final project = controller._projects.firstWhereOrNull((project) => project.id.toString() == id);
     if (project != null) {
       controller._selectedProjectId.value = id;
     }
@@ -337,7 +337,7 @@ class ProjectsController extends GetxController {
   /// 获取选中的项目
   ProjectModel? getSelectedProject() {
     if (_selectedProjectId.value.isEmpty) return null;
-    return _projects.firstWhereOrNull((project) => project.id == _selectedProjectId.value);
+    return _projects.firstWhereOrNull((project) => project.id.toString() == _selectedProjectId.value);
   }
 
   /// 获取项目统计信息
@@ -410,7 +410,7 @@ class ProjectsController extends GetxController {
       await controller._projectService.updateProjectLastAccessed(projectId, 'default-user');
 
       // 更新本地列表中的项目
-      final index = controller._projects.indexWhere((p) => p.id == projectId);
+      final index = controller._projects.indexWhere((p) => p.id.toString() == projectId);
       if (index != -1) {
         final project = controller._projects[index];
         controller._projects[index] = project.copyWith(
@@ -428,7 +428,7 @@ class ProjectsController extends GetxController {
     final controller = instance;
 
     try {
-      final cachedProject = controller._projects.firstWhereOrNull((project) => project.id == projectId);
+      final cachedProject = controller._projects.firstWhereOrNull((project) => project.id.toString() == projectId);
       if (cachedProject != null) {
         return cachedProject;
       }

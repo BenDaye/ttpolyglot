@@ -179,19 +179,21 @@ class NotificationSettingsView extends StatelessWidget {
               style: const TextStyle(fontSize: 14.0),
             ),
           ),
-          Obx(() => Switch(
-                value: controller.isNotificationEnabled(
+          Obx(
+            () => Switch(
+              value: controller.isNotificationEnabled(
+                notificationType: setting.notificationType,
+                channel: setting.channel,
+              ),
+              onChanged: (value) {
+                controller.updateSetting(
                   notificationType: setting.notificationType,
                   channel: setting.channel,
-                ),
-                onChanged: (value) {
-                  controller.updateSetting(
-                    notificationType: setting.notificationType,
-                    channel: setting.channel,
-                    isEnabled: value,
-                  );
-                },
-              )),
+                  isEnabled: value,
+                );
+              },
+            ),
+          ),
         ],
       ),
     );

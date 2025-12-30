@@ -58,7 +58,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
   Widget build(BuildContext context) {
     final primaryLanguage = ProjectController.getInstance(widget.controller.projectId).project?.primaryLanguage;
     _selectedSourceEntry ??= (primaryLanguage != null
-        ? widget.entries.firstWhereOrNull((item) => item.targetLanguage.code == primaryLanguage.code)
+        ? widget.entries.firstWhereOrNull((item) => item.targetLanguage.code == primaryLanguage)
         : widget.entries.first);
 
     return AlertDialog(
@@ -446,9 +446,11 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
     final List<TranslationEntryModel> translateEntries = [];
     for (final entry in widget.entries) {
       if (entry.targetLanguage.code == _selectedSourceEntry!.targetLanguage.code) continue;
-      translateEntries.add(entry.copyWith(
-        sourceText: _selectedSourceEntry!.targetText,
-      ));
+      translateEntries.add(
+        entry.copyWith(
+          sourceText: _selectedSourceEntry!.targetText,
+        ),
+      );
     }
 
     // 如果不覆盖，则直接返回
@@ -509,11 +511,13 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
       }
       if (result.success) {
         successCount++;
-        updatedEntries.add(entry.copyWith(
-          targetText: result.translatedText,
-          status: TranslationStatusEnum.completed,
-          updatedAt: DateTime.now(),
-        ));
+        updatedEntries.add(
+          entry.copyWith(
+            targetText: result.translatedText,
+            status: TranslationStatusEnum.completed,
+            updatedAt: DateTime.now(),
+          ),
+        );
       } else {
         failCount++;
         LoggerUtils.info('翻译失败: ${entry.key} - ${result.error}');

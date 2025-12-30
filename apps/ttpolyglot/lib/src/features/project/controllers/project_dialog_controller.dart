@@ -263,8 +263,12 @@ class ProjectDialogController extends GetxController {
         }
       }
     } catch (error, stackTrace) {
-      LoggerUtils.error('[showEditStatusDialog]',
-          error: error, stackTrace: stackTrace, name: 'ProjectDialogController');
+      LoggerUtils.error(
+        '[showEditStatusDialog]',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'ProjectDialogController',
+      );
       Get.snackbar('错误', '更新项目状态失败: $error');
     }
   }
@@ -325,8 +329,12 @@ class ProjectDialogController extends GetxController {
         }
       }
     } catch (error, stackTrace) {
-      LoggerUtils.error('[showEditVisibilityDialog]',
-          error: error, stackTrace: stackTrace, name: 'ProjectDialogController');
+      LoggerUtils.error(
+        '[showEditVisibilityDialog]',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'ProjectDialogController',
+      );
       Get.snackbar('错误', '更新项目可见性失败: $error');
     }
   }
@@ -372,7 +380,7 @@ class ProjectDialogController extends GetxController {
 
     // 设置主语言（编辑模式下不可修改）
     _selectedPrimaryLanguage.value = _availableLanguages.firstWhere(
-      (lang) => lang.code == project.primaryLanguage.code,
+      (lang) => lang == project.primaryLanguage.code,
       orElse: () => _availableLanguages.first,
     );
 
@@ -542,8 +550,12 @@ class ProjectDialogController extends GetxController {
         LoggerUtils.info('从项目 $projectId 删除语言: $languageId');
       }
     } catch (error, stackTrace) {
-      LoggerUtils.error('[_updateTargetLanguages]',
-          error: error, stackTrace: stackTrace, name: 'ProjectDialogController');
+      LoggerUtils.error(
+        '[_updateTargetLanguages]',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'ProjectDialogController',
+      );
       rethrow;
     }
   }
@@ -606,12 +618,14 @@ class ProjectDialog extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Obx(() => Text(
-                          controller.isEditMode ? '编辑项目' : '创建新项目',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                        )),
+                    Obx(
+                      () => Text(
+                        controller.isEditMode ? '编辑项目' : '创建新项目',
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ),
                     IconButton(
                       onPressed: controller.closeDialog,
                       icon: const Icon(Icons.close),
@@ -691,53 +705,55 @@ class ProjectDialog extends StatelessWidget {
                                     ),
                               ),
                               const SizedBox(height: 8.0),
-                              Obx(() => Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 0.0),
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context).colorScheme.surfaceContainer,
-                                      borderRadius: BorderRadius.circular(8.0),
-                                    ),
-                                    child: DropdownButton<LanguageEnum>(
-                                      value: controller.selectedPrimaryLanguage != null &&
-                                              controller.availableLanguages
-                                                  .any((lang) => lang.code == controller.selectedPrimaryLanguage!.code)
-                                          ? controller.availableLanguages.firstWhere(
-                                              (lang) => lang.code == controller.selectedPrimaryLanguage!.code)
-                                          : null,
-                                      isExpanded: true,
-                                      menuMaxHeight: 240.0,
-                                      underline: const SizedBox(),
-                                      hint: const Text('选择主语言'),
-                                      items: controller.availableLanguages.map((language) {
-                                        return DropdownMenuItem<LanguageEnum>(
-                                          value: language,
-                                          child: Row(
-                                            children: [
-                                              Container(
-                                                width: 24.0,
-                                                height: 16.0,
-                                                margin: const EdgeInsets.only(right: 8.0),
-                                                decoration: BoxDecoration(
-                                                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                                                  borderRadius: BorderRadius.circular(2.0),
-                                                ),
-                                                child: Center(
-                                                  child: Text(
-                                                    language.code.split('-')[0].toUpperCase(),
-                                                    style: const TextStyle(fontSize: 10.0),
-                                                  ),
+                              Obx(
+                                () => Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 0.0),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.surfaceContainer,
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                  child: DropdownButton<LanguageEnum>(
+                                    value: controller.selectedPrimaryLanguage != null &&
+                                            controller.availableLanguages
+                                                .any((lang) => lang == controller.selectedPrimaryLanguage)
+                                        ? controller.availableLanguages
+                                            .firstWhere((lang) => lang == controller.selectedPrimaryLanguage)
+                                        : null,
+                                    isExpanded: true,
+                                    menuMaxHeight: 240.0,
+                                    underline: const SizedBox(),
+                                    hint: const Text('选择主语言'),
+                                    items: controller.availableLanguages.map((language) {
+                                      return DropdownMenuItem<LanguageEnum>(
+                                        value: language,
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              width: 24.0,
+                                              height: 16.0,
+                                              margin: const EdgeInsets.only(right: 8.0),
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                                                borderRadius: BorderRadius.circular(2.0),
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  language.code.split('-')[0].toUpperCase(),
+                                                  style: const TextStyle(fontSize: 10.0),
                                                 ),
                                               ),
-                                              Expanded(
-                                                child: Text('${language.name} (${language.nativeName})'),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      }).toList(),
-                                      onChanged: controller.setPrimaryLanguage,
-                                    ),
-                                  )),
+                                            ),
+                                            Expanded(
+                                              child: Text('${language.name} (${language.nativeName})'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }).toList(),
+                                    onChanged: controller.setPrimaryLanguage,
+                                  ),
+                                ),
+                              ),
                               const SizedBox(height: 16.0),
                             ],
                             if (dialogModule.contains(ProjectDialogModule.targetLanguages)) ...[

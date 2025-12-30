@@ -60,45 +60,49 @@ class ProjectMembersView extends StatelessWidget {
           // 角色过滤
           SizedBox(
             width: 150.0,
-            child: Obx(() => DropdownButtonFormField<String?>(
-                  value: controller.roleFilter,
-                  decoration: const InputDecoration(
-                    labelText: '角色',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                  ),
-                  items: const [
-                    DropdownMenuItem(value: null, child: Text('全部')),
-                    DropdownMenuItem(value: 'owner', child: Text('所有者')),
-                    DropdownMenuItem(value: 'admin', child: Text('管理员')),
-                    DropdownMenuItem(value: 'member', child: Text('成员')),
-                    DropdownMenuItem(value: 'viewer', child: Text('查看者')),
-                  ],
-                  onChanged: controller.updateRoleFilter,
-                )),
+            child: Obx(
+              () => DropdownButtonFormField<String?>(
+                value: controller.roleFilter,
+                decoration: const InputDecoration(
+                  labelText: '角色',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                ),
+                items: const [
+                  DropdownMenuItem(value: null, child: Text('全部')),
+                  DropdownMenuItem(value: 'owner', child: Text('所有者')),
+                  DropdownMenuItem(value: 'admin', child: Text('管理员')),
+                  DropdownMenuItem(value: 'member', child: Text('成员')),
+                  DropdownMenuItem(value: 'viewer', child: Text('查看者')),
+                ],
+                onChanged: controller.updateRoleFilter,
+              ),
+            ),
           ),
           const SizedBox(width: 16.0),
           // 状态过滤
           SizedBox(
             width: 150.0,
-            child: Obx(() => DropdownButtonFormField<String>(
-                  value: controller.statusFilter,
-                  decoration: const InputDecoration(
-                    labelText: '状态',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                  ),
-                  items: const [
-                    DropdownMenuItem(value: 'active', child: Text('活跃')),
-                    DropdownMenuItem(value: 'pending', child: Text('待接受')),
-                    DropdownMenuItem(value: 'inactive', child: Text('已停用')),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      controller.updateStatusFilter(value);
-                    }
-                  },
-                )),
+            child: Obx(
+              () => DropdownButtonFormField<String>(
+                value: controller.statusFilter,
+                decoration: const InputDecoration(
+                  labelText: '状态',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'active', child: Text('活跃')),
+                  DropdownMenuItem(value: 'pending', child: Text('待接受')),
+                  DropdownMenuItem(value: 'inactive', child: Text('已停用')),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    controller.updateStatusFilter(value);
+                  }
+                },
+              ),
+            ),
           ),
           const Spacer(),
           // 刷新按钮
@@ -114,14 +118,16 @@ class ProjectMembersView extends StatelessWidget {
 
   /// 构建成员列表
   Widget _buildMembersList(BuildContext context, ProjectMembersController controller) {
-    return Obx(() => ListView.builder(
-          padding: const EdgeInsets.all(16.0),
-          itemCount: controller.members.length,
-          itemBuilder: (context, index) {
-            final member = controller.members[index];
-            return _buildMemberCard(context, controller, member);
-          },
-        ));
+    return Obx(
+      () => ListView.builder(
+        padding: const EdgeInsets.all(16.0),
+        itemCount: controller.members.length,
+        itemBuilder: (context, index) {
+          final member = controller.members[index];
+          return _buildMemberCard(context, controller, member);
+        },
+      ),
+    );
   }
 
   /// 构建成员卡片
@@ -187,7 +193,7 @@ class ProjectMembersView extends StatelessWidget {
             ),
           ],
         ),
-        trailing: member.role != ProjectRoleEnum.owner.value
+        trailing: member.role != ProjectRoleEnum.owner
             ? PopupMenuButton<String>(
                 icon: const Icon(Icons.more_vert),
                 onSelected: (value) {

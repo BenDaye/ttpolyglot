@@ -119,7 +119,7 @@ class TranslationController extends GetxController {
       );
 
       // 验证目标语言不包含主语言
-      if (targetLanguages.any((lang) => lang.code == project.primaryLanguage.code)) {
+      if (targetLanguages.any((lang) => lang == project.primaryLanguage.code)) {
         throw Exception('目标语言不能包含项目的主语言');
       }
 

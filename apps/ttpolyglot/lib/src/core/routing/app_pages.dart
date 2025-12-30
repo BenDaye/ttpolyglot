@@ -22,86 +22,87 @@ class AppPages {
 
   static final List<GetPage> pages = [
     GetPage(
-        name: '/',
-        page: () => const RootView(),
-        bindings: [RootBinding()],
-        participatesInRootNavigator: true,
-        preventDuplicates: true,
-        children: [
-          GetPage(
-            name: _Paths.signIn,
-            page: () => const SignInView(),
-            bindings: [SignInBinding()],
-            middlewares: [EnsureNotAuthenticatedMiddleware()],
-          ),
-          GetPage(
-            name: _Paths.signUp,
-            page: () => const SignUpView(),
-            bindings: [SignUpBinding()],
-            middlewares: [EnsureNotAuthenticatedMiddleware()],
-          ),
-          GetPage(
-            name: _Paths.forgotPassword,
-            page: () => const ForgotPasswordView(),
-            bindings: [ForgotPasswordBinding()],
-            middlewares: [EnsureNotAuthenticatedMiddleware()],
-          ),
-          GetPage(
-            name: _Paths.resetPassword,
-            page: () => const ResetPasswordView(),
-            bindings: [ResetPasswordBinding()],
-            middlewares: [EnsureNotAuthenticatedMiddleware()],
-          ),
-          GetPage(
-            name: _Paths.join,
-            page: () => const JoinProjectView(),
-            binding: BindingsBuilder(() {
-              final inviteCode = Get.parameters['inviteCode']!;
-              Get.put(JoinProjectController(inviteCode: inviteCode));
-            }),
-          ),
-          GetPage(
-            name: _Paths.home,
-            page: () => const MainShell(),
-            bindings: [LayoutBindings()],
-            middlewares: [EnsureAuthenticatedMiddleware()],
-            preventDuplicates: true,
-            title: null,
-            children: [
-              GetPage(
-                name: _Paths.dashboard,
-                page: () => const DashboardView(),
-                transition: Transition.fadeIn,
-              ),
-              GetPage(
-                name: _Paths.settings,
-                page: () => const SettingsView(),
-                bindings: [SettingsBinding()],
-                transition: Transition.fadeIn,
-              ),
-              GetPage(
-                name: _Paths.profile,
-                page: () => const ProfileView(),
-                bindings: [ProfileBinding()],
-                transition: Transition.fadeIn,
-              ),
-              GetPage(
-                name: _Paths.projects,
-                page: () => const ProjectsShell(),
-                bindings: [ProjectsBinding()],
-                transition: Transition.fadeIn,
-                children: [
-                  GetPage(
-                    name: _Paths.project,
-                    page: () => const ProjectShell(),
-                    bindings: [ProjectBinding()],
-                    transition: Transition.leftToRightWithFade,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ]),
+      name: '/',
+      page: () => const RootView(),
+      bindings: [RootBinding()],
+      participatesInRootNavigator: true,
+      preventDuplicates: true,
+      children: [
+        GetPage(
+          name: _Paths.signIn,
+          page: () => const SignInView(),
+          bindings: [SignInBinding()],
+          middlewares: [EnsureNotAuthenticatedMiddleware()],
+        ),
+        GetPage(
+          name: _Paths.signUp,
+          page: () => const SignUpView(),
+          bindings: [SignUpBinding()],
+          middlewares: [EnsureNotAuthenticatedMiddleware()],
+        ),
+        GetPage(
+          name: _Paths.forgotPassword,
+          page: () => const ForgotPasswordView(),
+          bindings: [ForgotPasswordBinding()],
+          middlewares: [EnsureNotAuthenticatedMiddleware()],
+        ),
+        GetPage(
+          name: _Paths.resetPassword,
+          page: () => const ResetPasswordView(),
+          bindings: [ResetPasswordBinding()],
+          middlewares: [EnsureNotAuthenticatedMiddleware()],
+        ),
+        GetPage(
+          name: _Paths.join,
+          page: () => const JoinProjectView(),
+          binding: BindingsBuilder(() {
+            final inviteCode = Get.parameters['inviteCode']!;
+            Get.put(JoinProjectController(inviteCode: inviteCode));
+          }),
+        ),
+        GetPage(
+          name: _Paths.home,
+          page: () => const MainShell(),
+          bindings: [LayoutBindings()],
+          middlewares: [EnsureAuthenticatedMiddleware()],
+          preventDuplicates: true,
+          title: null,
+          children: [
+            GetPage(
+              name: _Paths.dashboard,
+              page: () => const DashboardView(),
+              transition: Transition.fadeIn,
+            ),
+            GetPage(
+              name: _Paths.settings,
+              page: () => const SettingsView(),
+              bindings: [SettingsBinding()],
+              transition: Transition.fadeIn,
+            ),
+            GetPage(
+              name: _Paths.profile,
+              page: () => const ProfileView(),
+              bindings: [ProfileBinding()],
+              transition: Transition.fadeIn,
+            ),
+            GetPage(
+              name: _Paths.projects,
+              page: () => const ProjectsShell(),
+              bindings: [ProjectsBinding()],
+              transition: Transition.fadeIn,
+              children: [
+                GetPage(
+                  name: _Paths.project,
+                  page: () => const ProjectShell(),
+                  bindings: [ProjectBinding()],
+                  transition: Transition.leftToRightWithFade,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ),
   ];
 }
 
