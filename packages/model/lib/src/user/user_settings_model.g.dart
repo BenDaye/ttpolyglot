@@ -77,6 +77,10 @@ _$TranslationSettingsModelImpl _$$TranslationSettingsModelImplFromJson(
                   e as Map<String, dynamic>))
               .toList() ??
           const [],
+      defaultProvider: json['default_provider'] == null
+          ? TranslationProviderEnum.google
+          : const TranslationProviderEnumConverter()
+              .fromJson(json['default_provider'] as String),
       maxRetries: (json['max_retries'] as num?)?.toInt() ?? 3,
       timeoutSeconds: (json['timeout_seconds'] as num?)?.toInt() ?? 30,
     );
@@ -85,6 +89,8 @@ Map<String, dynamic> _$$TranslationSettingsModelImplToJson(
         _$TranslationSettingsModelImpl instance) =>
     <String, dynamic>{
       'providers': instance.providers,
+      'default_provider': const TranslationProviderEnumConverter()
+          .toJson(instance.defaultProvider),
       'max_retries': instance.maxRetries,
       'timeout_seconds': instance.timeoutSeconds,
     };
@@ -93,7 +99,8 @@ _$TranslationProviderConfigModelImpl
     _$$TranslationProviderConfigModelImplFromJson(Map<String, dynamic> json) =>
         _$TranslationProviderConfigModelImpl(
           id: json['id'] as String? ?? '',
-          provider: json['provider'] as String? ?? '',
+          provider: const TranslationProviderEnumConverter()
+              .fromJson(json['provider'] as String),
           name: json['name'] as String?,
           appId: json['app_id'] as String? ?? '',
           appKey: json['app_key'] as String? ?? '',
@@ -105,7 +112,8 @@ Map<String, dynamic> _$$TranslationProviderConfigModelImplToJson(
         _$TranslationProviderConfigModelImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'provider': instance.provider,
+      'provider':
+          const TranslationProviderEnumConverter().toJson(instance.provider),
       'name': instance.name,
       'app_id': instance.appId,
       'app_key': instance.appKey,

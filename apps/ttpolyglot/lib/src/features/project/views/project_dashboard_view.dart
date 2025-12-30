@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/widgets/stat_card.dart';
 import 'package:ttpolyglot/src/features/features.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// 项目概览页面
 class ProjectDashboardView extends StatelessWidget {
@@ -42,7 +42,7 @@ class ProjectDashboardView extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 16.0),
-                          FutureBuilder<ProjectStats>(
+                          FutureBuilder<ProjectStatisticsModel?>(
                             future: controller.getProjectStats(),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -50,15 +50,14 @@ class ProjectDashboardView extends StatelessWidget {
                               }
 
                               final stats = snapshot.data ??
-                                  ProjectStats(
+                                  const ProjectStatisticsModel(
                                     totalEntries: 0,
-                                    completedEntries: 0,
-                                    pendingEntries: 0,
+                                    translatedEntries: 0,
                                     reviewingEntries: 0,
-                                    completionRate: 0.0,
-                                    languageCount: project.allLanguages.length,
+                                    approvedEntries: 0,
+                                    avgQualityScore: 0.0,
+                                    languageCount: 0,
                                     memberCount: 1,
-                                    lastUpdated: DateTime.now(),
                                   );
 
                               return Column(
@@ -78,7 +77,7 @@ class ProjectDashboardView extends StatelessWidget {
                                       Expanded(
                                         child: StatCard(
                                           title: '已翻译',
-                                          value: stats.completedEntries.toString(),
+                                          value: stats.translatedEntries.toString(),
                                           icon: Icons.check_circle,
                                           color: Colors.green,
                                         ),
@@ -87,7 +86,7 @@ class ProjectDashboardView extends StatelessWidget {
                                       Expanded(
                                         child: StatCard(
                                           title: '待翻译',
-                                          value: stats.pendingEntries.toString(),
+                                          value: (stats.totalEntries - stats.translatedEntries).toString(),
                                           icon: Icons.pending,
                                           color: Colors.orange,
                                         ),
@@ -119,7 +118,7 @@ class ProjectDashboardView extends StatelessWidget {
                                       Expanded(
                                         child: StatCard(
                                           title: '目标语言',
-                                          value: project.targetLanguages.length.toString(),
+                                          value: (project.languages.length - 1).toString(),
                                           icon: Icons.translate,
                                           color: Colors.green,
                                         ),
@@ -137,7 +136,9 @@ class ProjectDashboardView extends StatelessWidget {
                                       Expanded(
                                         child: StatCard(
                                           title: '完成率',
-                                          value: '${(stats.completionRate * 100).toStringAsFixed(1)}%',
+                                          value: stats.totalEntries > 0
+                                              ? '${(stats.translatedEntries / stats.totalEntries * 100).toStringAsFixed(1)}%'
+                                              : '0.0%',
                                           icon: Icons.trending_up,
                                           color: Colors.teal,
                                         ),
@@ -174,13 +175,13 @@ class ProjectDashboardView extends StatelessWidget {
                           ),
                           const SizedBox(height: 16.0),
                           _buildInfoRow('项目名称', project.name),
-                          _buildInfoRow('项目描述', project.description),
-                          _buildInfoRow('项目ID', project.id),
+                          _buildInfoRow('项目描述', project.description ?? ''),
+                          _buildInfoRow('项目ID', project.id.toString()),
                           _buildInfoRow('项目状态', project.isActive ? '激活' : '停用'),
                           _buildInfoRow('创建时间', _formatDateTime(project.createdAt)),
                           _buildInfoRow('更新时间', _formatDateTime(project.updatedAt)),
-                          if (project.lastAccessedAt != null)
-                            _buildInfoRow('最后访问', _formatDateTime(project.lastAccessedAt!)),
+                          if (project.lastActivityAt != null)
+                            _buildInfoRow('最后活动', _formatDateTime(project.lastActivityAt!)),
                         ],
                       ),
                     ),
@@ -216,7 +217,10 @@ class ProjectDashboardView extends StatelessWidget {
                           Wrap(
                             spacing: 8,
                             runSpacing: 8,
-                            children: project.targetLanguages.map<Widget>((lang) => _buildLanguageChip(lang)).toList(),
+                            children: project.languages
+                                .where((lang) => lang.id != project.primaryLanguageId)
+                                .map<Widget>((lang) => _buildLanguageChip(lang))
+                                .toList(),
                           ),
                         ],
                       ),
@@ -243,8 +247,8 @@ class ProjectDashboardView extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 16.0),
-                          _buildInfoRow('姓名', project.owner.name),
-                          _buildInfoRow('邮箱', project.owner.email),
+                          _buildInfoRow('姓名', project.owner.name ?? ''),
+                          _buildInfoRow('邮箱', project.owner.email ?? ''),
                           _buildInfoRow('角色', project.owner.role.toString().split('.').last),
                         ],
                       ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// 项目翻译管理页面
 class ProjectTranslationsView extends StatelessWidget {
@@ -63,7 +63,7 @@ class ProjectTranslationsView extends StatelessWidget {
   Widget _buildToolbar(
     BuildContext context, {
     required TranslationController controller,
-    required Project project,
+    required ProjectModel project,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
@@ -147,7 +147,7 @@ class ProjectTranslationsView extends StatelessWidget {
   Widget _buildFilterBar(
     BuildContext context, {
     required TranslationController controller,
-    required Project project,
+    required ProjectModel project,
   }) {
     return Container(
       height: 72.0,
@@ -183,7 +183,7 @@ class ProjectTranslationsView extends StatelessWidget {
             child: Obx(
               () {
                 final languages = controller.availableLanguages;
-                return DropdownButtonFormField<Language>(
+                return DropdownButtonFormField<LanguageEnum>(
                   menuMaxHeight: 240.0,
                   decoration: const InputDecoration(
                     hintText: '筛选语言',
@@ -193,7 +193,7 @@ class ProjectTranslationsView extends StatelessWidget {
                   ),
                   value: controller.selectedLanguage,
                   items: [
-                    DropdownMenuItem<Language>(
+                    DropdownMenuItem<LanguageEnum>(
                       value: null,
                       child: Text(
                         '所有语言',
@@ -201,7 +201,7 @@ class ProjectTranslationsView extends StatelessWidget {
                       ),
                     ),
                     ...languages.map(
-                      (language) => DropdownMenuItem<Language>(
+                      (language) => DropdownMenuItem<LanguageEnum>(
                         value: language,
                         child: Text(
                           '${language.nativeName} (${language.code})',
@@ -222,7 +222,7 @@ class ProjectTranslationsView extends StatelessWidget {
           Expanded(
             child: Obx(() {
               final statuses = controller.availableStatuses;
-              return DropdownButtonFormField<TranslationStatus>(
+              return DropdownButtonFormField<TranslationStatusEnum>(
                 menuMaxHeight: 240.0,
                 decoration: const InputDecoration(
                   hintText: '筛选状态',
@@ -232,7 +232,7 @@ class ProjectTranslationsView extends StatelessWidget {
                 ),
                 value: controller.selectedStatus,
                 items: [
-                  DropdownMenuItem<TranslationStatus>(
+                  DropdownMenuItem<TranslationStatusEnum>(
                     value: null,
                     child: Text(
                       '所有状态',
@@ -240,7 +240,7 @@ class ProjectTranslationsView extends StatelessWidget {
                     ),
                   ),
                   ...statuses.map(
-                    (status) => DropdownMenuItem<TranslationStatus>(
+                    (status) => DropdownMenuItem<TranslationStatusEnum>(
                       value: status,
                       child: Text(
                         status.displayName,
@@ -304,7 +304,7 @@ class ProjectTranslationsView extends StatelessWidget {
   void _showAddTranslationDialog(
     BuildContext context, {
     required TranslationController controller,
-    required Project project,
+    required ProjectModel project,
   }) {
     final keyController = TextEditingController();
     final sourceTextController = TextEditingController();
@@ -382,10 +382,13 @@ class ProjectTranslationsView extends StatelessWidget {
                 return;
               }
 
+              // 获取除主语言外的所有目标语言
+              final targetLanguages = project.languages.where((lang) => lang.id != project.primaryLanguageId).toList();
+
               controller.createTranslationKey(
                 key: key,
                 sourceText: sourceText,
-                targetLanguages: project.targetLanguages..sort((a, b) => a.sortIndex.compareTo(b.sortIndex)),
+                targetLanguages: targetLanguages.map((lang) => lang.code).toList(),
                 context: contextController.text.trim().isEmpty ? null : contextController.text.trim(),
                 comment: commentController.text.trim().isEmpty ? null : commentController.text.trim(),
               );
@@ -403,7 +406,7 @@ class ProjectTranslationsView extends StatelessWidget {
   void _showTranslateAllDialog(
     BuildContext context, {
     required TranslationController controller,
-    required Project project,
+    required ProjectModel project,
   }) {
     BatchTranslationDialog.show(
       controller: controller,

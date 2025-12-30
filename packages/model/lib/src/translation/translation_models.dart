@@ -4,3 +4,4 @@ library;
 export 'translation_batch_job_model.dart';
 export 'translation_entry_model.dart';
 export 'translation_history_model.dart';
+export 'translation_request_models.dart';

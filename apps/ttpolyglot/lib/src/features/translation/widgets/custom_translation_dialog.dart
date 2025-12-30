@@ -5,7 +5,7 @@ import 'package:ttpolyglot/src/core/services/translation_service_manager.dart';
 import 'package:ttpolyglot/src/features/project/controllers/project_controller.dart';
 import 'package:ttpolyglot/src/features/settings/controllers/translation_config_controller.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_translators/translators.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
@@ -18,7 +18,7 @@ class CustomTranslationDialog extends StatefulWidget {
   });
 
   final String translationKey;
-  final List<TranslationEntry> entries;
+  final List<TranslationEntryModel> entries;
   final TranslationController controller;
 
   @override
@@ -27,7 +27,7 @@ class CustomTranslationDialog extends StatefulWidget {
   /// 显示自定义翻译弹窗
   static void show({
     required String translationKey,
-    required List<TranslationEntry> entries,
+    required List<TranslationEntryModel> entries,
     required TranslationController controller,
   }) {
     Get.dialog(
@@ -42,8 +42,8 @@ class CustomTranslationDialog extends StatefulWidget {
 
 class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
   // 状态管理
-  TranslationProviderConfig? _selectedProvider;
-  TranslationEntry? _selectedSourceEntry;
+  TranslationProviderConfigModel? _selectedProvider;
+  TranslationEntryModel? _selectedSourceEntry;
   bool _isTranslating = false;
   bool _isOverride = true; // 是否覆盖
   CancelToken? _cancelToken; // 取消令牌
@@ -101,9 +101,13 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
               // 选择翻译接口
               Obx(
                 () {
-                  _selectedProvider ??= TranslationConfigController.instance.config.defaultProvider;
+                  final config = TranslationConfigController.instance.config;
+                  _selectedProvider ??= config.providers.firstWhereOrNull(
+                        (p) => p.provider == config.defaultProvider,
+                      ) ??
+                      config.providers.firstOrNull;
                   return _buildProviderSelector(
-                    list: TranslationConfigController.instance.config.providers,
+                    list: config.providers,
                   );
                 },
               ),
@@ -208,7 +212,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
 
   /// 构建翻译服务提供商选择器
   Widget _buildProviderSelector({
-    required List<TranslationProviderConfig> list,
+    required List<TranslationProviderConfigModel> list,
   }) {
     // 去重，确保 items 唯一
     final providers = _distinctProviders(list);
@@ -216,10 +220,10 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
     final mappedValue = _selectedProvider == null
         ? null
         : providers.firstWhereOrNull(
-            (p) => p.provider == _selectedProvider!.provider && p.displayName == _selectedProvider!.displayName,
+            (p) => p.provider == _selectedProvider!.provider && p.name == _selectedProvider!.name,
           );
 
-    return DropdownButtonFormField<TranslationProviderConfig>(
+    return DropdownButtonFormField<TranslationProviderConfigModel>(
       value: mappedValue,
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20.0),
@@ -251,7 +255,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
         ),
       ),
       items: providers.map((provider) {
-        return DropdownMenuItem<TranslationProviderConfig>(
+        return DropdownMenuItem<TranslationProviderConfigModel>(
           value: provider,
           child: SizedBox(
             width: 300.0,
@@ -275,7 +279,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
                   ),
                 ),
                 Flexible(
-                  child: Text(provider.displayName),
+                  child: Text(provider.name ?? provider.provider.name),
                 ),
               ],
             ),
@@ -287,18 +291,18 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
           setState(() {
             _selectedProvider = value;
           });
-          LoggerUtils.info('选择翻译提供商: ${value.displayName}');
+          LoggerUtils.info('选择翻译提供商: ${value.name ?? value.provider.name}');
         }
       },
     );
   }
 
   /// 根据 provider 标识去重
-  List<TranslationProviderConfig> _distinctProviders(List<TranslationProviderConfig> list) {
+  List<TranslationProviderConfigModel> _distinctProviders(List<TranslationProviderConfigModel> list) {
     final seen = <String>{};
-    final result = <TranslationProviderConfig>[];
+    final result = <TranslationProviderConfigModel>[];
     for (final p in list) {
-      final key = '${p.provider.name}::${p.displayName}';
+      final key = '${p.provider.name}::${p.name ?? p.provider.name}';
       if (seen.add(key)) {
         result.add(p);
       }
@@ -308,9 +312,9 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
 
   /// 构建源语言选择器
   Widget _buildSourceLanguageSelector({
-    required List<TranslationEntry> list,
+    required List<TranslationEntryModel> list,
   }) {
-    return DropdownButtonFormField<TranslationEntry>(
+    return DropdownButtonFormField<TranslationEntryModel>(
       value: _selectedSourceEntry,
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20.0),
@@ -342,7 +346,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
         ),
       ),
       items: list.map((entry) {
-        return DropdownMenuItem<TranslationEntry>(
+        return DropdownMenuItem<TranslationEntryModel>(
           value: entry,
           child: SizedBox(
             width: 300.0,
@@ -439,7 +443,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
   /// 执行自定义翻译
   Future<void> _performCustomTranslation(TranslationServiceManager translationManager) async {
     // 获取需要翻译的条目
-    final List<TranslationEntry> translateEntries = [];
+    final List<TranslationEntryModel> translateEntries = [];
     for (final entry in widget.entries) {
       if (entry.targetLanguage.code == _selectedSourceEntry!.targetLanguage.code) continue;
       translateEntries.add(entry.copyWith(
@@ -490,11 +494,11 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
   /// 处理翻译结果
   Future<void> _handleTranslationResults(
     List<TranslationResult> results,
-    List<TranslationEntry> translateEntries,
+    List<TranslationEntryModel> translateEntries,
   ) async {
     int successCount = 0;
     int failCount = 0;
-    final updatedEntries = <TranslationEntry>[];
+    final updatedEntries = <TranslationEntryModel>[];
 
     for (int i = 0; i < results.length; i++) {
       final result = results[i];
@@ -507,7 +511,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
         successCount++;
         updatedEntries.add(entry.copyWith(
           targetText: result.translatedText,
-          status: TranslationStatus.completed,
+          status: TranslationStatusEnum.completed,
           updatedAt: DateTime.now(),
         ));
       } else {
@@ -519,7 +523,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
     // 更新翻译条目
     if (updatedEntries.isNotEmpty) {
       for (final entry in updatedEntries) {
-        await widget.controller.updateTranslationEntry(entry, isShowSnackbar: false);
+        await widget.controller.updateTranslationEntryModel(entry, isShowSnackbar: false);
       }
       await widget.controller.refreshTranslationEntries();
     }

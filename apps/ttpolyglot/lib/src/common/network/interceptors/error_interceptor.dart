@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:ttpolyglot/src/common/common.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// 错误统一处理拦截器
 class ErrorInterceptor extends Interceptor {

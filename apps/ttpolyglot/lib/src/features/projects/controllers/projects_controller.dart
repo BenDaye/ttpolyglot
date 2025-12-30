@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ttpolyglot/src/common/common.dart';
 import 'package:ttpolyglot/src/core/services/service.dart';
 import 'package:ttpolyglot/src/features/features.dart';
-import 'package:ttpolyglot_core/core.dart' hide CreateProjectRequest, UpdateProjectRequest;
 import 'package:ttpolyglot_utils/utils.dart';
 
 /// 项目管理控制器
@@ -18,7 +17,7 @@ class ProjectsController extends GetxController {
   late final ProjectCacheService _cacheService;
 
   // 响应式项目列表
-  final _projects = <Project>[].obs;
+  final _projects = <ProjectModel>[].obs;
   final _isLoading = false.obs;
   final _isLoadingMore = false.obs;
   final _searchQuery = ''.obs;
@@ -31,7 +30,7 @@ class ProjectsController extends GetxController {
   final _totalSize = 0.obs;
 
   // Getters
-  List<Project> get projects => _projects;
+  List<ProjectModel> get projects => _projects;
   bool get isLoading => _isLoading.value;
   bool get isLoadingMore => _isLoadingMore.value;
   String get searchQuery => _searchQuery.value;
@@ -44,13 +43,13 @@ class ProjectsController extends GetxController {
   bool get hasNextPage => _currentPage.value < _totalPage.value;
 
   // 过滤后的项目列表
-  List<Project> get filteredProjects {
+  List<ProjectModel> get filteredProjects {
     if (_searchQuery.value.isEmpty) {
       return _projects;
     }
     return _projects.where((project) {
       return project.name.toLowerCase().contains(_searchQuery.value.toLowerCase()) ||
-          project.description.toLowerCase().contains(_searchQuery.value.toLowerCase());
+          (project.description?.toLowerCase().contains(_searchQuery.value.toLowerCase()) ?? false);
     }).toList();
   }
 
@@ -66,10 +65,6 @@ class ProjectsController extends GetxController {
       // 初始化缓存服务
       final prefs = await SharedPreferences.getInstance();
       _cacheService = ProjectCacheService(prefs);
-
-      // 初始化示例数据
-      final initializer = ProjectDataInitializer(_projectService);
-      await initializer.initializeSampleProjects();
 
       await loadProjects();
     } catch (error, stackTrace) {
@@ -96,7 +91,7 @@ class ProjectsController extends GetxController {
         if (cachedProjects != null && cachedProjects.isNotEmpty) {
           LoggerUtils.info('从缓存加载 ${cachedProjects.length} 个项目');
           // 转换 ProjectModel 到 Project
-          final projects = cachedProjects.map((model) => ProjectConverter.toProject(model)).toList();
+          final projects = cachedProjects.map((model) => ProjectModel.fromJson(model as Map<String, dynamic>)).toList();
           controller._projects.assignAll(projects);
           controller._isLoading.value = false;
         }
@@ -121,7 +116,8 @@ class ProjectsController extends GetxController {
           await controller._cacheService.cacheProjects(apiProjects.items ?? []);
 
           // 转换并更新界面
-          final projects = apiProjects.items?.map((model) => ProjectConverter.toProject(model)).toList() ?? [];
+          final projects =
+              apiProjects.items?.map((model) => ProjectModel.fromJson(model as Map<String, dynamic>)).toList() ?? [];
           controller._projects.assignAll(projects);
 
           LoggerUtils.info('项目列表已更新并缓存，当前页: ${apiProjects.page}/${apiProjects.totalPage}');
@@ -146,8 +142,8 @@ class ProjectsController extends GetxController {
   static Future<void> createProject({
     required String name,
     required String description,
-    required Language primaryLanguage,
-    required List<Language> targetLanguages,
+    required LanguageEnum primaryLanguage,
+    required List<LanguageEnum> targetLanguages,
   }) async {
     // 刷新项目列表以获取最新数据
     await loadProjects();
@@ -159,8 +155,8 @@ class ProjectsController extends GetxController {
     String projectId, {
     String? name,
     String? description,
-    Language? defaultLanguage,
-    List<Language>? targetLanguages,
+    LanguageEnum? defaultLanguage,
+    List<LanguageEnum>? targetLanguages,
     bool? isActive,
   }) async {
     // 刷新项目列表以获取最新数据
@@ -220,9 +216,9 @@ class ProjectsController extends GetxController {
 
   /// 检查语言配置是否发生变化
   static bool hasLanguageConfigChanged(
-    Project currentProject,
-    Language? newPrimaryLanguage,
-    List<Language>? newTargetLanguages,
+    ProjectModel currentProject,
+    LanguageEnum? newPrimaryLanguage,
+    List<LanguageEnum>? newTargetLanguages,
   ) {
     // 检查默认语言是否变化
     if (newPrimaryLanguage != null && currentProject.primaryLanguage.code != newPrimaryLanguage.code) {
@@ -231,7 +227,10 @@ class ProjectsController extends GetxController {
 
     // 检查目标语言是否变化
     if (newTargetLanguages != null) {
-      final currentCodes = currentProject.targetLanguages.map((lang) => lang.code).toSet();
+      // 获取当前项目的目标语言（除主语言外的所有语言）
+      final currentTargetLanguages =
+          currentProject.languages.where((lang) => lang.id != currentProject.primaryLanguageId).toList();
+      final currentCodes = currentTargetLanguages.map((lang) => lang.code).toSet();
       final newCodes = newTargetLanguages.map((lang) => lang.code).toSet();
 
       if (currentCodes.length != newCodes.length ||
@@ -246,8 +245,8 @@ class ProjectsController extends GetxController {
 
   /// 同步翻译条目的语言配置
   static Future<void> syncTranslationLanguages({
-    required Language sourceLanguage,
-    required List<Language> targetLanguages,
+    required LanguageEnum sourceLanguage,
+    required List<LanguageEnum> targetLanguages,
     required String projectId,
   }) async {
     try {
@@ -302,7 +301,8 @@ class ProjectsController extends GetxController {
         controller._totalSize.value = apiProjects.totalSize;
 
         // 将新数据追加到现有列表
-        final newProjects = apiProjects.items!.map((model) => ProjectConverter.toProject(model)).toList();
+        final newProjects =
+            apiProjects.items!.map((model) => ProjectModel.fromJson(model as Map<String, dynamic>)).toList();
         controller._projects.addAll(newProjects);
 
         LoggerUtils.info('加载了 ${newProjects.length} 个项目，当前页: ${apiProjects.page}/${apiProjects.totalPage}');
@@ -335,29 +335,20 @@ class ProjectsController extends GetxController {
   }
 
   /// 获取选中的项目
-  Project? getSelectedProject() {
+  ProjectModel? getSelectedProject() {
     if (_selectedProjectId.value.isEmpty) return null;
     return _projects.firstWhereOrNull((project) => project.id == _selectedProjectId.value);
   }
 
   /// 获取项目统计信息
-  static Future<ProjectStats> getProjectStats(String projectId) async {
+  static Future<ProjectStatisticsModel?> getProjectStats(String projectId) async {
     final controller = instance;
 
     try {
       return await controller._projectService.getProjectStats(projectId);
     } catch (error, stackTrace) {
       LoggerUtils.error('获取项目统计失败', error: error, stackTrace: stackTrace);
-      return ProjectStats(
-        totalEntries: 0,
-        completedEntries: 0,
-        pendingEntries: 0,
-        reviewingEntries: 0,
-        completionRate: 0.0,
-        languageCount: 0,
-        memberCount: 1,
-        lastUpdated: DateTime.now(),
-      );
+      return null;
     }
   }
 
@@ -388,7 +379,7 @@ class ProjectsController extends GetxController {
   }
 
   /// 获取最近访问的项目
-  static Future<List<Project>> getRecentProjects({int limit = 10}) async {
+  static Future<List<ProjectModel>> getRecentProjects({int limit = 10}) async {
     final controller = instance;
 
     try {
@@ -423,7 +414,7 @@ class ProjectsController extends GetxController {
       if (index != -1) {
         final project = controller._projects[index];
         controller._projects[index] = project.copyWith(
-          lastAccessedAt: DateTime.now(),
+          lastActivityAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
       }
@@ -433,7 +424,7 @@ class ProjectsController extends GetxController {
   }
 
   /// 获取项目详情
-  static Future<Project?> getProject(String projectId) async {
+  static Future<ProjectModel?> getProject(String projectId) async {
     final controller = instance;
 
     try {
@@ -452,7 +443,7 @@ class ProjectsController extends GetxController {
       if (projectIdInt != null) {
         final apiProject = await controller._projectApi.getProject(projectIdInt);
         if (apiProject != null) {
-          final project = ProjectConverter.toProject(apiProject);
+          final project = ProjectModel.fromJson(apiProject as Map<String, dynamic>);
           _cacheProjectLocally(controller, project);
           return project;
         }
@@ -465,7 +456,7 @@ class ProjectsController extends GetxController {
     }
   }
 
-  static void _cacheProjectLocally(ProjectsController controller, Project project) {
+  static void _cacheProjectLocally(ProjectsController controller, ProjectModel project) {
     final index = controller._projects.indexWhere((item) => item.id == project.id);
     if (index != -1) {
       controller._projects[index] = project;
@@ -487,12 +478,12 @@ class ProjectsController extends GetxController {
   }
 
   /// 获取预设语言列表
-  static List<Language> getPresetLanguages() {
+  static List<LanguageEnum> getPresetLanguages() {
     return ProjectDataInitializer.getPresetLanguages();
   }
 
   /// 根据语言代码获取语言对象
-  static Language? getLanguageByCode(String code) {
+  static LanguageEnum? getLanguageByCode(String code) {
     return ProjectDataInitializer.getLanguageByCode(code);
   }
 }

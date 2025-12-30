@@ -1,4 +1,4 @@
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:uuid/uuid.dart';
 
 import '../constants/file_formats.dart';
@@ -36,11 +36,11 @@ class PropertiesParser implements TranslationParser {
   @override
   Future<ParserResult> parseString(
     String content,
-    Language language, {
+    LanguageEnum language, {
     Map<String, dynamic>? options,
   }) async {
     try {
-      final entries = <TranslationEntry>[];
+      final entries = <TranslationEntryModel>[];
       final warnings = <String>[];
       final lines = content.split('\n');
 
@@ -83,15 +83,14 @@ class PropertiesParser implements TranslationParser {
         final unescapedKey = _unescapeProperties(key);
         final unescapedValue = _unescapeProperties(value);
 
-        entries.add(TranslationEntry(
-          id: _uuid.v4(),
-          key: unescapedKey,
+        entries.add(TranslationEntryModel(
+          uuid: _uuid.v4(),
+          entryKey: unescapedKey,
           projectId: 'unknown',
-          sourceLanguage: language,
           targetLanguage: language,
           sourceText: unescapedValue,
           targetText: unescapedValue,
-          status: TranslationStatus.completed,
+          status: TranslationStatusEnum.completed,
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         ));
@@ -110,8 +109,8 @@ class PropertiesParser implements TranslationParser {
   @override
   Future<WriteResult> writeFile(
     String filePath,
-    List<TranslationEntry> entries,
-    Language language, {
+    List<TranslationEntryModel> entries,
+    LanguageEnum language, {
     Map<String, dynamic>? options,
   }) async {
     try {
@@ -134,8 +133,8 @@ class PropertiesParser implements TranslationParser {
 
   @override
   Future<String> writeString(
-    List<TranslationEntry> entries,
-    Language language, {
+    List<TranslationEntryModel> entries,
+    LanguageEnum language, {
     Map<String, dynamic>? options,
   }) async {
     final separator = options?['separator'] as String? ?? '=';
@@ -152,14 +151,14 @@ class PropertiesParser implements TranslationParser {
     }
 
     // 获取要写入的条目
-    final filteredEntries = entries.where((entry) => entry.targetLanguage.code == language.code).toList();
+    final filteredEntries = entries.where((entry) => entry.targetLanguage == language).toList();
 
     if (sortKeys) {
-      filteredEntries.sort((a, b) => a.key.compareTo(b.key));
+      filteredEntries.sort((a, b) => a.entryKey.compareTo(b.entryKey));
     }
 
     for (final entry in filteredEntries) {
-      final escapedKey = _escapeProperties(entry.key);
+      final escapedKey = _escapeProperties(entry.entryKey);
       final escapedValue = _escapeProperties(entry.targetText);
       buffer.writeln('$escapedKey$separator$escapedValue');
     }
@@ -210,20 +209,15 @@ class PropertiesParser implements TranslationParser {
   }
 
   /// 从文件名推断语言
-  Language _inferLanguageFromFileName(String fileName) {
+  LanguageEnum _inferLanguageFromFileName(String fileName) {
     // Properties 文件通常命名为 messages_en.properties, strings_zh.properties 等
     final parts = fileName.split('_');
     if (parts.length > 1) {
       final langCode = parts.last;
-      return Language(
-        id: Language.supportedLanguages.firstWhere((lang) => lang.code == langCode).id,
-        code: langCode,
-        name: langCode.toUpperCase(),
-        nativeName: langCode,
-      );
+      return LanguageEnum.fromValue(langCode);
     }
 
-    return Language.supportedLanguages.first;
+    return LanguageEnum.enUS;
   }
 
   /// 转义 Properties 特殊字符

@@ -1105,13 +1105,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.2.4"
-  ttpolyglot_core:
-    dependency: "direct main"
-    description:
-      path: "../../packages/core"
-      relative: true
-    source: path
-    version: "1.0.0"
   ttpolyglot_model:
     dependency: "direct main"
     description:

@@ -1,4 +1,4 @@
-import 'package:ttpolyglot_core/core.dart';
+import 'storage_quota.dart';
 
 /// Web存储的占位实现（非Web平台）
 class WebStorageImpl {

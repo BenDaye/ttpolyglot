@@ -5,16 +5,16 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/services/conflict_detection_service.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_parsers/parsers.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
 class UploadFileList extends StatefulWidget {
   final List<PlatformFile> files;
-  final List<Language> languages;
+  final List<LanguageEnum> languages;
   final List<String> allowedExtensions;
   final VoidCallback? onClear; // 清空文件列表
-  final Function(Map<String, Language>, Map<String, Map<String, String>>)? onImport; // 导入文件
+  final Function(Map<String, LanguageEnum>, Map<String, Map<String, String>>)? onImport; // 导入文件
   final Function(int index)? onDelete; // 删除文件
 
   const UploadFileList({
@@ -32,7 +32,7 @@ class UploadFileList extends StatefulWidget {
 }
 
 class _UploadFileListState extends State<UploadFileList> {
-  final Map<String, Language> _fileLanguageMap = {};
+  final Map<String, LanguageEnum> _fileLanguageMap = {};
   final Map<String, Map<String, String>> _fileTranslationMap = {};
   final Map<String, ConflictDetectionResult> _fileConflictMap = {};
 
@@ -343,7 +343,7 @@ class _UploadFileListState extends State<UploadFileList> {
           color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
         ),
       ),
-      child: DropdownButton<Language>(
+      child: DropdownButton<LanguageEnum>(
         value: _fileLanguageMap[file.name],
         isExpanded: true,
         underline: const SizedBox(),
@@ -354,7 +354,7 @@ class _UploadFileListState extends State<UploadFileList> {
         hint: const Text('选择语言'),
         items: availableLanguages
             .map(
-              (language) => DropdownMenuItem<Language>(
+              (language) => DropdownMenuItem<LanguageEnum>(
                 value: language,
                 child: Text(
                   '${language.nativeName} (${language.code})',
@@ -374,7 +374,7 @@ class _UploadFileListState extends State<UploadFileList> {
     );
   }
 
-  Language? _matchLanguageFromFileName(String fileName) {
+  LanguageEnum? _matchLanguageFromFileName(String fileName) {
     if (widget.languages.isEmpty) return null;
 
     final fileNameLower = fileName.toLowerCase();
@@ -666,24 +666,24 @@ class _UploadFileListState extends State<UploadFileList> {
   }
 
   /// 检测文件的翻译冲突
-  Future<void> _detectFileConflicts(String fileName, Map<String, String> translations, Language language) async {
+  Future<void> _detectFileConflicts(String fileName, Map<String, String> translations, LanguageEnum language) async {
     try {
       // 这里应该获取现有的翻译条目，但由于在widget中无法直接访问翻译服务
       // 我们先创建一个简单的模拟冲突检测
       // 实际实现应该在Controller层处理
 
-      // 将翻译转换为TranslationEntry格式以便冲突检测
-      final importedEntries = <TranslationEntry>[];
+      // 将翻译转换为TranslationEntryModel格式以便冲突检测
+      final importedEntries = <TranslationEntryModel>[];
       for (final entry in translations.entries) {
-        importedEntries.add(TranslationEntry(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
+        importedEntries.add(TranslationEntryModel(
+          uuid: DateTime.now().millisecondsSinceEpoch.toString(),
           projectId: 'temp',
-          key: entry.key,
+          entryKey: entry.key,
           sourceLanguage: language,
           targetLanguage: language,
           sourceText: entry.value,
           targetText: entry.value,
-          status: TranslationStatus.completed,
+          status: TranslationStatusEnum.completed,
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         ));
@@ -707,10 +707,10 @@ class _UploadFileListState extends State<UploadFileList> {
   Future<Map<String, String>> _parseJsonFile(String content) async {
     try {
       final parser = ParserFactory.getParser(FileFormats.json);
-      final defaultLanguage = Language.supportedLanguages.first;
+      final defaultLanguage = LanguageEnum.supportedLanguages.first;
       final result = await parser.parseString(content, defaultLanguage);
 
-      // 将 TranslationEntry 列表转换为 Map<String, String>
+      // 将 TranslationEntryModel 列表转换为 Map<String, String>
       final translations = <String, String>{};
       for (final entry in result.entries) {
         translations[entry.key] = entry.targetText;
@@ -724,12 +724,12 @@ class _UploadFileListState extends State<UploadFileList> {
   }
 
   /// 解析 CSV 格式文件
-  Future<Map<String, String>> _parseCsvFile(String content, Language language) async {
+  Future<Map<String, String>> _parseCsvFile(String content, LanguageEnum language) async {
     try {
       final parser = ParserFactory.getParser(FileFormats.csv);
       final result = await parser.parseString(content, language);
 
-      // 将 TranslationEntry 列表转换为 Map<String, String>
+      // 将 TranslationEntryModel 列表转换为 Map<String, String>
       final translations = <String, String>{};
       for (final entry in result.entries) {
         translations[entry.key] = entry.targetText;
@@ -743,7 +743,7 @@ class _UploadFileListState extends State<UploadFileList> {
   }
 
   /// 解析 Excel 格式文件 (xlsx/xls)
-  Future<Map<String, String>> _parseExcelFile(List<int> bytes, Language language) async {
+  Future<Map<String, String>> _parseExcelFile(List<int> bytes, LanguageEnum language) async {
     try {
       // 临时使用简单的Excel解析，稍后会实现完整的解析器
       final excelData = excel.Excel.decodeBytes(bytes);
@@ -775,12 +775,12 @@ class _UploadFileListState extends State<UploadFileList> {
   }
 
   /// 解析 ARB 格式文件
-  Future<Map<String, String>> _parseArbFile(String content, Language language) async {
+  Future<Map<String, String>> _parseArbFile(String content, LanguageEnum language) async {
     try {
       final parser = ParserFactory.getParser(FileFormats.arb);
       final result = await parser.parseString(content, language);
 
-      // 将 TranslationEntry 列表转换为 Map<String, String>
+      // 将 TranslationEntryModel 列表转换为 Map<String, String>
       final translations = <String, String>{};
       for (final entry in result.entries) {
         translations[entry.key] = entry.targetText;
@@ -794,12 +794,12 @@ class _UploadFileListState extends State<UploadFileList> {
   }
 
   /// 解析 PO 格式文件
-  Future<Map<String, String>> _parsePoFile(String content, Language language) async {
+  Future<Map<String, String>> _parsePoFile(String content, LanguageEnum language) async {
     try {
       final parser = ParserFactory.getParser(FileFormats.po);
       final result = await parser.parseString(content, language);
 
-      // 将 TranslationEntry 列表转换为 Map<String, String>
+      // 将 TranslationEntryModel 列表转换为 Map<String, String>
       final translations = <String, String>{};
       for (final entry in result.entries) {
         translations[entry.key] = entry.targetText;

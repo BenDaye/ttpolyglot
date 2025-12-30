@@ -6,7 +6,6 @@ import 'package:ttpolyglot/src/core/services/translation_service_impl.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 import 'package:ttpolyglot/src/features/projects/projects.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
-import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
 class ProjectController extends GetxController {
@@ -25,8 +24,8 @@ class ProjectController extends GetxController {
   final NotificationSettingsApi _notificationSettingsApi = Get.find<NotificationSettingsApi>();
 
   // 响应式项目对象
-  final _project = Rxn<Project>();
-  final _projectModel = Rxn<ProjectModel>(); // 保存 API 模型，包含 memberLimit 等额外信息
+  final _project = Rxn<ProjectModel>();
+  ProjectModel? get project => _project.value;
   final _isLoading = false.obs;
   final _members = <ProjectMemberModel>[].obs;
 
@@ -35,9 +34,7 @@ class ProjectController extends GetxController {
   final _isLoadingNotificationSettings = false.obs;
 
   // Getters
-  Project? get project => _project.value;
-  ProjectModel? get projectModel => _projectModel.value; // 用于访问 memberLimit 等信息
-  Rxn<Project> get projectObs => _project;
+  Rxn<ProjectModel> get projectObs => _project;
   bool get isLoading => _isLoading.value;
   List<ProjectMemberModel> get members => _members;
   List<NotificationSettingsModel> get notificationSettings => _notificationSettings;
@@ -46,13 +43,12 @@ class ProjectController extends GetxController {
   /// 检查当前用户是否是项目所有者
   bool get isCurrentUserOwner {
     final currentUsername = Get.find<AuthService>().currentUser?.username;
-    final ownerUsername = _projectModel.value?.owner.username;
-    return currentUsername != null && ownerUsername != null && currentUsername == ownerUsername;
+    return currentUsername != null && _project.value?.ownerId != null && currentUsername == _project.value?.ownerId;
   }
 
   String get title => _project.value?.name ?? '-';
   String get description => _project.value?.description ?? '-';
-  int get languageCount => _project.value?.allLanguages.length ?? 0;
+  int get languageCount => _project.value?.languages.length ?? 0;
   int get translationCount => 0;
 
   // Files
@@ -138,19 +134,11 @@ class ProjectController extends GetxController {
       // 从 API 获取项目详情
       final projectModel = await _projectApi.getProject(projectIdInt);
       if (projectModel != null) {
-        // 保存 ProjectModel，用于访问 memberLimit 等 API 层信息
-        _projectModel.value = projectModel;
-
-        // 将 ProjectModel 转换为 Project（包含语言列表）
-        final project = ProjectConverter.toProject(projectModel);
-
+        _project.value = projectModel;
         // 保存成员列表
         _members.value = projectModel.members;
+        //
         LoggerUtils.info('项目成员加载成功: ${projectModel.members.length} 个成员');
-
-        LoggerUtils.info(
-            '项目加载成功: ID=${project.id}, 名称="${project.name}", 主语言=${project.primaryLanguage.code}, 目标语言=${project.targetLanguages.length} 个');
-        _project.value = project;
         return;
       }
 
@@ -168,21 +156,12 @@ class ProjectController extends GetxController {
   }
 
   /// 获取项目统计信息
-  Future<ProjectStats> getProjectStats() async {
+  Future<ProjectStatisticsModel?> getProjectStats() async {
     try {
       return await ProjectsController.getProjectStats(projectId);
     } catch (error, stackTrace) {
       LoggerUtils.error('获取项目统计失败', error: error, stackTrace: stackTrace);
-      return ProjectStats(
-        totalEntries: 0,
-        completedEntries: 0,
-        pendingEntries: 0,
-        reviewingEntries: 0,
-        completionRate: 0.0,
-        languageCount: 0,
-        memberCount: 1,
-        lastUpdated: DateTime.now(),
-      );
+      return null;
     }
   }
 
@@ -452,7 +431,7 @@ class ProjectController extends GetxController {
     await refreshProject();
   }
 
-  Future<void> removeTargetLanguage(Language language) async {
+  Future<void> removeTargetLanguage(LanguageEnum language) async {
     if (_project.value == null) return;
 
     final result = await Get.dialog(
@@ -483,7 +462,7 @@ class ProjectController extends GetxController {
 
         final success = await _projectApi.removeProjectLanguage(
           projectId: projectIdInt,
-          languageId: language.id,
+          languageId: _project.value?.languages.firstWhere((lang) => lang.code == language).id ?? 0,
         );
 
         if (success) {
@@ -501,15 +480,16 @@ class ProjectController extends GetxController {
 
   /// 导入内容到项目中
   /// 这种设计确保了所有翻译都基于相同的源语言，提高了数据一致性。
-  Future<void> importFiles(Map<String, Language> languageMap, Map<String, Map<String, String>> translationMap) async {
+  Future<void> importFiles(
+      Map<String, LanguageModel> languageMap, Map<String, Map<String, String>> translationMap) async {
     final startTime = DateTime.now();
     try {
       LoggerUtils.info('开始批量导入翻译文件，设置：覆盖现有翻译=$overrideExisting，自动审核=$autoReview，忽略空值=$ignoreEmpty',
           name: 'ProjectController');
 
-      final allImportedEntries = <TranslationEntry>[];
+      final allImportedEntries = <TranslationEntryModel>[];
       final allSkippedEntries = <String>[];
-      final allUpdatedEntries = <TranslationEntry>[];
+      final allUpdatedEntries = <TranslationEntryModel>[];
       int totalSkipped = 0;
 
       // 获取现有翻译条目用于精确检查
@@ -556,12 +536,12 @@ class ProjectController extends GetxController {
 
           // 初始化键的语言映射
           keyValueMap[trimmedKey] ??= {};
-          keyValueMap[trimmedKey]![selectedLanguage.code] = value;
+          keyValueMap[trimmedKey]![selectedLanguage.code.code] = value;
         }
       }
 
       // 获取项目的全部语言
-      final allProjectLanguages = _project.value!.allLanguages;
+      final allProjectLanguages = _project.value!.languages;
 
       // 处理每个键，为缺少的语言创建翻译条目
       for (final key in allKeys) {
@@ -572,7 +552,7 @@ class ProjectController extends GetxController {
 
         // 为每个项目语言检查是否需要创建或更新条目
         for (final language in allProjectLanguages) {
-          final languageCode = language.code;
+          final languageCode = language.code.code;
           final hasValue = keyValueMap[key]?.containsKey(languageCode) ?? false;
           final value = keyValueMap[key]?[languageCode] ?? '';
 
@@ -585,23 +565,24 @@ class ProjectController extends GetxController {
             LoggerUtils.info('键 "$key" 缺少语言 "$languageCode" 的条目，将创建新条目');
 
             // 根据"自动审核"设置确定状态
-            TranslationStatus entryStatus;
+            TranslationStatusEnum entryStatus;
             if (value.trim().isEmpty) {
-              entryStatus = TranslationStatus.pending;
+              entryStatus = TranslationStatusEnum.pending;
             } else if (autoReview) {
-              entryStatus = TranslationStatus.completed;
+              entryStatus = TranslationStatusEnum.completed;
             } else {
-              entryStatus = TranslationStatus.reviewing;
+              entryStatus = TranslationStatusEnum.reviewing;
             }
 
-            final newEntry = TranslationEntry(
-              id: DateTime.now().millisecondsSinceEpoch.toString() +
+            final newEntry = TranslationEntryModel(
+              uuid: DateTime.now().millisecondsSinceEpoch.toString() +
                   (DateTime.now().microsecond % 1000).toString().padLeft(3, '0'),
               projectId: projectId,
-              key: key,
-              sourceLanguage:
-                  languageCode == _project.value!.primaryLanguage.code ? language : _project.value!.primaryLanguage,
-              targetLanguage: language,
+              entryKey: key,
+              sourceLanguage: languageCode == _project.value!.primaryLanguage.code
+                  ? language.code
+                  : _project.value!.primaryLanguage.code,
+              targetLanguage: language.code,
               sourceText: languageCode == _project.value!.primaryLanguage.code ? value : key,
               targetText: value,
               status: entryStatus,
@@ -614,13 +595,13 @@ class ProjectController extends GetxController {
             // 该语言的条目存在，且有值且允许覆盖，需要更新
             LoggerUtils.info('键 "$key" 的语言 "$languageCode" 条目存在，根据配置将覆盖现有翻译');
 
-            TranslationStatus entryStatus;
+            TranslationStatusEnum entryStatus;
             if (value.trim().isEmpty) {
-              entryStatus = TranslationStatus.pending;
+              entryStatus = TranslationStatusEnum.pending;
             } else if (autoReview) {
-              entryStatus = TranslationStatus.completed;
+              entryStatus = TranslationStatusEnum.completed;
             } else {
-              entryStatus = TranslationStatus.reviewing;
+              entryStatus = TranslationStatusEnum.reviewing;
             }
 
             final updatedEntry = existingEntryForLanguage.first.copyWith(
@@ -759,7 +740,7 @@ class ProjectController extends GetxController {
 
   /// 创建导入记录
   void _createImportRecords(
-    Map<String, Language> languageMap,
+    Map<String, LanguageModel> languageMap,
     Map<String, Map<String, String>> translationMap,
     int totalCreatedCount,
     int totalUpdatedCount,
@@ -849,7 +830,7 @@ class ProjectController extends GetxController {
           conflictCount: fileUpdatedCount,
           skippedCount: fileSkippedCount,
           timestamp: startTime,
-          language: selectedLanguage?.code,
+          language: selectedLanguage?.code.code,
           duration: duration,
         );
 

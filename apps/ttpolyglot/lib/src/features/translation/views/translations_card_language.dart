@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 class ExpansionPanelListItem {
-  Language language;
-  List<TranslationEntry> entries;
+  LanguageEnum language;
+  List<TranslationEntryModel> entries;
   bool isExpanded;
 
   ExpansionPanelListItem({
@@ -24,13 +24,13 @@ class TranslationsCardByLanguageExpansionPanelList extends StatefulWidget {
     this.onEditEntry,
   });
 
-  final Map<Language, List<TranslationEntry>> groupedEntries;
+  final Map<LanguageEnum, List<TranslationEntryModel>> groupedEntries;
   final Function({
     required String key,
-    required List<TranslationEntry> entries,
+    required List<TranslationEntryModel> entries,
   })? onDeleteAllEntries;
   final Function({
-    required TranslationEntry entry,
+    required TranslationEntryModel entry,
   })? onEditEntry;
 
   @override
@@ -108,14 +108,14 @@ class TranslationsCardByLanguageHeader extends StatelessWidget {
     this.onEditEntry,
   });
 
-  final Language language;
-  final List<TranslationEntry> translationEntries;
+  final LanguageEnum language;
+  final List<TranslationEntryModel> translationEntries;
   final Function({
     required String key,
-    required List<TranslationEntry> entries,
+    required List<TranslationEntryModel> entries,
   })? onDeleteAllEntries;
   final Function({
-    required TranslationEntry entry,
+    required TranslationEntryModel entry,
   })? onEditEntry;
 
   @override
@@ -186,14 +186,14 @@ class TranslationsCardByLanguageBody extends StatelessWidget {
     this.onEditEntry,
   });
 
-  final Language language;
-  final List<TranslationEntry> translationEntries;
+  final LanguageEnum language;
+  final List<TranslationEntryModel> translationEntries;
   final Function({
     required String key,
-    required List<TranslationEntry> entries,
+    required List<TranslationEntryModel> entries,
   })? onDeleteAllEntries;
   final Function({
-    required TranslationEntry entry,
+    required TranslationEntryModel entry,
   })? onEditEntry;
 
   @override

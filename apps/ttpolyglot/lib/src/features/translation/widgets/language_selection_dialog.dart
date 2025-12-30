@@ -1,6 +1,7 @@
+import 'package:ttpolyglot_model/model.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ttpolyglot_core/core.dart';
 
 /// 语言选择弹窗
 class LanguageSelectionDialog extends StatelessWidget {
@@ -12,19 +13,19 @@ class LanguageSelectionDialog extends StatelessWidget {
     this.subtitle = '请选择要翻译的源语言',
   });
 
-  final List<Language> availableLanguages;
-  final Function(Language) onLanguageSelected;
+  final List<LanguageEnum> availableLanguages;
+  final Function(LanguageEnum) onLanguageSelected;
   final String title;
   final String subtitle;
 
   /// 显示语言选择弹窗
-  static Future<Language?> show({
+  static Future<LanguageEnum?> show({
     required BuildContext context,
-    required List<Language> availableLanguages,
+    required List<LanguageEnum> availableLanguages,
     String title = '选择源语言',
     String subtitle = '请选择要翻译的源语言',
   }) {
-    return Get.dialog<Language>(
+    return Get.dialog<LanguageEnum>(
       LanguageSelectionDialog(
         availableLanguages: availableLanguages,
         onLanguageSelected: (language) => Get.back(result: language),
@@ -95,7 +96,7 @@ class LanguageSelectionDialog extends StatelessWidget {
   }
 
   /// 构建语言选项
-  Widget _buildLanguageItem(BuildContext context, Language language) {
+  Widget _buildLanguageItem(BuildContext context, LanguageEnum language) {
     return InkWell(
       onTap: () => onLanguageSelected(language),
       borderRadius: BorderRadius.circular(8.0),

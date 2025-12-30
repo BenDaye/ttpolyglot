@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ttpolyglot/src/features/features.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// 项目语言设置页面
 class ProjectLanguagesView extends StatelessWidget {
@@ -63,7 +63,7 @@ class ProjectLanguagesView extends StatelessWidget {
                           const SizedBox(height: 16.0),
                           _buildLanguageCard(
                             context,
-                            project.primaryLanguage,
+                            project.primaryLanguage.code,
                             isPrimary: true,
                             onInfo: (language) {
                               // 显示主语言信息
@@ -119,14 +119,16 @@ class ProjectLanguagesView extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 16.0),
-                          ...project.targetLanguages.map((lang) => _buildLanguageCard(
-                                context,
-                                lang,
-                                isPrimary: false,
-                                onDelete: (language) {
-                                  controller.removeTargetLanguage(language);
-                                },
-                              )),
+                          ...project.languages
+                              .where((lang) => lang.id != project.primaryLanguageId)
+                              .map((lang) => _buildLanguageCard(
+                                    context,
+                                    lang.code,
+                                    isPrimary: false,
+                                    onDelete: (language) {
+                                      controller.removeTargetLanguage(language);
+                                    },
+                                  )),
                         ],
                       ),
                     ),
@@ -145,10 +147,10 @@ class ProjectLanguagesView extends StatelessWidget {
 
   Widget _buildLanguageCard(
     BuildContext context,
-    Language language, {
+    LanguageEnum language, {
     required bool isPrimary,
-    Function(Language)? onInfo,
-    Function(Language)? onDelete,
+    Function(LanguageEnum)? onInfo,
+    Function(LanguageEnum)? onDelete,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),

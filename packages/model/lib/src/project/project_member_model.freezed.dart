@@ -440,7 +440,7 @@ class __$$ProjectMemberModelImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$ProjectMemberModelImpl implements _ProjectMemberModel {
+class _$ProjectMemberModelImpl extends _ProjectMemberModel {
   const _$ProjectMemberModelImpl(
       {@JsonKey(name: 'id') required this.id,
       @JsonKey(name: 'project_id') required this.projectId,
@@ -464,7 +464,8 @@ class _$ProjectMemberModelImpl implements _ProjectMemberModel {
       @JsonKey(name: 'avatar_url') this.avatarUrl,
       @JsonKey(name: 'email') this.email,
       @JsonKey(name: 'inviter_username') this.inviterUsername,
-      @JsonKey(name: 'inviter_display_name') this.inviterDisplayName});
+      @JsonKey(name: 'inviter_display_name') this.inviterDisplayName})
+      : super._();
 
   factory _$ProjectMemberModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$ProjectMemberModelImplFromJson(json);
@@ -671,7 +672,7 @@ class _$ProjectMemberModelImpl implements _ProjectMemberModel {
   }
 }
 
-abstract class _ProjectMemberModel implements ProjectMemberModel {
+abstract class _ProjectMemberModel extends ProjectMemberModel {
   const factory _ProjectMemberModel(
       {@JsonKey(name: 'id') required final int id,
       @JsonKey(name: 'project_id') required final int projectId,
@@ -709,6 +710,7 @@ abstract class _ProjectMemberModel implements ProjectMemberModel {
       @JsonKey(name: 'inviter_username') final String? inviterUsername,
       @JsonKey(name: 'inviter_display_name')
       final String? inviterDisplayName}) = _$ProjectMemberModelImpl;
+  const _ProjectMemberModel._() : super._();
 
   factory _ProjectMemberModel.fromJson(Map<String, dynamic> json) =
       _$ProjectMemberModelImpl.fromJson;

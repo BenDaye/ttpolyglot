@@ -62,7 +62,7 @@ class TranslationApiService {
       cancelToken?.throwIfCancelled();
 
       switch (config.provider) {
-        case 'baidu':
+        case TranslationProviderEnum.baidu:
           return await _translateWithBaidu(
             text: text,
             sourceLanguage: sourceLanguage,
@@ -71,7 +71,7 @@ class TranslationApiService {
             context: context,
             cancelToken: cancelToken,
           );
-        case 'youdao':
+        case TranslationProviderEnum.youdao:
           return await _translateWithYoudao(
             text: text,
             sourceLanguage: sourceLanguage,
@@ -80,7 +80,7 @@ class TranslationApiService {
             context: context,
             cancelToken: cancelToken,
           );
-        case 'google':
+        case TranslationProviderEnum.google:
           return await _translateWithGoogle(
             text: text,
             sourceLanguage: sourceLanguage,
@@ -89,7 +89,7 @@ class TranslationApiService {
             context: context,
             cancelToken: cancelToken,
           );
-        case 'custom':
+        case TranslationProviderEnum.custom:
           return await _translateWithCustom(
             text: text,
             sourceLanguage: sourceLanguage,
@@ -99,7 +99,6 @@ class TranslationApiService {
             cancelToken: cancelToken,
           );
       }
-      return null;
     } catch (error, stackTrace) {
       log('翻译失败', error: error, stackTrace: stackTrace, name: 'TranslationApiService');
       return null;

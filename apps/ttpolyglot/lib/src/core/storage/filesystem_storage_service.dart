@@ -3,8 +3,24 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_utils/utils.dart';
+
+import 'storage_service.dart';
+
+/// 文件系统存储服务抽象类
+abstract class FileSystemStorageService extends StorageService {
+  /// 获取存储根目录
+  Future<String> getStorageRoot();
+
+  /// 获取配置目录
+  Future<String> getConfigDirectory();
+
+  /// 获取项目目录
+  Future<String> getProjectDirectory(String projectId);
+
+  /// 确保目录存在
+  Future<void> ensureDirectoryExists(String path);
+}
 
 /// 文件系统存储服务实现（桌面端）
 class FileSystemStorageServiceImpl extends FileSystemStorageService {

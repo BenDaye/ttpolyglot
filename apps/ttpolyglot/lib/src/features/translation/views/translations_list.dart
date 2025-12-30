@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 enum TranslationsListType {
   byKey,
@@ -89,16 +89,17 @@ class TranslationsList extends StatelessWidget {
                       child: TranslationsCardByKey(
                         translationKey: key,
                         translationEntries: entries,
-                        onDeleteAllEntries: ({required String key, required List<TranslationEntry> entries}) async {
+                        onDeleteAllEntries: (
+                            {required String key, required List<TranslationEntryModel> entries}) async {
                           _deleteTranslationKey(context, controller: controller, key: key, entries: entries);
                         },
-                        onEditEntry: ({required TranslationEntry entry}) {
+                        onEditEntry: ({required TranslationEntryModel entry}) {
                           _showEditTranslationDialog(context, controller: controller, entry: entry);
                         },
-                        onChangeTranslate: ({required List<TranslationEntry> entries}) {
+                        onChangeTranslate: ({required List<TranslationEntryModel> entries}) {
                           controller.updateTranslationEntries(entries, isShowSnackbar: false);
                         },
-                        onTranslateByCustom: ({required String key, required List<TranslationEntry> entries}) {
+                        onTranslateByCustom: ({required String key, required List<TranslationEntryModel> entries}) {
                           CustomTranslationDialog.show(
                             translationKey: key,
                             entries: entries,
@@ -159,10 +160,10 @@ class TranslationsList extends StatelessWidget {
             builder: (context, constraints) {
               return TranslationsCardByLanguageExpansionPanelList(
                 groupedEntries: groupedEntries,
-                onDeleteAllEntries: ({required String key, required List<TranslationEntry> entries}) async {
+                onDeleteAllEntries: ({required String key, required List<TranslationEntryModel> entries}) async {
                   _deleteTranslationKey(context, controller: controller, key: key, entries: entries);
                 },
-                onEditEntry: ({required TranslationEntry entry}) {
+                onEditEntry: ({required TranslationEntryModel entry}) {
                   _showEditTranslationDialog(context, controller: controller, entry: entry);
                 },
               );
@@ -204,7 +205,7 @@ class TranslationsList extends StatelessWidget {
     BuildContext context, {
     required TranslationController controller,
     required String key,
-    required List<TranslationEntry> entries,
+    required List<TranslationEntryModel> entries,
   }) async {
     final result = await Get.dialog<bool>(
       AlertDialog(
@@ -234,11 +235,11 @@ class TranslationsList extends StatelessWidget {
   void _showEditTranslationDialog(
     BuildContext context, {
     required TranslationController controller,
-    required TranslationEntry entry,
+    required TranslationEntryModel entry,
   }) {
     final targetTextController = TextEditingController(text: entry.targetText);
-    final contextController = TextEditingController(text: entry.context ?? '');
-    final commentController = TextEditingController(text: entry.comment ?? '');
+    final contextController = TextEditingController(text: entry.context);
+    final commentController = TextEditingController(text: entry.comment);
     var selectedStatus = entry.status;
 
     Get.dialog(
@@ -308,14 +309,14 @@ class TranslationsList extends StatelessWidget {
                 const SizedBox(height: 16.0),
                 StatefulBuilder(
                   builder: (context, setState) {
-                    return DropdownButtonFormField<TranslationStatus>(
+                    return DropdownButtonFormField<TranslationStatusEnum>(
                       value: selectedStatus,
                       decoration: const InputDecoration(
                         labelText: '状态',
                         contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
                         border: OutlineInputBorder(),
                       ),
-                      items: TranslationStatus.values.map((status) {
+                      items: TranslationStatusEnum.values.map((status) {
                         return DropdownMenuItem(
                           value: status,
                           child: Text(status.displayName),
@@ -345,11 +346,11 @@ class TranslationsList extends StatelessWidget {
               final updatedEntry = entry.copyWith(
                 targetText: targetTextController.text.trim(),
                 status: selectedStatus,
-                context: contextController.text.trim().isEmpty ? null : contextController.text.trim(),
-                comment: commentController.text.trim().isEmpty ? null : commentController.text.trim(),
+                context: contextController.text.trim(),
+                comment: commentController.text.trim(),
               );
 
-              controller.updateTranslationEntry(updatedEntry);
+              controller.updateTranslationEntryModel(updatedEntry);
               Get.back();
             },
             child: const Text('保存'),

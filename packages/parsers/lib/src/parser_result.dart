@@ -1,4 +1,4 @@
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// 解析结果类
 class ParserResult {
@@ -10,10 +10,10 @@ class ParserResult {
   });
 
   /// 解析出的翻译条目
-  final List<TranslationEntry> entries;
+  final List<TranslationEntryModel> entries;
 
   /// 语言信息
-  final Language language;
+  final LanguageEnum language;
 
   /// 元数据信息
   final Map<String, dynamic> metadata;
@@ -29,8 +29,8 @@ class ParserResult {
 
   /// 复制并更新结果
   ParserResult copyWith({
-    List<TranslationEntry>? entries,
-    Language? language,
+    List<TranslationEntryModel>? entries,
+    LanguageEnum? language,
     Map<String, dynamic>? metadata,
     List<String>? warnings,
   }) {

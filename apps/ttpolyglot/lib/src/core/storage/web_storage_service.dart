@@ -1,7 +1,22 @@
-import 'package:ttpolyglot_core/core.dart';
-
+import 'storage_quota.dart';
+import 'storage_service.dart';
 // 条件导入：只在 Web 平台上导入 dart:html
 import 'web_storage_stub.dart' if (dart.library.html) 'web_storage_html.dart' as web_impl;
+
+/// Web存储服务抽象类
+abstract class WebStorageService extends StorageService {
+  /// 使用LocalStorage
+  Future<void> useLocalStorage();
+
+  /// 使用IndexedDB
+  Future<void> useIndexedDB();
+
+  /// 获取存储配额
+  Future<StorageQuota> getStorageQuota();
+
+  /// 请求存储权限
+  Future<bool> requestStoragePermission();
+}
 
 /// Web存储服务实现（基于LocalStorage）
 class WebStorageServiceImpl extends WebStorageService {

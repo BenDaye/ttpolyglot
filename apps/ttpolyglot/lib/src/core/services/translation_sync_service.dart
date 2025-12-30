@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:get/get.dart';
-import 'package:ttpolyglot/src/common/api/translation_api.dart';
+import 'package:ttpolyglot/src/common/common.dart';
 import 'package:ttpolyglot/src/core/storage/storage_provider.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot/src/core/storage/storage_service.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
 /// 待同步操作

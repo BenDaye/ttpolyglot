@@ -1,6 +1,10 @@
+export 'export_options.dart';
+export 'export_service.dart';
 export 'export_service_impl.dart';
 export 'export_service_impl_desktop.dart';
 export 'project_cache_service.dart';
+export 'project_service.dart';
 export 'project_service_impl.dart';
+export 'translation_service.dart';
 export 'translation_service_impl.dart';
 export 'translation_service_manager.dart';

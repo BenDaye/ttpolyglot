@@ -383,7 +383,7 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                                           ),
                                           const SizedBox(width: 12.0),
                                           Text(
-                                            '选择语言 (${exportController.selectedLanguages.length}/${project.targetLanguages.length + 1})',
+                                            '选择语言 (${exportController.selectedLanguages.length}/${project.languages.length})',
                                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                                   fontWeight: FontWeight.w600,
                                                   color: Theme.of(context).colorScheme.onSurface,
@@ -408,7 +408,7 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                                             crossAxisCount = 5; // 很宽，五列
                                           }
 
-                                          final allLanguages = [project.primaryLanguage, ...project.targetLanguages];
+                                          final allLanguages = project.languages;
 
                                           return GridView.builder(
                                             shrinkWrap: true,

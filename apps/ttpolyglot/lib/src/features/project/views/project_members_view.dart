@@ -163,12 +163,12 @@ class _ProjectMembersViewState extends State<ProjectMembersView> {
   }
 
   Widget _buildMemberLimitHeader(BuildContext context, ProjectController controller) {
-    final projectModel = controller.projectObs.value;
-    if (projectModel == null) return const SizedBox.shrink();
+    final project = controller.projectObs.value;
+    if (project == null) return const SizedBox.shrink();
 
-    // 从 projectModel 中获取成员数和上限
+    // 从 project 中获取成员数和上限
     final currentCount = controller.members.length;
-    final limit = controller.projectModel?.memberLimit ?? 10;
+    final limit = controller.project?.memberLimit ?? 10;
     final percentage = currentCount / limit;
     final remaining = limit - currentCount;
 
@@ -583,7 +583,7 @@ class _InviteDialogContentState extends State<_InviteDialogContent> with SingleT
                 Builder(
                   builder: (context) {
                     final projectController = Get.find<ProjectController>(tag: controller.projectId.toString());
-                    final memberLimit = projectController.projectModel?.memberLimit ?? 10;
+                    final memberLimit = projectController.project?.memberLimit ?? 10;
                     return Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text(

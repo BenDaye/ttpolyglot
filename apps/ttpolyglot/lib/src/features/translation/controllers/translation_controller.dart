@@ -1,11 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/services/service.dart';
 import 'package:ttpolyglot/src/core/services/translation_sync_service.dart';
 import 'package:ttpolyglot/src/features/features.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
 /// 翻译控制器
@@ -19,21 +20,21 @@ class TranslationController extends GetxController {
   final TranslationServiceImpl _translationService = Get.find<TranslationServiceImpl>();
 
   // 响应式变量
-  final _translationEntries = <TranslationEntry>[].obs;
-  final _filteredEntries = <TranslationEntry>[].obs;
+  final _translationEntries = <TranslationEntryModel>[].obs;
+  final _filteredEntries = <TranslationEntryModel>[].obs;
   final _isLoading = false.obs;
   final _searchQuery = ''.obs;
-  final _selectedLanguage = Rxn<Language>();
-  final _selectedStatus = Rxn<TranslationStatus>();
+  final _selectedLanguage = Rxn<LanguageEnum>();
+  final _selectedStatus = Rxn<TranslationStatusEnum>();
   final _listType = TranslationsListType.byKey.obs;
 
   // Getters
-  List<TranslationEntry> get translationEntries => _translationEntries;
-  List<TranslationEntry> get filteredEntries => _filteredEntries;
+  List<TranslationEntryModel> get translationEntries => _translationEntries;
+  List<TranslationEntryModel> get filteredEntries => _filteredEntries;
   bool get isLoading => _isLoading.value;
   String get searchQuery => _searchQuery.value;
-  Language? get selectedLanguage => _selectedLanguage.value;
-  TranslationStatus? get selectedStatus => _selectedStatus.value;
+  LanguageEnum? get selectedLanguage => _selectedLanguage.value;
+  TranslationStatusEnum? get selectedStatus => _selectedStatus.value;
   TranslationsListType get listType => _listType.value;
 
   @override
@@ -90,7 +91,7 @@ class TranslationController extends GetxController {
   Future<void> createTranslationKey({
     required String key,
     required String sourceText,
-    required List<Language> targetLanguages,
+    required List<LanguageEnum> targetLanguages,
     String? context,
     String? comment,
     int? maxLength,
@@ -107,22 +108,15 @@ class TranslationController extends GetxController {
       // 使用项目的主语言作为源语言
       final request = CreateTranslationKeyRequest(
         projectId: projectId,
-        key: key,
-        sourceLanguage: project.primaryLanguage, // 使用项目主语言
+        entryKey: key,
+        sourceLanguage: project.primaryLanguage.code,
         sourceText: sourceText,
         targetLanguages: targetLanguages,
         context: context,
-        comment: comment,
         maxLength: maxLength,
         isPlural: isPlural,
-        pluralForms: pluralForms,
-        generateForDefaultLanguage: true,
+        pluralForms: pluralForms != null ? jsonEncode(pluralForms) : null,
       );
-
-      if (!request.isValid) {
-        final errors = request.validate();
-        throw Exception('创建翻译键验证失败: ${errors.join(', ')}');
-      }
 
       // 验证目标语言不包含主语言
       if (targetLanguages.any((lang) => lang.code == project.primaryLanguage.code)) {
@@ -140,9 +134,9 @@ class TranslationController extends GetxController {
   }
 
   /// 更新翻译条目
-  Future<void> updateTranslationEntry(TranslationEntry entry, {bool isShowSnackbar = true}) async {
+  Future<void> updateTranslationEntryModel(TranslationEntryModel entry, {bool isShowSnackbar = true}) async {
     try {
-      await _translationService.updateTranslationEntry(entry);
+      await _translationService.updateTranslationEntryModel(entry);
 
       // 更新本地列表
       final index = _translationEntries.indexWhere((e) => e.id == entry.id);
@@ -163,13 +157,13 @@ class TranslationController extends GetxController {
   }
 
   /// 批量更新翻译条目
-  Future<void> updateTranslationEntries(List<TranslationEntry> entries, {bool isShowSnackbar = true}) async {
+  Future<void> updateTranslationEntries(List<TranslationEntryModel> entries, {bool isShowSnackbar = true}) async {
     if (entries.isEmpty) return;
 
     try {
       // 批量更新到服务
       for (final entry in entries) {
-        await _translationService.updateTranslationEntry(entry);
+        await _translationService.updateTranslationEntryModel(entry);
       }
 
       // 更新本地列表
@@ -193,7 +187,7 @@ class TranslationController extends GetxController {
   }
 
   /// 删除翻译条目
-  Future<void> deleteTranslationEntry(String entryId) async {
+  Future<void> deleteTranslationEntryModel(String entryId) async {
     try {
       final result = await Get.dialog<bool>(
         AlertDialog(
@@ -221,7 +215,7 @@ class TranslationController extends GetxController {
         }
 
         // 使用更高效的删除方法
-        await _translationService.deleteTranslationEntryFromProject(projectId, entryId);
+        await _translationService.deleteTranslationEntryModelFromProject(projectId, entryId);
 
         // 从本地列表中移除
         _translationEntries.removeWhere((e) => e.id == entryId);
@@ -258,7 +252,7 @@ class TranslationController extends GetxController {
 
       if (result == true) {
         for (final entryId in entryIds) {
-          await _translationService.deleteTranslationEntryFromProject(projectId, entryId);
+          await _translationService.deleteTranslationEntryModelFromProject(projectId, entryId);
         }
 
         // 从本地列表中移除
@@ -280,13 +274,13 @@ class TranslationController extends GetxController {
   }
 
   /// 根据语言筛选
-  void filterByLanguage(Language? language) {
+  void filterByLanguage(LanguageEnum? language) {
     _selectedLanguage.value = language;
     _applyFilters();
   }
 
   /// 根据状态筛选
-  void filterByStatus(TranslationStatus? status) {
+  void filterByStatus(TranslationStatusEnum? status) {
     _selectedStatus.value = status;
     _applyFilters();
   }
@@ -343,8 +337,8 @@ class TranslationController extends GetxController {
   }
 
   /// 获取可用的语言列表
-  List<Language> get availableLanguages {
-    final languages = <Language>[];
+  List<LanguageEnum> get availableLanguages {
+    final languages = <LanguageEnum>[];
     for (final entry in _translationEntries) {
       if (!languages.any((lang) => lang.code == entry.targetLanguage.code)) {
         languages.add(entry.targetLanguage);
@@ -366,8 +360,8 @@ class TranslationController extends GetxController {
   }
 
   /// 获取可用的状态列表
-  List<TranslationStatus> get availableStatuses {
-    return TranslationStatus.values;
+  List<TranslationStatusEnum> get availableStatuses {
+    return TranslationStatusEnum.values;
   }
 
   /// 手动触发同步待入库的变更（网络恢复后调用）
@@ -383,8 +377,8 @@ class TranslationController extends GetxController {
   }
 
   /// 按翻译键分组条目
-  Map<String, List<TranslationEntry>> get groupedEntries {
-    final grouped = <String, List<TranslationEntry>>{};
+  Map<String, List<TranslationEntryModel>> get groupedEntries {
+    final grouped = <String, List<TranslationEntryModel>>{};
 
     for (final entry in _filteredEntries) {
       grouped.putIfAbsent(entry.key, () => []).add(entry);
@@ -392,7 +386,7 @@ class TranslationController extends GetxController {
 
     // 按键名排序
     final sortedKeys = grouped.keys.toList()..sort();
-    final sortedGrouped = <String, List<TranslationEntry>>{};
+    final sortedGrouped = <String, List<TranslationEntryModel>>{};
 
     for (final key in sortedKeys) {
       // 按语言的 sortIndex 排序每个组内的条目
@@ -413,8 +407,8 @@ class TranslationController extends GetxController {
   }
 
   /// 按语言分组条目（包含来源语言）
-  Map<Language, List<TranslationEntry>> get groupedEntriesByLanguage {
-    final grouped = <Language, List<TranslationEntry>>{};
+  Map<LanguageEnum, List<TranslationEntryModel>> get groupedEntriesByLanguage {
+    final grouped = <LanguageEnum, List<TranslationEntryModel>>{};
 
     for (final entry in _filteredEntries) {
       // 只按目标语言分组，避免重复
@@ -423,13 +417,13 @@ class TranslationController extends GetxController {
 
     if (grouped.isNotEmpty) {
       final sourceLanguage = grouped.entries.first.value.first.sourceLanguage;
-      final List<TranslationEntry> copy = grouped.entries.first.value
+      final List<TranslationEntryModel> copy = grouped.entries.first.value
           .map(
             (item) => item.copyWith(
-              id: item.id.replaceAll(item.targetLanguage.code, item.sourceLanguage.code),
+              uuid: item.uuid.replaceAll(item.targetLanguage.code, item.sourceLanguage.code),
               targetLanguage: item.sourceLanguage,
               targetText: item.sourceText,
-              status: TranslationStatus.completed,
+              status: TranslationStatusEnum.completed,
             ),
           )
           .toList();
@@ -450,7 +444,7 @@ class TranslationController extends GetxController {
         },
       );
 
-    final sortedGrouped = <Language, List<TranslationEntry>>{};
+    final sortedGrouped = <LanguageEnum, List<TranslationEntryModel>>{};
 
     for (final language in sortedLanguages) {
       // 按翻译键名排序每个语言组内的条目
@@ -467,19 +461,19 @@ class TranslationController extends GetxController {
     final stats = <String, int>{};
 
     stats['total'] = _translationEntries.length;
-    stats['completed'] = _translationEntries.where((e) => e.status == TranslationStatus.completed).length;
-    stats['pending'] = _translationEntries.where((e) => e.status == TranslationStatus.pending).length;
-    stats['reviewing'] = _translationEntries.where((e) => e.status == TranslationStatus.reviewing).length;
-    stats['translating'] = _translationEntries.where((e) => e.status == TranslationStatus.translating).length;
+    stats['completed'] = _translationEntries.where((e) => e.status == TranslationStatusEnum.completed).length;
+    stats['pending'] = _translationEntries.where((e) => e.status == TranslationStatusEnum.pending).length;
+    stats['reviewing'] = _translationEntries.where((e) => e.status == TranslationStatusEnum.reviewing).length;
+    stats['translating'] = _translationEntries.where((e) => e.status == TranslationStatusEnum.translating).length;
 
     return stats;
   }
 
   /// 获取项目默认语言
-  Future<Language?> getProjectDefaultLanguage() async {
+  Future<LanguageEnum?> getProjectDefaultLanguage() async {
     try {
       final project = await ProjectsController.getProject(projectId);
-      return project?.primaryLanguage;
+      return project?.primaryLanguage.code;
     } catch (error, stackTrace) {
       LoggerUtils.error('获取项目默认语言失败', error: error, stackTrace: stackTrace);
       return null;
@@ -487,22 +481,18 @@ class TranslationController extends GetxController {
   }
 
   /// 获取状态颜色
-  static Color getStatusColor(TranslationStatus status) {
+  static Color getStatusColor(TranslationStatusEnum status) {
     switch (status) {
-      case TranslationStatus.pending:
+      case TranslationStatusEnum.pending:
         return Colors.orange;
-      case TranslationStatus.translating:
-        return Colors.blue;
-      case TranslationStatus.completed:
+      case TranslationStatusEnum.translating:
+        return Colors.yellow;
+      case TranslationStatusEnum.completed:
         return Colors.green;
-      case TranslationStatus.reviewing:
+      case TranslationStatusEnum.reviewing:
         return Colors.purple;
-      case TranslationStatus.rejected:
-        return Colors.red;
-      case TranslationStatus.needsRevision:
-        return Colors.amber;
-      case TranslationStatus.outdated:
-        return Colors.grey;
+      case TranslationStatusEnum.approved:
+        return Colors.blue;
     }
   }
 }

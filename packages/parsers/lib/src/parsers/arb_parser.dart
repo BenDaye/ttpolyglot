@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:uuid/uuid.dart';
 
 import '../constants/file_formats.dart';
@@ -38,12 +38,12 @@ class ArbParser implements TranslationParser {
   @override
   Future<ParserResult> parseString(
     String content,
-    Language language, {
+    LanguageEnum language, {
     Map<String, dynamic>? options,
   }) async {
     try {
       final arbData = json.decode(content) as Map<String, dynamic>;
-      final entries = <TranslationEntry>[];
+      final entries = <TranslationEntryModel>[];
       final warnings = <String>[];
       final metadata = <String, dynamic>{};
 
@@ -62,30 +62,16 @@ class ArbParser implements TranslationParser {
         }
 
         if (value is String) {
-          // 检查是否有对应的元数据
-          final metadataKey = '@$key';
-          Map<String, dynamic>? entryMetadata;
-
-          if (arbData.containsKey(metadataKey)) {
-            final meta = arbData[metadataKey];
-            if (meta is Map<String, dynamic>) {
-              entryMetadata = meta;
-            }
-          }
-
-          entries.add(TranslationEntry(
-            id: _uuid.v4(),
-            key: key,
+          entries.add(TranslationEntryModel(
+            uuid: _uuid.v4(),
+            entryKey: key,
             projectId: 'unknown',
-            sourceLanguage: language,
             targetLanguage: language,
             sourceText: value,
             targetText: value,
-            status: TranslationStatus.completed,
+            status: TranslationStatusEnum.completed,
             createdAt: DateTime.now(),
             updatedAt: DateTime.now(),
-            comment: entryMetadata?['description'] as String?,
-            context: entryMetadata?['context'] as String?,
           ));
         } else {
           warnings.add('Value for key $key is not a string, skipping');
@@ -106,8 +92,8 @@ class ArbParser implements TranslationParser {
   @override
   Future<WriteResult> writeFile(
     String filePath,
-    List<TranslationEntry> entries,
-    Language language, {
+    List<TranslationEntryModel> entries,
+    LanguageEnum language, {
     Map<String, dynamic>? options,
   }) async {
     try {
@@ -130,8 +116,8 @@ class ArbParser implements TranslationParser {
 
   @override
   Future<String> writeString(
-    List<TranslationEntry> entries,
-    Language language, {
+    List<TranslationEntryModel> entries,
+    LanguageEnum language, {
     Map<String, dynamic>? options,
   }) async {
     final arbObject = <String, dynamic>{};
@@ -147,23 +133,8 @@ class ArbParser implements TranslationParser {
 
     // 添加翻译条目
     for (final entry in entries) {
-      if (entry.targetLanguage.code == language.code) {
-        arbObject[entry.key] = entry.targetText;
-
-        // 添加条目元数据
-        if (entry.comment != null || entry.context != null) {
-          final metadataKey = '@${entry.key}';
-          final metadata = <String, dynamic>{};
-
-          if (entry.comment != null) {
-            metadata['description'] = entry.comment;
-          }
-          if (entry.context != null) {
-            metadata['context'] = entry.context;
-          }
-
-          arbObject[metadataKey] = metadata;
-        }
+      if (entry.targetLanguage == language) {
+        arbObject[entry.entryKey] = entry.targetText;
       }
     }
 
@@ -204,20 +175,15 @@ class ArbParser implements TranslationParser {
   }
 
   /// 从文件名推断语言
-  Language _inferLanguageFromFileName(String fileName) {
+  LanguageEnum _inferLanguageFromFileName(String fileName) {
     // ARB 文件通常命名为 app_en.arb, intl_zh.arb 等
     final parts = fileName.split('_');
     if (parts.length > 1) {
       final langCode = parts.last;
-      return Language(
-        id: Language.supportedLanguages.firstWhere((lang) => lang.code == langCode).id,
-        code: langCode,
-        name: langCode.toUpperCase(),
-        nativeName: langCode,
-      );
+      return LanguageEnum.fromValue(langCode);
     }
 
-    return Language.supportedLanguages.first;
+    return LanguageEnum.enUS;
   }
 
   /// 排序 ARB 对象，确保元数据在前

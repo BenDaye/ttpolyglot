@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
 import '../controllers/translation_config_controller.dart';
@@ -31,7 +31,7 @@ class ProviderDialog extends StatefulWidget {
   final ProviderDialogMode mode;
 
   /// 编辑模式时的配置（仅编辑模式需要）
-  final TranslationProviderConfig? config;
+  final TranslationProviderConfigModel? config;
 
   /// 成功回调
   final VoidCallback? onSuccess;
@@ -41,7 +41,7 @@ class ProviderDialog extends StatefulWidget {
 }
 
 class _ProviderDialogState extends State<ProviderDialog> {
-  late TranslationProvider selectedProvider;
+  late TranslationProviderConfigModel selectedProvider;
   late TextEditingController nameController;
   late TextEditingController appIdController;
   late TextEditingController appKeyController;
@@ -65,7 +65,7 @@ class _ProviderDialogState extends State<ProviderDialog> {
     if (widget.mode == ProviderDialogMode.edit && widget.config != null) {
       // 编辑模式：使用现有配置初始化
       final config = widget.config!;
-      selectedProvider = config.provider;
+      selectedProvider = config;
       nameController = TextEditingController(text: config.name);
       appIdController = TextEditingController(text: config.appId);
       appKeyController = TextEditingController(text: config.appKey);
@@ -73,7 +73,15 @@ class _ProviderDialogState extends State<ProviderDialog> {
       isDefault = config.isDefault;
     } else {
       // 添加模式：使用默认值
-      selectedProvider = TranslationProvider.google;
+      selectedProvider = TranslationProviderConfigModel(
+        id: '',
+        provider: TranslationProviderEnum.google,
+        name: '',
+        appId: '',
+        appKey: '',
+        apiUrl: '',
+        isDefault: false,
+      );
       nameController = TextEditingController();
       appIdController = TextEditingController();
       appKeyController = TextEditingController();
@@ -122,29 +130,29 @@ class _ProviderDialogState extends State<ProviderDialog> {
     }
 
     // 验证App ID（谷歌翻译不需要，自定义翻译不校验API Key）
-    if (selectedProvider != TranslationProvider.google &&
-        selectedProvider != TranslationProvider.custom &&
+    if (selectedProvider.provider != TranslationProviderEnum.google &&
+        selectedProvider.provider != TranslationProviderEnum.custom &&
         appIdController.text.trim().isEmpty) {
       appIdError = '请输入应用ID';
       isValid = false;
     }
 
     // 验证App Key（非自定义翻译和谷歌翻译）
-    if (selectedProvider != TranslationProvider.custom &&
-        selectedProvider != TranslationProvider.google &&
+    if (selectedProvider.provider != TranslationProviderEnum.custom &&
+        selectedProvider.provider != TranslationProviderEnum.google &&
         appKeyController.text.trim().isEmpty) {
       appKeyError = '请输入应用密钥';
       isValid = false;
     }
 
     // 验证API URL（仅自定义翻译）
-    if (selectedProvider == TranslationProvider.custom && apiUrlController.text.trim().isEmpty) {
+    if (selectedProvider.provider == TranslationProviderEnum.custom && apiUrlController.text.trim().isEmpty) {
       apiUrlError = '请输入API地址';
       isValid = false;
     }
 
     // 验证API URL格式（仅自定义翻译）
-    if (selectedProvider == TranslationProvider.custom &&
+    if (selectedProvider.provider == TranslationProviderEnum.custom &&
         apiUrlController.text.trim().isNotEmpty &&
         !apiUrlController.text.trim().startsWith('http')) {
       apiUrlError = 'API地址必须以http或https开头';
@@ -167,9 +175,9 @@ class _ProviderDialogState extends State<ProviderDialog> {
         widget.controller.addTranslationProvider(
           provider: selectedProvider,
           name: nameController.text.trim(),
-          appId: selectedProvider != TranslationProvider.custom ? appIdController.text.trim() : null,
-          appKey: selectedProvider != TranslationProvider.custom ? appKeyController.text.trim() : null,
-          apiUrl: selectedProvider == TranslationProvider.custom ? apiUrlController.text.trim() : null,
+          appId: selectedProvider.provider != TranslationProviderEnum.custom ? appIdController.text.trim() : null,
+          appKey: selectedProvider.provider != TranslationProviderEnum.custom ? appKeyController.text.trim() : null,
+          apiUrl: selectedProvider.provider == TranslationProviderEnum.custom ? apiUrlController.text.trim() : null,
           isDefault: isDefault,
         );
 
@@ -194,9 +202,9 @@ class _ProviderDialogState extends State<ProviderDialog> {
         widget.controller.updateProviderConfigById(
           widget.config!.id,
           name: nameController.text.trim(),
-          appId: widget.config!.provider != TranslationProvider.custom ? appIdController.text.trim() : null,
-          appKey: widget.config!.provider != TranslationProvider.custom ? appKeyController.text.trim() : null,
-          apiUrl: widget.config!.provider == TranslationProvider.custom ? apiUrlController.text.trim() : null,
+          appId: widget.config!.provider != TranslationProviderEnum.custom ? appIdController.text.trim() : null,
+          appKey: widget.config!.provider != TranslationProviderEnum.custom ? appKeyController.text.trim() : null,
+          apiUrl: widget.config!.provider == TranslationProviderEnum.custom ? apiUrlController.text.trim() : null,
           isDefault: isDefault,
         );
       }
@@ -268,13 +276,13 @@ class _ProviderDialogState extends State<ProviderDialog> {
               const SizedBox(height: 20.0),
 
               // App Key 输入框（非自定义翻译）
-              if (selectedProvider != TranslationProvider.custom) ...[
+              if (selectedProvider.provider != TranslationProviderEnum.custom) ...[
                 _buildAppKeyField(),
                 const SizedBox(height: 16.0),
               ],
 
               // API URL 输入框（仅自定义翻译）
-              if (selectedProvider == TranslationProvider.custom) ...[
+              if (selectedProvider.provider == TranslationProviderEnum.custom) ...[
                 _buildApiUrlField(),
                 const SizedBox(height: 16.0),
               ],
@@ -361,7 +369,7 @@ class _ProviderDialogState extends State<ProviderDialog> {
                   ),
                   const SizedBox(height: 4.0),
                   Text(
-                    selectedProvider.name,
+                    selectedProvider.name ?? '',
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 16.0,
@@ -380,7 +388,7 @@ class _ProviderDialogState extends State<ProviderDialog> {
       );
     } else {
       // 添加模式：可选择
-      return DropdownButtonFormField<TranslationProvider>(
+      return DropdownButtonFormField<TranslationProviderConfigModel>(
         value: selectedProvider,
         decoration: InputDecoration(
           contentPadding: const EdgeInsets.all(12.0),
@@ -411,9 +419,17 @@ class _ProviderDialogState extends State<ProviderDialog> {
             ),
           ),
         ),
-        items: TranslationProvider.values.map((provider) {
+        items: TranslationProviderEnum.values.map((provider) {
           return DropdownMenuItem(
-            value: provider,
+            value: TranslationProviderConfigModel(
+              id: '',
+              provider: provider,
+              name: '',
+              appId: '',
+              appKey: '',
+              apiUrl: '',
+              isDefault: false,
+            ),
             child: Text(provider.name),
           );
         }).toList(),
@@ -488,7 +504,7 @@ class _ProviderDialogState extends State<ProviderDialog> {
       controller: appIdController,
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.all(12.0),
-        labelText: selectedProvider == TranslationProvider.custom ? 'API Key (可选)' : 'App ID',
+        labelText: selectedProvider.provider == TranslationProviderEnum.custom ? 'API Key (可选)' : 'App ID',
         labelStyle: TextStyle(
           color: Theme.of(context).primaryColor,
           fontWeight: FontWeight.w500,
@@ -514,7 +530,7 @@ class _ProviderDialogState extends State<ProviderDialog> {
             width: 2.0,
           ),
         ),
-        hintText: selectedProvider == TranslationProvider.custom ? '输入API密钥（可选）' : '输入应用ID',
+        hintText: selectedProvider.provider == TranslationProviderEnum.custom ? '输入API密钥（可选）' : '输入应用ID',
         hintStyle: TextStyle(
           color: Colors.grey.withValues(alpha: 0.6),
           fontSize: 14.0,

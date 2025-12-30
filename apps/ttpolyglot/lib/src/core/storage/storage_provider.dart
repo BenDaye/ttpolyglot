@@ -1,8 +1,9 @@
 import 'package:ttpolyglot/src/core/platform/platform_adapter.dart';
-import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
 import 'filesystem_storage_service.dart';
+import 'memory_storage_service.dart';
+import 'storage_service.dart';
 import 'web_storage_service.dart';
 
 /// 存储提供者

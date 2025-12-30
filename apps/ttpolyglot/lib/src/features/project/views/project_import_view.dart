@@ -7,7 +7,6 @@ import 'package:ttpolyglot/src/core/widgets/format_card.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 import 'package:ttpolyglot/src/features/project/widgets/upload_file.dart';
 import 'package:ttpolyglot/src/features/project/widgets/upload_file_list.dart';
-import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
@@ -315,19 +314,19 @@ class _ProjectImportViewState extends State<ProjectImportView> {
                           padding: const EdgeInsets.only(top: 16.0),
                           child: Builder(
                             builder: (context) {
-                              // 组合默认语言 + 目标语言，并按 code 去重
-                              final combinedLanguages = <Language>[
-                                if (controller.project?.primaryLanguage != null) controller.project!.primaryLanguage,
-                                ...(controller.project?.targetLanguages ?? []),
-                              ];
+                              // 获取项目的所有语言
+                              final combinedLanguages = controller.project?.languages ?? <LanguageModel>[];
 
                               final languages = {
                                 for (final lang in combinedLanguages) lang.code: lang,
                               }.values.toList();
 
+                              // 将 LanguageModel 转换为 LanguageEnum
+                              final languageEnums = languages.map((lang) => lang.code).toList();
+
                               return UploadFileList(
                                 files: controller.files,
-                                languages: languages,
+                                languages: languageEnums,
                                 allowedExtensions: controller.allowedExtensions,
                                 onDelete: (index) {
                                   controller.setFiles(
@@ -339,7 +338,15 @@ class _ProjectImportViewState extends State<ProjectImportView> {
                                 },
                                 onImport: (languageMap, translationMap) async {
                                   try {
-                                    await controller.importFiles(languageMap, translationMap);
+                                    // 将 LanguageEnum 转换回 LanguageModel
+                                    final languageModelMap = <String, LanguageModel>{};
+                                    for (final entry in languageMap.entries) {
+                                      final languageModel = languages.firstWhere(
+                                        (lang) => lang.code == entry.value,
+                                      );
+                                      languageModelMap[entry.key] = languageModel;
+                                    }
+                                    await controller.importFiles(languageModelMap, translationMap);
 
                                     // 获取导入的文件名（假设从languageMap中获取第一个文件的名字）
                                     final firstFile = controller.files.isNotEmpty ? controller.files.first : null;

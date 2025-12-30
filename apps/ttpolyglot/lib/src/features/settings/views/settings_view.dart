@@ -4,7 +4,7 @@ import 'package:ttpolyglot/src/core/layout/layout_controller.dart';
 import 'package:ttpolyglot/src/core/routing/app_pages.dart';
 import 'package:ttpolyglot/src/core/theme/app_theme.dart';
 import 'package:ttpolyglot/src/features/settings/settings.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 class SettingsView extends StatefulWidget {
   const SettingsView({super.key});
@@ -437,7 +437,7 @@ class _SettingsViewContentState extends State<_SettingsViewContent> {
 
   /// 构建单个翻译接口项
   Widget _buildProviderItem(
-      BuildContext context, TranslationConfigController controller, TranslationProviderConfig config) {
+      BuildContext context, TranslationConfigController controller, TranslationProviderConfigModel config) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12.0),
       shape: RoundedRectangleBorder(
@@ -516,7 +516,7 @@ class _SettingsViewContentState extends State<_SettingsViewContent> {
                       ],
                       Expanded(
                         child: Text(
-                          config.displayName,
+                          config.name ?? '',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 18.0,
@@ -837,7 +837,7 @@ class _SettingsViewContentState extends State<_SettingsViewContent> {
   }
 
   /// 显示编辑翻译接口对话框
-  void _showEditProviderDialog(TranslationConfigController controller, TranslationProviderConfig config) {
+  void _showEditProviderDialog(TranslationConfigController controller, TranslationProviderConfigModel config) {
     Get.dialog(
       ProviderDialog(
         controller: controller,
@@ -848,11 +848,11 @@ class _SettingsViewContentState extends State<_SettingsViewContent> {
   }
 
   /// 显示删除翻译接口对话框
-  void _showDeleteProviderDialog(TranslationConfigController controller, TranslationProviderConfig config) {
+  void _showDeleteProviderDialog(TranslationConfigController controller, TranslationProviderConfigModel config) {
     Get.dialog(
       AlertDialog(
         title: const Text('确认删除'),
-        content: Text('确定要删除翻译接口 "${config.displayName}" 吗？此操作不可撤销。'),
+        content: Text('确定要删除翻译接口 "${config.name ?? ''}" 吗？此操作不可撤销。'),
         actions: [
           TextButton(
             onPressed: () => Get.back(),

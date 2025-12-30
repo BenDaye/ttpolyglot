@@ -1,8 +1,11 @@
 import 'dart:convert';
 
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/common/common.dart';
+import 'package:ttpolyglot/src/common/constants/storage_keys.dart';
+import 'package:ttpolyglot/src/core/services/project_service.dart';
 import 'package:ttpolyglot/src/core/storage/storage_provider.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot/src/core/storage/storage_service.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
 /// 项目服务实现
@@ -24,30 +27,30 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
   }
 
   @override
-  Future<Project> createProject(CreateProjectRequest request) async {
-    final project = Project(
-      id: 'project-${DateTime.now().millisecondsSinceEpoch}',
+  Future<ProjectModel> createProject(CreateProjectRequest request) async {
+    // 调用 API 创建项目
+    final projectApi = Get.find<ProjectApi>();
+    final project = await projectApi.createProject(
       name: request.name,
       description: request.description,
-      primaryLanguage: request.primaryLanguage, // 修改：使用primaryLanguage
-      targetLanguages: request.targetLanguages,
-      owner: await _getCurrentUser(),
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      isActive: request.isActive,
+      primaryLanguageId: request.primaryLanguageId!,
+      slug: request.slug,
+      visibility: request.visibility,
     );
 
-    await _saveProject(project);
-    await _updateProjectList(project.id, add: true);
+    if (project == null) {
+      throw Exception('创建项目失败');
+    }
 
-    // 创建项目后验证数据一致性
-    await _validateProjectSourceLanguageConsistency(project);
+    // 本地存储项目信息（如果需要）
+    await _saveProject(project);
+    await _updateProjectList(project.id.toString(), add: true);
 
     return project;
   }
 
   @override
-  Future<Project?> getProject(String projectId) async {
+  Future<ProjectModel?> getProject(String projectId) async {
     try {
       LoggerUtils.info('从存储读取项目: $projectId');
       final projectJson = await _storageService.read(StorageKeys.projectConfig(projectId));
@@ -57,7 +60,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
       }
 
       final projectData = jsonDecode(projectJson) as Map<String, dynamic>;
-      final project = Project.fromJson(projectData);
+      final project = ProjectModel.fromJson(projectData);
       LoggerUtils.info('项目读取成功: ID=${project.id}, 名称="${project.name}"');
       return project;
     } catch (error, stackTrace) {
@@ -67,13 +70,13 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
   }
 
   @override
-  Future<List<Project>> getUserProjects(String userId) async {
+  Future<List<ProjectModel>> getUserProjects(String userId) async {
     try {
       final projectListJson = await _storageService.read(StorageKeys.projectList);
       if (projectListJson == null) return [];
 
       final projectIds = projectListJson.split(',').where((id) => id.isNotEmpty).toList();
-      final projects = <Project>[];
+      final projects = <ProjectModel>[];
 
       for (final projectId in projectIds) {
         final project = await getProject(projectId);
@@ -90,7 +93,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
   }
 
   @override
-  Future<List<Project>> getAllProjects({
+  Future<List<ProjectModel>> getAllProjects({
     int? limit,
     int? offset,
     String? search,
@@ -101,7 +104,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
       if (projectListJson == null) return [];
 
       final projectIds = projectListJson.split(',').where((id) => id.isNotEmpty).toList();
-      final projects = <Project>[];
+      final projects = <ProjectModel>[];
 
       for (final projectId in projectIds) {
         final project = await getProject(projectId);
@@ -111,7 +114,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
           if (search != null && search.isNotEmpty) {
             final searchLower = search.toLowerCase();
             if (!project.name.toLowerCase().contains(searchLower) &&
-                !project.description.toLowerCase().contains(searchLower)) {
+                !(project.description?.toLowerCase().contains(searchLower) ?? false)) {
               continue;
             }
           }
@@ -141,25 +144,28 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
   }
 
   @override
-  Future<Project> updateProject(String projectId, UpdateProjectRequest request) async {
+  Future<ProjectModel> updateProject(String projectId, UpdateProjectRequest request) async {
     final existingProject = await getProject(projectId);
     if (existingProject == null) {
       throw Exception('项目不存在: $projectId');
     }
 
-    final updatedProject = existingProject.copyWith(
+    // 调用 API 更新项目
+    final projectApi = Get.find<ProjectApi>();
+    final updatedProject = await projectApi.updateProject(
+      projectId: int.parse(projectId),
       name: request.name,
       description: request.description,
-      // 注意：primaryLanguage（主语言）不可修改，已从copyWith中移除
-      targetLanguages: request.targetLanguages,
-      isActive: request.isActive,
-      updatedAt: DateTime.now(),
+      status: request.status,
+      visibility: request.visibility,
     );
 
-    await _saveProject(updatedProject);
+    if (updatedProject == null) {
+      throw Exception('更新项目失败');
+    }
 
-    // 更新项目后验证数据一致性
-    await _validateProjectSourceLanguageConsistency(updatedProject);
+    // 本地存储更新后的项目信息
+    await _saveProject(updatedProject);
 
     return updatedProject;
   }
@@ -179,7 +185,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
   }
 
   @override
-  Future<Project> toggleProjectStatus(String projectId, {required bool isActive}) async {
+  Future<ProjectModel> toggleProjectStatus(String projectId, {required bool isActive}) async {
     final project = await getProject(projectId);
     if (project == null) {
       throw Exception('项目不存在: $projectId');
@@ -209,7 +215,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
   @override
   Future<ProjectStats> getProjectStats(String projectId) async {
     try {
-      final statsJson = await _storageService.read(StorageKeys.projectCache(projectId));
+      final statsJson = await _storageService.read('${StorageKeys.projectCache}.$projectId.stats');
       if (statsJson != null) {
         final statsData = jsonDecode(statsJson) as Map<String, dynamic>;
         return ProjectStats.fromJson(statsData);
@@ -220,39 +226,36 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
 
     // 返回默认统计
     return ProjectStats(
-      totalEntries: 0,
-      completedEntries: 0,
-      pendingEntries: 0,
-      reviewingEntries: 0,
-      completionRate: 0.0,
       languageCount: 0,
       memberCount: 1,
-      lastUpdated: DateTime.now(),
+      totalEntries: 0,
+      translatedEntries: 0,
+      reviewingEntries: 0,
+      approvedEntries: 0,
+      avgQualityScore: 0.0,
     );
   }
 
   @override
-  Future<List<Project>> searchProjects(
+  Future<List<ProjectModel>> searchProjects(
     String query, {
     String? userId,
-    int? limit,
-    int? offset,
+    bool? isActive,
   }) async {
     return await getAllProjects(
       search: query,
-      limit: limit,
-      offset: offset,
+      isActive: isActive,
     );
   }
 
   @override
-  Future<List<Project>> getRecentProjects(String userId, {int limit = 10}) async {
+  Future<List<ProjectModel>> getRecentProjects(String userId, {int limit = 10}) async {
     final projects = await getUserProjects(userId);
 
-    // 按最后访问时间排序
+    // 按最后活动时间排序
     projects.sort((a, b) {
-      final aTime = a.lastAccessedAt ?? a.updatedAt;
-      final bTime = b.lastAccessedAt ?? b.updatedAt;
+      final aTime = a.lastActivityAt ?? a.updatedAt;
+      final bTime = b.lastActivityAt ?? b.updatedAt;
       return bTime.compareTo(aTime);
     });
 
@@ -264,8 +267,9 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
     final project = await getProject(projectId);
     if (project == null) return;
 
+    // 更新最后活动时间
     final updatedProject = project.copyWith(
-      lastAccessedAt: DateTime.now(),
+      lastActivityAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
 
@@ -273,10 +277,10 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
   }
 
   /// 保存项目到存储
-  Future<void> _saveProject(Project project) async {
+  Future<void> _saveProject(ProjectModel project) async {
     LoggerUtils.info('保存项目到存储: ID=${project.id}, 名称="${project.name}"');
     final projectJson = jsonEncode(project.toJson());
-    await _storageService.write(StorageKeys.projectConfig(project.id), projectJson);
+    await _storageService.write(StorageKeys.projectConfig(project.id.toString()), projectJson);
     LoggerUtils.info('项目保存完成: ${project.id}');
   }
 
@@ -296,20 +300,6 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
     } catch (error, stackTrace) {
       LoggerUtils.error('更新项目列表失败', error: error, stackTrace: stackTrace);
     }
-  }
-
-  /// 获取当前用户（简化实现）
-  Future<User> _getCurrentUser() async {
-    // 这里应该从认证服务获取当前用户
-    // 暂时返回默认用户
-    return User(
-      id: 'default-user',
-      email: 'user@example.com',
-      name: '默认用户',
-      role: UserRole.admin,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
   }
 
   // 以下方法暂时不实现，返回默认值或抛出异常
@@ -339,7 +329,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
   }
 
   @override
-  Future<Project> duplicateProject(String sourceProjectId, String newName) async {
+  Future<ProjectModel> duplicateProject(String sourceProjectId, String newName) async {
     throw UnimplementedError('duplicateProject not implemented');
   }
 
@@ -349,14 +339,14 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
   }
 
   @override
-  Future<Project> importProjectConfig(Map<String, dynamic> config) async {
+  Future<ProjectModel> importProjectConfig(Map<String, dynamic> config) async {
     throw UnimplementedError('importProjectConfig not implemented');
   }
 
   @override
-  Future<List<Language>> getSupportedLanguages() async {
+  Future<List<LanguageEnum>> getSupportedLanguages() async {
     try {
-      return Language.supportedLanguages;
+      return LanguageEnum.values;
     } catch (error, stackTrace) {
       LoggerUtils.error('获取支持的语言列表失败', error: error, stackTrace: stackTrace);
       return [];
@@ -364,9 +354,12 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
   }
 
   @override
-  Future<List<Language>> searchSupportedLanguages(String query) async {
+  Future<List<LanguageEnum>> searchSupportedLanguages(String query) async {
     try {
-      return Language.searchSupportedLanguages(query);
+      final lowerQuery = query.toLowerCase();
+      return LanguageEnum.values.where((lang) {
+        return lang.name.toLowerCase().contains(lowerQuery);
+      }).toList();
     } catch (error, stackTrace) {
       LoggerUtils.error('搜索支持的语言失败', error: error, stackTrace: stackTrace);
       return [];
@@ -374,9 +367,15 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
   }
 
   @override
-  Future<Map<String, List<Language>>> getSupportedLanguagesByGroup() async {
+  Future<Map<String, List<LanguageEnum>>> getSupportedLanguagesByGroup() async {
     try {
-      return Language.supportedLanguagesByGroup;
+      // 简单分组：将所有语言按首字母分组
+      final Map<String, List<LanguageEnum>> grouped = {};
+      for (final lang in LanguageEnum.values) {
+        final firstChar = lang.name[0].toUpperCase();
+        grouped.putIfAbsent(firstChar, () => []).add(lang);
+      }
+      return grouped;
     } catch (error, stackTrace) {
       LoggerUtils.error('获取分组语言列表失败', error: error, stackTrace: stackTrace);
       return {};
@@ -386,7 +385,7 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
   @override
   Future<bool> validateLanguageSupport(String languageCode) async {
     try {
-      return Language.isLanguageSupported(languageCode);
+      return LanguageEnum.values.any((lang) => lang.name == languageCode);
     } catch (error, stackTrace) {
       LoggerUtils.error('验证语言支持失败', error: error, stackTrace: stackTrace);
       return false;
@@ -398,32 +397,12 @@ class ProjectServiceImpl extends GetxService implements ProjectService {
     try {
       final Map<String, bool> results = {};
       for (final code in languageCodes) {
-        results[code] = Language.isLanguageSupported(code);
+        results[code] = LanguageEnum.values.any((lang) => lang.name == code);
       }
       return results;
     } catch (error, stackTrace) {
       LoggerUtils.error('验证多个语言支持失败', error: error, stackTrace: stackTrace);
       return {};
-    }
-  }
-
-  /// 验证项目源语言数据一致性
-  Future<void> _validateProjectSourceLanguageConsistency(Project project) async {
-    try {
-      // 这里应该获取项目的翻译条目进行验证
-      // 暂时只记录日志，具体实现需要根据实际的数据结构调整
-      LoggerUtils.info(
-        '验证项目源语言一致性，项目ID: ${project.id}, 主语言: ${project.primaryLanguage.code}',
-      );
-
-      // TODO: 实现具体的翻译条目验证逻辑
-      // 可以使用 SourceLanguageValidator 来验证翻译条目
-    } catch (error, stackTrace) {
-      LoggerUtils.error(
-        '验证项目源语言一致性失败',
-        error: error,
-        stackTrace: stackTrace,
-      );
     }
   }
 }

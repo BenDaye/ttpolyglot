@@ -34,7 +34,6 @@ dependencies:
   path_provider: ^2.1.4
   shared_preferences: ^2.3.2
   tray_manager: ^0.2.3
-  ttpolyglot_core: ^1.0.0
   ttpolyglot_model: ^1.0.0
   ttpolyglot_parsers: ^1.0.0
   ttpolyglot_translators: ^1.0.0

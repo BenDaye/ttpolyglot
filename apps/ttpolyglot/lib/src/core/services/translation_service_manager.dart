@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/common/common.dart';
 import 'package:ttpolyglot/src/core/routing/app_pages.dart';
 import 'package:ttpolyglot/src/features/settings/controllers/translation_config_controller.dart';
-import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_translators/translators.dart';
 import 'package:ttpolyglot_utils/utils.dart';
@@ -13,29 +13,10 @@ class TranslationServiceManager extends GetxService {
       ? Get.find<TranslationServiceManager>()
       : Get.put(TranslationServiceManager());
 
-  /// 将 Language 转换为 LanguageEnum
-  static LanguageEnum? _languageToLanguageEnum(Language? language) {
-    if (language == null) return null;
-    return LanguageEnum.fromValue(language.code);
-  }
-
-  /// 将 TranslationProviderConfig 转换为 TranslationProviderConfigModel
-  static TranslationProviderConfigModel _providerConfigToModel(TranslationProviderConfig config) {
-    return TranslationProviderConfigModel(
-      id: config.id,
-      provider: config.provider.code,
-      name: config.name,
-      appId: config.appId,
-      appKey: config.appKey,
-      apiUrl: config.apiUrl,
-      isDefault: config.isDefault,
-    );
-  }
-
   /// 检查翻译配置是否完整
   bool get hasValidConfig {
     final config = TranslationConfigController.instance.config;
-    return config.enabledProviders.isNotEmpty;
+    return config.providers.isNotEmpty;
   }
 
   /// 异步检查翻译配置是否完整（等待配置加载完成）
@@ -63,12 +44,12 @@ class TranslationServiceManager extends GetxService {
     }
 
     final config = controller.config;
-    return config.enabledProviders.isNotEmpty;
+    return config.providers.isNotEmpty;
   }
 
   /// 获取默认翻译接口
-  TranslationProviderConfig? get defaultProvider {
-    return TranslationConfigController.instance.config.defaultProvider;
+  TranslationProviderConfigModel? get defaultProvider {
+    return TranslationConfigController.instance.config.providers.firstWhereOrNull((p) => p.isDefault);
   }
 
   /// 检查是否有设置默认翻译接口
@@ -100,16 +81,11 @@ class TranslationServiceManager extends GetxService {
     return config.providers.any((p) => p.isDefault);
   }
 
-  /// 获取所有启用的翻译接口
-  List<TranslationProviderConfig> get enabledProviders {
-    return TranslationConfigController.instance.config.enabledProviders;
-  }
-
   /// 批量翻译翻译条目
   Future<List<TranslationResult>> batchTranslateEntries({
-    required TranslationEntry sourceEntries, // 翻译源
-    required List<TranslationEntry> entries, // 需要的翻译条目
-    TranslationProviderConfig? provider,
+    required TranslationEntryModel sourceEntries, // 翻译源
+    required List<TranslationEntryModel> entries, // 需要的翻译条目
+    TranslationProviderConfigModel? provider,
     CancelToken? cancelToken, // 取消令牌
   }) async {
     try {
@@ -120,8 +96,8 @@ class TranslationServiceManager extends GetxService {
                   success: false,
                   translatedText: '',
                   error: '请先配置翻译接口',
-                  sourceLanguage: _languageToLanguageEnum(entry.sourceLanguage),
-                  targetLanguage: _languageToLanguageEnum(entry.targetLanguage),
+                  sourceLanguage: entry.sourceLanguage,
+                  targetLanguage: entry.targetLanguage,
                 ))
             .toList();
       }
@@ -134,33 +110,33 @@ class TranslationServiceManager extends GetxService {
                   success: false,
                   translatedText: '',
                   error: '没有可用的翻译接口',
-                  sourceLanguage: _languageToLanguageEnum(entry.sourceLanguage),
-                  targetLanguage: _languageToLanguageEnum(entry.targetLanguage),
+                  sourceLanguage: entry.sourceLanguage,
+                  targetLanguage: entry.targetLanguage,
                 ))
             .toList();
       }
 
       // 验证提供商配置
-      if (!selectedProvider.isValid) {
+      if (!selectedProvider.isDefault) {
         return entries
             .map((entry) => TranslationResult(
                   success: false,
                   translatedText: '',
-                  error: '${selectedProvider.displayName} 配置不完整',
-                  sourceLanguage: _languageToLanguageEnum(entry.sourceLanguage),
-                  targetLanguage: _languageToLanguageEnum(entry.targetLanguage),
+                  error: '${selectedProvider.name} 配置不完整',
+                  sourceLanguage: entry.sourceLanguage,
+                  targetLanguage: entry.targetLanguage,
                 ))
             .toList();
       }
 
-      LoggerUtils.info('开始批量翻译 ${entries.length} 个条目，使用 ${selectedProvider.displayName}');
+      LoggerUtils.info('开始批量翻译 ${entries.length} 个条目，使用 ${selectedProvider.name}');
 
       // 使用批量翻译API
       final result = await TranslationApiService.translateBatchTexts(
         sourceText: sourceEntries.targetText,
-        sourceLanguage: _languageToLanguageEnum(sourceEntries.targetLanguage)!,
-        targetLanguages: entries.map((e) => _languageToLanguageEnum(e.targetLanguage)!).toSet().toList(),
-        config: _providerConfigToModel(selectedProvider),
+        sourceLanguage: sourceEntries.targetLanguage,
+        targetLanguages: entries.map((e) => e.targetLanguage).toSet().toList(),
+        config: selectedProvider,
         cancelToken: cancelToken,
       );
 
@@ -168,7 +144,7 @@ class TranslationServiceManager extends GetxService {
           .map((item) => TranslationResult(
                 success: item.success,
                 translatedText: item.translatedText,
-                sourceLanguage: _languageToLanguageEnum(sourceEntries.sourceLanguage),
+                sourceLanguage: sourceEntries.sourceLanguage,
                 targetLanguage: item.targetLanguage,
                 error: item.error,
               ))
@@ -181,8 +157,8 @@ class TranslationServiceManager extends GetxService {
           .map((entry) => TranslationResult(
                 success: false,
                 translatedText: '',
-                sourceLanguage: _languageToLanguageEnum(entry.sourceLanguage),
-                targetLanguage: _languageToLanguageEnum(entry.targetLanguage),
+                sourceLanguage: entry.sourceLanguage,
+                targetLanguage: entry.targetLanguage,
                 error: '批量翻译异常: $error',
               ))
           .toList();
@@ -404,9 +380,9 @@ class TranslationServiceManager extends GetxService {
   }
 
   /// 显示翻译提供商选择弹窗
-  static Future<TranslationProviderConfig?> showProviderSelectionDialog(
+  static Future<TranslationProviderConfigModel?> showProviderSelectionDialog(
     BuildContext context,
-    List<TranslationProviderConfig> providers,
+    List<TranslationProviderConfigModel> providers,
   ) {
     if (providers.isEmpty) {
       return Future.value(null);
@@ -416,7 +392,7 @@ class TranslationServiceManager extends GetxService {
       return Future.value(providers.first);
     }
 
-    return Get.dialog<TranslationProviderConfig>(
+    return Get.dialog<TranslationProviderConfigModel>(
       AlertDialog(
         title: Row(
           children: [
@@ -437,7 +413,7 @@ class TranslationServiceManager extends GetxService {
                 _getProviderIcon(provider.provider),
                 color: Theme.of(context).primaryColor,
               ),
-              title: Text(provider.displayName),
+              title: Text(provider.name ?? provider.provider.name),
               subtitle: Text(provider.provider.name),
               onTap: () => Get.back(result: provider),
             );
@@ -454,15 +430,15 @@ class TranslationServiceManager extends GetxService {
   }
 
   /// 获取提供商图标
-  static IconData _getProviderIcon(TranslationProvider provider) {
+  static IconData _getProviderIcon(TranslationProviderEnum provider) {
     switch (provider) {
-      case TranslationProvider.baidu:
+      case TranslationProviderEnum.baidu:
         return Icons.search;
-      case TranslationProvider.youdao:
+      case TranslationProviderEnum.youdao:
         return Icons.translate;
-      case TranslationProvider.google:
+      case TranslationProviderEnum.google:
         return Icons.language;
-      case TranslationProvider.custom:
+      case TranslationProviderEnum.custom:
         return Icons.api;
     }
   }

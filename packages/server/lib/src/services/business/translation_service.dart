@@ -370,7 +370,7 @@ class TranslationService extends BaseService {
         // 更新项目统计信息
         await _updateProjectStats(projectId);
 
-        logInfo('翻译条目创建成功', context: {'entry_id': entry.id});
+        logInfo('翻译条目创建成功', context: {'entry_id': entry.uuid});
 
         return entry;
       },
@@ -638,7 +638,7 @@ class TranslationService extends BaseService {
           @old_status, @new_status, @change_type, @changed_by, @change_reason
         )
       ''', {
-        'entry_id': entry.id,
+        'entry_id': entry.uuid,
         'old_text': null, // 简化版本，实际应该比较差异
         'new_text': entry.targetText,
         'old_status': null,
@@ -648,7 +648,7 @@ class TranslationService extends BaseService {
         'change_reason': changeReason,
       });
     } catch (error, stackTrace) {
-      logError('记录翻译历史失败', error: error, stackTrace: stackTrace, context: {'entry_id': entry.id});
+      logError('记录翻译历史失败', error: error, stackTrace: stackTrace, context: {'entry_id': entry.uuid});
       // 不抛出异常，避免影响主要操作
     }
   }

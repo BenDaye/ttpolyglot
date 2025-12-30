@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ttpolyglot/src/core/services/translation_service_manager.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
 class TranslationsCardByKey extends StatefulWidget {
@@ -19,22 +19,22 @@ class TranslationsCardByKey extends StatefulWidget {
   });
 
   final String translationKey;
-  final List<TranslationEntry> translationEntries;
+  final List<TranslationEntryModel> translationEntries;
   final Function({
     required String key,
-    required List<TranslationEntry> entries,
+    required List<TranslationEntryModel> entries,
   })? onDeleteAllEntries;
   final Function({
-    required TranslationEntry entry,
+    required TranslationEntryModel entry,
   })? onEditEntry;
-  final Function({required List<TranslationEntry> entries})? onChangeTranslate;
+  final Function({required List<TranslationEntryModel> entries})? onChangeTranslate;
   final Function({
     required String key,
-    required List<TranslationEntry> entries,
+    required List<TranslationEntryModel> entries,
   })? onTranslateByDefaultLanguage;
   final Function({
     required String key,
-    required List<TranslationEntry> entries,
+    required List<TranslationEntryModel> entries,
   })? onTranslateByCustom;
 
   @override
@@ -157,7 +157,7 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
             ),
 
             // 上下文信息（如果有）
-            if (firstEntry.context != null && firstEntry.context!.isNotEmpty) ...[
+            if (firstEntry.context.isNotEmpty) ...[
               const SizedBox(height: 8.0),
               Container(
                 width: double.infinity,
@@ -177,7 +177,7 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
                     ),
                     const SizedBox(height: 4.0),
                     Text(
-                      firstEntry.context!,
+                      firstEntry.context,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
@@ -212,7 +212,7 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
   /// 构建语言翻译项
   Widget _buildLanguageTranslationItem(
     BuildContext context,
-    TranslationEntry entry,
+    TranslationEntryModel entry,
   ) {
     return InkWell(
       onTap: () => widget.onEditEntry?.call(entry: entry),
@@ -346,7 +346,7 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
       }
 
       // 如果有多个源语言，让用户选择
-      Language selectedSourceLanguage;
+      LanguageEnum selectedSourceLanguage;
       if (availableSourceLanguages.length == 1) {
         selectedSourceLanguage = availableSourceLanguages.first;
       } else {
@@ -378,7 +378,7 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
       }
 
       // 源语言文本
-      final TranslationEntry? entriesToTranslate = widget.translationEntries
+      final TranslationEntryModel? entriesToTranslate = widget.translationEntries
           .firstWhereOrNull((entry) => entry.targetLanguage.code == selectedSourceLanguage.code);
 
       if (entriesToTranslate == null || entriesToTranslate.targetText.isEmpty) {
@@ -394,7 +394,7 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
       }
 
       // 获取需要翻译的条目
-      final List<TranslationEntry> translateEntries = [];
+      final List<TranslationEntryModel> translateEntries = [];
       for (final entry in widget.translationEntries) {
         if (entry.targetLanguage.code == selectedSourceLanguage.code) continue;
         translateEntries.add(entry.copyWith(
@@ -413,8 +413,8 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
       // 处理翻译结果
       int successCount = 0;
       int failCount = 0;
-      final updatedEntries = <TranslationEntry>[];
-      final failedEntries = <TranslationEntry>[];
+      final updatedEntries = <TranslationEntryModel>[];
+      final failedEntries = <TranslationEntryModel>[];
 
       for (int i = 0; i < results.length; i++) {
         final result = results[i];
@@ -423,7 +423,7 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
           successCount++;
           updatedEntries.add(entry.copyWith(
             targetText: result.translatedText,
-            status: TranslationStatus.completed,
+            status: TranslationStatusEnum.completed,
             updatedAt: DateTime.now(),
           ));
         } else {
@@ -494,7 +494,7 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
   /// 显示失败翻译详情对话框
   void _showFailedTranslationsDialog(
     BuildContext context,
-    List<TranslationEntry> failedEntries,
+    List<TranslationEntryModel> failedEntries,
     List<String> errors,
   ) {
     Get.dialog(

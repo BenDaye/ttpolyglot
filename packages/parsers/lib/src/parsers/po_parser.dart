@@ -1,4 +1,4 @@
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:uuid/uuid.dart';
 
 import '../constants/file_formats.dart';
@@ -36,11 +36,11 @@ class PoParser implements TranslationParser {
   @override
   Future<ParserResult> parseString(
     String content,
-    Language language, {
+    LanguageEnum language, {
     Map<String, dynamic>? options,
   }) async {
     try {
-      final entries = <TranslationEntry>[];
+      final entries = <TranslationEntryModel>[];
       final warnings = <String>[];
       final metadata = <String, dynamic>{};
 
@@ -92,8 +92,8 @@ class PoParser implements TranslationParser {
   @override
   Future<WriteResult> writeFile(
     String filePath,
-    List<TranslationEntry> entries,
-    Language language, {
+    List<TranslationEntryModel> entries,
+    LanguageEnum language, {
     Map<String, dynamic>? options,
   }) async {
     try {
@@ -116,8 +116,8 @@ class PoParser implements TranslationParser {
 
   @override
   Future<String> writeString(
-    List<TranslationEntry> entries,
-    Language language, {
+    List<TranslationEntryModel> entries,
+    LanguageEnum language, {
     Map<String, dynamic>? options,
   }) async {
     final includeHeader = options?['includeHeader'] as bool? ?? true;
@@ -140,21 +140,14 @@ class PoParser implements TranslationParser {
     }
 
     // 获取要写入的条目
-    final filteredEntries = entries.where((entry) => entry.targetLanguage.code == language.code).toList();
+    final filteredEntries = entries.where((entry) => entry.targetLanguage == language).toList();
 
     if (sortKeys) {
-      filteredEntries.sort((a, b) => a.key.compareTo(b.key));
+      filteredEntries.sort((a, b) => a.entryKey.compareTo(b.entryKey));
     }
 
     for (final entry in filteredEntries) {
       // 添加注释
-      if (entry.comment != null && entry.comment!.isNotEmpty) {
-        buffer.writeln('# ${entry.comment}');
-      }
-      if (entry.context != null && entry.context!.isNotEmpty) {
-        buffer.writeln('#: ${entry.context}');
-      }
-
       // 添加 msgid 和 msgstr
       buffer.writeln('msgid "${_escapePoString(entry.sourceText)}"');
       buffer.writeln('msgstr "${_escapePoString(entry.targetText)}"');
@@ -206,7 +199,7 @@ class PoParser implements TranslationParser {
   }
 
   /// 从文件名推断语言
-  Language _inferLanguageFromFileName(String fileName) {
+  LanguageEnum _inferLanguageFromFileName(String fileName) {
     // PO 文件通常命名为 messages.po, zh_CN.po 等
     if (fileName.contains('_') || fileName.contains('-')) {
       final parts = fileName.split(RegExp(r'[_-]'));
@@ -214,46 +207,18 @@ class PoParser implements TranslationParser {
         final langCode = parts.last;
         // 标准化语言代码格式为 xx-XX
         final standardizedCode = _standardizeLanguageCode(langCode);
-        return Language(
-          id: Language.supportedLanguages.firstWhere((lang) => lang.code == standardizedCode).id,
-          code: standardizedCode,
-          name: standardizedCode.toUpperCase(),
-          nativeName: standardizedCode,
-        );
+        return LanguageEnum.fromValue(standardizedCode);
       }
     }
 
-    return Language.supportedLanguages.first;
+    return LanguageEnum.enUS;
   }
 
   /// 解析单个 PO 条目
-  (TranslationEntry, int)? _parsePoEntry(List<String> lines, int startIndex, Language language) {
+  (TranslationEntryModel, int)? _parsePoEntry(List<String> lines, int startIndex, LanguageEnum language) {
     int i = startIndex;
-    String? comment;
-    String? context;
     String? msgid;
     String? msgstr;
-
-    // 跳过空行和注释
-    while (i < lines.length) {
-      final line = lines[i].trim();
-      if (line.isEmpty) {
-        i++;
-        continue;
-      }
-
-      if (line.startsWith('#')) {
-        if (line.startsWith('# ')) {
-          comment = line.substring(2);
-        } else if (line.startsWith('#: ')) {
-          context = line.substring(3);
-        }
-        i++;
-        continue;
-      }
-
-      break;
-    }
 
     // 解析 msgid
     if (i < lines.length && lines[i].trim().startsWith('msgid ')) {
@@ -268,19 +233,16 @@ class PoParser implements TranslationParser {
     }
 
     if (msgid != null && msgstr != null && msgid.isNotEmpty) {
-      final entry = TranslationEntry(
-        id: _uuid.v4(),
-        key: msgid,
+      final entry = TranslationEntryModel(
+        uuid: _uuid.v4(),
+        entryKey: msgid,
         projectId: 'unknown',
-        sourceLanguage: language,
         targetLanguage: language,
         sourceText: msgid,
         targetText: msgstr,
-        status: msgstr.isEmpty ? TranslationStatus.pending : TranslationStatus.completed,
+        status: msgstr.isEmpty ? TranslationStatusEnum.pending : TranslationStatusEnum.completed,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
-        comment: comment,
-        context: context,
       );
 
       return (entry, i);

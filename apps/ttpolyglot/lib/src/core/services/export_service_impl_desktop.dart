@@ -4,7 +4,8 @@ import 'dart:io';
 import 'package:archive/archive_io.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot/src/common/common.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_parsers/parsers.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
@@ -15,8 +16,8 @@ class ExportTaskParams {
     required this.entries,
   });
 
-  final Project project;
-  final List<TranslationEntry> entries;
+  final ProjectModel project;
+  final List<TranslationEntryModel> entries;
 }
 
 /// 导出任务结果
@@ -35,14 +36,8 @@ class ExportTaskResult {
 class ExportServiceImplDesktop {
   /// 使用 isolate 导出翻译文件
   static Future<String?> exportTranslationsShortcutJson({
-    required Project project,
-    required List<TranslationEntry> entries,
-    ExportOptions options = const ExportOptions(
-      languages: [],
-      keyStyle: TranslationKeyStyle.nested,
-      separateFirstLevelKeyIntoFiles: false,
-      useLanguageCodeAsFolderName: false,
-    ),
+    required ProjectModel project,
+    required List<TranslationEntryModel> entries,
   }) async {
     try {
       // 生成默认文件名
@@ -90,13 +85,13 @@ class ExportServiceImplDesktop {
   /// 在 isolate 中执行导出任务
   static Future<ExportTaskResult> _executeExportTask(ExportTaskParams params) async {
     try {
-      final allLanguages = [params.project.primaryLanguage, ...params.project.targetLanguages];
+      final allLanguages = [params.project.primaryLanguage, ...params.project.languages];
       final Archive archive = Archive();
 
       // 处理每个语言的翻译
       for (final language in allLanguages) {
         // 过滤当前语言的翻译条目
-        final filterEntries = params.entries.where((entry) => entry.targetLanguage.code == language.code).toList();
+        final filterEntries = params.entries.where((entry) => entry.targetLanguageId == language.id).toList();
 
         // 按键排序
         filterEntries.sort((a, b) => a.key.compareTo(b.key));
@@ -105,14 +100,14 @@ class ExportServiceImplDesktop {
         final jsonParser = ParserFactory.getParser(FileFormats.json);
         final jsonString = await jsonParser.writeString(
           filterEntries,
-          language,
+          language.code,
           options: {
             'nestedKeyStyle': false, // 使用扁平格式，与导入demo保持一致
           },
         );
 
         // 创建压缩文件条目
-        final fileName = '${language.code}.json';
+        final fileName = '${language.code.code}.json';
         final contentBytes = utf8.encode(jsonString);
         final file = ArchiveFile(fileName, contentBytes.length, contentBytes);
         archive.addFile(file);
@@ -138,8 +133,8 @@ class ExportServiceImplDesktop {
 
   /// 使用 isolate 导出翻译文件 (CSV格式)
   static Future<String?> exportTranslationsShortcutCsv({
-    required Project project,
-    required List<TranslationEntry> entries,
+    required ProjectModel project,
+    required List<TranslationEntryModel> entries,
   }) async {
     try {
       // 生成默认文件名
@@ -186,8 +181,8 @@ class ExportServiceImplDesktop {
 
   /// 使用 isolate 导出翻译文件 (Excel格式)
   static Future<String?> exportTranslationsShortcutExcel({
-    required Project project,
-    required List<TranslationEntry> entries,
+    required ProjectModel project,
+    required List<TranslationEntryModel> entries,
   }) async {
     try {
       // 生成默认文件名
@@ -234,8 +229,8 @@ class ExportServiceImplDesktop {
 
   /// 使用 isolate 导出翻译文件 (ARB格式)
   static Future<String?> exportTranslationsShortcutArb({
-    required Project project,
-    required List<TranslationEntry> entries,
+    required ProjectModel project,
+    required List<TranslationEntryModel> entries,
   }) async {
     try {
       // 生成默认文件名
@@ -282,8 +277,8 @@ class ExportServiceImplDesktop {
 
   /// 使用 isolate 导出翻译文件 (PO格式)
   static Future<String?> exportTranslationsShortcutPo({
-    required Project project,
-    required List<TranslationEntry> entries,
+    required ProjectModel project,
+    required List<TranslationEntryModel> entries,
   }) async {
     try {
       // 生成默认文件名
@@ -331,13 +326,13 @@ class ExportServiceImplDesktop {
   /// 在 isolate 中执行CSV导出任务
   static Future<ExportTaskResult> _executeExportTaskCsv(ExportTaskParams params) async {
     try {
-      final allLanguages = [params.project.primaryLanguage, ...params.project.targetLanguages];
+      final allLanguages = [params.project.primaryLanguage, ...params.project.languages];
       final Archive archive = Archive();
 
       // 处理每个语言的翻译
       for (final language in allLanguages) {
         // 过滤当前语言的翻译条目
-        final filterEntries = params.entries.where((entry) => entry.targetLanguage.code == language.code).toList();
+        final filterEntries = params.entries.where((entry) => entry.targetLanguageId == language.id).toList();
 
         // 按键排序
         filterEntries.sort((a, b) => a.key.compareTo(b.key));
@@ -346,12 +341,12 @@ class ExportServiceImplDesktop {
         final csvParser = ParserFactory.getParser(FileFormats.csv);
         final csvString = await csvParser.writeString(
           filterEntries,
-          language,
+          language.code,
           options: {},
         );
 
         // 创建压缩文件条目
-        final fileName = '${language.code}.csv';
+        final fileName = '${language.code.code}.csv';
         final contentBytes = utf8.encode(csvString);
         final file = ArchiveFile(fileName, contentBytes.length, contentBytes);
         archive.addFile(file);
@@ -378,13 +373,13 @@ class ExportServiceImplDesktop {
   /// 在 isolate 中执行Excel导出任务
   static Future<ExportTaskResult> _executeExportTaskExcel(ExportTaskParams params) async {
     try {
-      final allLanguages = [params.project.primaryLanguage, ...params.project.targetLanguages];
+      final allLanguages = [params.project.primaryLanguage, ...params.project.languages];
       final Archive archive = Archive();
 
       // 处理每个语言的翻译
       for (final language in allLanguages) {
         // 过滤当前语言的翻译条目
-        final filterEntries = params.entries.where((entry) => entry.targetLanguage.code == language.code).toList();
+        final filterEntries = params.entries.where((entry) => entry.targetLanguageId == language.id).toList();
 
         // 按键排序
         filterEntries.sort((a, b) => a.key.compareTo(b.key));
@@ -393,13 +388,13 @@ class ExportServiceImplDesktop {
         final excelParser = ParserFactory.getParser(FileFormats.csv); // 先使用CSV格式，因为Excel可能不支持
         final excelString = await excelParser.writeString(
           filterEntries,
-          language,
+          language.code,
           options: {},
         );
         final excelBytes = utf8.encode(excelString);
 
         // 创建压缩文件条目
-        final fileName = '${language.code}.xlsx';
+        final fileName = '${language.code.code}.xlsx';
         final file = ArchiveFile(fileName, excelBytes.length, excelBytes);
         archive.addFile(file);
 
@@ -425,13 +420,13 @@ class ExportServiceImplDesktop {
   /// 在 isolate 中执行ARB导出任务
   static Future<ExportTaskResult> _executeExportTaskArb(ExportTaskParams params) async {
     try {
-      final allLanguages = [params.project.primaryLanguage, ...params.project.targetLanguages];
+      final allLanguages = [params.project.primaryLanguage, ...params.project.languages];
       final Archive archive = Archive();
 
       // 处理每个语言的翻译
       for (final language in allLanguages) {
         // 过滤当前语言的翻译条目
-        final filterEntries = params.entries.where((entry) => entry.targetLanguage.code == language.code).toList();
+        final filterEntries = params.entries.where((entry) => entry.targetLanguageId == language.id).toList();
 
         // 按键排序
         filterEntries.sort((a, b) => a.key.compareTo(b.key));
@@ -440,12 +435,12 @@ class ExportServiceImplDesktop {
         final arbParser = ParserFactory.getParser(FileFormats.arb);
         final arbString = await arbParser.writeString(
           filterEntries,
-          language,
+          language.code,
           options: {},
         );
 
         // 创建压缩文件条目
-        final fileName = 'app_${language.code}.arb';
+        final fileName = 'app_${language.code.code}.arb';
         final contentBytes = utf8.encode(arbString);
         final file = ArchiveFile(fileName, contentBytes.length, contentBytes);
         archive.addFile(file);
@@ -472,13 +467,13 @@ class ExportServiceImplDesktop {
   /// 在 isolate 中执行PO导出任务
   static Future<ExportTaskResult> _executeExportTaskPo(ExportTaskParams params) async {
     try {
-      final allLanguages = [params.project.primaryLanguage, ...params.project.targetLanguages];
+      final allLanguages = [params.project.primaryLanguage, ...params.project.languages];
       final Archive archive = Archive();
 
       // 处理每个语言的翻译
       for (final language in allLanguages) {
         // 过滤当前语言的翻译条目
-        final filterEntries = params.entries.where((entry) => entry.targetLanguage.code == language.code).toList();
+        final filterEntries = params.entries.where((entry) => entry.targetLanguageId == language.id).toList();
 
         // 按键排序
         filterEntries.sort((a, b) => a.key.compareTo(b.key));
@@ -487,7 +482,7 @@ class ExportServiceImplDesktop {
         final poParser = ParserFactory.getParser(FileFormats.po);
         final poString = await poParser.writeString(
           filterEntries,
-          language,
+          language.code,
           options: {},
         );
 

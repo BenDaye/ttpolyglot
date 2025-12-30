@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ttpolyglot/src/core/services/service.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
 class ProjectExportController extends GetxController {
@@ -231,11 +231,10 @@ class ProjectExportController extends GetxController {
   void setSelectedFormat(String format) => _selectedFormat.value = format;
 
   /// 初始化自定义导出设置
-  void initializeCustomExport(Project project) {
+  void initializeCustomExport(ProjectModel project) {
     // 默认选择所有语言
     _selectedLanguages.clear();
-    _selectedLanguages.add(project.primaryLanguage.code);
-    _selectedLanguages.addAll(project.targetLanguages.map((lang) => lang.code));
+    _selectedLanguages.addAll(project.languages.map((lang) => lang.code.name));
 
     // 重置其他设置
     _exportOnlyTranslated.value = true;
@@ -311,13 +310,13 @@ class ProjectExportController extends GetxController {
 
   /// 根据格式调用相应的导出方法
   static Future<String?> _exportByFormat({
-    required Project project,
-    required List<TranslationEntry> entries,
+    required ProjectModel project,
+    required List<TranslationEntryModel> entries,
     required String format,
     bool includeStatus = false,
     bool includeTimestamps = false,
   }) async {
-    final controller = instance(project.id);
+    final controller = instance(project.id.toString());
 
     switch (format) {
       case 'json':

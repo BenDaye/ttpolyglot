@@ -1,3 +1,5 @@
+import 'package:ttpolyglot_model/model.dart';
+
 import 'dart:developer';
 
 import 'package:get/get.dart';

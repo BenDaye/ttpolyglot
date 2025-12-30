@@ -7,7 +7,7 @@ import 'package:ttpolyglot/src/core/services/translation_service_manager.dart';
 import 'package:ttpolyglot/src/features/project/controllers/project_controller.dart';
 import 'package:ttpolyglot/src/features/settings/controllers/translation_config_controller.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_translators/translators.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
@@ -47,8 +47,8 @@ class BatchTranslationDialog extends StatefulWidget {
 
 class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
   // 状态管理
-  TranslationProviderConfig? _selectedProvider;
-  TranslationEntry? _selectedSourceEntry;
+  TranslationProviderConfigModel? _selectedProvider;
+  TranslationEntryModel? _selectedSourceEntry;
   bool _isOverride = true; // 是否覆盖
   BatchTranslationStatus _translationStatus = BatchTranslationStatus.idle;
 
@@ -58,9 +58,9 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
   int _successCount = 0;
   int _failCount = 0;
   final List<String> _pendingKeys = []; // 按key分组的待翻译键列表
-  final Map<String, List<TranslationEntry>> _keyEntries = {}; // key对应的条目映射
-  final Map<String, TranslationEntry> _keySourceEntries = {}; // key对应的源语言条目
-  final List<TranslationEntry> _processedEntries = [];
+  final Map<String, List<TranslationEntryModel>> _keyEntries = {}; // key对应的条目映射
+  final Map<String, TranslationEntryModel> _keySourceEntries = {}; // key对应的源语言条目
+  final List<TranslationEntryModel> _processedEntries = [];
 
   // 控制相关
   Timer? _translationTimer;
@@ -123,7 +123,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
             children: [
               // 配置区域
               if (_translationStatus == BatchTranslationStatus.idle) ...[
-                _buildConfigurationSection(primaryLanguage),
+                _buildConfigurationSection(primaryLanguage?.code),
               ] else ...[
                 _buildProgressSection(),
               ],
@@ -136,17 +136,17 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
   }
 
   /// 构建配置区域
-  Widget _buildConfigurationSection(Language? primaryLanguage) {
+  Widget _buildConfigurationSection(LanguageEnum? primaryLanguage) {
     // 获取所有翻译条目，按 key 分组
     final allEntries = widget.controller.translationEntries;
-    final Map<String, List<TranslationEntry>> entriesByKey = {};
+    final Map<String, List<TranslationEntryModel>> entriesByKey = {};
 
     for (final entry in allEntries) {
       entriesByKey.putIfAbsent(entry.key, () => []).add(entry);
     }
 
     // 获取可用的源语言条目（按语言去重）
-    final Map<String, TranslationEntry> languageEntryMap = {};
+    final Map<String, TranslationEntryModel> languageEntryMap = {};
 
     for (final entries in entriesByKey.values) {
       if (entries.isNotEmpty) {
@@ -177,7 +177,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
         if (a.targetLanguage.code == primaryLanguage?.code) return -1;
         if (b.targetLanguage.code == primaryLanguage?.code) return 1;
         // 其他语言按sortIndex排序
-        return a.targetLanguage.sortIndex.compareTo(b.targetLanguage.sortIndex);
+        return a.sortIndex.compareTo(b.sortIndex);
       });
 
     _selectedSourceEntry ??= availableSourceEntries.isNotEmpty ? availableSourceEntries.first : null;
@@ -532,10 +532,10 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
   /// 构建翻译服务提供商选择器
   Widget _buildProviderSelector({
-    required List<TranslationProviderConfig> list,
+    required List<TranslationProviderConfigModel> list,
   }) {
     // 通过 id 匹配找到正确的 provider 对象，避免对象引用不匹配的问题
-    TranslationProviderConfig? matchedProvider;
+    TranslationProviderConfigModel? matchedProvider;
     if (_selectedProvider != null) {
       matchedProvider = list.firstWhereOrNull(
         (p) => p.id == _selectedProvider!.id,
@@ -545,15 +545,13 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
     // 如果没有匹配的，使用默认的或列表中的第一个
     if (matchedProvider == null && list.isNotEmpty) {
       final defaultProvider = TranslationConfigController.instance.config.defaultProvider;
-      if (defaultProvider != null) {
-        matchedProvider = list.firstWhereOrNull(
-          (p) => p.id == defaultProvider.id,
-        );
-      }
+      matchedProvider = list.firstWhereOrNull(
+        (p) => p.provider == defaultProvider,
+      );
       matchedProvider ??= list.first;
 
       // 在下一帧更新 _selectedProvider，避免在 build 方法中直接修改状态
-      if (_selectedProvider?.id != matchedProvider.id) {
+      if (_selectedProvider?.provider != matchedProvider.provider) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
             setState(() {
@@ -564,7 +562,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
       }
     }
 
-    return DropdownButtonFormField<TranslationProviderConfig>(
+    return DropdownButtonFormField<TranslationProviderConfigModel>(
       value: matchedProvider,
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20.0),
@@ -596,7 +594,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
         ),
       ),
       items: list.map((provider) {
-        return DropdownMenuItem<TranslationProviderConfig>(
+        return DropdownMenuItem<TranslationProviderConfigModel>(
           value: provider,
           child: SizedBox(
             width: 350.0,
@@ -620,7 +618,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
                   ),
                 ),
                 Flexible(
-                  child: Text(provider.displayName),
+                  child: Text(provider.name ?? provider.provider.name),
                 ),
               ],
             ),
@@ -632,7 +630,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
           setState(() {
             _selectedProvider = value;
           });
-          LoggerUtils.info('选择翻译提供商: ${value.displayName}');
+          LoggerUtils.info('选择翻译提供商: ${value.name ?? value.provider.name}');
         }
       },
     );
@@ -640,9 +638,9 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
   /// 构建源语言选择器
   Widget _buildSourceLanguageSelector({
-    required List<TranslationEntry> list,
+    required List<TranslationEntryModel> list,
   }) {
-    return DropdownButtonFormField<TranslationEntry>(
+    return DropdownButtonFormField<TranslationEntryModel>(
       value: _selectedSourceEntry,
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20.0),
@@ -674,7 +672,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
         ),
       ),
       items: list.map((entry) {
-        return DropdownMenuItem<TranslationEntry>(
+        return DropdownMenuItem<TranslationEntryModel>(
           value: entry,
           child: SizedBox(
             width: 350.0,
@@ -953,7 +951,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
   /// 准备批量翻译
   void _prepareBatchTranslation() {
     final allEntries = widget.controller.translationEntries;
-    final Map<String, List<TranslationEntry>> entriesByKey = {};
+    final Map<String, List<TranslationEntryModel>> entriesByKey = {};
 
     // 按 key 分组
     for (final entry in allEntries) {
@@ -983,7 +981,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
       if (sourceEntry == null) continue;
 
       // 获取需要翻译的目标语言条目
-      final targetEntries = <TranslationEntry>[];
+      final targetEntries = <TranslationEntryModel>[];
       for (final entry in keyEntries) {
         // 跳过源语言本身
         if (entry.targetLanguage.code == sourceLanguageCode) continue;
@@ -1084,14 +1082,14 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
           keySuccessCount++;
           final updatedEntry = entry.copyWith(
             targetText: result.translatedText,
-            status: TranslationStatus.completed,
+            status: TranslationStatusEnum.completed,
             updatedAt: DateTime.now(),
           );
           _processedEntries.add(updatedEntry);
 
           // 立即更新到控制器（只有在弹窗未关闭时）
           if (!_isDisposed) {
-            await widget.controller.updateTranslationEntry(updatedEntry, isShowSnackbar: false);
+            await widget.controller.updateTranslationEntryModel(updatedEntry, isShowSnackbar: false);
           }
         } else {
           keyFailCount++;

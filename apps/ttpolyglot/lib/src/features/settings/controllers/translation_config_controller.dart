@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ttpolyglot/src/common/api/api.dart';
-import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
@@ -16,7 +15,7 @@ class TranslationConfigController extends GetxController {
   final UserSettingsApi _userSettingsApi = Get.find<UserSettingsApi>();
 
   // 响应式变量
-  final _config = TranslationConfig(
+  final _config = TranslationSettingsModel(
     providers: [],
   ).obs;
 
@@ -24,29 +23,23 @@ class TranslationConfigController extends GetxController {
   final _isInitialized = false.obs;
 
   // Getters
-  TranslationConfig get config => _config.value;
+  TranslationSettingsModel get config => _config.value;
   bool get isLoading => _isLoading.value;
   bool get isInitialized => _isInitialized.value;
 
-  /// 获取所有提供商选项
-  List<Map<String, String>> get providerOptions => TranslationProvider.getAllProviders();
-
-  /// 获取启用的提供商
-  List<TranslationProviderConfig> get enabledProviders => config.enabledProviders;
-
   /// 更新提供商配置
   void updateProviderConfig(
-    TranslationProvider provider, {
+    TranslationProviderConfigModel provider, {
     String? appId,
     String? appKey,
     String? apiUrl,
     bool? isEnabled,
   }) {
     final updatedProviders = config.providers.map((p) {
-      if (p.provider == provider) {
+      if (p.id == provider.id) {
         return p.copyWith(
-          appId: appId,
-          appKey: appKey,
+          appId: appId ?? '',
+          appKey: appKey ?? '',
           apiUrl: apiUrl,
         );
       }
@@ -71,48 +64,14 @@ class TranslationConfigController extends GetxController {
     await _saveConfigToServer();
   }
 
-  /// 验证配置
-  bool validateConfig() {
-    for (final provider in config.providers) {
-      if (!provider.isValid) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /// 获取配置验证错误
-  List<String> getValidationErrors() {
-    final errors = <String>[];
-    for (final provider in config.providers) {
-      if (provider.isValid) {
-        errors.addAll(provider.getValidationErrors());
-      }
-    }
-    return errors;
-  }
-
   /// 从服务器加载配置
   Future<void> loadConfigFromServer() async {
     try {
       _isLoading.value = true;
       final settings = await _userSettingsApi.getUserSettings();
 
-      // 转换 Model 到 Core 类型
-      final providers = settings.translationSettings.providers
-          .map((p) => TranslationProviderConfig(
-                id: p.id,
-                provider: TranslationProvider.fromCode(p.provider) ?? TranslationProvider.google,
-                name: p.name,
-                appId: p.appId,
-                appKey: p.appKey,
-                apiUrl: p.apiUrl,
-                isDefault: p.isDefault,
-              ))
-          .toList();
-
-      _config.value = TranslationConfig(
-        providers: providers,
+      _config.value = TranslationSettingsModel(
+        providers: settings.translationSettings.providers,
         maxRetries: settings.translationSettings.maxRetries,
         timeoutSeconds: settings.translationSettings.timeoutSeconds,
       );
@@ -133,21 +92,8 @@ class TranslationConfigController extends GetxController {
   /// 保存配置到服务器
   Future<void> _saveConfigToServer() async {
     try {
-      // 转换 Core 类型到 Model
-      final providers = config.providers
-          .map((p) => TranslationProviderConfigModel(
-                id: p.id,
-                provider: p.provider.code,
-                name: p.name,
-                appId: p.appId,
-                appKey: p.appKey,
-                apiUrl: p.apiUrl,
-                isDefault: p.isDefault,
-              ))
-          .toList();
-
       final translationSettings = TranslationSettingsModel(
-        providers: providers,
+        providers: config.providers,
         maxRetries: config.maxRetries,
         timeoutSeconds: config.timeoutSeconds,
       );
@@ -167,7 +113,7 @@ class TranslationConfigController extends GetxController {
   Future<void> _saveConfigLocal() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final configMap = config.toMap();
+      final configMap = config.toJson();
       final configJson = jsonEncode(configMap);
       await prefs.setString('translation_config', configJson);
     } catch (error, stackTrace) {
@@ -182,7 +128,7 @@ class TranslationConfigController extends GetxController {
       final configString = prefs.getString('translation_config');
       if (configString != null && configString.isNotEmpty) {
         final configMap = jsonDecode(configString) as Map<String, dynamic>;
-        final loadedConfig = TranslationConfig.fromMap(configMap);
+        final loadedConfig = TranslationSettingsModel.fromJson(configMap);
         _config.value = loadedConfig;
       }
     } catch (error, stackTrace) {
@@ -207,14 +153,9 @@ class TranslationConfigController extends GetxController {
     }
   }
 
-  /// 生成唯一ID
-  String _generateId() {
-    return DateTime.now().millisecondsSinceEpoch.toString();
-  }
-
   /// 添加翻译接口
   Future<void> addTranslationProvider({
-    required TranslationProvider provider,
+    required TranslationProviderConfigModel provider,
     required String name,
     String? appId,
     String? appKey,
@@ -222,18 +163,7 @@ class TranslationConfigController extends GetxController {
     bool isDefault = false,
   }) async {
     try {
-      // 转换 Core 类型到 Model
-      final providerModel = TranslationProviderConfigModel(
-        id: _generateId(),
-        provider: provider.code,
-        name: name,
-        appId: appId ?? '',
-        appKey: appKey ?? '',
-        apiUrl: apiUrl,
-        isDefault: isDefault,
-      );
-
-      final addedProvider = await _userSettingsApi.addTranslationProvider(providerModel);
+      final addedProvider = await _userSettingsApi.addTranslationProvider(provider);
 
       // 如果设置为默认，先取消其他默认设置
       var updatedProviders = config.providers;
@@ -242,13 +172,13 @@ class TranslationConfigController extends GetxController {
       }
 
       // 添加新接口
-      final newConfig = TranslationProviderConfig(
+      final newConfig = TranslationProviderConfigModel(
         id: addedProvider.id,
-        provider: provider,
+        provider: provider.provider,
         name: name,
         appId: appId ?? '',
         appKey: appKey ?? '',
-        apiUrl: apiUrl,
+        apiUrl: apiUrl ?? '',
         isDefault: isDefault,
       );
 
@@ -291,14 +221,14 @@ class TranslationConfigController extends GetxController {
   }) async {
     try {
       // 获取现有配置
-      final existingProvider = config.getProviderConfigById(id);
+      final existingProvider = config.providers.firstWhereOrNull((p) => p.id == id);
       if (existingProvider == null) {
         LoggerUtils.warning('翻译接口不存在: $id');
         return;
       }
 
       // 构建更新后的配置
-      final updatedProviderConfig = TranslationProviderConfig(
+      final updatedProviderConfig = TranslationProviderConfigModel(
         id: id,
         provider: existingProvider.provider,
         name: name ?? existingProvider.name,
@@ -311,7 +241,7 @@ class TranslationConfigController extends GetxController {
       // 转换为 Model
       final providerModel = TranslationProviderConfigModel(
         id: updatedProviderConfig.id,
-        provider: updatedProviderConfig.provider.code,
+        provider: updatedProviderConfig.provider,
         name: updatedProviderConfig.name,
         appId: updatedProviderConfig.appId,
         appKey: updatedProviderConfig.appKey,
@@ -346,8 +276,8 @@ class TranslationConfigController extends GetxController {
   }
 
   /// 获取翻译接口配置
-  TranslationProviderConfig? getProviderConfigById(String id) {
-    return config.getProviderConfigById(id);
+  TranslationProviderConfigModel? getProviderConfigById(String id) {
+    return config.providers.firstWhereOrNull((p) => p.id == id);
   }
 
   /// 加载设置（优先从服务器，失败则从本地）

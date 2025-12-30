@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:ttpolyglot_model/src/converter/converters.dart';
 import 'package:ttpolyglot_model/src/enums/language_enum.dart';
+import 'package:ttpolyglot_model/src/enums/translation_provider_enum.dart';
 
 part 'user_settings_model.freezed.dart';
 part 'user_settings_model.g.dart';
@@ -60,6 +61,12 @@ class TranslationSettingsModel with _$TranslationSettingsModel {
     /// 翻译接口列表
     @JsonKey(name: 'providers') @Default([]) List<TranslationProviderConfigModel> providers,
 
+    /// 默认提供商
+    @JsonKey(name: 'default_provider')
+    @TranslationProviderEnumConverter()
+    @Default(TranslationProviderEnum.google)
+    TranslationProviderEnum defaultProvider,
+
     /// 最大重试次数
     @JsonKey(name: 'max_retries') @Default(3) int maxRetries,
 
@@ -78,7 +85,7 @@ class TranslationProviderConfigModel with _$TranslationProviderConfigModel {
     @JsonKey(name: 'id') @Default('') String id,
 
     /// 翻译提供商代码 (google/baidu/youdao/custom)
-    @JsonKey(name: 'provider') @Default('') String provider,
+    @JsonKey(name: 'provider') @TranslationProviderEnumConverter() required TranslationProviderEnum provider,
 
     /// 自定义名称
     @JsonKey(name: 'name') String? name,

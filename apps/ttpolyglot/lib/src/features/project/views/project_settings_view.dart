@@ -65,14 +65,14 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                           _buildSettingItem(
                             context,
                             '项目描述',
-                            project.description,
+                            project.description ?? '',
                             Icons.description,
                             () => ProjectDialogController.showEditDescriptionDialog(project),
                           ),
                           _buildSettingItem(
                             context,
                             '项目状态',
-                            _getStatusText(controller.projectModel?.status ?? 'active'),
+                            _getStatusText(controller.project?.status ?? 'active'),
                             Icons.toggle_on,
                             () => ProjectDialogController.showEditStatusDialog(project),
                           ),
@@ -123,7 +123,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                           _buildSettingItem(
                             context,
                             '可见性',
-                            _getVisibilityText(controller.projectModel?.visibility ?? 'private'),
+                            _getVisibilityText(controller.project?.visibility ?? 'private'),
                             Icons.visibility,
                             () => ProjectDialogController.showEditVisibilityDialog(project),
                           ),
@@ -254,7 +254,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
   Widget _buildMemberLimitSettings(BuildContext context, ProjectController controller) {
     // 从 controller 获取当前成员数和上限
     final currentCount = controller.members.length;
-    final memberLimit = controller.projectModel?.memberLimit ?? 10;
+    final memberLimit = controller.project?.memberLimit ?? 10;
 
     return Card(
       child: Padding(

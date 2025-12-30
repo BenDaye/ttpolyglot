@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/layout/utils/layout_breakpoints.dart';
 import 'package:ttpolyglot/src/features/features.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// 项目侧边栏
 class ProjectsSidebar extends StatelessWidget {
@@ -182,7 +182,7 @@ class ProjectsSidebar extends StatelessWidget {
                   context: context,
                   delegate: delegate,
                   onTap: (project) {
-                    ProjectsController.setSelectedProjectId(project.id);
+                    ProjectsController.setSelectedProjectId(project.id.toString());
                   },
                   isSelected: controller.selectedProjectId == project.id,
                 ),
@@ -195,10 +195,10 @@ class ProjectsSidebar extends StatelessWidget {
   }
 
   Widget _buildProjectCard(
-    Project project, {
+    ProjectModel project, {
     required BuildContext context,
     GetDelegate? delegate,
-    required Function(Project) onTap,
+    required Function(ProjectModel) onTap,
     bool isSelected = false,
   }) {
     return Card(
@@ -232,7 +232,7 @@ class ProjectsSidebar extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              project.description, // 直接使用 project.description
+              project.description ?? '', // 直接使用 project.description
               style: TextStyle(
                 color: Colors.grey[600],
                 fontSize: 12,
@@ -265,7 +265,7 @@ class ProjectsSidebar extends StatelessWidget {
                     Icon(Icons.language, size: 14, color: Colors.grey[600]),
                     const SizedBox(width: 4),
                     Text(
-                      '${project.allLanguages.length}', // 直接使用 project.allLanguages.length
+                      '${project.languages.length}',
                       style: TextStyle(color: Colors.grey[600], fontSize: 12),
                     ),
                   ],

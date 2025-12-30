@@ -1,4 +1,4 @@
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
 /// 冲突类型
@@ -48,10 +48,10 @@ class TranslationConflict {
   final String key;
 
   /// 现有的翻译条目
-  final TranslationEntry existingEntry;
+  final TranslationEntryModel existingEntry;
 
   /// 导入的翻译条目
-  final TranslationEntry importedEntry;
+  final TranslationEntryModel importedEntry;
 
   /// 冲突类型
   final ConflictType conflictType;
@@ -94,7 +94,7 @@ class ConflictResolution {
   final ConflictResolutionStrategy strategy;
 
   /// 解决后的翻译条目（当策略为 merge 或自定义时使用）
-  final TranslationEntry? resolvedEntry;
+  final TranslationEntryModel? resolvedEntry;
 }
 
 /// 冲突检测结果
@@ -109,7 +109,7 @@ class ConflictDetectionResult {
   final List<TranslationConflict> conflicts;
 
   /// 新的（无冲突的）翻译条目
-  final List<TranslationEntry> newEntries;
+  final List<TranslationEntryModel> newEntries;
 
   /// 检测结果摘要
   final String? summary;
@@ -133,17 +133,17 @@ class ConflictDetectionResult {
 class ConflictDetectionService {
   /// 检测翻译冲突
   static Future<ConflictDetectionResult> detectConflicts(
-    List<TranslationEntry> existingEntries,
-    List<TranslationEntry> importedEntries,
+    List<TranslationEntryModel> existingEntries,
+    List<TranslationEntryModel> importedEntries,
   ) async {
     try {
       LoggerUtils.info('开始检测翻译冲突，现有条目: ${existingEntries.length}，导入条目: ${importedEntries.length}');
 
       final conflicts = <TranslationConflict>[];
-      final newEntries = <TranslationEntry>[];
+      final newEntries = <TranslationEntryModel>[];
 
       // 创建现有条目的键值映射
-      final existingMap = <String, TranslationEntry>{};
+      final existingMap = <String, TranslationEntryModel>{};
       for (final entry in existingEntries) {
         existingMap[entry.key] = entry;
       }
@@ -187,12 +187,12 @@ class ConflictDetectionService {
   }
 
   /// 解决冲突
-  static List<TranslationEntry> resolveConflicts(
+  static List<TranslationEntryModel> resolveConflicts(
     List<TranslationConflict> conflicts,
     List<ConflictResolution> resolutions,
   ) {
     try {
-      final resolvedEntries = <TranslationEntry>[];
+      final resolvedEntries = <TranslationEntryModel>[];
 
       // 创建解决方案映射
       final resolutionMap = <String, ConflictResolution>{};
@@ -208,7 +208,7 @@ class ConflictDetectionService {
           continue;
         }
 
-        TranslationEntry? resolvedEntry;
+        TranslationEntryModel? resolvedEntry;
 
         switch (resolution.strategy) {
           case ConflictResolutionStrategy.keepExisting:
@@ -243,8 +243,8 @@ class ConflictDetectionService {
 
   /// 分析冲突类型
   static ConflictType _analyzeConflictType(
-    TranslationEntry existing,
-    TranslationEntry imported,
+    TranslationEntryModel existing,
+    TranslationEntryModel imported,
   ) {
     // 检查翻译内容
     if (existing.targetText != imported.targetText) {
@@ -257,9 +257,7 @@ class ConflictDetectionService {
     }
 
     // 检查元数据
-    if (existing.comment != imported.comment ||
-        existing.context != imported.context ||
-        existing.maxLength != imported.maxLength) {
+    if (existing.context != imported.context) {
       return ConflictType.metadataDifference;
     }
 
@@ -269,8 +267,8 @@ class ConflictDetectionService {
 
   /// 生成冲突描述
   static String _generateConflictDescription(
-    TranslationEntry existing,
-    TranslationEntry imported,
+    TranslationEntryModel existing,
+    TranslationEntryModel imported,
     ConflictType type,
   ) {
     switch (type) {
@@ -279,7 +277,7 @@ class ConflictDetectionService {
       case ConflictType.textDifference:
         return '翻译内容不同：现有 "${existing.targetText}" vs 导入 "${imported.targetText}"';
       case ConflictType.statusDifference:
-        return '翻译状态不同：现有 ${existing.status.displayName} vs 导入 ${imported.status.displayName}';
+        return '翻译状态不同：现有 ${existing.status} vs 导入 ${imported.status}';
       case ConflictType.metadataDifference:
         return '元数据不同（注释、上下文或最大长度）';
     }
@@ -291,21 +289,16 @@ class ConflictDetectionService {
   }
 
   /// 智能合并两个翻译条目
-  static TranslationEntry _mergeEntries(
-    TranslationEntry existing,
-    TranslationEntry imported,
+  static TranslationEntryModel _mergeEntries(
+    TranslationEntryModel existing,
+    TranslationEntryModel imported,
   ) {
     return existing.copyWith(
       // 优先使用导入的翻译文本（如果不为空）
       targetText: imported.targetText.isNotEmpty ? imported.targetText : existing.targetText,
       // 使用更新的状态
-      status: imported.status != TranslationStatus.pending ? imported.status : existing.status,
-      // 合并注释
-      comment: imported.comment?.isNotEmpty == true ? imported.comment : existing.comment,
-      // 合并上下文
-      context: imported.context?.isNotEmpty == true ? imported.context : existing.context,
-      // 使用导入的最大长度（如果设置了）
-      maxLength: imported.maxLength ?? existing.maxLength,
+      status: imported.status,
+      context: imported.context.isNotEmpty ? imported.context : existing.context,
       // 更新时间
       updatedAt: DateTime.now(),
     );

@@ -71,6 +71,11 @@ class ProjectMemberModel with _$ProjectMemberModel {
     @JsonKey(name: 'inviter_display_name') String? inviterDisplayName,
   }) = _ProjectMemberModel;
 
+  const ProjectMemberModel._();
+
+  /// name 别名（指向 displayName 或 username）
+  String? get name => displayName ?? username;
+
   factory ProjectMemberModel.fromJson(Map<String, dynamic> json) => _$ProjectMemberModelFromJson(json);
 }
 

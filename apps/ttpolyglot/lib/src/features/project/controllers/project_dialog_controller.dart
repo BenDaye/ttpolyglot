@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/common/common.dart';
 import 'package:ttpolyglot/src/features/features.dart';
-import 'package:ttpolyglot_core/core.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
 /// 项目弹窗控制器
@@ -14,24 +13,24 @@ class ProjectDialogController extends GetxController {
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
 
-  final _selectedPrimaryLanguage = Rxn<Language>();
-  final _selectedTargetLanguages = <Language>[].obs;
-  final _availableLanguages = <Language>[].obs;
+  final _selectedPrimaryLanguage = Rxn<LanguageEnum>();
+  final _selectedTargetLanguages = <LanguageEnum>[].obs;
+  final _availableLanguages = <LanguageEnum>[].obs;
   final _isLoading = false.obs;
   final _isLoadingLanguages = false.obs;
   final _nameError = Rxn<String>();
   final _isEditMode = false.obs;
-  final _editingProject = Rxn<Project>();
+  final _editingProject = Rxn<ProjectModel>();
 
   // Getters
-  Language? get selectedPrimaryLanguage => _selectedPrimaryLanguage.value;
-  List<Language> get selectedTargetLanguages => _selectedTargetLanguages;
-  List<Language> get availableLanguages => _availableLanguages;
+  LanguageEnum? get selectedPrimaryLanguage => _selectedPrimaryLanguage.value;
+  List<LanguageEnum> get selectedTargetLanguages => _selectedTargetLanguages;
+  List<LanguageEnum> get availableLanguages => _availableLanguages;
   bool get isLoading => _isLoading.value;
   bool get isLoadingLanguages => _isLoadingLanguages.value;
   String? get nameError => _nameError.value;
   bool get isEditMode => _isEditMode.value;
-  Project? get editingProject => _editingProject.value;
+  ProjectModel? get editingProject => _editingProject.value;
 
   @override
   void onInit() {
@@ -47,17 +46,8 @@ class ProjectDialogController extends GetxController {
   }
 
   /// 将 LanguageModel 转换为 Language
-  List<Language> _convertToLanguages(List<LanguageModel> models) {
-    return models.map((model) {
-      return Language(
-        id: model.id,
-        code: model.code.code,
-        name: model.name,
-        nativeName: model.nativeName ?? model.name,
-        isRtl: model.isRtl,
-        sortIndex: model.sortOrder,
-      );
-    }).toList();
+  List<LanguageEnum> _convertToLanguages(List<LanguageModel> models) {
+    return models.map((model) => model.code).toList();
   }
 
   /// 初始化语言列表
@@ -117,7 +107,7 @@ class ProjectDialogController extends GetxController {
   }
 
   /// 显示编辑项目弹窗
-  static Future<void> showEditDialog(Project project) async {
+  static Future<void> showEditDialog(ProjectModel project) async {
     final tag = 'project_dialog_controller_${DateTime.now().millisecondsSinceEpoch}_project_${project.id}';
     final controller = Get.put(ProjectDialogController(), tag: tag);
     await controller._waitForLanguagesLoaded();
@@ -130,11 +120,11 @@ class ProjectDialogController extends GetxController {
       Get.delete<ProjectDialogController>(tag: tag);
     }
 
-    _refreshProject(project.id);
+    _refreshProject(project.id.toString());
   }
 
   /// 显示编辑项目目标语言弹窗
-  static Future<void> showEditTargetLanguagesDialog(Project project) async {
+  static Future<void> showEditTargetLanguagesDialog(ProjectModel project) async {
     final tag = 'project_dialog_controller_${DateTime.now().millisecondsSinceEpoch}_project_${project.id}';
     final controller = Get.put(ProjectDialogController(), tag: tag);
     await controller._waitForLanguagesLoaded();
@@ -153,12 +143,12 @@ class ProjectDialogController extends GetxController {
         Get.delete<ProjectDialogController>(tag: tag);
       }
 
-      _refreshProject(project.id);
+      _refreshProject(project.id.toString());
     });
   }
 
   /// 显示编辑项目主语言弹窗
-  static Future<void> showEditDefaultLanguagesDialog(Project project) async {
+  static Future<void> showEditDefaultLanguagesDialog(ProjectModel project) async {
     final tag = 'project_dialog_controller_${DateTime.now().millisecondsSinceEpoch}_project_${project.id}';
     final controller = Get.put(ProjectDialogController(), tag: tag);
     await controller._waitForLanguagesLoaded();
@@ -174,11 +164,11 @@ class ProjectDialogController extends GetxController {
       Get.delete<ProjectDialogController>(tag: tag);
     }
 
-    _refreshProject(project.id);
+    _refreshProject(project.id.toString());
   }
 
   /// 显示编辑项目名称弹窗
-  static Future<void> showEditNameDialog(Project project) async {
+  static Future<void> showEditNameDialog(ProjectModel project) async {
     final tag = 'project_dialog_controller_${DateTime.now().millisecondsSinceEpoch}_project_${project.id}';
     final controller = Get.put(ProjectDialogController(), tag: tag);
     await controller._waitForLanguagesLoaded();
@@ -194,11 +184,11 @@ class ProjectDialogController extends GetxController {
       Get.delete<ProjectDialogController>(tag: tag);
     }
 
-    _refreshProject(project.id);
+    _refreshProject(project.id.toString());
   }
 
   /// 显示编辑项目描述弹窗
-  static Future<void> showEditDescriptionDialog(Project project) async {
+  static Future<void> showEditDescriptionDialog(ProjectModel project) async {
     final tag = 'project_dialog_controller_${DateTime.now().millisecondsSinceEpoch}_project_${project.id}';
     final controller = Get.put(ProjectDialogController(), tag: tag);
     await controller._waitForLanguagesLoaded();
@@ -214,19 +204,12 @@ class ProjectDialogController extends GetxController {
       Get.delete<ProjectDialogController>(tag: tag);
     }
 
-    _refreshProject(project.id);
+    _refreshProject(project.id.toString());
   }
 
   /// 显示编辑项目状态弹窗
-  static Future<void> showEditStatusDialog(Project project) async {
+  static Future<void> showEditStatusDialog(ProjectModel project) async {
     try {
-      // 获取当前状态
-      final projectIdInt = int.tryParse(project.id);
-      if (projectIdInt == null) {
-        Get.snackbar('错误', '项目ID无效');
-        return;
-      }
-
       final projectApi = Get.find<ProjectApi>();
 
       // 显示状态选择对话框
@@ -268,13 +251,13 @@ class ProjectDialogController extends GetxController {
       if (result != null) {
         // 调用 API 更新状态
         final updatedProject = await projectApi.updateProject(
-          projectId: projectIdInt,
+          projectId: project.id,
           status: result,
         );
 
         if (updatedProject != null) {
           Get.snackbar('成功', '项目状态已更新');
-          _refreshProject(project.id);
+          _refreshProject(project.id.toString());
         } else {
           Get.snackbar('失败', '更新项目状态失败');
         }
@@ -287,15 +270,8 @@ class ProjectDialogController extends GetxController {
   }
 
   /// 显示编辑项目可见性弹窗
-  static Future<void> showEditVisibilityDialog(Project project) async {
+  static Future<void> showEditVisibilityDialog(ProjectModel project) async {
     try {
-      // 获取当前可见性
-      final projectIdInt = int.tryParse(project.id);
-      if (projectIdInt == null) {
-        Get.snackbar('错误', '项目ID无效');
-        return;
-      }
-
       final projectApi = Get.find<ProjectApi>();
 
       // 显示可见性选择对话框
@@ -337,13 +313,13 @@ class ProjectDialogController extends GetxController {
       if (result != null) {
         // 调用 API 更新可见性
         final updatedProject = await projectApi.updateProject(
-          projectId: projectIdInt,
+          projectId: project.id,
           visibility: result,
         );
 
         if (updatedProject != null) {
           Get.snackbar('成功', '项目可见性已更新');
-          _refreshProject(project.id);
+          _refreshProject(project.id.toString());
         } else {
           Get.snackbar('失败', '更新项目可见性失败');
         }
@@ -386,13 +362,13 @@ class ProjectDialogController extends GetxController {
   }
 
   /// 重置表单为编辑模式
-  void _resetForEdit(Project project) {
+  void _resetForEdit(ProjectModel project) {
     _isEditMode.value = true;
     _editingProject.value = project;
 
     // 填充表单数据
     nameController.text = project.name;
-    descriptionController.text = project.description;
+    descriptionController.text = project.description ?? '';
 
     // 设置主语言（编辑模式下不可修改）
     _selectedPrimaryLanguage.value = _availableLanguages.firstWhere(
@@ -400,12 +376,13 @@ class ProjectDialogController extends GetxController {
       orElse: () => _availableLanguages.first,
     );
 
-    // 设置目标语言
+    // 设置目标语言（除主语言外的所有语言）
     _selectedTargetLanguages.clear();
-    for (final targetLang in project.targetLanguages) {
+    final targetLanguages = project.languages.where((lang) => lang.id != project.primaryLanguageId).toList();
+    for (final targetLang in targetLanguages) {
       final lang = _availableLanguages.firstWhere(
-        (lang) => lang.code == targetLang.code,
-        orElse: () => targetLang,
+        (lang) => lang.code == targetLang.code.code,
+        orElse: () => targetLang.code,
       );
       _selectedTargetLanguages.add(lang);
     }
@@ -414,7 +391,7 @@ class ProjectDialogController extends GetxController {
   }
 
   /// 设置主语言
-  void setPrimaryLanguage(Language? language) {
+  void setPrimaryLanguage(LanguageEnum? language) {
     _selectedPrimaryLanguage.value = language;
     if (language != null) {
       _selectedTargetLanguages.remove(language);
@@ -422,7 +399,7 @@ class ProjectDialogController extends GetxController {
   }
 
   /// 切换目标语言
-  void toggleTargetLanguage(Language language) {
+  void toggleTargetLanguage(LanguageEnum language) {
     if (_selectedTargetLanguages.contains(language)) {
       _selectedTargetLanguages.remove(language);
     } else {
@@ -431,7 +408,7 @@ class ProjectDialogController extends GetxController {
   }
 
   /// 移除目标语言
-  void removeTargetLanguage(Language language) {
+  void removeTargetLanguage(LanguageEnum language) {
     _selectedTargetLanguages.remove(language);
   }
 
@@ -466,10 +443,9 @@ class ProjectDialogController extends GetxController {
       if (_isEditMode.value) {
         // 编辑模式：检查名称是否与其他项目冲突
         if (name != _editingProject.value!.name) {
-          final projectId = int.tryParse(_editingProject.value!.id);
           final isNameAvailable = await _projectApi.checkProjectNameAvailable(
             name,
-            excludeProjectId: projectId,
+            excludeProjectId: _editingProject.value!.id,
           );
           if (isNameAvailable == false) {
             _nameError.value = '项目名称已存在';
@@ -478,17 +454,15 @@ class ProjectDialogController extends GetxController {
           }
         }
 
-        final projectId = int.parse(_editingProject.value!.id);
-
         // 更新项目基本信息
         await _projectApi.updateProject(
-          projectId: projectId,
+          projectId: _editingProject.value!.id,
           name: name,
           description: description,
         );
 
         // 处理目标语言的变更
-        await _updateTargetLanguages(projectId);
+        await _updateTargetLanguages(_editingProject.value!.id);
 
         Get.back(closeOverlays: true);
         Get.snackbar('成功', '项目更新成功');
@@ -535,8 +509,9 @@ class ProjectDialogController extends GetxController {
   Future<void> _updateTargetLanguages(int projectId) async {
     if (_editingProject.value == null) return;
 
-    // 获取原有的目标语言列表
-    final originalTargetLanguages = _editingProject.value!.targetLanguages;
+    // 获取原有的目标语言列表（除主语言外的所有语言）
+    final originalTargetLanguages =
+        _editingProject.value!.languages.where((lang) => lang.id != _editingProject.value!.primaryLanguageId).toList();
     final originalLanguageIds = originalTargetLanguages.map((lang) => lang.id).whereType<int>().toSet();
 
     // 获取新选择的目标语言列表
@@ -722,7 +697,7 @@ class ProjectDialog extends StatelessWidget {
                                       color: Theme.of(context).colorScheme.surfaceContainer,
                                       borderRadius: BorderRadius.circular(8.0),
                                     ),
-                                    child: DropdownButton<Language>(
+                                    child: DropdownButton<LanguageEnum>(
                                       value: controller.selectedPrimaryLanguage != null &&
                                               controller.availableLanguages
                                                   .any((lang) => lang.code == controller.selectedPrimaryLanguage!.code)
@@ -734,7 +709,7 @@ class ProjectDialog extends StatelessWidget {
                                       underline: const SizedBox(),
                                       hint: const Text('选择主语言'),
                                       items: controller.availableLanguages.map((language) {
-                                        return DropdownMenuItem<Language>(
+                                        return DropdownMenuItem<LanguageEnum>(
                                           value: language,
                                           child: Row(
                                             children: [
@@ -783,7 +758,7 @@ class ProjectDialog extends StatelessWidget {
                                     color: Theme.of(context).colorScheme.surfaceContainer,
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
-                                  child: DropdownButton<Language>(
+                                  child: DropdownButton<LanguageEnum>(
                                     value: null,
                                     isExpanded: true,
                                     menuMaxHeight: 240.0,
@@ -795,7 +770,7 @@ class ProjectDialog extends StatelessWidget {
                                         final isAlreadySelected = controller.selectedTargetLanguages.contains(language);
                                         final isDisabled = isPrimaryLanguage || isAlreadySelected;
 
-                                        return DropdownMenuItem<Language>(
+                                        return DropdownMenuItem<LanguageEnum>(
                                           value: language,
                                           enabled: !isDisabled,
                                           child: Row(

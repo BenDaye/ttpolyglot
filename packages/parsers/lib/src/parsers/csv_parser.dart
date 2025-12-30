@@ -1,5 +1,5 @@
 import 'package:csv/csv.dart';
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:uuid/uuid.dart';
 
 import '../constants/file_formats.dart';
@@ -37,7 +37,7 @@ class CsvParser implements TranslationParser {
   @override
   Future<ParserResult> parseString(
     String content,
-    Language language, {
+    LanguageEnum language, {
     Map<String, dynamic>? options,
   }) async {
     try {
@@ -53,7 +53,7 @@ class CsvParser implements TranslationParser {
       );
 
       final rows = converter.convert(content);
-      final entries = <TranslationEntry>[];
+      final entries = <TranslationEntryModel>[];
       final warnings = <String>[];
 
       if (rows.isEmpty) {
@@ -82,15 +82,14 @@ class CsvParser implements TranslationParser {
           continue;
         }
 
-        entries.add(TranslationEntry(
-          id: _uuid.v4(),
-          key: key,
+        entries.add(TranslationEntryModel(
+          uuid: _uuid.v4(),
+          entryKey: key,
           projectId: 'unknown',
-          sourceLanguage: language,
           targetLanguage: language,
           sourceText: value,
           targetText: value,
-          status: TranslationStatus.completed,
+          status: TranslationStatusEnum.completed,
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         ));
@@ -109,8 +108,8 @@ class CsvParser implements TranslationParser {
   @override
   Future<WriteResult> writeFile(
     String filePath,
-    List<TranslationEntry> entries,
-    Language language, {
+    List<TranslationEntryModel> entries,
+    LanguageEnum language, {
     Map<String, dynamic>? options,
   }) async {
     try {
@@ -133,8 +132,8 @@ class CsvParser implements TranslationParser {
 
   @override
   Future<String> writeString(
-    List<TranslationEntry> entries,
-    Language language, {
+    List<TranslationEntryModel> entries,
+    LanguageEnum language, {
     Map<String, dynamic>? options,
   }) async {
     final delimiter = options?['delimiter'] as String? ?? ',';
@@ -153,8 +152,8 @@ class CsvParser implements TranslationParser {
     }
 
     for (final entry in entries) {
-      if (entry.targetLanguage.code == language.code) {
-        rows.add([entry.key, entry.targetText]);
+      if (entry.targetLanguage == language) {
+        rows.add([entry.entryKey, entry.targetText]);
       }
     }
 
@@ -196,21 +195,16 @@ class CsvParser implements TranslationParser {
   }
 
   /// 从文件名推断语言
-  Language _inferLanguageFromFileName(String fileName) {
+  LanguageEnum _inferLanguageFromFileName(String fileName) {
     final parts = fileName.split('.');
     if (parts.length > 1) {
       final langCode = parts.last;
       // 标准化语言代码格式为 xx-XX
       final standardizedCode = _standardizeLanguageCode(langCode);
-      return Language(
-        id: Language.supportedLanguages.firstWhere((lang) => lang.code == standardizedCode).id,
-        code: standardizedCode,
-        name: standardizedCode.toUpperCase(),
-        nativeName: standardizedCode,
-      );
+      return LanguageEnum.fromValue(standardizedCode);
     }
 
-    return Language.supportedLanguages.first;
+    return LanguageEnum.enUS;
   }
 
   /// 标准化语言代码格式为 xx-XX

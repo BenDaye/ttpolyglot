@@ -1,4 +1,4 @@
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 import 'parser_result.dart';
 
@@ -19,22 +19,22 @@ abstract class TranslationParser {
   /// 从字符串内容解析翻译条目
   Future<ParserResult> parseString(
     String content,
-    Language language, {
+    LanguageEnum language, {
     Map<String, dynamic>? options,
   });
 
   /// 将翻译条目写入文件
   Future<WriteResult> writeFile(
     String filePath,
-    List<TranslationEntry> entries,
-    Language language, {
+    List<TranslationEntryModel> entries,
+    LanguageEnum language, {
     Map<String, dynamic>? options,
   });
 
   /// 将翻译条目转换为字符串
   Future<String> writeString(
-    List<TranslationEntry> entries,
-    Language language, {
+    List<TranslationEntryModel> entries,
+    LanguageEnum language, {
     Map<String, dynamic>? options,
   });
 

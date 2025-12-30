@@ -1,4 +1,4 @@
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
 
@@ -37,12 +37,12 @@ class YamlParser implements TranslationParser {
   @override
   Future<ParserResult> parseString(
     String content,
-    Language language, {
+    LanguageEnum language, {
     Map<String, dynamic>? options,
   }) async {
     try {
       final yamlData = loadYaml(content);
-      final entries = <TranslationEntry>[];
+      final entries = <TranslationEntryModel>[];
       final warnings = <String>[];
 
       if (yamlData is Map) {
@@ -64,8 +64,8 @@ class YamlParser implements TranslationParser {
   @override
   Future<WriteResult> writeFile(
     String filePath,
-    List<TranslationEntry> entries,
-    Language language, {
+    List<TranslationEntryModel> entries,
+    LanguageEnum language, {
     Map<String, dynamic>? options,
   }) async {
     try {
@@ -88,8 +88,8 @@ class YamlParser implements TranslationParser {
 
   @override
   Future<String> writeString(
-    List<TranslationEntry> entries,
-    Language language, {
+    List<TranslationEntryModel> entries,
+    LanguageEnum language, {
     Map<String, dynamic>? options,
   }) async {
     final yamlObject = <String, dynamic>{};
@@ -97,8 +97,8 @@ class YamlParser implements TranslationParser {
     final sortKeys = options?['sortKeys'] as bool? ?? true;
 
     for (final entry in entries) {
-      if (entry.targetLanguage.code == language.code) {
-        _setNestedValue(yamlObject, entry.key, entry.targetText);
+      if (entry.targetLanguage == language) {
+        _setNestedValue(yamlObject, entry.entryKey, entry.targetText);
       }
     }
 
@@ -134,26 +134,21 @@ class YamlParser implements TranslationParser {
   }
 
   /// 从文件名推断语言
-  Language _inferLanguageFromFileName(String fileName) {
+  LanguageEnum _inferLanguageFromFileName(String fileName) {
     final parts = fileName.split('.');
     if (parts.length > 1) {
       final langCode = parts.last;
-      return Language(
-        id: Language.supportedLanguages.firstWhere((lang) => lang.code == langCode).id,
-        code: langCode,
-        name: langCode.toUpperCase(),
-        nativeName: langCode,
-      );
+      return LanguageEnum.fromValue(langCode);
     }
 
-    return Language.supportedLanguages.first;
+    return LanguageEnum.enUS;
   }
 
   /// 解析 YAML 对象
   void _parseYamlObject(
     Map yamlData,
-    List<TranslationEntry> entries,
-    Language language,
+    List<TranslationEntryModel> entries,
+    LanguageEnum language,
     List<String> warnings, {
     String prefix = '',
   }) {
@@ -161,15 +156,14 @@ class YamlParser implements TranslationParser {
       final fullKey = prefix.isEmpty ? key.toString() : '$prefix.${key.toString()}';
 
       if (value is String) {
-        entries.add(TranslationEntry(
-          id: _uuid.v4(),
-          key: fullKey,
+        entries.add(TranslationEntryModel(
+          uuid: _uuid.v4(),
+          entryKey: fullKey,
           projectId: 'unknown',
-          sourceLanguage: language,
           targetLanguage: language,
           sourceText: value,
           targetText: value,
-          status: TranslationStatus.completed,
+          status: TranslationStatusEnum.completed,
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         ));
@@ -180,15 +174,14 @@ class YamlParser implements TranslationParser {
         for (int i = 0; i < value.length; i++) {
           final item = value[i];
           if (item is String) {
-            entries.add(TranslationEntry(
-              id: _uuid.v4(),
-              key: '$fullKey[$i]',
+            entries.add(TranslationEntryModel(
+              uuid: _uuid.v4(),
+              entryKey: '$fullKey[$i]',
               projectId: 'unknown',
-              sourceLanguage: language,
               targetLanguage: language,
               sourceText: item,
               targetText: item,
-              status: TranslationStatus.completed,
+              status: TranslationStatusEnum.completed,
               createdAt: DateTime.now(),
               updatedAt: DateTime.now(),
             ));

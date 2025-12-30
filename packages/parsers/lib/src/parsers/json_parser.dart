@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:ttpolyglot_core/core.dart';
+import 'package:ttpolyglot_model/model.dart';
 import 'package:uuid/uuid.dart';
 
 import '../constants/file_formats.dart';
@@ -38,12 +38,12 @@ class JsonParser implements TranslationParser {
   @override
   Future<ParserResult> parseString(
     String content,
-    Language language, {
+    LanguageEnum language, {
     Map<String, dynamic>? options,
   }) async {
     try {
       final jsonData = json.decode(content);
-      final entries = <TranslationEntry>[];
+      final entries = <TranslationEntryModel>[];
       final warnings = <String>[];
 
       if (jsonData is Map<String, dynamic>) {
@@ -65,8 +65,8 @@ class JsonParser implements TranslationParser {
   @override
   Future<WriteResult> writeFile(
     String filePath,
-    List<TranslationEntry> entries,
-    Language language, {
+    List<TranslationEntryModel> entries,
+    LanguageEnum language, {
     Map<String, dynamic>? options,
   }) async {
     try {
@@ -89,8 +89,8 @@ class JsonParser implements TranslationParser {
 
   @override
   Future<String> writeString(
-    List<TranslationEntry> entries,
-    Language language, {
+    List<TranslationEntryModel> entries,
+    LanguageEnum language, {
     Map<String, dynamic>? options,
   }) async {
     final jsonObject = <String, dynamic>{};
@@ -99,11 +99,11 @@ class JsonParser implements TranslationParser {
     final nestedKeyStyle = options?['nestedKeyStyle'] as bool? ?? true;
 
     for (final entry in entries) {
-      if (entry.targetLanguage.code == language.code) {
+      if (entry.targetLanguage == language) {
         if (nestedKeyStyle) {
-          _setNestedValue(jsonObject, entry.key, entry.targetText);
+          _setNestedValue(jsonObject, entry.entryKey, entry.targetText);
         } else {
-          jsonObject[entry.key] = entry.targetText;
+          jsonObject[entry.entryKey] = entry.targetText;
         }
       }
     }
@@ -144,17 +144,12 @@ class JsonParser implements TranslationParser {
   }
 
   /// 从文件名推断语言
-  Language _inferLanguageFromFileName(String fileName) {
+  LanguageEnum _inferLanguageFromFileName(String fileName) {
     // 检查文件名是否包含语言代码模式（如 en-US, zh-CN 等）
     final langCodeRegex = RegExp(r'^[a-z]{2}(-[A-Z]{2})?$');
 
     if (langCodeRegex.hasMatch(fileName)) {
-      return Language(
-        id: Language.supportedLanguages.firstWhere((lang) => lang.code == fileName).id,
-        code: fileName,
-        name: fileName.toUpperCase(),
-        nativeName: fileName,
-      );
+      return LanguageEnum.fromValue(fileName);
     }
 
     // 如果文件名包含点号，尝试从最后一部分推断
@@ -162,23 +157,19 @@ class JsonParser implements TranslationParser {
     if (parts.length > 1) {
       final langCode = parts.last;
       if (langCodeRegex.hasMatch(langCode)) {
-        return Language(
-          id: Language.supportedLanguages.firstWhere((lang) => lang.code == langCode).id,
-          code: langCode,
-          name: langCode.toUpperCase(),
-          nativeName: langCode,
-        );
+        return LanguageEnum.fromValue(langCode);
       }
     }
 
-    return Language.supportedLanguages.first;
+    // 默认返回英语
+    return LanguageEnum.enUS;
   }
 
   /// 解析 JSON 对象
   void _parseJsonObject(
     Map<String, dynamic> jsonData,
-    List<TranslationEntry> entries,
-    Language language,
+    List<TranslationEntryModel> entries,
+    LanguageEnum language,
     List<String> warnings, {
     String prefix = '',
   }) {
@@ -186,15 +177,14 @@ class JsonParser implements TranslationParser {
       final fullKey = prefix.isEmpty ? key : '$prefix.$key';
 
       if (value is String) {
-        entries.add(TranslationEntry(
-          id: _uuid.v4(),
-          key: fullKey,
+        entries.add(TranslationEntryModel(
+          uuid: _uuid.v4(),
+          entryKey: fullKey,
           projectId: 'unknown',
-          sourceLanguage: language,
           targetLanguage: language,
           sourceText: value,
           targetText: value,
-          status: TranslationStatus.completed,
+          status: TranslationStatusEnum.completed,
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         ));
@@ -205,15 +195,14 @@ class JsonParser implements TranslationParser {
         for (int i = 0; i < value.length; i++) {
           final item = value[i];
           if (item is String) {
-            entries.add(TranslationEntry(
-              id: _uuid.v4(),
-              key: '$fullKey[$i]',
+            entries.add(TranslationEntryModel(
+              uuid: _uuid.v4(),
+              entryKey: '$fullKey[$i]',
               projectId: 'unknown',
-              sourceLanguage: language,
               targetLanguage: language,
               sourceText: item,
               targetText: item,
-              status: TranslationStatus.completed,
+              status: TranslationStatusEnum.completed,
               createdAt: DateTime.now(),
               updatedAt: DateTime.now(),
             ));

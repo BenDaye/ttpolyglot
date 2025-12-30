@@ -7,8 +7,8 @@ environment:
   sdk: ^3.6.1
 
 dependencies:
-  # 核心包依赖
-  ttpolyglot_core: ^1.0.0
+  # Model 包依赖
+  ttpolyglot_model: ^1.0.0
 
   # JSON 处理
   json_annotation: ^4.8.1

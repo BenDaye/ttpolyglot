@@ -742,6 +742,12 @@ mixin _$TranslationSettingsModel {
   List<TranslationProviderConfigModel> get providers =>
       throw _privateConstructorUsedError;
 
+  /// 默认提供商
+  @JsonKey(name: 'default_provider')
+  @TranslationProviderEnumConverter()
+  TranslationProviderEnum get defaultProvider =>
+      throw _privateConstructorUsedError;
+
   /// 最大重试次数
   @JsonKey(name: 'max_retries')
   int get maxRetries => throw _privateConstructorUsedError;
@@ -769,6 +775,9 @@ abstract class $TranslationSettingsModelCopyWith<$Res> {
   $Res call(
       {@JsonKey(name: 'providers')
       List<TranslationProviderConfigModel> providers,
+      @JsonKey(name: 'default_provider')
+      @TranslationProviderEnumConverter()
+      TranslationProviderEnum defaultProvider,
       @JsonKey(name: 'max_retries') int maxRetries,
       @JsonKey(name: 'timeout_seconds') int timeoutSeconds});
 }
@@ -790,6 +799,7 @@ class _$TranslationSettingsModelCopyWithImpl<$Res,
   @override
   $Res call({
     Object? providers = null,
+    Object? defaultProvider = null,
     Object? maxRetries = null,
     Object? timeoutSeconds = null,
   }) {
@@ -798,6 +808,10 @@ class _$TranslationSettingsModelCopyWithImpl<$Res,
           ? _value.providers
           : providers // ignore: cast_nullable_to_non_nullable
               as List<TranslationProviderConfigModel>,
+      defaultProvider: null == defaultProvider
+          ? _value.defaultProvider
+          : defaultProvider // ignore: cast_nullable_to_non_nullable
+              as TranslationProviderEnum,
       maxRetries: null == maxRetries
           ? _value.maxRetries
           : maxRetries // ignore: cast_nullable_to_non_nullable
@@ -822,6 +836,9 @@ abstract class _$$TranslationSettingsModelImplCopyWith<$Res>
   $Res call(
       {@JsonKey(name: 'providers')
       List<TranslationProviderConfigModel> providers,
+      @JsonKey(name: 'default_provider')
+      @TranslationProviderEnumConverter()
+      TranslationProviderEnum defaultProvider,
       @JsonKey(name: 'max_retries') int maxRetries,
       @JsonKey(name: 'timeout_seconds') int timeoutSeconds});
 }
@@ -842,6 +859,7 @@ class __$$TranslationSettingsModelImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? providers = null,
+    Object? defaultProvider = null,
     Object? maxRetries = null,
     Object? timeoutSeconds = null,
   }) {
@@ -850,6 +868,10 @@ class __$$TranslationSettingsModelImplCopyWithImpl<$Res>
           ? _value._providers
           : providers // ignore: cast_nullable_to_non_nullable
               as List<TranslationProviderConfigModel>,
+      defaultProvider: null == defaultProvider
+          ? _value.defaultProvider
+          : defaultProvider // ignore: cast_nullable_to_non_nullable
+              as TranslationProviderEnum,
       maxRetries: null == maxRetries
           ? _value.maxRetries
           : maxRetries // ignore: cast_nullable_to_non_nullable
@@ -868,6 +890,9 @@ class _$TranslationSettingsModelImpl implements _TranslationSettingsModel {
   const _$TranslationSettingsModelImpl(
       {@JsonKey(name: 'providers')
       final List<TranslationProviderConfigModel> providers = const [],
+      @JsonKey(name: 'default_provider')
+      @TranslationProviderEnumConverter()
+      this.defaultProvider = TranslationProviderEnum.google,
       @JsonKey(name: 'max_retries') this.maxRetries = 3,
       @JsonKey(name: 'timeout_seconds') this.timeoutSeconds = 30})
       : _providers = providers;
@@ -887,6 +912,12 @@ class _$TranslationSettingsModelImpl implements _TranslationSettingsModel {
     return EqualUnmodifiableListView(_providers);
   }
 
+  /// 默认提供商
+  @override
+  @JsonKey(name: 'default_provider')
+  @TranslationProviderEnumConverter()
+  final TranslationProviderEnum defaultProvider;
+
   /// 最大重试次数
   @override
   @JsonKey(name: 'max_retries')
@@ -899,7 +930,7 @@ class _$TranslationSettingsModelImpl implements _TranslationSettingsModel {
 
   @override
   String toString() {
-    return 'TranslationSettingsModel(providers: $providers, maxRetries: $maxRetries, timeoutSeconds: $timeoutSeconds)';
+    return 'TranslationSettingsModel(providers: $providers, defaultProvider: $defaultProvider, maxRetries: $maxRetries, timeoutSeconds: $timeoutSeconds)';
   }
 
   @override
@@ -909,6 +940,8 @@ class _$TranslationSettingsModelImpl implements _TranslationSettingsModel {
             other is _$TranslationSettingsModelImpl &&
             const DeepCollectionEquality()
                 .equals(other._providers, _providers) &&
+            (identical(other.defaultProvider, defaultProvider) ||
+                other.defaultProvider == defaultProvider) &&
             (identical(other.maxRetries, maxRetries) ||
                 other.maxRetries == maxRetries) &&
             (identical(other.timeoutSeconds, timeoutSeconds) ||
@@ -920,6 +953,7 @@ class _$TranslationSettingsModelImpl implements _TranslationSettingsModel {
   int get hashCode => Object.hash(
       runtimeType,
       const DeepCollectionEquality().hash(_providers),
+      defaultProvider,
       maxRetries,
       timeoutSeconds);
 
@@ -944,6 +978,9 @@ abstract class _TranslationSettingsModel implements TranslationSettingsModel {
   const factory _TranslationSettingsModel(
           {@JsonKey(name: 'providers')
           final List<TranslationProviderConfigModel> providers,
+          @JsonKey(name: 'default_provider')
+          @TranslationProviderEnumConverter()
+          final TranslationProviderEnum defaultProvider,
           @JsonKey(name: 'max_retries') final int maxRetries,
           @JsonKey(name: 'timeout_seconds') final int timeoutSeconds}) =
       _$TranslationSettingsModelImpl;
@@ -955,6 +992,12 @@ abstract class _TranslationSettingsModel implements TranslationSettingsModel {
   @override
   @JsonKey(name: 'providers')
   List<TranslationProviderConfigModel> get providers;
+
+  /// 默认提供商
+  @override
+  @JsonKey(name: 'default_provider')
+  @TranslationProviderEnumConverter()
+  TranslationProviderEnum get defaultProvider;
 
   /// 最大重试次数
   @override
@@ -987,7 +1030,8 @@ mixin _$TranslationProviderConfigModel {
 
   /// 翻译提供商代码 (google/baidu/youdao/custom)
   @JsonKey(name: 'provider')
-  String get provider => throw _privateConstructorUsedError;
+  @TranslationProviderEnumConverter()
+  TranslationProviderEnum get provider => throw _privateConstructorUsedError;
 
   /// 自定义名称
   @JsonKey(name: 'name')
@@ -1029,7 +1073,9 @@ abstract class $TranslationProviderConfigModelCopyWith<$Res> {
   @useResult
   $Res call(
       {@JsonKey(name: 'id') String id,
-      @JsonKey(name: 'provider') String provider,
+      @JsonKey(name: 'provider')
+      @TranslationProviderEnumConverter()
+      TranslationProviderEnum provider,
       @JsonKey(name: 'name') String? name,
       @JsonKey(name: 'app_id') String appId,
       @JsonKey(name: 'app_key') String appKey,
@@ -1069,7 +1115,7 @@ class _$TranslationProviderConfigModelCopyWithImpl<$Res,
       provider: null == provider
           ? _value.provider
           : provider // ignore: cast_nullable_to_non_nullable
-              as String,
+              as TranslationProviderEnum,
       name: freezed == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
@@ -1105,7 +1151,9 @@ abstract class _$$TranslationProviderConfigModelImplCopyWith<$Res>
   @useResult
   $Res call(
       {@JsonKey(name: 'id') String id,
-      @JsonKey(name: 'provider') String provider,
+      @JsonKey(name: 'provider')
+      @TranslationProviderEnumConverter()
+      TranslationProviderEnum provider,
       @JsonKey(name: 'name') String? name,
       @JsonKey(name: 'app_id') String appId,
       @JsonKey(name: 'app_key') String appKey,
@@ -1144,7 +1192,7 @@ class __$$TranslationProviderConfigModelImplCopyWithImpl<$Res>
       provider: null == provider
           ? _value.provider
           : provider // ignore: cast_nullable_to_non_nullable
-              as String,
+              as TranslationProviderEnum,
       name: freezed == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
@@ -1175,7 +1223,9 @@ class _$TranslationProviderConfigModelImpl
     implements _TranslationProviderConfigModel {
   const _$TranslationProviderConfigModelImpl(
       {@JsonKey(name: 'id') this.id = '',
-      @JsonKey(name: 'provider') this.provider = '',
+      @JsonKey(name: 'provider')
+      @TranslationProviderEnumConverter()
+      required this.provider,
       @JsonKey(name: 'name') this.name,
       @JsonKey(name: 'app_id') this.appId = '',
       @JsonKey(name: 'app_key') this.appKey = '',
@@ -1194,7 +1244,8 @@ class _$TranslationProviderConfigModelImpl
   /// 翻译提供商代码 (google/baidu/youdao/custom)
   @override
   @JsonKey(name: 'provider')
-  final String provider;
+  @TranslationProviderEnumConverter()
+  final TranslationProviderEnum provider;
 
   /// 自定义名称
   @override
@@ -1269,7 +1320,9 @@ abstract class _TranslationProviderConfigModel
     implements TranslationProviderConfigModel {
   const factory _TranslationProviderConfigModel(
           {@JsonKey(name: 'id') final String id,
-          @JsonKey(name: 'provider') final String provider,
+          @JsonKey(name: 'provider')
+          @TranslationProviderEnumConverter()
+          required final TranslationProviderEnum provider,
           @JsonKey(name: 'name') final String? name,
           @JsonKey(name: 'app_id') final String appId,
           @JsonKey(name: 'app_key') final String appKey,
@@ -1288,7 +1341,8 @@ abstract class _TranslationProviderConfigModel
   /// 翻译提供商代码 (google/baidu/youdao/custom)
   @override
   @JsonKey(name: 'provider')
-  String get provider;
+  @TranslationProviderEnumConverter()
+  TranslationProviderEnum get provider;
 
   /// 自定义名称
   @override
