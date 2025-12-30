@@ -58,7 +58,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
   Widget build(BuildContext context) {
     final primaryLanguage = ProjectController.getInstance(widget.controller.projectId).project?.primaryLanguage;
     _selectedSourceEntry ??= (primaryLanguage != null
-        ? widget.entries.firstWhereOrNull((item) => item.targetLanguage.code == primaryLanguage)
+        ? widget.entries.firstWhereOrNull((item) => item.targetLanguage == primaryLanguage.code)
         : widget.entries.first);
 
     return AlertDialog(

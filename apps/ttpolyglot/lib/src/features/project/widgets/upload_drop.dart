@@ -41,15 +41,17 @@ class _UploadDropState extends State<UploadDrop> {
 
         final List<XFile> files = details.files;
 
-        final platformFiles = await Future.wait(files.map((item) async {
-          final bytes = await item.readAsBytes();
-          return PlatformFile(
-            name: item.name,
-            size: bytes.length,
-            path: item.path,
-            bytes: bytes,
-          );
-        }).toList());
+        final platformFiles = await Future.wait(
+          files.map((item) async {
+            final bytes = await item.readAsBytes();
+            return PlatformFile(
+              name: item.name,
+              size: bytes.length,
+              path: item.path,
+              bytes: bytes,
+            );
+          }).toList(),
+        );
 
         widget.onDrop?.call(platformFiles);
       },
