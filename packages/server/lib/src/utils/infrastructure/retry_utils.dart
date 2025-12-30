@@ -127,7 +127,7 @@ class RetryUtils {
         final delay = _calculateDelay(config, attempt);
 
         ServerLogger.debug(
-            '重试中: ${operationName ?? 'operation'} (第${attempt}次失败, ${delay.inMilliseconds}ms后重试) - $error');
+            '重试中: ${operationName ?? 'operation'} (第$attempt次失败, ${delay.inMilliseconds}ms后重试) - $error');
 
         // 等待后重试
         await Future.delayed(delay);

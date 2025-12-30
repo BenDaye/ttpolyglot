@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as path;
-import 'package:ttpolyglot_server/server.dart';
 import 'package:ttpolyglot_model/model.dart';
+import 'package:ttpolyglot_server/server.dart';
 
 import 'migrations/base_migration.dart';
 import 'seeds/base_seed.dart';
@@ -261,7 +261,7 @@ class MigrationService {
     try {
       final tableName = '${ServerConfig.tablePrefix}migration_lock';
       final lockKey = 'migration';
-      final lockedBy = '${Platform.localHostname}_${pid}';
+      final lockedBy = '${Platform.localHostname}_$pid';
       final expiresAt = DateTime.now().add(timeout);
 
       // 首先清理过期的锁
@@ -280,7 +280,7 @@ class MigrationService {
         'key': lockKey,
         'by': lockedBy,
         'expires': expiresAt.toIso8601String(),
-        'pid': pid.toString(),
+        'pid': '$pid',
       });
 
       if (result.isNotEmpty) {
@@ -741,7 +741,7 @@ class MigrationService {
       final rollbackSql = _generateRollbackSqlFromClass(migration, migrationName);
 
       // 生成回滚迁移文件名
-      final rollbackFileName = '${_getNextMigrationNumber()}_rollback_${migrationName}.sql';
+      final rollbackFileName = '${_getNextMigrationNumber()}_rollback_$migrationName.sql';
       final rollbackPath = 'database/migrations/$rollbackFileName';
 
       // 创建回滚迁移文件

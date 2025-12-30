@@ -208,7 +208,7 @@ class TranslationController extends BaseController {
     return ResponseUtils.success(message: '批量操作功能待实现');
   }
 
-  /// POST /api/v1/projects/<projectId>/translations/batch
+  /// POST /api/v1/projects/{projectId}/translations/batch
   Future<Response> _batchCreateTranslations(Request request, String projectId) async {
     try {
       final body = await request.readAsString();

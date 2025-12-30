@@ -91,7 +91,7 @@ class BatchImportService extends BaseService {
             );
 
             logInfo('批次处理完成', context: {
-              'batch': '${i}-${i + batch.length}',
+              'batch': '$i-${i + batch.length}',
               'success': successCount,
               'failed': failedCount,
             });
