@@ -24,6 +24,7 @@ class Migration006ProjectsTable extends BaseMigration {
       await createTable('projects', '''
         CREATE TABLE IF NOT EXISTS {table_name} (
           id SERIAL PRIMARY KEY,
+          uuid UUID DEFAULT gen_random_uuid() UNIQUE NOT NULL,
           name VARCHAR(200) NOT NULL,
           slug VARCHAR(200) NOT NULL UNIQUE,
           description TEXT,
@@ -49,6 +50,7 @@ class Migration006ProjectsTable extends BaseMigration {
           onDelete: 'SET NULL');
 
       // 创建索引
+      await createIndex('projects_uuid', 'projects', 'uuid');
       await createIndex('projects_slug', 'projects', 'slug');
       await createIndex('projects_owner_id', 'projects', 'owner_id');
       await createIndex('projects_status', 'projects', 'status');
@@ -69,6 +71,7 @@ class Migration006ProjectsTable extends BaseMigration {
       // 添加表注释
       await addTableComment('projects', '项目表，存储翻译项目信息');
       await addColumnComment('projects', 'id', '项目ID，主键');
+      await addColumnComment('projects', 'uuid', '项目UUID，用于分布式场景和外键引用');
       await addColumnComment('projects', 'name', '项目名称');
       await addColumnComment('projects', 'slug', '项目唯一标识符，用于URL');
       await addColumnComment('projects', 'description', '项目描述');

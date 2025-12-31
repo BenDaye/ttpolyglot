@@ -56,9 +56,9 @@ class Migration009TranslationEntriesTable extends BaseMigration {
 
       // 创建外键约束
       await addForeignKey('translation_entries_project_id', 'translation_entries', 'project_id', 'projects', 'uuid');
-      await addForeignKey('translation_entries_translated_by', 'translation_entries', 'translated_by', 'users', 'uuid',
+      await addForeignKey('translation_entries_translated_by', 'translation_entries', 'translated_by', 'users', 'id',
           onDelete: 'SET NULL');
-      await addForeignKey('translation_entries_reviewed_by', 'translation_entries', 'reviewed_by', 'users', 'uuid',
+      await addForeignKey('translation_entries_reviewed_by', 'translation_entries', 'reviewed_by', 'users', 'id',
           onDelete: 'SET NULL');
 
       // 初始化 entry_key 字段（如果为空则使用 key）
