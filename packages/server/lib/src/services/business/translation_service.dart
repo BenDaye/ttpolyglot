@@ -43,11 +43,11 @@ class TranslationService extends BaseService {
             // 幂等检查：若已存在则跳过或报错，这里选择跳过并取现有记录
             final existing = await _databaseService.query('''
               SELECT * FROM {translation_entries}
-              WHERE project_id = @project_id AND entry_key = @entry_key AND language_code = @language_code
+              WHERE project_id = @project_id AND entry_key = @entry_key AND target_language = @target_language
             ''', {
               'project_id': projectId,
               'entry_key': entryKey,
-              'language_code': languageCode,
+              'target_language': languageCode,
             });
 
             if (existing.isNotEmpty) {
@@ -57,17 +57,20 @@ class TranslationService extends BaseService {
 
             final result = await _databaseService.query('''
               INSERT INTO {translation_entries} (
-                project_id, entry_key, language_code, source_text, target_text,
-                translator_id, context_info, status, version
+                project_id, entry_key, target_language, source_text, target_text,
+                translated_by, context, status
               ) VALUES (
-                @project_id, @entry_key, @language_code, @source_text, @target_text,
-                @translator_id, @context_info, 'pending', 1
+                @project_id, @entry_key, @target_language, @source_text, @target_text,
+                @translator_id, @context_info, 'pending'
               )
-              RETURNING *
+              RETURNING id, COALESCE(uuid::text, id::text) as uuid, project_id, entry_key, 
+                        source_language, target_language, source_text, target_text, status,
+                        translated_by, reviewed_by, COALESCE(context, '') as context, 
+                        COALESCE(comment, '') as comment, deleted_at, created_at, updated_at
             ''', {
               'project_id': projectId,
               'entry_key': entryKey,
-              'language_code': languageCode,
+              'target_language': languageCode,
               'source_text': sourceText,
               'target_text': targetText,
               'translator_id': translatorId,
@@ -106,11 +109,11 @@ class TranslationService extends BaseService {
         });
 
         // 构建查询条件
-        final conditions = <String>['te.project_id = @project_id', 'te.is_deleted = false'];
+        final conditions = <String>['te.project_id = @project_id', 'te.deleted_at IS NULL'];
         final parameters = <String, dynamic>{'project_id': projectId};
 
         if (languageCode != null && languageCode.isNotEmpty) {
-          conditions.add('te.language_code = @language_code');
+          conditions.add('te.target_language = @language_code');
           parameters['language_code'] = languageCode;
         }
 
@@ -153,7 +156,22 @@ class TranslationService extends BaseService {
 
         final sql = '''
         SELECT
-          te.*,
+          te.id,
+          COALESCE(te.uuid::text, te.id::text) as uuid,
+          te.project_id,
+          te.entry_key,
+          te.source_language,
+          te.target_language,
+          te.source_text,
+          te.target_text,
+          te.status,
+          te.translated_by,
+          te.reviewed_by,
+          COALESCE(te.context, '') as context,
+          COALESCE(te.comment, '') as comment,
+          te.deleted_at,
+          te.created_at,
+          te.updated_at,
           u_translator.username as translator_username,
           u_reviewer.username as reviewer_username
         FROM {translation_entries} te
@@ -201,7 +219,7 @@ class TranslationService extends BaseService {
         });
 
         // 构建查询条件
-        final conditions = <String>['te.project_id = @project_id', 'te.is_deleted = false'];
+        final conditions = <String>['te.project_id = @project_id', 'te.deleted_at IS NULL'];
         final parameters = <String, dynamic>{
           'project_id': projectId,
           'limit': limit + 1, // 多查询1条用于判断是否有下一页
@@ -245,7 +263,22 @@ class TranslationService extends BaseService {
 
         final sql = '''
         SELECT
-          te.*,
+          te.id,
+          COALESCE(te.uuid::text, te.id::text) as uuid,
+          te.project_id,
+          te.entry_key,
+          te.source_language,
+          te.target_language,
+          te.source_text,
+          te.target_text,
+          te.status,
+          te.translated_by,
+          te.reviewed_by,
+          COALESCE(te.context, '') as context,
+          COALESCE(te.comment, '') as comment,
+          te.deleted_at,
+          te.created_at,
+          te.updated_at,
           u_translator.username as translator_username,
           u_reviewer.username as reviewer_username
         FROM {translation_entries} te
@@ -294,12 +327,27 @@ class TranslationService extends BaseService {
 
         const sql = '''
         SELECT
-          te.*,
+          te.id,
+          COALESCE(te.uuid::text, te.id::text) as uuid,
+          te.project_id,
+          te.entry_key,
+          te.source_language,
+          te.target_language,
+          te.source_text,
+          te.target_text,
+          te.status,
+          te.translated_by,
+          te.reviewed_by,
+          COALESCE(te.context, '') as context,
+          COALESCE(te.comment, '') as comment,
+          te.deleted_at,
+          te.created_at,
+          te.updated_at,
           u_translator.username as translator_username,
           u_reviewer.username as reviewer_username
         FROM {translation_entries} te
-        LEFT JOIN {users} u_translator ON te.translator_id = u_translator.id
-        LEFT JOIN {users} u_reviewer ON te.reviewer_id = u_reviewer.id
+        LEFT JOIN {users} u_translator ON te.translated_by = u_translator.id
+        LEFT JOIN {users} u_reviewer ON te.reviewed_by = u_reviewer.id
         WHERE te.id = @entry_id
       ''';
 
@@ -334,12 +382,12 @@ class TranslationService extends BaseService {
 
         // 检查是否已存在相同的条目
         final existing = await _databaseService.query('''
-        SELECT id FROM translation_entries
-        WHERE project_id = @project_id AND entry_key = @entry_key AND language_code = @language_code
+        SELECT id FROM {translation_entries}
+        WHERE project_id = @project_id AND entry_key = @entry_key AND target_language = @target_language
       ''', {
           'project_id': projectId,
           'entry_key': entryKey,
-          'language_code': languageCode,
+          'target_language': languageCode,
         });
 
         if (existing.isNotEmpty) {
@@ -349,16 +397,19 @@ class TranslationService extends BaseService {
         // 创建翻译条目
         final result = await _databaseService.query('''
         INSERT INTO {translation_entries} (
-          project_id, entry_key, language_code, source_text, target_text,
-          translator_id, context_info, status, version
+          project_id, entry_key, target_language, source_text, target_text,
+          translated_by, context, status
         ) VALUES (
-          @project_id, @entry_key, @language_code, @source_text, @target_text,
-          @translator_id, @context_info, 'pending', 1
-        ) RETURNING *
+          @project_id, @entry_key, @target_language, @source_text, @target_text,
+          @translator_id, @context_info, 'pending'
+        ) RETURNING id, COALESCE(uuid::text, id::text) as uuid, project_id, entry_key, 
+                    source_language, target_language, source_text, target_text, status,
+                    translated_by, reviewed_by, COALESCE(context, '') as context, 
+                    COALESCE(comment, '') as comment, deleted_at, created_at, updated_at
       ''', {
           'project_id': projectId,
           'entry_key': entryKey,
-          'language_code': languageCode,
+          'target_language': languageCode,
           'source_text': sourceText,
           'target_text': targetText,
           'translator_id': translatorId,
@@ -456,10 +507,13 @@ class TranslationService extends BaseService {
 
         // 更新数据库
         final sql = '''
-        UPDATE translation_entries
-        SET ${updates.join(', ')}, version = version + 1, updated_at = CURRENT_TIMESTAMP
+        UPDATE {translation_entries}
+        SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP
         WHERE id = @entry_id
-        RETURNING *
+        RETURNING id, COALESCE(uuid::text, id::text) as uuid, project_id, entry_key, 
+                  source_language, target_language, source_text, target_text, status,
+                  translated_by, reviewed_by, COALESCE(context, '') as context, 
+                  COALESCE(comment, '') as comment, deleted_at, created_at, updated_at
       ''';
 
         final result = await _databaseService.query(sql, parameters);

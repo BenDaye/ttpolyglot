@@ -41,14 +41,10 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       if (AppConfig.useServerForTranslations) {
         try {
           final res = await _translationApi.getTranslations(projectId: projectId, page: 1, limit: 1000);
-          if (res != null) {
-            final list = res.toArray<TranslationEntryModel>(
-              (json) => TranslationEntryModel.fromJson(json),
-            );
-            if (list.isNotEmpty) {
-              final items = list.map((m) => TranslationEntryModel.fromJson(m as Map<String, dynamic>)).toList();
+          if (res != null && res.items != null) {
+            final items = res.items!;
+            if (items.isNotEmpty) {
               if (!includeSourceLanguage) return items;
-              if (items.isEmpty) return [];
               final copyLanguageCode = items.first.targetLanguage.code;
               final copyEntries = items
                   .where((item) => item.targetLanguage.code == copyLanguageCode)
@@ -78,7 +74,23 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       if (entriesJson == null) return [];
 
       final entriesData = jsonDecode(entriesJson) as List<dynamic>;
-      List<TranslationEntryModel> result = entriesData.map((data) => TranslationEntryModel.fromJson(data)).toList();
+
+      // 处理旧数据，确保必需字段不为空
+      final cleanedData = entriesData.map((data) {
+        if (data is Map<String, dynamic>) {
+          // 确保 uuid 不为空，如果为空则使用 id 或生成一个
+          if (data['uuid'] == null || (data['uuid'] as String).isEmpty) {
+            data['uuid'] = data['id']?.toString() ?? 'temp-${DateTime.now().millisecondsSinceEpoch}';
+          }
+          // 确保 context 和 comment 不为空
+          data['context'] = data['context'] ?? '';
+          data['comment'] = data['comment'] ?? '';
+        }
+        return data;
+      }).toList();
+
+      List<TranslationEntryModel> result =
+          cleanedData.map((data) => TranslationEntryModel.fromJson(data as Map<String, dynamic>)).toList();
 
       if (!includeSourceLanguage) return result;
 
@@ -141,7 +153,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
             data: entry.toJson(),
           );
           if (created != null) {
-            return TranslationEntryModel.fromJson(created as Map<String, dynamic>);
+            return created;
           }
         } catch (error, stackTrace) {
           log(
@@ -213,7 +225,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
           final payload = generated.map((e) => e.toJson()).toList();
           final created = await _translationApi.batchCreateTranslations(projectId: request.projectId, items: payload);
           if (created != null) {
-            return created.map((m) => TranslationEntryModel.fromJson(m as Map<String, dynamic>)).toList();
+            return created;
           }
         } catch (error, stackTrace) {
           log(
@@ -271,7 +283,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
             },
           );
           if (updated != null) {
-            return TranslationEntryModel.fromJson(updated as Map<String, dynamic>);
+            return updated;
           }
         } catch (error, stackTrace) {
           log(
@@ -444,7 +456,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
             languageCode: language?.code,
           );
           if (models != null) {
-            return models.map((m) => TranslationEntryModel.fromJson(m as Map<String, dynamic>)).toList();
+            return models;
           }
         } catch (error, stackTrace) {
           log(
