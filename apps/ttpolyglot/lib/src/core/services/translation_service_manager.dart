@@ -423,7 +423,7 @@ class TranslationServiceManager extends GetxService {
                 _getProviderIcon(provider.provider),
                 color: Theme.of(context).primaryColor,
               ),
-              title: Text(provider.name ?? provider.provider.name),
+              title: Text(provider.name),
               subtitle: Text(provider.provider.name),
               onTap: () => Get.back(result: provider),
             );

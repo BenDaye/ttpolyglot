@@ -1035,7 +1035,7 @@ mixin _$TranslationProviderConfigModel {
 
   /// 自定义名称
   @JsonKey(name: 'name')
-  String? get name => throw _privateConstructorUsedError;
+  String get name => throw _privateConstructorUsedError;
 
   /// App ID
   @JsonKey(name: 'app_id')
@@ -1076,7 +1076,7 @@ abstract class $TranslationProviderConfigModelCopyWith<$Res> {
       @JsonKey(name: 'provider')
       @TranslationProviderEnumConverter()
       TranslationProviderEnum provider,
-      @JsonKey(name: 'name') String? name,
+      @JsonKey(name: 'name') String name,
       @JsonKey(name: 'app_id') String appId,
       @JsonKey(name: 'app_key') String appKey,
       @JsonKey(name: 'api_url') String? apiUrl,
@@ -1101,7 +1101,7 @@ class _$TranslationProviderConfigModelCopyWithImpl<$Res,
   $Res call({
     Object? id = null,
     Object? provider = null,
-    Object? name = freezed,
+    Object? name = null,
     Object? appId = null,
     Object? appKey = null,
     Object? apiUrl = freezed,
@@ -1116,10 +1116,10 @@ class _$TranslationProviderConfigModelCopyWithImpl<$Res,
           ? _value.provider
           : provider // ignore: cast_nullable_to_non_nullable
               as TranslationProviderEnum,
-      name: freezed == name
+      name: null == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as String,
       appId: null == appId
           ? _value.appId
           : appId // ignore: cast_nullable_to_non_nullable
@@ -1154,7 +1154,7 @@ abstract class _$$TranslationProviderConfigModelImplCopyWith<$Res>
       @JsonKey(name: 'provider')
       @TranslationProviderEnumConverter()
       TranslationProviderEnum provider,
-      @JsonKey(name: 'name') String? name,
+      @JsonKey(name: 'name') String name,
       @JsonKey(name: 'app_id') String appId,
       @JsonKey(name: 'app_key') String appKey,
       @JsonKey(name: 'api_url') String? apiUrl,
@@ -1178,7 +1178,7 @@ class __$$TranslationProviderConfigModelImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? provider = null,
-    Object? name = freezed,
+    Object? name = null,
     Object? appId = null,
     Object? appKey = null,
     Object? apiUrl = freezed,
@@ -1193,10 +1193,10 @@ class __$$TranslationProviderConfigModelImplCopyWithImpl<$Res>
           ? _value.provider
           : provider // ignore: cast_nullable_to_non_nullable
               as TranslationProviderEnum,
-      name: freezed == name
+      name: null == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as String,
       appId: null == appId
           ? _value.appId
           : appId // ignore: cast_nullable_to_non_nullable
@@ -1226,7 +1226,7 @@ class _$TranslationProviderConfigModelImpl
       @JsonKey(name: 'provider')
       @TranslationProviderEnumConverter()
       required this.provider,
-      @JsonKey(name: 'name') this.name,
+      @JsonKey(name: 'name') required this.name,
       @JsonKey(name: 'app_id') this.appId = '',
       @JsonKey(name: 'app_key') this.appKey = '',
       @JsonKey(name: 'api_url') this.apiUrl,
@@ -1250,7 +1250,7 @@ class _$TranslationProviderConfigModelImpl
   /// 自定义名称
   @override
   @JsonKey(name: 'name')
-  final String? name;
+  final String name;
 
   /// App ID
   @override
@@ -1323,7 +1323,7 @@ abstract class _TranslationProviderConfigModel
           @JsonKey(name: 'provider')
           @TranslationProviderEnumConverter()
           required final TranslationProviderEnum provider,
-          @JsonKey(name: 'name') final String? name,
+          @JsonKey(name: 'name') required final String name,
           @JsonKey(name: 'app_id') final String appId,
           @JsonKey(name: 'app_key') final String appKey,
           @JsonKey(name: 'api_url') final String? apiUrl,
@@ -1347,7 +1347,7 @@ abstract class _TranslationProviderConfigModel
   /// 自定义名称
   @override
   @JsonKey(name: 'name')
-  String? get name;
+  String get name;
 
   /// App ID
   @override

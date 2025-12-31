@@ -88,7 +88,7 @@ class TranslationProviderConfigModel with _$TranslationProviderConfigModel {
     @JsonKey(name: 'provider') @TranslationProviderEnumConverter() required TranslationProviderEnum provider,
 
     /// 自定义名称
-    @JsonKey(name: 'name') String? name,
+    @JsonKey(name: 'name') required String name,
 
     /// App ID
     @JsonKey(name: 'app_id') @Default('') String appId,

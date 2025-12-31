@@ -118,9 +118,9 @@ class _ProviderDialogState extends State<ProviderDialog> {
       final nameExists = widget.controller.config.providers.any((p) {
         // 编辑模式时排除当前配置
         if (widget.mode == ProviderDialogMode.edit && widget.config != null) {
-          return p.id != widget.config!.id && p.name?.toLowerCase() == nameController.text.trim().toLowerCase();
+          return p.id != widget.config!.id && p.name.toLowerCase() == nameController.text.trim().toLowerCase();
         }
-        return p.name?.toLowerCase() == nameController.text.trim().toLowerCase();
+        return p.name.toLowerCase() == nameController.text.trim().toLowerCase();
       });
 
       if (nameExists) {
@@ -369,7 +369,7 @@ class _ProviderDialogState extends State<ProviderDialog> {
                   ),
                   const SizedBox(height: 4.0),
                   Text(
-                    selectedProvider.name ?? '',
+                    selectedProvider.name,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 16.0,

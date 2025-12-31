@@ -519,7 +519,7 @@ class _SettingsViewContentState extends State<_SettingsViewContent> {
                       ],
                       Expanded(
                         child: Text(
-                          config.name ?? '',
+                          config.name,
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 18.0,
@@ -554,6 +554,7 @@ class _SettingsViewContentState extends State<_SettingsViewContent> {
                           onChanged: (bool value) {
                             controller.updateProviderConfigById(
                               config.id,
+                              name: config.name,
                               isDefault: value,
                             );
                           },
@@ -855,7 +856,7 @@ class _SettingsViewContentState extends State<_SettingsViewContent> {
     Get.dialog(
       AlertDialog(
         title: const Text('确认删除'),
-        content: Text('确定要删除翻译接口 "${config.name ?? ''}" 吗？此操作不可撤销。'),
+        content: Text('确定要删除翻译接口 "${config.name}" 吗？此操作不可撤销。'),
         actions: [
           TextButton(
             onPressed: () => Get.back(),

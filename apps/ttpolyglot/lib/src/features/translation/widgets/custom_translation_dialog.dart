@@ -279,7 +279,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
                   ),
                 ),
                 Flexible(
-                  child: Text(provider.name ?? provider.provider.name),
+                  child: Text(provider.name),
                 ),
               ],
             ),
@@ -291,7 +291,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
           setState(() {
             _selectedProvider = value;
           });
-          LoggerUtils.info('选择翻译提供商: ${value.name ?? value.provider.name}');
+          LoggerUtils.info('选择翻译提供商: ${value.name}');
         }
       },
     );
@@ -302,7 +302,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
     final seen = <String>{};
     final result = <TranslationProviderConfigModel>[];
     for (final p in list) {
-      final key = '${p.provider.name}::${p.name ?? p.provider.name}';
+      final key = '${p.provider.name}::${p.name}';
       if (seen.add(key)) {
         result.add(p);
       }

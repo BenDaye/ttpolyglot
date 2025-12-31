@@ -101,7 +101,7 @@ _$TranslationProviderConfigModelImpl
           id: json['id'] as String? ?? '',
           provider: const TranslationProviderEnumConverter()
               .fromJson(json['provider'] as String),
-          name: json['name'] as String?,
+          name: json['name'] as String,
           appId: json['app_id'] as String? ?? '',
           appKey: json['app_key'] as String? ?? '',
           apiUrl: json['api_url'] as String?,

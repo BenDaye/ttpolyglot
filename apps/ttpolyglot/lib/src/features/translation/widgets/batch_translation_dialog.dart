@@ -618,7 +618,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
                   ),
                 ),
                 Flexible(
-                  child: Text(provider.name ?? provider.provider.name),
+                  child: Text(provider.name),
                 ),
               ],
             ),
@@ -630,7 +630,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
           setState(() {
             _selectedProvider = value;
           });
-          LoggerUtils.info('选择翻译提供商: ${value.name ?? value.provider.name}');
+          LoggerUtils.info('选择翻译提供商: ${value.name}');
         }
       },
     );
