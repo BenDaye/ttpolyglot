@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/utils/file_save_util.dart';
 import 'package:ttpolyglot/src/core/widgets/clickable_stat_card.dart';
 import 'package:ttpolyglot/src/features/features.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// 项目导出页面
 class ProjectExportView extends StatefulWidget {
@@ -914,17 +915,17 @@ class _ProjectExportViewState extends State<ProjectExportView> {
 
   Widget _buildLanguageChip(
     BuildContext context,
-    dynamic language,
+    LanguageModel language,
     bool isDefault,
     ProjectExportController exportController,
   ) {
-    final isSelected = exportController.selectedLanguages.contains(language.code);
+    final isSelected = exportController.selectedLanguages.contains(language.code.code);
 
     return Material(
       color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
       borderRadius: BorderRadius.circular(12.0),
       child: InkWell(
-        onTap: () => exportController.toggleLanguage(language.code),
+        onTap: () => exportController.toggleLanguage(language.code.code),
         borderRadius: BorderRadius.circular(12.0),
         child: Container(
           padding: const EdgeInsets.all(12.0),
@@ -972,7 +973,7 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      language.nativeName,
+                      language.nativeName ?? '',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                             color: isSelected
@@ -983,7 +984,7 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                     ),
                     const SizedBox(height: 2.0),
                     Text(
-                      language.code.toUpperCase(),
+                      language.code.code.toUpperCase(),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                             fontWeight: FontWeight.w500,

@@ -1,7 +1,6 @@
-import 'package:ttpolyglot_model/model.dart';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot_model/model.dart';
 
 /// 语言选择弹窗
 class LanguageSelectionDialog extends StatelessWidget {
