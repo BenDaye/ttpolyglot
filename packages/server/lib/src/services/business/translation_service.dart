@@ -42,7 +42,13 @@ class TranslationService extends BaseService {
 
             // 幂等检查：若已存在则跳过或报错，这里选择跳过并取现有记录
             final existing = await _databaseService.query('''
-              SELECT * FROM {translation_entries}
+              SELECT id, COALESCE(uuid::text, id::text) as uuid, COALESCE(project_id, '') as project_id,
+                     COALESCE(entry_key, '') as entry_key, COALESCE(source_language, 'en_US') as source_language,
+                     COALESCE(target_language, '') as target_language, COALESCE(source_text, '') as source_text,
+                     COALESCE(target_text, '') as target_text, COALESCE(status, 'pending') as status,
+                     translated_by, reviewed_by, COALESCE(context, '') as context,
+                     COALESCE(comment, '') as comment, deleted_at, created_at, updated_at
+              FROM {translation_entries}
               WHERE project_id = @project_id AND entry_key = @entry_key AND target_language = @target_language
             ''', {
               'project_id': projectId,
@@ -63,8 +69,10 @@ class TranslationService extends BaseService {
                 @project_id, @entry_key, @target_language, @source_text, @target_text,
                 @translator_id, @context_info, 'pending'
               )
-              RETURNING id, COALESCE(uuid::text, id::text) as uuid, project_id, entry_key, 
-                        source_language, target_language, source_text, target_text, status,
+              RETURNING id, COALESCE(uuid::text, id::text) as uuid, COALESCE(project_id, '') as project_id, 
+                        COALESCE(entry_key, '') as entry_key, COALESCE(source_language, 'en_US') as source_language, 
+                        COALESCE(target_language, '') as target_language, COALESCE(source_text, '') as source_text, 
+                        COALESCE(target_text, '') as target_text, COALESCE(status, 'pending') as status,
                         translated_by, reviewed_by, COALESCE(context, '') as context, 
                         COALESCE(comment, '') as comment, deleted_at, created_at, updated_at
             ''', {
@@ -158,13 +166,13 @@ class TranslationService extends BaseService {
         SELECT
           te.id,
           COALESCE(te.uuid::text, te.id::text) as uuid,
-          te.project_id,
-          te.entry_key,
-          te.source_language,
-          te.target_language,
-          te.source_text,
-          te.target_text,
-          te.status,
+          COALESCE(te.project_id, '') as project_id,
+          COALESCE(te.entry_key, '') as entry_key,
+          COALESCE(te.source_language, 'en_US') as source_language,
+          COALESCE(te.target_language, '') as target_language,
+          COALESCE(te.source_text, '') as source_text,
+          COALESCE(te.target_text, '') as target_text,
+          COALESCE(te.status, 'pending') as status,
           te.translated_by,
           te.reviewed_by,
           COALESCE(te.context, '') as context,
@@ -265,13 +273,13 @@ class TranslationService extends BaseService {
         SELECT
           te.id,
           COALESCE(te.uuid::text, te.id::text) as uuid,
-          te.project_id,
-          te.entry_key,
-          te.source_language,
-          te.target_language,
-          te.source_text,
-          te.target_text,
-          te.status,
+          COALESCE(te.project_id, '') as project_id,
+          COALESCE(te.entry_key, '') as entry_key,
+          COALESCE(te.source_language, 'en_US') as source_language,
+          COALESCE(te.target_language, '') as target_language,
+          COALESCE(te.source_text, '') as source_text,
+          COALESCE(te.target_text, '') as target_text,
+          COALESCE(te.status, 'pending') as status,
           te.translated_by,
           te.reviewed_by,
           COALESCE(te.context, '') as context,
@@ -329,13 +337,13 @@ class TranslationService extends BaseService {
         SELECT
           te.id,
           COALESCE(te.uuid::text, te.id::text) as uuid,
-          te.project_id,
-          te.entry_key,
-          te.source_language,
-          te.target_language,
-          te.source_text,
-          te.target_text,
-          te.status,
+          COALESCE(te.project_id, '') as project_id,
+          COALESCE(te.entry_key, '') as entry_key,
+          COALESCE(te.source_language, 'en_US') as source_language,
+          COALESCE(te.target_language, '') as target_language,
+          COALESCE(te.source_text, '') as source_text,
+          COALESCE(te.target_text, '') as target_text,
+          COALESCE(te.status, 'pending') as status,
           te.translated_by,
           te.reviewed_by,
           COALESCE(te.context, '') as context,
@@ -402,8 +410,10 @@ class TranslationService extends BaseService {
         ) VALUES (
           @project_id, @entry_key, @target_language, @source_text, @target_text,
           @translator_id, @context_info, 'pending'
-        ) RETURNING id, COALESCE(uuid::text, id::text) as uuid, project_id, entry_key, 
-                    source_language, target_language, source_text, target_text, status,
+        ) RETURNING id, COALESCE(uuid::text, id::text) as uuid, COALESCE(project_id, '') as project_id, 
+                    COALESCE(entry_key, '') as entry_key, COALESCE(source_language, 'en_US') as source_language, 
+                    COALESCE(target_language, '') as target_language, COALESCE(source_text, '') as source_text, 
+                    COALESCE(target_text, '') as target_text, COALESCE(status, 'pending') as status,
                     translated_by, reviewed_by, COALESCE(context, '') as context, 
                     COALESCE(comment, '') as comment, deleted_at, created_at, updated_at
       ''', {
@@ -510,8 +520,10 @@ class TranslationService extends BaseService {
         UPDATE {translation_entries}
         SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP
         WHERE id = @entry_id
-        RETURNING id, COALESCE(uuid::text, id::text) as uuid, project_id, entry_key, 
-                  source_language, target_language, source_text, target_text, status,
+        RETURNING id, COALESCE(uuid::text, id::text) as uuid, COALESCE(project_id, '') as project_id, 
+                  COALESCE(entry_key, '') as entry_key, COALESCE(source_language, 'en_US') as source_language, 
+                  COALESCE(target_language, '') as target_language, COALESCE(source_text, '') as source_text, 
+                  COALESCE(target_text, '') as target_text, COALESCE(status, 'pending') as status,
                   translated_by, reviewed_by, COALESCE(context, '') as context, 
                   COALESCE(comment, '') as comment, deleted_at, created_at, updated_at
       ''';
