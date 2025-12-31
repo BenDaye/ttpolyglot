@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:ttpolyglot/src/common/network/network.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_utils/utils.dart';
@@ -73,11 +72,6 @@ class NotificationSettingsApi {
           'channel': channel.value,
           'isEnabled': isEnabled,
         },
-        options: Options(
-          extra: const ExtraModel(
-            showSuccessToast: true,
-          ).toJson(),
-        ),
       );
 
       final result = ModelUtils.toModel(
@@ -110,11 +104,6 @@ class NotificationSettingsApi {
           'channel': channel.value,
           'isEnabled': isEnabled,
         },
-        options: Options(
-          extra: const ExtraModel(
-            showSuccessToast: true,
-          ).toJson(),
-        ),
       );
 
       final result = ModelUtils.toModel(
@@ -144,11 +133,6 @@ class NotificationSettingsApi {
           if (projectId != null) 'projectId': projectId,
           'updates': updates.map((u) => u.toJson()).toList(),
         },
-        options: Options(
-          extra: const ExtraModel(
-            showSuccessToast: true,
-          ).toJson(),
-        ),
       );
 
       final result = ModelUtils.toModelArray(
@@ -176,11 +160,6 @@ class NotificationSettingsApi {
         data: {
           if (projectId != null) 'projectId': projectId,
         },
-        options: Options(
-          extra: const ExtraModel(
-            showSuccessToast: false, // 不显示成功提示
-          ).toJson(),
-        ),
       );
     } catch (error, stackTrace) {
       LoggerUtils.error('[initializeDefaultSettings] 初始化默认设置失败', error: error, stackTrace: stackTrace);

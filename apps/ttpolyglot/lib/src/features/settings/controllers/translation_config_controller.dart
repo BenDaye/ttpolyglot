@@ -228,7 +228,7 @@ class TranslationConfigController extends GetxController {
       }
 
       // 构建更新后的配置
-      final updatedProviderConfig = TranslationProviderConfigModel(
+      final providerModel = TranslationProviderConfigModel(
         id: id,
         provider: existingProvider.provider,
         name: name ?? existingProvider.name,
@@ -236,17 +236,6 @@ class TranslationConfigController extends GetxController {
         appKey: appKey ?? existingProvider.appKey,
         apiUrl: apiUrl ?? existingProvider.apiUrl,
         isDefault: isDefault ?? existingProvider.isDefault,
-      );
-
-      // 转换为 Model
-      final providerModel = TranslationProviderConfigModel(
-        id: updatedProviderConfig.id,
-        provider: updatedProviderConfig.provider,
-        name: updatedProviderConfig.name,
-        appId: updatedProviderConfig.appId,
-        appKey: updatedProviderConfig.appKey,
-        apiUrl: updatedProviderConfig.apiUrl,
-        isDefault: updatedProviderConfig.isDefault,
       );
 
       await _userSettingsApi.updateTranslationProvider(id, providerModel);
@@ -260,7 +249,7 @@ class TranslationConfigController extends GetxController {
 
       updatedProviders = updatedProviders.map((p) {
         if (p.id == id) {
-          return updatedProviderConfig;
+          return providerModel;
         }
         return p;
       }).toList();

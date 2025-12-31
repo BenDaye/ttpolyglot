@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:ttpolyglot/src/common/network/network.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_utils/utils.dart';
@@ -60,11 +59,6 @@ class ProjectMemberApi {
           'userId': userId,
           'role': role,
         },
-        options: Options(
-          extra: const ExtraModel(
-            showSuccessToast: true,
-          ).toJson(),
-        ),
       );
 
       final result = ModelUtils.toModel(
@@ -89,11 +83,6 @@ class ProjectMemberApi {
     try {
       final response = await HttpClient.post<Map<String, dynamic>>(
         '/projects/$projectId/members/accept',
-        options: Options(
-          extra: const ExtraModel(
-            showSuccessToast: true,
-          ).toJson(),
-        ),
       );
 
       final result = ModelUtils.toModel(
@@ -123,11 +112,6 @@ class ProjectMemberApi {
         data: {
           'role': role,
         },
-        options: Options(
-          extra: const ExtraModel(
-            showSuccessToast: true,
-          ).toJson(),
-        ),
       );
 
       final result = ModelUtils.toModel(
@@ -153,11 +137,6 @@ class ProjectMemberApi {
     try {
       final response = await HttpClient.delete(
         '/projects/$projectId/members/$memberId',
-        options: Options(
-          extra: const ExtraModel(
-            showSuccessToast: true,
-          ).toJson(),
-        ),
       );
 
       final result = ModelUtils.toModel(
@@ -240,11 +219,6 @@ class ProjectMemberApi {
           if (expiresIn != null) 'expires_in': expiresIn,
           if (maxUses != null) 'max_uses': maxUses,
         },
-        options: Options(
-          extra: const ExtraModel(
-            showSuccessToast: true,
-          ).toJson(),
-        ),
       );
 
       final result = ModelUtils.toModel(
@@ -314,11 +288,6 @@ class ProjectMemberApi {
     try {
       final response = await HttpClient.post<Map<String, dynamic>>(
         '/invites/$inviteCode/accept',
-        options: Options(
-          extra: const ExtraModel(
-            showSuccessToast: true,
-          ).toJson(),
-        ),
       );
 
       final result = ModelUtils.toModel(
@@ -344,11 +313,6 @@ class ProjectMemberApi {
     try {
       final response = await HttpClient.delete(
         '/projects/$projectId/invites/$inviteId',
-        options: Options(
-          extra: const ExtraModel(
-            showSuccessToast: true,
-          ).toJson(),
-        ),
       );
 
       final result = ModelUtils.toModel(
@@ -379,11 +343,6 @@ class ProjectMemberApi {
           'user_id': userId,
           'role': role,
         },
-        options: Options(
-          extra: const ExtraModel(
-            showSuccessToast: true,
-          ).toJson(),
-        ),
       );
 
       final result = ModelUtils.toModel(

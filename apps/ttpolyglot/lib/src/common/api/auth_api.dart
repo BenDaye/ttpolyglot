@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:ttpolyglot/src/common/network/network.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_utils/utils.dart';
@@ -12,12 +11,6 @@ class AuthApi {
       final response = await HttpClient.post(
         '/auth/login',
         data: request.toJson(),
-        options: Options(
-          extra: const ExtraModel(
-            showLoading: false, // 关键：登录不使用拦截器 loading
-            showErrorToast: true,
-          ).toJson(),
-        ),
       );
       final loginResponse = ModelUtils.toModel(
         response.data,
@@ -39,11 +32,6 @@ class AuthApi {
     try {
       await HttpClient.post(
         '/auth/logout',
-        options: Options(
-          extra: const ExtraModel(
-            showSuccessToast: true,
-          ).toJson(),
-        ),
       );
     } catch (error, stackTrace) {
       LoggerUtils.error('登出请求失败', error: error, stackTrace: stackTrace);
@@ -98,12 +86,6 @@ class AuthApi {
       final response = await HttpClient.post(
         '/auth/register',
         data: request.toJson(),
-        options: Options(
-          extra: const ExtraModel(
-            showLoading: false,
-            showErrorToast: true,
-          ).toJson(),
-        ),
       );
       final userInfo = ModelUtils.toModel(
         response.data,
@@ -126,13 +108,6 @@ class AuthApi {
       await HttpClient.post(
         '/auth/forgot-password',
         data: request.toJson(),
-        options: Options(
-          extra: const ExtraModel(
-            showLoading: true,
-            showErrorToast: true,
-            showSuccessToast: true,
-          ).toJson(),
-        ),
       );
       return true;
     } catch (error, stackTrace) {
@@ -147,13 +122,6 @@ class AuthApi {
       await HttpClient.post(
         '/auth/reset-password',
         data: request.toJson(),
-        options: Options(
-          extra: const ExtraModel(
-            showLoading: true,
-            showErrorToast: true,
-            showSuccessToast: true,
-          ).toJson(),
-        ),
       );
       return true;
     } catch (error, stackTrace) {
@@ -168,13 +136,6 @@ class AuthApi {
       await HttpClient.post(
         '/auth/verify-email',
         data: request.toJson(),
-        options: Options(
-          extra: const ExtraModel(
-            showLoading: true,
-            showErrorToast: true,
-            showSuccessToast: true,
-          ).toJson(),
-        ),
       );
       return true;
     } catch (error, stackTrace) {
@@ -189,13 +150,6 @@ class AuthApi {
       await HttpClient.post(
         '/auth/resend-verification',
         data: request.toJson(),
-        options: Options(
-          extra: const ExtraModel(
-            showLoading: true,
-            showErrorToast: true,
-            showSuccessToast: true,
-          ).toJson(),
-        ),
       );
       return true;
     } catch (error, stackTrace) {

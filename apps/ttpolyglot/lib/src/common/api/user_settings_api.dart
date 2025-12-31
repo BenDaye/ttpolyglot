@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:ttpolyglot/src/common/network/network.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_utils/utils.dart';
@@ -10,12 +9,6 @@ class UserSettingsApi {
     try {
       final response = await HttpClient.get<Map<String, dynamic>>(
         '/users/me/settings',
-        options: Options(
-          extra: const ExtraModel(
-            showLoading: false,
-            showErrorToast: true,
-          ).toJson(),
-        ),
       );
 
       final data = response.data as Map<String, dynamic>;
@@ -32,12 +25,6 @@ class UserSettingsApi {
       final response = await HttpClient.put<Map<String, dynamic>>(
         '/users/me/settings',
         data: settings,
-        options: Options(
-          extra: const ExtraModel(
-            showSuccessToast: true,
-            showErrorToast: true,
-          ).toJson(),
-        ),
       );
 
       final data = response.data as Map<String, dynamic>;
@@ -54,12 +41,6 @@ class UserSettingsApi {
       final response = await HttpClient.put<Map<String, dynamic>>(
         '/users/me/settings/language',
         data: {'language_code': languageCode},
-        options: Options(
-          extra: const ExtraModel(
-            showSuccessToast: true,
-            showErrorToast: true,
-          ).toJson(),
-        ),
       );
 
       final data = response.data as Map<String, dynamic>;
@@ -83,12 +64,6 @@ class UserSettingsApi {
       final response = await HttpClient.put<Map<String, dynamic>>(
         '/users/me/settings/general',
         data: data,
-        options: Options(
-          extra: const ExtraModel(
-            showSuccessToast: true,
-            showErrorToast: true,
-          ).toJson(),
-        ),
       );
 
       final responseData = response.data as Map<String, dynamic>;
@@ -107,12 +82,6 @@ class UserSettingsApi {
       final response = await HttpClient.put<Map<String, dynamic>>(
         '/users/me/settings/translation',
         data: settings.toJson(),
-        options: Options(
-          extra: const ExtraModel(
-            showSuccessToast: true,
-            showErrorToast: true,
-          ).toJson(),
-        ),
       );
 
       final data = response.data as Map<String, dynamic>;
@@ -131,12 +100,6 @@ class UserSettingsApi {
       final response = await HttpClient.post<Map<String, dynamic>>(
         '/users/me/settings/translation/providers',
         data: provider.toJson(),
-        options: Options(
-          extra: const ExtraModel(
-            showSuccessToast: true,
-            showErrorToast: true,
-          ).toJson(),
-        ),
       );
 
       final data = response.data as Map<String, dynamic>;
@@ -156,12 +119,6 @@ class UserSettingsApi {
       final response = await HttpClient.put<Map<String, dynamic>>(
         '/users/me/settings/translation/providers/$providerId',
         data: provider.toJson(),
-        options: Options(
-          extra: const ExtraModel(
-            showSuccessToast: true,
-            showErrorToast: true,
-          ).toJson(),
-        ),
       );
 
       final data = response.data as Map<String, dynamic>;
@@ -177,12 +134,6 @@ class UserSettingsApi {
     try {
       await HttpClient.delete(
         '/users/me/settings/translation/providers/$providerId',
-        options: Options(
-          extra: const ExtraModel(
-            showSuccessToast: true,
-            showErrorToast: true,
-          ).toJson(),
-        ),
       );
     } catch (error, stackTrace) {
       LoggerUtils.error('删除翻译接口失败', error: error, stackTrace: stackTrace);
@@ -195,12 +146,6 @@ class UserSettingsApi {
     try {
       final response = await HttpClient.post<Map<String, dynamic>>(
         '/users/me/settings/reset',
-        options: Options(
-          extra: const ExtraModel(
-            showSuccessToast: true,
-            showErrorToast: true,
-          ).toJson(),
-        ),
       );
 
       final data = response.data as Map<String, dynamic>;
