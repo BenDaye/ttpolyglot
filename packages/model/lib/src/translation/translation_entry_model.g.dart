@@ -31,7 +31,7 @@ _$TranslationEntryModelImpl _$$TranslationEntryModelImplFromJson(
       maxLength: (json['max_length'] as num?)?.toInt(),
       isPlural: json['is_plural'] as bool? ?? false,
       pluralForms: json['plural_forms'] as String?,
-      sortIndex: (json['sort_index'] as num?)?.toInt() ?? 0.0,
+      sortIndex: (json['sort_index'] as num?)?.toInt() ?? 0,
       targetLanguageId: (json['target_language_id'] as num?)?.toInt(),
       deletedAt: const NullableTimesConverter().fromJson(json['deleted_at']),
       createdAt: const NullableTimesConverter().fromJson(json['created_at']),

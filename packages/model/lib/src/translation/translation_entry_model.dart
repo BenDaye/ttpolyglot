@@ -60,7 +60,7 @@ class TranslationEntryModel with _$TranslationEntryModel {
     @JsonKey(name: 'plural_forms') String? pluralForms,
 
     /// 排序索引
-    @JsonKey(name: 'sort_index') @Default(0.0) int sortIndex,
+    @JsonKey(name: 'sort_index') @Default(0) int sortIndex,
 
     /// 目标语言ID（用于兼容旧代码）
     @JsonKey(name: 'target_language_id') int? targetLanguageId,

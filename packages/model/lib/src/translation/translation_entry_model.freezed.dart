@@ -503,7 +503,7 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
       @JsonKey(name: 'max_length') this.maxLength,
       @JsonKey(name: 'is_plural') this.isPlural = false,
       @JsonKey(name: 'plural_forms') this.pluralForms,
-      @JsonKey(name: 'sort_index') this.sortIndex = 0.0,
+      @JsonKey(name: 'sort_index') this.sortIndex = 0,
       @JsonKey(name: 'target_language_id') this.targetLanguageId,
       @JsonKey(name: 'deleted_at') @NullableTimesConverter() this.deletedAt,
       @JsonKey(name: 'created_at') @NullableTimesConverter() this.createdAt,
