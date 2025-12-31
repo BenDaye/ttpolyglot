@@ -268,7 +268,7 @@ class UserSettingsService extends BaseService {
         translationSettings.providers
             .map((p) => {
                   'id': p.id,
-                  'provider': p.provider,
+                  'provider': p.provider.name,
                   'name': p.name,
                   'app_id': p.appId,
                   'app_key': p.appKey,

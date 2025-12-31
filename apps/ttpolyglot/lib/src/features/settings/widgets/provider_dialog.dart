@@ -163,7 +163,7 @@ class _ProviderDialogState extends State<ProviderDialog> {
   }
 
   /// 保存配置
-  void _saveConfig() {
+  Future<void> _saveConfig() async {
     if (!_validateInputs()) {
       setState(() {});
       return;
@@ -172,7 +172,7 @@ class _ProviderDialogState extends State<ProviderDialog> {
     try {
       if (widget.mode == ProviderDialogMode.add) {
         // 添加模式
-        widget.controller.addTranslationProvider(
+        await widget.controller.addTranslationProvider(
           provider: selectedProvider,
           name: nameController.text.trim(),
           appId: selectedProvider.provider != TranslationProviderEnum.custom ? appIdController.text.trim() : null,
@@ -199,7 +199,7 @@ class _ProviderDialogState extends State<ProviderDialog> {
         widget.onSuccess?.call();
       } else {
         // 编辑模式
-        widget.controller.updateProviderConfigById(
+        await widget.controller.updateProviderConfigById(
           widget.config!.id,
           name: nameController.text.trim(),
           appId: widget.config!.provider != TranslationProviderEnum.custom ? appIdController.text.trim() : null,
