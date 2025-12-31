@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:ttpolyglot_model/model.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../config/server_config.dart';
 import '../base_service.dart';
@@ -317,23 +318,35 @@ class UserSettingsService extends BaseService {
 
       // 如果设为默认，先取消其他默认设置
       if (provider.isDefault) {
-        providers.map((p) {
-          if (p.isDefault) {
-            providers[providers.indexOf(p)] = TranslationProviderConfigModel(
-              id: p.id,
-              provider: p.provider,
-              name: p.name,
-              appId: p.appId,
-              appKey: p.appKey,
-              apiUrl: p.apiUrl,
+        for (var i = 0; i < providers.length; i++) {
+          if (providers[i].isDefault) {
+            providers[i] = TranslationProviderConfigModel(
+              id: providers[i].id,
+              provider: providers[i].provider,
+              name: providers[i].name,
+              appId: providers[i].appId,
+              appKey: providers[i].appKey,
+              apiUrl: providers[i].apiUrl,
               isDefault: false,
             );
           }
-        });
+        }
       }
 
+      // 为新接口生成唯一ID
+      final uuid = Uuid();
+      final newProvider = TranslationProviderConfigModel(
+        id: uuid.v4(),
+        provider: provider.provider,
+        name: provider.name,
+        appId: provider.appId,
+        appKey: provider.appKey,
+        apiUrl: provider.apiUrl,
+        isDefault: provider.isDefault,
+      );
+
       // 添加新接口
-      providers.add(provider);
+      providers.add(newProvider);
 
       // 更新配置
       final updatedSettings = TranslationSettingsModel(
@@ -344,7 +357,7 @@ class UserSettingsService extends BaseService {
 
       await updateTranslationSettings(userId, updatedSettings);
 
-      return provider;
+      return newProvider;
     }, operationName: 'addTranslationProvider');
   }
 
@@ -384,7 +397,18 @@ class UserSettingsService extends BaseService {
         }
       }
 
-      providers[index] = updatedProvider;
+      // 更新接口配置，确保使用 URL 中的 providerId
+      final finalProvider = TranslationProviderConfigModel(
+        id: providerId,
+        provider: updatedProvider.provider,
+        name: updatedProvider.name,
+        appId: updatedProvider.appId,
+        appKey: updatedProvider.appKey,
+        apiUrl: updatedProvider.apiUrl,
+        isDefault: updatedProvider.isDefault,
+      );
+
+      providers[index] = finalProvider;
 
       // 更新配置
       final updatedSettings = TranslationSettingsModel(
@@ -395,7 +419,7 @@ class UserSettingsService extends BaseService {
 
       await updateTranslationSettings(userId, updatedSettings);
 
-      return updatedProvider;
+      return finalProvider;
     }, operationName: 'updateTranslationProvider');
   }
 
