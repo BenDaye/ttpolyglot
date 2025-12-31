@@ -572,7 +572,6 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                                                             includeStatus: exportController.includeStatus,
                                                             includeTimestamps: exportController.includeTimestamps,
                                                             format: exportController.selectedFormat,
-                                                            onUIUpdate: () => setState(() {}),
                                                           );
                                                         },
                                                   child: Container(
@@ -652,7 +651,6 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                                                                     includeTimestamps:
                                                                         exportController.includeTimestamps,
                                                                     format: exportController.selectedFormat,
-                                                                    onUIUpdate: () => setState(() {}),
                                                                   );
                                                                 },
                                                           icon: const Icon(Icons.download_rounded),

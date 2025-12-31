@@ -357,7 +357,6 @@ class ProjectExportController extends GetxController {
     required bool includeStatus,
     required bool includeTimestamps,
     required String format,
-    required Function() onUIUpdate,
   }) async {
     try {
       final savePath = await exportTranslationsCustom(
@@ -399,7 +398,6 @@ class ProjectExportController extends GetxController {
       );
 
       await ExportHistoryCache.saveExportHistory(projectId, historyItem);
-      onUIUpdate(); // 触发UI更新
 
       return savePath;
     } catch (error, stackTrace) {
@@ -416,7 +414,6 @@ class ProjectExportController extends GetxController {
       );
 
       await ExportHistoryCache.saveExportHistory(projectId, historyItem);
-      onUIUpdate(); // 触发UI更新
 
       return null;
     }
