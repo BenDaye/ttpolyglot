@@ -90,9 +90,8 @@ class ProjectsController extends GetxController {
         final cachedProjects = await controller._cacheService.getCachedProjects();
         if (cachedProjects != null && cachedProjects.isNotEmpty) {
           LoggerUtils.info('从缓存加载 ${cachedProjects.length} 个项目');
-          // 转换 ProjectModel 到 Project
-          final projects = cachedProjects.map((model) => ProjectModel.fromJson(model as Map<String, dynamic>)).toList();
-          controller._projects.assignAll(projects);
+          // cachedProjects 已经是 List<ProjectModel>，直接使用
+          controller._projects.assignAll(cachedProjects);
           controller._isLoading.value = false;
         }
       }
@@ -115,10 +114,8 @@ class ProjectsController extends GetxController {
           // 更新缓存
           await controller._cacheService.cacheProjects(apiProjects.items ?? []);
 
-          // 转换并更新界面
-          final projects =
-              apiProjects.items?.map((model) => ProjectModel.fromJson(model as Map<String, dynamic>)).toList() ?? [];
-          controller._projects.assignAll(projects);
+          // apiProjects.items 已经是 List<ProjectModel>，直接使用
+          controller._projects.assignAll(apiProjects.items ?? []);
 
           LoggerUtils.info('项目列表已更新并缓存，当前页: ${apiProjects.page}/${apiProjects.totalPage}');
         }
@@ -300,12 +297,10 @@ class ProjectsController extends GetxController {
         controller._totalPage.value = apiProjects.totalPage;
         controller._totalSize.value = apiProjects.totalSize;
 
-        // 将新数据追加到现有列表
-        final newProjects =
-            apiProjects.items!.map((model) => ProjectModel.fromJson(model as Map<String, dynamic>)).toList();
-        controller._projects.addAll(newProjects);
+        // 将新数据追加到现有列表（apiProjects.items 已经是 List<ProjectModel>）
+        controller._projects.addAll(apiProjects.items!);
 
-        LoggerUtils.info('加载了 ${newProjects.length} 个项目，当前页: ${apiProjects.page}/${apiProjects.totalPage}');
+        LoggerUtils.info('加载了 ${apiProjects.items!.length} 个项目，当前页: ${apiProjects.page}/${apiProjects.totalPage}');
       }
     } catch (error, stackTrace) {
       LoggerUtils.error('[loadMoreProjects]', error: error, stackTrace: stackTrace, name: 'ProjectsController');
@@ -443,9 +438,9 @@ class ProjectsController extends GetxController {
       if (projectIdInt != null) {
         final apiProject = await controller._projectApi.getProject(projectIdInt);
         if (apiProject != null) {
-          final project = ProjectModel.fromJson(apiProject as Map<String, dynamic>);
-          _cacheProjectLocally(controller, project);
-          return project;
+          // apiProject 已经是 ProjectModel，直接使用
+          _cacheProjectLocally(controller, apiProject);
+          return apiProject;
         }
       }
 
