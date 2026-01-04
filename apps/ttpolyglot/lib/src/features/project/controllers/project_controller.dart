@@ -43,7 +43,17 @@ class ProjectController extends GetxController {
   /// 检查当前用户是否是项目所有者
   bool get isCurrentUserOwner {
     final currentUsername = Get.find<AuthService>().currentUser?.username;
-    return currentUsername != null && _project.value?.ownerId != null && currentUsername == _project.value?.ownerId;
+    if (currentUsername == null || _project.value == null) {
+      return false;
+    }
+
+    // 从成员列表中找到所有者（通过 userId 匹配 ownerId）
+    final owner = _project.value!.members.firstWhereOrNull(
+      (member) => member.userId == _project.value!.ownerId,
+    );
+
+    // 比较当前用户的 username 与所有者的 username
+    return owner != null && owner.username == currentUsername;
   }
 
   String get title => _project.value?.name ?? '-';
@@ -290,26 +300,39 @@ class ProjectController extends GetxController {
               const Text('选择新的项目所有者：'),
               const SizedBox(height: 16.0),
               // 成员列表
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 300.0),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: _members.where((m) => m.role != ProjectRoleEnum.owner).length,
-                  itemBuilder: (context, index) {
-                    final member = _members.where((m) => m.role != ProjectRoleEnum.owner).toList()[index];
-                    final username = member.username ?? '';
-                    final firstLetter = username.isNotEmpty ? username.substring(0, 1).toUpperCase() : '?';
-                    return ListTile(
-                      leading: CircleAvatar(
-                        child: Text(firstLetter),
+              Builder(
+                builder: (context) {
+                  final availableMembers = _members.where((m) => m.role != ProjectRoleEnum.owner).toList();
+                  if (availableMembers.isEmpty) {
+                    return const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Center(
+                        child: Text('没有可转移的成员'),
                       ),
-                      title: Text(username.isNotEmpty ? username : '未命名用户'),
-                      subtitle: Text(member.email ?? '无邮箱'),
-                      trailing: Text(_getRoleText(member.role)),
-                      onTap: () => Get.back(result: member),
                     );
-                  },
-                ),
+                  }
+                  return ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 300.0),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: availableMembers.length,
+                      itemBuilder: (context, index) {
+                        final member = availableMembers[index];
+                        final username = member.username ?? '';
+                        final firstLetter = username.isNotEmpty ? username.substring(0, 1).toUpperCase() : '?';
+                        return ListTile(
+                          leading: CircleAvatar(
+                            child: Text(firstLetter),
+                          ),
+                          title: Text(username.isNotEmpty ? username : '未命名用户'),
+                          subtitle: Text(member.email ?? '无邮箱'),
+                          trailing: Text(_getRoleText(member.role)),
+                          onTap: () => Get.back(result: member),
+                        );
+                      },
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 16.0),
               Container(
