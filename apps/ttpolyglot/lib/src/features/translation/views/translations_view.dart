@@ -410,6 +410,7 @@ class ProjectTranslationsView extends StatelessWidget {
   }) {
     BatchTranslationDialog.show(
       controller: controller,
+      project: project,
     );
   }
 }

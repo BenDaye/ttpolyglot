@@ -25,9 +25,11 @@ class BatchTranslationDialog extends StatefulWidget {
   const BatchTranslationDialog({
     super.key,
     required this.controller,
+    required this.project,
   });
 
   final TranslationController controller;
+  final ProjectModel project;
 
   @override
   State<BatchTranslationDialog> createState() => _BatchTranslationDialogState();
@@ -35,10 +37,12 @@ class BatchTranslationDialog extends StatefulWidget {
   /// 显示批量翻译弹窗
   static void show({
     required TranslationController controller,
+    required ProjectModel project,
   }) {
     Get.dialog(
       BatchTranslationDialog(
         controller: controller,
+        project: project,
       ),
       barrierDismissible: false,
     );
@@ -48,7 +52,7 @@ class BatchTranslationDialog extends StatefulWidget {
 class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
   // 状态管理
   TranslationProviderConfigModel? _selectedProvider;
-  TranslationEntryModel? _selectedSourceEntry;
+  LanguageModel? _selectedSourceEntry;
   bool _isOverride = true; // 是否覆盖
   BatchTranslationStatus _translationStatus = BatchTranslationStatus.idle;
 
@@ -137,50 +141,9 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
   /// 构建配置区域
   Widget _buildConfigurationSection(LanguageEnum? primaryLanguage) {
-    // 获取所有翻译条目，按 key 分组
-    final allEntries = widget.controller.translationEntries;
-    final Map<String, List<TranslationEntryModel>> entriesByKey = {};
-
-    for (final entry in allEntries) {
-      entriesByKey.putIfAbsent(entry.key, () => []).add(entry);
-    }
-
-    // 获取可用的源语言条目（按语言去重）
-    final Map<String, TranslationEntryModel> languageEntryMap = {};
-
-    for (final entries in entriesByKey.values) {
-      if (entries.isNotEmpty) {
-        for (final entry in entries) {
-          final langCode = entry.targetLanguage.code;
-
-          // 如果该语言还没有条目，或者当前条目有内容而之前的没有内容，则更新
-          if (!languageEntryMap.containsKey(langCode) ||
-              (entry.targetText.isNotEmpty && languageEntryMap[langCode]!.targetText.isEmpty)) {
-            // 优先选择主语言，如果是主语言且有内容则直接使用
-            if (langCode == primaryLanguage?.code && entry.targetText.isNotEmpty) {
-              languageEntryMap[langCode] = entry;
-            } else if (entry.targetText.isNotEmpty) {
-              languageEntryMap[langCode] = entry;
-            } else if (!languageEntryMap.containsKey(langCode)) {
-              // 如果该语言还没有任何条目，即使内容为空也先保存
-              languageEntryMap[langCode] = entry;
-            }
-          }
-        }
-      }
-    }
-
-    // 获取有内容的语言条目，按语言排序
-    final availableSourceEntries = languageEntryMap.values.where((entry) => entry.targetText.isNotEmpty).toList()
-      ..sort((a, b) {
-        // 主语言排在最前面
-        if (a.targetLanguage.code == primaryLanguage?.code) return -1;
-        if (b.targetLanguage.code == primaryLanguage?.code) return 1;
-        // 其他语言按sortIndex排序
-        return a.sortIndex.compareTo(b.sortIndex);
-      });
-
-    _selectedSourceEntry ??= availableSourceEntries.isNotEmpty ? availableSourceEntries.first : null;
+    final availableSourceEntries =
+        widget.project.languages.firstWhere((lang) => lang.id == widget.project.primaryLanguageId);
+    _selectedSourceEntry ??= availableSourceEntries;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -202,7 +165,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
         // 选择源语言基准
         _buildSourceLanguageSelector(
-          list: availableSourceEntries,
+          list: widget.project.languages,
         ),
         const SizedBox(height: 24.0),
 
@@ -608,9 +571,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
                     borderRadius: BorderRadius.circular(6.0),
                   ),
                   child: Text(
-                    provider.provider.name.length >= 2
-                        ? provider.provider.name.substring(0, 2).toUpperCase()
-                        : provider.provider.name.toUpperCase(),
+                    provider.provider.name,
                     style: GoogleFonts.notoSansMono(
                       color: Theme.of(Get.context!).colorScheme.onSecondaryContainer,
                       fontWeight: FontWeight.w500,
@@ -638,9 +599,9 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
   /// 构建源语言选择器
   Widget _buildSourceLanguageSelector({
-    required List<TranslationEntryModel> list,
+    required List<LanguageModel> list,
   }) {
-    return DropdownButtonFormField<TranslationEntryModel>(
+    return DropdownButtonFormField<LanguageModel>(
       value: _selectedSourceEntry,
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20.0),
@@ -672,7 +633,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
         ),
       ),
       items: list.map((entry) {
-        return DropdownMenuItem<TranslationEntryModel>(
+        return DropdownMenuItem<LanguageModel>(
           value: entry,
           child: SizedBox(
             width: 350.0,
@@ -686,7 +647,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
                     borderRadius: BorderRadius.circular(6.0),
                   ),
                   child: Text(
-                    entry.targetLanguage.code,
+                    entry.code.code,
                     style: GoogleFonts.notoSansMono(
                       color: Theme.of(Get.context!).colorScheme.onSecondaryContainer,
                       fontWeight: FontWeight.w500,
@@ -695,7 +656,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
                 ),
                 Flexible(
                   child: Text(
-                    entry.targetLanguage.nativeName,
+                    entry.nativeName ?? '',
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -710,7 +671,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
             _selectedSourceEntry = value;
           });
           LoggerUtils.info(
-            '选择源语言: ${value.targetLanguage.code} - ${value.targetLanguage.nativeName}',
+            '选择源语言: ${value.code.name} - ${value.nativeName ?? ''}',
             name: 'BatchTranslationDialog',
           );
         }
@@ -968,7 +929,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
     // 创建新的取消令牌
     _cancelToken = CancelToken();
 
-    final sourceLanguageCode = _selectedSourceEntry!.targetLanguage.code;
+    final sourceLanguageCode = _selectedSourceEntry!.code.name;
 
     // 遍历所有翻译键，按key分组准备翻译数据
     for (final translationKey in entriesByKey.keys) {
