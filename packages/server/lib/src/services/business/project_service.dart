@@ -990,6 +990,32 @@ class ProjectService extends BaseService {
     try {
       logInfo('获取项目统计信息: $projectId');
 
+      // 处理项目ID：可能是数字ID或UUID字符串
+      String projectUuid;
+      int? projectIdInt = int.tryParse(projectId);
+
+      if (projectIdInt != null) {
+        // 如果是数字ID，查询对应的UUID
+        final projectResult = await _databaseService.query(
+          'SELECT uuid::text as uuid FROM {projects} WHERE id = @project_id',
+          {'project_id': projectIdInt},
+        );
+        if (projectResult.isEmpty) {
+          logError('项目不存在', context: {'project_id': projectId});
+          return null;
+        }
+        final projectData = projectResult.first.toColumnMap();
+        final uuid = projectData['uuid']?.toString();
+        if (uuid == null || uuid.isEmpty) {
+          logError('项目UUID为空', context: {'project_id': projectId});
+          return null;
+        }
+        projectUuid = uuid;
+      } else {
+        // 如果是UUID字符串，直接使用
+        projectUuid = projectId;
+      }
+
       // 获取基本统计信息
       final basicStats = await _databaseService.query('''
         SELECT
@@ -999,14 +1025,14 @@ class ProjectService extends BaseService {
           COUNT(te.id) FILTER (WHERE te.status = 'completed') as translated_entries,
           COUNT(te.id) FILTER (WHERE te.status = 'reviewing') as reviewing_entries,
           COUNT(te.id) FILTER (WHERE te.status = 'approved') as approved_entries,
-          COALESCE(AVG(te.quality_score), 0) as avg_quality_score
+          0.0 as avg_quality_score
         FROM {projects} p
         LEFT JOIN {project_languages} pl ON p.id = pl.project_id AND pl.is_active = true
         LEFT JOIN {project_members} pm ON p.id = pm.project_id AND pm.status = 'active'
-        LEFT JOIN {translation_entries} te ON p.id = te.project_id AND te.is_deleted = false
-        WHERE p.id = @project_id
+        LEFT JOIN {translation_entries} te ON p.uuid = te.project_id AND te.deleted_at IS NULL
+        WHERE p.uuid = @project_uuid
         GROUP BY p.id
-      ''', {'project_id': projectId});
+      ''', {'project_uuid': projectUuid});
 
       return basicStats.isNotEmpty
           ? ProjectStatisticsModel.fromJson(basicStats.first.toColumnMap())
