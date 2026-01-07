@@ -996,14 +996,14 @@ class ProjectService extends BaseService {
           COUNT(DISTINCT pl.language_id) as language_count,
           COUNT(DISTINCT pm.user_id) as member_count,
           COUNT(te.id) as total_entries,
-          COUNT(te.id) FILTER (WHERE te.status = 'completed') as completed_entries,
+          COUNT(te.id) FILTER (WHERE te.status = 'completed') as translated_entries,
           COUNT(te.id) FILTER (WHERE te.status = 'reviewing') as reviewing_entries,
           COUNT(te.id) FILTER (WHERE te.status = 'approved') as approved_entries,
           COALESCE(AVG(te.quality_score), 0) as avg_quality_score
         FROM {projects} p
         LEFT JOIN {project_languages} pl ON p.id = pl.project_id AND pl.is_active = true
         LEFT JOIN {project_members} pm ON p.id = pm.project_id AND pm.status = 'active'
-        LEFT JOIN {translation_entries} te ON p.id = te.project_id
+        LEFT JOIN {translation_entries} te ON p.id = te.project_id AND te.is_deleted = false
         WHERE p.id = @project_id
         GROUP BY p.id
       ''', {'project_id': projectId});

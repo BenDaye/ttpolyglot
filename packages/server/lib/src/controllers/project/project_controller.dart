@@ -500,6 +500,9 @@ class ProjectController extends BaseController {
         return ResponseUtils.error(message: '项目ID格式无效');
       }
       final stats = await _projectService.getProjectStatistics(id);
+      if (stats == null) {
+        return ResponseUtils.error(message: '项目不存在或无法获取统计信息');
+      }
       return ResponseUtils.success<ProjectStatisticsModel>(message: '获取项目统计信息成功', data: stats);
     } catch (error, stackTrace) {
       ServerLogger.error('获取项目统计信息失败: $id', error: error, stackTrace: stackTrace);

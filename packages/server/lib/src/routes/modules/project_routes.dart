@@ -52,6 +52,7 @@ class ProjectRoutes {
     router.delete('/projects/<id>/languages/<languageId>', projectController.removeProjectLanguage);
 
     // 项目统计
+    router.get('/projects/<id>/stats', projectController.getProjectStatistics);
     router.get('/projects/<id>/statistics', projectController.getProjectStatistics);
     router.get('/projects/<id>/activity', projectController.getProjectActivity);
 
