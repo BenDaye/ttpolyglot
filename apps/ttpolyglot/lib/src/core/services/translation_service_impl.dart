@@ -219,8 +219,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
         isPlural: request.isPlural,
         pluralForms: request.pluralForms,
       );
-      final payload = generated.map((e) => e.toJson()).toList();
-      final created = await _translationApi.batchCreateTranslations(projectId: request.projectId, items: payload);
+      final created = await _translationApi.batchCreateTranslations(projectId: request.projectId, items: generated);
       if (created == null) {
         throw Exception('创建翻译键失败：API 返回为空');
       }

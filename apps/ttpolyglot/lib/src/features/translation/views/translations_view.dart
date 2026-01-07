@@ -373,28 +373,45 @@ class ProjectTranslationsView extends StatelessWidget {
             child: const Text('取消'),
           ),
           ElevatedButton(
-            onPressed: () async {
-              final key = keyController.text.trim();
-              final sourceText = sourceTextController.text.trim();
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              elevation: 2.0,
+              backgroundColor:
+                  controller.isLoading ? Theme.of(context).colorScheme.surface : Theme.of(context).colorScheme.primary,
+              foregroundColor: controller.isLoading
+                  ? Theme.of(context).colorScheme.onSurface
+                  : Theme.of(context).colorScheme.onPrimary,
+            ),
+            onPressed: controller.isLoading
+                ? null
+                : () async {
+                    final key = keyController.text.trim();
+                    final sourceText = sourceTextController.text.trim();
 
-              if (key.isEmpty || sourceText.isEmpty) {
-                Get.snackbar('错误', '翻译键和源文本不能为空');
-                return;
-              }
+                    if (key.isEmpty || sourceText.isEmpty) {
+                      Get.snackbar('错误', '翻译键和源文本不能为空');
+                      return;
+                    }
 
-              // 获取除主语言外的所有目标语言
-              final targetLanguages = project.languages.where((lang) => lang.id != project.primaryLanguageId).toList();
+                    // 获取除主语言外的所有目标语言
+                    final targetLanguages =
+                        project.languages.where((lang) => lang.id != project.primaryLanguageId).toList();
 
-              await controller.createTranslationKey(
-                key: key,
-                sourceText: sourceText,
-                targetLanguages: targetLanguages.map((lang) => lang.code).toList(),
-                context: contextController.text.trim().isEmpty ? null : contextController.text.trim(),
-                comment: commentController.text.trim().isEmpty ? null : commentController.text.trim(),
-              );
+                    final result = await controller.createTranslationKey(
+                      key: key,
+                      sourceText: sourceText,
+                      targetLanguages: targetLanguages.map((lang) => lang.code).toList(),
+                      context: contextController.text.trim().isEmpty ? null : contextController.text.trim(),
+                      comment: commentController.text.trim().isEmpty ? null : commentController.text.trim(),
+                    );
 
-              Get.back();
-            },
+                    if (result) {
+                      Get.back();
+                    }
+                  },
             child: const Text('创建'),
           ),
         ],

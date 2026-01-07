@@ -227,9 +227,8 @@ class TranslationService extends BaseService {
           final data = row.toColumnMap();
           // 确保 project_id 是整数类型
           if (data['project_id'] != null) {
-            data['project_id'] = data['project_id'] is int
-                ? data['project_id']
-                : int.tryParse(data['project_id'].toString());
+            data['project_id'] =
+                data['project_id'] is int ? data['project_id'] : int.tryParse(data['project_id'].toString());
           }
           return data;
         }).toList();
@@ -377,11 +376,14 @@ class TranslationService extends BaseService {
       () async {
         logInfo('获取翻译条目详情', context: {'entry_id': entryId});
 
-        const sql = '''
+        // 判断 entryId 是数字 ID 还是 UUID
+        final isNumericId = int.tryParse(entryId) != null;
+
+        final sql = '''
         SELECT
           te.id,
           COALESCE(te.uuid::text, te.id::text) as uuid,
-          te.project_id::text as project_id,
+          p.id as project_id,
           COALESCE(te.entry_key, '') as entry_key,
           COALESCE(te.source_language, 'en_US') as source_language,
           COALESCE(te.target_language, '') as target_language,
@@ -398,9 +400,10 @@ class TranslationService extends BaseService {
           u_translator.username as translator_username,
           u_reviewer.username as reviewer_username
         FROM {translation_entries} te
+        JOIN {projects} p ON p.uuid = te.project_id
         LEFT JOIN {users} u_translator ON te.translated_by = u_translator.id
         LEFT JOIN {users} u_reviewer ON te.reviewed_by = u_reviewer.id
-        WHERE te.id = @entry_id
+        WHERE ${isNumericId ? 'te.id = @entry_id' : 'te.uuid::text = @entry_id'}
       ''';
 
         final result = await _databaseService.query(sql, {'entry_id': entryId});
@@ -576,11 +579,14 @@ class TranslationService extends BaseService {
           throwBusiness('没有可更新的字段');
         }
 
+        // 判断 entryId 是数字 ID 还是 UUID
+        final isNumericId = int.tryParse(entryId) != null;
+
         // 更新数据库
         final sql = '''
         UPDATE {translation_entries}
         SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP
-        WHERE id = @entry_id
+        WHERE ${isNumericId ? 'id = @entry_id' : 'uuid::text = @entry_id'}
         RETURNING id, COALESCE(uuid::text, id::text) as uuid, project_id::text as project_id, 
                   COALESCE(entry_key, '') as entry_key, COALESCE(source_language, 'en_US') as source_language, 
                   COALESCE(target_language, '') as target_language, COALESCE(source_text, '') as source_text, 
@@ -628,8 +634,12 @@ class TranslationService extends BaseService {
         // 记录删除历史
         await _recordTranslationHistory(entry, deletedBy, changeType: 'delete');
 
-        // 删除条目
-        await _databaseService.query('DELETE FROM {translation_entries} WHERE id = @entry_id', {'entry_id': entryId});
+        // 删除条目（支持通过 ID 或 UUID 删除）
+        final isNumericId = int.tryParse(entryId) != null;
+        final deleteSql = isNumericId
+            ? 'DELETE FROM {translation_entries} WHERE id = @entry_id'
+            : 'DELETE FROM {translation_entries} WHERE uuid::text = @entry_id';
+        await _databaseService.query(deleteSql, {'entry_id': entryId});
 
         // 更新项目统计信息
         await _updateProjectStats(entry.projectId);
@@ -794,23 +804,51 @@ class TranslationService extends BaseService {
     String? changeReason,
   }) async {
     try {
+      // 通过 UUID 查询获取数字 ID
+      final entryResult = await _databaseService.query(
+        'SELECT id FROM {translation_entries} WHERE uuid::text = @uuid',
+        {'uuid': entry.uuid},
+      );
+
+      if (entryResult.isEmpty) {
+        logError('无法找到翻译条目ID', context: {'uuid': entry.uuid});
+        return;
+      }
+
+      final entryData = entryResult.first.toColumnMap();
+      final entryIdValue = entryData['id'];
+      final entryId = entryIdValue is int ? entryIdValue : int.tryParse(entryIdValue.toString());
+
+      if (entryId == null) {
+        logError('无法解析翻译条目ID', context: {'uuid': entry.uuid, 'id': entryIdValue});
+        return;
+      }
+
+      // changed_by 是必填字段，如果为空则跳过记录
+      if (changedBy == null || changedBy.isEmpty) {
+        logError('changed_by 不能为空，跳过记录翻译历史', context: {'uuid': entry.uuid});
+        return;
+      }
+
       await _databaseService.query('''
         INSERT INTO {translation_history} (
-          translation_entry_id, old_target_text, new_target_text,
-          old_status, new_status, change_type, changed_by, change_reason
+          entry_id, entry_uuid, project_id, old_target_text, new_target_text,
+          old_status, new_status, action, changed_by, reason
         ) VALUES (
-          @entry_id, @old_text, @new_text,
-          @old_status, @new_status, @change_type, @changed_by, @change_reason
+          @entry_id, @entry_uuid, @project_id, @old_text, @new_text,
+          @old_status, @new_status, @action, @changed_by, @reason
         )
       ''', {
-        'entry_id': entry.uuid,
+        'entry_id': entryId,
+        'entry_uuid': entry.uuid,
+        'project_id': entry.projectId,
         'old_text': null, // 简化版本，实际应该比较差异
         'new_text': entry.targetText,
         'old_status': null,
-        'new_status': entry.status,
-        'change_type': changeType,
+        'new_status': entry.status.name,
+        'action': changeType,
         'changed_by': changedBy,
-        'change_reason': changeReason,
+        'reason': changeReason,
       });
     } catch (error, stackTrace) {
       logError('记录翻译历史失败', error: error, stackTrace: stackTrace, context: {'entry_id': entry.uuid});

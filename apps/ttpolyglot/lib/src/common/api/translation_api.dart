@@ -66,12 +66,12 @@ class TranslationApi {
   /// 批量创建翻译条目
   Future<List<TranslationEntryModel>?> batchCreateTranslations({
     required int projectId,
-    required List<Map<String, dynamic>> items,
+    required List<TranslationEntryModel> items,
   }) async {
     try {
       final response = await HttpClient.post(
         '/projects/$projectId/translations/batch',
-        data: {'items': items},
+        data: {'items': items.map((e) => e.toJson()).toList()},
       );
       return ModelUtils.toModelArray<TranslationEntryModel>(
         response.data,

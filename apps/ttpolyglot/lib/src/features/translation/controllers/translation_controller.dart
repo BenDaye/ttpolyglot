@@ -88,7 +88,7 @@ class TranslationController extends GetxController {
   ///
   /// 使用项目的主语言作为源语言创建翻译条目。
   /// 这种设计确保了所有翻译都基于相同的源语言，提高了数据一致性。
-  Future<void> createTranslationKey({
+  Future<bool> createTranslationKey({
     required String key,
     required String sourceText,
     required List<LanguageEnum> targetLanguages,
@@ -123,13 +123,18 @@ class TranslationController extends GetxController {
         throw Exception('目标语言不能包含项目的主语言');
       }
 
-      await _translationService.createTranslationKey(request);
-      await loadTranslationEntries();
+      final result = await _translationService.createTranslationKey(request);
+      if (result.isEmpty) {
+        return false;
+      }
 
+      loadTranslationEntries();
       Get.snackbar('成功', '翻译键创建成功');
+      return true;
     } catch (error, stackTrace) {
       Get.snackbar('错误', '创建翻译键失败: $error');
       LoggerUtils.error('创建翻译键失败', error: error, stackTrace: stackTrace);
+      return false;
     }
   }
 
