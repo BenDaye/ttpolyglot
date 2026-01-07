@@ -1020,7 +1020,7 @@ class ProjectService extends BaseService {
       final basicStats = await _databaseService.query('''
         SELECT
           COUNT(DISTINCT pl.language_id) as language_count,
-          COUNT(DISTINCT pm.user_id) as member_count,
+          COUNT(DISTINCT pm.user_id) FILTER (WHERE pm.user_id IS NOT NULL AND pm.is_active = true AND pm.status = 'active') as member_count,
           COUNT(te.id) as total_entries,
           COUNT(te.id) FILTER (WHERE te.status = 'completed') as translated_entries,
           COUNT(te.id) FILTER (WHERE te.status = 'reviewing') as reviewing_entries,
@@ -1028,7 +1028,7 @@ class ProjectService extends BaseService {
           0.0 as avg_quality_score
         FROM {projects} p
         LEFT JOIN {project_languages} pl ON p.id = pl.project_id AND pl.is_active = true
-        LEFT JOIN {project_members} pm ON p.id = pm.project_id AND pm.status = 'active'
+        LEFT JOIN {project_members} pm ON p.id = pm.project_id
         LEFT JOIN {translation_entries} te ON p.uuid = te.project_id AND te.deleted_at IS NULL
         WHERE p.uuid = @project_uuid
         GROUP BY p.id
