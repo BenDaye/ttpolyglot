@@ -8,7 +8,7 @@ import 'package:ttpolyglot/src/features/features.dart';
 /// 项目设置页面
 class ProjectSettingsView extends StatefulWidget {
   const ProjectSettingsView({super.key, required this.projectId});
-  final String projectId;
+  final int projectId;
 
   @override
   State<ProjectSettingsView> createState() => _ProjectSettingsViewState();
@@ -31,7 +31,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ProjectController>(
-      tag: widget.projectId,
+      tag: widget.projectId.toString(),
       builder: (controller) {
         return Obx(
           () {
@@ -519,13 +519,10 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
       return;
     }
 
-    final projectIdInt = int.tryParse(widget.projectId);
-    if (projectIdInt == null) return;
-
     try {
       final projectApi = Get.find<ProjectApi>();
       await projectApi.updateMemberLimit(
-        projectId: projectIdInt,
+        projectId: widget.projectId,
         memberLimit: newLimit,
       );
 

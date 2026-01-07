@@ -8,7 +8,7 @@ import 'package:ttpolyglot/src/features/features.dart';
 /// 项目成员管理页面
 class ProjectMembersView extends StatefulWidget {
   const ProjectMembersView({super.key, required this.projectId});
-  final String projectId;
+  final int projectId;
 
   @override
   State<ProjectMembersView> createState() => _ProjectMembersViewState();
@@ -18,7 +18,7 @@ class _ProjectMembersViewState extends State<ProjectMembersView> {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ProjectController>(
-      tag: widget.projectId,
+      tag: widget.projectId.toString(),
       builder: (controller) {
         return Obx(
           () {
@@ -219,8 +219,7 @@ class _ProjectMembersViewState extends State<ProjectMembersView> {
   }
 
   void _showInviteDialog(BuildContext context, ProjectController controller) {
-    final projectIdInt = int.tryParse(widget.projectId);
-    if (projectIdInt == null) return;
+    final projectIdInt = widget.projectId;
 
     // 创建邀请控制器
     Get.put(ProjectMemberInviteController(projectId: projectIdInt));
@@ -418,8 +417,7 @@ class _ProjectMembersViewState extends State<ProjectMembersView> {
   }
 
   void _showEditMemberDialog(BuildContext context, ProjectController controller, ProjectMemberModel member) {
-    final projectIdInt = int.tryParse(widget.projectId);
-    if (projectIdInt == null) return;
+    final projectIdInt = widget.projectId;
 
     ProjectRoleEnum selectedRole = member.role;
 
@@ -484,8 +482,7 @@ class _ProjectMembersViewState extends State<ProjectMembersView> {
   }
 
   void _showRemoveMemberDialog(BuildContext context, ProjectController controller, ProjectMemberModel member) {
-    final projectIdInt = int.tryParse(widget.projectId);
-    if (projectIdInt == null) return;
+    final projectIdInt = widget.projectId;
 
     Get.dialog(
       AlertDialog(

@@ -65,7 +65,7 @@ class ArbParser implements TranslationParser {
           entries.add(TranslationEntryModel(
             uuid: _uuid.v4(),
             entryKey: key,
-            projectId: 'unknown',
+            projectId: 0,
             targetLanguage: language,
             sourceText: value,
             targetText: value,

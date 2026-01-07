@@ -7,12 +7,12 @@ import 'package:ttpolyglot_model/model.dart';
 /// 项目翻译管理页面
 class ProjectTranslationsView extends StatelessWidget {
   const ProjectTranslationsView({super.key, required this.projectId});
-  final String projectId;
+  final int projectId;
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ProjectController>(
-      tag: projectId,
+      tag: projectId.toString(),
       builder: (projectController) {
         return Obx(() {
           final project = projectController.project;
@@ -22,7 +22,7 @@ class ProjectTranslationsView extends StatelessWidget {
 
           return Scaffold(
             body: GetBuilder<TranslationController>(
-              tag: projectId,
+              tag: projectId.toString(),
               builder: (translationController) {
                 return Column(
                   children: [

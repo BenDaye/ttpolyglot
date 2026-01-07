@@ -7,12 +7,12 @@ import 'package:ttpolyglot_model/model.dart';
 /// 项目语言设置页面
 class ProjectLanguagesView extends StatelessWidget {
   const ProjectLanguagesView({super.key, required this.projectId});
-  final String projectId;
+  final int projectId;
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ProjectController>(
-      tag: projectId,
+      tag: projectId.toString(),
       builder: (controller) {
         return Obx(
           () {

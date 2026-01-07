@@ -27,7 +27,7 @@ mixin _$TranslationEntryModel {
 
   /// 项目ID
   @JsonKey(name: 'project_id')
-  String get projectId => throw _privateConstructorUsedError;
+  int get projectId => throw _privateConstructorUsedError;
 
   /// 条目键（优化字段）
   @JsonKey(name: 'entry_key')
@@ -133,7 +133,7 @@ abstract class $TranslationEntryModelCopyWith<$Res> {
   @useResult
   $Res call(
       {@JsonKey(name: 'uuid') String uuid,
-      @JsonKey(name: 'project_id') String projectId,
+      @JsonKey(name: 'project_id') int projectId,
       @JsonKey(name: 'entry_key') String entryKey,
       @JsonKey(name: 'source_language')
       @LanguageEnumConverter()
@@ -215,7 +215,7 @@ class _$TranslationEntryModelCopyWithImpl<$Res,
       projectId: null == projectId
           ? _value.projectId
           : projectId // ignore: cast_nullable_to_non_nullable
-              as String,
+              as int,
       entryKey: null == entryKey
           ? _value.entryKey
           : entryKey // ignore: cast_nullable_to_non_nullable
@@ -311,7 +311,7 @@ abstract class _$$TranslationEntryModelImplCopyWith<$Res>
   @useResult
   $Res call(
       {@JsonKey(name: 'uuid') String uuid,
-      @JsonKey(name: 'project_id') String projectId,
+      @JsonKey(name: 'project_id') int projectId,
       @JsonKey(name: 'entry_key') String entryKey,
       @JsonKey(name: 'source_language')
       @LanguageEnumConverter()
@@ -391,7 +391,7 @@ class __$$TranslationEntryModelImplCopyWithImpl<$Res>
       projectId: null == projectId
           ? _value.projectId
           : projectId // ignore: cast_nullable_to_non_nullable
-              as String,
+              as int,
       entryKey: null == entryKey
           ? _value.entryKey
           : entryKey // ignore: cast_nullable_to_non_nullable
@@ -521,7 +521,7 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
   /// 项目ID
   @override
   @JsonKey(name: 'project_id')
-  final String projectId;
+  final int projectId;
 
   /// 条目键（优化字段）
   @override
@@ -729,7 +729,7 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
 abstract class _TranslationEntryModel extends TranslationEntryModel {
   const factory _TranslationEntryModel(
       {@JsonKey(name: 'uuid') required final String uuid,
-      @JsonKey(name: 'project_id') required final String projectId,
+      @JsonKey(name: 'project_id') required final int projectId,
       @JsonKey(name: 'entry_key') required final String entryKey,
       @JsonKey(name: 'source_language')
       @LanguageEnumConverter()
@@ -775,7 +775,7 @@ abstract class _TranslationEntryModel extends TranslationEntryModel {
   /// 项目ID
   @override
   @JsonKey(name: 'project_id')
-  String get projectId;
+  int get projectId;
 
   /// 条目键（优化字段）
   @override

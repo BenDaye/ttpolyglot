@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ttpolyglot/src/common/api/api.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_utils/utils.dart';
@@ -34,7 +33,6 @@ class SettingsController extends GetxController {
   /// 切换深色模式
   void toggleDarkMode() {
     _isDarkMode.value = !_isDarkMode.value;
-    _saveSettingsLocal();
   }
 
   /// 设置语言
@@ -68,14 +66,9 @@ class SettingsController extends GetxController {
       _autoSave.value = settings.generalSettings.autoSave;
       _notifications.value = settings.generalSettings.notifications;
 
-      // 同时保存到本地缓存
-      await _saveSettingsLocal();
-
       LoggerUtils.info('从服务器加载设置成功');
     } catch (error, stackTrace) {
       LoggerUtils.error('从服务器加载设置失败', error: error, stackTrace: stackTrace);
-      // 加载失败时从本地加载
-      await _loadSettingsLocal();
     } finally {
       _isLoading.value = false;
     }
@@ -86,12 +79,9 @@ class SettingsController extends GetxController {
     try {
       // 使用连字符格式发送给服务器（en-US）
       await _userSettingsApi.updateLanguageSettings(languageCode);
-      await _saveSettingsLocal();
       LoggerUtils.info('保存语言设置到服务器成功');
     } catch (error, stackTrace) {
       LoggerUtils.error('保存语言设置到服务器失败', error: error, stackTrace: stackTrace);
-      // 保存失败时仅保存到本地
-      await _saveSettingsLocal();
     }
   }
 
@@ -102,38 +92,9 @@ class SettingsController extends GetxController {
         autoSave: _autoSave.value,
         notifications: _notifications.value,
       );
-      await _saveSettingsLocal();
       LoggerUtils.info('保存通用设置到服务器成功');
     } catch (error, stackTrace) {
       LoggerUtils.error('保存通用设置到服务器失败', error: error, stackTrace: stackTrace);
-      // 保存失败时仅保存到本地
-      await _saveSettingsLocal();
-    }
-  }
-
-  /// 保存设置到本地存储（作为缓存）
-  Future<void> _saveSettingsLocal() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('isDarkMode', _isDarkMode.value);
-      await prefs.setString('language', _language.value);
-      await prefs.setBool('autoSave', _autoSave.value);
-      await prefs.setBool('notifications', _notifications.value);
-    } catch (error, stackTrace) {
-      LoggerUtils.error('保存设置到本地失败', error: error, stackTrace: stackTrace);
-    }
-  }
-
-  /// 从本地存储加载设置
-  Future<void> _loadSettingsLocal() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      _isDarkMode.value = prefs.getBool('isDarkMode') ?? false;
-      _language.value = prefs.getString('language') ?? 'zh-CN';
-      _autoSave.value = prefs.getBool('autoSave') ?? true;
-      _notifications.value = prefs.getBool('notifications') ?? true;
-    } catch (error, stackTrace) {
-      LoggerUtils.error('从本地加载设置失败', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -150,13 +111,11 @@ class SettingsController extends GetxController {
     }
   }
 
-  /// 加载设置（优先从服务器，失败则从本地）
+  /// 加载设置
   Future<void> loadSettings() async {
-    // 先从本地快速加载
-    await _loadSettingsLocal();
     // 加载语言列表
     await _loadLanguages();
-    // 然后从服务器加载最新数据
+    // 从服务器加载最新数据
     await loadSettingsFromServer();
   }
 }

@@ -39,7 +39,7 @@ class StreamExportService extends BaseService {
       try {
         // 使用游标分页获取数据
         final result = await _translationService.getTranslationEntriesCursor(
-          projectId: projectId.toString(),
+          projectId: projectId,
           cursor: cursor,
           limit: batchSize,
           targetLanguageId: targetLanguageId,

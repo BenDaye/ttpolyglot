@@ -2,7 +2,6 @@ import 'package:excel/excel.dart' as excel;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/core/utils/file_save_util.dart';
-import 'package:ttpolyglot/src/core/utils/import_history_cache.dart';
 import 'package:ttpolyglot/src/core/widgets/format_card.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 import 'package:ttpolyglot/src/features/project/widgets/upload_file.dart';
@@ -13,7 +12,7 @@ import 'package:ttpolyglot_utils/utils.dart';
 /// 项目导入页面
 class ProjectImportView extends StatefulWidget {
   const ProjectImportView({super.key, required this.projectId});
-  final String projectId;
+  final int projectId;
 
   @override
   State<ProjectImportView> createState() => _ProjectImportViewState();
@@ -40,7 +39,7 @@ class _ProjectImportViewState extends State<ProjectImportView> {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ProjectController>(
-      tag: widget.projectId,
+      tag: widget.projectId.toString(),
       builder: (controller) {
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -348,52 +347,9 @@ class _ProjectImportViewState extends State<ProjectImportView> {
                                     }
                                     await controller.importFiles(languageModelMap, translationMap);
 
-                                    // 获取导入的文件名（假设从languageMap中获取第一个文件的名字）
-                                    final firstFile = controller.files.isNotEmpty ? controller.files.first : null;
-                                    final filename = firstFile?.name ?? '导入文件';
-
-                                    // 计算总记录数
-                                    final totalRecords =
-                                        translationMap.values.expand((translations) => translations.values).length;
-
-                                    // 确定文件格式
-                                    final format = firstFile?.name.split('.').last.toUpperCase() ?? 'UNKNOWN';
-
-                                    // 生成描述
-                                    final languageCount = languageMap.length;
-                                    final languageText = languageCount == 1 ? '单语言' : '$languageCount 种语言';
-                                    final description = '$languageText - $format格式 - $totalRecords 条记录';
-
-                                    // 保存导入历史
-                                    final historyItem = ImportHistoryItemModel(
-                                      filename: filename,
-                                      description: description,
-                                      timestamp: DateTime.now(),
-                                      success: true,
-                                      format: format,
-                                      recordCount: totalRecords,
-                                    );
-
-                                    await ImportHistoryCache.saveImportHistory(widget.projectId, historyItem);
-
                                     // 强制刷新UI
                                     setState(() {});
                                   } catch (e) {
-                                    // 导入失败时保存失败记录
-                                    final firstFile = controller.files.isNotEmpty ? controller.files.first : null;
-                                    final filename = firstFile?.name ?? '导入失败';
-                                    final format = firstFile?.name.split('.').last.toUpperCase() ?? 'UNKNOWN';
-
-                                    final historyItem = ImportHistoryItemModel(
-                                      filename: filename,
-                                      description: '导入过程中发生错误 - $format格式',
-                                      timestamp: DateTime.now(),
-                                      success: false,
-                                      format: format,
-                                      recordCount: 0,
-                                    );
-
-                                    await ImportHistoryCache.saveImportHistory(widget.projectId, historyItem);
                                     setState(() {});
                                   }
                                 },
@@ -469,52 +425,11 @@ class _ProjectImportViewState extends State<ProjectImportView> {
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
                           const Spacer(),
-                          FutureBuilder<List<ImportHistoryItemModel>>(
-                            future: ImportHistoryCache.getImportHistory(widget.projectId),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                                return TextButton.icon(
-                                  onPressed: () async {
-                                    final result = await Get.dialog<bool>(
-                                      AlertDialog(
-                                        title: const Text('确认清空'),
-                                        content: const Text('确定要清空所有的导入历史记录吗？此操作不可撤销。'),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () => Get.back(result: false),
-                                            child: const Text('取消'),
-                                          ),
-                                          TextButton(
-                                            onPressed: () => Get.back(result: true),
-                                            style: TextButton.styleFrom(
-                                              foregroundColor: Theme.of(context).colorScheme.error,
-                                            ),
-                                            child: const Text('清空'),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-
-                                    if (result == true) {
-                                      await ImportHistoryCache.clearImportHistory(widget.projectId);
-                                      setState(() {}); // 触发UI更新
-                                    }
-                                  },
-                                  icon: const Icon(Icons.clear, size: 16.0),
-                                  label: const Text('清空'),
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: Theme.of(context).colorScheme.error,
-                                  ),
-                                );
-                              }
-                              return const SizedBox.shrink();
-                            },
-                          ),
                         ],
                       ),
                       const SizedBox(height: 16.0),
                       FutureBuilder<List<ImportHistoryItemModel>>(
-                        future: ImportHistoryCache.getImportHistory(widget.projectId),
+                        future: Future.value(<ImportHistoryItemModel>[]), // TODO: 从接口获取导入历史
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
                             return const Center(

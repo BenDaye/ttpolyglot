@@ -33,7 +33,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
 
   @override
   Future<List<TranslationEntryModel>> getTranslationEntries(
-    String projectId, {
+    int projectId, {
     bool includeSourceLanguage = false,
   }) async {
     try {
@@ -115,7 +115,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
 
   @override
   Future<List<TranslationEntryModel>> getTranslationEntriesByLanguage(
-    String projectId,
+    int projectId,
     LanguageEnum targetLanguage, {
     bool includeSourceLanguage = false,
   }) async {
@@ -130,7 +130,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
 
   @override
   Future<List<TranslationEntryModel>> getTranslationEntriesByStatus(
-    String projectId,
+    int projectId,
     TranslationStatusEnum status,
   ) async {
     try {
@@ -275,7 +275,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
         try {
           final updated = await _translationApi.updateTranslation(
             projectId: entry.projectId,
-            entryId: entry.id,
+            entryId: entry.uuid,
             data: {
               'target_text': entry.targetText,
               'status': entry.status.name,
@@ -297,9 +297,9 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
 
       // 本地回退
       final allEntries = await getTranslationEntries(entry.projectId);
-      final index = allEntries.indexWhere((e) => e.id == entry.id);
+      final index = allEntries.indexWhere((e) => e.uuid == entry.uuid);
       if (index == -1) {
-        throw Exception('翻译条目不存在: ${entry.id}');
+        throw Exception('翻译条目不存在: ${entry.uuid}');
       }
       final updatedLocal = entry.copyWith(updatedAt: DateTime.now());
       allEntries[index] = updatedLocal;
@@ -311,7 +311,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
           projectId: entry.projectId,
           opType: 'update',
           payload: {
-            'entry_id': entry.id,
+            'entry_id': entry.uuid,
             'data': {
               'target_text': entry.targetText,
               'status': entry.status.name,
@@ -338,12 +338,15 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       final storageKeys = await _storageService.listKeys('projects.');
       for (final key in storageKeys) {
         if (key.startsWith('projects.') && key.endsWith('.translations')) {
-          final projectId = key.substring('projects.'.length, key.length - '.translations'.length);
-          final allEntries = await getTranslationEntries(projectId);
+          final projectIdStr = key.substring('projects.'.length, key.length - '.translations'.length);
+          final projectId = int.tryParse(projectIdStr);
+          if (projectId != null) {
+            final allEntries = await getTranslationEntries(projectId);
 
-          if (allEntries.any((e) => e.id == entryId)) {
-            targetProjectId = projectId;
-            break;
+            if (allEntries.any((e) => e.uuid == entryId)) {
+              targetProjectId = projectIdStr;
+              break;
+            }
           }
         }
       }
@@ -352,14 +355,15 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
         throw Exception('翻译条目不存在: $entryId');
       }
 
-      final allEntries = await getTranslationEntries(targetProjectId);
-      final filteredEntries = allEntries.where((e) => e.id != entryId).toList();
+      final projectIdInt = int.parse(targetProjectId);
+      final allEntries = await getTranslationEntries(projectIdInt);
+      final filteredEntries = allEntries.where((e) => e.uuid != entryId).toList();
 
       if (filteredEntries.length == allEntries.length) {
         throw Exception('翻译条目不存在: $entryId');
       }
 
-      await _saveTranslationEntries(targetProjectId, filteredEntries);
+      await _saveTranslationEntries(projectIdInt, filteredEntries);
       LoggerUtils.info('成功删除翻译条目: $entryId 从项目: $targetProjectId');
     } catch (error, stackTrace) {
       LoggerUtils.error('删除翻译条目失败', error: error, stackTrace: stackTrace);
@@ -369,7 +373,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
 
   /// 删除翻译条目（指定项目ID的版本，更高效）
   @override
-  Future<void> deleteTranslationEntryModelFromProject(String projectId, String entryId) async {
+  Future<void> deleteTranslationEntryModelFromProject(int projectId, String entryId) async {
     try {
       // API 优先
       if (AppConfig.useServerForTranslations) {
@@ -390,7 +394,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
 
       // 本地回退
       final allEntries = await getTranslationEntries(projectId);
-      final filteredEntries = allEntries.where((e) => e.id != entryId).toList();
+      final filteredEntries = allEntries.where((e) => e.uuid != entryId).toList();
       if (filteredEntries.length == allEntries.length) {
         throw Exception('翻译条目不存在: $entryId');
       }
@@ -424,7 +428,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       final allEntries = await getTranslationEntries(projectId);
 
       for (final entry in entries) {
-        final index = allEntries.indexWhere((e) => e.id == entry.id);
+        final index = allEntries.indexWhere((e) => e.uuid == entry.uuid);
         if (index != -1) {
           allEntries[index] = entry.copyWith(updatedAt: DateTime.now());
         }
@@ -440,7 +444,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
 
   @override
   Future<List<TranslationEntryModel>> searchTranslationEntries(
-    String projectId, {
+    int projectId, {
     String? query,
     LanguageEnum? language,
     TranslationStatusEnum? status,
@@ -493,7 +497,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
   }
 
   @override
-  Future<Map<String, int>> getTranslationProgress(String projectId) async {
+  Future<Map<String, int>> getTranslationProgress(int projectId) async {
     try {
       final allEntries = await getTranslationEntries(projectId);
       final statusCounts = <String, int>{};
@@ -513,7 +517,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
   /// 同步项目语言变化
   /// 当项目的目标语言发生变化时，同步更新翻译条目
   Future<void> syncProjectLanguages(
-    String projectId,
+    int projectId,
     LanguageEnum sourceLanguage,
     List<LanguageEnum> newTargetLanguages,
   ) async {
@@ -523,10 +527,10 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       // 按翻译键分组现有条目
       final groupedEntries = <String, List<TranslationEntryModel>>{};
       for (final entry in allEntries) {
-        if (!groupedEntries.containsKey(entry.key)) {
-          groupedEntries[entry.key] = [];
+        if (!groupedEntries.containsKey(entry.entryKey)) {
+          groupedEntries[entry.entryKey] = [];
         }
-        groupedEntries[entry.key]!.add(entry);
+        groupedEntries[entry.entryKey]!.add(entry);
       }
 
       final updatedEntries = <TranslationEntryModel>[];
@@ -595,7 +599,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
         if (aIndex != bIndex) {
           return aIndex.compareTo(bIndex);
         }
-        return a.key.compareTo(b.key);
+        return a.entryKey.compareTo(b.entryKey);
       });
 
       // 保存更新后的翻译条目
@@ -615,7 +619,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
   }
 
   /// 保存翻译条目到存储
-  Future<void> _saveTranslationEntries(String projectId, List<TranslationEntryModel> entries) async {
+  Future<void> _saveTranslationEntries(int projectId, List<TranslationEntryModel> entries) async {
     final entriesJson = jsonEncode(entries.map((e) => e.toJson()).toList());
     await _storageService.write('projects.$projectId.translations', entriesJson);
   }
@@ -623,7 +627,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
   // 以下方法暂时不实现，返回默认值或抛出异常
   @override
   Future<String> exportTranslations(
-    String projectId,
+    int projectId,
     LanguageEnum language, {
     String format = FileFormats.json,
     TranslationKeyStyle keyStyle = TranslationKeyStyle.nested,
@@ -637,7 +641,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       );
     }
 
-    entries.sort((a, b) => a.key.compareTo(b.key));
+    entries.sort((a, b) => a.entryKey.compareTo(b.entryKey));
 
     final jsonParser = ParserFactory.getParser(FileFormats.json);
 
@@ -656,7 +660,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
 
   @override
   Future<List<TranslationEntryModel>> importTranslations(
-    String projectId,
+    int projectId,
     String filePath, {
     String format = FileFormats.json,
     TranslationKeyStyle keyStyle = TranslationKeyStyle.nested,
@@ -679,7 +683,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
 
       // 获取现有翻译条目进行冲突检测
       final existingEntries = await getTranslationEntries(projectId);
-      final existingKeys = existingEntries.map((e) => e.key).toSet();
+      final existingKeys = existingEntries.map((e) => e.entryKey).toSet();
 
       final importedEntries = <TranslationEntryModel>[];
       final conflictEntries = <TranslationEntryModel>[];

@@ -15,7 +15,7 @@ class TranslationService extends BaseService {
 
   /// 批量创建翻译条目
   Future<List<TranslationEntryModel>> batchCreateTranslations({
-    required String projectId,
+    required int projectId,
     required List<Map<String, dynamic>> items,
   }) async {
     return execute<List<TranslationEntryModel>>(
@@ -103,7 +103,7 @@ class TranslationService extends BaseService {
 
   /// 获取翻译条目（传统分页，保留向后兼容）
   Future<PagerModel<TranslationEntryModel>> getTranslationEntries({
-    required String projectId,
+    required int projectId,
     String? languageCode,
     String? status,
     String? translatorId,
@@ -218,7 +218,7 @@ class TranslationService extends BaseService {
   /// 使用游标分页替代传统OFFSET分页，在大数据量下性能更好
   /// cursor 格式："{id}_{updated_at_iso8601}"
   Future<Map<String, dynamic>> getTranslationEntriesCursor({
-    required String projectId,
+    required int projectId,
     String? cursor,
     int limit = 50,
     String? status,
@@ -383,7 +383,7 @@ class TranslationService extends BaseService {
 
   /// 创建翻译条目
   Future<TranslationEntryModel> createTranslationEntry({
-    required String projectId,
+    required int projectId,
     required String entryKey,
     required String languageCode,
     String? sourceText,
@@ -673,7 +673,7 @@ class TranslationService extends BaseService {
   }
 
   /// 获取项目翻译统计
-  Future<Map<String, dynamic>> getProjectTranslationStats(String projectId) async {
+  Future<Map<String, dynamic>> getProjectTranslationStats(int projectId) async {
     return execute(
       () async {
         logInfo('获取项目翻译统计', context: {'project_id': projectId});
@@ -704,29 +704,24 @@ class TranslationService extends BaseService {
   }
 
   /// 将项目ID（可能是数字ID或UUID）转换为UUID
-  Future<String> _resolveProjectUuid(String projectId) async {
+  Future<String> _resolveProjectUuid(int projectId) async {
     try {
-      final projectIdInt = int.tryParse(projectId);
-      if (projectIdInt != null) {
-        // 如果是数字ID，查询对应的UUID
-        final projectResult = await _databaseService.query(
-          'SELECT uuid::text as uuid FROM {projects} WHERE id = @project_id',
-          {'project_id': projectIdInt},
-        );
-        if (projectResult.isEmpty) {
-          logError('项目不存在', context: {'project_id': projectId, 'project_id_int': projectIdInt});
-          throwNotFound('项目不存在: $projectId');
-        }
-        final projectData = projectResult.first.toColumnMap();
-        final uuid = projectData['uuid']?.toString();
-        if (uuid == null || uuid.isEmpty) {
-          logError('项目UUID为空', context: {'project_id': projectId, 'project_data': projectData});
-          throwNotFound('项目UUID不存在: $projectId');
-        }
-        return uuid;
+      // 如果是数字ID，查询对应的UUID
+      final projectResult = await _databaseService.query(
+        'SELECT uuid::text as uuid FROM {projects} WHERE id = @project_id',
+        {'project_id': projectId},
+      );
+      if (projectResult.isEmpty) {
+        logError('项目不存在', context: {'project_id': projectId});
+        throwNotFound('项目不存在: $projectId');
       }
-      // 如果已经是UUID，直接返回（也可以验证UUID是否存在，但为了性能暂时跳过）
-      return projectId;
+      final projectData = projectResult.first.toColumnMap();
+      final uuid = projectData['uuid']?.toString();
+      if (uuid == null || uuid.isEmpty) {
+        logError('项目UUID为空', context: {'project_id': projectId, 'project_data': projectData});
+        throwNotFound('项目UUID不存在: $projectId');
+      }
+      return uuid;
     } catch (error, stackTrace) {
       if (error is NotFoundException) {
         rethrow;
@@ -769,37 +764,23 @@ class TranslationService extends BaseService {
   }
 
   /// 更新项目统计信息
-  Future<void> _updateProjectStats(String projectId) async {
+  Future<void> _updateProjectStats(int projectId) async {
     try {
-      // 处理项目ID：如果是数字ID，需要转换为UUID用于查询translation_entries
-      // 但UPDATE语句的WHERE条件需要数字ID
-      String projectUuid = projectId;
-      int? projectIdInt = int.tryParse(projectId);
+      // 如果是数字ID，查询对应的UUID
+      final projectResult = await _databaseService.query(
+        'SELECT uuid::text as uuid FROM {projects} WHERE id = @project_id',
+        {'project_id': projectId},
+      );
+      if (projectResult.isEmpty) {
+        logError('项目不存在', context: {'project_id': projectId});
+        return;
+      }
+      final projectData = projectResult.first.toColumnMap();
+      final projectUuid = projectData['uuid']?.toString();
 
-      if (projectIdInt == null) {
-        // 如果是UUID，需要先获取数字ID
-        final projectResult = await _databaseService.query(
-          'SELECT id FROM {projects} WHERE uuid = @project_uuid',
-          {'project_uuid': projectId},
-        );
-        if (projectResult.isEmpty) {
-          logError('项目不存在', context: {'project_id': projectId});
-          return;
-        }
-        final projectData = projectResult.first.toColumnMap();
-        projectIdInt = projectData['id'] as int?;
-      } else {
-        // 如果是数字ID，查询对应的UUID
-        final projectResult = await _databaseService.query(
-          'SELECT uuid::text as uuid FROM {projects} WHERE id = @project_id',
-          {'project_id': projectIdInt},
-        );
-        if (projectResult.isEmpty) {
-          logError('项目不存在', context: {'project_id': projectId});
-          return;
-        }
-        final projectData = projectResult.first.toColumnMap();
-        projectUuid = projectData['uuid']?.toString() ?? projectId;
+      if (projectUuid == null || projectUuid.isEmpty) {
+        logError('项目UUID为空', context: {'project_id': projectId});
+        return;
       }
 
       await _databaseService.query('''
@@ -818,7 +799,7 @@ class TranslationService extends BaseService {
           last_activity_at = CURRENT_TIMESTAMP
         WHERE id = @project_id
       ''', {
-        'project_id': projectIdInt!,
+        'project_id': projectId,
         'project_uuid': projectUuid,
       });
     } catch (error, stackTrace) {

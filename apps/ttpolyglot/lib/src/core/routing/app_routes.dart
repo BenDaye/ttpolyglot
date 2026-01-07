@@ -9,16 +9,16 @@ abstract class Routes {
 
   static const projects = _Paths.home + _Paths.projects;
 
-  static String project(String projectId) => '$projects/$projectId';
+  static String project(int projectId) => '$projects/$projectId';
 
   // 项目子页面路由
-  static String projectDashboard(String projectId) => '${project(projectId)}/dashboard';
-  static String projectTranslations(String projectId) => '${project(projectId)}/translations';
-  static String projectLanguages(String projectId) => '${project(projectId)}/languages';
-  static String projectMembers(String projectId) => '${project(projectId)}/members';
-  static String projectSettings(String projectId) => '${project(projectId)}/settings';
-  static String projectImport(String projectId) => '${project(projectId)}/import';
-  static String projectExport(String projectId) => '${project(projectId)}/export';
+  static String projectDashboard(int projectId) => '${project(projectId)}/dashboard';
+  static String projectTranslations(int projectId) => '${project(projectId)}/translations';
+  static String projectLanguages(int projectId) => '${project(projectId)}/languages';
+  static String projectMembers(int projectId) => '${project(projectId)}/members';
+  static String projectSettings(int projectId) => '${project(projectId)}/settings';
+  static String projectImport(int projectId) => '${project(projectId)}/import';
+  static String projectExport(int projectId) => '${project(projectId)}/export';
 
   static const settings = _Paths.home + _Paths.settings;
 

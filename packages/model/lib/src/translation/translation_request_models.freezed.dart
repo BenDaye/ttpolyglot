@@ -23,7 +23,7 @@ CreateTranslationKeyRequest _$CreateTranslationKeyRequestFromJson(
 mixin _$CreateTranslationKeyRequest {
   /// 项目ID
   @JsonKey(name: 'project_id')
-  String get projectId => throw _privateConstructorUsedError;
+  int get projectId => throw _privateConstructorUsedError;
 
   /// 条目键
   @JsonKey(name: 'entry_key')
@@ -77,7 +77,7 @@ abstract class $CreateTranslationKeyRequestCopyWith<$Res> {
           CreateTranslationKeyRequest>;
   @useResult
   $Res call(
-      {@JsonKey(name: 'project_id') String projectId,
+      {@JsonKey(name: 'project_id') int projectId,
       @JsonKey(name: 'entry_key') String entryKey,
       @JsonKey(name: 'source_language')
       @LanguageEnumConverter()
@@ -120,7 +120,7 @@ class _$CreateTranslationKeyRequestCopyWithImpl<$Res,
       projectId: null == projectId
           ? _value.projectId
           : projectId // ignore: cast_nullable_to_non_nullable
-              as String,
+              as int,
       entryKey: null == entryKey
           ? _value.entryKey
           : entryKey // ignore: cast_nullable_to_non_nullable
@@ -167,7 +167,7 @@ abstract class _$$CreateTranslationKeyRequestImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {@JsonKey(name: 'project_id') String projectId,
+      {@JsonKey(name: 'project_id') int projectId,
       @JsonKey(name: 'entry_key') String entryKey,
       @JsonKey(name: 'source_language')
       @LanguageEnumConverter()
@@ -209,7 +209,7 @@ class __$$CreateTranslationKeyRequestImplCopyWithImpl<$Res>
       projectId: null == projectId
           ? _value.projectId
           : projectId // ignore: cast_nullable_to_non_nullable
-              as String,
+              as int,
       entryKey: null == entryKey
           ? _value.entryKey
           : entryKey // ignore: cast_nullable_to_non_nullable
@@ -272,7 +272,7 @@ class _$CreateTranslationKeyRequestImpl
   /// 项目ID
   @override
   @JsonKey(name: 'project_id')
-  final String projectId;
+  final int projectId;
 
   /// 条目键
   @override
@@ -385,7 +385,7 @@ class _$CreateTranslationKeyRequestImpl
 abstract class _CreateTranslationKeyRequest
     implements CreateTranslationKeyRequest {
   const factory _CreateTranslationKeyRequest(
-          {@JsonKey(name: 'project_id') required final String projectId,
+          {@JsonKey(name: 'project_id') required final int projectId,
           @JsonKey(name: 'entry_key') required final String entryKey,
           @JsonKey(name: 'source_language')
           @LanguageEnumConverter()
@@ -405,7 +405,7 @@ abstract class _CreateTranslationKeyRequest
   /// 项目ID
   @override
   @JsonKey(name: 'project_id')
-  String get projectId;
+  int get projectId;
 
   /// 条目键
   @override

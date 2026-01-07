@@ -17,7 +17,7 @@ class _PendingOp {
   });
 
   final String opType; // create | update | delete | batchCreate
-  final String projectId;
+  final int projectId;
   final Map<String, dynamic> payload;
   final DateTime createdAt;
 
@@ -31,7 +31,7 @@ class _PendingOp {
   static _PendingOp fromJson(Map<String, dynamic> json) {
     return _PendingOp(
       opType: json['opType'] as String,
-      projectId: json['projectId'] as String,
+      projectId: json['projectId'] as int,
       payload: Map<String, dynamic>.from(json['payload'] as Map),
       createdAt: DateTime.parse(json['createdAt'] as String),
     );
@@ -54,9 +54,9 @@ class TranslationSyncService extends GetxService {
     return this;
   }
 
-  String _queueKey(String projectId) => 'projects.$projectId.translation.pending_ops';
+  String _queueKey(int projectId) => 'projects.$projectId.translation.pending_ops';
 
-  Future<List<_PendingOp>> _loadQueue(String projectId) async {
+  Future<List<_PendingOp>> _loadQueue(int projectId) async {
     try {
       final raw = await _storage.read(_queueKey(projectId));
       if (raw == null || raw.isEmpty) return [];
@@ -68,14 +68,14 @@ class TranslationSyncService extends GetxService {
     }
   }
 
-  Future<void> _saveQueue(String projectId, List<_PendingOp> queue) async {
+  Future<void> _saveQueue(int projectId, List<_PendingOp> queue) async {
     final data = jsonEncode(queue.map((e) => e.toJson()).toList());
     await _storage.write(_queueKey(projectId), data);
   }
 
   /// 入队：在 API 写失败时调用
   Future<void> enqueue({
-    required String projectId,
+    required int projectId,
     required String opType, // create | update | delete | batchCreate
     required Map<String, dynamic> payload,
   }) async {
@@ -97,7 +97,7 @@ class TranslationSyncService extends GetxService {
   }
 
   /// 手动触发同步（可在网络恢复时或用户点击“立即同步”时调用）
-  Future<void> drain(String projectId) async {
+  Future<void> drain(int projectId) async {
     try {
       var queue = await _loadQueue(projectId);
       if (queue.isEmpty) return;

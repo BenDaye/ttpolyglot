@@ -1,7 +1,4 @@
-import 'dart:convert';
-
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ttpolyglot/src/common/api/api.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_utils/utils.dart';
@@ -76,14 +73,9 @@ class TranslationConfigController extends GetxController {
         timeoutSeconds: settings.translationSettings.timeoutSeconds,
       );
 
-      // 同时保存到本地缓存
-      await _saveConfigLocal();
-
       LoggerUtils.info('从服务器加载翻译配置成功');
     } catch (error, stackTrace) {
       LoggerUtils.error('从服务器加载翻译配置失败', error: error, stackTrace: stackTrace);
-      // 加载失败时从本地加载
-      await _loadConfigLocal();
     } finally {
       _isLoading.value = false;
     }
@@ -99,40 +91,10 @@ class TranslationConfigController extends GetxController {
       );
 
       await _userSettingsApi.updateTranslationSettings(translationSettings);
-      await _saveConfigLocal();
 
       LoggerUtils.info('保存翻译配置到服务器成功');
     } catch (error, stackTrace) {
       LoggerUtils.error('保存翻译配置到服务器失败', error: error, stackTrace: stackTrace);
-      // 保存失败时仅保存到本地
-      await _saveConfigLocal();
-    }
-  }
-
-  /// 保存配置到本地存储（作为缓存）
-  Future<void> _saveConfigLocal() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final configMap = config.toJson();
-      final configJson = jsonEncode(configMap);
-      await prefs.setString('translation_config', configJson);
-    } catch (error, stackTrace) {
-      LoggerUtils.error('保存翻译配置到本地失败', error: error, stackTrace: stackTrace);
-    }
-  }
-
-  /// 从本地存储加载配置
-  Future<void> _loadConfigLocal() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final configString = prefs.getString('translation_config');
-      if (configString != null && configString.isNotEmpty) {
-        final configMap = jsonDecode(configString) as Map<String, dynamic>;
-        final loadedConfig = TranslationSettingsModel.fromJson(configMap);
-        _config.value = loadedConfig;
-      }
-    } catch (error, stackTrace) {
-      LoggerUtils.error('从本地加载翻译配置失败', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -184,7 +146,6 @@ class TranslationConfigController extends GetxController {
 
       updatedProviders = [...updatedProviders, newConfig];
       _config.value = config.copyWith(providers: updatedProviders);
-      await _saveConfigLocal();
 
       LoggerUtils.info('添加翻译接口成功');
     } catch (error, stackTrace) {
@@ -200,7 +161,6 @@ class TranslationConfigController extends GetxController {
 
       final updatedProviders = config.providers.where((p) => p.id != id).toList();
       _config.value = config.copyWith(providers: updatedProviders);
-      await _saveConfigLocal();
 
       LoggerUtils.info('删除翻译接口成功');
     } catch (error, stackTrace) {
@@ -255,7 +215,6 @@ class TranslationConfigController extends GetxController {
       }).toList();
 
       _config.value = config.copyWith(providers: updatedProviders);
-      await _saveConfigLocal();
 
       LoggerUtils.info('更新翻译接口成功');
     } catch (error, stackTrace) {
@@ -269,12 +228,10 @@ class TranslationConfigController extends GetxController {
     return config.providers.firstWhereOrNull((p) => p.id == id);
   }
 
-  /// 加载设置（优先从服务器，失败则从本地）
+  /// 加载设置
   Future<void> loadSettings() async {
     try {
-      // 先从本地快速加载
-      await _loadConfigLocal();
-      // 然后从服务器加载最新数据
+      // 从服务器加载最新数据
       await loadConfigFromServer();
     } finally {
       _isInitialized.value = true;
@@ -286,11 +243,5 @@ class TranslationConfigController extends GetxController {
     super.onInit();
     // 确保配置加载完成后再继续
     loadSettings();
-  }
-
-  @override
-  void onClose() {
-    _saveConfigLocal();
-    super.onClose();
   }
 }

@@ -520,7 +520,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
         );
       } else {
         failCount++;
-        LoggerUtils.info('翻译失败: ${entry.key} - ${result.error}');
+        LoggerUtils.info('翻译失败: ${entry.entryKey} - ${result.error}');
       }
     }
 

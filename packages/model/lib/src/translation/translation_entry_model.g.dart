@@ -10,7 +10,7 @@ _$TranslationEntryModelImpl _$$TranslationEntryModelImplFromJson(
         Map<String, dynamic> json) =>
     _$TranslationEntryModelImpl(
       uuid: json['uuid'] as String,
-      projectId: json['project_id'] as String,
+      projectId: (json['project_id'] as num).toInt(),
       entryKey: json['entry_key'] as String,
       sourceLanguage: json['source_language'] == null
           ? LanguageEnum.enUS

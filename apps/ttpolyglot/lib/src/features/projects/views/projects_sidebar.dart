@@ -78,7 +78,7 @@ class ProjectsSidebar extends StatelessWidget {
                 child: Material(
                   color: Colors.transparent,
                   child: TextField(
-                    onChanged: ProjectsController.searchProjectsWithService,
+                    onChanged: (value) => controller.searchProjects(value),
                     style: TextStyle(
                       fontSize: 14.0,
                       color: Theme.of(context).colorScheme.onSurface,
@@ -182,9 +182,9 @@ class ProjectsSidebar extends StatelessWidget {
                   context: context,
                   delegate: delegate,
                   onTap: (project) {
-                    ProjectsController.setSelectedProjectId(project.id.toString());
+                    ProjectsController.setSelectedProjectId(project.id);
                   },
-                  isSelected: controller.selectedProjectId == project.id.toString(),
+                  isSelected: controller.selectedProjectId == project.id,
                 ),
               );
             },

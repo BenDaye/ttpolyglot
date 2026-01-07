@@ -85,7 +85,7 @@ class CsvParser implements TranslationParser {
         entries.add(TranslationEntryModel(
           uuid: _uuid.v4(),
           entryKey: key,
-          projectId: 'unknown',
+          projectId: 0, // TODO: 需要从文件中获取项目ID
           targetLanguage: language,
           sourceText: value,
           targetText: value,

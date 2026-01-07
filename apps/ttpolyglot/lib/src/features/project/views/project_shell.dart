@@ -12,7 +12,7 @@ class ProjectShell extends StatefulWidget {
 }
 
 class _ProjectShellState extends State<ProjectShell> {
-  final projectId = Get.parameters['projectId'] ?? '';
+  final projectId = int.tryParse(Get.parameters['projectId'] ?? '0') ?? 0;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,7 @@ class _ProjectShellState extends State<ProjectShell> {
 
     return GetBuilder<ProjectController>(
       init: ProjectController.getInstance(projectId),
-      tag: projectId,
+      tag: projectId.toString(),
       builder: (controller) {
         return Scaffold(
           body: Stack(
@@ -44,7 +44,7 @@ class _ProjectShellState extends State<ProjectShell> {
                   // 根据当前子页面显示不同内容
                   return GetBuilder<ProjectNavigationController>(
                     init: ProjectNavigationController.getInstance(projectId),
-                    tag: projectId,
+                    tag: projectId.toString(),
                     builder: (navController) {
                       return Obx(() => navController.subPage);
                     },
@@ -66,9 +66,9 @@ class _ProjectShellState extends State<ProjectShell> {
 
   @override
   void dispose() {
-    final projectId = Get.parameters['projectId'] ?? '';
-    if (projectId.isNotEmpty && Get.isRegistered<ProjectNavigationController>(tag: projectId)) {
-      Get.delete<ProjectNavigationController>(tag: projectId);
+    final projectId = int.tryParse(Get.parameters['projectId'] ?? '0') ?? 0;
+    if (projectId != 0 && Get.isRegistered<ProjectNavigationController>(tag: projectId.toString())) {
+      Get.delete<ProjectNavigationController>(tag: projectId.toString());
     }
     super.dispose();
   }

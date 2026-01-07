@@ -7,7 +7,7 @@ import 'package:ttpolyglot_model/model.dart';
 class TranslationApi {
   /// 获取翻译条目列表
   Future<PagerModel<TranslationEntryModel>?> getTranslations({
-    required String projectId,
+    required int projectId,
     String? languageCode,
     String? status,
     String? translatorId,
@@ -45,7 +45,7 @@ class TranslationApi {
 
   /// 创建翻译条目
   Future<TranslationEntryModel?> createTranslation({
-    required String projectId,
+    required int projectId,
     required Map<String, dynamic> data,
   }) async {
     try {
@@ -65,7 +65,7 @@ class TranslationApi {
 
   /// 批量创建翻译条目
   Future<List<TranslationEntryModel>?> batchCreateTranslations({
-    required String projectId,
+    required int projectId,
     required List<Map<String, dynamic>> items,
   }) async {
     try {
@@ -85,7 +85,7 @@ class TranslationApi {
 
   /// 更新翻译条目
   Future<TranslationEntryModel?> updateTranslation({
-    required String projectId,
+    required int projectId,
     required String entryId,
     required Map<String, dynamic> data,
   }) async {
@@ -106,7 +106,7 @@ class TranslationApi {
 
   /// 删除翻译条目
   Future<bool> deleteTranslation({
-    required String projectId,
+    required int projectId,
     required String entryId,
   }) async {
     try {
@@ -123,7 +123,7 @@ class TranslationApi {
 
   /// 搜索翻译条目
   Future<List<TranslationEntryModel>?> searchTranslations({
-    required String projectId,
+    required int projectId,
     required String query,
     String? status,
     String? languageCode,

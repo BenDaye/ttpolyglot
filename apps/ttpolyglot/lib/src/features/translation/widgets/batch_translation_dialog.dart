@@ -918,7 +918,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
     // 按 key 分组
     for (final entry in allEntries) {
-      entriesByKey.putIfAbsent(entry.key, () => []).add(entry);
+      entriesByKey.putIfAbsent(entry.entryKey, () => []).add(entry);
     }
 
     // 清空之前的数据
@@ -1059,7 +1059,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
         } else {
           keyFailCount++;
           final errorMessage = result.error ?? '翻译失败';
-          LoggerUtils.info('翻译失败: ${entry.key} (${entry.targetLanguage.code}) - $errorMessage');
+          LoggerUtils.info('翻译失败: ${entry.entryKey} (${entry.targetLanguage.code}) - $errorMessage');
         }
       }
 

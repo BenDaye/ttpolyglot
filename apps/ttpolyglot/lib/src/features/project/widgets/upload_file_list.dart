@@ -686,8 +686,8 @@ class _UploadFileListState extends State<UploadFileList> {
         importedEntries.add(
           TranslationEntryModel(
             uuid: DateTime.now().millisecondsSinceEpoch.toString(),
-            projectId: 'temp',
-            entryKey: entry.key,
+            projectId: 0,
+            entryKey: entry.value,
             sourceLanguage: language,
             targetLanguage: language,
             sourceText: entry.value,
@@ -723,7 +723,7 @@ class _UploadFileListState extends State<UploadFileList> {
       // 将 TranslationEntryModel 列表转换为 Map<String, String>
       final translations = <String, String>{};
       for (final entry in result.entries) {
-        translations[entry.key] = entry.targetText;
+        translations[entry.entryKey] = entry.targetText;
       }
 
       return translations;
@@ -742,7 +742,7 @@ class _UploadFileListState extends State<UploadFileList> {
       // 将 TranslationEntryModel 列表转换为 Map<String, String>
       final translations = <String, String>{};
       for (final entry in result.entries) {
-        translations[entry.key] = entry.targetText;
+        translations[entry.entryKey] = entry.targetText;
       }
 
       return translations;
@@ -793,7 +793,7 @@ class _UploadFileListState extends State<UploadFileList> {
       // 将 TranslationEntryModel 列表转换为 Map<String, String>
       final translations = <String, String>{};
       for (final entry in result.entries) {
-        translations[entry.key] = entry.targetText;
+        translations[entry.entryKey] = entry.targetText;
       }
 
       return translations;
@@ -812,7 +812,7 @@ class _UploadFileListState extends State<UploadFileList> {
       // 将 TranslationEntryModel 列表转换为 Map<String, String>
       final translations = <String, String>{};
       for (final entry in result.entries) {
-        translations[entry.key] = entry.targetText;
+        translations[entry.entryKey] = entry.targetText;
       }
 
       return translations;

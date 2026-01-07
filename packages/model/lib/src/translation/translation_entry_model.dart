@@ -12,7 +12,7 @@ class TranslationEntryModel with _$TranslationEntryModel {
     @JsonKey(name: 'uuid') required String uuid,
 
     /// 项目ID
-    @JsonKey(name: 'project_id') required String projectId,
+    @JsonKey(name: 'project_id') required int projectId,
 
     /// 条目键（优化字段）
     @JsonKey(name: 'entry_key') required String entryKey,
@@ -76,12 +76,6 @@ class TranslationEntryModel with _$TranslationEntryModel {
   }) = _TranslationEntryModel;
 
   const TranslationEntryModel._();
-
-  /// ID 别名（指向 uuid）
-  String get id => uuid;
-
-  /// key 别名（指向 entryKey）
-  String get key => entryKey;
 
   factory TranslationEntryModel.fromJson(Map<String, dynamic> json) => _$TranslationEntryModelFromJson(json);
 }

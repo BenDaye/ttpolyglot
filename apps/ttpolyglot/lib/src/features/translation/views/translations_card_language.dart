@@ -235,7 +235,7 @@ class TranslationsCardByLanguageBody extends StatelessWidget {
                 ),
               ),
               title: Text(
-                entry.key,
+                entry.entryKey,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w500,
                     ),

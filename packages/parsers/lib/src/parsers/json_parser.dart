@@ -180,7 +180,7 @@ class JsonParser implements TranslationParser {
         entries.add(TranslationEntryModel(
           uuid: _uuid.v4(),
           entryKey: fullKey,
-          projectId: 'unknown',
+          projectId: 0, // TODO: 需要从文件中获取项目ID
           targetLanguage: language,
           sourceText: value,
           targetText: value,
@@ -198,7 +198,7 @@ class JsonParser implements TranslationParser {
             entries.add(TranslationEntryModel(
               uuid: _uuid.v4(),
               entryKey: '$fullKey[$i]',
-              projectId: 'unknown',
+              projectId: 0, // TODO: 需要从文件中获取项目ID
               targetLanguage: language,
               sourceText: item,
               targetText: item,

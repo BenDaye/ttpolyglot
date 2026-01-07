@@ -7,12 +7,12 @@ import 'package:ttpolyglot_model/model.dart';
 /// 项目概览页面
 class ProjectDashboardView extends StatelessWidget {
   const ProjectDashboardView({super.key, required this.projectId});
-  final String projectId;
+  final int projectId;
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ProjectController>(
-      tag: projectId,
+      tag: projectId.toString(),
       builder: (controller) {
         return Obx(
           () {

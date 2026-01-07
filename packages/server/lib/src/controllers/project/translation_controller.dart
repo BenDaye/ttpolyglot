@@ -18,7 +18,7 @@ class TranslationController extends BaseController {
   })  : _translationService = TranslationService(databaseService: databaseService),
         super('TranslationController');
 
-  Future<Response> getTranslations(Request request, String projectId) async {
+  Future<Response> getTranslations(Request request, int projectId) async {
     return execute(
       () async {
         final params = request.url.queryParameters;
@@ -54,7 +54,7 @@ class TranslationController extends BaseController {
     );
   }
 
-  Future<Response> createTranslation(Request request, String projectId) async {
+  Future<Response> createTranslation(Request request, int projectId) async {
     return execute(
       () async {
         final body = await request.readAsString();
@@ -89,7 +89,7 @@ class TranslationController extends BaseController {
     );
   }
 
-  Future<Response> getTranslation(Request request, String projectId, String entryId) async {
+  Future<Response> getTranslation(Request request, int projectId, String entryId) async {
     return execute(
       () async {
         final entry = await _translationService.getTranslationEntryById(entryId);
@@ -110,7 +110,7 @@ class TranslationController extends BaseController {
     );
   }
 
-  Future<Response> updateTranslation(Request request, String projectId, String entryId) async {
+  Future<Response> updateTranslation(Request request, int projectId, String entryId) async {
     return execute(
       () async {
         final body = await request.readAsString();
@@ -150,7 +150,7 @@ class TranslationController extends BaseController {
     );
   }
 
-  Future<Response> patchTranslation(Request request, String projectId, String entryId) async {
+  Future<Response> patchTranslation(Request request, int projectId, String entryId) async {
     return execute(
       () async {
         final body = await request.readAsString();
@@ -209,7 +209,7 @@ class TranslationController extends BaseController {
   }
 
   /// POST /api/v1/projects/{projectId}/translations/batch
-  Future<Response> _batchCreateTranslations(Request request, String projectId) async {
+  Future<Response> _batchCreateTranslations(Request request, int projectId) async {
     try {
       final body = await request.readAsString();
       final decoded = jsonDecode(body);
@@ -262,9 +262,9 @@ class TranslationController extends BaseController {
   }
 
   // 暴露用于路由绑定的方法引用
-  Future<Response> Function(Request, String) get batchCreate => _batchCreateTranslations;
+  Future<Response> Function(Request, int) get batchCreate => _batchCreateTranslations;
 
-  Future<Response> batchDelete(Request request, String projectId) async {
+  Future<Response> batchDelete(Request request, int projectId) async {
     return execute(
       () async {
         final body = await request.readAsString();
@@ -289,7 +289,7 @@ class TranslationController extends BaseController {
     );
   }
 
-  Future<Response> batchTranslate(Request request, String projectId) async {
+  Future<Response> batchTranslate(Request request, int projectId) async {
     return execute(
       () async {
         final body = await request.readAsString();
@@ -316,7 +316,7 @@ class TranslationController extends BaseController {
     );
   }
 
-  Future<Response> batchApprove(Request request, String projectId) async {
+  Future<Response> batchApprove(Request request, int projectId) async {
     return execute(
       () async {
         final body = await request.readAsString();
@@ -344,7 +344,7 @@ class TranslationController extends BaseController {
     );
   }
 
-  Future<Response> getTranslationHistory(Request request, String projectId, String entryId) async {
+  Future<Response> getTranslationHistory(Request request, int projectId, String entryId) async {
     return execute(
       () async {
         final params = request.url.queryParameters;
@@ -361,7 +361,7 @@ class TranslationController extends BaseController {
     );
   }
 
-  Future<Response> getTranslationVersions(Request request, String projectId, String entryId) async {
+  Future<Response> getTranslationVersions(Request request, int projectId, String entryId) async {
     return execute(
       () async {
         // 版本信息可以从历史记录中获取，这里简化处理
@@ -376,7 +376,7 @@ class TranslationController extends BaseController {
     );
   }
 
-  Future<Response> revertTranslation(Request request, String projectId, String entryId) async {
+  Future<Response> revertTranslation(Request request, int projectId, String entryId) async {
     return execute(
       () async {
         final body = await request.readAsString();
@@ -412,7 +412,7 @@ class TranslationController extends BaseController {
     );
   }
 
-  Future<Response> assignTranslator(Request request, String projectId, String entryId) async {
+  Future<Response> assignTranslator(Request request, int projectId, String entryId) async {
     return execute(
       () async {
         final body = await request.readAsString();
@@ -435,7 +435,7 @@ class TranslationController extends BaseController {
     );
   }
 
-  Future<Response> submitTranslation(Request request, String projectId, String entryId) async {
+  Future<Response> submitTranslation(Request request, int projectId, String entryId) async {
     return execute(
       () async {
         final updatedBy = getCurrentUserId(request);
@@ -454,7 +454,7 @@ class TranslationController extends BaseController {
     );
   }
 
-  Future<Response> reviewTranslation(Request request, String projectId, String entryId) async {
+  Future<Response> reviewTranslation(Request request, int projectId, String entryId) async {
     return execute(
       () async {
         final body = await request.readAsString();
@@ -478,7 +478,7 @@ class TranslationController extends BaseController {
     );
   }
 
-  Future<Response> approveTranslation(Request request, String projectId, String entryId) async {
+  Future<Response> approveTranslation(Request request, int projectId, String entryId) async {
     return execute(
       () async {
         final updatedBy = getCurrentUserId(request);
@@ -498,7 +498,7 @@ class TranslationController extends BaseController {
     );
   }
 
-  Future<Response> rejectTranslation(Request request, String projectId, String entryId) async {
+  Future<Response> rejectTranslation(Request request, int projectId, String entryId) async {
     return execute(
       () async {
         final body = await request.readAsString();
@@ -523,7 +523,7 @@ class TranslationController extends BaseController {
     );
   }
 
-  Future<Response> searchTranslations(Request request, String projectId) async {
+  Future<Response> searchTranslations(Request request, int projectId) async {
     return execute(
       () async {
         final params = request.url.queryParameters;
@@ -551,7 +551,7 @@ class TranslationController extends BaseController {
     );
   }
 
-  Future<Response> filterTranslations(Request request, String projectId) async {
+  Future<Response> filterTranslations(Request request, int projectId) async {
     return execute(
       () async {
         final params = request.url.queryParameters;

@@ -9,7 +9,7 @@ part 'translation_request_models.g.dart';
 class CreateTranslationKeyRequest with _$CreateTranslationKeyRequest {
   const factory CreateTranslationKeyRequest({
     /// 项目ID
-    @JsonKey(name: 'project_id') required String projectId,
+    @JsonKey(name: 'project_id') required int projectId,
 
     /// 条目键
     @JsonKey(name: 'entry_key') required String entryKey,

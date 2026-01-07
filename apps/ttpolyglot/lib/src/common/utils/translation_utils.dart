@@ -107,7 +107,7 @@ class TranslationUtils {
 
   /// 生成翻译条目列表
   static List<TranslationEntryModel> generateTranslationEntries({
-    required String projectId,
+    required int projectId,
     required String entryKey,
     required String sourceText,
     required LanguageEnum sourceLanguage,

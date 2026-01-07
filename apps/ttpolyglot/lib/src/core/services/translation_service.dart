@@ -6,19 +6,19 @@ import 'export_options.dart';
 abstract class TranslationService {
   /// 获取项目的所有翻译条目
   Future<List<TranslationEntryModel>> getTranslationEntries(
-    String projectId, {
+    int projectId, {
     bool includeSourceLanguage = false,
   });
 
   /// 按语言获取翻译条目
   Future<List<TranslationEntryModel>> getTranslationEntriesByLanguage(
-    String projectId,
+    int projectId,
     LanguageEnum language,
   );
 
   /// 按状态获取翻译条目
   Future<List<TranslationEntryModel>> getTranslationEntriesByStatus(
-    String projectId,
+    int projectId,
     TranslationStatusEnum status,
   );
 
@@ -42,7 +42,7 @@ abstract class TranslationService {
   Future<void> deleteTranslationEntryModel(String entryId);
 
   /// 从项目中删除翻译条目
-  Future<void> deleteTranslationEntryModelFromProject(String projectId, String entryId);
+  Future<void> deleteTranslationEntryModelFromProject(int projectId, String entryId);
 
   /// 批量更新翻译条目
   Future<List<TranslationEntryModel>> batchUpdateTranslationEntries(
@@ -51,18 +51,18 @@ abstract class TranslationService {
 
   /// 搜索翻译条目
   Future<List<TranslationEntryModel>> searchTranslationEntries(
-    String projectId, {
+    int projectId, {
     String? query,
     LanguageEnum? language,
     TranslationStatusEnum? status,
   });
 
   /// 获取翻译进度
-  Future<Map<String, int>> getTranslationProgress(String projectId);
+  Future<Map<String, int>> getTranslationProgress(int projectId);
 
   /// 导出翻译
   Future<String> exportTranslations(
-    String projectId,
+    int projectId,
     LanguageEnum language, {
     String format = 'json',
     TranslationKeyStyle keyStyle = TranslationKeyStyle.nested,
@@ -71,7 +71,7 @@ abstract class TranslationService {
 
   /// 导入翻译
   Future<List<TranslationEntryModel>> importTranslations(
-    String projectId,
+    int projectId,
     String filePath, {
     String format = 'json',
     TranslationKeyStyle keyStyle = TranslationKeyStyle.nested,

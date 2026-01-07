@@ -14,7 +14,7 @@ import 'package:ttpolyglot_utils/utils.dart';
 /// 负责管理翻译条目的创建、更新和查询。
 /// 所有翻译操作都使用项目的主语言作为源语言，确保数据一致性。
 class TranslationController extends GetxController {
-  final String projectId;
+  final int projectId;
   TranslationController({required this.projectId});
 
   final TranslationServiceImpl _translationService = Get.find<TranslationServiceImpl>();
@@ -139,7 +139,7 @@ class TranslationController extends GetxController {
       await _translationService.updateTranslationEntryModel(entry);
 
       // 更新本地列表
-      final index = _translationEntries.indexWhere((e) => e.id == entry.id);
+      final index = _translationEntries.indexWhere((e) => e.uuid == entry.uuid);
       if (index != -1) {
         _translationEntries[index] = entry;
         _applyFilters();
@@ -168,7 +168,7 @@ class TranslationController extends GetxController {
 
       // 更新本地列表
       for (final entry in entries) {
-        final index = _translationEntries.indexWhere((e) => e.id == entry.id);
+        final index = _translationEntries.indexWhere((e) => e.uuid == entry.uuid);
         if (index != -1) {
           _translationEntries[index] = entry;
         }
@@ -209,7 +209,7 @@ class TranslationController extends GetxController {
 
       if (result == true) {
         // 先从本地查找条目确认存在
-        final entryToDelete = _translationEntries.firstWhereOrNull((e) => e.id == entryId);
+        final entryToDelete = _translationEntries.firstWhereOrNull((e) => e.uuid == entryId);
         if (entryToDelete == null) {
           throw Exception('翻译条目不存在');
         }
@@ -218,7 +218,7 @@ class TranslationController extends GetxController {
         await _translationService.deleteTranslationEntryModelFromProject(projectId, entryId);
 
         // 从本地列表中移除
-        _translationEntries.removeWhere((e) => e.id == entryId);
+        _translationEntries.removeWhere((e) => e.uuid == entryId);
         _applyFilters();
 
         Get.snackbar('成功', '翻译条目删除成功');
@@ -256,7 +256,7 @@ class TranslationController extends GetxController {
         }
 
         // 从本地列表中移除
-        _translationEntries.removeWhere((e) => entryIds.contains(e.id));
+        _translationEntries.removeWhere((e) => entryIds.contains(e.uuid));
         _applyFilters();
 
         Get.snackbar('成功', '批量删除翻译条目成功');
@@ -301,7 +301,7 @@ class TranslationController extends GetxController {
     if (_searchQuery.value.isNotEmpty) {
       final query = _searchQuery.value.toLowerCase();
       filtered = filtered.where((entry) {
-        return entry.key.toLowerCase().contains(query) ||
+        return entry.entryKey.toLowerCase().contains(query) ||
             entry.sourceText.toLowerCase().contains(query) ||
             entry.targetText.toLowerCase().contains(query);
       }).toList();
@@ -381,7 +381,7 @@ class TranslationController extends GetxController {
     final grouped = <String, List<TranslationEntryModel>>{};
 
     for (final entry in _filteredEntries) {
-      grouped.putIfAbsent(entry.key, () => []).add(entry);
+      grouped.putIfAbsent(entry.entryKey, () => []).add(entry);
     }
 
     // 按键名排序
@@ -449,7 +449,7 @@ class TranslationController extends GetxController {
     for (final language in sortedLanguages) {
       // 按翻译键名排序每个语言组内的条目
       final entries = grouped[language]!;
-      entries.sort((a, b) => a.key.compareTo(b.key));
+      entries.sort((a, b) => a.entryKey.compareTo(b.entryKey));
       sortedGrouped[language] = entries;
     }
 

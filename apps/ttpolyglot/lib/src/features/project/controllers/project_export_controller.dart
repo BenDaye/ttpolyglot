@@ -1,19 +1,16 @@
-import 'dart:convert';
-
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ttpolyglot/src/core/services/service.dart';
 import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
 class ProjectExportController extends GetxController {
-  final String projectId;
+  final int projectId;
   ProjectExportController({required this.projectId});
 
-  static ProjectExportController instance(String projectId) {
-    return Get.isRegistered<ProjectExportController>(tag: projectId)
-        ? Get.find<ProjectExportController>(tag: projectId)
-        : Get.put(ProjectExportController(projectId: projectId), tag: projectId);
+  static ProjectExportController instance(int projectId) {
+    return Get.isRegistered<ProjectExportController>(tag: projectId.toString())
+        ? Get.find<ProjectExportController>(tag: projectId.toString())
+        : Get.put(ProjectExportController(projectId: projectId), tag: projectId.toString());
   }
 
   final ProjectServiceImpl _projectService = Get.find<ProjectServiceImpl>();
@@ -21,7 +18,7 @@ class ProjectExportController extends GetxController {
   final ExportServiceImpl _exportService = Get.find<ExportServiceImpl>();
 
   static Future<String?> exportTranslationsShortcutJson(
-    String projectId,
+    int projectId,
   ) async {
     final controller = instance(projectId);
 
@@ -57,7 +54,7 @@ class ProjectExportController extends GetxController {
   }
 
   static Future<String?> exportTranslationsShortcutCsv(
-    String projectId,
+    int projectId,
   ) async {
     final controller = instance(projectId);
 
@@ -93,7 +90,7 @@ class ProjectExportController extends GetxController {
   }
 
   static Future<String?> exportTranslationsShortcutExcel(
-    String projectId,
+    int projectId,
   ) async {
     final controller = instance(projectId);
 
@@ -129,7 +126,7 @@ class ProjectExportController extends GetxController {
   }
 
   static Future<String?> exportTranslationsShortcutArb(
-    String projectId,
+    int projectId,
   ) async {
     final controller = instance(projectId);
 
@@ -165,7 +162,7 @@ class ProjectExportController extends GetxController {
   }
 
   static Future<String?> exportTranslationsShortcutPo(
-    String projectId,
+    int projectId,
   ) async {
     final controller = instance(projectId);
 
@@ -245,7 +242,7 @@ class ProjectExportController extends GetxController {
 
   /// 执行自定义导出
   static Future<String?> exportTranslationsCustom(
-    String projectId, {
+    int projectId, {
     required Set<String> selectedLanguages,
     required bool exportOnlyTranslated,
     required bool includeStatus,
@@ -316,7 +313,7 @@ class ProjectExportController extends GetxController {
     bool includeStatus = false,
     bool includeTimestamps = false,
   }) async {
-    final controller = instance(project.id.toString());
+    final controller = instance(project.id);
 
     switch (format) {
       case 'json':
@@ -351,7 +348,7 @@ class ProjectExportController extends GetxController {
 
   /// 执行导出并保存历史记录
   static Future<String?> exportTranslationsWithHistory(
-    String projectId, {
+    int projectId, {
     required Set<String> selectedLanguages,
     required bool exportOnlyTranslated,
     required bool includeStatus,
@@ -367,53 +364,9 @@ class ProjectExportController extends GetxController {
         includeTimestamps: includeTimestamps,
         format: format,
       );
-
-      // 生成导出描述
-      final formatName = switch (format.toLowerCase()) {
-        'json' => 'JSON',
-        'csv' => 'CSV',
-        'excel' => 'Excel',
-        'arb' => 'ARB',
-        'po' => 'PO',
-        _ => format.toUpperCase(),
-      };
-
-      final languageText = selectedLanguages.length == 1 ? '单语言' : '${selectedLanguages.length} 种语言';
-      final translatedText = exportOnlyTranslated ? '（仅已翻译）' : '';
-
-      final description = '$languageText$translatedText - $formatName 格式';
-
-      final filename =
-          savePath != null ? savePath.split('/').last : 'translations_${DateTime.now().millisecondsSinceEpoch}.$format';
-
-      // 保存导出历史
-      final historyItem = ExportHistoryItem(
-        filename: filename,
-        description: description,
-        timestamp: DateTime.now(),
-        success: savePath != null,
-        format: format,
-        languageCount: selectedLanguages.length,
-        filePath: savePath,
-      );
-
-      await ExportHistoryCache.saveExportHistory(projectId, historyItem);
-
       return savePath;
     } catch (error, stackTrace) {
       LoggerUtils.error('exportTranslationsWithHistory', error: error, stackTrace: stackTrace);
-
-      // 导出失败时保存失败记录
-      final historyItem = ExportHistoryItem(
-        filename: '导出失败',
-        description: '导出过程中发生错误',
-        timestamp: DateTime.now(),
-        success: false,
-        format: format,
-        languageCount: selectedLanguages.length,
-      );
-
-      await ExportHistoryCache.saveExportHistory(projectId, historyItem);
 
       return null;
     }
@@ -462,52 +415,5 @@ class ExportHistoryItem {
       languageCount: json['languageCount'] ?? 0,
       filePath: json['filePath'],
     );
-  }
-}
-
-/// 导出历史记录缓存管理
-class ExportHistoryCache {
-  static const String _cacheKey = 'export_history';
-  static const int _maxHistoryPerProject = 5;
-
-  static Future<void> saveExportHistory(String projectId, ExportHistoryItem item) async {
-    final prefs = await SharedPreferences.getInstance();
-    final key = '$_cacheKey:$projectId';
-
-    // 获取现有历史记录
-    final historyList = await getExportHistory(projectId);
-
-    // 添加新记录到开头
-    historyList.insert(0, item);
-
-    // 限制每个项目最多5条记录
-    if (historyList.length > _maxHistoryPerProject) {
-      historyList.removeRange(_maxHistoryPerProject, historyList.length);
-    }
-
-    // 保存到缓存
-    final jsonList = historyList.map((item) => item.toJson()).toList();
-    await prefs.setString(key, jsonEncode(jsonList));
-  }
-
-  static Future<List<ExportHistoryItem>> getExportHistory(String projectId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final key = '$_cacheKey:$projectId';
-
-    final jsonString = prefs.getString(key);
-    if (jsonString == null) return [];
-
-    try {
-      final jsonList = jsonDecode(jsonString) as List;
-      return jsonList.map((json) => ExportHistoryItem.fromJson(json)).toList();
-    } catch (e) {
-      return [];
-    }
-  }
-
-  static Future<void> clearExportHistory(String projectId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final key = '$_cacheKey:$projectId';
-    await prefs.remove(key);
   }
 }

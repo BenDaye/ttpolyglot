@@ -214,6 +214,26 @@ class ProjectApi {
     }
   }
 
+  /// 更新项目状态
+  Future<ProjectModel?> updateProjectStatus(int projectId, {required bool isActive}) async {
+    try {
+      LoggerUtils.info('[updateProjectStatus] projectId=$projectId, isActive=$isActive', name: 'ProjectApi');
+      final response = await HttpClient.put('/projects/$projectId/status', data: {'is_active': isActive});
+      final result = ModelUtils.toModel(
+        response.data,
+        (json) => ProjectModel.fromJson(json),
+      );
+      if (result == null) {
+        LoggerUtils.error('更新项目状态响应数据为空');
+        return null;
+      }
+      return result;
+    } catch (error, stackTrace) {
+      LoggerUtils.error('[updateProjectStatus]', error: error, stackTrace: stackTrace, name: 'ProjectApi');
+      rethrow;
+    }
+  }
+
   /// 获取项目统计信息
   Future<ProjectStatisticsModel?> getProjectStats(int projectId) async {
     try {

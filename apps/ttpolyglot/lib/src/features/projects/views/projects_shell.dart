@@ -50,7 +50,7 @@ class _ProjectsShellState extends State<ProjectsShell> {
           child: GetBuilder<ProjectsController>(
             builder: (controller) => Obx(
               () {
-                if (controller.selectedProjectId.isEmpty) {
+                if (controller.selectedProjectId == null) {
                   return Container(
                     color: Theme.of(context).colorScheme.surface,
                     child: Center(
@@ -60,7 +60,7 @@ class _ProjectsShellState extends State<ProjectsShell> {
                 }
 
                 return GetRouterOutlet(
-                  initialRoute: Routes.project(controller.selectedProjectId),
+                  initialRoute: Routes.project(controller.selectedProjectId!),
                   anchorRoute: Routes.projects,
                 );
               },

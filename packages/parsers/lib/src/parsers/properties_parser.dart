@@ -86,7 +86,7 @@ class PropertiesParser implements TranslationParser {
         entries.add(TranslationEntryModel(
           uuid: _uuid.v4(),
           entryKey: unescapedKey,
-          projectId: 'unknown',
+          projectId: 0, // TODO: 需要从文件中获取项目ID
           targetLanguage: language,
           sourceText: unescapedValue,
           targetText: unescapedValue,

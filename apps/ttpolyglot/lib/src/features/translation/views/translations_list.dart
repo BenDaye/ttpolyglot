@@ -16,12 +16,12 @@ class TranslationsList extends StatelessWidget {
   });
 
   final TranslationsListType type;
-  final String projectId;
+  final int projectId;
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<TranslationController>(
-      tag: projectId,
+      tag: projectId.toString(),
       builder: (controller) {
         switch (type) {
           case TranslationsListType.byKey:
@@ -228,7 +228,7 @@ class TranslationsList extends StatelessWidget {
     );
 
     if (result == true) {
-      final entryIds = entries.map((entry) => entry.id).toList();
+      final entryIds = entries.map((entry) => entry.uuid).toList();
       await controller.batchDeleteTranslationEntries(entryIds);
     }
   }
@@ -246,7 +246,7 @@ class TranslationsList extends StatelessWidget {
 
     Get.dialog(
       AlertDialog(
-        title: Text('编辑翻译：${entry.key}'),
+        title: Text('编辑翻译：${entry.entryKey}'),
         content: Container(
           width: 480.0,
           padding: const EdgeInsets.symmetric(vertical: 16.0),

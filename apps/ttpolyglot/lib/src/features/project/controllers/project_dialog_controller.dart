@@ -357,7 +357,7 @@ class ProjectDialogController extends GetxController {
     descriptionController.clear();
 
     // 重置为默认主语言（中文）
-    final presetLanguages = ProjectsController.getPresetLanguages();
+    final presetLanguages = ProjectDataInitializer.getPresetLanguages();
     _selectedPrimaryLanguage.value = presetLanguages.firstWhere(
       (lang) => lang.code == 'zh-CN',
       orElse: () => presetLanguages.first,

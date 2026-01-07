@@ -94,7 +94,7 @@ class ExportServiceImplDesktop {
         final filterEntries = params.entries.where((entry) => entry.targetLanguageId == language.id).toList();
 
         // 按键排序
-        filterEntries.sort((a, b) => a.key.compareTo(b.key));
+        filterEntries.sort((a, b) => a.entryKey.compareTo(b.entryKey));
 
         // 使用 JSON 解析器生成内容
         final jsonParser = ParserFactory.getParser(FileFormats.json);
@@ -335,7 +335,7 @@ class ExportServiceImplDesktop {
         final filterEntries = params.entries.where((entry) => entry.targetLanguageId == language.id).toList();
 
         // 按键排序
-        filterEntries.sort((a, b) => a.key.compareTo(b.key));
+        filterEntries.sort((a, b) => a.entryKey.compareTo(b.entryKey));
 
         // 使用 CSV 解析器生成内容
         final csvParser = ParserFactory.getParser(FileFormats.csv);
@@ -382,7 +382,7 @@ class ExportServiceImplDesktop {
         final filterEntries = params.entries.where((entry) => entry.targetLanguageId == language.id).toList();
 
         // 按键排序
-        filterEntries.sort((a, b) => a.key.compareTo(b.key));
+        filterEntries.sort((a, b) => a.entryKey.compareTo(b.entryKey));
 
         // 使用 Excel 解析器生成内容
         final excelParser = ParserFactory.getParser(FileFormats.csv); // 先使用CSV格式，因为Excel可能不支持
@@ -429,7 +429,7 @@ class ExportServiceImplDesktop {
         final filterEntries = params.entries.where((entry) => entry.targetLanguageId == language.id).toList();
 
         // 按键排序
-        filterEntries.sort((a, b) => a.key.compareTo(b.key));
+        filterEntries.sort((a, b) => a.entryKey.compareTo(b.entryKey));
 
         // 使用 ARB 解析器生成内容
         final arbParser = ParserFactory.getParser(FileFormats.arb);
@@ -476,7 +476,7 @@ class ExportServiceImplDesktop {
         final filterEntries = params.entries.where((entry) => entry.targetLanguageId == language.id).toList();
 
         // 按键排序
-        filterEntries.sort((a, b) => a.key.compareTo(b.key));
+        filterEntries.sort((a, b) => a.entryKey.compareTo(b.entryKey));
 
         // 使用 PO 解析器生成内容
         final poParser = ParserFactory.getParser(FileFormats.po);

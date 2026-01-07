@@ -9,7 +9,7 @@ part of 'translation_request_models.dart';
 _$CreateTranslationKeyRequestImpl _$$CreateTranslationKeyRequestImplFromJson(
         Map<String, dynamic> json) =>
     _$CreateTranslationKeyRequestImpl(
-      projectId: json['project_id'] as String,
+      projectId: (json['project_id'] as num).toInt(),
       entryKey: json['entry_key'] as String,
       sourceLanguage: const LanguageEnumConverter()
           .fromJson(json['source_language'] as String),

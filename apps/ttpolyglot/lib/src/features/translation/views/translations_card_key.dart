@@ -433,7 +433,7 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
         } else {
           failCount++;
           failedEntries.add(entry);
-          LoggerUtils.error('翻译失败: ${entry.key} - ${result.error}');
+          LoggerUtils.error('翻译失败: ${entry.entryKey} - ${result.error}');
         }
       }
 
@@ -533,7 +533,7 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        entry.key,
+                        entry.entryKey,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.w600,
                             ),

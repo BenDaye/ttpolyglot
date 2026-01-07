@@ -9,13 +9,13 @@ import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
 class ProjectController extends GetxController {
-  String projectId;
+  int projectId;
   ProjectController({required this.projectId});
 
-  static ProjectController getInstance(String projectId) {
-    return Get.isRegistered<ProjectController>(tag: projectId)
-        ? Get.find<ProjectController>(tag: projectId)
-        : Get.put(ProjectController(projectId: projectId), tag: projectId);
+  static ProjectController getInstance(int projectId) {
+    return Get.isRegistered<ProjectController>(tag: projectId.toString())
+        ? Get.find<ProjectController>(tag: projectId.toString())
+        : Get.put(ProjectController(projectId: projectId), tag: projectId.toString());
   }
 
   final TextEditingController _deleteProjectNameTextController = TextEditingController();
@@ -92,8 +92,6 @@ class ProjectController extends GetxController {
     if (_importRecords.length > 5) {
       _importRecords.removeRange(5, _importRecords.length);
     }
-
-    // TODO: 可以在这里添加持久化存储逻辑
   }
 
   // 允许的文件扩展名
@@ -102,8 +100,8 @@ class ProjectController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    final paramProjectId = Get.parameters['projectId'];
-    if (paramProjectId != null && paramProjectId.isNotEmpty) {
+    final paramProjectId = int.tryParse(Get.parameters['projectId'] ?? '0');
+    if (paramProjectId != null) {
       projectId = paramProjectId;
     }
     // 如果构造函数中已经传入了有效的 projectId，就保持不变
@@ -125,24 +123,13 @@ class ProjectController extends GetxController {
 
   /// 加载项目详情
   Future<void> loadProject() async {
-    if (projectId.isEmpty) {
-      LoggerUtils.info('项目ID为空，跳过项目加载');
-      return;
-    }
-
     LoggerUtils.info('开始加载项目: $projectId');
     _isLoading.value = true;
 
     try {
       // 将 String 类型的 projectId 转换为 int
-      final projectIdInt = int.tryParse(projectId);
-      if (projectIdInt == null) {
-        LoggerUtils.error('项目ID格式无效: $projectId');
-        return;
-      }
-
       // 从 API 获取项目详情
-      final projectModel = await _projectApi.getProject(projectIdInt);
+      final projectModel = await _projectApi.getProject(projectId);
       if (projectModel != null) {
         _project.value = projectModel;
         // 保存成员列表
@@ -177,13 +164,10 @@ class ProjectController extends GetxController {
 
   /// 加载通知设置
   Future<void> loadNotificationSettings() async {
-    final projectIdInt = int.tryParse(projectId);
-    if (projectIdInt == null) return;
-
     _isLoadingNotificationSettings.value = true;
     try {
       final settings = await _notificationSettingsApi.getProjectNotificationSettings(
-        projectId: projectIdInt,
+        projectId: projectId,
       );
       _notificationSettings.value = settings;
       LoggerUtils.info('通知设置加载成功: ${settings.length} 条', name: 'ProjectController');
@@ -200,12 +184,9 @@ class ProjectController extends GetxController {
     required NotificationChannelEnum channel,
     required bool isEnabled,
   }) async {
-    final projectIdInt = int.tryParse(projectId);
-    if (projectIdInt == null) return;
-
     try {
       await _notificationSettingsApi.updateProjectNotificationSetting(
-        projectId: projectIdInt,
+        projectId: projectId,
         notificationType: notificationType,
         channel: channel,
         isEnabled: isEnabled,
@@ -405,20 +386,14 @@ class ProjectController extends GetxController {
     if (confirmed != true) return;
 
     try {
-      final projectIdInt = int.tryParse(projectId);
-      if (projectIdInt == null) {
-        Get.snackbar('错误', '项目ID无效');
-        return;
-      }
-
       final newOwnerId = selectedMember.userId;
-      if (newOwnerId == null || newOwnerId.isEmpty) {
+      if (newOwnerId == null) {
         Get.snackbar('错误', '无效的用户ID');
         return;
       }
 
       final success = await _projectApi.transferProjectOwnership(
-        projectId: projectIdInt,
+        projectId: projectId,
         newOwnerId: newOwnerId,
       );
 
@@ -477,14 +452,8 @@ class ProjectController extends GetxController {
 
     if (result == true) {
       try {
-        final projectIdInt = int.tryParse(projectId);
-        if (projectIdInt == null) {
-          Get.snackbar('错误', '项目ID无效');
-          return;
-        }
-
         final success = await _projectApi.removeProjectLanguage(
-          projectId: projectIdInt,
+          projectId: projectId,
           languageId: _project.value?.languages.firstWhere((lang) => lang.code == language).id ?? 0,
         );
 
@@ -577,7 +546,7 @@ class ProjectController extends GetxController {
         LoggerUtils.info('处理键: "$key"');
 
         // 检查该键在每个项目语言中的现有条目
-        final existingEntriesForKey = existingEntries.where((entry) => entry.key == key).toList();
+        final existingEntriesForKey = existingEntries.where((entry) => entry.entryKey == key).toList();
 
         // 为每个项目语言检查是否需要创建或更新条目
         for (final language in allProjectLanguages) {
@@ -669,8 +638,8 @@ class ProjectController extends GetxController {
       // 刷新翻译列表（如果翻译控制器已注册）
       if (allImportedEntries.isNotEmpty) {
         try {
-          if (Get.isRegistered<TranslationController>(tag: projectId)) {
-            final translationController = Get.find<TranslationController>(tag: projectId);
+          if (Get.isRegistered<TranslationController>(tag: projectId.toString())) {
+            final translationController = Get.find<TranslationController>(tag: projectId.toString());
             await translationController.refreshTranslationEntries();
             LoggerUtils.info('已通知翻译控制器刷新数据');
           }

@@ -145,12 +145,12 @@ class ConflictDetectionService {
       // 创建现有条目的键值映射
       final existingMap = <String, TranslationEntryModel>{};
       for (final entry in existingEntries) {
-        existingMap[entry.key] = entry;
+        existingMap[entry.entryKey] = entry;
       }
 
       // 检查每个导入的条目
       for (final importedEntry in importedEntries) {
-        final existingEntry = existingMap[importedEntry.key];
+        final existingEntry = existingMap[importedEntry.entryKey];
 
         if (existingEntry == null) {
           // 新条目，无冲突
@@ -160,7 +160,7 @@ class ConflictDetectionService {
           final conflictType = _analyzeConflictType(existingEntry, importedEntry);
 
           final conflict = TranslationConflict(
-            key: importedEntry.key,
+            key: importedEntry.entryKey,
             existingEntry: existingEntry,
             importedEntry: importedEntry,
             conflictType: conflictType,
@@ -273,7 +273,7 @@ class ConflictDetectionService {
   ) {
     switch (type) {
       case ConflictType.keyExists:
-        return '翻译键 "${existing.key}" 已存在';
+        return '翻译键 "${existing.entryKey}" 已存在';
       case ConflictType.textDifference:
         return '翻译内容不同：现有 "${existing.targetText}" vs 导入 "${imported.targetText}"';
       case ConflictType.statusDifference:

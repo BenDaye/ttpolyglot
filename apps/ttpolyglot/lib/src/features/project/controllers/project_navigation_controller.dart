@@ -18,13 +18,13 @@ enum ProjectSubPage {
 
 /// 项目导航控制器
 class ProjectNavigationController extends GetxController {
-  final String projectId;
+  final int projectId;
   ProjectNavigationController({required this.projectId});
 
-  static ProjectNavigationController getInstance(String projectId) {
-    return Get.isRegistered<ProjectNavigationController>(tag: projectId)
-        ? Get.find<ProjectNavigationController>(tag: projectId)
-        : Get.put(ProjectNavigationController(projectId: projectId), tag: projectId);
+  static ProjectNavigationController getInstance(int projectId) {
+    return Get.isRegistered<ProjectNavigationController>(tag: projectId.toString())
+        ? Get.find<ProjectNavigationController>(tag: projectId.toString())
+        : Get.put(ProjectNavigationController(projectId: projectId), tag: projectId.toString());
   }
 
   // 当前活跃的子页面
@@ -103,12 +103,12 @@ class ProjectNavigationController extends GetxController {
     if (_currentSubPage.value == subPageId) return;
 
     if (subPageId == ProjectSubPage.refresh) {
-      if (Get.isRegistered<ProjectController>(tag: projectId)) {
+      if (Get.isRegistered<ProjectController>(tag: projectId.toString())) {
         Future.microtask(() async {
           _isLoading.value = true;
 
           await Future.wait([
-            Get.find<ProjectController>(tag: projectId).refreshProject(),
+            Get.find<ProjectController>(tag: projectId.toString()).refreshProject(),
             Future.delayed(const Duration(seconds: 3)),
           ]);
 

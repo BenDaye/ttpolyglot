@@ -5,13 +5,13 @@ import 'package:ttpolyglot/src/features/features.dart';
 /// 项目悬浮导航组件
 class ProjectFloatingNavigation extends StatelessWidget {
   const ProjectFloatingNavigation({super.key, required this.projectId});
-  final String projectId;
+  final int projectId;
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ProjectNavigationController>(
       init: ProjectNavigationController.getInstance(projectId),
-      tag: projectId,
+      tag: projectId.toString(),
       builder: (controller) {
         return Positioned(
           right: 8.0,
@@ -85,10 +85,10 @@ class ProjectFloatingNavigationCompact extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final projectId = Get.parameters['projectId'] ?? '';
+    final projectId = int.tryParse(Get.parameters['projectId'] ?? '0') ?? 0;
     return GetBuilder<ProjectNavigationController>(
       init: ProjectNavigationController.getInstance(projectId),
-      tag: projectId,
+      tag: projectId.toString(),
       builder: (controller) {
         return Positioned(
           right: 16.0,
@@ -172,13 +172,13 @@ class ProjectFloatingNavigationCompact extends StatelessWidget {
 /// 水平版本的悬浮导航（适用于移动端）
 class ProjectFloatingNavigationHorizontal extends StatelessWidget {
   const ProjectFloatingNavigationHorizontal({super.key, required this.projectId});
-  final String projectId;
+  final int projectId;
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ProjectNavigationController>(
       init: ProjectNavigationController.getInstance(projectId),
-      tag: projectId,
+      tag: projectId.toString(),
       builder: (controller) {
         return Positioned(
           left: 16.0,
