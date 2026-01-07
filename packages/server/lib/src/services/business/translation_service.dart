@@ -1,5 +1,6 @@
 import 'package:ttpolyglot_model/model.dart';
 
+import '../../exceptions/exceptions.dart';
 import '../base_service.dart';
 import '../infrastructure/database_service.dart';
 
@@ -20,6 +21,9 @@ class TranslationService extends BaseService {
     return execute<List<TranslationEntryModel>>(
       () async {
         logInfo('批量创建翻译条目', context: {'project_id': projectId, 'count': items.length});
+
+        // 处理项目ID：如果是数字ID，需要转换为UUID
+        final projectUuid = await _resolveProjectUuid(projectId);
 
         final created = <TranslationEntryModel>[];
 
@@ -42,7 +46,7 @@ class TranslationService extends BaseService {
 
             // 幂等检查：若已存在则跳过或报错，这里选择跳过并取现有记录
             final existing = await _databaseService.query('''
-              SELECT id, COALESCE(uuid::text, id::text) as uuid, COALESCE(project_id, '') as project_id,
+              SELECT id, COALESCE(uuid::text, id::text) as uuid, project_id::text as project_id,
                      COALESCE(entry_key, '') as entry_key, COALESCE(source_language, 'en_US') as source_language,
                      COALESCE(target_language, '') as target_language, COALESCE(source_text, '') as source_text,
                      COALESCE(target_text, '') as target_text, COALESCE(status, 'pending') as status,
@@ -51,7 +55,7 @@ class TranslationService extends BaseService {
               FROM {translation_entries}
               WHERE project_id = @project_id AND entry_key = @entry_key AND target_language = @target_language
             ''', {
-              'project_id': projectId,
+              'project_id': projectUuid,
               'entry_key': entryKey,
               'target_language': languageCode,
             });
@@ -69,14 +73,14 @@ class TranslationService extends BaseService {
                 @project_id, @entry_key, @target_language, @source_text, @target_text,
                 @translator_id, @context_info, 'pending'
               )
-              RETURNING id, COALESCE(uuid::text, id::text) as uuid, COALESCE(project_id, '') as project_id, 
+              RETURNING id, COALESCE(uuid::text, id::text) as uuid, project_id::text as project_id, 
                         COALESCE(entry_key, '') as entry_key, COALESCE(source_language, 'en_US') as source_language, 
                         COALESCE(target_language, '') as target_language, COALESCE(source_text, '') as source_text, 
                         COALESCE(target_text, '') as target_text, COALESCE(status, 'pending') as status,
                         translated_by, reviewed_by, COALESCE(context, '') as context, 
                         COALESCE(comment, '') as comment, deleted_at, created_at, updated_at
             ''', {
-              'project_id': projectId,
+              'project_id': projectUuid,
               'entry_key': entryKey,
               'target_language': languageCode,
               'source_text': sourceText,
@@ -116,9 +120,12 @@ class TranslationService extends BaseService {
           'page': page,
         });
 
+        // 处理项目ID：如果是数字ID，需要转换为UUID
+        final projectUuid = await _resolveProjectUuid(projectId);
+
         // 构建查询条件
         final conditions = <String>['te.project_id = @project_id', 'te.deleted_at IS NULL'];
-        final parameters = <String, dynamic>{'project_id': projectId};
+        final parameters = <String, dynamic>{'project_id': projectUuid};
 
         if (languageCode != null && languageCode.isNotEmpty) {
           conditions.add('te.target_language = @language_code');
@@ -166,7 +173,7 @@ class TranslationService extends BaseService {
         SELECT
           te.id,
           COALESCE(te.uuid::text, te.id::text) as uuid,
-          COALESCE(te.project_id, '') as project_id,
+          te.project_id::text as project_id,
           COALESCE(te.entry_key, '') as entry_key,
           COALESCE(te.source_language, 'en_US') as source_language,
           COALESCE(te.target_language, '') as target_language,
@@ -226,10 +233,13 @@ class TranslationService extends BaseService {
           'limit': limit,
         });
 
+        // 处理项目ID：如果是数字ID，需要转换为UUID
+        final projectUuid = await _resolveProjectUuid(projectId);
+
         // 构建查询条件
         final conditions = <String>['te.project_id = @project_id', 'te.deleted_at IS NULL'];
         final parameters = <String, dynamic>{
-          'project_id': projectId,
+          'project_id': projectUuid,
           'limit': limit + 1, // 多查询1条用于判断是否有下一页
         };
 
@@ -273,7 +283,7 @@ class TranslationService extends BaseService {
         SELECT
           te.id,
           COALESCE(te.uuid::text, te.id::text) as uuid,
-          COALESCE(te.project_id, '') as project_id,
+          te.project_id::text as project_id,
           COALESCE(te.entry_key, '') as entry_key,
           COALESCE(te.source_language, 'en_US') as source_language,
           COALESCE(te.target_language, '') as target_language,
@@ -337,7 +347,7 @@ class TranslationService extends BaseService {
         SELECT
           te.id,
           COALESCE(te.uuid::text, te.id::text) as uuid,
-          COALESCE(te.project_id, '') as project_id,
+          te.project_id::text as project_id,
           COALESCE(te.entry_key, '') as entry_key,
           COALESCE(te.source_language, 'en_US') as source_language,
           COALESCE(te.target_language, '') as target_language,
@@ -388,12 +398,15 @@ class TranslationService extends BaseService {
           'language_code': languageCode,
         });
 
+        // 处理项目ID：如果是数字ID，需要转换为UUID
+        final projectUuid = await _resolveProjectUuid(projectId);
+
         // 检查是否已存在相同的条目
         final existing = await _databaseService.query('''
         SELECT id FROM {translation_entries}
         WHERE project_id = @project_id AND entry_key = @entry_key AND target_language = @target_language
       ''', {
-          'project_id': projectId,
+          'project_id': projectUuid,
           'entry_key': entryKey,
           'target_language': languageCode,
         });
@@ -410,14 +423,14 @@ class TranslationService extends BaseService {
         ) VALUES (
           @project_id, @entry_key, @target_language, @source_text, @target_text,
           @translator_id, @context_info, 'pending'
-        ) RETURNING id, COALESCE(uuid::text, id::text) as uuid, COALESCE(project_id, '') as project_id, 
+        ) RETURNING id, COALESCE(uuid::text, id::text) as uuid, project_id::text as project_id, 
                     COALESCE(entry_key, '') as entry_key, COALESCE(source_language, 'en_US') as source_language, 
                     COALESCE(target_language, '') as target_language, COALESCE(source_text, '') as source_text, 
                     COALESCE(target_text, '') as target_text, COALESCE(status, 'pending') as status,
                     translated_by, reviewed_by, COALESCE(context, '') as context, 
                     COALESCE(comment, '') as comment, deleted_at, created_at, updated_at
       ''', {
-          'project_id': projectId,
+          'project_id': projectUuid,
           'entry_key': entryKey,
           'target_language': languageCode,
           'source_text': sourceText,
@@ -520,7 +533,7 @@ class TranslationService extends BaseService {
         UPDATE {translation_entries}
         SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP
         WHERE id = @entry_id
-        RETURNING id, COALESCE(uuid::text, id::text) as uuid, COALESCE(project_id, '') as project_id, 
+        RETURNING id, COALESCE(uuid::text, id::text) as uuid, project_id::text as project_id, 
                   COALESCE(entry_key, '') as entry_key, COALESCE(source_language, 'en_US') as source_language, 
                   COALESCE(target_language, '') as target_language, COALESCE(source_text, '') as source_text, 
                   COALESCE(target_text, '') as target_text, COALESCE(status, 'pending') as status,
@@ -665,6 +678,9 @@ class TranslationService extends BaseService {
       () async {
         logInfo('获取项目翻译统计', context: {'project_id': projectId});
 
+        // 处理项目ID：如果是数字ID，需要转换为UUID
+        final projectUuid = await _resolveProjectUuid(projectId);
+
         const sql = '''
         SELECT
           COUNT(*) as total_entries,
@@ -676,15 +692,48 @@ class TranslationService extends BaseService {
           COALESCE(SUM(word_count), 0) as total_words,
           COALESCE(AVG(quality_score), 0) as avg_quality_score,
           COUNT(*) FILTER (WHERE has_issues = true) as entries_with_issues
-        FROM translation_entries
+        FROM {translation_entries}
         WHERE project_id = @project_id
       ''';
 
-        final result = await _databaseService.query(sql, {'project_id': projectId});
+        final result = await _databaseService.query(sql, {'project_id': projectUuid});
         return result.first.toColumnMap();
       },
       operationName: 'getProjectTranslationStats',
     );
+  }
+
+  /// 将项目ID（可能是数字ID或UUID）转换为UUID
+  Future<String> _resolveProjectUuid(String projectId) async {
+    try {
+      final projectIdInt = int.tryParse(projectId);
+      if (projectIdInt != null) {
+        // 如果是数字ID，查询对应的UUID
+        final projectResult = await _databaseService.query(
+          'SELECT uuid::text as uuid FROM {projects} WHERE id = @project_id',
+          {'project_id': projectIdInt},
+        );
+        if (projectResult.isEmpty) {
+          logError('项目不存在', context: {'project_id': projectId, 'project_id_int': projectIdInt});
+          throwNotFound('项目不存在: $projectId');
+        }
+        final projectData = projectResult.first.toColumnMap();
+        final uuid = projectData['uuid']?.toString();
+        if (uuid == null || uuid.isEmpty) {
+          logError('项目UUID为空', context: {'project_id': projectId, 'project_data': projectData});
+          throwNotFound('项目UUID不存在: $projectId');
+        }
+        return uuid;
+      }
+      // 如果已经是UUID，直接返回（也可以验证UUID是否存在，但为了性能暂时跳过）
+      return projectId;
+    } catch (error, stackTrace) {
+      if (error is NotFoundException) {
+        rethrow;
+      }
+      logError('解析项目UUID失败', error: error, stackTrace: stackTrace, context: {'project_id': projectId});
+      throwBusiness('解析项目ID失败: ${error.toString()}');
+    }
   }
 
   /// 记录翻译历史
@@ -722,22 +771,56 @@ class TranslationService extends BaseService {
   /// 更新项目统计信息
   Future<void> _updateProjectStats(String projectId) async {
     try {
+      // 处理项目ID：如果是数字ID，需要转换为UUID用于查询translation_entries
+      // 但UPDATE语句的WHERE条件需要数字ID
+      String projectUuid = projectId;
+      int? projectIdInt = int.tryParse(projectId);
+
+      if (projectIdInt == null) {
+        // 如果是UUID，需要先获取数字ID
+        final projectResult = await _databaseService.query(
+          'SELECT id FROM {projects} WHERE uuid = @project_uuid',
+          {'project_uuid': projectId},
+        );
+        if (projectResult.isEmpty) {
+          logError('项目不存在', context: {'project_id': projectId});
+          return;
+        }
+        final projectData = projectResult.first.toColumnMap();
+        projectIdInt = projectData['id'] as int?;
+      } else {
+        // 如果是数字ID，查询对应的UUID
+        final projectResult = await _databaseService.query(
+          'SELECT uuid::text as uuid FROM {projects} WHERE id = @project_id',
+          {'project_id': projectIdInt},
+        );
+        if (projectResult.isEmpty) {
+          logError('项目不存在', context: {'project_id': projectId});
+          return;
+        }
+        final projectData = projectResult.first.toColumnMap();
+        projectUuid = projectData['uuid']?.toString() ?? projectId;
+      }
+
       await _databaseService.query('''
-        UPDATE projects
+        UPDATE {projects}
         SET
           total_keys = (
             SELECT COUNT(DISTINCT entry_key)
-            FROM translation_entries
-            WHERE project_id = @project_id
+            FROM {translation_entries}
+            WHERE project_id = @project_uuid AND deleted_at IS NULL
           ),
           translated_keys = (
             SELECT COUNT(DISTINCT entry_key)
-            FROM translation_entries
-            WHERE project_id = @project_id AND status IN ('completed', 'reviewing', 'approved')
+            FROM {translation_entries}
+            WHERE project_id = @project_uuid AND status IN ('completed', 'reviewing', 'approved') AND deleted_at IS NULL
           ),
           last_activity_at = CURRENT_TIMESTAMP
         WHERE id = @project_id
-      ''', {'project_id': projectId});
+      ''', {
+        'project_id': projectIdInt!,
+        'project_uuid': projectUuid,
+      });
     } catch (error, stackTrace) {
       logError('更新项目统计失败', error: error, stackTrace: stackTrace, context: {'project_id': projectId});
       // 不抛出异常，避免影响主要操作
