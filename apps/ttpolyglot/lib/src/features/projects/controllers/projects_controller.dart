@@ -27,6 +27,9 @@ class ProjectsController extends GetxController {
   final _pageSize = 50.obs;
   final _totalSize = 0.obs;
 
+  // 防止重复初始化的标志
+  bool _isInitialized = false;
+
   // Getters
   List<ProjectModel> get projects => _projects;
   bool get isLoading => _isLoading.value;
@@ -54,12 +57,21 @@ class ProjectsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadProjects();
+    // 防止重复初始化
+    if (!_isInitialized) {
+      _isInitialized = true;
+      loadProjects();
+    }
   }
 
   /// 加载项目列表
   static Future<void> loadProjects({bool refresh = false}) async {
     final controller = instance;
+
+    // 如果正在加载且不是刷新操作，直接返回，防止重复请求
+    if (controller._isLoading.value && !refresh) {
+      return;
+    }
 
     try {
       controller._isLoading.value = true;
@@ -263,6 +275,15 @@ class ProjectsController extends GetxController {
 
   /// 刷新项目列表
   static Future<void> refreshProjects() async {
+    final controller = instance;
+    // 刷新时，如果正在加载，等待加载完成后再执行刷新
+    if (controller._isLoading.value) {
+      // 等待当前加载完成
+      await Future.doWhile(() async {
+        await Future.delayed(const Duration(milliseconds: 50));
+        return controller._isLoading.value;
+      });
+    }
     await loadProjects(refresh: true);
   }
 
