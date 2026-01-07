@@ -18,9 +18,14 @@ class TranslationController extends BaseController {
   })  : _translationService = TranslationService(databaseService: databaseService),
         super('TranslationController');
 
-  Future<Response> getTranslations(Request request, int projectId) async {
+  Future<Response> getTranslations(Request request, String projectId) async {
     return execute(
       () async {
+        final projectIdInt = int.tryParse(projectId);
+        if (projectIdInt == null) {
+          throw ValidationException(message: '项目ID格式无效');
+        }
+
         final params = request.url.queryParameters;
         final page = int.tryParse(params['page'] ?? '1') ?? 1;
         final limit = int.tryParse(params['limit'] ?? '50') ?? 50;
@@ -35,7 +40,7 @@ class TranslationController extends BaseController {
         }
 
         final result = await _translationService.getTranslationEntries(
-          projectId: projectId,
+          projectId: projectIdInt,
           languageCode: languageCode,
           status: status,
           translatorId: translatorId,
@@ -54,9 +59,14 @@ class TranslationController extends BaseController {
     );
   }
 
-  Future<Response> createTranslation(Request request, int projectId) async {
+  Future<Response> createTranslation(Request request, String projectId) async {
     return execute(
       () async {
+        final projectIdInt = int.tryParse(projectId);
+        if (projectIdInt == null) {
+          throw ValidationException(message: '项目ID格式无效');
+        }
+
         final body = await request.readAsString();
         final data = jsonDecode(body) as Map<String, dynamic>;
 
@@ -71,7 +81,7 @@ class TranslationController extends BaseController {
         final contextInfo = data['context_info']?.toString() ?? data['context']?.toString();
 
         final entry = await _translationService.createTranslationEntry(
-          projectId: projectId,
+          projectId: projectIdInt,
           entryKey: entryKey,
           languageCode: languageCode,
           sourceText: sourceText,
@@ -89,15 +99,20 @@ class TranslationController extends BaseController {
     );
   }
 
-  Future<Response> getTranslation(Request request, int projectId, String entryId) async {
+  Future<Response> getTranslation(Request request, String projectId, String entryId) async {
     return execute(
       () async {
+        final projectIdInt = int.tryParse(projectId);
+        if (projectIdInt == null) {
+          throw ValidationException(message: '项目ID格式无效');
+        }
+
         final entry = await _translationService.getTranslationEntryById(entryId);
         if (entry == null) {
           throw NotFoundException(message: '翻译条目不存在');
         }
 
-        if (entry.projectId.toString() != projectId) {
+        if (entry.projectId != projectIdInt) {
           throw NotFoundException(message: '翻译条目不存在');
         }
 
@@ -110,7 +125,7 @@ class TranslationController extends BaseController {
     );
   }
 
-  Future<Response> updateTranslation(Request request, int projectId, String entryId) async {
+  Future<Response> updateTranslation(Request request, String projectId, String entryId) async {
     return execute(
       () async {
         final body = await request.readAsString();
@@ -150,7 +165,7 @@ class TranslationController extends BaseController {
     );
   }
 
-  Future<Response> patchTranslation(Request request, int projectId, String entryId) async {
+  Future<Response> patchTranslation(Request request, String projectId, String entryId) async {
     return execute(
       () async {
         final body = await request.readAsString();
@@ -209,8 +224,13 @@ class TranslationController extends BaseController {
   }
 
   /// POST /api/v1/projects/{projectId}/translations/batch
-  Future<Response> _batchCreateTranslations(Request request, int projectId) async {
+  Future<Response> _batchCreateTranslations(Request request, String projectId) async {
     try {
+      final projectIdInt = int.tryParse(projectId);
+      if (projectIdInt == null) {
+        return ResponseUtils.error(message: '项目ID格式无效');
+      }
+
       final body = await request.readAsString();
       final decoded = jsonDecode(body);
       List<dynamic>? rawItems;
@@ -243,7 +263,7 @@ class TranslationController extends BaseController {
       }
 
       final created = await _translationService.batchCreateTranslations(
-        projectId: projectId,
+        projectId: projectIdInt,
         items: items,
       );
 
@@ -262,9 +282,9 @@ class TranslationController extends BaseController {
   }
 
   // 暴露用于路由绑定的方法引用
-  Future<Response> Function(Request, int) get batchCreate => _batchCreateTranslations;
+  Future<Response> Function(Request, String) get batchCreate => _batchCreateTranslations;
 
-  Future<Response> batchDelete(Request request, int projectId) async {
+  Future<Response> batchDelete(Request request, String projectId) async {
     return execute(
       () async {
         final body = await request.readAsString();
