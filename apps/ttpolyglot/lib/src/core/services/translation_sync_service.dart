@@ -18,13 +18,13 @@ class _PendingOp {
 
   final String opType; // create | update | delete | batchCreate
   final int projectId;
-  final Map<String, dynamic> payload;
+  final TranslationEntryModel payload; // create | update | delete | batchCreate
   final DateTime createdAt;
 
   Map<String, dynamic> toJson() => {
         'opType': opType,
         'projectId': projectId,
-        'payload': payload,
+        'payload': payload.toJson(),
         'createdAt': createdAt.toIso8601String(),
       };
 
@@ -32,7 +32,7 @@ class _PendingOp {
     return _PendingOp(
       opType: json['opType'] as String,
       projectId: json['projectId'] as int,
-      payload: Map<String, dynamic>.from(json['payload'] as Map),
+      payload: TranslationEntryModel.fromJson(json['payload'] as Map<String, dynamic>),
       createdAt: DateTime.parse(json['createdAt'] as String),
     );
   }
@@ -77,7 +77,7 @@ class TranslationSyncService extends GetxService {
   Future<void> enqueue({
     required int projectId,
     required String opType, // create | update | delete | batchCreate
-    required Map<String, dynamic> payload,
+    required TranslationEntryModel payload,
   }) async {
     try {
       final queue = await _loadQueue(projectId);
@@ -126,23 +126,22 @@ class TranslationSyncService extends GetxService {
     try {
       switch (op.opType) {
         case 'create':
-          await _api.createTranslation(projectId: op.projectId, data: op.payload);
+          await _api.createTranslation(projectId: op.projectId, data: op.payload.toJson());
           return true;
         case 'batchCreate':
-          final items = (op.payload['items'] as List).whereType<Map<String, dynamic>>().toList();
-          await _api.batchCreateTranslations(projectId: op.projectId, items: items);
+          await _api.batchCreateTranslations(projectId: op.projectId, items: [op.payload]);
           return true;
         case 'update':
           await _api.updateTranslation(
             projectId: op.projectId,
-            entryId: op.payload['entry_id'] as String,
-            data: Map<String, dynamic>.from(op.payload['data'] as Map),
+            entryId: op.payload.uuid,
+            data: op.payload.toJson(),
           );
           return true;
         case 'delete':
           await _api.deleteTranslation(
             projectId: op.projectId,
-            entryId: op.payload['entry_id'] as String,
+            entryId: op.payload.uuid,
           );
           return true;
         default:

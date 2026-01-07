@@ -175,7 +175,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
         await TranslationSyncService.instance.enqueue(
           projectId: entry.projectId,
           opType: 'create',
-          payload: entry.toJson(),
+          payload: entry,
         );
       } catch (_) {}
       return entry.copyWith(updatedAt: DateTime.now());
@@ -279,14 +279,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
         await TranslationSyncService.instance.enqueue(
           projectId: entry.projectId,
           opType: 'update',
-          payload: {
-            'entry_id': entry.uuid,
-            'data': {
-              'target_text': entry.targetText,
-              'status': entry.status.name,
-              if (entry.context.isNotEmpty) 'context_info': entry.context,
-            },
-          },
+          payload: entry,
         );
       } catch (_) {}
       return updatedLocal;
@@ -375,9 +368,17 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
         await TranslationSyncService.instance.enqueue(
           projectId: projectId,
           opType: 'delete',
-          payload: {
-            'entry_id': entryId,
-          },
+          payload: TranslationEntryModel(
+            projectId: projectId,
+            uuid: entryId,
+            entryKey: '',
+            sourceText: '',
+            targetText: '',
+            targetLanguage: LanguageEnum.enUS,
+            status: TranslationStatusEnum.pending,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
         );
       } catch (_) {}
     } catch (error, stackTrace) {
