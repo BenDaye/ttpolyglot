@@ -208,36 +208,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
     CreateTranslationKeyRequest request,
   ) async {
     try {
-      // API 优先（批量创建）
-      if (AppConfig.useServerForTranslations) {
-        try {
-          final generated = TranslationUtils.generateTranslationEntries(
-            projectId: request.projectId,
-            entryKey: request.entryKey,
-            sourceText: request.sourceText,
-            sourceLanguage: request.sourceLanguage,
-            targetLanguages: request.targetLanguages,
-            context: request.context,
-            maxLength: request.maxLength,
-            isPlural: request.isPlural,
-            pluralForms: request.pluralForms,
-          );
-          final payload = generated.map((e) => e.toJson()).toList();
-          final created = await _translationApi.batchCreateTranslations(projectId: request.projectId, items: payload);
-          if (created != null) {
-            return created;
-          }
-        } catch (error, stackTrace) {
-          log(
-            '[createTranslationKey_api_fallback]',
-            error: error,
-            stackTrace: stackTrace,
-            name: 'TranslationServiceImpl',
-          );
-        }
-      }
-
-      final entries = TranslationUtils.generateTranslationEntries(
+      final generated = TranslationUtils.generateTranslationEntries(
         projectId: request.projectId,
         entryKey: request.entryKey,
         sourceText: request.sourceText,
@@ -247,21 +218,20 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
         maxLength: request.maxLength,
         isPlural: request.isPlural,
         pluralForms: request.pluralForms,
-      ); // 本地回退
-      final created = await batchCreateTranslationEntries(entries);
-      // 入队待同步（批量）
-      try {
-        await TranslationSyncService.instance.init();
-        await TranslationSyncService.instance.enqueue(
-          projectId: request.projectId,
-          opType: 'batchCreate',
-          payload: {
-            'items': created.map((e) => e.toJson()).toList(),
-          },
-        );
-      } catch (_) {}
+      );
+      final payload = generated.map((e) => e.toJson()).toList();
+      final created = await _translationApi.batchCreateTranslations(projectId: request.projectId, items: payload);
+      if (created == null) {
+        throw Exception('创建翻译键失败：API 返回为空');
+      }
       return created;
     } catch (error, stackTrace) {
+      log(
+        '[createTranslationKey]',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'TranslationServiceImpl',
+      );
       LoggerUtils.error('创建翻译键失败', error: error, stackTrace: stackTrace);
       rethrow;
     }

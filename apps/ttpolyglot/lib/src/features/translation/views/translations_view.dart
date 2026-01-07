@@ -373,7 +373,7 @@ class ProjectTranslationsView extends StatelessWidget {
             child: const Text('取消'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               final key = keyController.text.trim();
               final sourceText = sourceTextController.text.trim();
 
@@ -385,7 +385,7 @@ class ProjectTranslationsView extends StatelessWidget {
               // 获取除主语言外的所有目标语言
               final targetLanguages = project.languages.where((lang) => lang.id != project.primaryLanguageId).toList();
 
-              controller.createTranslationKey(
+              await controller.createTranslationKey(
                 key: key,
                 sourceText: sourceText,
                 targetLanguages: targetLanguages.map((lang) => lang.code).toList(),
