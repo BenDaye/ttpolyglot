@@ -223,7 +223,16 @@ class TranslationService extends BaseService {
 
         final result = await _databaseService.query(sql, parameters);
 
-        final entries = result.map((row) => row.toColumnMap()).toList();
+        final entries = result.map((row) {
+          final data = row.toColumnMap();
+          // 确保 project_id 是整数类型
+          if (data['project_id'] != null) {
+            data['project_id'] = data['project_id'] is int
+                ? data['project_id']
+                : int.tryParse(data['project_id'].toString());
+          }
+          return data;
+        }).toList();
 
         return PagerModel<TranslationEntryModel>(
           page: page,
@@ -400,7 +409,14 @@ class TranslationService extends BaseService {
           return null;
         }
 
-        return TranslationEntryModel.fromJson(result.first.toColumnMap());
+        final resultData = result.first.toColumnMap();
+        // 确保 project_id 是整数类型
+        if (resultData['project_id'] != null) {
+          resultData['project_id'] = resultData['project_id'] is int
+              ? resultData['project_id']
+              : int.tryParse(resultData['project_id'].toString());
+        }
+        return TranslationEntryModel.fromJson(resultData);
       },
       operationName: 'getTranslationEntryById',
     );
@@ -464,7 +480,14 @@ class TranslationService extends BaseService {
           'context_info': contextInfo,
         });
 
-        final entry = TranslationEntryModel.fromJson(result.first.toColumnMap());
+        final resultData = result.first.toColumnMap();
+        // 确保 project_id 是整数类型
+        if (resultData['project_id'] != null) {
+          resultData['project_id'] = resultData['project_id'] is int
+              ? resultData['project_id']
+              : int.tryParse(resultData['project_id'].toString()) ?? projectId;
+        }
+        final entry = TranslationEntryModel.fromJson(resultData);
 
         // 更新项目统计信息
         await _updateProjectStats(projectId);
@@ -567,7 +590,14 @@ class TranslationService extends BaseService {
       ''';
 
         final result = await _databaseService.query(sql, parameters);
-        final updatedEntry = TranslationEntryModel.fromJson(result.first.toColumnMap());
+        final resultData = result.first.toColumnMap();
+        // 确保 project_id 是整数类型
+        if (resultData['project_id'] != null) {
+          resultData['project_id'] = resultData['project_id'] is int
+              ? resultData['project_id']
+              : int.tryParse(resultData['project_id'].toString());
+        }
+        final updatedEntry = TranslationEntryModel.fromJson(resultData);
 
         // 记录翻译历史
         await _recordTranslationHistory(updatedEntry, updatedBy);
