@@ -630,6 +630,8 @@ class TranslationService extends BaseService {
   }
 
   /// 删除翻译条目
+  ///
+  /// 注意：此操作是幂等的，如果条目不存在，视为删除成功
   Future<void> deleteTranslationEntry(String entryId, {String? deletedBy}) async {
     return execute(
       () async {
@@ -638,7 +640,9 @@ class TranslationService extends BaseService {
         // 获取条目信息以便记录历史
         final entry = await getTranslationEntryById(entryId);
         if (entry == null) {
-          throwNotFound('翻译条目不存在');
+          // 幂等性：如果条目不存在，视为删除成功，记录日志但不抛出异常
+          logInfo('翻译条目不存在，视为删除成功', context: {'entry_id': entryId});
+          return;
         }
 
         // 记录删除历史
