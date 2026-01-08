@@ -90,6 +90,10 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
           // 确保 context 和 comment 不为空
           data['context'] = data['context'] ?? '';
           data['comment'] = data['comment'] ?? '';
+          // 确保 target_languages 不为空，如果为 null 则设置为空列表
+          if (data['target_languages'] == null) {
+            data['target_languages'] = <dynamic>[];
+          }
         }
         return data;
       }).toList();
