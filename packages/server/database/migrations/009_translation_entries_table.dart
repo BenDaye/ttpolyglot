@@ -25,23 +25,22 @@ class Migration009TranslationEntriesTable extends BaseMigration {
       await createTable('translation_entries', '''
         CREATE TABLE IF NOT EXISTS {table_name} (
           id SERIAL PRIMARY KEY,
-          uuid UUID DEFAULT gen_random_uuid(),
-          project_id UUID NOT NULL,
-          key VARCHAR(500),
+          uuid UUID DEFAULT gen_random_uuid() NOT NULL,
+          project_id INTEGER NOT NULL,
           entry_key VARCHAR(500) NOT NULL,
-          source_language VARCHAR(20),
-          target_language VARCHAR(20),
-          source_text TEXT,
-          target_text TEXT,
-          status VARCHAR(20) DEFAULT 'pending',
+          source_language VARCHAR(20) NOT NULL DEFAULT 'en_US',
+          source_text TEXT NOT NULL,
           
           -- 审核字段
           translated_by UUID,
           reviewed_by UUID,
           
           -- 附加信息字段
-          context TEXT,
-          comment TEXT,
+          context TEXT DEFAULT '',
+          comment TEXT DEFAULT '',
+          
+          -- 排序索引
+          sort_index INTEGER DEFAULT 0,
           
           -- 软删除
           deleted_at TIMESTAMPTZ,
@@ -50,32 +49,24 @@ class Migration009TranslationEntriesTable extends BaseMigration {
           created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
           
-          UNIQUE(project_id, entry_key, target_language)
+          UNIQUE(project_id, entry_key)
         );
       ''');
 
       // 创建外键约束
-      await addForeignKey('translation_entries_project_id', 'translation_entries', 'project_id', 'projects', 'uuid');
+      await addForeignKey('translation_entries_project_id', 'translation_entries', 'project_id', 'projects', 'id');
       await addForeignKey('translation_entries_translated_by', 'translation_entries', 'translated_by', 'users', 'id',
           onDelete: 'SET NULL');
       await addForeignKey('translation_entries_reviewed_by', 'translation_entries', 'reviewed_by', 'users', 'id',
           onDelete: 'SET NULL');
 
-      // 初始化 entry_key 字段（如果为空则使用 key）
-      await connection.execute('''
-        UPDATE ${tablePrefix}translation_entries 
-        SET entry_key = COALESCE(key, '') 
-        WHERE entry_key IS NULL OR entry_key = '';
-      ''');
-
       // 创建基础索引
       await createIndex('translation_entries_uuid', 'translation_entries', 'uuid');
       await createIndex('translation_entries_project_id', 'translation_entries', 'project_id');
       await createIndex('translation_entries_source_language', 'translation_entries', 'source_language');
-      await createIndex('translation_entries_target_language', 'translation_entries', 'target_language');
-      await createIndex('translation_entries_status', 'translation_entries', 'status');
       await createIndex('translation_entries_translated_by', 'translation_entries', 'translated_by');
       await createIndex('translation_entries_reviewed_by', 'translation_entries', 'reviewed_by');
+      await createIndex('translation_entries_sort_index', 'translation_entries', 'sort_index');
 
       // 创建优化索引
       await connection.execute('''
@@ -92,8 +83,8 @@ class Migration009TranslationEntriesTable extends BaseMigration {
 
       // 创建复合索引优化常见查询
       await connection.execute('''
-        CREATE INDEX IF NOT EXISTS ${tablePrefix}idx_translation_entries_project_lang_status 
-        ON ${tablePrefix}translation_entries(project_id, target_language, status) 
+        CREATE INDEX IF NOT EXISTS ${tablePrefix}idx_translation_entries_project_entry_key 
+        ON ${tablePrefix}translation_entries(project_id, entry_key) 
         WHERE deleted_at IS NULL;
       ''');
 
@@ -101,31 +92,8 @@ class Migration009TranslationEntriesTable extends BaseMigration {
       await connection.execute('''
         CREATE INDEX IF NOT EXISTS ${tablePrefix}idx_translation_entries_fulltext 
         ON ${tablePrefix}translation_entries 
-        USING GIN (to_tsvector('simple', coalesce(source_text, '') || ' ' || coalesce(target_text, ''))) 
+        USING GIN (to_tsvector('simple', coalesce(source_text, ''))) 
         WHERE deleted_at IS NULL;
-      ''');
-
-      // 创建触发器函数：自动设置 entry_key
-      await connection.execute('''
-        CREATE OR REPLACE FUNCTION update_translation_entry_fields()
-        RETURNS TRIGGER AS \$\$
-        BEGIN
-          -- 确保 entry_key 有值，如果没有则使用 key
-          IF NEW.entry_key IS NULL OR NEW.entry_key = '' THEN
-            NEW.entry_key = COALESCE(NEW.key, '');
-          END IF;
-          
-          RETURN NEW;
-        END;
-        \$\$ LANGUAGE plpgsql;
-      ''');
-
-      // 创建触发器：在插入或更新时自动更新字段
-      await connection.execute('''
-        CREATE TRIGGER trigger_update_translation_entry_fields
-          BEFORE INSERT OR UPDATE ON ${tablePrefix}translation_entries
-          FOR EACH ROW
-          EXECUTE FUNCTION update_translation_entry_fields();
       ''');
 
       // 创建触发器：自动更新 updated_at
@@ -136,25 +104,64 @@ class Migration009TranslationEntriesTable extends BaseMigration {
           EXECUTE FUNCTION update_updated_at_column();
       ''');
 
+      // 创建翻译条目目标语言表
+      await createTable('translation_entry_targets', '''
+        CREATE TABLE IF NOT EXISTS {table_name} (
+          id SERIAL PRIMARY KEY,
+          entry_id INTEGER NOT NULL,
+          language VARCHAR(20) NOT NULL,
+          text TEXT NOT NULL DEFAULT '',
+          
+          -- 时间戳
+          created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+          
+          UNIQUE(entry_id, language)
+        );
+      ''');
+
+      // 创建外键约束
+      await addForeignKey(
+          'translation_entry_targets_entry_id', 'translation_entry_targets', 'entry_id', 'translation_entries', 'id',
+          onDelete: 'CASCADE');
+
+      // 创建索引
+      await createIndex('translation_entry_targets_entry_id', 'translation_entry_targets', 'entry_id');
+      await createIndex('translation_entry_targets_language', 'translation_entry_targets', 'language');
+      await createIndex('translation_entry_targets_entry_language', 'translation_entry_targets', 'entry_id, language');
+
+      // 创建触发器：自动更新 updated_at
+      await connection.execute('''
+        CREATE TRIGGER update_${tablePrefix}translation_entry_targets_updated_at 
+          BEFORE UPDATE ON ${tablePrefix}translation_entry_targets 
+          FOR EACH ROW 
+          EXECUTE FUNCTION update_updated_at_column();
+      ''');
+
       // 添加表注释
-      await addTableComment('translation_entries', '翻译条目表，存储翻译条目内容（优化版）');
+      await addTableComment('translation_entries', '翻译条目表，存储翻译条目基本信息');
       await addColumnComment('translation_entries', 'id', '翻译条目ID，主键');
       await addColumnComment('translation_entries', 'uuid', 'UUID，用于分布式场景');
-      await addColumnComment('translation_entries', 'project_id', '项目UUID，外键关联projects表');
-      await addColumnComment('translation_entries', 'key', '原始翻译键名');
+      await addColumnComment('translation_entries', 'project_id', '项目ID，外键关联projects表');
       await addColumnComment('translation_entries', 'entry_key', '翻译条目键（必填）');
       await addColumnComment('translation_entries', 'source_language', '源语言代码');
-      await addColumnComment('translation_entries', 'target_language', '目标语言代码');
       await addColumnComment('translation_entries', 'source_text', '源文本');
-      await addColumnComment('translation_entries', 'target_text', '目标文本');
-      await addColumnComment('translation_entries', 'status', '翻译状态：pending/completed/reviewing/approved');
       await addColumnComment('translation_entries', 'translated_by', '翻译者UUID，外键关联users表');
       await addColumnComment('translation_entries', 'reviewed_by', '审核者UUID，外键关联users表');
       await addColumnComment('translation_entries', 'context', '上下文信息');
       await addColumnComment('translation_entries', 'comment', '备注信息');
+      await addColumnComment('translation_entries', 'sort_index', '排序索引');
       await addColumnComment('translation_entries', 'deleted_at', '软删除时间');
       await addColumnComment('translation_entries', 'created_at', '创建时间');
       await addColumnComment('translation_entries', 'updated_at', '更新时间');
+
+      await addTableComment('translation_entry_targets', '翻译条目目标语言表，存储翻译条目的目标语言翻译');
+      await addColumnComment('translation_entry_targets', 'id', '目标语言翻译ID，主键');
+      await addColumnComment('translation_entry_targets', 'entry_id', '翻译条目ID，外键关联translation_entries表');
+      await addColumnComment('translation_entry_targets', 'language', '目标语言代码');
+      await addColumnComment('translation_entry_targets', 'text', '翻译文本');
+      await addColumnComment('translation_entry_targets', 'created_at', '创建时间');
+      await addColumnComment('translation_entry_targets', 'updated_at', '更新时间');
 
       ServerLogger.info('迁移完成: $name');
     } catch (error, stackTrace) {
@@ -170,8 +177,8 @@ class Migration009TranslationEntriesTable extends BaseMigration {
 
       // 删除触发器
       await connection.execute('''
-        DROP TRIGGER IF EXISTS trigger_update_translation_entry_fields 
-        ON ${tablePrefix}translation_entries;
+        DROP TRIGGER IF EXISTS update_${tablePrefix}translation_entry_targets_updated_at 
+        ON ${tablePrefix}translation_entry_targets;
       ''');
 
       await connection.execute('''
@@ -179,10 +186,8 @@ class Migration009TranslationEntriesTable extends BaseMigration {
         ON ${tablePrefix}translation_entries;
       ''');
 
-      // 删除触发器函数
-      await connection.execute('''
-        DROP FUNCTION IF EXISTS update_translation_entry_fields();
-      ''');
+      // 删除翻译条目目标语言表
+      await dropTable('translation_entry_targets');
 
       // 删除翻译条目表
       await dropTable('translation_entries');

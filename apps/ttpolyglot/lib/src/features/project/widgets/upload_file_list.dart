@@ -689,10 +689,13 @@ class _UploadFileListState extends State<UploadFileList> {
             projectId: 0,
             entryKey: entry.value,
             sourceLanguage: language,
-            targetLanguage: language,
             sourceText: entry.value,
-            targetText: entry.value,
-            status: TranslationStatusEnum.completed,
+            targetLanguages: [
+              TranslationTargetLanguageModel(
+                language: language,
+                text: entry.value,
+              ),
+            ],
             createdAt: DateTime.now(),
             updatedAt: DateTime.now(),
           ),
@@ -723,7 +726,9 @@ class _UploadFileListState extends State<UploadFileList> {
       // 将 TranslationEntryModel 列表转换为 Map<String, String>
       final translations = <String, String>{};
       for (final entry in result.entries) {
-        translations[entry.entryKey] = entry.targetText;
+        // 获取第一个目标语言的翻译文本
+        final targetText = entry.targetLanguages.isNotEmpty ? entry.targetLanguages.first.text : '';
+        translations[entry.entryKey] = targetText;
       }
 
       return translations;
@@ -742,7 +747,9 @@ class _UploadFileListState extends State<UploadFileList> {
       // 将 TranslationEntryModel 列表转换为 Map<String, String>
       final translations = <String, String>{};
       for (final entry in result.entries) {
-        translations[entry.entryKey] = entry.targetText;
+        // 获取第一个目标语言的翻译文本
+        final targetText = entry.targetLanguages.isNotEmpty ? entry.targetLanguages.first.text : '';
+        translations[entry.entryKey] = targetText;
       }
 
       return translations;
@@ -793,7 +800,9 @@ class _UploadFileListState extends State<UploadFileList> {
       // 将 TranslationEntryModel 列表转换为 Map<String, String>
       final translations = <String, String>{};
       for (final entry in result.entries) {
-        translations[entry.entryKey] = entry.targetText;
+        // 获取第一个目标语言的翻译文本
+        final targetText = entry.targetLanguages.isNotEmpty ? entry.targetLanguages.first.text : '';
+        translations[entry.entryKey] = targetText;
       }
 
       return translations;
@@ -812,7 +821,9 @@ class _UploadFileListState extends State<UploadFileList> {
       // 将 TranslationEntryModel 列表转换为 Map<String, String>
       final translations = <String, String>{};
       for (final entry in result.entries) {
-        translations[entry.entryKey] = entry.targetText;
+        // 获取第一个目标语言的翻译文本
+        final targetText = entry.targetLanguages.isNotEmpty ? entry.targetLanguages.first.text : '';
+        translations[entry.entryKey] = targetText;
       }
 
       return translations;

@@ -246,14 +246,26 @@ class ConflictDetectionService {
     TranslationEntryModel existing,
     TranslationEntryModel imported,
   ) {
-    // 检查翻译内容
-    if (existing.targetText != imported.targetText) {
-      return ConflictType.textDifference;
+    // 检查翻译内容（比较相同语言的翻译）
+    for (final importedTarget in imported.targetLanguages) {
+      final existingTarget = existing.targetLanguages.firstWhere(
+        (t) => t.language == importedTarget.language,
+        orElse: () => TranslationTargetLanguageModel(language: importedTarget.language, text: ''),
+      );
+      if (existingTarget.text != importedTarget.text) {
+        return ConflictType.textDifference;
+      }
     }
 
-    // 检查翻译状态
-    if (existing.status != imported.status) {
-      return ConflictType.statusDifference;
+    // 检查翻译状态（比较相同语言的翻译状态）
+    for (final importedTarget in imported.targetLanguages) {
+      final existingTarget = existing.targetLanguages.firstWhere(
+        (t) => t.language == importedTarget.language,
+        orElse: () => TranslationTargetLanguageModel(language: importedTarget.language, text: ''),
+      );
+      if (existingTarget.status != importedTarget.status) {
+        return ConflictType.statusDifference;
+      }
     }
 
     // 检查元数据
@@ -275,9 +287,29 @@ class ConflictDetectionService {
       case ConflictType.keyExists:
         return '翻译键 "${existing.entryKey}" 已存在';
       case ConflictType.textDifference:
-        return '翻译内容不同：现有 "${existing.targetText}" vs 导入 "${imported.targetText}"';
+        // 找到第一个不同的翻译
+        for (final importedTarget in imported.targetLanguages) {
+          final existingTarget = existing.targetLanguages.firstWhere(
+            (t) => t.language == importedTarget.language,
+            orElse: () => TranslationTargetLanguageModel(language: importedTarget.language, text: ''),
+          );
+          if (existingTarget.text != importedTarget.text) {
+            return '翻译内容不同（${importedTarget.language.code}）：现有 "${existingTarget.text}" vs 导入 "${importedTarget.text}"';
+          }
+        }
+        return '翻译内容不同';
       case ConflictType.statusDifference:
-        return '翻译状态不同：现有 ${existing.status} vs 导入 ${imported.status}';
+        // 找到第一个不同的状态
+        for (final importedTarget in imported.targetLanguages) {
+          final existingTarget = existing.targetLanguages.firstWhere(
+            (t) => t.language == importedTarget.language,
+            orElse: () => TranslationTargetLanguageModel(language: importedTarget.language, text: ''),
+          );
+          if (existingTarget.status != importedTarget.status) {
+            return '翻译状态不同（${importedTarget.language.code}）：现有 ${existingTarget.status} vs 导入 ${importedTarget.status}';
+          }
+        }
+        return '翻译状态不同';
       case ConflictType.metadataDifference:
         return '元数据不同（注释、上下文或最大长度）';
     }
@@ -293,13 +325,34 @@ class ConflictDetectionService {
     TranslationEntryModel existing,
     TranslationEntryModel imported,
   ) {
-    return existing.copyWith(
+    // 合并目标语言列表
+    final mergedTargetLanguages = <TranslationTargetLanguageModel>[];
+
+    // 先添加现有的目标语言
+    for (final existingTarget in existing.targetLanguages) {
+      final importedTarget = imported.targetLanguages.firstWhere(
+        (t) => t.language == existingTarget.language,
+        orElse: () => TranslationTargetLanguageModel(language: existingTarget.language, text: ''),
+      );
+
       // 优先使用导入的翻译文本（如果不为空）
-      targetText: imported.targetText.isNotEmpty ? imported.targetText : existing.targetText,
-      // 使用更新的状态
-      status: imported.status,
+      mergedTargetLanguages.add(
+        existingTarget.copyWith(
+          text: importedTarget.text.isNotEmpty ? importedTarget.text : existingTarget.text,
+        ),
+      );
+    }
+
+    // 添加导入中新增的目标语言
+    for (final importedTarget in imported.targetLanguages) {
+      if (!mergedTargetLanguages.any((t) => t.language == importedTarget.language)) {
+        mergedTargetLanguages.add(importedTarget);
+      }
+    }
+
+    return existing.copyWith(
+      targetLanguages: mergedTargetLanguages,
       context: imported.context.isNotEmpty ? imported.context : existing.context,
-      // 更新时间
       updatedAt: DateTime.now(),
     );
   }

@@ -45,18 +45,23 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
             final items = res.items!;
             if (items.isNotEmpty) {
               if (!includeSourceLanguage) return items;
-              final copyLanguageCode = items.first.targetLanguage.code;
-              final copyEntries = items
-                  .where((item) => item.targetLanguage.code == copyLanguageCode)
-                  .map(
-                    (item) => item.copyWith(
-                      uuid: item.uuid.replaceAll(item.targetLanguage.code, item.sourceLanguage.code),
-                      targetLanguage: item.sourceLanguage,
-                      targetText: item.sourceText,
-                      status: TranslationStatusEnum.completed,
-                    ),
-                  )
-                  .toList();
+              // 获取第一个条目的第一个目标语言
+              if (items.first.targetLanguages.isEmpty) return items;
+              final copyLanguageCode = items.first.targetLanguages.first.language.code;
+              final copyEntries =
+                  items.where((item) => item.targetLanguages.any((t) => t.language.code == copyLanguageCode)).map(
+                (item) {
+                  // 创建源语言作为目标语言的条目
+                  final sourceTargetLang = TranslationTargetLanguageModel(
+                    language: item.sourceLanguage,
+                    text: item.sourceText,
+                  );
+                  return item.copyWith(
+                    uuid: item.uuid.replaceAll(copyLanguageCode, item.sourceLanguage.code),
+                    targetLanguages: [sourceTargetLang],
+                  );
+                },
+              ).toList();
               return [...copyEntries, ...items];
             }
           }
@@ -96,15 +101,23 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
 
       if (result.isEmpty) return [];
 
-      final copyLanguageCode = result.first.targetLanguage.code;
-      final copyEntries = result.where((item) => item.targetLanguage.code == copyLanguageCode).toList().map(
-            (item) => item.copyWith(
-              uuid: item.uuid.replaceAll(item.targetLanguage.code, item.sourceLanguage.code),
-              targetLanguage: item.sourceLanguage,
-              targetText: item.sourceText,
-              status: TranslationStatusEnum.completed,
-            ),
+      // 获取第一个条目的第一个目标语言
+      if (result.first.targetLanguages.isEmpty) return result;
+      final copyLanguageCode = result.first.targetLanguages.first.language.code;
+      final copyEntries =
+          result.where((item) => item.targetLanguages.any((t) => t.language.code == copyLanguageCode)).map(
+        (item) {
+          // 创建源语言作为目标语言的条目
+          final sourceTargetLang = TranslationTargetLanguageModel(
+            language: item.sourceLanguage,
+            text: item.sourceText,
           );
+          return item.copyWith(
+            uuid: item.uuid.replaceAll(copyLanguageCode, item.sourceLanguage.code),
+            targetLanguages: [sourceTargetLang],
+          );
+        },
+      );
 
       return [...copyEntries, ...result];
     } catch (error, stackTrace) {
@@ -121,7 +134,9 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
   }) async {
     try {
       final allEntries = await getTranslationEntries(projectId, includeSourceLanguage: includeSourceLanguage);
-      return allEntries.where((entry) => entry.targetLanguage.code == targetLanguage.code).toList();
+      return allEntries
+          .where((entry) => entry.targetLanguages.any((t) => t.language.code == targetLanguage.code))
+          .toList();
     } catch (error, stackTrace) {
       LoggerUtils.error('根据语言获取翻译条目失败', error: error, stackTrace: stackTrace);
       return [];
@@ -135,7 +150,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
   ) async {
     try {
       final allEntries = await getTranslationEntries(projectId);
-      return allEntries.where((entry) => entry.status == status).toList();
+      return allEntries.where((entry) => entry.targetLanguages.any((t) => t.status == status)).toList();
     } catch (error, stackTrace) {
       LoggerUtils.error('根据状态获取翻译条目失败', error: error, stackTrace: stackTrace);
       return [];
@@ -242,12 +257,14 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       // API 优先
       if (AppConfig.useServerForTranslations) {
         try {
+          // 获取第一个目标语言（如果有的话）
+          final firstTarget = entry.targetLanguages.isNotEmpty ? entry.targetLanguages.first : null;
           final updated = await _translationApi.updateTranslation(
             projectId: entry.projectId,
             entryId: entry.uuid,
             data: {
-              'target_text': entry.targetText,
-              'status': entry.status.name,
+              if (firstTarget != null) 'target_text': firstTarget.text,
+              if (firstTarget != null) 'target_language': firstTarget.language.code,
               if (entry.context.isNotEmpty) 'context_info': entry.context,
             },
           );
@@ -373,9 +390,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
             uuid: entryId,
             entryKey: '',
             sourceText: '',
-            targetText: '',
-            targetLanguage: LanguageEnum.enUS,
-            status: TranslationStatusEnum.pending,
+            targetLanguages: [],
             createdAt: DateTime.now(),
             updatedAt: DateTime.now(),
           ),
@@ -450,13 +465,13 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
             query.isEmpty ||
             entry.entryKey.toLowerCase().contains(query.toLowerCase()) ||
             entry.sourceText.toLowerCase().contains(query.toLowerCase()) ||
-            entry.targetText.toLowerCase().contains(query.toLowerCase());
+            entry.targetLanguages.any((t) => t.text.toLowerCase().contains(query.toLowerCase()));
 
         final matchesLanguage = language == null ||
             entry.sourceLanguage.code == language.code ||
-            entry.targetLanguage.code == language.code;
+            entry.targetLanguages.any((t) => t.language.code == language.code);
 
-        final matchesStatus = status == null || entry.status == status;
+        final matchesStatus = status == null || entry.targetLanguages.any((t) => t.status == status);
 
         return matchesQuery && matchesLanguage && matchesStatus;
       }).toList();
@@ -473,8 +488,11 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       final statusCounts = <String, int>{};
 
       for (final entry in allEntries) {
-        final statusKey = entry.status.name;
-        statusCounts[statusKey] = (statusCounts[statusKey] ?? 0) + 1;
+        // 统计所有目标语言的状态
+        for (final targetLang in entry.targetLanguages) {
+          final statusKey = targetLang.status.name;
+          statusCounts[statusKey] = (statusCounts[statusKey] ?? 0) + 1;
+        }
       }
 
       return statusCounts;
@@ -516,8 +534,18 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
           orElse: () => existingEntries.first,
         );
 
-        // 获取当前已有的目标语言
-        final existingTargetLanguages = existingEntries.map((entry) => entry.targetLanguage).toSet();
+        // 合并所有现有条目的目标语言
+        final existingTargetLanguages = <LanguageEnum>{};
+        final allTargetLanguages = <TranslationTargetLanguageModel>[];
+
+        for (final entry in existingEntries) {
+          for (final targetLang in entry.targetLanguages) {
+            if (!existingTargetLanguages.contains(targetLang.language)) {
+              existingTargetLanguages.add(targetLang.language);
+              allTargetLanguages.add(targetLang);
+            }
+          }
+        }
 
         // 确定需要添加的语言
         final languagesToAdd = newTargetLanguages
@@ -529,45 +557,51 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
             .where((lang) => !newTargetLanguages.any((newLang) => newLang.code == lang.code))
             .toList();
 
-        // 保留仍然存在的条目
-        final entriesToKeep = existingEntries
-            .where((entry) => newTargetLanguages.any((lang) => lang.code == entry.targetLanguage.code))
+        // 保留仍然存在的目标语言
+        final targetLanguagesToKeep = allTargetLanguages
+            .where((targetLang) => newTargetLanguages.any((lang) => lang.code == targetLang.language.code))
             .toList();
 
-        // 为新语言创建条目
+        // 为新语言添加目标语言翻译
         for (final language in languagesToAdd) {
+          targetLanguagesToKeep.add(TranslationTargetLanguageModel(
+            language: language,
+            text: '',
+          ));
+        }
+
+        // 创建或更新条目（合并所有目标语言到一个条目）
+        if (existingEntries.isNotEmpty) {
+          final firstEntry = existingEntries.first;
+          final updatedEntry = firstEntry.copyWith(
+            targetLanguages: targetLanguagesToKeep,
+            updatedAt: DateTime.now(),
+          );
+          updatedEntries.add(updatedEntry);
+        } else {
+          // 如果没有现有条目，创建新条目
           final newEntry = TranslationEntryModel(
             uuid: _generateId(),
             projectId: projectId,
             entryKey: key,
             sourceLanguage: sourceLanguage,
             sourceText: sourceEntry.sourceText,
-            targetLanguage: language,
-            targetText: '',
-            status: TranslationStatusEnum.pending,
+            targetLanguages: targetLanguagesToKeep,
             context: sourceEntry.context,
             comment: sourceEntry.comment,
-            maxLength: sourceEntry.maxLength,
-            isPlural: sourceEntry.isPlural,
-            pluralForms: sourceEntry.pluralForms,
             createdAt: DateTime.now(),
             updatedAt: DateTime.now(),
           );
           updatedEntries.add(newEntry);
         }
 
-        // 添加保留的条目
-        updatedEntries.addAll(entriesToKeep);
-
         LoggerUtils.info('同步翻译键 "$key": 添加 ${languagesToAdd.length} 个语言, 删除 ${languagesToRemove.length} 个语言');
       }
 
-      // 按目标语言的 sortIndex 排序
+      // 按排序索引和条目键排序
       updatedEntries.sort((a, b) {
-        final aIndex = a.targetLanguage.sortIndex;
-        final bIndex = b.targetLanguage.sortIndex;
-        if (aIndex != bIndex) {
-          return aIndex.compareTo(bIndex);
+        if (a.sortIndex != b.sortIndex) {
+          return a.sortIndex.compareTo(b.sortIndex);
         }
         return a.entryKey.compareTo(b.entryKey);
       });

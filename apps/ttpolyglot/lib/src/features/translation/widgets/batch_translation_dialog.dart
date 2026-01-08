@@ -481,7 +481,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
           ),
           const SizedBox(height: 8.0),
           Text(
-            sourceEntry.targetText,
+            sourceEntry.targetLanguages.isNotEmpty ? sourceEntry.targetLanguages.first.text : sourceEntry.sourceText,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -935,26 +935,39 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
     for (final translationKey in entriesByKey.keys) {
       final keyEntries = entriesByKey[translationKey]!;
 
-      // 找到源语言的条目
+      // 找到源语言的条目（检查是否有该语言的翻译）
       final sourceEntry = keyEntries.firstWhereOrNull(
-        (entry) => entry.targetLanguage.code == sourceLanguageCode && entry.targetText.isNotEmpty,
+        (entry) {
+          final targetLang = entry.targetLanguages.firstWhere(
+            (t) => t.language.code == sourceLanguageCode,
+            orElse: () => TranslationTargetLanguageModel(language: LanguageEnum.enUS, text: ''),
+          );
+          return targetLang.text.isNotEmpty;
+        },
       );
 
       // 如果源语言没有对应的翻译，跳过这个key
       if (sourceEntry == null) continue;
 
+      // 获取源语言的文本
+      final sourceTargetLang = sourceEntry.targetLanguages.firstWhere(
+        (t) => t.language.code == sourceLanguageCode,
+        orElse: () => TranslationTargetLanguageModel(language: LanguageEnum.enUS, text: ''),
+      );
+      final sourceText = sourceTargetLang.text;
+
       // 获取需要翻译的目标语言条目
       final targetEntries = <TranslationEntryModel>[];
       for (final entry in keyEntries) {
-        // 跳过源语言本身
-        if (entry.targetLanguage.code == sourceLanguageCode) continue;
+        // 跳过源语言本身（检查是否有该语言的翻译）
+        if (entry.targetLanguages.any((t) => t.language.code == sourceLanguageCode)) continue;
 
         // 如果不覆盖且已有翻译，则跳过
-        if (!_isOverride && entry.targetText.trim().isNotEmpty) continue;
+        if (!_isOverride && entry.targetLanguages.any((t) => t.text.trim().isNotEmpty)) continue;
 
         targetEntries.add(
           entry.copyWith(
-            sourceText: sourceEntry.targetText,
+            sourceText: sourceText,
           ),
         );
       }
@@ -1045,9 +1058,40 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
         if (result.success) {
           keySuccessCount++;
+
+          // 获取源语言代码（从 sourceEntry 的第一个目标语言获取）
+          final sourceLangCode = sourceEntry.targetLanguages.isNotEmpty
+              ? sourceEntry.targetLanguages.first.language.code
+              : sourceEntry.sourceLanguage.code;
+
+          // 找到第一个非源语言的目标语言进行更新
+          final targetLangToUpdate = entry.targetLanguages.firstWhere(
+            (t) => t.language.code != sourceLangCode,
+            orElse: () => entry.targetLanguages.isNotEmpty
+                ? entry.targetLanguages.first
+                : TranslationTargetLanguageModel(language: entry.sourceLanguage, text: ''),
+          );
+
+          // 更新目标语言列表
+          final updatedTargetLanguages = entry.targetLanguages.map((t) {
+            if (t.language == targetLangToUpdate.language) {
+              return t.copyWith(text: result.translatedText);
+            }
+            return t;
+          }).toList();
+
+          // 如果该语言不存在，添加它
+          if (!updatedTargetLanguages.any((t) => t.language == targetLangToUpdate.language)) {
+            updatedTargetLanguages.add(
+              TranslationTargetLanguageModel(
+                language: targetLangToUpdate.language,
+                text: result.translatedText,
+              ),
+            );
+          }
+
           final updatedEntry = entry.copyWith(
-            targetText: result.translatedText,
-            status: TranslationStatusEnum.completed,
+            targetLanguages: updatedTargetLanguages,
             updatedAt: DateTime.now(),
           );
           _processedEntries.add(updatedEntry);
@@ -1059,7 +1103,9 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
         } else {
           keyFailCount++;
           final errorMessage = result.error ?? '翻译失败';
-          LoggerUtils.info('翻译失败: ${entry.entryKey} (${entry.targetLanguage.code}) - $errorMessage');
+          final firstTarget = entry.targetLanguages.isNotEmpty ? entry.targetLanguages.first : null;
+          LoggerUtils.info(
+              '翻译失败: ${entry.entryKey} (${firstTarget?.language.code ?? entry.sourceLanguage.code}) - $errorMessage');
         }
       }
 

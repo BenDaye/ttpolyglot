@@ -54,8 +54,17 @@ class TranslationUtils {
   }
 
   /// 检查是否需要翻译
-  static bool needsTranslation(TranslationEntryModel entry) {
-    return entry.targetText.isEmpty || entry.status == TranslationStatusEnum.pending;
+  static bool needsTranslation(TranslationEntryModel entry, {LanguageEnum? language}) {
+    if (entry.targetLanguages.isEmpty) return true;
+    if (language != null) {
+      final target = entry.targetLanguages.firstWhere(
+        (t) => t.language == language,
+        orElse: () => TranslationTargetLanguageModel(language: language, text: ''),
+      );
+      return target.text.isEmpty || target.status == TranslationStatusEnum.pending;
+    }
+    // 如果没有指定语言，检查是否有任何未完成的翻译
+    return entry.targetLanguages.any((t) => t.text.isEmpty || t.status == TranslationStatusEnum.pending);
   }
 
   /// 估算翻译成本（按字符数）
@@ -86,9 +95,19 @@ class TranslationUtils {
 
   /// 检查两个翻译条目是否冲突
   static bool hasConflict(TranslationEntryModel entry1, TranslationEntryModel entry2) {
-    return entry1.entryKey == entry2.entryKey &&
-        entry1.targetLanguage == entry2.targetLanguage &&
-        entry1.targetText != entry2.targetText;
+    if (entry1.entryKey != entry2.entryKey) return false;
+
+    // 检查是否有相同语言的翻译文本不同
+    for (final target1 in entry1.targetLanguages) {
+      final target2 = entry2.targetLanguages.firstWhere(
+        (t) => t.language == target1.language,
+        orElse: () => TranslationTargetLanguageModel(language: target1.language, text: ''),
+      );
+      if (target1.text != target2.text) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /// 合并翻译条目（选择最新的）
@@ -120,21 +139,22 @@ class TranslationUtils {
   }) {
     final entries = <TranslationEntryModel>[];
 
+    // 为每个目标语言创建一个条目
     for (final targetLanguage in targetLanguages) {
       final entry = TranslationEntryModel(
         uuid: '${DateTime.now().millisecondsSinceEpoch}_${targetLanguage.code}',
         projectId: projectId,
         entryKey: entryKey,
         sourceLanguage: sourceLanguage,
-        targetLanguage: targetLanguage,
         sourceText: sourceText,
-        targetText: '',
-        status: TranslationStatusEnum.pending,
+        targetLanguages: [
+          TranslationTargetLanguageModel(
+            language: targetLanguage,
+            text: '',
+          ),
+        ],
         context: context ?? '',
         comment: comment ?? '',
-        maxLength: maxLength,
-        isPlural: isPlural,
-        pluralForms: pluralForms,
         sortIndex: targetLanguage.sortIndex,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),

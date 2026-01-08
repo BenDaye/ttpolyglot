@@ -226,31 +226,26 @@ class FileController extends BaseController {
 
         final params = request.url.queryParameters;
         final format = params['format'] ?? 'json'; // json, csv, excel
-        final targetLanguageId =
-            params['target_language_id'] != null ? int.tryParse(params['target_language_id']!) : null;
-        final status = params['status'];
+        final languageCode = params['language_code'];
 
         String filePath;
         switch (format) {
           case 'json':
             filePath = await _streamExportService.exportToJsonFile(
               projectId: projectId,
-              targetLanguageId: targetLanguageId,
-              status: status,
+              languageCode: languageCode,
             );
             break;
           case 'csv':
             filePath = await _streamExportService.exportToCsvFile(
               projectId: projectId,
-              targetLanguageId: targetLanguageId,
-              status: status,
+              languageCode: languageCode,
             );
             break;
           case 'excel':
             filePath = await _streamExportService.exportToExcel(
               projectId: projectId,
-              targetLanguageId: targetLanguageId,
-              status: status,
+              languageCode: languageCode,
             );
             break;
           default:

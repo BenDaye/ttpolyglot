@@ -21,13 +21,12 @@ class StreamExportService extends BaseService {
   /// 使用游标分页逐批读取数据，返回Stream
   Stream<List<Map<String, dynamic>>> streamExportEntries({
     required int projectId,
-    int? targetLanguageId,
-    String? status,
+    String? languageCode,
     int batchSize = 1000,
   }) async* {
     logInfo('开始流式导出', context: {
       'project_id': projectId,
-      'target_language_id': targetLanguageId,
+      'language_code': languageCode,
       'batch_size': batchSize,
     });
 
@@ -42,8 +41,7 @@ class StreamExportService extends BaseService {
           projectId: projectId,
           cursor: cursor,
           limit: batchSize,
-          targetLanguageId: targetLanguageId,
-          status: status,
+          languageCode: languageCode,
         );
 
         final entries = result['entries'] as List<dynamic>;
@@ -77,8 +75,7 @@ class StreamExportService extends BaseService {
   /// 使用流式处理写入文件，避免内存溢出
   Future<String> exportToJsonFile({
     required int projectId,
-    int? targetLanguageId,
-    String? status,
+    String? languageCode,
     String? outputPath,
   }) async {
     return execute(
@@ -89,6 +86,7 @@ class StreamExportService extends BaseService {
         logInfo('开始导出到文件', context: {
           'file_path': filePath,
           'project_id': projectId,
+          'language_code': languageCode,
         });
 
         final file = File(filePath);
@@ -104,8 +102,7 @@ class StreamExportService extends BaseService {
           // 流式读取和写入
           await for (final batch in streamExportEntries(
             projectId: projectId,
-            targetLanguageId: targetLanguageId,
-            status: status,
+            languageCode: languageCode,
           )) {
             for (final entry in batch) {
               if (!isFirst) {
@@ -152,8 +149,7 @@ class StreamExportService extends BaseService {
   /// CSV格式导出，适合Excel查看
   Future<String> exportToCsvFile({
     required int projectId,
-    int? targetLanguageId,
-    String? status,
+    String? languageCode,
     String? outputPath,
   }) async {
     return execute(
@@ -171,32 +167,44 @@ class StreamExportService extends BaseService {
 
         try {
           // 写入CSV头部
-          sink.write(
-              'ID,Key,Source Language ID,Target Language ID,Source Text,Target Text,Status,Created At,Updated At\n');
+          sink.write('ID,Entry Key,Source Language,Target Language,Source Text,Target Text,Created At,Updated At\n');
 
           int totalCount = 0;
 
           // 流式读取和写入
           await for (final batch in streamExportEntries(
             projectId: projectId,
-            targetLanguageId: targetLanguageId,
-            status: status,
+            languageCode: languageCode,
           )) {
             for (final entry in batch) {
-              final id = entry['id'] ?? '';
-              final key = _escapeCsv(entry['entry_key'] ?? entry['key'] ?? '');
-              final sourceLangId = entry['source_language_id'] ?? '';
-              final targetLangId = entry['target_language_id'] ?? '';
-              final sourceText = _escapeCsv(entry['source_text'] ?? '');
-              final targetText = _escapeCsv(entry['target_text'] ?? '');
-              final entryStatus = entry['status'] ?? '';
-              final createdAt = entry['created_at'] ?? '';
-              final updatedAt = entry['updated_at'] ?? '';
+              final entryData = entry;
+              final id = entryData['uuid'] ?? entryData['id'] ?? '';
+              final entryKey = _escapeCsv(entryData['entry_key'] ?? '');
+              final sourceLanguage = _escapeCsv(entryData['source_language'] ?? '');
+              final sourceText = _escapeCsv(entryData['source_text'] ?? '');
+              final createdAt = entryData['created_at'] ?? '';
+              final updatedAt = entryData['updated_at'] ?? '';
 
-              sink.write(
-                  '$id,$key,$sourceLangId,$targetLangId,$sourceText,$targetText,$entryStatus,$createdAt,$updatedAt\n');
-
-              totalCount++;
+              // 处理目标语言翻译列表
+              final targetLanguages = entryData['target_languages'] as List<dynamic>? ?? [];
+              if (targetLanguages.isEmpty) {
+                // 如果没有目标语言，输出一行空数据
+                final targetLanguage = languageCode ?? '';
+                final targetText = '';
+                sink.write(
+                    '$id,$entryKey,$sourceLanguage,$targetLanguage,$sourceText,$targetText,$createdAt,$updatedAt\n');
+                totalCount++;
+              } else {
+                // 每个目标语言输出一行
+                for (final targetLang in targetLanguages) {
+                  final targetLangData = targetLang;
+                  final targetLanguage = _escapeCsv(targetLangData['language'] ?? '');
+                  final targetText = _escapeCsv(targetLangData['text'] ?? '');
+                  sink.write(
+                      '$id,$entryKey,$sourceLanguage,$targetLanguage,$sourceText,$targetText,$createdAt,$updatedAt\n');
+                  totalCount++;
+                }
+              }
             }
           }
 
@@ -230,8 +238,7 @@ class StreamExportService extends BaseService {
   /// 导出到Excel文件（使用CSV格式，Excel可直接打开）
   Future<String> exportToExcel({
     required int projectId,
-    int? targetLanguageId,
-    String? status,
+    String? languageCode,
     String? outputPath,
   }) async {
     // 实际上输出CSV格式，Excel可以直接打开
@@ -240,8 +247,7 @@ class StreamExportService extends BaseService {
 
     return await exportToCsvFile(
       projectId: projectId,
-      targetLanguageId: targetLanguageId,
-      status: status,
+      languageCode: languageCode,
       outputPath: filePath,
     );
   }

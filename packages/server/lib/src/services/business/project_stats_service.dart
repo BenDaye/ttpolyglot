@@ -138,23 +138,24 @@ class ProjectStatsService extends BaseService {
 
         final sql = '''
           SELECT 
-            target_language_id,
-            COUNT(*) as total_entries,
-            SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_count,
-            SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_count,
-            SUM(CASE WHEN status = 'reviewing' THEN 1 ELSE 0 END) as reviewing_count,
-            SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved_count,
-            COALESCE(SUM(source_char_count), 0) as total_source_chars,
-            COALESCE(SUM(target_char_count), 0) as total_target_chars,
+            tet.language as target_language_id,
+            COUNT(DISTINCT te.id) as total_entries,
+            COUNT(DISTINCT CASE WHEN tet.text IS NULL OR tet.text = '' THEN te.id END) as pending_count,
+            COUNT(DISTINCT CASE WHEN tet.text IS NOT NULL AND tet.text != '' THEN te.id END) as completed_count,
+            0 as reviewing_count,
+            0 as approved_count,
+            COALESCE(SUM(LENGTH(te.source_text)), 0) as total_source_chars,
+            COALESCE(SUM(LENGTH(tet.text)), 0) as total_target_chars,
             CASE 
-              WHEN COUNT(*) > 0 
-              THEN ROUND((SUM(CASE WHEN status IN ('completed', 'approved') THEN 1 ELSE 0 END)::DECIMAL / COUNT(*)) * 100, 2)
+              WHEN COUNT(DISTINCT te.id) > 0 
+              THEN ROUND((COUNT(DISTINCT CASE WHEN tet.text IS NOT NULL AND tet.text != '' THEN te.id END)::DECIMAL / COUNT(DISTINCT te.id)) * 100, 2)
               ELSE 0 
             END as completion_rate
-          FROM {translation_entries}
-          WHERE project_id = @project_id AND is_deleted = false
-          GROUP BY target_language_id
-          ORDER BY target_language_id
+          FROM {translation_entries} te
+          LEFT JOIN {translation_entry_targets} tet ON tet.entry_id = te.id
+          WHERE te.project_id = @project_id AND te.deleted_at IS NULL
+          GROUP BY tet.language
+          ORDER BY tet.language
         ''';
 
         final result = await _databaseService.query(sql, {'project_id': projectId});

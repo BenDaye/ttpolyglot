@@ -66,10 +66,14 @@ class ArbParser implements TranslationParser {
             uuid: _uuid.v4(),
             entryKey: key,
             projectId: 0,
-            targetLanguage: language,
+            sourceLanguage: language,
             sourceText: value,
-            targetText: value,
-            status: TranslationStatusEnum.completed,
+            targetLanguages: [
+              TranslationTargetLanguageModel(
+                language: language,
+                text: value,
+              ),
+            ],
             createdAt: DateTime.now(),
             updatedAt: DateTime.now(),
           ));
@@ -133,8 +137,13 @@ class ArbParser implements TranslationParser {
 
     // 添加翻译条目
     for (final entry in entries) {
-      if (entry.targetLanguage == language) {
-        arbObject[entry.entryKey] = entry.targetText;
+      // 查找匹配语言的目标翻译
+      final targetLang = entry.targetLanguages.firstWhere(
+        (t) => t.language == language,
+        orElse: () => TranslationTargetLanguageModel(language: language, text: ''),
+      );
+      if (targetLang.text.isNotEmpty) {
+        arbObject[entry.entryKey] = targetLang.text;
       }
     }
 

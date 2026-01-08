@@ -239,10 +239,13 @@ class TranslationsList extends StatelessWidget {
     required TranslationController controller,
     required TranslationEntryModel entry,
   }) {
-    final targetTextController = TextEditingController(text: entry.targetText);
+    // 获取第一个目标语言（如果有的话）
+    final firstTargetLang = entry.targetLanguages.isNotEmpty ? entry.targetLanguages.first : null;
+    final targetTextController = TextEditingController(text: firstTargetLang?.text ?? '');
     final contextController = TextEditingController(text: entry.context);
     final commentController = TextEditingController(text: entry.comment);
-    var selectedStatus = entry.status;
+    var selectedStatus = firstTargetLang?.status ?? TranslationStatusEnum.pending;
+    var selectedLanguage = firstTargetLang?.language;
 
     Get.dialog(
       AlertDialog(
@@ -278,15 +281,18 @@ class TranslationsList extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16.0),
-                TextField(
-                  controller: targetTextController,
-                  decoration: InputDecoration(
-                    labelText: '目标文本 (${entry.targetLanguage.code})',
-                    contentPadding: const EdgeInsets.all(12.0),
-                    border: const OutlineInputBorder(),
-                  ),
-                  maxLines: 3,
-                ),
+                if (selectedLanguage != null)
+                  TextField(
+                    controller: targetTextController,
+                    decoration: InputDecoration(
+                      labelText: '目标文本 (${selectedLanguage.code})',
+                      contentPadding: const EdgeInsets.all(12.0),
+                      border: const OutlineInputBorder(),
+                    ),
+                    maxLines: 3,
+                  )
+                else
+                  const Text('暂无目标语言'),
                 const SizedBox(height: 16.0),
 
                 TextField(
@@ -309,31 +315,32 @@ class TranslationsList extends StatelessWidget {
                   maxLines: 2,
                 ),
                 const SizedBox(height: 16.0),
-                StatefulBuilder(
-                  builder: (context, setState) {
-                    return DropdownButtonFormField<TranslationStatusEnum>(
-                      value: selectedStatus,
-                      decoration: const InputDecoration(
-                        labelText: '状态',
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
-                        border: OutlineInputBorder(),
-                      ),
-                      items: TranslationStatusEnum.values.map((status) {
-                        return DropdownMenuItem(
-                          value: status,
-                          child: Text(status.displayName),
-                        );
-                      }).toList(),
-                      onChanged: (status) {
-                        if (status != null) {
-                          setState(() {
-                            selectedStatus = status;
-                          });
-                        }
-                      },
-                    );
-                  },
-                ),
+                if (selectedLanguage != null)
+                  StatefulBuilder(
+                    builder: (context, setState) {
+                      return DropdownButtonFormField<TranslationStatusEnum>(
+                        value: selectedStatus,
+                        decoration: const InputDecoration(
+                          labelText: '状态',
+                          contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+                          border: OutlineInputBorder(),
+                        ),
+                        items: TranslationStatusEnum.values.map((status) {
+                          return DropdownMenuItem(
+                            value: status,
+                            child: Text(status.displayName),
+                          );
+                        }).toList(),
+                        onChanged: (status) {
+                          if (status != null) {
+                            setState(() {
+                              selectedStatus = status;
+                            });
+                          }
+                        },
+                      );
+                    },
+                  ),
               ],
             ),
           ),
@@ -345,9 +352,33 @@ class TranslationsList extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () {
+              if (selectedLanguage == null) {
+                Get.back();
+                return;
+              }
+
+              // 更新目标语言列表
+              final updatedTargetLanguages = entry.targetLanguages.map((t) {
+                if (t.language == selectedLanguage) {
+                  return t.copyWith(
+                    text: targetTextController.text.trim(),
+                  );
+                }
+                return t;
+              }).toList();
+
+              // 如果该语言不存在，添加它
+              if (!updatedTargetLanguages.any((t) => t.language == selectedLanguage)) {
+                updatedTargetLanguages.add(
+                  TranslationTargetLanguageModel(
+                    language: selectedLanguage,
+                    text: targetTextController.text.trim(),
+                  ),
+                );
+              }
+
               final updatedEntry = entry.copyWith(
-                targetText: targetTextController.text.trim(),
-                status: selectedStatus,
+                targetLanguages: updatedTargetLanguages,
                 context: contextController.text.trim(),
                 comment: commentController.text.trim(),
               );

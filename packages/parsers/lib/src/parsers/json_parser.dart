@@ -99,11 +99,16 @@ class JsonParser implements TranslationParser {
     final nestedKeyStyle = options?['nestedKeyStyle'] as bool? ?? true;
 
     for (final entry in entries) {
-      if (entry.targetLanguage == language) {
+      // 查找匹配语言的目标翻译
+      final targetLang = entry.targetLanguages.firstWhere(
+        (t) => t.language == language,
+        orElse: () => TranslationTargetLanguageModel(language: language, text: ''),
+      );
+      if (targetLang.text.isNotEmpty) {
         if (nestedKeyStyle) {
-          _setNestedValue(jsonObject, entry.entryKey, entry.targetText);
+          _setNestedValue(jsonObject, entry.entryKey, targetLang.text);
         } else {
-          jsonObject[entry.entryKey] = entry.targetText;
+          jsonObject[entry.entryKey] = targetLang.text;
         }
       }
     }
@@ -181,10 +186,14 @@ class JsonParser implements TranslationParser {
           uuid: _uuid.v4(),
           entryKey: fullKey,
           projectId: 0, // TODO: 需要从文件中获取项目ID
-          targetLanguage: language,
+          sourceLanguage: language,
           sourceText: value,
-          targetText: value,
-          status: TranslationStatusEnum.completed,
+          targetLanguages: [
+            TranslationTargetLanguageModel(
+              language: language,
+              text: value,
+            ),
+          ],
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         ));
@@ -199,10 +208,14 @@ class JsonParser implements TranslationParser {
               uuid: _uuid.v4(),
               entryKey: '$fullKey[$i]',
               projectId: 0, // TODO: 需要从文件中获取项目ID
-              targetLanguage: language,
+              sourceLanguage: language,
               sourceText: item,
-              targetText: item,
-              status: TranslationStatusEnum.completed,
+              targetLanguages: [
+                TranslationTargetLanguageModel(
+                  language: language,
+                  text: item,
+                ),
+              ],
               createdAt: DateTime.now(),
               updatedAt: DateTime.now(),
             ));

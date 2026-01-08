@@ -22,6 +22,7 @@ export 'src/project/project_models.dart';
 export 'src/system/system_models.dart';
 // 翻译模型
 export 'src/translation/translation_models.dart';
+export 'src/translation/translation_target_language_model.dart';
 // 用户模型
 export 'src/user/user_models.dart';
 // 工具模型

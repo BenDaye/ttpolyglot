@@ -89,6 +89,23 @@ class TranslationServiceManager extends GetxService {
     CancelToken? cancelToken, // 取消令牌
   }) async {
     try {
+      // 获取源条目的第一个目标语言（作为翻译源）
+      if (sourceEntries.targetLanguages.isEmpty) {
+        return entries
+            .map(
+              (entry) => TranslationResult(
+                success: false,
+                translatedText: '',
+                error: '源条目没有目标语言',
+                sourceLanguage: entry.sourceLanguage,
+                targetLanguage: entry.targetLanguages.firstOrNull?.language ?? entry.sourceLanguage,
+              ),
+            )
+            .toList();
+      }
+
+      final sourceTargetLang = sourceEntries.targetLanguages.first;
+
       // 检查配置（异步等待配置加载完成）
       if (!await hasValidConfigAsync()) {
         return entries
@@ -98,7 +115,7 @@ class TranslationServiceManager extends GetxService {
                 translatedText: '',
                 error: '请先配置翻译接口',
                 sourceLanguage: entry.sourceLanguage,
-                targetLanguage: entry.targetLanguage,
+                targetLanguage: entry.targetLanguages.firstOrNull?.language ?? entry.sourceLanguage,
               ),
             )
             .toList();
@@ -114,7 +131,7 @@ class TranslationServiceManager extends GetxService {
                 translatedText: '',
                 error: '没有可用的翻译接口',
                 sourceLanguage: entry.sourceLanguage,
-                targetLanguage: entry.targetLanguage,
+                targetLanguage: entry.targetLanguages.firstOrNull?.language ?? entry.sourceLanguage,
               ),
             )
             .toList();
@@ -129,7 +146,7 @@ class TranslationServiceManager extends GetxService {
                 translatedText: '',
                 error: '${selectedProvider.name} 配置不完整',
                 sourceLanguage: entry.sourceLanguage,
-                targetLanguage: entry.targetLanguage,
+                targetLanguage: entry.targetLanguages.firstOrNull?.language ?? entry.sourceLanguage,
               ),
             )
             .toList();
@@ -137,26 +154,70 @@ class TranslationServiceManager extends GetxService {
 
       LoggerUtils.info('开始批量翻译 ${entries.length} 个条目，使用 ${selectedProvider.name}');
 
+      // 收集所有需要翻译的目标语言
+      final targetLanguages = <LanguageEnum>[];
+      for (final entry in entries) {
+        for (final targetLang in entry.targetLanguages) {
+          if (!targetLanguages.contains(targetLang.language)) {
+            targetLanguages.add(targetLang.language);
+          }
+        }
+      }
+
       // 使用批量翻译API
       final result = await TranslationApiService.translateBatchTexts(
-        sourceText: sourceEntries.targetText,
-        sourceLanguage: sourceEntries.targetLanguage,
-        targetLanguages: entries.map((e) => e.targetLanguage).toSet().toList(),
+        sourceText: sourceTargetLang.text,
+        sourceLanguage: sourceTargetLang.language,
+        targetLanguages: targetLanguages,
         config: selectedProvider,
         cancelToken: cancelToken,
       );
 
-      return result.items
-          .map(
-            (item) => TranslationResult(
-              success: item.success,
-              translatedText: item.translatedText,
-              sourceLanguage: sourceEntries.sourceLanguage,
-              targetLanguage: item.targetLanguage,
-              error: item.error,
-            ),
-          )
-          .toList();
+      // 创建语言到翻译结果的映射
+      final langToResult = <LanguageEnum, TranslationResult>{};
+      for (final item in result.items) {
+        langToResult[item.targetLanguage] = TranslationResult(
+          success: item.success,
+          translatedText: item.translatedText,
+          sourceLanguage: sourceEntries.sourceLanguage,
+          targetLanguage: item.targetLanguage,
+          error: item.error,
+        );
+      }
+
+      // 为每个条目返回对应的翻译结果
+      return entries.map((entry) {
+        if (entry.targetLanguages.isEmpty) {
+          return TranslationResult(
+            success: false,
+            translatedText: '',
+            error: '条目没有目标语言',
+            sourceLanguage: entry.sourceLanguage,
+            targetLanguage: entry.sourceLanguage,
+          );
+        }
+
+        final targetLang = entry.targetLanguages.first;
+        final translationResult = langToResult[targetLang.language];
+
+        if (translationResult != null) {
+          return TranslationResult(
+            success: translationResult.success,
+            translatedText: translationResult.translatedText,
+            sourceLanguage: sourceEntries.sourceLanguage,
+            targetLanguage: targetLang.language,
+            error: translationResult.error,
+          );
+        }
+
+        return TranslationResult(
+          success: false,
+          translatedText: '',
+          error: '未找到对应语言的翻译结果',
+          sourceLanguage: entry.sourceLanguage,
+          targetLanguage: targetLang.language,
+        );
+      }).toList();
     } catch (error, stackTrace) {
       LoggerUtils.error('批量翻译条目异常', error: error, stackTrace: stackTrace);
 
@@ -167,7 +228,7 @@ class TranslationServiceManager extends GetxService {
               success: false,
               translatedText: '',
               sourceLanguage: entry.sourceLanguage,
-              targetLanguage: entry.targetLanguage,
+              targetLanguage: entry.targetLanguages.firstOrNull?.language ?? entry.sourceLanguage,
               error: '批量翻译异常: $error',
             ),
           )

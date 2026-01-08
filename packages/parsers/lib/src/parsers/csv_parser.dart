@@ -86,10 +86,14 @@ class CsvParser implements TranslationParser {
           uuid: _uuid.v4(),
           entryKey: key,
           projectId: 0, // TODO: 需要从文件中获取项目ID
-          targetLanguage: language,
+          sourceLanguage: language,
           sourceText: value,
-          targetText: value,
-          status: TranslationStatusEnum.completed,
+          targetLanguages: [
+            TranslationTargetLanguageModel(
+              language: language,
+              text: value,
+            ),
+          ],
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         ));
@@ -152,8 +156,13 @@ class CsvParser implements TranslationParser {
     }
 
     for (final entry in entries) {
-      if (entry.targetLanguage == language) {
-        rows.add([entry.entryKey, entry.targetText]);
+      // 查找匹配语言的目标翻译
+      final targetLang = entry.targetLanguages.firstWhere(
+        (t) => t.language == language,
+        orElse: () => TranslationTargetLanguageModel(language: language, text: ''),
+      );
+      if (targetLang.text.isNotEmpty) {
+        rows.add([entry.entryKey, targetLang.text]);
       }
     }
 

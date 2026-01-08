@@ -87,10 +87,14 @@ class PropertiesParser implements TranslationParser {
           uuid: _uuid.v4(),
           entryKey: unescapedKey,
           projectId: 0, // TODO: 需要从文件中获取项目ID
-          targetLanguage: language,
+          sourceLanguage: language,
           sourceText: unescapedValue,
-          targetText: unescapedValue,
-          status: TranslationStatusEnum.completed,
+          targetLanguages: [
+            TranslationTargetLanguageModel(
+              language: language,
+              text: unescapedValue,
+            ),
+          ],
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         ));
@@ -150,16 +154,22 @@ class PropertiesParser implements TranslationParser {
       buffer.writeln();
     }
 
-    // 获取要写入的条目
-    final filteredEntries = entries.where((entry) => entry.targetLanguage == language).toList();
+    // 获取要写入的条目（查找匹配语言的目标翻译）
+    final filteredEntries = entries.where((entry) {
+      return entry.targetLanguages.any((t) => t.language == language && t.text.isNotEmpty);
+    }).toList();
 
     if (sortKeys) {
       filteredEntries.sort((a, b) => a.entryKey.compareTo(b.entryKey));
     }
 
     for (final entry in filteredEntries) {
+      final targetLang = entry.targetLanguages.firstWhere(
+        (t) => t.language == language,
+        orElse: () => TranslationTargetLanguageModel(language: language, text: ''),
+      );
       final escapedKey = _escapeProperties(entry.entryKey);
-      final escapedValue = _escapeProperties(entry.targetText);
+      final escapedValue = _escapeProperties(targetLang.text);
       buffer.writeln('$escapedKey$separator$escapedValue');
     }
 

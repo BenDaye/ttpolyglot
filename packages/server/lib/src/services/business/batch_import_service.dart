@@ -143,25 +143,47 @@ class BatchImportService extends BaseService {
     int failed = 0;
     final errors = <Map<String, dynamic>>[];
 
-    // 构建批量插入SQL
-    final values = <String>[];
-    final entryKeys = <String>[];
+    // 按 entry_key 分组，因为新结构是一个 entry_key 对应多个目标语言
+    final entryMap = <String, Map<String, dynamic>>{};
+    final targetLanguagesMap = <String, List<Map<String, String>>>{};
 
     for (final entry in entries) {
       try {
-        final key = entry['key'] as String? ?? entry['entry_key'] as String;
-        final sourceLanguageId = entry['source_language_id'] as int;
-        final targetLanguageId = entry['target_language_id'] as int;
-        final sourceText = _escape(entry['source_text'] as String? ?? '');
-        final targetText = _escape(entry['target_text'] as String? ?? '');
-        final status = entry['status'] as String? ?? 'pending';
+        final entryKey = entry['key'] as String? ?? entry['entry_key'] as String;
+        final sourceLanguage =
+            entry['source_language'] as String? ?? entry['source_language_id']?.toString() ?? 'en_US';
+        final targetLanguage = entry['target_language'] as String? ?? entry['target_language_id']?.toString() ?? '';
+        final sourceText = entry['source_text'] as String? ?? '';
+        final targetText = entry['target_text'] as String? ?? '';
 
-        values.add('''
-          ($projectId, '$key', '$key', $sourceLanguageId, $targetLanguageId,
-           '$sourceText', '$targetText', '$status')
-        ''');
+        if (entryKey.isEmpty) {
+          failed++;
+          errors.add({
+            'entry': entry,
+            'error': 'entry_key 不能为空',
+          });
+          continue;
+        }
 
-        entryKeys.add(key);
+        // 存储条目基本信息（只存储一次）
+        if (!entryMap.containsKey(entryKey)) {
+          entryMap[entryKey] = {
+            'entry_key': entryKey,
+            'source_language': sourceLanguage,
+            'source_text': sourceText,
+            'context': entry['context'] as String? ?? '',
+            'comment': entry['comment'] as String? ?? '',
+          };
+          targetLanguagesMap[entryKey] = [];
+        }
+
+        // 存储目标语言翻译
+        if (targetLanguage.isNotEmpty && targetText.isNotEmpty) {
+          targetLanguagesMap[entryKey]!.add({
+            'language': targetLanguage,
+            'text': targetText,
+          });
+        }
       } catch (error) {
         failed++;
         errors.add({
@@ -171,7 +193,7 @@ class BatchImportService extends BaseService {
       }
     }
 
-    if (values.isEmpty) {
+    if (entryMap.isEmpty) {
       return {
         'success': 0,
         'failed': failed,
@@ -180,27 +202,64 @@ class BatchImportService extends BaseService {
     }
 
     try {
-      final onConflict = overrideExisting
-          ? '''
-            ON CONFLICT (project_id, key, target_language_id) 
-            DO UPDATE SET
-              target_text = EXCLUDED.target_text,
-              status = EXCLUDED.status,
-              updated_at = CURRENT_TIMESTAMP
-          '''
-          : 'ON CONFLICT (project_id, key, target_language_id) DO NOTHING';
+      await _databaseService.transaction(() async {
+        // 批量插入 translation_entries
+        for (final entryKey in entryMap.keys) {
+          final entryData = entryMap[entryKey]!;
 
-      final sql = '''
-        INSERT INTO {translation_entries} 
-        (project_id, key, entry_key, source_language_id, target_language_id, 
-         source_text, target_text, status)
-        VALUES ${values.join(',')}
-        $onConflict
-        RETURNING id
-      ''';
+          final onConflict = overrideExisting
+              ? '''
+                ON CONFLICT (project_id, entry_key) 
+                DO UPDATE SET
+                  source_text = EXCLUDED.source_text,
+                  source_language = EXCLUDED.source_language,
+                  context = EXCLUDED.context,
+                  comment = EXCLUDED.comment,
+                  updated_at = CURRENT_TIMESTAMP
+              '''
+              : 'ON CONFLICT (project_id, entry_key) DO NOTHING';
 
-      final result = await _databaseService.query(sql, {});
-      success = result.length;
+          final entrySql = '''
+            INSERT INTO {translation_entries} 
+            (project_id, entry_key, source_language, source_text, context, comment)
+            VALUES (@project_id, @entry_key, @source_language, @source_text, @context, @comment)
+            $onConflict
+            RETURNING id
+          ''';
+
+          final entryResult = await _databaseService.query(entrySql, {
+            'project_id': projectId,
+            'entry_key': entryData['entry_key'],
+            'source_language': entryData['source_language'],
+            'source_text': entryData['source_text'],
+            'context': entryData['context'],
+            'comment': entryData['comment'],
+          });
+
+          if (entryResult.isNotEmpty) {
+            final entryId = entryResult.first.toColumnMap()['id'] as int;
+
+            // 插入目标语言翻译
+            final targetLanguages = targetLanguagesMap[entryKey]!;
+            for (final targetLang in targetLanguages) {
+              final targetSql = '''
+                INSERT INTO {translation_entry_targets} (entry_id, language, text)
+                VALUES (@entry_id, @language, @text)
+                ON CONFLICT (entry_id, language) 
+                DO UPDATE SET text = @text, updated_at = CURRENT_TIMESTAMP
+              ''';
+
+              await _databaseService.query(targetSql, {
+                'entry_id': entryId,
+                'language': targetLang['language'],
+                'text': targetLang['text'],
+              });
+            }
+
+            success++;
+          }
+        }
+      });
 
       return {
         'success': success,
@@ -229,50 +288,114 @@ class BatchImportService extends BaseService {
     int failed = 0;
     final errors = <Map<String, dynamic>>[];
 
+    // 按 entry_key 分组
+    final entryMap = <String, Map<String, dynamic>>{};
+    final targetLanguagesMap = <String, List<Map<String, String>>>{};
+
     for (final entry in entries) {
       try {
-        final key = entry['key'] as String? ?? entry['entry_key'] as String;
-        final sourceLanguageId = entry['source_language_id'] as int;
-        final targetLanguageId = entry['target_language_id'] as int;
+        final entryKey = entry['key'] as String? ?? entry['entry_key'] as String;
+        final sourceLanguage =
+            entry['source_language'] as String? ?? entry['source_language_id']?.toString() ?? 'en_US';
+        final targetLanguage = entry['target_language'] as String? ?? entry['target_language_id']?.toString() ?? '';
         final sourceText = entry['source_text'] as String? ?? '';
         final targetText = entry['target_text'] as String? ?? '';
-        final status = entry['status'] as String? ?? 'pending';
 
-        final onConflict = overrideExisting
-            ? '''
-              ON CONFLICT (project_id, key, target_language_id) 
-              DO UPDATE SET
-                target_text = @target_text,
-                status = @status,
-                updated_at = CURRENT_TIMESTAMP
-            '''
-            : 'ON CONFLICT (project_id, key, target_language_id) DO NOTHING';
+        if (entryKey.isEmpty) {
+          failed++;
+          errors.add({
+            'entry': entry,
+            'error': 'entry_key 不能为空',
+          });
+          continue;
+        }
 
-        final sql = '''
-          INSERT INTO {translation_entries} 
-          (project_id, key, entry_key, source_language_id, target_language_id, 
-           source_text, target_text, status)
-          VALUES (@project_id, @key, @key, @source_language_id, @target_language_id,
-                  @source_text, @target_text, @status)
-          $onConflict
-          RETURNING id
-        ''';
+        if (!entryMap.containsKey(entryKey)) {
+          entryMap[entryKey] = {
+            'entry_key': entryKey,
+            'source_language': sourceLanguage,
+            'source_text': sourceText,
+            'context': entry['context'] as String? ?? '',
+            'comment': entry['comment'] as String? ?? '',
+          };
+          targetLanguagesMap[entryKey] = [];
+        }
 
-        await _databaseService.query(sql, {
-          'project_id': projectId,
-          'key': key,
-          'source_language_id': sourceLanguageId,
-          'target_language_id': targetLanguageId,
-          'source_text': sourceText,
-          'target_text': targetText,
-          'status': status,
-        });
-
-        success++;
+        if (targetLanguage.isNotEmpty && targetText.isNotEmpty) {
+          targetLanguagesMap[entryKey]!.add({
+            'language': targetLanguage,
+            'text': targetText,
+          });
+        }
       } catch (error) {
         failed++;
         errors.add({
           'entry': entry,
+          'error': error.toString(),
+        });
+      }
+    }
+
+    // 逐条插入
+    for (final entryKey in entryMap.keys) {
+      try {
+        final entryData = entryMap[entryKey]!;
+
+        final onConflict = overrideExisting
+            ? '''
+              ON CONFLICT (project_id, entry_key) 
+              DO UPDATE SET
+                source_text = EXCLUDED.source_text,
+                source_language = EXCLUDED.source_language,
+                context = EXCLUDED.context,
+                comment = EXCLUDED.comment,
+                updated_at = CURRENT_TIMESTAMP
+            '''
+            : 'ON CONFLICT (project_id, entry_key) DO NOTHING';
+
+        final entrySql = '''
+          INSERT INTO {translation_entries} 
+          (project_id, entry_key, source_language, source_text, context, comment)
+          VALUES (@project_id, @entry_key, @source_language, @source_text, @context, @comment)
+          $onConflict
+          RETURNING id
+        ''';
+
+        final entryResult = await _databaseService.query(entrySql, {
+          'project_id': projectId,
+          'entry_key': entryData['entry_key'],
+          'source_language': entryData['source_language'],
+          'source_text': entryData['source_text'],
+          'context': entryData['context'],
+          'comment': entryData['comment'],
+        });
+
+        if (entryResult.isNotEmpty) {
+          final entryId = entryResult.first.toColumnMap()['id'] as int;
+
+          // 插入目标语言翻译
+          final targetLanguages = targetLanguagesMap[entryKey]!;
+          for (final targetLang in targetLanguages) {
+            final targetSql = '''
+              INSERT INTO {translation_entry_targets} (entry_id, language, text)
+              VALUES (@entry_id, @language, @text)
+              ON CONFLICT (entry_id, language) 
+              DO UPDATE SET text = @text, updated_at = CURRENT_TIMESTAMP
+            ''';
+
+            await _databaseService.query(targetSql, {
+              'entry_id': entryId,
+              'language': targetLang['language'],
+              'text': targetLang['text'],
+            });
+          }
+
+          success++;
+        }
+      } catch (error) {
+        failed++;
+        errors.add({
+          'entry_key': entryKey,
           'error': error.toString(),
         });
       }
@@ -367,10 +490,5 @@ class BatchImportService extends BaseService {
       'success_items': successItems,
       'failed_items': failedItems,
     });
-  }
-
-  /// 转义SQL字符串
-  String _escape(String text) {
-    return text.replaceAll("'", "''").replaceAll(r'\', r'\\');
   }
 }

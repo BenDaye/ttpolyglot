@@ -139,18 +139,25 @@ class PoParser implements TranslationParser {
       buffer.writeln();
     }
 
-    // 获取要写入的条目
-    final filteredEntries = entries.where((entry) => entry.targetLanguage == language).toList();
+    // 获取要写入的条目（查找匹配语言的目标翻译）
+    final filteredEntries = entries.where((entry) {
+      return entry.targetLanguages.any((t) => t.language == language);
+    }).toList();
 
     if (sortKeys) {
       filteredEntries.sort((a, b) => a.entryKey.compareTo(b.entryKey));
     }
 
     for (final entry in filteredEntries) {
+      // 查找匹配语言的目标翻译
+      final targetLang = entry.targetLanguages.firstWhere(
+        (t) => t.language == language,
+        orElse: () => TranslationTargetLanguageModel(language: language, text: ''),
+      );
       // 添加注释
       // 添加 msgid 和 msgstr
       buffer.writeln('msgid "${_escapePoString(entry.sourceText)}"');
-      buffer.writeln('msgstr "${_escapePoString(entry.targetText)}"');
+      buffer.writeln('msgstr "${_escapePoString(targetLang.text)}"');
       buffer.writeln();
     }
 
@@ -237,10 +244,14 @@ class PoParser implements TranslationParser {
         uuid: _uuid.v4(),
         entryKey: msgid,
         projectId: 0, // TODO: 需要从文件中获取项目ID
-        targetLanguage: language,
+        sourceLanguage: language,
         sourceText: msgid,
-        targetText: msgstr,
-        status: msgstr.isEmpty ? TranslationStatusEnum.pending : TranslationStatusEnum.completed,
+        targetLanguages: [
+          TranslationTargetLanguageModel(
+            language: language,
+            text: msgstr,
+          ),
+        ],
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );

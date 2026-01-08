@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:ttpolyglot_model/model.dart';
+import 'package:ttpolyglot_model/src/translation/translation_target_language_model.dart';
 
 part 'translation_entry_model.freezed.dart';
 part 'translation_entry_model.g.dart';
@@ -14,23 +15,17 @@ class TranslationEntryModel with _$TranslationEntryModel {
     /// 项目ID
     @JsonKey(name: 'project_id') required int projectId,
 
-    /// 条目键（优化字段）
+    /// 条目键
     @JsonKey(name: 'entry_key') required String entryKey,
 
     /// 源语言ID
     @JsonKey(name: 'source_language') @LanguageEnumConverter() @Default(LanguageEnum.enUS) LanguageEnum sourceLanguage,
 
-    /// 目标语言ID
-    @JsonKey(name: 'target_language') @LanguageEnumConverter() required LanguageEnum targetLanguage,
-
     /// 源文本
     @JsonKey(name: 'source_text') required String sourceText,
 
-    /// 目标文本
-    @JsonKey(name: 'target_text') required String targetText,
-
-    /// 状态 (pending, completed, reviewing, approved)
-    @JsonKey(name: 'status') @TranslationStatusEnumConverter() required TranslationStatusEnum status,
+    /// 翻译列表
+    @JsonKey(name: 'target_languages') required List<TranslationTargetLanguageModel> targetLanguages,
 
     /// 翻译者ID
     @JsonKey(name: 'translated_by') String? translatedBy,
@@ -50,20 +45,8 @@ class TranslationEntryModel with _$TranslationEntryModel {
     /// 备注
     @JsonKey(name: 'comment') @Default('') String comment,
 
-    /// 最大长度限制
-    @JsonKey(name: 'max_length') int? maxLength,
-
-    /// 是否为复数形式
-    @JsonKey(name: 'is_plural') @Default(false) bool isPlural,
-
-    /// 复数形式（JSON字符串）
-    @JsonKey(name: 'plural_forms') String? pluralForms,
-
     /// 排序索引
     @JsonKey(name: 'sort_index') @Default(0) int sortIndex,
-
-    /// 目标语言ID（用于兼容旧代码）
-    @JsonKey(name: 'target_language_id') int? targetLanguageId,
 
     /// 删除时间
     @JsonKey(name: 'deleted_at') @NullableTimesConverter() DateTime? deletedAt,

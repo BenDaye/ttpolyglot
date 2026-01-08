@@ -266,14 +266,14 @@ class ProjectExportController extends GetxController {
         includeSourceLanguage: true,
       );
 
-      // 过滤选中的语言
+      // 过滤选中的语言（检查条目的目标语言列表中是否包含选中的语言）
       final filteredEntries = allEntries.where((entry) {
-        return selectedLanguages.contains(entry.targetLanguage.code);
+        return entry.targetLanguages.any((t) => selectedLanguages.contains(t.language.code));
       }).toList();
 
       // 过滤未翻译的内容（如果需要）
       final finalEntries = exportOnlyTranslated
-          ? filteredEntries.where((entry) => entry.targetText.trim().isNotEmpty).toList()
+          ? filteredEntries.where((entry) => entry.targetLanguages.any((t) => t.text.trim().isNotEmpty)).toList()
           : filteredEntries;
 
       if (finalEntries.isEmpty) {

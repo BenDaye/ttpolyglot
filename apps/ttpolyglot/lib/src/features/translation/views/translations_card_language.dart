@@ -220,19 +220,28 @@ class TranslationsCardByLanguageBody extends StatelessWidget {
             child: ListTile(
               onTap: isSourceLanguage ? null : () => onEditEntry?.call(entry: entry),
               leading: // 状态标签
-                  Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
-                decoration: BoxDecoration(
-                  color: TranslationController.getStatusColor(entry.status).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(4.0),
-                ),
-                child: Text(
-                  entry.status.displayName,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: TranslationController.getStatusColor(entry.status),
-                        fontSize: 10.0,
-                      ),
-                ),
+                  Builder(
+                builder: (context) {
+                  final targetLang = entry.targetLanguages.firstWhere(
+                    (t) => t.language == language,
+                    orElse: () => TranslationTargetLanguageModel(language: language, text: ''),
+                  );
+                  final status = targetLang.status;
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                    decoration: BoxDecoration(
+                      color: TranslationController.getStatusColor(status).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(4.0),
+                    ),
+                    child: Text(
+                      status.displayName,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: TranslationController.getStatusColor(status),
+                            fontSize: 10.0,
+                          ),
+                    ),
+                  );
+                },
               ),
               title: Text(
                 entry.entryKey,
@@ -240,16 +249,25 @@ class TranslationsCardByLanguageBody extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                     ),
               ),
-              subtitle: Text(
-                entry.targetText.isEmpty ? '待翻译' : entry.targetText,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: entry.targetText.isEmpty
-                          ? Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5)
-                          : null,
-                      fontStyle: entry.targetText.isEmpty ? FontStyle.italic : null,
-                    ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+              subtitle: Builder(
+                builder: (context) {
+                  final targetLang = entry.targetLanguages.firstWhere(
+                    (t) => t.language == language,
+                    orElse: () => TranslationTargetLanguageModel(language: language, text: ''),
+                  );
+                  final targetText = targetLang.text;
+                  return Text(
+                    targetText.isEmpty ? '待翻译' : targetText,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: targetText.isEmpty
+                              ? Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5)
+                              : null,
+                          fontStyle: targetText.isEmpty ? FontStyle.italic : null,
+                        ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  );
+                },
               ),
             ),
           );

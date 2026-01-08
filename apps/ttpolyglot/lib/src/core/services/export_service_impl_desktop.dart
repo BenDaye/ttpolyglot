@@ -90,8 +90,19 @@ class ExportServiceImplDesktop {
 
       // 处理每个语言的翻译
       for (final language in allLanguages) {
-        // 过滤当前语言的翻译条目
-        final filterEntries = params.entries.where((entry) => entry.targetLanguageId == language.id).toList();
+        // 过滤包含当前语言翻译的条目，并为每个条目创建只包含该语言翻译的副本
+        final filterEntries =
+            params.entries.where((entry) => entry.targetLanguages.any((t) => t.language == language.code)).map((entry) {
+          // 找到该语言的目标翻译
+          final targetLang = entry.targetLanguages.firstWhere(
+            (t) => t.language == language.code,
+            orElse: () => TranslationTargetLanguageModel(language: language.code, text: ''),
+          );
+          // 创建一个只包含该语言翻译的条目副本
+          return entry.copyWith(
+            targetLanguages: [targetLang],
+          );
+        }).toList();
 
         // 按键排序
         filterEntries.sort((a, b) => a.entryKey.compareTo(b.entryKey));
@@ -331,8 +342,19 @@ class ExportServiceImplDesktop {
 
       // 处理每个语言的翻译
       for (final language in allLanguages) {
-        // 过滤当前语言的翻译条目
-        final filterEntries = params.entries.where((entry) => entry.targetLanguageId == language.id).toList();
+        // 过滤包含当前语言翻译的条目，并为每个条目创建只包含该语言翻译的副本
+        final filterEntries =
+            params.entries.where((entry) => entry.targetLanguages.any((t) => t.language == language.code)).map((entry) {
+          // 找到该语言的目标翻译
+          final targetLang = entry.targetLanguages.firstWhere(
+            (t) => t.language == language.code,
+            orElse: () => TranslationTargetLanguageModel(language: language.code, text: ''),
+          );
+          // 创建一个只包含该语言翻译的条目副本
+          return entry.copyWith(
+            targetLanguages: [targetLang],
+          );
+        }).toList();
 
         // 按键排序
         filterEntries.sort((a, b) => a.entryKey.compareTo(b.entryKey));
@@ -378,8 +400,19 @@ class ExportServiceImplDesktop {
 
       // 处理每个语言的翻译
       for (final language in allLanguages) {
-        // 过滤当前语言的翻译条目
-        final filterEntries = params.entries.where((entry) => entry.targetLanguageId == language.id).toList();
+        // 过滤包含当前语言翻译的条目，并为每个条目创建只包含该语言翻译的副本
+        final filterEntries =
+            params.entries.where((entry) => entry.targetLanguages.any((t) => t.language == language.code)).map((entry) {
+          // 找到该语言的目标翻译
+          final targetLang = entry.targetLanguages.firstWhere(
+            (t) => t.language == language.code,
+            orElse: () => TranslationTargetLanguageModel(language: language.code, text: ''),
+          );
+          // 创建一个只包含该语言翻译的条目副本
+          return entry.copyWith(
+            targetLanguages: [targetLang],
+          );
+        }).toList();
 
         // 按键排序
         filterEntries.sort((a, b) => a.entryKey.compareTo(b.entryKey));
@@ -425,8 +458,19 @@ class ExportServiceImplDesktop {
 
       // 处理每个语言的翻译
       for (final language in allLanguages) {
-        // 过滤当前语言的翻译条目
-        final filterEntries = params.entries.where((entry) => entry.targetLanguageId == language.id).toList();
+        // 过滤包含当前语言翻译的条目，并为每个条目创建只包含该语言翻译的副本
+        final filterEntries =
+            params.entries.where((entry) => entry.targetLanguages.any((t) => t.language == language.code)).map((entry) {
+          // 找到该语言的目标翻译
+          final targetLang = entry.targetLanguages.firstWhere(
+            (t) => t.language == language.code,
+            orElse: () => TranslationTargetLanguageModel(language: language.code, text: ''),
+          );
+          // 创建一个只包含该语言翻译的条目副本
+          return entry.copyWith(
+            targetLanguages: [targetLang],
+          );
+        }).toList();
 
         // 按键排序
         filterEntries.sort((a, b) => a.entryKey.compareTo(b.entryKey));
@@ -472,8 +516,19 @@ class ExportServiceImplDesktop {
 
       // 处理每个语言的翻译
       for (final language in allLanguages) {
-        // 过滤当前语言的翻译条目
-        final filterEntries = params.entries.where((entry) => entry.targetLanguageId == language.id).toList();
+        // 过滤包含当前语言翻译的条目，并为每个条目创建只包含该语言翻译的副本
+        final filterEntries =
+            params.entries.where((entry) => entry.targetLanguages.any((t) => t.language == language.code)).map((entry) {
+          // 找到该语言的目标翻译
+          final targetLang = entry.targetLanguages.firstWhere(
+            (t) => t.language == language.code,
+            orElse: () => TranslationTargetLanguageModel(language: language.code, text: ''),
+          );
+          // 创建一个只包含该语言翻译的条目副本
+          return entry.copyWith(
+            targetLanguages: [targetLang],
+          );
+        }).toList();
 
         // 按键排序
         filterEntries.sort((a, b) => a.entryKey.compareTo(b.entryKey));

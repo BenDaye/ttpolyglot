@@ -554,58 +554,78 @@ class ProjectController extends GetxController {
           final hasValue = keyValueMap[key]?.containsKey(languageCode.code) ?? false;
           final value = keyValueMap[key]?[languageCode.code] ?? '';
 
-          // 查找该语言的现有条目
-          final existingEntryForLanguage =
-              existingEntriesForKey.where((entry) => entry.targetLanguage == languageCode).toList();
+          // 查找该语言的现有条目（检查是否有该语言的目标翻译）
+          final existingEntryForLanguage = existingEntriesForKey.where((entry) {
+            return entry.targetLanguages.any((t) => t.language.code == languageCode.code);
+          }).toList();
 
           if (existingEntryForLanguage.isEmpty) {
-            // 该语言的条目不存在，需要创建
+            // 该语言的条目不存在，需要创建或添加到现有条目
             LoggerUtils.info('键 "$key" 缺少语言 "$languageCode" 的条目，将创建新条目');
 
-            // 根据"自动审核"设置确定状态
-            TranslationStatusEnum entryStatus;
-            if (value.trim().isEmpty) {
-              entryStatus = TranslationStatusEnum.pending;
-            } else if (autoReview) {
-              entryStatus = TranslationStatusEnum.completed;
+            // 检查是否已有该键的条目（但缺少这个语言）
+            final existingEntryForKey = existingEntriesForKey.isNotEmpty ? existingEntriesForKey.first : null;
+
+            if (existingEntryForKey != null) {
+              // 已有条目，添加新的目标语言
+              final newTargetLang = TranslationTargetLanguageModel(
+                language: language.code,
+                text: value,
+              );
+              final updatedEntry = existingEntryForKey.copyWith(
+                targetLanguages: [...existingEntryForKey.targetLanguages, newTargetLang],
+                updatedAt: DateTime.now(),
+              );
+              allUpdatedEntries.add(updatedEntry);
             } else {
-              entryStatus = TranslationStatusEnum.reviewing;
+              // 创建新条目
+              final newEntry = TranslationEntryModel(
+                uuid: DateTime.now().millisecondsSinceEpoch.toString() +
+                    (DateTime.now().microsecond % 1000).toString().padLeft(3, '0'),
+                projectId: projectId,
+                entryKey: key,
+                sourceLanguage: languageCode == _project.value!.primaryLanguage.code
+                    ? language.code
+                    : _project.value!.primaryLanguage.code,
+                sourceText: languageCode == _project.value!.primaryLanguage.code ? value : key,
+                targetLanguages: [
+                  TranslationTargetLanguageModel(
+                    language: language.code,
+                    text: value,
+                  ),
+                ],
+                createdAt: DateTime.now(),
+                updatedAt: DateTime.now(),
+              );
+
+              allImportedEntries.add(newEntry);
             }
-
-            final newEntry = TranslationEntryModel(
-              uuid: DateTime.now().millisecondsSinceEpoch.toString() +
-                  (DateTime.now().microsecond % 1000).toString().padLeft(3, '0'),
-              projectId: projectId,
-              entryKey: key,
-              sourceLanguage: languageCode == _project.value!.primaryLanguage.code
-                  ? language.code
-                  : _project.value!.primaryLanguage.code,
-              targetLanguage: language.code,
-              sourceText: languageCode == _project.value!.primaryLanguage.code ? value : key,
-              targetText: value,
-              status: entryStatus,
-              createdAt: DateTime.now(),
-              updatedAt: DateTime.now(),
-            );
-
-            allImportedEntries.add(newEntry);
           } else if (hasValue && overrideExisting) {
             // 该语言的条目存在，且有值且允许覆盖，需要更新
             LoggerUtils.info('键 "$key" 的语言 "$languageCode" 条目存在，根据配置将覆盖现有翻译');
 
-            TranslationStatusEnum entryStatus;
-            if (value.trim().isEmpty) {
-              entryStatus = TranslationStatusEnum.pending;
-            } else if (autoReview) {
-              entryStatus = TranslationStatusEnum.completed;
-            } else {
-              entryStatus = TranslationStatusEnum.reviewing;
+            final existingEntry = existingEntryForLanguage.first;
+            // 更新目标语言列表
+            final updatedTargetLanguages = existingEntry.targetLanguages.map((t) {
+              if (t.language.code == languageCode.code) {
+                return t.copyWith(text: value);
+              }
+              return t;
+            }).toList();
+
+            // 如果该语言不存在，添加它
+            if (!updatedTargetLanguages.any((t) => t.language.code == languageCode.code)) {
+              updatedTargetLanguages.add(
+                TranslationTargetLanguageModel(
+                  language: language.code,
+                  text: value,
+                ),
+              );
             }
 
-            final updatedEntry = existingEntryForLanguage.first.copyWith(
+            final updatedEntry = existingEntry.copyWith(
               sourceText: languageCode == _project.value!.primaryLanguage.code ? value : key,
-              targetText: value,
-              status: entryStatus,
+              targetLanguages: updatedTargetLanguages,
               updatedAt: DateTime.now(),
             );
 

@@ -1,6 +1,5 @@
 import 'package:ttpolyglot_model/model.dart';
 
-import '../../exceptions/exceptions.dart';
 import '../base_service.dart';
 import '../infrastructure/database_service.dart';
 
@@ -13,6 +12,33 @@ class TranslationService extends BaseService {
   })  : _databaseService = databaseService,
         super('TranslationService');
 
+  /// 从数据库行数据组装 TranslationEntryModel（包括目标语言）
+  Future<TranslationEntryModel> _buildTranslationEntryModel(Map<String, dynamic> entryData) async {
+    final entryId = entryData['id'] as int;
+
+    // 查询目标语言翻译
+    final targetLanguagesResult = await _databaseService.query('''
+      SELECT language, text
+      FROM {translation_entry_targets}
+      WHERE entry_id = @entry_id
+      ORDER BY language
+    ''', {'entry_id': entryId});
+
+    final targetLanguages = targetLanguagesResult.map((row) {
+      final data = row.toColumnMap();
+      return TranslationTargetLanguageModel(
+        language: const LanguageEnumConverter().fromJson(data['language'] as String),
+        text: data['text'] as String? ?? '',
+      );
+    }).toList();
+
+    // 组装完整数据
+    final fullData = Map<String, dynamic>.from(entryData);
+    fullData['target_languages'] = targetLanguages.map((t) => t.toJson()).toList();
+
+    return TranslationEntryModel.fromJson(fullData);
+  }
+
   /// 批量创建翻译条目
   Future<List<TranslationEntryModel>> batchCreateTranslations({
     required int projectId,
@@ -22,9 +48,6 @@ class TranslationService extends BaseService {
       () async {
         logInfo('批量创建翻译条目', context: {'project_id': projectId, 'count': items.length});
 
-        // 处理项目ID：如果是数字ID，需要转换为UUID
-        final projectUuid = await _resolveProjectUuid(projectId);
-
         final created = <TranslationEntryModel>[];
 
         await _databaseService.transaction(() async {
@@ -32,10 +55,11 @@ class TranslationService extends BaseService {
             final data = Map<String, dynamic>.from(raw);
             final entryKey = (data['entry_key'] ?? data['key'])?.toString();
             final languageCode = (data['language_code'] ?? data['target_language'] ?? data['lang'])?.toString();
-            final sourceText = data['source_text']?.toString();
-            final targetText = data['target_text']?.toString();
+            final sourceText = data['source_text']?.toString() ?? '';
+            final targetText = data['target_text']?.toString() ?? '';
+            final sourceLanguage = (data['source_language']?.toString() ?? 'en_US');
             final translatorId = data['translator_id']?.toString();
-            final contextInfo = data['context_info']?.toString() ?? data['context']?.toString();
+            final contextInfo = data['context_info']?.toString() ?? data['context']?.toString() ?? '';
 
             if (entryKey == null || entryKey.trim().isEmpty) {
               throwBusiness('entry_key 不能为空');
@@ -44,75 +68,82 @@ class TranslationService extends BaseService {
               throwBusiness('language_code 不能为空');
             }
 
-            // 幂等检查：若已存在则跳过或报错，这里选择跳过并取现有记录
+            // 幂等检查：若已存在则跳过并取现有记录
             final existing = await _databaseService.query('''
-              SELECT te.id, COALESCE(te.uuid::text, te.id::text) as uuid, p.id as project_id,
-                     COALESCE(te.entry_key, '') as entry_key, COALESCE(te.source_language, 'en_US') as source_language,
-                     COALESCE(te.target_language, '') as target_language, COALESCE(te.source_text, '') as source_text,
-                     COALESCE(te.target_text, '') as target_text, COALESCE(te.status, 'pending') as status,
-                     te.translated_by, te.reviewed_by, COALESCE(te.context, '') as context,
-                     COALESCE(te.comment, '') as comment, te.deleted_at, te.created_at, te.updated_at
+              SELECT te.id, COALESCE(te.uuid::text, te.id::text) as uuid, te.project_id,
+                     COALESCE(te.entry_key, '') as entry_key, 
+                     COALESCE(te.source_language, 'en_US') as source_language,
+                     COALESCE(te.source_text, '') as source_text,
+                     te.translated_by, te.reviewed_by, 
+                     COALESCE(te.context, '') as context,
+                     COALESCE(te.comment, '') as comment,
+                     COALESCE(te.sort_index, 0) as sort_index,
+                     te.deleted_at, te.created_at, te.updated_at,
+                     u_translator.username as translator_username,
+                     u_reviewer.username as reviewer_username
               FROM {translation_entries} te
-              JOIN {projects} p ON p.uuid = te.project_id
-              WHERE te.project_id = @project_id AND te.entry_key = @entry_key AND te.target_language = @target_language
+              LEFT JOIN {users} u_translator ON te.translated_by = u_translator.id
+              LEFT JOIN {users} u_reviewer ON te.reviewed_by = u_reviewer.id
+              WHERE te.project_id = @project_id AND te.entry_key = @entry_key AND te.deleted_at IS NULL
             ''', {
-              'project_id': projectUuid,
+              'project_id': projectId,
               'entry_key': entryKey,
-              'target_language': languageCode,
             });
 
             if (existing.isNotEmpty) {
               final existingData = existing.first.toColumnMap();
-              // 确保 project_id 是整数类型
-              if (existingData['project_id'] != null) {
-                existingData['project_id'] = existingData['project_id'] is int
-                    ? existingData['project_id']
-                    : int.tryParse(existingData['project_id'].toString()) ?? projectId;
-              }
-              created.add(TranslationEntryModel.fromJson(existingData));
+              final entry = await _buildTranslationEntryModel(existingData);
+              created.add(entry);
               continue;
             }
 
-            final result = await _databaseService.query('''
-              WITH inserted AS (
-                INSERT INTO {translation_entries} (
-                  project_id, entry_key, target_language, source_text, target_text,
-                  translated_by, context, status
-                ) VALUES (
-                  @project_id, @entry_key, @target_language, @source_text, @target_text,
-                  @translator_id, @context_info, 'pending'
-                )
-                RETURNING id, COALESCE(uuid::text, id::text) as uuid, project_id, 
-                          COALESCE(entry_key, '') as entry_key, COALESCE(source_language, 'en_US') as source_language, 
-                          COALESCE(target_language, '') as target_language, COALESCE(source_text, '') as source_text, 
-                          COALESCE(target_text, '') as target_text, COALESCE(status, 'pending') as status,
-                          translated_by, reviewed_by, COALESCE(context, '') as context, 
-                          COALESCE(comment, '') as comment, deleted_at, created_at, updated_at
+            // 插入翻译条目
+            final entryResult = await _databaseService.query('''
+              INSERT INTO {translation_entries} (
+                project_id, entry_key, source_language, source_text,
+                translated_by, context
+              ) VALUES (
+                @project_id, @entry_key, @source_language, @source_text,
+                @translator_id, @context_info
               )
-              SELECT i.id, i.uuid, p.id as project_id,
-                     i.entry_key, i.source_language, i.target_language, i.source_text, 
-                     i.target_text, i.status, i.translated_by, i.reviewed_by, i.context, 
-                     i.comment, i.deleted_at, i.created_at, i.updated_at
-              FROM inserted i
-              JOIN {projects} p ON p.uuid = i.project_id
+              RETURNING id, COALESCE(uuid::text, id::text) as uuid, project_id, 
+                        COALESCE(entry_key, '') as entry_key, 
+                        COALESCE(source_language, 'en_US') as source_language, 
+                        COALESCE(source_text, '') as source_text,
+                        translated_by, reviewed_by, 
+                        COALESCE(context, '') as context, 
+                        COALESCE(comment, '') as comment,
+                        COALESCE(sort_index, 0) as sort_index,
+                        deleted_at, created_at, updated_at
             ''', {
-              'project_id': projectUuid,
+              'project_id': projectId,
               'entry_key': entryKey,
-              'target_language': languageCode,
+              'source_language': sourceLanguage,
               'source_text': sourceText,
-              'target_text': targetText,
               'translator_id': translatorId,
               'context_info': contextInfo,
             });
 
-            final resultData = result.first.toColumnMap();
-            // 确保 project_id 是整数类型
-            if (resultData['project_id'] != null) {
-              resultData['project_id'] = resultData['project_id'] is int
-                  ? resultData['project_id']
-                  : int.tryParse(resultData['project_id'].toString()) ?? projectId;
+            final entryData = entryResult.first.toColumnMap();
+            final entryId = entryData['id'] as int;
+
+            // 插入目标语言翻译
+            if (targetText.isNotEmpty) {
+              await _databaseService.query('''
+                INSERT INTO {translation_entry_targets} (entry_id, language, text)
+                VALUES (@entry_id, @language, @text)
+                ON CONFLICT (entry_id, language) 
+                DO UPDATE SET text = @text, updated_at = CURRENT_TIMESTAMP
+              ''', {
+                'entry_id': entryId,
+                'language': languageCode,
+                'text': targetText,
+              });
             }
-            created.add(TranslationEntryModel.fromJson(resultData));
+
+            // 组装完整数据
+            final entry = await _buildTranslationEntryModel(entryData);
+            created.add(entry);
           }
         });
 
@@ -143,21 +174,14 @@ class TranslationService extends BaseService {
           'page': page,
         });
 
-        // 处理项目ID：如果是数字ID，需要转换为UUID
-        final projectUuid = await _resolveProjectUuid(projectId);
-
         // 构建查询条件
         final conditions = <String>['te.project_id = @project_id', 'te.deleted_at IS NULL'];
-        final parameters = <String, dynamic>{'project_id': projectUuid};
+        final parameters = <String, dynamic>{'project_id': projectId};
 
         if (languageCode != null && languageCode.isNotEmpty) {
-          conditions.add('te.target_language = @language_code');
+          conditions.add(
+              'EXISTS (SELECT 1 FROM {translation_entry_targets} tet WHERE tet.entry_id = te.id AND tet.language = @language_code)');
           parameters['language_code'] = languageCode;
-        }
-
-        if (status != null && status.isNotEmpty && status != 'all') {
-          conditions.add('te.status = @status');
-          parameters['status'] = status;
         }
 
         if (translatorId != null && translatorId.isNotEmpty) {
@@ -171,8 +195,7 @@ class TranslationService extends BaseService {
         }
 
         if (search != null && search.isNotEmpty) {
-          conditions.add(
-              '(te.entry_key ILIKE @search OR te.source_text ILIKE @search OR COALESCE(te.target_text, \'\') ILIKE @search)');
+          conditions.add('(te.entry_key ILIKE @search OR te.source_text ILIKE @search)');
           parameters['search'] = '%$search%';
         }
 
@@ -196,49 +219,44 @@ class TranslationService extends BaseService {
         SELECT
           te.id,
           COALESCE(te.uuid::text, te.id::text) as uuid,
-          p.id as project_id,
+          te.project_id,
           COALESCE(te.entry_key, '') as entry_key,
           COALESCE(te.source_language, 'en_US') as source_language,
-          COALESCE(te.target_language, '') as target_language,
           COALESCE(te.source_text, '') as source_text,
-          COALESCE(te.target_text, '') as target_text,
-          COALESCE(te.status, 'pending') as status,
           te.translated_by,
           te.reviewed_by,
           COALESCE(te.context, '') as context,
           COALESCE(te.comment, '') as comment,
+          COALESCE(te.sort_index, 0) as sort_index,
           te.deleted_at,
           te.created_at,
           te.updated_at,
           u_translator.username as translator_username,
           u_reviewer.username as reviewer_username
         FROM {translation_entries} te
-        JOIN {projects} p ON p.uuid = te.project_id
         LEFT JOIN {users} u_translator ON te.translated_by = u_translator.id
         LEFT JOIN {users} u_reviewer ON te.reviewed_by = u_reviewer.id
         WHERE ${conditions.join(' AND ')}
-        ORDER BY te.updated_at DESC, te.id DESC
+        ORDER BY te.sort_index ASC, te.updated_at DESC, te.id DESC
         LIMIT @limit OFFSET @offset
       ''';
 
         final result = await _databaseService.query(sql, parameters);
 
-        final entries = result.map((row) {
+        // 组装完整的翻译条目数据
+        final entries = <TranslationEntryModel>[];
+        for (final row in result) {
           final data = row.toColumnMap();
-          // 确保 project_id 是整数类型
-          if (data['project_id'] != null) {
-            data['project_id'] =
-                data['project_id'] is int ? data['project_id'] : int.tryParse(data['project_id'].toString());
-          }
-          return data;
-        }).toList();
+          final entry = await _buildTranslationEntryModel(data);
+          entries.add(entry);
+        }
 
         return PagerModel<TranslationEntryModel>(
           page: page,
           pageSize: limit,
           totalSize: total,
           totalPage: (total / limit).ceil(),
-          items: entries.map((row) => TranslationEntryModel.fromJson(row)).toList(),
+          items: entries,
         );
       },
       operationName: 'getTranslationEntries',
@@ -253,8 +271,7 @@ class TranslationService extends BaseService {
     required int projectId,
     String? cursor,
     int limit = 50,
-    String? status,
-    int? targetLanguageId,
+    String? languageCode,
     String? search,
   }) async {
     return execute(
@@ -265,13 +282,10 @@ class TranslationService extends BaseService {
           'limit': limit,
         });
 
-        // 处理项目ID：如果是数字ID，需要转换为UUID
-        final projectUuid = await _resolveProjectUuid(projectId);
-
         // 构建查询条件
         final conditions = <String>['te.project_id = @project_id', 'te.deleted_at IS NULL'];
         final parameters = <String, dynamic>{
-          'project_id': projectUuid,
+          'project_id': projectId,
           'limit': limit + 1, // 多查询1条用于判断是否有下一页
         };
 
@@ -294,19 +308,15 @@ class TranslationService extends BaseService {
         }
 
         // 其他过滤条件
-        if (status != null && status.isNotEmpty && status != 'all') {
-          conditions.add('te.status = @status');
-          parameters['status'] = status;
-        }
-
-        if (targetLanguageId != null) {
-          conditions.add('te.target_language_id = @target_language_id');
-          parameters['target_language_id'] = targetLanguageId;
+        if (languageCode != null && languageCode.isNotEmpty) {
+          conditions.add(
+              'EXISTS (SELECT 1 FROM {translation_entry_targets} tet WHERE tet.entry_id = te.id AND tet.language = @language_code)');
+          parameters['language_code'] = languageCode;
         }
 
         // 全文搜索（使用优化的索引）
         if (search != null && search.isNotEmpty) {
-          conditions.add('''to_tsvector('simple', coalesce(te.source_text, '') || ' ' || coalesce(te.target_text, ''))
+          conditions.add('''to_tsvector('simple', coalesce(te.source_text, ''))
                @@ plainto_tsquery('simple', @search)''');
           parameters['search'] = search;
         }
@@ -315,28 +325,25 @@ class TranslationService extends BaseService {
         SELECT
           te.id,
           COALESCE(te.uuid::text, te.id::text) as uuid,
-          p.id as project_id,
+          te.project_id,
           COALESCE(te.entry_key, '') as entry_key,
           COALESCE(te.source_language, 'en_US') as source_language,
-          COALESCE(te.target_language, '') as target_language,
           COALESCE(te.source_text, '') as source_text,
-          COALESCE(te.target_text, '') as target_text,
-          COALESCE(te.status, 'pending') as status,
           te.translated_by,
           te.reviewed_by,
           COALESCE(te.context, '') as context,
           COALESCE(te.comment, '') as comment,
+          COALESCE(te.sort_index, 0) as sort_index,
           te.deleted_at,
           te.created_at,
           te.updated_at,
           u_translator.username as translator_username,
           u_reviewer.username as reviewer_username
         FROM {translation_entries} te
-        JOIN {projects} p ON p.uuid = te.project_id
         LEFT JOIN {users} u_translator ON te.translated_by = u_translator.id
         LEFT JOIN {users} u_reviewer ON te.reviewed_by = u_reviewer.id
         WHERE ${conditions.join(' AND ')}
-        ORDER BY te.updated_at DESC, te.id DESC
+        ORDER BY te.sort_index ASC, te.updated_at DESC, te.id DESC
         LIMIT @limit
       ''';
 
@@ -345,6 +352,14 @@ class TranslationService extends BaseService {
         // 判断是否有下一页
         final hasNextPage = result.length > limit;
         final entries = hasNextPage ? result.take(limit).toList() : result;
+
+        // 组装完整的翻译条目数据
+        final entriesList = <TranslationEntryModel>[];
+        for (final row in entries) {
+          final data = row.toColumnMap();
+          final entry = await _buildTranslationEntryModel(data);
+          entriesList.add(entry);
+        }
 
         // 生成下一页的游标
         String? nextCursor;
@@ -355,10 +370,8 @@ class TranslationService extends BaseService {
           nextCursor = '${id}_${updatedAt.toIso8601String()}';
         }
 
-        final entriesData = entries.map((row) => row.toColumnMap()).toList();
-
         return {
-          'entries': entriesData,
+          'entries': entriesList.map((e) => e.toJson()).toList(),
           'cursor': {
             'nextCursor': nextCursor,
             'hasNextPage': hasNextPage,
@@ -383,27 +396,24 @@ class TranslationService extends BaseService {
         SELECT
           te.id,
           COALESCE(te.uuid::text, te.id::text) as uuid,
-          p.id as project_id,
+          te.project_id,
           COALESCE(te.entry_key, '') as entry_key,
           COALESCE(te.source_language, 'en_US') as source_language,
-          COALESCE(te.target_language, '') as target_language,
           COALESCE(te.source_text, '') as source_text,
-          COALESCE(te.target_text, '') as target_text,
-          COALESCE(te.status, 'pending') as status,
           te.translated_by,
           te.reviewed_by,
           COALESCE(te.context, '') as context,
           COALESCE(te.comment, '') as comment,
+          COALESCE(te.sort_index, 0) as sort_index,
           te.deleted_at,
           te.created_at,
           te.updated_at,
           u_translator.username as translator_username,
           u_reviewer.username as reviewer_username
         FROM {translation_entries} te
-        JOIN {projects} p ON p.uuid = te.project_id
         LEFT JOIN {users} u_translator ON te.translated_by = u_translator.id
         LEFT JOIN {users} u_reviewer ON te.reviewed_by = u_reviewer.id
-        WHERE ${isNumericId ? 'te.id = @entry_id' : 'te.uuid::text = @entry_id'}
+        WHERE ${isNumericId ? 'te.id = @entry_id' : 'te.uuid::text = @entry_id'} AND te.deleted_at IS NULL
       ''';
 
         final result = await _databaseService.query(sql, {'entry_id': entryId});
@@ -413,13 +423,7 @@ class TranslationService extends BaseService {
         }
 
         final resultData = result.first.toColumnMap();
-        // 确保 project_id 是整数类型
-        if (resultData['project_id'] != null) {
-          resultData['project_id'] = resultData['project_id'] is int
-              ? resultData['project_id']
-              : int.tryParse(resultData['project_id'].toString());
-        }
-        return TranslationEntryModel.fromJson(resultData);
+        return await _buildTranslationEntryModel(resultData);
       },
       operationName: 'getTranslationEntryById',
     );
@@ -442,17 +446,13 @@ class TranslationService extends BaseService {
           'language_code': languageCode,
         });
 
-        // 处理项目ID：如果是数字ID，需要转换为UUID
-        final projectUuid = await _resolveProjectUuid(projectId);
-
         // 检查是否已存在相同的条目
         final existing = await _databaseService.query('''
         SELECT id FROM {translation_entries}
-        WHERE project_id = @project_id AND entry_key = @entry_key AND target_language = @target_language
+        WHERE project_id = @project_id AND entry_key = @entry_key AND deleted_at IS NULL
       ''', {
-          'project_id': projectUuid,
+          'project_id': projectId,
           'entry_key': entryKey,
-          'target_language': languageCode,
         });
 
         if (existing.isNotEmpty) {
@@ -462,35 +462,45 @@ class TranslationService extends BaseService {
         // 创建翻译条目
         final result = await _databaseService.query('''
         INSERT INTO {translation_entries} (
-          project_id, entry_key, target_language, source_text, target_text,
-          translated_by, context, status
+          project_id, entry_key, source_language, source_text,
+          translated_by, context
         ) VALUES (
-          @project_id, @entry_key, @target_language, @source_text, @target_text,
-          @translator_id, @context_info, 'pending'
-        ) RETURNING id, COALESCE(uuid::text, id::text) as uuid, project_id::text as project_id, 
-                    COALESCE(entry_key, '') as entry_key, COALESCE(source_language, 'en_US') as source_language, 
-                    COALESCE(target_language, '') as target_language, COALESCE(source_text, '') as source_text, 
-                    COALESCE(target_text, '') as target_text, COALESCE(status, 'pending') as status,
-                    translated_by, reviewed_by, COALESCE(context, '') as context, 
-                    COALESCE(comment, '') as comment, deleted_at, created_at, updated_at
+          @project_id, @entry_key, @source_language, @source_text,
+          @translator_id, @context_info
+        ) RETURNING id, COALESCE(uuid::text, id::text) as uuid, project_id, 
+                    COALESCE(entry_key, '') as entry_key, 
+                    COALESCE(source_language, 'en_US') as source_language, 
+                    COALESCE(source_text, '') as source_text,
+                    translated_by, reviewed_by, 
+                    COALESCE(context, '') as context, 
+                    COALESCE(comment, '') as comment,
+                    COALESCE(sort_index, 0) as sort_index,
+                    deleted_at, created_at, updated_at
       ''', {
-          'project_id': projectUuid,
+          'project_id': projectId,
           'entry_key': entryKey,
-          'target_language': languageCode,
-          'source_text': sourceText,
-          'target_text': targetText,
+          'source_language': 'en_US',
+          'source_text': sourceText ?? '',
           'translator_id': translatorId,
-          'context_info': contextInfo,
+          'context_info': contextInfo ?? '',
         });
 
         final resultData = result.first.toColumnMap();
-        // 确保 project_id 是整数类型
-        if (resultData['project_id'] != null) {
-          resultData['project_id'] = resultData['project_id'] is int
-              ? resultData['project_id']
-              : int.tryParse(resultData['project_id'].toString()) ?? projectId;
+        final entryId = resultData['id'] as int;
+
+        // 插入目标语言翻译
+        if (targetText != null && targetText.isNotEmpty) {
+          await _databaseService.query('''
+            INSERT INTO {translation_entry_targets} (entry_id, language, text)
+            VALUES (@entry_id, @language, @text)
+          ''', {
+            'entry_id': entryId,
+            'language': languageCode,
+            'text': targetText,
+          });
         }
-        final entry = TranslationEntryModel.fromJson(resultData);
+
+        final entry = await _buildTranslationEntryModel(resultData);
 
         // 更新项目统计信息
         await _updateProjectStats(projectId);
@@ -507,12 +517,12 @@ class TranslationService extends BaseService {
   Future<TranslationEntryModel> updateTranslationEntry({
     required String entryId,
     String? targetText,
-    String? status,
+    String? targetLanguage,
     String? translatorId,
     String? reviewerId,
     String? contextInfo,
-    double? qualityScore,
-    Map<String, dynamic>? issues,
+    String? sourceText,
+    int? sortIndex,
     String? updatedBy,
   }) async {
     return execute<TranslationEntryModel>(
@@ -524,86 +534,86 @@ class TranslationService extends BaseService {
           throwNotFound('翻译条目不存在');
         }
 
+        // 判断 entryId 是数字 ID 还是 UUID
+        final isNumericId = int.tryParse(entryId) != null;
+
         // 构建更新字段
         final updates = <String>[];
         final parameters = <String, dynamic>{'entry_id': entryId};
 
-        if (targetText != null) {
-          updates.add('target_text = @target_text');
-          parameters['target_text'] = targetText;
-        }
-
-        if (status != null) {
-          updates.add('status = @status');
-          parameters['status'] = status;
-
-          // 根据状态设置时间戳
-          if (status == 'completed') {
-            updates.add('translated_at = CURRENT_TIMESTAMP');
-          } else if (status == 'reviewing') {
-            updates.add('reviewed_at = CURRENT_TIMESTAMP');
-          } else if (status == 'approved') {
-            updates.add('approved_at = CURRENT_TIMESTAMP');
-          }
+        if (sourceText != null) {
+          updates.add('source_text = @source_text');
+          parameters['source_text'] = sourceText;
         }
 
         if (translatorId != null) {
-          updates.add('translator_id = @translator_id');
+          updates.add('translated_by = @translator_id');
           parameters['translator_id'] = translatorId;
-          updates.add('assigned_at = CURRENT_TIMESTAMP');
         }
 
         if (reviewerId != null) {
-          updates.add('reviewer_id = @reviewer_id');
+          updates.add('reviewed_by = @reviewer_id');
           parameters['reviewer_id'] = reviewerId;
         }
 
         if (contextInfo != null) {
-          updates.add('context_info = @context_info');
+          updates.add('context = @context_info');
           parameters['context_info'] = contextInfo;
         }
 
-        if (qualityScore != null) {
-          updates.add('quality_score = @quality_score');
-          parameters['quality_score'] = qualityScore;
+        if (sortIndex != null) {
+          updates.add('sort_index = @sort_index');
+          parameters['sort_index'] = sortIndex;
         }
 
-        if (issues != null) {
-          updates.add('issues = @issues');
-          parameters['issues'] = issues.toString();
-          updates.add('has_issues = @has_issues');
-          parameters['has_issues'] = issues.isNotEmpty;
+        // 更新翻译条目基本信息
+        if (updates.isNotEmpty) {
+          final sql = '''
+          UPDATE {translation_entries}
+          SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP
+          WHERE ${isNumericId ? 'id = @entry_id' : 'uuid::text = @entry_id'}
+          RETURNING id, COALESCE(uuid::text, id::text) as uuid, project_id, 
+                    COALESCE(entry_key, '') as entry_key, 
+                    COALESCE(source_language, 'en_US') as source_language, 
+                    COALESCE(source_text, '') as source_text,
+                    translated_by, reviewed_by, 
+                    COALESCE(context, '') as context, 
+                    COALESCE(comment, '') as comment,
+                    COALESCE(sort_index, 0) as sort_index,
+                    deleted_at, created_at, updated_at
+        ''';
+
+          await _databaseService.query(sql, parameters);
         }
 
-        if (updates.isEmpty) {
-          throwBusiness('没有可更新的字段');
+        // 更新目标语言翻译
+        if (targetText != null && targetLanguage != null) {
+          // 先获取 entry_id
+          final entryResult = await _databaseService.query('''
+            SELECT id FROM {translation_entries}
+            WHERE ${isNumericId ? 'id = @entry_id' : 'uuid::text = @entry_id'}
+          ''', {'entry_id': entryId});
+
+          if (entryResult.isNotEmpty) {
+            final entryIdValue = entryResult.first[0] as int;
+            await _databaseService.query('''
+              INSERT INTO {translation_entry_targets} (entry_id, language, text)
+              VALUES (@entry_id, @language, @text)
+              ON CONFLICT (entry_id, language) 
+              DO UPDATE SET text = @text, updated_at = CURRENT_TIMESTAMP
+            ''', {
+              'entry_id': entryIdValue,
+              'language': targetLanguage,
+              'text': targetText,
+            });
+          }
         }
 
-        // 判断 entryId 是数字 ID 还是 UUID
-        final isNumericId = int.tryParse(entryId) != null;
-
-        // 更新数据库
-        final sql = '''
-        UPDATE {translation_entries}
-        SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP
-        WHERE ${isNumericId ? 'id = @entry_id' : 'uuid::text = @entry_id'}
-        RETURNING id, COALESCE(uuid::text, id::text) as uuid, project_id::text as project_id, 
-                  COALESCE(entry_key, '') as entry_key, COALESCE(source_language, 'en_US') as source_language, 
-                  COALESCE(target_language, '') as target_language, COALESCE(source_text, '') as source_text, 
-                  COALESCE(target_text, '') as target_text, COALESCE(status, 'pending') as status,
-                  translated_by, reviewed_by, COALESCE(context, '') as context, 
-                  COALESCE(comment, '') as comment, deleted_at, created_at, updated_at
-      ''';
-
-        final result = await _databaseService.query(sql, parameters);
-        final resultData = result.first.toColumnMap();
-        // 确保 project_id 是整数类型
-        if (resultData['project_id'] != null) {
-          resultData['project_id'] = resultData['project_id'] is int
-              ? resultData['project_id']
-              : int.tryParse(resultData['project_id'].toString());
+        // 获取更新后的完整数据
+        final updatedEntry = await getTranslationEntryById(entryId);
+        if (updatedEntry == null) {
+          throwNotFound('翻译条目不存在');
         }
-        final updatedEntry = TranslationEntryModel.fromJson(resultData);
 
         // 记录翻译历史
         await _recordTranslationHistory(updatedEntry, updatedBy);
@@ -653,7 +663,6 @@ class TranslationService extends BaseService {
   /// 批量更新翻译条目
   Future<List<TranslationEntryModel>> bulkUpdateTranslationEntries({
     required List<String> entryIds,
-    String? status,
     String? translatorId,
     String? reviewerId,
     String? updatedBy,
@@ -670,28 +679,14 @@ class TranslationService extends BaseService {
             if (entry == null) continue;
 
             // 构建更新数据
-            final updateData = <String, dynamic>{};
+            final hasUpdates = translatorId != null || reviewerId != null;
 
-            if (status != null) {
-              updateData['status'] = status;
-            }
-
-            if (translatorId != null) {
-              updateData['translator_id'] = translatorId;
-            }
-
-            if (reviewerId != null) {
-              updateData['reviewer_id'] = reviewerId;
-            }
-
-            if (updateData.isNotEmpty) {
+            if (hasUpdates) {
               final updatedEntry = await updateTranslationEntry(
                 entryId: entryId,
                 updatedBy: updatedBy,
-                targetText: updateData['target_text'],
-                status: updateData['status'],
-                translatorId: updateData['translator_id'],
-                reviewerId: updateData['reviewer_id'],
+                translatorId: translatorId,
+                reviewerId: reviewerId,
               );
               updatedEntries.add(updatedEntry);
             }
@@ -743,57 +738,23 @@ class TranslationService extends BaseService {
       () async {
         logInfo('获取项目翻译统计', context: {'project_id': projectId});
 
-        // 处理项目ID：如果是数字ID，需要转换为UUID
-        final projectUuid = await _resolveProjectUuid(projectId);
-
-        const sql = '''
+        final sql = '''
         SELECT
-          COUNT(*) as total_entries,
-          COUNT(*) FILTER (WHERE status = 'completed') as completed_entries,
-          COUNT(*) FILTER (WHERE status = 'reviewing') as reviewing_entries,
-          COUNT(*) FILTER (WHERE status = 'approved') as approved_entries,
-          COUNT(*) FILTER (WHERE status = 'pending') as pending_entries,
-          COALESCE(SUM(character_count), 0) as total_characters,
-          COALESCE(SUM(word_count), 0) as total_words,
-          COALESCE(AVG(quality_score), 0) as avg_quality_score,
-          COUNT(*) FILTER (WHERE has_issues = true) as entries_with_issues
-        FROM {translation_entries}
-        WHERE project_id = @project_id
+          COUNT(DISTINCT te.id) as total_entries,
+          COUNT(DISTINCT CASE WHEN tet.text IS NOT NULL AND tet.text != '' THEN te.id END) as completed_entries,
+          COUNT(DISTINCT CASE WHEN tet.text IS NULL OR tet.text = '' THEN te.id END) as pending_entries,
+          COALESCE(SUM(LENGTH(te.source_text)), 0) as total_source_characters,
+          COALESCE(SUM(LENGTH(tet.text)), 0) as total_target_characters
+        FROM {translation_entries} te
+        LEFT JOIN {translation_entry_targets} tet ON tet.entry_id = te.id
+        WHERE te.project_id = @project_id AND te.deleted_at IS NULL
       ''';
 
-        final result = await _databaseService.query(sql, {'project_id': projectUuid});
+        final result = await _databaseService.query(sql, {'project_id': projectId});
         return result.first.toColumnMap();
       },
       operationName: 'getProjectTranslationStats',
     );
-  }
-
-  /// 将项目ID（可能是数字ID或UUID）转换为UUID
-  Future<String> _resolveProjectUuid(int projectId) async {
-    try {
-      // 如果是数字ID，查询对应的UUID
-      final projectResult = await _databaseService.query(
-        'SELECT uuid::text as uuid FROM {projects} WHERE id = @project_id',
-        {'project_id': projectId},
-      );
-      if (projectResult.isEmpty) {
-        logError('项目不存在', context: {'project_id': projectId});
-        throwNotFound('项目不存在: $projectId');
-      }
-      final projectData = projectResult.first.toColumnMap();
-      final uuid = projectData['uuid']?.toString();
-      if (uuid == null || uuid.isEmpty) {
-        logError('项目UUID为空', context: {'project_id': projectId, 'project_data': projectData});
-        throwNotFound('项目UUID不存在: $projectId');
-      }
-      return uuid;
-    } catch (error, stackTrace) {
-      if (error is NotFoundException) {
-        rethrow;
-      }
-      logError('解析项目UUID失败', error: error, stackTrace: stackTrace, context: {'project_id': projectId});
-      throwBusiness('解析项目ID失败: ${error.toString()}');
-    }
   }
 
   /// 记录翻译历史
@@ -830,6 +791,9 @@ class TranslationService extends BaseService {
         return;
       }
 
+      // 获取目标语言翻译文本（简化版本，取第一个）
+      final targetText = entry.targetLanguages.isNotEmpty ? entry.targetLanguages.first.text : '';
+
       await _databaseService.query('''
         INSERT INTO {translation_history} (
           entry_id, entry_uuid, project_id, old_target_text, new_target_text,
@@ -843,9 +807,9 @@ class TranslationService extends BaseService {
         'entry_uuid': entry.uuid,
         'project_id': entry.projectId,
         'old_text': null, // 简化版本，实际应该比较差异
-        'new_text': entry.targetText,
+        'new_text': targetText,
         'old_status': null,
-        'new_status': entry.status.name,
+        'new_status': null, // 状态现在在 target_languages 中计算
         'action': changeType,
         'changed_by': changedBy,
         'reason': changeReason,
@@ -859,41 +823,27 @@ class TranslationService extends BaseService {
   /// 更新项目统计信息
   Future<void> _updateProjectStats(int projectId) async {
     try {
-      // 如果是数字ID，查询对应的UUID
-      final projectResult = await _databaseService.query(
-        'SELECT uuid::text as uuid FROM {projects} WHERE id = @project_id',
-        {'project_id': projectId},
-      );
-      if (projectResult.isEmpty) {
-        logError('项目不存在', context: {'project_id': projectId});
-        return;
-      }
-      final projectData = projectResult.first.toColumnMap();
-      final projectUuid = projectData['uuid']?.toString();
-
-      if (projectUuid == null || projectUuid.isEmpty) {
-        logError('项目UUID为空', context: {'project_id': projectId});
-        return;
-      }
-
       await _databaseService.query('''
         UPDATE {projects}
         SET
           total_keys = (
             SELECT COUNT(DISTINCT entry_key)
             FROM {translation_entries}
-            WHERE project_id = @project_uuid AND deleted_at IS NULL
+            WHERE project_id = @project_id AND deleted_at IS NULL
           ),
           translated_keys = (
-            SELECT COUNT(DISTINCT entry_key)
-            FROM {translation_entries}
-            WHERE project_id = @project_uuid AND status IN ('completed', 'reviewing', 'approved') AND deleted_at IS NULL
+            SELECT COUNT(DISTINCT te.entry_key)
+            FROM {translation_entries} te
+            INNER JOIN {translation_entry_targets} tet ON tet.entry_id = te.id
+            WHERE te.project_id = @project_id 
+              AND te.deleted_at IS NULL
+              AND tet.text IS NOT NULL 
+              AND tet.text != ''
           ),
           last_activity_at = CURRENT_TIMESTAMP
         WHERE id = @project_id
       ''', {
         'project_id': projectId,
-        'project_uuid': projectUuid,
       });
     } catch (error, stackTrace) {
       logError('更新项目统计失败', error: error, stackTrace: stackTrace, context: {'project_id': projectId});

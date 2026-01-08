@@ -1021,15 +1021,16 @@ class ProjectService extends BaseService {
         SELECT
           COUNT(DISTINCT pl.language_id) as language_count,
           COUNT(DISTINCT pm.user_id) FILTER (WHERE pm.user_id IS NOT NULL AND pm.is_active = true AND pm.status = 'active') as member_count,
-          COUNT(te.id) as total_entries,
-          COUNT(te.id) FILTER (WHERE te.status = 'completed') as translated_entries,
-          COUNT(te.id) FILTER (WHERE te.status = 'reviewing') as reviewing_entries,
-          COUNT(te.id) FILTER (WHERE te.status = 'approved') as approved_entries,
+          COUNT(DISTINCT te.id) as total_entries,
+          COUNT(DISTINCT CASE WHEN tet.text IS NOT NULL AND tet.text != '' THEN te.id END) as translated_entries,
+          0 as reviewing_entries,
+          0 as approved_entries,
           0.0 as avg_quality_score
         FROM {projects} p
         LEFT JOIN {project_languages} pl ON p.id = pl.project_id AND pl.is_active = true
         LEFT JOIN {project_members} pm ON p.id = pm.project_id
-        LEFT JOIN {translation_entries} te ON p.uuid = te.project_id AND te.deleted_at IS NULL
+        LEFT JOIN {translation_entries} te ON p.id = te.project_id AND te.deleted_at IS NULL
+        LEFT JOIN {translation_entry_targets} tet ON tet.entry_id = te.id
         WHERE p.uuid = @project_uuid
         GROUP BY p.id
       ''', {'project_uuid': projectUuid});
@@ -1054,13 +1055,14 @@ class ProjectService extends BaseService {
         SELECT
           'translation_updated' as activity_type,
           te.entry_key,
-          te.language_code,
+          tet.language as language_code,
           u.username as user_name,
-          te.status,
+          CASE WHEN tet.text IS NOT NULL AND tet.text != '' THEN 'completed' ELSE 'pending' END as status,
           te.updated_at as activity_at
         FROM {translation_entries} te
-        JOIN {users} u ON te.translator_id = u.id OR te.reviewer_id = u.id
-        WHERE te.project_id = @project_id
+        LEFT JOIN {translation_entry_targets} tet ON tet.entry_id = te.id
+        LEFT JOIN {users} u ON te.translated_by = u.id OR te.reviewed_by = u.id
+        WHERE te.project_id = @project_id AND te.deleted_at IS NULL
         ORDER BY te.updated_at DESC
         LIMIT @limit OFFSET @offset
       ''', {

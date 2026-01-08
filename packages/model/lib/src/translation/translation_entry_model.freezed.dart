@@ -38,23 +38,14 @@ mixin _$TranslationEntryModel {
   @LanguageEnumConverter()
   LanguageEnum get sourceLanguage => throw _privateConstructorUsedError;
 
-  /// 目标语言ID
-  @JsonKey(name: 'target_language')
-  @LanguageEnumConverter()
-  LanguageEnum get targetLanguage => throw _privateConstructorUsedError;
-
   /// 源文本
   @JsonKey(name: 'source_text')
   String get sourceText => throw _privateConstructorUsedError;
 
-  /// 目标文本
-  @JsonKey(name: 'target_text')
-  String get targetText => throw _privateConstructorUsedError;
-
-  /// 状态 (pending, completed, reviewing, approved)
-  @JsonKey(name: 'status')
-  @TranslationStatusEnumConverter()
-  TranslationStatusEnum get status => throw _privateConstructorUsedError;
+  /// 翻译列表
+  @JsonKey(name: 'target_languages')
+  List<TranslationTargetLanguageModel> get targetLanguages =>
+      throw _privateConstructorUsedError;
 
   /// 翻译者ID
   @JsonKey(name: 'translated_by')
@@ -80,25 +71,9 @@ mixin _$TranslationEntryModel {
   @JsonKey(name: 'comment')
   String get comment => throw _privateConstructorUsedError;
 
-  /// 最大长度限制
-  @JsonKey(name: 'max_length')
-  int? get maxLength => throw _privateConstructorUsedError;
-
-  /// 是否为复数形式
-  @JsonKey(name: 'is_plural')
-  bool get isPlural => throw _privateConstructorUsedError;
-
-  /// 复数形式（JSON字符串）
-  @JsonKey(name: 'plural_forms')
-  String? get pluralForms => throw _privateConstructorUsedError;
-
   /// 排序索引
   @JsonKey(name: 'sort_index')
   int get sortIndex => throw _privateConstructorUsedError;
-
-  /// 目标语言ID（用于兼容旧代码）
-  @JsonKey(name: 'target_language_id')
-  int? get targetLanguageId => throw _privateConstructorUsedError;
 
   /// 删除时间
   @JsonKey(name: 'deleted_at')
@@ -138,25 +113,16 @@ abstract class $TranslationEntryModelCopyWith<$Res> {
       @JsonKey(name: 'source_language')
       @LanguageEnumConverter()
       LanguageEnum sourceLanguage,
-      @JsonKey(name: 'target_language')
-      @LanguageEnumConverter()
-      LanguageEnum targetLanguage,
       @JsonKey(name: 'source_text') String sourceText,
-      @JsonKey(name: 'target_text') String targetText,
-      @JsonKey(name: 'status')
-      @TranslationStatusEnumConverter()
-      TranslationStatusEnum status,
+      @JsonKey(name: 'target_languages')
+      List<TranslationTargetLanguageModel> targetLanguages,
       @JsonKey(name: 'translated_by') String? translatedBy,
       @JsonKey(name: 'translator_username') String? translatorUsername,
       @JsonKey(name: 'reviewed_by') String? reviewedBy,
       @JsonKey(name: 'reviewer_username') String? reviewerUsername,
       @JsonKey(name: 'context') String context,
       @JsonKey(name: 'comment') String comment,
-      @JsonKey(name: 'max_length') int? maxLength,
-      @JsonKey(name: 'is_plural') bool isPlural,
-      @JsonKey(name: 'plural_forms') String? pluralForms,
       @JsonKey(name: 'sort_index') int sortIndex,
-      @JsonKey(name: 'target_language_id') int? targetLanguageId,
       @JsonKey(name: 'deleted_at')
       @NullableTimesConverter()
       DateTime? deletedAt,
@@ -188,21 +154,15 @@ class _$TranslationEntryModelCopyWithImpl<$Res,
     Object? projectId = null,
     Object? entryKey = null,
     Object? sourceLanguage = null,
-    Object? targetLanguage = null,
     Object? sourceText = null,
-    Object? targetText = null,
-    Object? status = null,
+    Object? targetLanguages = null,
     Object? translatedBy = freezed,
     Object? translatorUsername = freezed,
     Object? reviewedBy = freezed,
     Object? reviewerUsername = freezed,
     Object? context = null,
     Object? comment = null,
-    Object? maxLength = freezed,
-    Object? isPlural = null,
-    Object? pluralForms = freezed,
     Object? sortIndex = null,
-    Object? targetLanguageId = freezed,
     Object? deletedAt = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
@@ -224,22 +184,14 @@ class _$TranslationEntryModelCopyWithImpl<$Res,
           ? _value.sourceLanguage
           : sourceLanguage // ignore: cast_nullable_to_non_nullable
               as LanguageEnum,
-      targetLanguage: null == targetLanguage
-          ? _value.targetLanguage
-          : targetLanguage // ignore: cast_nullable_to_non_nullable
-              as LanguageEnum,
       sourceText: null == sourceText
           ? _value.sourceText
           : sourceText // ignore: cast_nullable_to_non_nullable
               as String,
-      targetText: null == targetText
-          ? _value.targetText
-          : targetText // ignore: cast_nullable_to_non_nullable
-              as String,
-      status: null == status
-          ? _value.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as TranslationStatusEnum,
+      targetLanguages: null == targetLanguages
+          ? _value.targetLanguages
+          : targetLanguages // ignore: cast_nullable_to_non_nullable
+              as List<TranslationTargetLanguageModel>,
       translatedBy: freezed == translatedBy
           ? _value.translatedBy
           : translatedBy // ignore: cast_nullable_to_non_nullable
@@ -264,26 +216,10 @@ class _$TranslationEntryModelCopyWithImpl<$Res,
           ? _value.comment
           : comment // ignore: cast_nullable_to_non_nullable
               as String,
-      maxLength: freezed == maxLength
-          ? _value.maxLength
-          : maxLength // ignore: cast_nullable_to_non_nullable
-              as int?,
-      isPlural: null == isPlural
-          ? _value.isPlural
-          : isPlural // ignore: cast_nullable_to_non_nullable
-              as bool,
-      pluralForms: freezed == pluralForms
-          ? _value.pluralForms
-          : pluralForms // ignore: cast_nullable_to_non_nullable
-              as String?,
       sortIndex: null == sortIndex
           ? _value.sortIndex
           : sortIndex // ignore: cast_nullable_to_non_nullable
               as int,
-      targetLanguageId: freezed == targetLanguageId
-          ? _value.targetLanguageId
-          : targetLanguageId // ignore: cast_nullable_to_non_nullable
-              as int?,
       deletedAt: freezed == deletedAt
           ? _value.deletedAt
           : deletedAt // ignore: cast_nullable_to_non_nullable
@@ -316,25 +252,16 @@ abstract class _$$TranslationEntryModelImplCopyWith<$Res>
       @JsonKey(name: 'source_language')
       @LanguageEnumConverter()
       LanguageEnum sourceLanguage,
-      @JsonKey(name: 'target_language')
-      @LanguageEnumConverter()
-      LanguageEnum targetLanguage,
       @JsonKey(name: 'source_text') String sourceText,
-      @JsonKey(name: 'target_text') String targetText,
-      @JsonKey(name: 'status')
-      @TranslationStatusEnumConverter()
-      TranslationStatusEnum status,
+      @JsonKey(name: 'target_languages')
+      List<TranslationTargetLanguageModel> targetLanguages,
       @JsonKey(name: 'translated_by') String? translatedBy,
       @JsonKey(name: 'translator_username') String? translatorUsername,
       @JsonKey(name: 'reviewed_by') String? reviewedBy,
       @JsonKey(name: 'reviewer_username') String? reviewerUsername,
       @JsonKey(name: 'context') String context,
       @JsonKey(name: 'comment') String comment,
-      @JsonKey(name: 'max_length') int? maxLength,
-      @JsonKey(name: 'is_plural') bool isPlural,
-      @JsonKey(name: 'plural_forms') String? pluralForms,
       @JsonKey(name: 'sort_index') int sortIndex,
-      @JsonKey(name: 'target_language_id') int? targetLanguageId,
       @JsonKey(name: 'deleted_at')
       @NullableTimesConverter()
       DateTime? deletedAt,
@@ -364,21 +291,15 @@ class __$$TranslationEntryModelImplCopyWithImpl<$Res>
     Object? projectId = null,
     Object? entryKey = null,
     Object? sourceLanguage = null,
-    Object? targetLanguage = null,
     Object? sourceText = null,
-    Object? targetText = null,
-    Object? status = null,
+    Object? targetLanguages = null,
     Object? translatedBy = freezed,
     Object? translatorUsername = freezed,
     Object? reviewedBy = freezed,
     Object? reviewerUsername = freezed,
     Object? context = null,
     Object? comment = null,
-    Object? maxLength = freezed,
-    Object? isPlural = null,
-    Object? pluralForms = freezed,
     Object? sortIndex = null,
-    Object? targetLanguageId = freezed,
     Object? deletedAt = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
@@ -400,22 +321,14 @@ class __$$TranslationEntryModelImplCopyWithImpl<$Res>
           ? _value.sourceLanguage
           : sourceLanguage // ignore: cast_nullable_to_non_nullable
               as LanguageEnum,
-      targetLanguage: null == targetLanguage
-          ? _value.targetLanguage
-          : targetLanguage // ignore: cast_nullable_to_non_nullable
-              as LanguageEnum,
       sourceText: null == sourceText
           ? _value.sourceText
           : sourceText // ignore: cast_nullable_to_non_nullable
               as String,
-      targetText: null == targetText
-          ? _value.targetText
-          : targetText // ignore: cast_nullable_to_non_nullable
-              as String,
-      status: null == status
-          ? _value.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as TranslationStatusEnum,
+      targetLanguages: null == targetLanguages
+          ? _value._targetLanguages
+          : targetLanguages // ignore: cast_nullable_to_non_nullable
+              as List<TranslationTargetLanguageModel>,
       translatedBy: freezed == translatedBy
           ? _value.translatedBy
           : translatedBy // ignore: cast_nullable_to_non_nullable
@@ -440,26 +353,10 @@ class __$$TranslationEntryModelImplCopyWithImpl<$Res>
           ? _value.comment
           : comment // ignore: cast_nullable_to_non_nullable
               as String,
-      maxLength: freezed == maxLength
-          ? _value.maxLength
-          : maxLength // ignore: cast_nullable_to_non_nullable
-              as int?,
-      isPlural: null == isPlural
-          ? _value.isPlural
-          : isPlural // ignore: cast_nullable_to_non_nullable
-              as bool,
-      pluralForms: freezed == pluralForms
-          ? _value.pluralForms
-          : pluralForms // ignore: cast_nullable_to_non_nullable
-              as String?,
       sortIndex: null == sortIndex
           ? _value.sortIndex
           : sortIndex // ignore: cast_nullable_to_non_nullable
               as int,
-      targetLanguageId: freezed == targetLanguageId
-          ? _value.targetLanguageId
-          : targetLanguageId // ignore: cast_nullable_to_non_nullable
-              as int?,
       deletedAt: freezed == deletedAt
           ? _value.deletedAt
           : deletedAt // ignore: cast_nullable_to_non_nullable
@@ -486,29 +383,21 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
       @JsonKey(name: 'source_language')
       @LanguageEnumConverter()
       this.sourceLanguage = LanguageEnum.enUS,
-      @JsonKey(name: 'target_language')
-      @LanguageEnumConverter()
-      required this.targetLanguage,
       @JsonKey(name: 'source_text') required this.sourceText,
-      @JsonKey(name: 'target_text') required this.targetText,
-      @JsonKey(name: 'status')
-      @TranslationStatusEnumConverter()
-      required this.status,
+      @JsonKey(name: 'target_languages')
+      required final List<TranslationTargetLanguageModel> targetLanguages,
       @JsonKey(name: 'translated_by') this.translatedBy,
       @JsonKey(name: 'translator_username') this.translatorUsername,
       @JsonKey(name: 'reviewed_by') this.reviewedBy,
       @JsonKey(name: 'reviewer_username') this.reviewerUsername,
       @JsonKey(name: 'context') this.context = '',
       @JsonKey(name: 'comment') this.comment = '',
-      @JsonKey(name: 'max_length') this.maxLength,
-      @JsonKey(name: 'is_plural') this.isPlural = false,
-      @JsonKey(name: 'plural_forms') this.pluralForms,
       @JsonKey(name: 'sort_index') this.sortIndex = 0,
-      @JsonKey(name: 'target_language_id') this.targetLanguageId,
       @JsonKey(name: 'deleted_at') @NullableTimesConverter() this.deletedAt,
       @JsonKey(name: 'created_at') @NullableTimesConverter() this.createdAt,
       @JsonKey(name: 'updated_at') @NullableTimesConverter() this.updatedAt})
-      : super._();
+      : _targetLanguages = targetLanguages,
+        super._();
 
   factory _$TranslationEntryModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$TranslationEntryModelImplFromJson(json);
@@ -534,27 +423,22 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
   @LanguageEnumConverter()
   final LanguageEnum sourceLanguage;
 
-  /// 目标语言ID
-  @override
-  @JsonKey(name: 'target_language')
-  @LanguageEnumConverter()
-  final LanguageEnum targetLanguage;
-
   /// 源文本
   @override
   @JsonKey(name: 'source_text')
   final String sourceText;
 
-  /// 目标文本
-  @override
-  @JsonKey(name: 'target_text')
-  final String targetText;
+  /// 翻译列表
+  final List<TranslationTargetLanguageModel> _targetLanguages;
 
-  /// 状态 (pending, completed, reviewing, approved)
+  /// 翻译列表
   @override
-  @JsonKey(name: 'status')
-  @TranslationStatusEnumConverter()
-  final TranslationStatusEnum status;
+  @JsonKey(name: 'target_languages')
+  List<TranslationTargetLanguageModel> get targetLanguages {
+    if (_targetLanguages is EqualUnmodifiableListView) return _targetLanguages;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_targetLanguages);
+  }
 
   /// 翻译者ID
   @override
@@ -586,30 +470,10 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
   @JsonKey(name: 'comment')
   final String comment;
 
-  /// 最大长度限制
-  @override
-  @JsonKey(name: 'max_length')
-  final int? maxLength;
-
-  /// 是否为复数形式
-  @override
-  @JsonKey(name: 'is_plural')
-  final bool isPlural;
-
-  /// 复数形式（JSON字符串）
-  @override
-  @JsonKey(name: 'plural_forms')
-  final String? pluralForms;
-
   /// 排序索引
   @override
   @JsonKey(name: 'sort_index')
   final int sortIndex;
-
-  /// 目标语言ID（用于兼容旧代码）
-  @override
-  @JsonKey(name: 'target_language_id')
-  final int? targetLanguageId;
 
   /// 删除时间
   @override
@@ -631,7 +495,7 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
 
   @override
   String toString() {
-    return 'TranslationEntryModel(uuid: $uuid, projectId: $projectId, entryKey: $entryKey, sourceLanguage: $sourceLanguage, targetLanguage: $targetLanguage, sourceText: $sourceText, targetText: $targetText, status: $status, translatedBy: $translatedBy, translatorUsername: $translatorUsername, reviewedBy: $reviewedBy, reviewerUsername: $reviewerUsername, context: $context, comment: $comment, maxLength: $maxLength, isPlural: $isPlural, pluralForms: $pluralForms, sortIndex: $sortIndex, targetLanguageId: $targetLanguageId, deletedAt: $deletedAt, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'TranslationEntryModel(uuid: $uuid, projectId: $projectId, entryKey: $entryKey, sourceLanguage: $sourceLanguage, sourceText: $sourceText, targetLanguages: $targetLanguages, translatedBy: $translatedBy, translatorUsername: $translatorUsername, reviewedBy: $reviewedBy, reviewerUsername: $reviewerUsername, context: $context, comment: $comment, sortIndex: $sortIndex, deletedAt: $deletedAt, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -646,13 +510,10 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
                 other.entryKey == entryKey) &&
             (identical(other.sourceLanguage, sourceLanguage) ||
                 other.sourceLanguage == sourceLanguage) &&
-            (identical(other.targetLanguage, targetLanguage) ||
-                other.targetLanguage == targetLanguage) &&
             (identical(other.sourceText, sourceText) ||
                 other.sourceText == sourceText) &&
-            (identical(other.targetText, targetText) ||
-                other.targetText == targetText) &&
-            (identical(other.status, status) || other.status == status) &&
+            const DeepCollectionEquality()
+                .equals(other._targetLanguages, _targetLanguages) &&
             (identical(other.translatedBy, translatedBy) ||
                 other.translatedBy == translatedBy) &&
             (identical(other.translatorUsername, translatorUsername) ||
@@ -663,16 +524,8 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
                 other.reviewerUsername == reviewerUsername) &&
             (identical(other.context, context) || other.context == context) &&
             (identical(other.comment, comment) || other.comment == comment) &&
-            (identical(other.maxLength, maxLength) ||
-                other.maxLength == maxLength) &&
-            (identical(other.isPlural, isPlural) ||
-                other.isPlural == isPlural) &&
-            (identical(other.pluralForms, pluralForms) ||
-                other.pluralForms == pluralForms) &&
             (identical(other.sortIndex, sortIndex) ||
                 other.sortIndex == sortIndex) &&
-            (identical(other.targetLanguageId, targetLanguageId) ||
-                other.targetLanguageId == targetLanguageId) &&
             (identical(other.deletedAt, deletedAt) ||
                 other.deletedAt == deletedAt) &&
             (identical(other.createdAt, createdAt) ||
@@ -683,31 +536,24 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hashAll([
-        runtimeType,
-        uuid,
-        projectId,
-        entryKey,
-        sourceLanguage,
-        targetLanguage,
-        sourceText,
-        targetText,
-        status,
-        translatedBy,
-        translatorUsername,
-        reviewedBy,
-        reviewerUsername,
-        context,
-        comment,
-        maxLength,
-        isPlural,
-        pluralForms,
-        sortIndex,
-        targetLanguageId,
-        deletedAt,
-        createdAt,
-        updatedAt
-      ]);
+  int get hashCode => Object.hash(
+      runtimeType,
+      uuid,
+      projectId,
+      entryKey,
+      sourceLanguage,
+      sourceText,
+      const DeepCollectionEquality().hash(_targetLanguages),
+      translatedBy,
+      translatorUsername,
+      reviewedBy,
+      reviewerUsername,
+      context,
+      comment,
+      sortIndex,
+      deletedAt,
+      createdAt,
+      updatedAt);
 
   /// Create a copy of TranslationEntryModel
   /// with the given fields replaced by the non-null parameter values.
@@ -734,25 +580,16 @@ abstract class _TranslationEntryModel extends TranslationEntryModel {
       @JsonKey(name: 'source_language')
       @LanguageEnumConverter()
       final LanguageEnum sourceLanguage,
-      @JsonKey(name: 'target_language')
-      @LanguageEnumConverter()
-      required final LanguageEnum targetLanguage,
       @JsonKey(name: 'source_text') required final String sourceText,
-      @JsonKey(name: 'target_text') required final String targetText,
-      @JsonKey(name: 'status')
-      @TranslationStatusEnumConverter()
-      required final TranslationStatusEnum status,
+      @JsonKey(name: 'target_languages')
+      required final List<TranslationTargetLanguageModel> targetLanguages,
       @JsonKey(name: 'translated_by') final String? translatedBy,
       @JsonKey(name: 'translator_username') final String? translatorUsername,
       @JsonKey(name: 'reviewed_by') final String? reviewedBy,
       @JsonKey(name: 'reviewer_username') final String? reviewerUsername,
       @JsonKey(name: 'context') final String context,
       @JsonKey(name: 'comment') final String comment,
-      @JsonKey(name: 'max_length') final int? maxLength,
-      @JsonKey(name: 'is_plural') final bool isPlural,
-      @JsonKey(name: 'plural_forms') final String? pluralForms,
       @JsonKey(name: 'sort_index') final int sortIndex,
-      @JsonKey(name: 'target_language_id') final int? targetLanguageId,
       @JsonKey(name: 'deleted_at')
       @NullableTimesConverter()
       final DateTime? deletedAt,
@@ -788,27 +625,15 @@ abstract class _TranslationEntryModel extends TranslationEntryModel {
   @LanguageEnumConverter()
   LanguageEnum get sourceLanguage;
 
-  /// 目标语言ID
-  @override
-  @JsonKey(name: 'target_language')
-  @LanguageEnumConverter()
-  LanguageEnum get targetLanguage;
-
   /// 源文本
   @override
   @JsonKey(name: 'source_text')
   String get sourceText;
 
-  /// 目标文本
+  /// 翻译列表
   @override
-  @JsonKey(name: 'target_text')
-  String get targetText;
-
-  /// 状态 (pending, completed, reviewing, approved)
-  @override
-  @JsonKey(name: 'status')
-  @TranslationStatusEnumConverter()
-  TranslationStatusEnum get status;
+  @JsonKey(name: 'target_languages')
+  List<TranslationTargetLanguageModel> get targetLanguages;
 
   /// 翻译者ID
   @override
@@ -840,30 +665,10 @@ abstract class _TranslationEntryModel extends TranslationEntryModel {
   @JsonKey(name: 'comment')
   String get comment;
 
-  /// 最大长度限制
-  @override
-  @JsonKey(name: 'max_length')
-  int? get maxLength;
-
-  /// 是否为复数形式
-  @override
-  @JsonKey(name: 'is_plural')
-  bool get isPlural;
-
-  /// 复数形式（JSON字符串）
-  @override
-  @JsonKey(name: 'plural_forms')
-  String? get pluralForms;
-
   /// 排序索引
   @override
   @JsonKey(name: 'sort_index')
   int get sortIndex;
-
-  /// 目标语言ID（用于兼容旧代码）
-  @override
-  @JsonKey(name: 'target_language_id')
-  int? get targetLanguageId;
 
   /// 删除时间
   @override

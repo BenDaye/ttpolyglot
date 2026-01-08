@@ -132,27 +132,23 @@ class TranslationController extends BaseController {
         final data = jsonDecode(body) as Map<String, dynamic>;
 
         final targetText = data['target_text']?.toString();
-        final status = data['status']?.toString();
+        final targetLanguage = data['target_language']?.toString();
         final translatorId = data['translator_id']?.toString();
         final reviewerId = data['reviewer_id']?.toString();
         final contextInfo = data['context_info']?.toString() ?? data['context']?.toString();
-        final qualityScore = data['quality_score'] != null
-            ? (data['quality_score'] is double
-                ? data['quality_score'] as double
-                : double.tryParse(data['quality_score'].toString()))
-            : null;
-        final issues = data['issues'] as Map<String, dynamic>?;
+        final sourceText = data['source_text']?.toString();
+        final sortIndex = data['sort_index'] != null ? int.tryParse(data['sort_index'].toString()) : null;
         final updatedBy = getCurrentUserId(request);
 
         final entry = await _translationService.updateTranslationEntry(
           entryId: entryId,
           targetText: targetText,
-          status: status,
+          targetLanguage: targetLanguage,
           translatorId: translatorId,
           reviewerId: reviewerId,
           contextInfo: contextInfo,
-          qualityScore: qualityScore,
-          issues: issues,
+          sourceText: sourceText,
+          sortIndex: sortIndex,
           updatedBy: updatedBy,
         );
 
@@ -172,27 +168,23 @@ class TranslationController extends BaseController {
         final data = jsonDecode(body) as Map<String, dynamic>;
 
         final targetText = data['target_text']?.toString();
-        final status = data['status']?.toString();
+        final targetLanguage = data['target_language']?.toString();
         final translatorId = data['translator_id']?.toString();
         final reviewerId = data['reviewer_id']?.toString();
         final contextInfo = data['context_info']?.toString() ?? data['context']?.toString();
-        final qualityScore = data['quality_score'] != null
-            ? (data['quality_score'] is double
-                ? data['quality_score'] as double
-                : double.tryParse(data['quality_score'].toString()))
-            : null;
-        final issues = data['issues'] as Map<String, dynamic>?;
+        final sourceText = data['source_text']?.toString();
+        final sortIndex = data['sort_index'] != null ? int.tryParse(data['sort_index'].toString()) : null;
         final updatedBy = getCurrentUserId(request);
 
         final entry = await _translationService.updateTranslationEntry(
           entryId: entryId,
           targetText: targetText,
-          status: status,
+          targetLanguage: targetLanguage,
           translatorId: translatorId,
           reviewerId: reviewerId,
           contextInfo: contextInfo,
-          qualityScore: qualityScore,
-          issues: issues,
+          sourceText: sourceText,
+          sortIndex: sortIndex,
           updatedBy: updatedBy,
         );
 
@@ -323,7 +315,6 @@ class TranslationController extends BaseController {
         final updatedBy = getCurrentUserId(request);
         final updatedEntries = await _translationService.bulkUpdateTranslationEntries(
           entryIds: entryIds,
-          status: 'completed',
           updatedBy: updatedBy,
         );
 
@@ -350,7 +341,6 @@ class TranslationController extends BaseController {
         final updatedBy = getCurrentUserId(request);
         final updatedEntries = await _translationService.bulkUpdateTranslationEntries(
           entryIds: entryIds,
-          status: 'approved',
           reviewerId: updatedBy,
           updatedBy: updatedBy,
         );
@@ -416,10 +406,13 @@ class TranslationController extends BaseController {
 
         // 恢复到指定版本
         final updatedBy = getCurrentUserId(request);
+        final targetText = targetVersion['old_target_text']?.toString() ?? targetVersion['new_target_text']?.toString();
+        final targetLanguage =
+            targetVersion['old_target_language']?.toString() ?? targetVersion['new_target_language']?.toString();
         final entry = await _translationService.updateTranslationEntry(
           entryId: entryId,
-          targetText: targetVersion['old_target_text']?.toString() ?? targetVersion['new_target_text']?.toString(),
-          status: targetVersion['old_status']?.toString() ?? targetVersion['new_status']?.toString(),
+          targetText: targetText,
+          targetLanguage: targetLanguage,
           updatedBy: updatedBy,
         );
 
@@ -461,7 +454,6 @@ class TranslationController extends BaseController {
         final updatedBy = getCurrentUserId(request);
         final entry = await _translationService.updateTranslationEntry(
           entryId: entryId,
-          status: 'reviewing',
           updatedBy: updatedBy,
         );
 
@@ -504,7 +496,6 @@ class TranslationController extends BaseController {
         final updatedBy = getCurrentUserId(request);
         final entry = await _translationService.updateTranslationEntry(
           entryId: entryId,
-          status: 'approved',
           reviewerId: updatedBy,
           updatedBy: updatedBy,
         );
@@ -528,7 +519,6 @@ class TranslationController extends BaseController {
         final updatedBy = getCurrentUserId(request);
         final entry = await _translationService.updateTranslationEntry(
           entryId: entryId,
-          status: 'rejected',
           reviewerId: updatedBy,
           contextInfo: reason,
           updatedBy: updatedBy,

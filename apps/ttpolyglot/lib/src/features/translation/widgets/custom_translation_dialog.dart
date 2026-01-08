@@ -58,7 +58,8 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
   Widget build(BuildContext context) {
     final primaryLanguage = ProjectController.getInstance(widget.controller.projectId).project?.primaryLanguage;
     _selectedSourceEntry ??= (primaryLanguage != null
-        ? widget.entries.firstWhereOrNull((item) => item.targetLanguage == primaryLanguage.code)
+        ? widget.entries
+            .firstWhereOrNull((item) => item.targetLanguages.any((t) => t.language.code == primaryLanguage.code))
         : widget.entries.first);
 
     return AlertDialog(
@@ -346,6 +347,8 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
         ),
       ),
       items: list.map((entry) {
+        // 获取第一个目标语言（如果有的话）
+        final firstTarget = entry.targetLanguages.isNotEmpty ? entry.targetLanguages.first : null;
         return DropdownMenuItem<TranslationEntryModel>(
           value: entry,
           child: SizedBox(
@@ -360,7 +363,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
                     borderRadius: BorderRadius.circular(6.0),
                   ),
                   child: Text(
-                    entry.targetLanguage.code,
+                    firstTarget?.language.code ?? entry.sourceLanguage.code,
                     style: GoogleFonts.notoSansMono(
                       color: Theme.of(Get.context!).colorScheme.onSecondaryContainer,
                       fontWeight: FontWeight.w500,
@@ -368,7 +371,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
                   ),
                 ),
                 Flexible(
-                  child: Text(entry.targetText),
+                  child: Text(firstTarget?.text ?? entry.sourceText),
                 ),
               ],
             ),
@@ -380,7 +383,9 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
           setState(() {
             _selectedSourceEntry = value;
           });
-          LoggerUtils.info('选择源语言: ${value.targetLanguage.code} - ${value.targetText}');
+          final firstTarget = value.targetLanguages.isNotEmpty ? value.targetLanguages.first : null;
+          LoggerUtils.info(
+              '选择源语言: ${firstTarget?.language.code ?? value.sourceLanguage.code} - ${firstTarget?.text ?? value.sourceText}');
         }
       },
     );
@@ -407,7 +412,11 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
       return;
     }
 
-    if (_selectedSourceEntry!.targetText.isEmpty) {
+    // 获取源语言的文本（优先使用第一个目标语言，否则使用源文本）
+    final sourceText = _selectedSourceEntry!.targetLanguages.isNotEmpty
+        ? _selectedSourceEntry!.targetLanguages.first.text
+        : _selectedSourceEntry!.sourceText;
+    if (sourceText.isEmpty) {
       _showErrorSnackBar('源语言文本不能为空');
       return;
     }
@@ -442,19 +451,26 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
 
   /// 执行自定义翻译
   Future<void> _performCustomTranslation(TranslationServiceManager translationManager) async {
+    // 获取源语言的文本（优先使用第一个目标语言，否则使用源文本）
+    final sourceTargetLang =
+        _selectedSourceEntry!.targetLanguages.isNotEmpty ? _selectedSourceEntry!.targetLanguages.first : null;
+    final sourceText = sourceTargetLang?.text ?? _selectedSourceEntry!.sourceText;
+    final sourceLanguageCode = sourceTargetLang?.language.code ?? _selectedSourceEntry!.sourceLanguage.code;
+
     // 获取需要翻译的条目
     final List<TranslationEntryModel> translateEntries = [];
     for (final entry in widget.entries) {
-      if (entry.targetLanguage.code == _selectedSourceEntry!.targetLanguage.code) continue;
+      // 跳过源语言相同的条目
+      if (entry.targetLanguages.any((t) => t.language.code == sourceLanguageCode)) continue;
       translateEntries.add(
         entry.copyWith(
-          sourceText: _selectedSourceEntry!.targetText,
+          sourceText: sourceText,
         ),
       );
     }
 
     // 如果不覆盖，则直接返回
-    if (!_isOverride && !translateEntries.any((e) => e.targetText.trim().isEmpty)) {
+    if (!_isOverride && !translateEntries.any((e) => e.targetLanguages.any((t) => t.text.trim().isEmpty))) {
       _showErrorSnackBar('没有可翻译语言');
       _resetTranslatingState();
       return;
@@ -502,19 +518,51 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
     int failCount = 0;
     final updatedEntries = <TranslationEntryModel>[];
 
+    // 获取源语言代码
+    final sourceTargetLang =
+        _selectedSourceEntry!.targetLanguages.isNotEmpty ? _selectedSourceEntry!.targetLanguages.first : null;
+    final sourceLanguageCode = sourceTargetLang?.language.code ?? _selectedSourceEntry!.sourceLanguage.code;
+
     for (int i = 0; i < results.length; i++) {
       final result = results[i];
       final entry = translateEntries[i];
+
+      // 找到要更新的目标语言（第一个非源语言的目标语言）
+      final targetLangToUpdate = entry.targetLanguages.firstWhere(
+        (t) => t.language.code != sourceLanguageCode,
+        orElse: () => entry.targetLanguages.isNotEmpty
+            ? entry.targetLanguages.first
+            : TranslationTargetLanguageModel(language: entry.sourceLanguage, text: ''),
+      );
+
       // 如果不覆盖，则直接跳过
-      if (!_isOverride && entry.targetText.trim().isNotEmpty) {
+      if (!_isOverride && targetLangToUpdate.text.trim().isNotEmpty) {
         continue;
       }
+
       if (result.success) {
         successCount++;
+        // 更新目标语言列表
+        final updatedTargetLanguages = entry.targetLanguages.map((t) {
+          if (t.language == targetLangToUpdate.language) {
+            return t.copyWith(text: result.translatedText);
+          }
+          return t;
+        }).toList();
+
+        // 如果该语言不存在，添加它
+        if (!updatedTargetLanguages.any((t) => t.language == targetLangToUpdate.language)) {
+          updatedTargetLanguages.add(
+            TranslationTargetLanguageModel(
+              language: targetLangToUpdate.language,
+              text: result.translatedText,
+            ),
+          );
+        }
+
         updatedEntries.add(
           entry.copyWith(
-            targetText: result.translatedText,
-            status: TranslationStatusEnum.completed,
+            targetLanguages: updatedTargetLanguages,
             updatedAt: DateTime.now(),
           ),
         );

@@ -236,12 +236,19 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
                 color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(6.0),
               ),
-              child: Text(
-                entry.targetLanguage.code,
-                style: GoogleFonts.notoSansMono(
-                  color: Theme.of(context).colorScheme.onSecondaryContainer,
-                  fontWeight: FontWeight.w500,
-                ),
+              child: Builder(
+                builder: (context) {
+                  final targetLang = entry.targetLanguages.isNotEmpty
+                      ? entry.targetLanguages.first
+                      : TranslationTargetLanguageModel(language: entry.sourceLanguage, text: '');
+                  return Text(
+                    targetLang.language.code,
+                    style: GoogleFonts.notoSansMono(
+                      color: Theme.of(context).colorScheme.onSecondaryContainer,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
               ),
             ),
 
@@ -249,40 +256,49 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
 
             // 翻译内容
             Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    entry.targetText.isEmpty ? '待翻译' : entry.targetText,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: entry.targetText.isEmpty
-                              ? Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5)
-                              : null,
-                          fontStyle: entry.targetText.isEmpty ? FontStyle.italic : null,
-                          overflow: TextOverflow.ellipsis,
+              child: Builder(
+                builder: (context) {
+                  final targetLang = entry.targetLanguages.isNotEmpty
+                      ? entry.targetLanguages.first
+                      : TranslationTargetLanguageModel(language: entry.sourceLanguage, text: '');
+                  final targetText = targetLang.text;
+                  final status = targetLang.status;
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        targetText.isEmpty ? '待翻译' : targetText,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: targetText.isEmpty
+                                  ? Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5)
+                                  : null,
+                              fontStyle: targetText.isEmpty ? FontStyle.italic : null,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                        maxLines: 1,
+                      ),
+
+                      const SizedBox(height: 4.0),
+
+                      // 状态标签
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+                        decoration: BoxDecoration(
+                          color: TranslationController.getStatusColor(status).withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4.0),
                         ),
-                    maxLines: 1,
-                  ),
-
-                  const SizedBox(height: 4.0),
-
-                  // 状态标签
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
-                    decoration: BoxDecoration(
-                      color: TranslationController.getStatusColor(entry.status).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(4.0),
-                    ),
-                    child: Text(
-                      entry.status.displayName,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: TranslationController.getStatusColor(entry.status),
-                            fontSize: 10.0,
-                          ),
-                    ),
-                  ),
-                ],
+                        child: Text(
+                          status.displayName,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: TranslationController.getStatusColor(status),
+                                fontSize: 10.0,
+                              ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ],
@@ -378,10 +394,15 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
       }
 
       // 源语言文本
-      final TranslationEntryModel? entriesToTranslate = widget.translationEntries
-          .firstWhereOrNull((entry) => entry.targetLanguage.code == selectedSourceLanguage.code);
+      final TranslationEntryModel? entriesToTranslate = widget.translationEntries.firstWhereOrNull(
+          (entry) => entry.targetLanguages.any((t) => t.language.code == selectedSourceLanguage.code));
 
-      if (entriesToTranslate == null || entriesToTranslate.targetText.isEmpty) {
+      final sourceTargetLang = entriesToTranslate?.targetLanguages.firstWhere(
+        (t) => t.language.code == selectedSourceLanguage.code,
+        orElse: () => TranslationTargetLanguageModel(language: selectedSourceLanguage, text: ''),
+      );
+
+      if (entriesToTranslate == null || sourceTargetLang == null || sourceTargetLang.text.isEmpty) {
         if (context.mounted) {
           _showErrorSnackBar(context, '主语言还没有设置翻译');
         }
@@ -396,12 +417,8 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
       // 获取需要翻译的条目
       final List<TranslationEntryModel> translateEntries = [];
       for (final entry in widget.translationEntries) {
-        if (entry.targetLanguage.code == selectedSourceLanguage.code) continue;
-        translateEntries.add(
-          entry.copyWith(
-            sourceText: entriesToTranslate.targetText,
-          ),
-        );
+        if (entry.targetLanguages.any((t) => t.language.code == selectedSourceLanguage.code)) continue;
+        translateEntries.add(entry);
       }
 
       // 批量翻译
@@ -423,10 +440,17 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
         final entry = translateEntries[i];
         if (result.success) {
           successCount++;
+          // 更新对应目标语言的翻译文本
+          final updatedTargetLanguages = entry.targetLanguages.map((t) {
+            if (t.language == result.targetLanguage) {
+              return t.copyWith(text: result.translatedText);
+            }
+            return t;
+          }).toList();
+
           updatedEntries.add(
             entry.copyWith(
-              targetText: result.translatedText,
-              status: TranslationStatusEnum.completed,
+              targetLanguages: updatedTargetLanguages,
               updatedAt: DateTime.now(),
             ),
           );
@@ -540,7 +564,7 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
                       ),
                       const SizedBox(height: 4.0),
                       Text(
-                        '(${entry.sourceLanguage.code} -> ${entry.targetLanguage.code}) ${entry.sourceText}',
+                        '(${entry.sourceLanguage.code} -> ${entry.targetLanguages.firstOrNull?.language.code ?? entry.sourceLanguage.code}) ${entry.sourceText}',
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 4.0),

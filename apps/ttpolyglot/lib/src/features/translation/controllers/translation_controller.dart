@@ -306,20 +306,24 @@ class TranslationController extends GetxController {
     if (_searchQuery.value.isNotEmpty) {
       final query = _searchQuery.value.toLowerCase();
       filtered = filtered.where((entry) {
-        return entry.entryKey.toLowerCase().contains(query) ||
-            entry.sourceText.toLowerCase().contains(query) ||
-            entry.targetText.toLowerCase().contains(query);
+        final matchesKey = entry.entryKey.toLowerCase().contains(query);
+        final matchesSource = entry.sourceText.toLowerCase().contains(query);
+        final matchesTarget = entry.targetLanguages.any((t) => t.text.toLowerCase().contains(query));
+        return matchesKey || matchesSource || matchesTarget;
       }).toList();
     }
 
     // 语言筛选
     if (_selectedLanguage.value != null) {
-      filtered = filtered.where((entry) => entry.targetLanguage.code == _selectedLanguage.value!.code).toList();
+      filtered = filtered
+          .where((entry) => entry.targetLanguages.any((t) => t.language.code == _selectedLanguage.value!.code))
+          .toList();
     }
 
     // 状态筛选
     if (_selectedStatus.value != null) {
-      filtered = filtered.where((entry) => entry.status == _selectedStatus.value).toList();
+      filtered =
+          filtered.where((entry) => entry.targetLanguages.any((t) => t.status == _selectedStatus.value)).toList();
     }
 
     _filteredEntries.assignAll(filtered);
@@ -345,8 +349,10 @@ class TranslationController extends GetxController {
   List<LanguageEnum> get availableLanguages {
     final languages = <LanguageEnum>[];
     for (final entry in _translationEntries) {
-      if (!languages.any((lang) => lang.code == entry.targetLanguage.code)) {
-        languages.add(entry.targetLanguage);
+      for (final targetLang in entry.targetLanguages) {
+        if (!languages.any((lang) => lang.code == targetLang.language.code)) {
+          languages.add(targetLang.language);
+        }
       }
     }
 
@@ -383,9 +389,22 @@ class TranslationController extends GetxController {
 
   /// 按翻译键分组条目
   Map<String, List<TranslationEntryModel>> get groupedEntries {
-    final grouped = <String, List<TranslationEntryModel>>{};
-
+    // 将每个条目的每个目标语言展开为单独的条目
+    final expandedEntries = <TranslationEntryModel>[];
     for (final entry in _filteredEntries) {
+      if (entry.targetLanguages.isEmpty) {
+        expandedEntries.add(entry);
+      } else {
+        for (final targetLang in entry.targetLanguages) {
+          expandedEntries.add(entry.copyWith(
+            targetLanguages: [targetLang],
+          ));
+        }
+      }
+    }
+
+    final grouped = <String, List<TranslationEntryModel>>{};
+    for (final entry in expandedEntries) {
       grouped.putIfAbsent(entry.entryKey, () => []).add(entry);
     }
 
@@ -397,13 +416,14 @@ class TranslationController extends GetxController {
       // 按语言的 sortIndex 排序每个组内的条目
       final entries = grouped[key]!;
       entries.sort((a, b) {
-        final aIndex = a.targetLanguage.sortIndex;
-        final bIndex = b.targetLanguage.sortIndex;
+        if (a.targetLanguages.isEmpty || b.targetLanguages.isEmpty) return 0;
+        final aIndex = a.targetLanguages.first.language.sortIndex;
+        final bIndex = b.targetLanguages.first.language.sortIndex;
         if (aIndex != bIndex) {
           return aIndex.compareTo(bIndex);
         }
         // 如果 sortIndex 相同，则按语言代码排序
-        return a.targetLanguage.code.compareTo(b.targetLanguage.code);
+        return a.targetLanguages.first.language.code.compareTo(b.targetLanguages.first.language.code);
       });
       sortedGrouped[key] = entries;
     }
@@ -416,22 +436,31 @@ class TranslationController extends GetxController {
     final grouped = <LanguageEnum, List<TranslationEntryModel>>{};
 
     for (final entry in _filteredEntries) {
-      // 只按目标语言分组，避免重复
-      grouped.putIfAbsent(entry.targetLanguage, () => []).add(entry);
+      // 按每个目标语言分组
+      for (final targetLang in entry.targetLanguages) {
+        grouped.putIfAbsent(targetLang.language, () => []).add(entry.copyWith(
+              targetLanguages: [targetLang],
+            ));
+      }
     }
 
     if (grouped.isNotEmpty) {
       final sourceLanguage = grouped.entries.first.value.first.sourceLanguage;
-      final List<TranslationEntryModel> copy = grouped.entries.first.value
-          .map(
-            (item) => item.copyWith(
-              uuid: item.uuid.replaceAll(item.targetLanguage.code, item.sourceLanguage.code),
-              targetLanguage: item.sourceLanguage,
-              targetText: item.sourceText,
-              status: TranslationStatusEnum.completed,
+      final List<TranslationEntryModel> copy = grouped.entries.first.value.map(
+        (item) {
+          final sourceTargetLang = TranslationTargetLanguageModel(
+            language: item.sourceLanguage,
+            text: item.sourceText,
+          );
+          return item.copyWith(
+            uuid: item.uuid.replaceAll(
+              item.targetLanguages.firstOrNull?.language.code ?? '',
+              item.sourceLanguage.code,
             ),
-          )
-          .toList();
+            targetLanguages: [sourceTargetLang],
+          );
+        },
+      ).toList();
       grouped.putIfAbsent(sourceLanguage, () => []).addAll(copy);
     }
 
@@ -465,11 +494,39 @@ class TranslationController extends GetxController {
   Map<String, int> get statistics {
     final stats = <String, int>{};
 
-    stats['total'] = _translationEntries.length;
-    stats['completed'] = _translationEntries.where((e) => e.status == TranslationStatusEnum.completed).length;
-    stats['pending'] = _translationEntries.where((e) => e.status == TranslationStatusEnum.pending).length;
-    stats['reviewing'] = _translationEntries.where((e) => e.status == TranslationStatusEnum.reviewing).length;
-    stats['translating'] = _translationEntries.where((e) => e.status == TranslationStatusEnum.translating).length;
+    int totalTargets = 0;
+    int completed = 0;
+    int pending = 0;
+    int reviewing = 0;
+    int translating = 0;
+
+    for (final entry in _translationEntries) {
+      for (final targetLang in entry.targetLanguages) {
+        totalTargets++;
+        switch (targetLang.status) {
+          case TranslationStatusEnum.completed:
+            completed++;
+            break;
+          case TranslationStatusEnum.pending:
+            pending++;
+            break;
+          case TranslationStatusEnum.reviewing:
+            reviewing++;
+            break;
+          case TranslationStatusEnum.translating:
+            translating++;
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
+    stats['total'] = totalTargets;
+    stats['completed'] = completed;
+    stats['pending'] = pending;
+    stats['reviewing'] = reviewing;
+    stats['translating'] = translating;
 
     return stats;
   }
