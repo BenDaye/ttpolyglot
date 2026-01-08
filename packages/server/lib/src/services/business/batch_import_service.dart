@@ -239,22 +239,42 @@ class BatchImportService extends BaseService {
           if (entryResult.isNotEmpty) {
             final entryId = entryResult.first.toColumnMap()['id'] as int;
 
-            // 插入目标语言翻译
+            // 更新目标语言翻译到 target_languages JSONB 字段
             final targetLanguages = targetLanguagesMap[entryKey]!;
-            for (final targetLang in targetLanguages) {
-              final targetSql = '''
-                INSERT INTO {translation_entry_targets} (entry_id, language, text)
-                VALUES (@entry_id, @language, @text)
-                ON CONFLICT (entry_id, language) 
-                DO UPDATE SET text = @text, updated_at = CURRENT_TIMESTAMP
-              ''';
 
-              await _databaseService.query(targetSql, {
-                'entry_id': entryId,
-                'language': targetLang['language'],
-                'text': targetLang['text'],
-              });
+            // 先获取现有的 target_languages
+            final existingResult = await _databaseService.query('''
+              SELECT COALESCE(target_languages::text, '[]') as target_languages
+              FROM {translation_entries}
+              WHERE id = @entry_id
+            ''', {'entry_id': entryId});
+
+            final existingTargetsJson = existingResult.first.toColumnMap()['target_languages'] as String? ?? '[]';
+            final existingTargets =
+                (jsonDecode(existingTargetsJson) as List<dynamic>).map((item) => item as Map<String, dynamic>).toList();
+
+            // 合并新的目标语言
+            for (final targetLang in targetLanguages) {
+              final existingIndex = existingTargets.indexWhere((item) => item['language'] == targetLang['language']);
+              if (existingIndex >= 0) {
+                // 更新现有翻译
+                existingTargets[existingIndex]['text'] = targetLang['text'];
+              } else {
+                // 添加新翻译
+                existingTargets.add({'language': targetLang['language'], 'text': targetLang['text']});
+              }
             }
+
+            // 更新 target_languages JSONB 字段
+            final updatedTargetsJson = jsonEncode(existingTargets);
+            await _databaseService.query('''
+              UPDATE {translation_entries}
+              SET target_languages = @target_languages::jsonb, updated_at = CURRENT_TIMESTAMP
+              WHERE id = @entry_id
+            ''', {
+              'entry_id': entryId,
+              'target_languages': updatedTargetsJson,
+            });
 
             success++;
           }
@@ -373,22 +393,42 @@ class BatchImportService extends BaseService {
         if (entryResult.isNotEmpty) {
           final entryId = entryResult.first.toColumnMap()['id'] as int;
 
-          // 插入目标语言翻译
+          // 更新目标语言翻译到 target_languages JSONB 字段
           final targetLanguages = targetLanguagesMap[entryKey]!;
-          for (final targetLang in targetLanguages) {
-            final targetSql = '''
-              INSERT INTO {translation_entry_targets} (entry_id, language, text)
-              VALUES (@entry_id, @language, @text)
-              ON CONFLICT (entry_id, language) 
-              DO UPDATE SET text = @text, updated_at = CURRENT_TIMESTAMP
-            ''';
 
-            await _databaseService.query(targetSql, {
-              'entry_id': entryId,
-              'language': targetLang['language'],
-              'text': targetLang['text'],
-            });
+          // 先获取现有的 target_languages
+          final existingResult = await _databaseService.query('''
+            SELECT COALESCE(target_languages::text, '[]') as target_languages
+            FROM {translation_entries}
+            WHERE id = @entry_id
+          ''', {'entry_id': entryId});
+
+          final existingTargetsJson = existingResult.first.toColumnMap()['target_languages'] as String? ?? '[]';
+          final existingTargets =
+              (jsonDecode(existingTargetsJson) as List<dynamic>).map((item) => item as Map<String, dynamic>).toList();
+
+          // 合并新的目标语言
+          for (final targetLang in targetLanguages) {
+            final existingIndex = existingTargets.indexWhere((item) => item['language'] == targetLang['language']);
+            if (existingIndex >= 0) {
+              // 更新现有翻译
+              existingTargets[existingIndex]['text'] = targetLang['text'];
+            } else {
+              // 添加新翻译
+              existingTargets.add({'language': targetLang['language'], 'text': targetLang['text']});
+            }
           }
+
+          // 更新 target_languages JSONB 字段
+          final updatedTargetsJson = jsonEncode(existingTargets);
+          await _databaseService.query('''
+            UPDATE {translation_entries}
+            SET target_languages = @target_languages::jsonb, updated_at = CURRENT_TIMESTAMP
+            WHERE id = @entry_id
+          ''', {
+            'entry_id': entryId,
+            'target_languages': updatedTargetsJson,
+          });
 
           success++;
         }

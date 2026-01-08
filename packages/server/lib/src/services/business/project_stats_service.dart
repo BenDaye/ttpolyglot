@@ -138,24 +138,24 @@ class ProjectStatsService extends BaseService {
 
         final sql = '''
           SELECT 
-            tet.language as target_language_id,
+            elem->>'language' as target_language_id,
             COUNT(DISTINCT te.id) as total_entries,
-            COUNT(DISTINCT CASE WHEN tet.text IS NULL OR tet.text = '' THEN te.id END) as pending_count,
-            COUNT(DISTINCT CASE WHEN tet.text IS NOT NULL AND tet.text != '' THEN te.id END) as completed_count,
+            COUNT(DISTINCT CASE WHEN elem->>'text' IS NULL OR elem->>'text' = '' THEN te.id END) as pending_count,
+            COUNT(DISTINCT CASE WHEN elem->>'text' IS NOT NULL AND elem->>'text' != '' THEN te.id END) as completed_count,
             0 as reviewing_count,
             0 as approved_count,
             COALESCE(SUM(LENGTH(te.source_text)), 0) as total_source_chars,
-            COALESCE(SUM(LENGTH(tet.text)), 0) as total_target_chars,
+            COALESCE(SUM(LENGTH(COALESCE(elem->>'text', ''))), 0) as total_target_chars,
             CASE 
               WHEN COUNT(DISTINCT te.id) > 0 
-              THEN ROUND((COUNT(DISTINCT CASE WHEN tet.text IS NOT NULL AND tet.text != '' THEN te.id END)::DECIMAL / COUNT(DISTINCT te.id)) * 100, 2)
+              THEN ROUND((COUNT(DISTINCT CASE WHEN elem->>'text' IS NOT NULL AND elem->>'text' != '' THEN te.id END)::DECIMAL / COUNT(DISTINCT te.id)) * 100, 2)
               ELSE 0 
             END as completion_rate
           FROM {translation_entries} te
-          LEFT JOIN {translation_entry_targets} tet ON tet.entry_id = te.id
+          CROSS JOIN LATERAL jsonb_array_elements(COALESCE(te.target_languages, '[]'::jsonb)) AS elem
           WHERE te.project_id = @project_id AND te.deleted_at IS NULL
-          GROUP BY tet.language
-          ORDER BY tet.language
+          GROUP BY elem->>'language'
+          ORDER BY elem->>'language'
         ''';
 
         final result = await _databaseService.query(sql, {'project_id': projectId});

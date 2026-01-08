@@ -754,12 +754,26 @@ class TranslationService extends BaseService {
         final sql = '''
         SELECT
           COUNT(DISTINCT te.id) as total_entries,
-          COUNT(DISTINCT CASE WHEN tet.text IS NOT NULL AND tet.text != '' THEN te.id END) as completed_entries,
-          COUNT(DISTINCT CASE WHEN tet.text IS NULL OR tet.text = '' THEN te.id END) as pending_entries,
+          COUNT(DISTINCT CASE 
+            WHEN EXISTS (
+              SELECT 1 
+              FROM jsonb_array_elements(COALESCE(te.target_languages, '[]'::jsonb)) AS elem 
+              WHERE elem->>'text' IS NOT NULL AND elem->>'text' != ''
+            ) THEN te.id 
+          END) as completed_entries,
+          COUNT(DISTINCT CASE 
+            WHEN NOT EXISTS (
+              SELECT 1 
+              FROM jsonb_array_elements(COALESCE(te.target_languages, '[]'::jsonb)) AS elem 
+              WHERE elem->>'text' IS NOT NULL AND elem->>'text' != ''
+            ) THEN te.id 
+          END) as pending_entries,
           COALESCE(SUM(LENGTH(te.source_text)), 0) as total_source_characters,
-          COALESCE(SUM(LENGTH(tet.text)), 0) as total_target_characters
+          COALESCE(SUM(
+            (SELECT SUM(LENGTH(COALESCE(elem->>'text', '')))
+             FROM jsonb_array_elements(COALESCE(te.target_languages, '[]'::jsonb)) AS elem)
+          ), 0) as total_target_characters
         FROM {translation_entries} te
-        LEFT JOIN {translation_entry_targets} tet ON tet.entry_id = te.id
         WHERE te.project_id = @project_id AND te.deleted_at IS NULL
       ''';
 
@@ -847,11 +861,13 @@ class TranslationService extends BaseService {
           translated_keys = (
             SELECT COUNT(DISTINCT te.entry_key)
             FROM {translation_entries} te
-            INNER JOIN {translation_entry_targets} tet ON tet.entry_id = te.id
             WHERE te.project_id = @project_id 
               AND te.deleted_at IS NULL
-              AND tet.text IS NOT NULL 
-              AND tet.text != ''
+              AND EXISTS (
+                SELECT 1 
+                FROM jsonb_array_elements(COALESCE(te.target_languages, '[]'::jsonb)) AS elem 
+                WHERE elem->>'text' IS NOT NULL AND elem->>'text' != ''
+              )
           ),
           last_activity_at = CURRENT_TIMESTAMP
         WHERE id = @project_id
