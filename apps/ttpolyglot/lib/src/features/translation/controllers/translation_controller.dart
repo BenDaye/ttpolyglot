@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -106,16 +105,15 @@ class TranslationController extends GetxController {
       }
 
       // 使用项目的主语言作为源语言
-      final request = CreateTranslationKeyRequest(
+      final entry = TranslationEntryModel(
+        uuid: '0',
         projectId: projectId,
         entryKey: key,
         sourceLanguage: project.primaryLanguage.code,
         sourceText: sourceText,
-        targetLanguages: targetLanguages,
-        context: context,
-        maxLength: maxLength,
-        isPlural: isPlural,
-        pluralForms: pluralForms != null ? jsonEncode(pluralForms) : null,
+        targetLanguages: [], // 目标语言列表在生成时添加
+        context: context ?? '',
+        comment: comment ?? '',
       );
 
       // 验证目标语言不包含主语言
@@ -123,8 +121,8 @@ class TranslationController extends GetxController {
         throw Exception('目标语言不能包含项目的主语言');
       }
 
-      final result = await _translationService.createTranslationKey(request);
-      if (result.isEmpty) {
+      final result = await _translationService.createTranslationKey(entry, targetLanguages);
+      if (result == null || result.isEmpty) {
         return false;
       }
 

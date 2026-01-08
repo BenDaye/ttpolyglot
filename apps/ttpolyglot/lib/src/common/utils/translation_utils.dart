@@ -126,42 +126,25 @@ class TranslationUtils {
 
   /// 生成翻译条目列表
   static List<TranslationEntryModel> generateTranslationEntries({
-    required int projectId,
-    required String entryKey,
-    required String sourceText,
-    required LanguageEnum sourceLanguage,
-    required List<LanguageEnum> targetLanguages,
-    String? context,
-    String? comment,
-    int? maxLength,
-    bool isPlural = false,
-    String? pluralForms,
+    required List<TranslationEntryModel> list,
+    required List<LanguageEnum> languages, // 当前项目可用语言列表（包括主语言）
   }) {
     final entries = <TranslationEntryModel>[];
-
     // 为每个目标语言创建一个条目
-    for (final targetLanguage in targetLanguages) {
-      final entry = TranslationEntryModel(
-        uuid: '${DateTime.now().millisecondsSinceEpoch}_${targetLanguage.code}',
-        projectId: projectId,
-        entryKey: entryKey,
-        sourceLanguage: sourceLanguage,
-        sourceText: sourceText,
-        targetLanguages: [
-          TranslationTargetLanguageModel(
-            language: targetLanguage,
-            text: '',
-          ),
-        ],
-        context: context ?? '',
-        comment: comment ?? '',
-        sortIndex: targetLanguage.sortIndex,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-      entries.add(entry);
+    for (final entry in list) {
+      final List<TranslationTargetLanguageModel> targetLanguages = [];
+      // 为每个目标语言创建一个条目
+      for (final language in languages) {
+        final TranslationTargetLanguageModel targetLanguage = entry.targetLanguages.firstWhere(
+          (t) => t.language == language,
+          orElse: () => TranslationTargetLanguageModel(language: language, text: ''),
+        );
+        // 如果目标语言不存在，则创建一个
+        targetLanguages.add(targetLanguage);
+      }
+      // 复制条目并更新目标语言列表
+      entries.add(entry.copyWith(targetLanguages: targetLanguages));
     }
-
     return entries;
   }
 }

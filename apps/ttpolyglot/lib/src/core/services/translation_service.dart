@@ -31,8 +31,9 @@ abstract class TranslationService {
   );
 
   /// 创建翻译键（为所有目标语言创建条目）
-  Future<List<TranslationEntryModel>> createTranslationKey(
-    CreateTranslationKeyRequest request,
+  Future<List<TranslationEntryModel>?> createTranslationKey(
+    TranslationEntryModel entry,
+    List<LanguageEnum> languages,
   );
 
   /// 更新翻译条目

@@ -223,22 +223,16 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
   }
 
   @override
-  Future<List<TranslationEntryModel>> createTranslationKey(
-    CreateTranslationKeyRequest request,
+  Future<List<TranslationEntryModel>?> createTranslationKey(
+    TranslationEntryModel entry,
+    List<LanguageEnum> languages,
   ) async {
     try {
       final generated = TranslationUtils.generateTranslationEntries(
-        projectId: request.projectId,
-        entryKey: request.entryKey,
-        sourceText: request.sourceText,
-        sourceLanguage: request.sourceLanguage,
-        targetLanguages: request.targetLanguages,
-        context: request.context,
-        maxLength: request.maxLength,
-        isPlural: request.isPlural,
-        pluralForms: request.pluralForms,
+        list: [entry],
+        languages: languages,
       );
-      final created = await _translationApi.batchCreateTranslations(projectId: request.projectId, items: generated);
+      final created = await _translationApi.batchCreateTranslations(projectId: entry.projectId, items: generated);
       if (created == null) {
         throw Exception('创建翻译键失败：API 返回为空');
       }
