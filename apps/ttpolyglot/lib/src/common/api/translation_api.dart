@@ -69,9 +69,19 @@ class TranslationApi {
     required List<TranslationEntryModel> items,
   }) async {
     try {
+      // 为每个条目添加 language_code 字段（服务器端需要）
+      final itemsData = items.map((e) {
+        final json = e.toJson();
+        // 从 target_languages 数组中提取第一个语言的 code
+        if (e.targetLanguages.isNotEmpty) {
+          json['language_code'] = e.targetLanguages.first.language.code;
+        }
+        return json;
+      }).toList();
+
       final response = await HttpClient.post(
         '/projects/$projectId/translations/batch',
-        data: {'items': items.map((e) => e.toJson()).toList()},
+        data: {'items': itemsData},
       );
       return ModelUtils.toModelArray<TranslationEntryModel>(
         response.data,

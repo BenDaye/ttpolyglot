@@ -342,8 +342,13 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       final allEntries = await getTranslationEntries(projectIdInt);
       final filteredEntries = allEntries.where((e) => e.uuid != entryId).toList();
 
+      // 幂等性：如果条目不存在，视为删除成功
       if (filteredEntries.length == allEntries.length) {
-        throw Exception('翻译条目不存在: $entryId');
+        log(
+          '[deleteTranslationEntryModel] 翻译条目不存在，视为删除成功（entryId: $entryId）',
+          name: 'TranslationServiceImpl',
+        );
+        return;
       }
 
       await _saveTranslationEntries(projectIdInt, filteredEntries);
@@ -378,8 +383,13 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       // 本地回退
       final allEntries = await getTranslationEntries(projectId);
       final filteredEntries = allEntries.where((e) => e.uuid != entryId).toList();
+      // 幂等性：如果条目不存在，视为删除成功
       if (filteredEntries.length == allEntries.length) {
-        throw Exception('翻译条目不存在: $entryId');
+        log(
+          '[deleteTranslationEntryModelFromProject] 翻译条目不存在，视为删除成功（entryId: $entryId）',
+          name: 'TranslationServiceImpl',
+        );
+        return;
       }
       await _saveTranslationEntries(projectId, filteredEntries);
       LoggerUtils.info('成功删除翻译条目: $entryId 从项目: $projectId');
