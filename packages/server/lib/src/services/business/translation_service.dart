@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:ttpolyglot_model/model.dart';
 
 import '../base_service.dart';
@@ -14,23 +16,25 @@ class TranslationService extends BaseService {
 
   /// 从数据库行数据组装 TranslationEntryModel（包括目标语言）
   Future<TranslationEntryModel> _buildTranslationEntryModel(Map<String, dynamic> entryData) async {
-    final entryId = entryData['id'] as int;
+    // 从 target_languages JSONB 字段读取数据
+    final targetLanguagesJson = entryData['target_languages'];
+    List<TranslationTargetLanguageModel> targetLanguages = [];
 
-    // 查询目标语言翻译
-    final targetLanguagesResult = await _databaseService.query('''
-      SELECT language, text
-      FROM {translation_entry_targets}
-      WHERE entry_id = @entry_id
-      ORDER BY language
-    ''', {'entry_id': entryId});
-
-    final targetLanguages = targetLanguagesResult.map((row) {
-      final data = row.toColumnMap();
-      return TranslationTargetLanguageModel(
-        language: const LanguageEnumConverter().fromJson(data['language'] as String),
-        text: data['text'] as String? ?? '',
-      );
-    }).toList();
+    if (targetLanguagesJson != null) {
+      if (targetLanguagesJson is String) {
+        // 如果是字符串，先解析为 JSON
+        final decoded = jsonDecode(targetLanguagesJson) as List<dynamic>?;
+        if (decoded != null) {
+          targetLanguages =
+              decoded.map((item) => TranslationTargetLanguageModel.fromJson(item as Map<String, dynamic>)).toList();
+        }
+      } else if (targetLanguagesJson is List) {
+        // 如果已经是 List，直接转换
+        targetLanguages = targetLanguagesJson
+            .map((item) => TranslationTargetLanguageModel.fromJson(item as Map<String, dynamic>))
+            .toList();
+      }
+    }
 
     // 组装完整数据
     final fullData = Map<String, dynamic>.from(entryData);
@@ -74,6 +78,7 @@ class TranslationService extends BaseService {
                      COALESCE(te.entry_key, '') as entry_key, 
                      COALESCE(te.source_language, 'en_US') as source_language,
                      COALESCE(te.source_text, '') as source_text,
+                     COALESCE(te.target_languages::text, '[]') as target_languages,
                      te.translated_by, te.reviewed_by, 
                      COALESCE(te.context, '') as context,
                      COALESCE(te.comment, '') as comment,
@@ -97,19 +102,27 @@ class TranslationService extends BaseService {
               continue;
             }
 
+            // 构建 target_languages JSONB 数据
+            final targetLanguagesJson = targetText.isNotEmpty
+                ? jsonEncode([
+                    {'language': languageCode, 'text': targetText}
+                  ])
+                : '[]';
+
             // 插入翻译条目
             final entryResult = await _databaseService.query('''
               INSERT INTO {translation_entries} (
                 project_id, entry_key, source_language, source_text,
-                translated_by, context
+                translated_by, context, target_languages
               ) VALUES (
                 @project_id, @entry_key, @source_language, @source_text,
-                @translator_id, @context_info
+                @translator_id, @context_info, @target_languages::jsonb
               )
               RETURNING id, COALESCE(uuid::text, id::text) as uuid, project_id, 
                         COALESCE(entry_key, '') as entry_key, 
                         COALESCE(source_language, 'en_US') as source_language, 
                         COALESCE(source_text, '') as source_text,
+                        COALESCE(target_languages::text, '[]') as target_languages,
                         translated_by, reviewed_by, 
                         COALESCE(context, '') as context, 
                         COALESCE(comment, '') as comment,
@@ -122,24 +135,10 @@ class TranslationService extends BaseService {
               'source_text': sourceText,
               'translator_id': translatorId,
               'context_info': contextInfo,
+              'target_languages': targetLanguagesJson,
             });
 
             final entryData = entryResult.first.toColumnMap();
-            final entryId = entryData['id'] as int;
-
-            // 插入目标语言翻译
-            if (targetText.isNotEmpty) {
-              await _databaseService.query('''
-                INSERT INTO {translation_entry_targets} (entry_id, language, text)
-                VALUES (@entry_id, @language, @text)
-                ON CONFLICT (entry_id, language) 
-                DO UPDATE SET text = @text, updated_at = CURRENT_TIMESTAMP
-              ''', {
-                'entry_id': entryId,
-                'language': languageCode,
-                'text': targetText,
-              });
-            }
 
             // 组装完整数据
             final entry = await _buildTranslationEntryModel(entryData);
@@ -180,7 +179,7 @@ class TranslationService extends BaseService {
 
         if (languageCode != null && languageCode.isNotEmpty) {
           conditions.add(
-              'EXISTS (SELECT 1 FROM {translation_entry_targets} tet WHERE tet.entry_id = te.id AND tet.language = @language_code)');
+              'EXISTS (SELECT 1 FROM jsonb_array_elements(COALESCE(te.target_languages, \'[]\'::jsonb)) AS elem WHERE elem->>\'language\' = @language_code)');
           parameters['language_code'] = languageCode;
         }
 
@@ -223,6 +222,7 @@ class TranslationService extends BaseService {
           COALESCE(te.entry_key, '') as entry_key,
           COALESCE(te.source_language, 'en_US') as source_language,
           COALESCE(te.source_text, '') as source_text,
+          COALESCE(te.target_languages::text, '[]') as target_languages,
           te.translated_by,
           te.reviewed_by,
           COALESCE(te.context, '') as context,
@@ -310,7 +310,7 @@ class TranslationService extends BaseService {
         // 其他过滤条件
         if (languageCode != null && languageCode.isNotEmpty) {
           conditions.add(
-              'EXISTS (SELECT 1 FROM {translation_entry_targets} tet WHERE tet.entry_id = te.id AND tet.language = @language_code)');
+              'EXISTS (SELECT 1 FROM jsonb_array_elements(COALESCE(te.target_languages, \'[]\'::jsonb)) AS elem WHERE elem->>\'language\' = @language_code)');
           parameters['language_code'] = languageCode;
         }
 
@@ -329,6 +329,7 @@ class TranslationService extends BaseService {
           COALESCE(te.entry_key, '') as entry_key,
           COALESCE(te.source_language, 'en_US') as source_language,
           COALESCE(te.source_text, '') as source_text,
+          COALESCE(te.target_languages::text, '[]') as target_languages,
           te.translated_by,
           te.reviewed_by,
           COALESCE(te.context, '') as context,
@@ -400,6 +401,7 @@ class TranslationService extends BaseService {
           COALESCE(te.entry_key, '') as entry_key,
           COALESCE(te.source_language, 'en_US') as source_language,
           COALESCE(te.source_text, '') as source_text,
+          COALESCE(te.target_languages::text, '[]') as target_languages,
           te.translated_by,
           te.reviewed_by,
           COALESCE(te.context, '') as context,
@@ -459,18 +461,26 @@ class TranslationService extends BaseService {
           throwConflict('翻译条目已存在');
         }
 
+        // 构建 target_languages JSONB 数据
+        final targetLanguagesJson = (targetText != null && targetText.isNotEmpty)
+            ? jsonEncode([
+                {'language': languageCode, 'text': targetText}
+              ])
+            : '[]';
+
         // 创建翻译条目
         final result = await _databaseService.query('''
         INSERT INTO {translation_entries} (
           project_id, entry_key, source_language, source_text,
-          translated_by, context
+          translated_by, context, target_languages
         ) VALUES (
           @project_id, @entry_key, @source_language, @source_text,
-          @translator_id, @context_info
+          @translator_id, @context_info, @target_languages::jsonb
         ) RETURNING id, COALESCE(uuid::text, id::text) as uuid, project_id, 
                     COALESCE(entry_key, '') as entry_key, 
                     COALESCE(source_language, 'en_US') as source_language, 
                     COALESCE(source_text, '') as source_text,
+                    COALESCE(target_languages::text, '[]') as target_languages,
                     translated_by, reviewed_by, 
                     COALESCE(context, '') as context, 
                     COALESCE(comment, '') as comment,
@@ -483,22 +493,10 @@ class TranslationService extends BaseService {
           'source_text': sourceText ?? '',
           'translator_id': translatorId,
           'context_info': contextInfo ?? '',
+          'target_languages': targetLanguagesJson,
         });
 
         final resultData = result.first.toColumnMap();
-        final entryId = resultData['id'] as int;
-
-        // 插入目标语言翻译
-        if (targetText != null && targetText.isNotEmpty) {
-          await _databaseService.query('''
-            INSERT INTO {translation_entry_targets} (entry_id, language, text)
-            VALUES (@entry_id, @language, @text)
-          ''', {
-            'entry_id': entryId,
-            'language': languageCode,
-            'text': targetText,
-          });
-        }
 
         final entry = await _buildTranslationEntryModel(resultData);
 
@@ -566,6 +564,39 @@ class TranslationService extends BaseService {
           parameters['sort_index'] = sortIndex;
         }
 
+        // 更新目标语言翻译
+        if (targetText != null && targetLanguage != null) {
+          // 先获取现有的 target_languages
+          final entryResult = await _databaseService.query('''
+            SELECT id, COALESCE(target_languages::text, '[]') as target_languages
+            FROM {translation_entries}
+            WHERE ${isNumericId ? 'id = @entry_id' : 'uuid::text = @entry_id'}
+          ''', {'entry_id': entryId});
+
+          if (entryResult.isNotEmpty) {
+            final entryData = entryResult.first.toColumnMap();
+            final existingTargetsJson = entryData['target_languages'] as String? ?? '[]';
+            final existingTargets =
+                (jsonDecode(existingTargetsJson) as List<dynamic>).map((item) => item as Map<String, dynamic>).toList();
+
+            // 查找是否已存在该语言的翻译
+            final existingIndex = existingTargets.indexWhere((item) => item['language'] == targetLanguage);
+
+            if (existingIndex >= 0) {
+              // 更新现有翻译
+              existingTargets[existingIndex]['text'] = targetText;
+            } else {
+              // 添加新翻译
+              existingTargets.add({'language': targetLanguage, 'text': targetText});
+            }
+
+            // 更新 target_languages JSONB 字段
+            final updatedTargetsJson = jsonEncode(existingTargets);
+            updates.add('target_languages = @target_languages::jsonb');
+            parameters['target_languages'] = updatedTargetsJson;
+          }
+        }
+
         // 更新翻译条目基本信息
         if (updates.isNotEmpty) {
           final sql = '''
@@ -576,6 +607,7 @@ class TranslationService extends BaseService {
                     COALESCE(entry_key, '') as entry_key, 
                     COALESCE(source_language, 'en_US') as source_language, 
                     COALESCE(source_text, '') as source_text,
+                    COALESCE(target_languages::text, '[]') as target_languages,
                     translated_by, reviewed_by, 
                     COALESCE(context, '') as context, 
                     COALESCE(comment, '') as comment,
@@ -584,29 +616,6 @@ class TranslationService extends BaseService {
         ''';
 
           await _databaseService.query(sql, parameters);
-        }
-
-        // 更新目标语言翻译
-        if (targetText != null && targetLanguage != null) {
-          // 先获取 entry_id
-          final entryResult = await _databaseService.query('''
-            SELECT id FROM {translation_entries}
-            WHERE ${isNumericId ? 'id = @entry_id' : 'uuid::text = @entry_id'}
-          ''', {'entry_id': entryId});
-
-          if (entryResult.isNotEmpty) {
-            final entryIdValue = entryResult.first[0] as int;
-            await _databaseService.query('''
-              INSERT INTO {translation_entry_targets} (entry_id, language, text)
-              VALUES (@entry_id, @language, @text)
-              ON CONFLICT (entry_id, language) 
-              DO UPDATE SET text = @text, updated_at = CURRENT_TIMESTAMP
-            ''', {
-              'entry_id': entryIdValue,
-              'language': targetLanguage,
-              'text': targetText,
-            });
-          }
         }
 
         // 获取更新后的完整数据

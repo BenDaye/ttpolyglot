@@ -39,6 +39,9 @@ class Migration009TranslationEntriesTable extends BaseMigration {
           context TEXT DEFAULT '',
           comment TEXT DEFAULT '',
           
+          -- 翻译目标语言数据（JSON数组）
+          target_languages JSONB DEFAULT '[]'::jsonb,
+          
           -- 排序索引
           sort_index INTEGER DEFAULT 0,
           
@@ -104,40 +107,6 @@ class Migration009TranslationEntriesTable extends BaseMigration {
           EXECUTE FUNCTION update_updated_at_column();
       ''');
 
-      // 创建翻译条目目标语言表
-      await createTable('translation_entry_targets', '''
-        CREATE TABLE IF NOT EXISTS {table_name} (
-          id SERIAL PRIMARY KEY,
-          entry_id INTEGER NOT NULL,
-          language VARCHAR(20) NOT NULL,
-          text TEXT NOT NULL DEFAULT '',
-          
-          -- 时间戳
-          created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-          updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-          
-          UNIQUE(entry_id, language)
-        );
-      ''');
-
-      // 创建外键约束
-      await addForeignKey(
-          'translation_entry_targets_entry_id', 'translation_entry_targets', 'entry_id', 'translation_entries', 'id',
-          onDelete: 'CASCADE');
-
-      // 创建索引
-      await createIndex('translation_entry_targets_entry_id', 'translation_entry_targets', 'entry_id');
-      await createIndex('translation_entry_targets_language', 'translation_entry_targets', 'language');
-      await createIndex('translation_entry_targets_entry_language', 'translation_entry_targets', 'entry_id, language');
-
-      // 创建触发器：自动更新 updated_at
-      await connection.execute('''
-        CREATE TRIGGER update_${tablePrefix}translation_entry_targets_updated_at 
-          BEFORE UPDATE ON ${tablePrefix}translation_entry_targets 
-          FOR EACH ROW 
-          EXECUTE FUNCTION update_updated_at_column();
-      ''');
-
       // 添加表注释
       await addTableComment('translation_entries', '翻译条目表，存储翻译条目基本信息');
       await addColumnComment('translation_entries', 'id', '翻译条目ID，主键');
@@ -150,18 +119,11 @@ class Migration009TranslationEntriesTable extends BaseMigration {
       await addColumnComment('translation_entries', 'reviewed_by', '审核者UUID，外键关联users表');
       await addColumnComment('translation_entries', 'context', '上下文信息');
       await addColumnComment('translation_entries', 'comment', '备注信息');
+      await addColumnComment('translation_entries', 'target_languages', '翻译目标语言数据（JSON数组）');
       await addColumnComment('translation_entries', 'sort_index', '排序索引');
       await addColumnComment('translation_entries', 'deleted_at', '软删除时间');
       await addColumnComment('translation_entries', 'created_at', '创建时间');
       await addColumnComment('translation_entries', 'updated_at', '更新时间');
-
-      await addTableComment('translation_entry_targets', '翻译条目目标语言表，存储翻译条目的目标语言翻译');
-      await addColumnComment('translation_entry_targets', 'id', '目标语言翻译ID，主键');
-      await addColumnComment('translation_entry_targets', 'entry_id', '翻译条目ID，外键关联translation_entries表');
-      await addColumnComment('translation_entry_targets', 'language', '目标语言代码');
-      await addColumnComment('translation_entry_targets', 'text', '翻译文本');
-      await addColumnComment('translation_entry_targets', 'created_at', '创建时间');
-      await addColumnComment('translation_entry_targets', 'updated_at', '更新时间');
 
       ServerLogger.info('迁移完成: $name');
     } catch (error, stackTrace) {
@@ -177,17 +139,9 @@ class Migration009TranslationEntriesTable extends BaseMigration {
 
       // 删除触发器
       await connection.execute('''
-        DROP TRIGGER IF EXISTS update_${tablePrefix}translation_entry_targets_updated_at 
-        ON ${tablePrefix}translation_entry_targets;
-      ''');
-
-      await connection.execute('''
         DROP TRIGGER IF EXISTS update_${tablePrefix}translation_entries_updated_at 
         ON ${tablePrefix}translation_entries;
       ''');
-
-      // 删除翻译条目目标语言表
-      await dropTable('translation_entry_targets');
 
       // 删除翻译条目表
       await dropTable('translation_entries');
