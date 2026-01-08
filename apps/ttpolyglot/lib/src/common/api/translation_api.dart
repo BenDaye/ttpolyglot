@@ -116,6 +116,15 @@ class TranslationApi {
       final ok = ModelUtils.toModel<bool>(response.data, (json) => json['code'] == DataCodeEnum.success) ?? false;
       return ok;
     } catch (error, stackTrace) {
+      // 如果错误是"数据不存在"，视为删除成功（幂等性：删除一个不存在的条目应该返回成功）
+      // HttpClient._fetch 会抛出 BaseModel 类型的错误
+      if (error is BaseModel && error.code == DataCodeEnum.dataNotFound) {
+        log(
+          '[deleteTranslation] 翻译条目不存在，视为删除成功（entryId: $entryId）',
+          name: 'TranslationApi',
+        );
+        return true;
+      }
       log('[deleteTranslation]', error: error, stackTrace: stackTrace, name: 'TranslationApi');
       rethrow;
     }
