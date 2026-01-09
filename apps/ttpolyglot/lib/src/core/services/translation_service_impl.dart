@@ -355,14 +355,14 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
 
   /// 删除翻译条目（指定项目ID的版本，更高效）
   @override
-  Future<void> deleteTranslationEntryModelFromProject(int projectId, String entryId) async {
+  Future<bool> deleteTranslationEntryModelFromProject(int projectId, String entryId) async {
     try {
       // API 优先
       if (AppConfig.useServerForTranslations) {
         try {
           final ok = await _translationApi.deleteTranslation(projectId: projectId, entryId: entryId);
           if (ok) {
-            return;
+            return true;
           }
         } catch (error, stackTrace) {
           log(
@@ -371,6 +371,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
             stackTrace: stackTrace,
             name: 'TranslationServiceImpl',
           );
+          return false;
         }
       }
 
@@ -383,7 +384,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
           '[deleteTranslationEntryModelFromProject] 翻译条目不存在，视为删除成功（entryId: $entryId）',
           name: 'TranslationServiceImpl',
         );
-        return;
+        return true;
       }
       await _saveTranslationEntries(projectId, filteredEntries);
       LoggerUtils.info('成功删除翻译条目: $entryId 从项目: $projectId');
@@ -404,6 +405,7 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
           ),
         );
       } catch (_) {}
+      return true;
     } catch (error, stackTrace) {
       LoggerUtils.error('删除翻译条目失败', error: error, stackTrace: stackTrace);
       rethrow;

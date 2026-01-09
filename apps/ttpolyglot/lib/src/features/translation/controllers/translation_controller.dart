@@ -231,41 +231,21 @@ class TranslationController extends GetxController {
     }
   }
 
-  /// 批量删除翻译条目
-  Future<void> batchDeleteTranslationEntries(List<String> entryIds) async {
+  /// 删除单个翻译条目
+  Future<bool> deleteTranslationEntry(String entryId) async {
     try {
-      final result = await Get.dialog<bool>(
-        AlertDialog(
-          title: const Text('批量删除翻译条目'),
-          content: Text('确定要删除选中的 ${entryIds.length} 个翻译条目吗？此操作不可撤销。'),
-          actions: [
-            TextButton(
-              onPressed: () => Get.back(result: false),
-              child: const Text('取消'),
-            ),
-            TextButton(
-              onPressed: () => Get.back(result: true),
-              child: const Text('确定'),
-            ),
-          ],
-        ),
-        barrierDismissible: false,
-      );
-
-      if (result == true) {
-        for (final entryId in entryIds) {
-          await _translationService.deleteTranslationEntryModelFromProject(projectId, entryId);
-        }
-
+      final result = await _translationService.deleteTranslationEntryModelFromProject(projectId, entryId);
+      if (result) {
         // 从本地列表中移除
-        _translationEntries.removeWhere((e) => entryIds.contains(e.uuid));
+        _translationEntries.removeWhere((e) => e.uuid == entryId);
         _applyFilters();
-
-        Get.snackbar('成功', '批量删除翻译条目成功');
+        return true;
+      } else {
+        return false;
       }
     } catch (error, stackTrace) {
-      Get.snackbar('错误', '批量删除翻译条目失败: $error');
-      LoggerUtils.error('批量删除翻译条目失败', error: error, stackTrace: stackTrace);
+      LoggerUtils.error('删除翻译条目失败', error: error, stackTrace: stackTrace);
+      return false;
     }
   }
 
@@ -381,6 +361,17 @@ class TranslationController extends GetxController {
     } catch (error, stackTrace) {
       Get.snackbar('同步失败', '请稍后重试: $error');
       LoggerUtils.error('同步待入库变更失败', error: error, stackTrace: stackTrace);
+    }
+  }
+
+  /// 获取项目默认语言
+  Future<LanguageEnum?> getProjectDefaultLanguage() async {
+    try {
+      final project = await ProjectsController.getProject(projectId);
+      return project?.primaryLanguage.code;
+    } catch (error, stackTrace) {
+      LoggerUtils.error('获取项目默认语言失败', error: error, stackTrace: stackTrace);
+      return null;
     }
   }
 
@@ -526,17 +517,6 @@ class TranslationController extends GetxController {
     stats['translating'] = translating;
 
     return stats;
-  }
-
-  /// 获取项目默认语言
-  Future<LanguageEnum?> getProjectDefaultLanguage() async {
-    try {
-      final project = await ProjectsController.getProject(projectId);
-      return project?.primaryLanguage.code;
-    } catch (error, stackTrace) {
-      LoggerUtils.error('获取项目默认语言失败', error: error, stackTrace: stackTrace);
-      return null;
-    }
   }
 
   /// 获取状态颜色

@@ -43,7 +43,7 @@ abstract class TranslationService {
   Future<void> deleteTranslationEntryModel(String entryId);
 
   /// 从项目中删除翻译条目
-  Future<void> deleteTranslationEntryModelFromProject(int projectId, String entryId);
+  Future<bool> deleteTranslationEntryModelFromProject(int projectId, String entryId);
 
   /// 批量更新翻译条目
   Future<List<TranslationEntryModel>> batchUpdateTranslationEntries(

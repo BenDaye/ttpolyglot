@@ -93,7 +93,7 @@ class TranslationsList extends StatelessWidget {
                           required String key,
                           required List<TranslationEntryModel> entries,
                         }) async {
-                          _deleteTranslationKey(context, controller: controller, key: key, entries: entries);
+                          _deleteTranslationKey(context, controller: controller, key: key, entry: entries.first);
                         },
                         onEditEntry: ({required TranslationEntryModel entry}) {
                           _showEditTranslationDialog(context, controller: controller, entry: entry);
@@ -163,7 +163,7 @@ class TranslationsList extends StatelessWidget {
               return TranslationsCardByLanguageExpansionPanelList(
                 groupedEntries: groupedEntries,
                 onDeleteAllEntries: ({required String key, required List<TranslationEntryModel> entries}) async {
-                  _deleteTranslationKey(context, controller: controller, key: key, entries: entries);
+                  _deleteTranslationKey(context, controller: controller, key: key, entry: entries.first);
                 },
                 onEditEntry: ({required TranslationEntryModel entry}) {
                   _showEditTranslationDialog(context, controller: controller, entry: entry);
@@ -207,7 +207,7 @@ class TranslationsList extends StatelessWidget {
     BuildContext context, {
     required TranslationController controller,
     required String key,
-    required List<TranslationEntryModel> entries,
+    required TranslationEntryModel entry,
   }) async {
     final result = await Get.dialog<bool>(
       AlertDialog(
@@ -228,8 +228,13 @@ class TranslationsList extends StatelessWidget {
     );
 
     if (result == true) {
-      final entryIds = entries.map((entry) => entry.uuid).toList();
-      await controller.batchDeleteTranslationEntries(entryIds);
+      // 删除所有相关条目
+      final ok = await controller.deleteTranslationEntry(entry.uuid);
+      if (!ok) {
+        Get.snackbar('成功', '删除翻译键成功');
+      } else {
+        Get.snackbar('错误', '部分翻译条目删除失败');
+      }
     }
   }
 
