@@ -410,6 +410,10 @@ class ProjectTranslationsView extends StatelessWidget {
 
                     if (result) {
                       Get.back();
+                      // 使用 Future.microtask 确保弹窗关闭后再显示成功消息
+                      Future.microtask(() {
+                        Get.snackbar('成功', '翻译键创建成功');
+                      });
                     }
                   },
             child: const Text('创建'),

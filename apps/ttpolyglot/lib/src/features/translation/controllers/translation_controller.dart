@@ -127,7 +127,6 @@ class TranslationController extends GetxController {
       }
 
       loadTranslationEntries();
-      Get.snackbar('成功', '翻译键创建成功');
       return true;
     } catch (error, stackTrace) {
       Get.snackbar('错误', '创建翻译键失败: $error');
