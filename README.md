@@ -1,11 +1,11 @@
-# TTPolyglot 🌍
+# TTPolyglot
 
 > **让每个开发者都成为多语言专家**
 
 TTPolyglot 是一个开发者友好的翻译管理平台，专为让非开发人员也能轻松参与翻译工作而设计。就像 Polyglot 程序员精通多种编程语言一样，TTPolyglot 帮助团队精通多种人类语言，打造真正的全球化产品。
 
-![TTPolyglot](https://img.shields.io/badge/TTPolyglot-v0.1.0-blue.svg)
-![Flutter](https://img.shields.io/badge/Flutter-3.0+-blue.svg)
+![TTPolyglot](https://img.shields.io/badge/TTPolyglot-v1.0.0-blue.svg)
+![Flutter](https://img.shields.io/badge/Flutter-3.27+-blue.svg)
 ![Dart](https://img.shields.io/badge/Dart-3.6+-0175C2.svg)
 ![Shelf](https://img.shields.io/badge/Shelf-Backend-green.svg)
 ![Melos](https://img.shields.io/badge/Melos-Monorepo-orange.svg)
@@ -13,165 +13,212 @@ TTPolyglot 是一个开发者友好的翻译管理平台，专为让非开发人
 
 ---
 
-> **🚧 项目状态**：目前处于早期开发阶段，核心架构已完成，正在积极开发业务功能。欢迎 Star 关注项目进展！
+## 目录
 
-## 📑 目录
+- [核心特性](#核心特性)
+- [技术架构](#技术架构)
+- [快速开始](#快速开始)
+- [开发指南](#开发指南)
+- [API 文档](#api-文档)
+- [开发路线图](#开发路线图)
+- [与 i18n-ally 的对比](#与-i18n-ally-的对比)
+- [贡献指南](#贡献指南)
+- [常见问题](#常见问题)
+- [相关资源](#相关资源)
 
-- [核心特性](#-核心特性)
-- [技术架构](#️-技术架构)
-- [快速开始](#-快速开始)
-  - [前置要求](#前置要求)
-  - [安装依赖](#安装依赖)
-  - [启动开发环境](#启动开发环境)
-- [开发指南](#️-开发指南)
-  - [开发命令](#开发命令)
-  - [数据库管理](#数据库管理)
-  - [构建和部署](#构建和部署)
-- [API 文档](#-api-文档)
-- [开发路线图](#-开发路线图)
-- [项目亮点](#-项目亮点)
-- [贡献指南](#-贡献指南)
-- [常见问题](#-常见问题-faq)
-- [相关资源](#-相关资源)
+## 核心特性
 
-<!-- 
-## 📸 功能展示
+### 全栈 Dart Monorepo
 
-TODO: 添加应用截图和功能演示
+前后端统一使用 Dart 语言，通过 Melos 管理 monorepo，模型层跨前后端共享，降低维护成本。
 
-- 翻译项目管理界面
-- 多语言翻译编辑器
-- 团队协作界面
-- 统计仪表板
+### 跨平台客户端
 
--->
+基于 Flutter 构建，一套代码支持 Web、macOS、Windows、Linux、iOS、Android 六大平台。桌面端支持离线编辑，网络恢复后自动同步。
 
-## ✨ 核心特性
+### 完整的后端服务
 
-### 🎯 **开发者友好**
-- **本地文件优先**：保持现有的开发工作流
-- **版本控制集成**：翻译文件在 Git 中有完整历史
-- **离线工作支持**：无需网络连接即可继续开发
-- **CLI 工具**：命令行工具无缝集成到构建流程
+基于 Shelf 框架的 REST API，具备：
+- JWT + RBAC 权限系统，细粒度角色控制（管理员、翻译员、审核员）
+- PostgreSQL 持久化 + Redis 多级缓存
+- 完善的中间件链：认证、权限、限流、CORS、日志、错误处理
+- 22 个数据库迁移，6 个种子数据文件
+- Docker + Nginx 一键部署
 
-### 🤝 **协作增强**
-- **实时多人编辑**：团队成员可以同时编辑翻译内容
-- **审核工作流**：完整的翻译 → 审核 → 发布流程
-- **评论讨论**：针对翻译内容的评论和讨论系统
-- **权限管理**：管理员、翻译员、审核员角色分工
+### 多格式文件解析
 
-### 🧠 **智能翻译**
-- **AI 翻译集成**：支持 Google、百度、腾讯等翻译服务
-- **翻译记忆**：复用历史翻译，确保术语一致性
-- **质量检查**：自动检查格式、长度、特殊字符
-- **批量操作**：批量翻译、导入、导出功能
+内置 6 种翻译文件格式的完整解析器（读取 + 写入 + 校验）：
 
-### 🔧 **技术集成**
-- **跨平台支持**：Web、macOS、Windows、Linux、iOS、Android
-- **文件格式支持**：JSON、YAML、CSV、PO、Dart ARB 等
-- **实时同步**：本地文件与云端的智能同步（开发中）
-- **冲突解决**：自动检测并提供冲突解决方案（计划中）
-- **Monorepo 架构**：使用 Melos 管理多包依赖
-- **类型安全**：Dart 强类型系统 + Drift ORM 的编译时检查
-- **容器化部署**：Docker + Docker Compose 一键部署
-- **现代化后端**：基于 Shelf 的轻量级高性能 REST API
+| 格式 | 扩展名 | 常见用途 |
+|------|--------|----------|
+| JSON | `.json` | 通用 (React, Vue 等) |
+| YAML | `.yml` / `.yaml` | Ruby on Rails, Spring 等 |
+| ARB | `.arb` | Flutter / Dart |
+| PO | `.po` | Gettext (WordPress, Django 等) |
+| CSV | `.csv` | 电子表格交换 |
+| Properties | `.properties` | Java / Android |
 
-## 🏗️ 技术架构
+### AI 翻译集成
 
-### 架构设计
+已集成 3 个翻译 API 提供商 + 自定义 API 支持：
+
+| 提供商 | 状态 |
+|--------|------|
+| Google Translate | 已实现 |
+| 百度翻译 | 已实现 |
+| 有道翻译 | 已实现 |
+| 自定义 API | 已实现 |
+
+支持单条翻译和批量翻译（并行请求多目标语言），内置取消令牌支持。
+
+### 多语言支持
+
+内置 10 种语言：
+
+`en-US` `zh-CN` `zh-TW` `th-TH` `ja-JP` `ko-KR` `my-MM` `tr-TR` `de-DE` `sv-SE`
+
+### 团队协作
+
+- 项目成员管理与邀请链接
+- RBAC 权限系统（Owner / Admin / Translator / Reviewer）
+- 翻译状态工作流：待翻译 → 翻译中 → 已完成 → 审核中 → 已批准
+- 通知系统与审计日志
+
+## 技术架构
+
+### 架构概览
+
 ```
-本地项目文件 ←→ TTPolyglot Platform ←→ 其他客户端
-     ↑                    ↑                    ↑
-   主要编辑             同步中心              拉取数据
+Flutter 客户端 (Web/Desktop/Mobile)
+         │
+         ▼
+    Nginx 反向代理 (HTTPS)
+         │
+         ▼
+   Shelf REST API (/api/v1/)
+    ├── 中间件链 (RequestId → Logging → CORS → RateLimit → Auth → ErrorHandler)
+    ├── Controllers (请求处理)
+    ├── Services (业务逻辑)
+    └── Infrastructure
+         ├── PostgreSQL (Drift ORM)
+         └── Redis (Session + Cache)
 ```
-
-### 核心包说明
-
-#### 📦 Core Package
-核心业务逻辑包，提供：
-- **47+ 种语言支持**：内置多种语言及其变体（en-US, zh-CN 等）
-- **数据模型**：Language, Project, TranslationEntry, User 等
-- **业务逻辑**：项目管理、翻译管理、翻译键创建
-- **验证工具**：语言代码验证、翻译键格式验证
-- **工具类**：TranslationUtils 提供各种翻译相关工具方法
-
-详见：[packages/core/README.md](packages/core/README.md)
-
-#### 📦 Model Package
-共享数据模型包，用于跨包的数据结构定义。
-
-#### 📦 Parsers Package
-文件解析器包，支持多种翻译文件格式：
-- JSON / JSON5
-- PO / POT (Gettext)
-- YAML / YML
-- CSV
-- Dart ARB
-- 更多格式开发中...
-
-#### 📦 Translators Package
-翻译服务集成包，计划支持：
-- Google Translate API
-- 百度翻译 API
-- 腾讯云翻译 API
-- DeepL API
-- 自定义翻译服务接口
-
-#### 📦 Server Package
-后端服务包，基于 Shelf 框架构建的 REST API：
-- **认证授权**：JWT Token + RBAC 权限系统
-- **数据库**：Drift ORM + PostgreSQL
-- **缓存**：Redis 多级缓存
-- **中间件**：
-  - 认证中间件（Auth）
-  - 权限中间件（Permission）
-  - 限流中间件（Rate Limit）
-  - 日志中间件（Logging）
-  - 错误处理中间件
-  - CORS 跨域支持
-- **API 模块**：
-  - 用户管理
-  - 项目管理
-  - 翻译管理
-  - 文件上传
-  - 语言管理
-  - 系统配置
 
 ### 技术栈
-- **后端框架**：Shelf (Dart) + Drift ORM
-- **前端框架**：Flutter (支持 Web、Desktop、Mobile)
-- **数据库**：PostgreSQL + Redis (缓存)
-- **认证授权**：JWT + RBAC 权限系统
-- **工作区管理**：Melos
+
+| 层级 | 技术 |
+|------|------|
+| 语言 | Dart 3.6+ |
+| 前端框架 | Flutter 3.27 |
+| 后端框架 | Shelf + shelf_router |
+| 状态管理 | GetX |
+| HTTP 客户端 | Dio |
+| 数据库 | PostgreSQL 15 |
+| ORM | Drift + drift_postgres |
+| 缓存 | Redis 7 |
+| 认证 | JWT (dart_jsonwebtoken) + bcrypt |
+| 代码生成 | Freezed + json_serializable + Drift codegen |
+| 日志 | Talker |
+| Monorepo | Melos |
+| 容器化 | Docker + Nginx |
 
 ### 项目结构
+
 ```
 ttpolyglot/
+├── apps/
+│   └── ttpolyglot/                 # Flutter 跨平台应用
+│       └── lib/src/
+│           ├── core/               # 核心层
+│           │   ├── layout/         #   响应式布局
+│           │   ├── routing/        #   路由定义 (GetX)
+│           │   ├── theme/          #   主题 (亮色/暗色)
+│           │   ├── services/       #   翻译/项目/导出/同步 服务
+│           │   ├── storage/        #   平台适配存储
+│           │   ├── widgets/        #   通用组件
+│           │   ├── platform/       #   平台适配
+│           │   └── utils/          #   工具类
+│           ├── common/             # 公共层
+│           │   ├── api/            #   API 调用 (8 个 API 类)
+│           │   ├── network/        #   Dio 封装 + 拦截器
+│           │   ├── config/         #   应用配置
+│           │   └── services/       #   认证/Token 服务
+│           └── features/           # 功能模块
+│               ├── sign_in/        #   登录
+│               ├── sign_up/        #   注册
+│               ├── forgot_password/#   忘记密码
+│               ├── reset_password/ #   重置密码
+│               ├── dashboard/      #   仪表板
+│               ├── projects/       #   项目列表
+│               ├── project/        #   项目详情/设置/导入/导出/成员/语言
+│               ├── translation/    #   翻译管理
+│               ├── settings/       #   用户设置/通知设置
+│               ├── profile/        #   个人资料
+│               ├── join/           #   接受邀请
+│               └── root/           #   应用入口
+│
 ├── packages/
-│   ├── core/           # 核心业务逻辑和数据模型
-│   ├── model/          # 共享数据模型
-│   ├── parsers/        # 多格式文件解析器 (JSON, PO, YAML等)
-│   ├── translators/    # 翻译服务集成 (Google, 百度, 腾讯等)
-│   └── server/         # 后端 REST API 服务
-│       ├── controllers/    # API 控制器
-│       ├── services/       # 业务服务层
-│       ├── middleware/     # 中间件 (认证、日志、限流等)
-│       └── routes/         # 路由定义
-└── apps/
-    └── ttpolyglot/     # Flutter 跨平台应用
+│   ├── server/                     # 后端 REST API
+│   │   ├── bin/                    #   server.dart + migrate.dart 入口
+│   │   ├── lib/src/
+│   │   │   ├── controllers/        #   HTTP 控制器 (auth/project/system/user/language)
+│   │   │   ├── services/           #   服务层
+│   │   │   │   ├── infrastructure/ #     数据库/Redis/连接池/多级缓存
+│   │   │   │   ├── business/       #     认证/用户/项目/翻译/权限/配置 等
+│   │   │   │   └── feature/        #     邮件/文件上传/IP定位/监控指标
+│   │   │   ├── middleware/         #   中间件 (auth/security/observability/error)
+│   │   │   ├── routes/             #   路由定义 (9 个模块)
+│   │   │   ├── config/             #   服务器配置
+│   │   │   ├── di/                 #   依赖注入
+│   │   │   ├── exceptions/         #   自定义异常
+│   │   │   └── utils/              #   工具类 (JWT/Crypto/Validator/Response 等)
+│   │   ├── database/
+│   │   │   ├── migrations/         #   22 个迁移文件
+│   │   │   └── seeds/              #   6 个种子文件
+│   │   ├── Dockerfile              #   多阶段 AOT 编译
+│   │   └── docker-compose.yml      #   PostgreSQL + Redis + Server + Nginx
+│   │
+│   ├── model/                      # 共享数据模型 (Freezed)
+│   │   └── lib/src/
+│   │       ├── auth/               #   认证模型 (12 个)
+│   │       ├── project/            #   项目模型 (7 个)
+│   │       ├── translation/        #   翻译模型 (6 个)
+│   │       ├── language/           #   语言模型
+│   │       ├── user/               #   用户设置模型
+│   │       ├── system/             #   系统/通知/审计模型
+│   │       ├── file/               #   文件模型
+│   │       ├── network/            #   网络基础模型
+│   │       ├── enums/              #   枚举定义 (8 个)
+│   │       ├── converter/          #   JSON 转换器
+│   │       └── utils/              #   模型工具类
+│   │
+│   ├── parsers/                    # 翻译文件解析器
+│   │   └── lib/src/
+│   │       └── parsers/            #   6 个解析器 (JSON/YAML/CSV/ARB/PO/Properties)
+│   │
+│   ├── translators/                # 翻译 API 集成
+│   │   └── lib/src/
+│   │       └── translation_api_service.dart  # Google/百度/有道/自定义
+│   │
+│   └── utils/                      # 共享工具类
+│       └── lib/src/                #   Dialog/Logger(Talker)/Toast
+│
+└── melos.yaml                      # Melos 工作区配置
 ```
 
-## 🚀 快速开始
+## 快速开始
 
 ### 前置要求
-- **Flutter SDK** >= 3.0.0
+
 - **Dart SDK** >= 3.6.1
-- **PostgreSQL** >= 13.0
-- **Redis** >= 6.0 (可选，用于缓存)
-- **Melos** >= 6.0.0
-- **Docker** & **Docker Compose** (推荐，用于容器化部署)
+- **Flutter SDK** >= 3.27.3
+- **PostgreSQL** >= 15
+- **Redis** >= 7 (用于 Session 和缓存)
+- **Melos** >= 6.0
+- **Docker** & **Docker Compose** (推荐)
 
 ### 安装依赖
+
 ```bash
 # 安装 Melos
 dart pub global activate melos
@@ -184,120 +231,98 @@ cd ttpolyglot
 melos bootstrap
 ```
 
-### 启动开发环境
+### 启动后端服务
 
-#### 启动后端服务
+#### 方式 1：Docker Compose（推荐）
 
-**方式 1：Docker Compose（推荐）**
 ```bash
-# 进入 server 包目录
 cd packages/server
 
-# 一键启动所有服务（PostgreSQL + Redis + Server）
+# 配置环境变量
+cp .env.example .env
+# 编辑 .env，至少配置: JWT_SECRET, ENCRYPTION_KEY, SESSION_SECRET
+
+# 一键启动 (PostgreSQL + Redis + Server + Nginx)
 sh start-docker.sh
 
 # 查看日志
-docker-compose logs -f server
+docker-compose logs -f
 ```
 
-**方式 2：本地开发**
+#### 方式 2：本地开发
+
 ```bash
-# 进入 server 包目录
 cd packages/server
 
-# 配置环境变量（首次运行）
+# 配置环境变量
 cp .env.example .env
-# 编辑 .env 文件，配置数据库连接等信息：
-# DATABASE_HOST=localhost
-# DATABASE_PORT=5432
-# DATABASE_NAME=ttpolyglot
-# DATABASE_USER=postgres
-# DATABASE_PASSWORD=your_password
-# REDIS_HOST=localhost
-# REDIS_PORT=6379
-# JWT_SECRET=your_secret_key
+# 编辑 .env 文件，配置:
+#   DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
+#   REDIS_PASSWORD, REDIS_PORT
+#   JWT_SECRET, ENCRYPTION_KEY, SESSION_SECRET
 
 # 运行数据库迁移
 dart run bin/migrate.dart
 
-# 启动后端服务
+# 启动服务 (默认 http://localhost:8080)
 dart run bin/server.dart
-# 服务默认运行在 http://localhost:8080
 ```
 
-#### 启动前端应用
+### 启动前端应用
+
 ```bash
-# 进入应用目录
 cd apps/ttpolyglot
 
-# 运行 Web 版本
+# Web
 flutter run -d chrome
 
-# 运行桌面版本
-flutter run -d macos  # 或 windows / linux
+# 桌面 (默认窗口 1680x800，最小 1280x640)
+flutter run -d macos    # 或 windows / linux
 
-# 运行移动版本
-flutter run -d ios    # 或 android
+# 移动端
+flutter run -d ios      # 或 android
 ```
 
-### CLI 工具（开发中）
-> CLI 工具正在开发中，计划提供以下功能：
+## 开发指南
+
+### 常用命令
 
 ```bash
-# 初始化项目配置
-ttpolyglot init
-
-# 推送本地翻译文件到云端
-ttpolyglot push
-
-# 拉取云端更新到本地
-ttpolyglot pull
-
-# 实时监听并同步变更
-ttpolyglot watch
-
-# 导出翻译文件
-ttpolyglot export --format json
-```
-
-## 🛠️ 开发指南
-
-### 开发命令
-```bash
-# 分析代码质量
+# 代码分析
 melos exec -- dart analyze
 
-# 运行所有包的测试
+# 运行测试
 melos exec -- dart test
 
-# 为 server 包生成数据库代码
-cd packages/server
-dart run build_runner build
+# 代码生成 (Freezed / json_serializable / Drift)
+cd packages/model && dart run build_runner build --delete-conflicting-outputs
+cd packages/server && dart run build_runner build --delete-conflicting-outputs
+cd apps/ttpolyglot && dart run build_runner build --delete-conflicting-outputs
 
-# 清理所有包的构建产物
+# 清理构建产物
 melos clean
 ```
 
 ### 数据库管理
+
 ```bash
-# 进入 server 目录
 cd packages/server
 
-# 修改数据库模型后重新生成代码
-dart run build_runner build --delete-conflicting-outputs
-
-# 运行数据库迁移
+# 运行迁移
 dart run bin/migrate.dart
 
-# 使用 Docker 启动数据库
-docker-compose up -d postgres redis
+# 修改 Drift 模型后重新生成
+dart run build_runner build --delete-conflicting-outputs
+
+# 单独启动数据库
+docker-compose up -d ttpolyglot-db ttpolyglot-redis
 ```
 
-### 构建和部署
+### 构建与部署
+
 ```bash
 # 构建 Web 应用
-cd apps/ttpolyglot
-flutter build web
+cd apps/ttpolyglot && flutter build web
 
 # 构建桌面应用
 flutter build macos    # 或 windows / linux
@@ -306,295 +331,276 @@ flutter build macos    # 或 windows / linux
 flutter build apk      # Android
 flutter build ios      # iOS
 
-# 构建后端 Docker 镜像
-cd packages/server
-docker build -t ttpolyglot-server .
-
-# 使用 Docker Compose 部署完整系统
-sh start-docker.sh
+# 构建后端 Docker 镜像 (多阶段 AOT 编译)
+cd packages/server && docker build -t ttpolyglot-server .
 ```
 
-## 📡 API 文档
+### 代码规范
+
+- 使用 `dart:developer` 的 `log` 替代 `print`
+- catch 时捕获 `error` 和 `stackTrace`，格式: `log('[函数名]', error: error, stackTrace: stackTrace, name: '[类名]')`
+- 使用 package 风格导入，不使用相对路径
+- 每个 feature 文件夹提供桶文件导出
+- Flutter 尺寸值始终使用 `double`（`10.0` 而非 `10`）
+- Border radius 只使用 `2.0` / `4.0` / `8.0`
+- 行宽 120 字符
+- 始终使用 trailing commas
+- 不手动编辑 `*.g.dart` 和 `*.freezed.dart`
+
+### Commit 规范
+
+遵循 [Conventional Commits](https://www.conventionalcommits.org/)，支持 scope：
+
+```
+feat(translation-service): add batch import support
+fix(auth): handle token refresh race condition
+refactor(project-controller): simplify error handling
+```
+
+类型：`feat` | `fix` | `docs` | `style` | `refactor` | `test` | `chore`
+
+## API 文档
 
 ### REST API
 
-后端服务提供完整的 REST API，默认运行在 `http://localhost:8080`
+后端提供完整的 REST API，默认运行在 `http://localhost:8080`，所有业务接口挂载在 `/api/v1/` 下。
 
 #### 认证
 
-大部分 API 需要 JWT Token 认证：
-
 ```bash
 # 登录获取 Token
-curl -X POST http://localhost:8080/api/auth/login \
+curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email": "user@example.com", "password": "password"}'
 
-# 使用 Token 访问受保护的 API
-curl -X GET http://localhost:8080/api/projects \
+# 使用 Token 访问 API
+curl -X GET http://localhost:8080/api/v1/projects \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
-#### 主要 API 端点
+#### 端点概览
 
 ```
-认证相关
-POST   /api/auth/login              # 用户登录
-POST   /api/auth/register           # 用户注册
-POST   /api/auth/refresh            # 刷新 Token
-POST   /api/auth/logout             # 用户登出
+健康检查
+GET    /health                                    # 健康状态
+GET    /health/db                                 # 数据库状态
+GET    /health/ready                              # 就绪检查
+GET    /metrics                                   # Prometheus 指标
 
-用户管理
-GET    /api/users                   # 获取用户列表
-GET    /api/users/:id               # 获取用户详情
-PUT    /api/users/:id               # 更新用户信息
-DELETE /api/users/:id               # 删除用户
+系统
+GET    /api/v1/version                            # API 版本
+GET    /api/v1/status                             # 系统状态
 
-项目管理
-GET    /api/projects                # 获取项目列表
-POST   /api/projects                # 创建项目
-GET    /api/projects/:id            # 获取项目详情
-PUT    /api/projects/:id            # 更新项目
-DELETE /api/projects/:id            # 删除项目
+认证
+POST   /api/v1/auth/register                      # 注册
+POST   /api/v1/auth/login                         # 登录
+POST   /api/v1/auth/logout                        # 登出
+POST   /api/v1/auth/refresh                       # 刷新 Token
+POST   /api/v1/auth/forgot-password               # 忘记密码
+POST   /api/v1/auth/reset-password                # 重置密码
+POST   /api/v1/auth/verify-email                  # 邮箱验证
+POST   /api/v1/auth/resend-verification           # 重发验证邮件
 
-翻译管理
-GET    /api/projects/:id/translations           # 获取翻译列表
-POST   /api/projects/:id/translations           # 创建翻译
-PUT    /api/translations/:id                    # 更新翻译
-DELETE /api/translations/:id                    # 删除翻译
+用户
+GET    /api/v1/users                              # 用户列表
+GET    /api/v1/users/:id                          # 用户详情
+PUT    /api/v1/users/:id                          # 更新用户
+DELETE /api/v1/users/:id                          # 删除用户
 
-语言管理
-GET    /api/languages               # 获取支持的语言列表
+项目
+GET    /api/v1/projects                           # 项目列表
+POST   /api/v1/projects                           # 创建项目
+GET    /api/v1/projects/:id                       # 项目详情
+PUT    /api/v1/projects/:id                       # 更新项目
+DELETE /api/v1/projects/:id                       # 删除项目
 
-文件操作
-POST   /api/files/upload            # 上传翻译文件
-POST   /api/projects/:id/import     # 导入翻译文件
-GET    /api/projects/:id/export     # 导出翻译文件
+项目成员
+GET    /api/v1/projects/:id/members               # 成员列表
+POST   /api/v1/projects/:id/members               # 添加成员
+DELETE /api/v1/projects/:id/members/:memberId     # 移除成员
 
-权限管理
-GET    /api/roles                   # 获取角色列表
-GET    /api/permissions             # 获取权限列表
-POST   /api/roles/:id/permissions   # 为角色分配权限
+翻译
+GET    /api/v1/projects/:id/translations          # 翻译列表
+POST   /api/v1/projects/:id/translations          # 创建翻译
+PUT    /api/v1/translations/:id                   # 更新翻译
+DELETE /api/v1/translations/:id                   # 删除翻译
+
+语言
+GET    /api/v1/languages                          # 支持的语言列表
+
+文件
+POST   /api/v1/files/upload                       # 上传文件
+POST   /api/v1/projects/:id/import                # 导入翻译文件
+GET    /api/v1/projects/:id/export                # 导出翻译文件
+
+角色与权限
+GET    /api/v1/roles                              # 角色列表
+GET    /api/v1/permissions                        # 权限列表
+POST   /api/v1/roles/:id/permissions              # 分配权限
+
+系统配置
+GET    /api/v1/configs                            # 配置列表
+PUT    /api/v1/configs/:key                       # 更新配置
+
+通知
+GET    /api/v1/notifications                      # 通知列表
+PUT    /api/v1/notifications/:id/read             # 标记已读
 ```
 
-详细的 API 文档可以通过访问 `http://localhost:8080/api/docs` 查看（开发中）。
+## 开发路线图
 
-## 📋 开发路线图
+### 第一阶段：基础架构 (已完成)
 
-### 🎯 第一阶段：基础架构（进行中）
-- [x] Melos Monorepo 工作区搭建
-- [x] Core 包：核心业务逻辑和数据模型
-- [x] Model 包：共享数据模型
-- [x] Server 包：后端 REST API 服务
-  - [x] JWT 认证授权系统
-  - [x] RBAC 权限管理
-  - [x] 数据库 ORM (Drift)
-  - [x] Redis 缓存支持
-  - [x] 完整的中间件系统
-- [x] Parsers 包：多格式文件解析
-- [x] Flutter 应用基础框架
-- [ ] 完善前后端集成
-- [ ] 基础 UI 界面开发
+- [x] Melos Monorepo 工作区
+- [x] Model 包：40+ 个共享数据模型 (Freezed)
+- [x] Server 包：完整后端 REST API
+  - [x] JWT 认证 + RBAC 权限系统
+  - [x] Drift ORM + PostgreSQL
+  - [x] Redis Session + 多级缓存
+  - [x] 中间件链 (Auth / Permission / RateLimit / CORS / Logging / ErrorHandler)
+  - [x] 22 个数据库迁移 + 6 个种子文件
+  - [x] Docker 多阶段 AOT 编译 + Nginx 部署
+- [x] Parsers 包：6 种格式解析器 (JSON / YAML / ARB / PO / CSV / Properties)
+- [x] Translators 包：3 个翻译 API + 自定义 API
+- [x] Utils 包：Logger / Dialog / Toast
 
-### 🤝 第二阶段：核心功能（计划中）
-- [ ] 项目管理（创建、编辑、删除）
-- [ ] 翻译键管理和编辑
-- [ ] 多语言文件导入/导出
-- [ ] 本地文件同步机制
-- [ ] 用户管理和团队协作
-- [ ] 翻译进度统计和可视化
+### 第二阶段：核心功能 (已完成)
 
-### 🚀 第三阶段：高级功能（规划中）
-- [ ] 实时多人协作编辑
-- [ ] AI 翻译服务集成（Google, 百度, 腾讯等）
-- [ ] 翻译记忆和术语库
+- [x] Flutter 跨平台应用 (12 个功能模块)
+- [x] 用户认证流程 (登录 / 注册 / 忘记密码 / 重置密码 / 邮箱验证)
+- [x] 项目管理 (创建 / 编辑 / 删除 / 统计)
+- [x] 翻译键管理与编辑
+- [x] 多语言文件导入
+- [x] 文件导出 (JSON / CSV / ARB / Excel / PO，桌面端)
+- [x] 项目成员管理与邀请链接
+- [x] 离线同步队列 (桌面端)
+- [x] 响应式布局 + 亮色/暗色主题
+- [x] 用户设置与通知设置
+
+### 第三阶段：增强功能 (进行中)
+
+- [ ] YAML / Properties 格式导出
+- [ ] Web / 移动端文件导出
+- [ ] AI 自动翻译 (后端集成)
+- [ ] 批量自动翻译
+- [ ] 翻译质量校验
+- [ ] 导入冲突解决机制
+- [ ] 移动端持久化存储
+
+### 第四阶段：高级功能 (规划中)
+
+- [ ] 实时多人协作编辑 (WebSocket)
+- [ ] 翻译记忆与术语库
 - [ ] 审核工作流
-- [ ] 评论和讨论系统
-- [ ] CLI 工具开发
-- [ ] API 接口开放
-- [ ] WebSocket 实时通信
+- [ ] 评论与讨论系统
+- [ ] CLI 工具
+- [ ] DeepL 翻译集成
+- [ ] 更多语言支持
 
-## 🎨 与 i18n-ally 的对比
+## 与 i18n-ally 的对比
 
-| 特性           | i18n-ally    | TTPolyglot        |
-| -------------- | ------------ | ----------------- |
-| 运行环境       | VS Code 扩展 | 跨平台应用 + Web  |
-| 多人协作       | ❌            | ✅ (计划中)        |
-| 实时同步       | ❌            | ✅ (计划中)        |
-| 审核工作流     | ❌            | ✅ (计划中)        |
-| AI 翻译        | ❌            | ✅ (计划中)        |
-| 非技术用户友好 | ❌            | ✅                 |
-| 本地文件优先   | ✅            | ✅                 |
-| 权限管理       | ❌            | ✅ (已实现 RBAC)   |
-| 离线使用       | ✅            | ✅ (桌面应用支持)  |
-| 自托管         | N/A          | ✅                 |
+| 特性 | i18n-ally | TTPolyglot |
+|------|-----------|------------|
+| 运行环境 | VS Code 扩展 | 跨平台应用 + Web |
+| 多人协作 | - | 已实现 (成员管理 + 邀请) |
+| 自托管 | N/A | 已实现 (Docker 部署) |
+| 权限管理 | - | 已实现 (RBAC) |
+| AI 翻译 | - | 已实现 (3 个 API) |
+| 文件格式 | 多格式 | 6 种格式 |
+| 离线使用 | 完全离线 | 混合模式 (离线 + 同步) |
+| 非技术用户 | 需要 VS Code | Web 即可使用 |
+| 翻译状态管理 | - | 已实现 (5 阶段工作流) |
+| 审核工作流 | - | 规划中 |
+| 实时同步 | - | 规划中 |
 
-## 🎯 项目亮点
+## 贡献指南
 
-### 技术优势
-- **🚀 全栈 Dart**：前后端统一使用 Dart 语言，代码共享，降低学习成本
-- **📱 真·跨平台**：一套代码，支持 6 大平台（Web + 桌面 + 移动）
-- **🏗️ Monorepo 架构**：Melos 管理，模块化清晰，易于维护和扩展
-- **🔐 企业级安全**：JWT + RBAC 权限系统，支持细粒度权限控制
-- **⚡ 高性能缓存**：Redis 多级缓存 + Drift ORM，性能优异
-- **🐳 容器化**：Docker Compose 一键部署，支持自托管
-- **🎨 现代化 UI**：Material Design 3，美观易用
-
-### 开发体验
-- **类型安全**：Dart 强类型 + 编译时检查，减少运行时错误
-- **热重载**：Flutter 热重载，极速开发调试
-- **完整工具链**：从开发、测试到部署的完整工具支持
-- **清晰架构**：分层设计，Controller → Service → Repository
-
-## 🌟 品牌故事
-
-TTPolyglot 是 **TT 品牌家族** 的一员：
-- **TTPOS**：餐饮业的技术专家
-- **TTPolyglot**：全球化的语言专家
-
-我们的共同价值观：**让复杂的事情变简单**
-
-## 🤝 贡献指南
-
-我们欢迎所有形式的贡献！无论是报告 bug、提出功能建议，还是提交代码。
+欢迎所有形式的贡献！
 
 ### 如何贡献
 
-1. **Fork 项目**
-2. **创建功能分支**
+1. Fork 项目
+2. 创建功能分支
    ```bash
    git checkout -b feature/amazing-feature
-   # 或者
-   git checkout -b fix/bug-fix
    ```
-3. **提交更改**
+3. 提交更改
    ```bash
-   git commit -m 'feat: Add amazing feature'
-   # 遵循 Conventional Commits 规范
+   git commit -m 'feat(scope): add amazing feature'
    ```
-4. **推送到分支**
-   ```bash
-   git push origin feature/amazing-feature
-   ```
-5. **创建 Pull Request**
+4. 推送并创建 Pull Request
 
 ### 开发规范
 
-#### 代码风格
 - 使用 `dart analyze` 检查代码质量
-- 遵循 Dart/Flutter 官方代码规范
-- 遵循项目的 workspace rules（见 `.cursor/rules` 目录）
-  - 使用 `dart:developer` 的 `log` 替代 `print`
-  - 使用 `double` 类型表示尺寸（如 `10.0` 而非 `10`）
-  - border radius 只使用 `2.0`, `4.0`, `8.0`
-
-#### 测试
+- 遵循 [Dart 官方代码规范](https://dart.dev/effective-dart)
 - 为新功能添加单元测试
-- 确保所有测试通过：`melos exec -- dart test`
-- 保持测试覆盖率
+- 更新相关文档
 
-#### 文档
-- 更新相关的 README 文档
-- 为公共 API 添加文档注释
-- 更新 CHANGELOG
-
-#### Commit 规范
-遵循 [Conventional Commits](https://www.conventionalcommits.org/)：
-- `feat:` 新功能
-- `fix:` Bug 修复
-- `docs:` 文档更新
-- `style:` 代码格式（不影响代码运行）
-- `refactor:` 重构
-- `test:` 测试相关
-- `chore:` 构建过程或辅助工具的变动
-
-## 📄 许可证
-
-本项目采用 Apache License 2.0 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
-
-## 💬 社区与支持
-
-- **文档**：[https://docs.ttpolyglot.dev](https://docs.ttpolyglot.dev)（建设中）
-- **问题报告**：[GitHub Issues](https://github.com/ttpolyglot/ttpolyglot/issues)
-- **讨论**：[GitHub Discussions](https://github.com/ttpolyglot/ttpolyglot/discussions)
-- **邮件**：support@ttpolyglot.dev
-
-## ❓ 常见问题 (FAQ)
+## 常见问题
 
 <details>
 <summary><strong>Q: TTPolyglot 与其他翻译管理平台有什么区别？</strong></summary>
 
-A: TTPolyglot 的核心理念是"本地文件优先"，不强制将翻译文件托管在云端。开发者可以继续使用 Git 管理翻译文件，同时享受云端协作的便利。此外，TTPolyglot 是开源的，支持自托管部署。
+TTPolyglot 的核心理念是"本地文件优先"。开发者可以继续使用 Git 管理翻译文件，同时享受云端协作的便利。全栈 Dart 架构使得前后端代码共享成为可能，开源且支持自托管部署。
 </details>
 
 <details>
-<summary><strong>Q: 是否需要修改现有的项目代码？</strong></summary>
+<summary><strong>Q: 支持哪些翻译文件格式？</strong></summary>
 
-A: 不需要。TTPolyglot 支持多种主流翻译文件格式（JSON, YAML, PO 等），可以直接导入现有的翻译文件。CLI 工具（开发中）可以与现有的开发工作流无缝集成。
+目前支持 6 种格式：JSON、YAML、CSV、ARB (Flutter)、PO (Gettext)、Properties (Java)。所有格式均支持读取、写入和校验。
 </details>
 
 <details>
-<summary><strong>Q: 支持哪些编程语言和框架？</strong></summary>
+<summary><strong>Q: 是否需要修改现有项目代码？</strong></summary>
 
-A: TTPolyglot 是语言和框架无关的翻译管理平台。只要您的项目使用支持的文件格式（JSON, YAML, PO 等），就可以使用 TTPolyglot。已在 Flutter、Vue、React 等框架中测试。
+不需要。TTPolyglot 可以直接导入现有的翻译文件。只要你的项目使用支持的文件格式，就可以无缝接入。
 </details>
 
 <details>
 <summary><strong>Q: 数据安全如何保障？</strong></summary>
 
-A: 
-- 支持自托管部署，数据完全掌握在自己手中
-- 使用 JWT + RBAC 权限系统，细粒度控制访问权限
-- 支持 HTTPS 加密传输
-- 密码使用 bcrypt 加密存储
-- 支持数据备份和恢复
+- 支持自托管部署，数据完全自控
+- JWT + RBAC 权限系统，细粒度控制
+- Nginx HTTPS 加密传输
+- bcrypt 密码加密
+- Redis Session 管理，支持登出失效
+- 账户登录锁定保护
 </details>
 
 <details>
 <summary><strong>Q: 可以离线使用吗？</strong></summary>
 
-A: 可以。桌面应用支持离线编辑翻译，待网络恢复后自动同步到云端（功能开发中）。
+桌面端应用支持离线模式。离线时编辑的翻译会进入同步队列，网络恢复后自动同步到服务器。
 </details>
 
 <details>
-<summary><strong>Q: 如何参与项目开发？</strong></summary>
+<summary><strong>Q: 技术栈为什么选择全栈 Dart？</strong></summary>
 
-A: 查看[贡献指南](#-贡献指南)了解如何参与。我们欢迎各种形式的贡献，包括代码、文档、测试、设计等。
+- **Flutter** 提供真正的跨平台能力，一套代码支持 6 大平台
+- **Shelf** 轻量级高性能，与 Flutter 共用同一语言
+- **Drift** 提供编译时类型安全的数据库访问
+- **Freezed** 保证数据模型的不可变性和类型安全
+- 前后端共享 model 包，消除序列化不一致问题
 </details>
 
-<details>
-<summary><strong>Q: 项目的技术栈选择？</strong></summary>
+## 相关资源
 
-A: 
-- **前端**：Flutter - 真正的跨平台，一套代码支持 6 大平台
-- **后端**：Shelf + Drift - 轻量级高性能，与前端使用相同语言（Dart）
-- **数据库**：PostgreSQL - 成熟稳定的关系型数据库
-- **缓存**：Redis - 高性能缓存方案
-- **工作区**：Melos - Dart/Flutter 生态的 Monorepo 最佳实践
-</details>
+| 类别 | 链接 |
+|------|------|
+| Flutter 文档 | [docs.flutter.dev](https://docs.flutter.dev/) |
+| Dart 指南 | [dart.dev/guides](https://dart.dev/guides) |
+| Shelf 文档 | [pub.dev/packages/shelf](https://pub.dev/packages/shelf) |
+| Drift ORM | [drift.simonbinder.eu](https://drift.simonbinder.eu/) |
+| Melos | [melos.invertase.dev](https://melos.invertase.dev/) |
+| GetX | [pub.dev/packages/get](https://pub.dev/packages/get) |
+| Freezed | [pub.dev/packages/freezed](https://pub.dev/packages/freezed) |
+| Material Design 3 | [m3.material.io](https://m3.material.io/) |
 
-## 📚 相关资源
+## 许可证
 
-### 技术文档
-- [Flutter 官方文档](https://docs.flutter.dev/)
-- [Dart 语言指南](https://dart.dev/guides)
-- [Shelf 框架文档](https://pub.dev/packages/shelf)
-- [Drift ORM 文档](https://drift.simonbinder.eu/)
-- [Melos 工作区管理](https://melos.invertase.dev/)
-
-### 设计参考
-- [Material Design 3](https://m3.material.io/)
-- [Flutter 设计指南](https://docs.flutter.dev/ui)
-
-### 翻译标准
-- [Unicode CLDR](https://cldr.unicode.org/)
-- [ISO 639 语言代码](https://www.loc.gov/standards/iso639-2/php/code_list.php)
-- [ISO 3166 国家代码](https://www.iso.org/iso-3166-country-codes.html)
-
-## 🙏 致谢
-
-感谢 [i18n-ally](https://github.com/lokalise/i18n-ally) 项目提供的灵感和参考。
+[Apache License 2.0](LICENSE)
 
 ---
 
-**TTPolyglot - Speak Every Language** 🌍✨ 
+**TTPolyglot** - 让复杂的事情变简单
