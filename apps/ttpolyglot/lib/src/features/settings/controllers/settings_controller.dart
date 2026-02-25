@@ -59,6 +59,10 @@ class SettingsController extends GetxController {
       _isLoading.value = true;
       final settings = await _userSettingsApi.getUserSettings();
 
+      if (settings == null) {
+        return;
+      }
+
       // 更新响应式变量
       // 使用服务器返回的语言代码格式（连字符格式：en-US）
       final serverLanguageCode = settings.languageSettings.languageCode?.code ?? 'zh-CN';

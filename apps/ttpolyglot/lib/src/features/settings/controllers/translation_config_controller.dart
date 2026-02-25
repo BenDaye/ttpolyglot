@@ -67,6 +67,10 @@ class TranslationConfigController extends GetxController {
       _isLoading.value = true;
       final settings = await _userSettingsApi.getUserSettings();
 
+      if (settings == null) {
+        return;
+      }
+
       _config.value = TranslationSettingsModel(
         providers: settings.translationSettings.providers,
         maxRetries: settings.translationSettings.maxRetries,
@@ -126,6 +130,10 @@ class TranslationConfigController extends GetxController {
   }) async {
     try {
       final addedProvider = await _userSettingsApi.addTranslationProvider(provider);
+
+      if (addedProvider == null) {
+        return;
+      }
 
       // 如果设置为默认，先取消其他默认设置
       var updatedProviders = config.providers;
