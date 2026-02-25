@@ -151,7 +151,7 @@ class TranslationApi {
   }
 
   /// 翻译单个条目（服务端翻译 + 入库）
-  Future<bool> translateEntry({
+  Future<TranslationEntryModel?> translateEntry({
     required int projectId,
     required String entryId,
     required List<String> targetLanguages,
@@ -168,10 +168,13 @@ class TranslationApi {
           if (force) 'force': true,
         },
       );
-      return response.success;
+      return ModelUtils.toModel<TranslationEntryModel>(
+        response.data,
+        (json) => TranslationEntryModel.fromJson(json),
+      );
     } catch (error, stackTrace) {
       log('[translateEntry]', error: error, stackTrace: stackTrace, name: 'TranslationApi');
-      return false;
+      return null;
     }
   }
 

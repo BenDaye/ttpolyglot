@@ -355,19 +355,19 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
         return;
       }
 
-      // 调用服务端翻译接口（翻译 + 入库）
-      final success = await TranslationApi().translateEntry(
+      // 调用服务端翻译接口（翻译 + 入库），返回最新数据
+      final updatedEntry = await TranslationApi().translateEntry(
         projectId: firstEntry.projectId,
         entryId: firstEntry.uuid,
         targetLanguages: targetLanguageCodes,
         provider: provider,
       );
 
-      if (success) {
-        // 翻译成功，通知父组件刷新列表
+      if (updatedEntry != null) {
+        // 翻译成功，用返回的最新数据更新本地列表
         widget.onTranslateByDefaultLanguage?.call(
           key: widget.translationKey,
-          entries: widget.translationEntries,
+          entries: [updatedEntry],
         );
         if (context.mounted) {
           _showSuccessSnackBar(context, '翻译成功');

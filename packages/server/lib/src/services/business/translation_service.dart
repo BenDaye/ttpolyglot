@@ -862,14 +862,14 @@ class TranslationService extends BaseService {
   }
 
   /// 翻译单个条目并入库
-  Future<void> translateEntry({
+  Future<TranslationEntryModel> translateEntry({
     required String entryId,
     required List<String> targetLanguages,
     required TranslationProviderConfigModel provider,
     bool force = false,
     String? updatedBy,
   }) async {
-    return execute<void>(
+    return execute<TranslationEntryModel>(
       () async {
         logInfo('开始翻译条目', context: {'entry_id': entryId, 'targets': targetLanguages});
 
@@ -894,6 +894,7 @@ class TranslationService extends BaseService {
         await _updateProjectStats(updatedEntry.projectId);
 
         logInfo('翻译条目完成', context: {'entry_id': entryId});
+        return updatedEntry;
       },
       operationName: 'translateEntry',
     );

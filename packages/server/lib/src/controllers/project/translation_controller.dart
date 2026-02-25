@@ -597,7 +597,7 @@ class TranslationController extends BaseController {
         final force = data['force'] == true;
         final updatedBy = getCurrentUserId(request);
 
-        await _translationService.translateEntry(
+        final entry = await _translationService.translateEntry(
           entryId: entryId,
           targetLanguages: targetLanguages,
           provider: provider,
@@ -607,6 +607,7 @@ class TranslationController extends BaseController {
 
         return ResponseUtils.success(
           message: '翻译成功',
+          data: entry,
         );
       },
       operationName: 'translate',

@@ -136,6 +136,15 @@ class TranslationController extends GetxController {
   }
 
   /// 更新翻译条目
+  /// 用最新数据直接更新本地列表（不调用 API）
+  void updateLocalEntry(TranslationEntryModel entry) {
+    final index = _translationEntries.indexWhere((e) => e.uuid == entry.uuid);
+    if (index != -1) {
+      _translationEntries[index] = entry;
+      _applyFilters();
+    }
+  }
+
   Future<void> updateTranslationEntryModel(TranslationEntryModel entry, {bool isShowSnackbar = true}) async {
     try {
       final updated = await _translationService.updateTranslationEntryModel(entry);

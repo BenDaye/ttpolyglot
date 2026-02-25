@@ -105,7 +105,10 @@ class TranslationsList extends StatelessWidget {
                           required String key,
                           required List<TranslationEntryModel> entries,
                         }) {
-                          controller.refreshTranslationEntries();
+                          // entries[0] 是服务端返回的最新完整数据
+                          if (entries.isNotEmpty) {
+                            controller.updateLocalEntry(entries.first);
+                          }
                         },
                         onTranslateByCustom: ({required String key, required List<TranslationEntryModel> entries}) {
                           CustomTranslationDialog.show(
