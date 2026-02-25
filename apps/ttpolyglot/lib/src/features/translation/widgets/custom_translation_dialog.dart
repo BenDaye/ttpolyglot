@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ttpolyglot/src/core/services/translation_service_manager.dart';
-import 'package:ttpolyglot/src/features/project/controllers/project_controller.dart';
 import 'package:ttpolyglot/src/features/settings/controllers/translation_config_controller.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_model/model.dart';
@@ -56,11 +55,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final primaryLanguage = ProjectController.getInstance(widget.controller.projectId).project?.primaryLanguage;
-    _selectedSourceEntry ??= (primaryLanguage != null
-        ? widget.entries
-            .firstWhereOrNull((item) => item.targetLanguages.any((t) => t.language.code == primaryLanguage.code))
-        : widget.entries.first);
+    _selectedSourceEntry ??= widget.entries.firstOrNull;
 
     return AlertDialog(
       title: Row(

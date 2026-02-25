@@ -929,39 +929,25 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
     // 创建新的取消令牌
     _cancelToken = CancelToken();
 
-    final sourceLanguageCode = _selectedSourceEntry!.code.name;
+    final sourceLanguage = _selectedSourceEntry!.code; // LanguageEnum
 
     // 遍历所有翻译键，按key分组准备翻译数据
     for (final translationKey in entriesByKey.keys) {
       final keyEntries = entriesByKey[translationKey]!;
 
-      // 找到源语言的条目（检查是否有该语言的翻译）
+      // 找到源语言的条目（通过 sourceLanguage 字段匹配）
       final sourceEntry = keyEntries.firstWhereOrNull(
-        (entry) {
-          final targetLang = entry.targetLanguages.firstWhere(
-            (t) => t.language.code == sourceLanguageCode,
-            orElse: () => TranslationTargetLanguageModel(language: LanguageEnum.enUS, text: ''),
-          );
-          return targetLang.text.isNotEmpty;
-        },
+        (entry) => entry.sourceLanguage == sourceLanguage && entry.sourceText.isNotEmpty,
       );
 
       // 如果源语言没有对应的翻译，跳过这个key
       if (sourceEntry == null) continue;
 
-      // 获取源语言的文本
-      final sourceTargetLang = sourceEntry.targetLanguages.firstWhere(
-        (t) => t.language.code == sourceLanguageCode,
-        orElse: () => TranslationTargetLanguageModel(language: LanguageEnum.enUS, text: ''),
-      );
-      final sourceText = sourceTargetLang.text;
+      final sourceText = sourceEntry.sourceText;
 
       // 获取需要翻译的目标语言条目
       final targetEntries = <TranslationEntryModel>[];
       for (final entry in keyEntries) {
-        // 跳过源语言本身（检查是否有该语言的翻译）
-        if (entry.targetLanguages.any((t) => t.language.code == sourceLanguageCode)) continue;
-
         // 如果不覆盖且已有翻译，则跳过
         if (!_isOverride && entry.targetLanguages.any((t) => t.text.trim().isNotEmpty)) continue;
 
@@ -972,11 +958,18 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
         );
       }
 
+      // 为 batchTranslateEntries 构造源条目（将 sourceText 放入 targetLanguages）
+      final sourceEntryForTranslation = sourceEntry.copyWith(
+        targetLanguages: [
+          TranslationTargetLanguageModel(language: sourceLanguage, text: sourceText),
+        ],
+      );
+
       // 如果这个key有需要翻译的目标语言，添加到待处理列表
       if (targetEntries.isNotEmpty) {
         _pendingKeys.add(translationKey);
         _keyEntries[translationKey] = targetEntries;
-        _keySourceEntries[translationKey] = sourceEntry;
+        _keySourceEntries[translationKey] = sourceEntryForTranslation;
       }
     }
 

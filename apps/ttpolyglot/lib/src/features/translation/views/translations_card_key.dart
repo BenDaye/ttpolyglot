@@ -393,16 +393,11 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
         selectedSourceLanguage = selectedLanguage;
       }
 
-      // 源语言文本
-      final TranslationEntryModel? entriesToTranslate = widget.translationEntries.firstWhereOrNull(
-          (entry) => entry.targetLanguages.any((t) => t.language.code == selectedSourceLanguage.code));
+      // 源语言文本（sourceText 存储在条目的 sourceText 字段中，而非 targetLanguages）
+      final TranslationEntryModel? sourceEntry = widget.translationEntries.firstWhereOrNull(
+          (entry) => entry.sourceLanguage == selectedSourceLanguage && entry.sourceText.isNotEmpty,);
 
-      final sourceTargetLang = entriesToTranslate?.targetLanguages.firstWhere(
-        (t) => t.language.code == selectedSourceLanguage.code,
-        orElse: () => TranslationTargetLanguageModel(language: selectedSourceLanguage, text: ''),
-      );
-
-      if (entriesToTranslate == null || sourceTargetLang == null || sourceTargetLang.text.isEmpty) {
+      if (sourceEntry == null) {
         if (context.mounted) {
           _showErrorSnackBar(context, '主语言还没有设置翻译');
         }
@@ -414,17 +409,20 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
         return;
       }
 
-      // 获取需要翻译的条目
-      final List<TranslationEntryModel> translateEntries = [];
-      for (final entry in widget.translationEntries) {
-        if (entry.targetLanguages.any((t) => t.language.code == selectedSourceLanguage.code)) continue;
-        translateEntries.add(entry);
-      }
+      // 为 batchTranslateEntries 构造源条目（将 sourceText 放入 targetLanguages）
+      final sourceEntryForTranslation = sourceEntry.copyWith(
+        targetLanguages: [
+          TranslationTargetLanguageModel(language: selectedSourceLanguage, text: sourceEntry.sourceText),
+        ],
+      );
+
+      // 获取需要翻译的条目（所有目标语言条目）
+      final List<TranslationEntryModel> translateEntries = widget.translationEntries.toList();
 
       // 批量翻译
       final results = await translationManager.batchTranslateEntries(
         // 翻译源
-        sourceEntries: entriesToTranslate,
+        sourceEntries: sourceEntryForTranslation,
         // 翻译条目
         entries: translateEntries,
       );
