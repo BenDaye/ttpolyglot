@@ -571,13 +571,22 @@ class TranslationService extends BaseService {
           parameters['sort_index'] = sortIndex;
         }
 
-        // 更新目标语言翻译（整组替换）
+        // 更新目标语言翻译（合并模式：传入的语言更新/新增，未传入的语言保留）
         if (targetLanguages != null) {
-          final targetLanguagesJson = jsonEncode(
-            targetLanguages.map((t) => {'language': t.language.code, 'text': t.text}).toList(),
-          );
+          final existingTargets = existing.targetLanguages.map((t) => {'language': t.language.code, 'text': t.text}).toList();
+
+          for (final incoming in targetLanguages) {
+            final code = incoming.language.code;
+            final idx = existingTargets.indexWhere((t) => t['language'] == code);
+            if (idx >= 0) {
+              existingTargets[idx] = {'language': code, 'text': incoming.text};
+            } else {
+              existingTargets.add({'language': code, 'text': incoming.text});
+            }
+          }
+
           updates.add('target_languages = @target_languages::jsonb');
-          parameters['target_languages'] = targetLanguagesJson;
+          parameters['target_languages'] = jsonEncode(existingTargets);
         }
 
         if (updates.isEmpty) {
