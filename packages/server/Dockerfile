@@ -9,8 +9,9 @@ FROM dart:stable AS build
 # 设置工作目录
 WORKDIR /app/packages/server
 
-# 先复制 model 包（server 的依赖）
+# 先复制本地依赖包
 COPY packages/model /app/packages/model
+COPY packages/translators /app/packages/translators
 
 # 复制 server 包的配置文件
 COPY packages/server/pubspec.yaml packages/server/pubspec_overrides.yaml ./
