@@ -141,7 +141,7 @@ class TranslationApi {
   }
 
   /// 翻译单个条目（服务端翻译 + 入库）
-  Future<TranslationEntryModel?> translateEntry({
+  Future<bool> translateEntry({
     required int projectId,
     required String entryId,
     required List<String> targetLanguages,
@@ -158,13 +158,10 @@ class TranslationApi {
           if (force) 'force': true,
         },
       );
-      return ModelUtils.toModel<TranslationEntryModel>(
-        response.data,
-        (json) => TranslationEntryModel.fromJson(json),
-      );
+      return response.success;
     } catch (error, stackTrace) {
       log('[translateEntry]', error: error, stackTrace: stackTrace, name: 'TranslationApi');
-      return null;
+      return false;
     }
   }
 
@@ -176,7 +173,7 @@ class TranslationApi {
     bool force = false,
   }) async {
     try {
-      await HttpClient.post(
+      final response = await HttpClient.post(
         '/projects/$projectId/translations/batch/translate-save',
         data: {
           'target_languages': targetLanguages,
@@ -184,7 +181,7 @@ class TranslationApi {
           if (force) 'force': true,
         },
       );
-      return true;
+      return response.success;
     } catch (error, stackTrace) {
       log('[batchTranslateProject]', error: error, stackTrace: stackTrace, name: 'TranslationApi');
       return false;

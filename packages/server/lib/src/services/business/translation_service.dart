@@ -882,14 +882,14 @@ class TranslationService extends BaseService {
   }
 
   /// 翻译单个条目并入库
-  Future<TranslationEntryModel> translateEntry({
+  Future<void> translateEntry({
     required String entryId,
     required List<String> targetLanguages,
     required TranslationProviderConfigModel provider,
     bool force = false,
     String? updatedBy,
   }) async {
-    return execute<TranslationEntryModel>(
+    return execute<void>(
       () async {
         logInfo('开始翻译条目', context: {'entry_id': entryId, 'targets': targetLanguages});
 
@@ -914,21 +914,20 @@ class TranslationService extends BaseService {
         await _updateProjectStats(updatedEntry.projectId);
 
         logInfo('翻译条目完成', context: {'entry_id': entryId});
-        return updatedEntry;
       },
       operationName: 'translateEntry',
     );
   }
 
   /// 批量翻译整个项目的所有条目并入库
-  Future<List<TranslationEntryModel>> batchTranslateEntries({
+  Future<void> batchTranslateEntries({
     required int projectId,
     required List<String> targetLanguages,
     required TranslationProviderConfigModel provider,
     bool force = false,
     String? updatedBy,
   }) async {
-    return execute<List<TranslationEntryModel>>(
+    return execute<void>(
       () async {
         // 获取项目下所有翻译条目
         final allEntries = await getTranslationEntries(projectId: projectId, limit: 10000);
@@ -936,7 +935,7 @@ class TranslationService extends BaseService {
 
         logInfo('开始批量翻译', context: {'project_id': projectId, 'count': entries.length, 'targets': targetLanguages});
 
-        final updatedEntries = <TranslationEntryModel>[];
+        var successCount = 0;
 
         for (final entry in entries) {
           if (entry.sourceText.isEmpty) continue;
@@ -950,7 +949,7 @@ class TranslationService extends BaseService {
               provider: provider,
               force: force,
             );
-            updatedEntries.add(updatedEntry);
+            successCount++;
             await _recordTranslationHistory(updatedEntry, updatedBy);
           } catch (error, stackTrace) {
             logError('翻译条目失败', error: error, stackTrace: stackTrace, context: {'entry_id': entry.uuid});
@@ -959,8 +958,7 @@ class TranslationService extends BaseService {
 
         await _updateProjectStats(projectId);
 
-        logInfo('批量翻译完成', context: {'total': entries.length, 'success': updatedEntries.length});
-        return updatedEntries;
+        logInfo('批量翻译完成', context: {'total': entries.length, 'success': successCount});
       },
       operationName: 'batchTranslateEntries',
     );

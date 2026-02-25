@@ -356,14 +356,14 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
       }
 
       // 调用服务端翻译接口（翻译 + 入库）
-      final result = await TranslationApi().translateEntry(
+      final success = await TranslationApi().translateEntry(
         projectId: firstEntry.projectId,
         entryId: firstEntry.uuid,
         targetLanguages: targetLanguageCodes,
         provider: provider,
       );
 
-      if (result != null) {
+      if (success) {
         // 翻译成功，通知父组件刷新列表
         widget.onTranslateByDefaultLanguage?.call(
           key: widget.translationKey,

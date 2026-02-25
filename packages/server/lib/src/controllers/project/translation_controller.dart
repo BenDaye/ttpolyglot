@@ -613,7 +613,7 @@ class TranslationController extends BaseController {
         final force = data['force'] == true;
         final updatedBy = getCurrentUserId(request);
 
-        final updatedEntry = await _translationService.translateEntry(
+        await _translationService.translateEntry(
           entryId: entryId,
           targetLanguages: targetLanguages,
           provider: provider,
@@ -623,7 +623,6 @@ class TranslationController extends BaseController {
 
         return ResponseUtils.success(
           message: '翻译成功',
-          data: updatedEntry.toJson(),
         );
       },
       operationName: 'translate',
@@ -656,7 +655,7 @@ class TranslationController extends BaseController {
         final force = data['force'] == true;
         final updatedBy = getCurrentUserId(request);
 
-        final updatedEntries = await _translationService.batchTranslateEntries(
+        await _translationService.batchTranslateEntries(
           projectId: projectIdInt,
           targetLanguages: targetLanguages,
           provider: provider,
@@ -666,7 +665,6 @@ class TranslationController extends BaseController {
 
         return ResponseUtils.success(
           message: '批量翻译成功',
-          data: updatedEntries.map((e) => e.toJson()).toList(),
         );
       },
       operationName: 'batchTranslateEntries',
