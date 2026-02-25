@@ -64,11 +64,15 @@ class ProjectModel with _$ProjectModel {
 
   factory ProjectModel.fromJson(Map<String, dynamic> json) => _$ProjectModelFromJson(json);
 
-  /// 项目所有者
-  ProjectMemberModel get owner => members.firstWhere((member) => member.userId == ownerId);
+  /// 项目所有者（如果找不到匹配的成员，返回第一个成员）
+  ProjectMemberModel get owner =>
+      members.cast<ProjectMemberModel?>().firstWhere((member) => member!.userId == ownerId, orElse: () => null) ??
+      members.first;
 
-  /// 主语言
-  LanguageModel get primaryLanguage => languages.firstWhere((language) => language.id == primaryLanguageId);
+  /// 主语言（如果找不到匹配的语言，返回第一个语言）
+  LanguageModel get primaryLanguage =>
+      languages.cast<LanguageModel?>().firstWhere((language) => language!.id == primaryLanguageId, orElse: () => null) ??
+      languages.first;
 }
 
 /// 创建项目请求模型

@@ -191,6 +191,28 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       if (entries.isEmpty) return [];
 
       final projectId = entries.first.projectId;
+
+      // API 优先
+      if (AppConfig.useServerForTranslations) {
+        try {
+          final created = await _translationApi.batchCreateTranslations(
+            projectId: projectId,
+            items: entries,
+          );
+          if (created != null && created.isNotEmpty) {
+            return created;
+          }
+        } catch (error, stackTrace) {
+          log(
+            '[batchCreateTranslationEntries_api_fallback]',
+            error: error,
+            stackTrace: stackTrace,
+            name: 'TranslationServiceImpl',
+          );
+        }
+      }
+
+      // 本地回退
       final allEntries = await getTranslationEntries(projectId);
       allEntries.addAll(entries);
       await _saveTranslationEntries(projectId, allEntries);

@@ -687,7 +687,7 @@ class _UploadFileListState extends State<UploadFileList> {
           TranslationEntryModel(
             uuid: DateTime.now().millisecondsSinceEpoch.toString(),
             projectId: 0,
-            entryKey: entry.value,
+            entryKey: entry.key,
             sourceLanguage: language,
             sourceText: entry.value,
             targetLanguages: [

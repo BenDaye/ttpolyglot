@@ -25,17 +25,17 @@ class _UploadDropState extends State<UploadDrop> {
   Widget build(BuildContext context) {
     return DropTarget(
       onDragEntered: (details) {
-        LoggerUtils.error('文件拖拽进入区域');
+        LoggerUtils.info('文件拖拽进入区域');
         //
         widget.onDragging?.call(true);
       },
       onDragExited: (details) {
-        LoggerUtils.error('文件拖拽离开区域');
+        LoggerUtils.info('文件拖拽离开区域');
         //
         widget.onDragging?.call(false);
       },
       onDragDone: (details) async {
-        LoggerUtils.error('文件被释放，共${details.files.length}个文件');
+        LoggerUtils.info('文件被释放，共${details.files.length}个文件');
         //
         widget.onDragging?.call(false);
 

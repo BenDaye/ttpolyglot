@@ -686,17 +686,11 @@ class ProjectController extends GetxController {
 
         if (newEntriesCount > 0) {
           message.write('创建了 $newEntriesCount 个新翻译条目');
-          if (autoReview) {
-            message.write('（已自动审核）');
-          }
         }
 
         if (updatedEntriesCount > 0) {
           if (message.isNotEmpty) message.write('，');
           message.write('更新了 $updatedEntriesCount 个现有翻译');
-          if (autoReview) {
-            message.write('（已自动审核）');
-          }
         }
 
         if (skippedEntriesCount > 0) {
@@ -833,9 +827,6 @@ class ProjectController extends GetxController {
           message = '成功处理 $fileCreatedCount 条翻译';
           if (fileUpdatedCount > 0) {
             message += '，更新 $fileUpdatedCount 条翻译';
-          }
-          if (autoReview) {
-            message += '（已自动审核）';
           }
         }
 

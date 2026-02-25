@@ -206,41 +206,69 @@ class BatchImportService extends BaseService {
         // 批量插入 translation_entries
         for (final entryKey in entryMap.keys) {
           final entryData = entryMap[entryKey]!;
+          final sourceLanguage = entryData['source_language'] as String? ?? 'en_US';
 
           final onConflict = overrideExisting
               ? '''
-                ON CONFLICT (project_id, entry_key) 
+                ON CONFLICT (project_id, entry_key)
                 DO UPDATE SET
                   source_text = EXCLUDED.source_text,
                   source_language = EXCLUDED.source_language,
                   context = EXCLUDED.context,
                   comment = EXCLUDED.comment,
                   updated_at = CURRENT_TIMESTAMP
+                RETURNING id
               '''
               : 'ON CONFLICT (project_id, entry_key) DO NOTHING';
 
           final entrySql = '''
-            INSERT INTO {translation_entries} 
+            INSERT INTO {translation_entries}
             (project_id, entry_key, source_language, source_text, context, comment)
             VALUES (@project_id, @entry_key, @source_language, @source_text, @context, @comment)
             $onConflict
-            RETURNING id
+            ${overrideExisting ? '' : 'RETURNING id'}
           ''';
 
           final entryResult = await _databaseService.query(entrySql, {
             'project_id': projectId,
             'entry_key': entryData['entry_key'],
-            'source_language': entryData['source_language'],
+            'source_language': sourceLanguage,
             'source_text': entryData['source_text'],
             'context': entryData['context'],
             'comment': entryData['comment'],
           });
 
-          if (entryResult.isNotEmpty) {
-            final entryId = entryResult.first.toColumnMap()['id'] as int;
+          int? entryId;
 
+          if (entryResult.isNotEmpty) {
+            entryId = entryResult.first.toColumnMap()['id'] as int;
+          } else {
+            // ON CONFLICT DO NOTHING 时 INSERT 不返回 ID，需要查询已有条目的 ID
+            final existingIdResult = await _databaseService.query('''
+              SELECT id FROM {translation_entries}
+              WHERE project_id = @project_id AND entry_key = @entry_key
+            ''', {
+              'project_id': projectId,
+              'entry_key': entryData['entry_key'],
+            });
+            if (existingIdResult.isNotEmpty) {
+              entryId = existingIdResult.first.toColumnMap()['id'] as int;
+            }
+          }
+
+          if (entryId != null) {
             // 更新目标语言翻译到 target_languages JSONB 字段
             final targetLanguages = targetLanguagesMap[entryKey]!;
+
+            // 过滤掉源语言，避免源语言被写入 target_languages JSONB
+            final filteredTargetLanguages = targetLanguages
+                .where((t) => t['language'] != sourceLanguage)
+                .toList();
+
+            if (filteredTargetLanguages.isEmpty) {
+              success++;
+              continue;
+            }
 
             // 先获取现有的 target_languages
             final existingResult = await _databaseService.query('''
@@ -254,13 +282,16 @@ class BatchImportService extends BaseService {
                 (jsonDecode(existingTargetsJson) as List<dynamic>).map((item) => item as Map<String, dynamic>).toList();
 
             // 合并新的目标语言
-            for (final targetLang in targetLanguages) {
+            for (final targetLang in filteredTargetLanguages) {
               final existingIndex = existingTargets.indexWhere((item) => item['language'] == targetLang['language']);
               if (existingIndex >= 0) {
-                // 更新现有翻译
-                existingTargets[existingIndex]['text'] = targetLang['text'];
+                if (overrideExisting) {
+                  // 覆盖模式：更新现有翻译
+                  existingTargets[existingIndex]['text'] = targetLang['text'];
+                }
+                // 非覆盖模式：保留现有翻译，跳过
               } else {
-                // 添加新翻译
+                // 添加新翻译（无论是否覆盖模式，新语言都应该添加）
                 existingTargets.add({'language': targetLang['language'], 'text': targetLang['text']});
               }
             }
@@ -360,41 +391,69 @@ class BatchImportService extends BaseService {
     for (final entryKey in entryMap.keys) {
       try {
         final entryData = entryMap[entryKey]!;
+        final sourceLanguage = entryData['source_language'] as String? ?? 'en_US';
 
         final onConflict = overrideExisting
             ? '''
-              ON CONFLICT (project_id, entry_key) 
+              ON CONFLICT (project_id, entry_key)
               DO UPDATE SET
                 source_text = EXCLUDED.source_text,
                 source_language = EXCLUDED.source_language,
                 context = EXCLUDED.context,
                 comment = EXCLUDED.comment,
                 updated_at = CURRENT_TIMESTAMP
+              RETURNING id
             '''
             : 'ON CONFLICT (project_id, entry_key) DO NOTHING';
 
         final entrySql = '''
-          INSERT INTO {translation_entries} 
+          INSERT INTO {translation_entries}
           (project_id, entry_key, source_language, source_text, context, comment)
           VALUES (@project_id, @entry_key, @source_language, @source_text, @context, @comment)
           $onConflict
-          RETURNING id
+          ${overrideExisting ? '' : 'RETURNING id'}
         ''';
 
         final entryResult = await _databaseService.query(entrySql, {
           'project_id': projectId,
           'entry_key': entryData['entry_key'],
-          'source_language': entryData['source_language'],
+          'source_language': sourceLanguage,
           'source_text': entryData['source_text'],
           'context': entryData['context'],
           'comment': entryData['comment'],
         });
 
-        if (entryResult.isNotEmpty) {
-          final entryId = entryResult.first.toColumnMap()['id'] as int;
+        int? entryId;
 
+        if (entryResult.isNotEmpty) {
+          entryId = entryResult.first.toColumnMap()['id'] as int;
+        } else {
+          // ON CONFLICT DO NOTHING 时 INSERT 不返回 ID，需要查询已有条目的 ID
+          final existingIdResult = await _databaseService.query('''
+            SELECT id FROM {translation_entries}
+            WHERE project_id = @project_id AND entry_key = @entry_key
+          ''', {
+            'project_id': projectId,
+            'entry_key': entryData['entry_key'],
+          });
+          if (existingIdResult.isNotEmpty) {
+            entryId = existingIdResult.first.toColumnMap()['id'] as int;
+          }
+        }
+
+        if (entryId != null) {
           // 更新目标语言翻译到 target_languages JSONB 字段
           final targetLanguages = targetLanguagesMap[entryKey]!;
+
+          // 过滤掉源语言，避免源语言被写入 target_languages JSONB
+          final filteredTargetLanguages = targetLanguages
+              .where((t) => t['language'] != sourceLanguage)
+              .toList();
+
+          if (filteredTargetLanguages.isEmpty) {
+            success++;
+            continue;
+          }
 
           // 先获取现有的 target_languages
           final existingResult = await _databaseService.query('''
@@ -408,13 +467,16 @@ class BatchImportService extends BaseService {
               (jsonDecode(existingTargetsJson) as List<dynamic>).map((item) => item as Map<String, dynamic>).toList();
 
           // 合并新的目标语言
-          for (final targetLang in targetLanguages) {
+          for (final targetLang in filteredTargetLanguages) {
             final existingIndex = existingTargets.indexWhere((item) => item['language'] == targetLang['language']);
             if (existingIndex >= 0) {
-              // 更新现有翻译
-              existingTargets[existingIndex]['text'] = targetLang['text'];
+              if (overrideExisting) {
+                // 覆盖模式：更新现有翻译
+                existingTargets[existingIndex]['text'] = targetLang['text'];
+              }
+              // 非覆盖模式：保留现有翻译，跳过
             } else {
-              // 添加新翻译
+              // 添加新翻译（无论是否覆盖模式，新语言都应该添加）
               existingTargets.add({'language': targetLang['language'], 'text': targetLang['text']});
             }
           }
