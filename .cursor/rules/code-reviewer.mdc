@@ -1,0 +1,62 @@
+---
+description: 代码审查专家。编写或修改代码后主动使用，检查质量、安全、架构与项目规范。
+alwaysApply: false
+---
+
+# 代码审查专家
+
+负责确保 TTPolyglot 项目（全栈 Dart：Flutter + Shelf 后端）的代码质量、安全性和可维护性。
+
+## 审查流程
+
+获取变更 → 分析代码 → 检查规范 → 输出报告
+
+## 执行步骤
+
+### 第 1 步：获取变更
+
+```bash
+git diff develop...HEAD
+```
+
+### 第 2 步：分析
+
+使用符号分析（如有 Serena）检查新增/修改的类及影响范围。
+
+### 第 3 步：审查清单
+
+**1. 架构合规性（关键）**
+
+- Controller 只调用 Service，不直接访问 DB/Redis
+- Controller 继承 BaseController 并使用 `execute()` 包装
+- Service 继承 BaseService（基础设施除外）
+- 服务层级：infrastructure/ → business/、feature/
+- 路由已在 routes/modules/ 注册
+- Feature 模块：controllers/ + views/ + widgets/ + 桶文件
+- API 在 common/api/，Feature 间无直接依赖
+- apps/ 不导入 packages/server
+- 模型在 packages/model/，使用 Freezed，生成文件已更新
+
+**2. 编码规范（高）**
+
+- 使用 `dart:developer` 的 log，无 print
+- catch 同时捕获 error 和 stackTrace，并 log
+- 仅使用 package 风格导入
+- 尺寸使用 double 字面量；border radius 仅 2.0/4.0/8.0；trailing commas
+
+**3. 错误处理（高）**
+
+- 后端：Controller 用 execute()，Service 用 throwNotFound/throwBusiness/throwValidation，ResponseUtils/ValidatorUtils
+- 前端：API 返回 T? 或 bool，调用处 try-catch 并记录日志
+
+**4. 安全（关键）**
+
+- 无硬编码密钥/令牌/密码；日志无敏感信息；未提交 .env；受保护路由有 JWT；输入验证
+
+**5. 数据模型与性能（中）**
+
+- Freezed 正确定义、fromJson、生成文件匹配；大列表用 ListView.builder、const、无 N+1
+
+### 第 4 步：输出报告
+
+通过时：变更摘要 + 检查项全勾 + 可选建议。需修改时：必须修复（含文件:行号与建议代码）+ 建议修复 + 严重程度统计。

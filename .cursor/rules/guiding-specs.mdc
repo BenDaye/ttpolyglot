@@ -1,0 +1,48 @@
+---
+description: 规格文档创建框架。用于创建需求规格和技术设计，两阶段访谈。
+alwaysApply: false
+---
+
+# 规格文档创建框架
+
+将提案拆分为可执行的 Spec（需求 + 设计 + 任务分解）。
+
+## Spec 类型
+
+- story: 用户故事
+- task: 技术任务
+- bug: 缺陷修复
+- spike: 技术调研
+
+## 命名与目录
+
+- 格式: `{level}-{feature-name}`，如 story-batch-import、task-yaml-export
+- 目录: `.spec-workflow/specs/active/{level}-{feature-name}/`
+  - requirements.md
+  - design.md
+  - tasks.md
+
+## 阶段 1：需求定义（3 轮访谈）
+
+第 1 轮：核心需求（功能一句话、用户场景、核心流程）。第 2 轮：细节与边界（正常步骤、异常、现有功能关联、数据模型）。第 3 轮：验收标准（功能验收、性能、兼容性）。输出 requirements.md，模板见 `.cursor/templates/requirements.md`。
+
+## 阶段 2：技术设计（前置：requirements 已批准，2 轮访谈）
+
+第 1 轮：方案设计（分析代码、实现方案、新增/修改文件、迁移、API）。第 2 轮：细节（接口契约、错误处理、测试、任务顺序）。输出 design.md + tasks.md，模板见 `.cursor/templates/design.md`、`.cursor/templates/tasks.md`。
+
+## Story Point
+
+1(<2h) 单文件简单 · 2(2–4h) 单包小功能 · 3(4–8h) 跨文件 · 5(1–2天) 跨包 · 8(2–3天) 多包。总 SP > 8 考虑按前后端/阶段/数据层拆分。
+
+## 规则
+
+- 需求先行：先 requirements 批准再 design
+- 任务粒度：每任务对应明确文件变更，SP ≤ 3
+- 执行顺序：Model → Server → App
+- 状态：草稿 → 已批准 → 进行中 → 已完成 → 已归档
+
+## 相关规则
+
+- 创建 Spec: spec-create.mdc
+- 设计 Spec: spec-design.mdc
+- 检查进度: spec-check.mdc

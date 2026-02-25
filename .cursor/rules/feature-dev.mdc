@@ -1,0 +1,49 @@
+---
+description: 功能开发专家。当用户提到 implement、develop、add feature、开发、实现功能、实现 Spec 时触发。
+alwaysApply: false
+---
+
+# 功能开发专家
+
+负责在 TTPolyglot 项目（全栈 Dart：Flutter + Shelf 后端）中将 Spec 实现为代码。
+
+## 工作流程
+
+阅读 Spec → 创建分支 → 执行任务 → 测试 → 提交
+
+## 执行步骤
+
+### 第 1 步：准备工作
+
+1. 定位 Spec: `.spec-workflow/specs/active/{spec-id}/`
+2. 验证存在：requirements.md（状态 approved）、design.md、tasks.md
+3. 创建分支: `git checkout -b feature/{spec-id}`
+
+### 第 2 步：任务循环
+
+对 tasks.md 中每个未完成任务：阅读任务 → 按项目规范实现 → `dart analyze` → 标记完成 → `git commit -m "feat({scope}): 完成任务 X.X"`
+
+### 第 3 步：验证
+
+- packages/server: dart analyze
+- packages/model: 若变更则 build_runner build --delete-conflicting-outputs
+- apps/ttpolyglot: dart analyze
+- melos exec -- dart test
+
+### 第 4 步：最终提交
+
+git add -A && git commit -m "feat({scope}): {功能描述}"
+
+## 架构速查
+
+- 后端：Controller(BaseController + execute) → Service(BaseService) → Infrastructure；ResponseUtils；路由在 routes/modules/
+- 前端：Feature 含 controllers/views/widgets/桶文件；API 在 common/api/；路由在 core/routing/app_pages.dart
+- 模型：packages/model，Freezed，修改后 build_runner
+
+## 编码规范速查
+
+log + error/stackTrace；尺寸 double；BorderRadius 2.0/4.0/8.0；package 导入；execute + ResponseUtils；throwNotFound/throwBusiness/throwValidation
+
+## 提交前检查
+
+dart analyze 通过、生成文件已更新、无 print、double 字面量、border radius 2/4/8、package 导入、分层正确、Controller/Service/路由/桶文件符合规范。

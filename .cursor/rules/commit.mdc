@@ -1,0 +1,58 @@
+---
+description: 生成并执行 Git 提交消息。基于暂存变更生成 Conventional Commits 格式。
+alwaysApply: false
+---
+
+# 提交消息生成
+
+基于暂存更改生成规范的 Git 提交消息。
+
+## 前置检查
+
+若暂存为空（无 `git add`），直接告知用户先执行 `git add`，不要自动 add。
+
+## 上下文
+
+- 暂存: `git diff --staged --name-only`
+- 分支: `git branch --show-current`
+- 状态: `git status`
+- 变更: `git diff --staged`
+- 最近: `git log --oneline -5`
+
+## 提交类型
+
+`feat` | `fix` | `docs` | `style` | `refactor` | `test` | `perf` | `build` | `ci` | `chore`
+
+## 格式
+
+`{type}({scope}): {description}`
+
+- type: 上表之一
+- scope: 可选，如 server、model、app、translation-service、auth-controller
+- description: 1–72 字符
+
+正则: `^(feat|fix|build|ci|docs|style|refactor|test|chore|perf)(\(.+\))?: .{1,72}$`
+
+## 生成策略
+
+1. 根据暂存路径推断 scope（见下表）
+2. 根据变更类型确定 type
+3. 简洁描述（1–72 字符）
+4. 可参考最近提交风格
+5. 可选 footer: Generated with Cursor / Co-Authored-By
+6. 执行 `git commit` 提交
+
+## Scope 推断
+
+- packages/server/lib/src/controllers/ → {模块}-controller
+- packages/server/lib/src/services/ → {模块}-service
+- packages/server 其他 → middleware / routes / migration
+- packages/model/ → model
+- packages/parsers|translators|utils/ → parsers / translators / utils
+- apps/ttpolyglot/lib/src/features/ → {功能名}
+- apps/ttpolyglot/lib/src/common/api/ → {模块}-api
+- apps/ttpolyglot/lib/src/core/ → core
+
+## 分支约定
+
+feature/*、hotfix/*、release/*、develop、main

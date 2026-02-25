@@ -1,0 +1,39 @@
+---
+description: 为已批准的 Spec 创建技术设计文档（design.md）和任务分解（tasks.md）。
+alwaysApply: false
+---
+
+# Spec 技术设计
+
+为已批准的需求规格创建技术设计和任务分解。
+
+## 前置条件
+
+`.spec-workflow/specs/active/{spec-name}/requirements.md` 存在且状态为 approved。
+
+## 流程
+
+### 第 1 步：分析需求
+
+读取 requirements.md；分析相关代码结构；识别需修改/新增的文件。
+
+### 第 2 步：技术访谈（2 轮）
+
+- 第 1 轮：整体方案、新模型/API/页面、数据库迁移
+- 第 2 轮：现有文件修改、前后端接口契约、测试策略
+
+### 第 3 步：生成 design.md
+
+参考 `.cursor/templates/design.md`：方案概述、新增/修改文件、数据库与 API 变更、数据流、技术决策。
+
+### 第 4 步：生成 tasks.md
+
+参考 `.cursor/templates/tasks.md`：任务列表（含文件、目的、要求）、执行顺序、依赖、SP 估算。
+
+## SP 估算参考
+
+- 1: 简单修改（字段、样式）
+- 2: 小功能（一个 API、简单页）
+- 3: 中等（CRUD 流程）
+- 5: 较大（跨前后端模块）
+- 8: 大型（多包）；SP > 5 考虑拆分

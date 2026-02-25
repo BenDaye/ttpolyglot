@@ -1,0 +1,43 @@
+---
+description: 提案创建框架。当用户提出新功能或改进建议时使用，通过 3 轮访谈产出提案。
+alwaysApply: false
+---
+
+# 提案创建框架
+
+通过 3 轮访谈创建功能提案（Proposal），用于团队评审。
+
+## 命名与目录
+
+- 格式: `{feature-name}`，如 batch-translation、conflict-resolution
+- 目录: `docs/team/proposals/{YYYY-MM}/{feature-name}/`
+  - proposal.md
+  - attachments/（可选）
+
+## 访谈流程（必须完成 3 轮）
+
+### 第 1 轮：问题与目标
+
+确认：要解决什么问题、期望理想状态、目标用户、涉及模块（server/app/model/parsers/translators）。
+
+### 第 2 轮：方案与范围
+
+确认：初步方案、功能边界（做/不做）、对现有功能影响、新依赖或服务。
+
+### 第 3 轮：优先级与风险
+
+确认：优先级 P0–P3、工作量 S/M/L/XL、风险与挑战、是否拆分为多个 Spec。
+
+## 输出模板
+
+使用 `.cursor/templates/proposal.md`。包含：状态（待评审、优先级、工作量、作者、日期）、问题描述、目标、方案概述、范围（包含/不包含）、影响分析（涉及包、数据库、API）、风险、后续步骤（批准后拆分为 Spec）。
+
+## 规则
+
+- 3 轮访谈必须完成，每轮结束后总结并确认
+- 不跳步；用户不确定处标记 TBD
+- 范围必须明确包含/不包含；预估 XL 时建议拆分为多 Spec
+
+## 状态流转
+
+待评审 → 已批准（转入 Spec）/ 已拒绝 / 需修改 → 待评审
