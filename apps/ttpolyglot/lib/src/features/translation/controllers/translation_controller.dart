@@ -138,12 +138,12 @@ class TranslationController extends GetxController {
   /// 更新翻译条目
   Future<void> updateTranslationEntryModel(TranslationEntryModel entry, {bool isShowSnackbar = true}) async {
     try {
-      await _translationService.updateTranslationEntryModel(entry);
+      final updated = await _translationService.updateTranslationEntryModel(entry);
 
-      // 更新本地列表
-      final index = _translationEntries.indexWhere((e) => e.uuid == entry.uuid);
+      // 用服务端返回的完整数据（包含所有目标语言）替换本地条目
+      final index = _translationEntries.indexWhere((e) => e.uuid == updated.uuid);
       if (index != -1) {
-        _translationEntries[index] = entry;
+        _translationEntries[index] = updated;
         _applyFilters();
       }
 
@@ -163,16 +163,12 @@ class TranslationController extends GetxController {
     if (entries.isEmpty) return;
 
     try {
-      // 批量更新到服务
+      // 批量更新到服务，用服务端返回的完整数据替换本地条目
       for (final entry in entries) {
-        await _translationService.updateTranslationEntryModel(entry);
-      }
-
-      // 更新本地列表
-      for (final entry in entries) {
-        final index = _translationEntries.indexWhere((e) => e.uuid == entry.uuid);
+        final updated = await _translationService.updateTranslationEntryModel(entry);
+        final index = _translationEntries.indexWhere((e) => e.uuid == updated.uuid);
         if (index != -1) {
-          _translationEntries[index] = entry;
+          _translationEntries[index] = updated;
         }
       }
 
