@@ -146,6 +146,7 @@ class TranslationApi {
     required String entryId,
     required List<String> targetLanguages,
     required TranslationProviderConfigModel provider,
+    bool force = false,
   }) async {
     try {
       final response = await HttpClient.post(
@@ -154,6 +155,7 @@ class TranslationApi {
           'entry_id': entryId,
           'target_languages': targetLanguages,
           'provider': provider.toJson(),
+          if (force) 'force': true,
         },
       );
       return ModelUtils.toModel<TranslationEntryModel>(
@@ -171,6 +173,7 @@ class TranslationApi {
     required int projectId,
     required List<String> targetLanguages,
     required TranslationProviderConfigModel provider,
+    bool force = false,
   }) async {
     try {
       await HttpClient.post(
@@ -178,6 +181,7 @@ class TranslationApi {
         data: {
           'target_languages': targetLanguages,
           'provider': provider.toJson(),
+          if (force) 'force': true,
         },
       );
       return true;

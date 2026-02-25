@@ -886,6 +886,7 @@ class TranslationService extends BaseService {
     required String entryId,
     required List<String> targetLanguages,
     required TranslationProviderConfigModel provider,
+    bool force = false,
     String? updatedBy,
   }) async {
     return execute<TranslationEntryModel>(
@@ -906,6 +907,7 @@ class TranslationService extends BaseService {
           sourceLanguage: entry.sourceLanguage,
           targetLanguages: targetLanguages,
           provider: provider,
+          force: force,
         );
 
         await _recordTranslationHistory(updatedEntry, updatedBy);
@@ -923,6 +925,7 @@ class TranslationService extends BaseService {
     required int projectId,
     required List<String> targetLanguages,
     required TranslationProviderConfigModel provider,
+    bool force = false,
     String? updatedBy,
   }) async {
     return execute<List<TranslationEntryModel>>(
@@ -945,6 +948,7 @@ class TranslationService extends BaseService {
               sourceLanguage: entry.sourceLanguage,
               targetLanguages: targetLanguages,
               provider: provider,
+              force: force,
             );
             updatedEntries.add(updatedEntry);
             await _recordTranslationHistory(updatedEntry, updatedBy);
@@ -964,13 +968,15 @@ class TranslationService extends BaseService {
 
   /// 调用翻译 API 并将结果写入数据库
   ///
-  /// 只翻译目标语言中还没有值的语言，已有翻译的语言会跳过
+  /// 默认只翻译目标语言中还没有值的语言，已有翻译的语言会跳过。
+  /// 当 [force] 为 true 时，强制覆盖已有翻译。
   Future<TranslationEntryModel> _translateAndSave({
     required String entryId,
     required String sourceText,
     required LanguageEnum sourceLanguage,
     required List<String> targetLanguages,
     required TranslationProviderConfigModel provider,
+    bool force = false,
   }) async {
     // 先读取现有 target_languages
     final isNumericId = int.tryParse(entryId) != null;
@@ -989,15 +995,20 @@ class TranslationService extends BaseService {
     final existingTargets =
         (jsonDecode(existingTargetsJson) as List<dynamic>).map((item) => item as Map<String, dynamic>).toList();
 
-    // 过滤掉已有翻译值的语言，只保留没有值的
-    final needTranslateLanguages = targetLanguages.where((langCode) {
-      final existing = existingTargets.firstWhere(
-        (t) => t['language'] == langCode,
-        orElse: () => <String, dynamic>{},
-      );
-      final text = existing['text']?.toString() ?? '';
-      return text.isEmpty;
-    }).toList();
+    // 过滤掉已有翻译值的语言，只保留没有值的（force 模式下全部翻译）
+    final List<String> needTranslateLanguages;
+    if (force) {
+      needTranslateLanguages = targetLanguages;
+    } else {
+      needTranslateLanguages = targetLanguages.where((langCode) {
+        final existing = existingTargets.firstWhere(
+          (t) => t['language'] == langCode,
+          orElse: () => <String, dynamic>{},
+        );
+        final text = existing['text']?.toString() ?? '';
+        return text.isEmpty;
+      }).toList();
+    }
 
     // 所有目标语言都已有翻译，直接返回现有条目
     if (needTranslateLanguages.isEmpty) {

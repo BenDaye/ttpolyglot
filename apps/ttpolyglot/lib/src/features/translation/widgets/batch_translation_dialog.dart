@@ -1,14 +1,12 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ttpolyglot/src/common/api/translation_api.dart';
 import 'package:ttpolyglot/src/core/services/translation_service_manager.dart';
 import 'package:ttpolyglot/src/features/project/controllers/project_controller.dart';
 import 'package:ttpolyglot/src/features/settings/controllers/translation_config_controller.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_model/model.dart';
-import 'package:ttpolyglot_translators/translators.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
 /// 批量翻译状态枚举
@@ -55,33 +53,6 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
   LanguageModel? _selectedSourceEntry;
   bool _isOverride = true; // 是否覆盖
   BatchTranslationStatus _translationStatus = BatchTranslationStatus.idle;
-
-  // 进度相关
-  int _totalCount = 0;
-  int _currentIndex = 0;
-  int _successCount = 0;
-  int _failCount = 0;
-  final List<String> _pendingKeys = []; // 按key分组的待翻译键列表
-  final Map<String, List<TranslationEntryModel>> _keyEntries = {}; // key对应的条目映射
-  final Map<String, TranslationEntryModel> _keySourceEntries = {}; // key对应的源语言条目
-  final List<TranslationEntryModel> _processedEntries = [];
-
-  // 控制相关
-  Timer? _translationTimer;
-  bool _shouldStop = false;
-  bool _isTranslating = false; // 防止并发翻译
-  bool _isDisposed = false; // 弹窗是否已被关闭
-  CancelToken? _cancelToken; // 取消令牌
-
-  @override
-  void dispose() {
-    _isDisposed = true; // 标记弹窗已关闭
-    _shouldStop = true; // 停止翻译
-    _isTranslating = false; // 重置翻译状态
-    _translationTimer?.cancel(); // 取消定时器
-    _cancelToken?.cancel(); // 取消正在进行的翻译请求
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -250,68 +221,26 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
 
   /// 构建进度区域
   Widget _buildProgressSection() {
-    // 按key数量计算进度（已处理的key数量 / 总的key数量）
-    final completedKeyCount = _currentIndex;
-    final progress = _totalCount > 0 ? (completedKeyCount / _totalCount).clamp(0.0, 1.0) : 0.0;
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // 状态指示器
         _buildStatusIndicator(),
         const SizedBox(height: 24.0),
-
-        // 进度条
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '翻译进度 (按翻译键)',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                ),
-                Text(
-                  '$completedKeyCount / $_totalCount 个键',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                ),
-              ],
+        if (_translationStatus == BatchTranslationStatus.running) ...[
+          LinearProgressIndicator(
+            backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+            minHeight: 8.0,
+          ),
+          const SizedBox(height: 12.0),
+          Text(
+            '正在翻译整个项目，请稍候...',
+            style: TextStyle(
+              fontSize: 12.0,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
-            const SizedBox(height: 8.0),
-            LinearProgressIndicator(
-              value: progress,
-              backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-              valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
-              minHeight: 8.0,
-            ),
-            const SizedBox(height: 8.0),
-            Text(
-              '${(progress * 100).toStringAsFixed(1)}%',
-              style: TextStyle(
-                fontSize: 12.0,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 24.0),
-
-        // 结果统计
-        _buildResultStatistics(),
-        const SizedBox(height: 16.0),
-
-        // 当前翻译项
-        if (_translationStatus == BatchTranslationStatus.running &&
-            _currentIndex < _pendingKeys.length &&
-            _currentIndex >= 0)
-          _buildCurrentTranslationItem(),
+          ),
+        ],
       ],
     );
   }
@@ -372,126 +301,6 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
     );
   }
 
-  /// 构建结果统计
-  Widget _buildResultStatistics() {
-    // 按key级别计算剩余数量
-    final remainingKeyCount = (_totalCount - _currentIndex).clamp(0, _totalCount);
-
-    return Row(
-      children: [
-        Expanded(
-          child: _buildResultCard('成功条目', _successCount, Colors.green, Icons.check_circle),
-        ),
-        const SizedBox(width: 8.0),
-        Expanded(
-          child: _buildResultCard('失败条目', _failCount, Colors.red, Icons.error),
-        ),
-        const SizedBox(width: 8.0),
-        Expanded(
-          child: _buildResultCard('剩余键', remainingKeyCount, Colors.blue, Icons.pending),
-        ),
-      ],
-    );
-  }
-
-  /// 构建结果卡片
-  Widget _buildResultCard(String label, int count, Color color, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(12.0),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8.0),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 16.0),
-          const SizedBox(height: 4.0),
-          Text(
-            count.toString(),
-            style: TextStyle(
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12.0,
-              color: color.withValues(alpha: 0.8),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 构建当前翻译项
-  Widget _buildCurrentTranslationItem() {
-    // 安全检查索引边界
-    if (_currentIndex < 0 || _currentIndex >= _pendingKeys.length) {
-      return const SizedBox.shrink();
-    }
-
-    final currentKey = _pendingKeys[_currentIndex];
-    final currentEntries = _keyEntries[currentKey]!;
-    final sourceEntry = _keySourceEntries[currentKey]!;
-
-    return Container(
-      padding: const EdgeInsets.all(12.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(8.0),
-        border: Border.all(
-          color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  borderRadius: BorderRadius.circular(4.0),
-                ),
-                child: Text(
-                  '${currentEntries.length} 种语言',
-                  style: GoogleFonts.notoSansMono(
-                    color: Colors.white,
-                    fontSize: 10.0,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8.0),
-              Expanded(
-                child: Text(
-                  currentKey,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8.0),
-          Text(
-            sourceEntry.targetLanguages.isNotEmpty ? sourceEntry.targetLanguages.first.text : sourceEntry.sourceText,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
 
   /// 构建翻译服务提供商选择器
   Widget _buildProviderSelector({
@@ -764,86 +573,14 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
         ];
 
       case BatchTranslationStatus.running:
-        return [
-          ElevatedButton.icon(
-            onPressed: _pauseTranslation,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-            ),
-            icon: const Icon(
-              Icons.pause,
-              size: 16.0,
-              color: Colors.white,
-            ),
-            label: const Text('暂停'),
-          ),
-          const SizedBox(width: 8.0),
-          ElevatedButton.icon(
-            onPressed: _stopTranslation,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-            ),
-            icon: const Icon(
-              Icons.stop,
-              size: 16.0,
-              color: Colors.white,
-            ),
-            label: const Text('停止'),
-          ),
-        ];
-
       case BatchTranslationStatus.paused:
         return [
-          ElevatedButton.icon(
-            onPressed: _resumeTranslation,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
-              ),
+          Text(
+            '翻译中，请勿关闭...',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontSize: 12.0,
             ),
-            icon: const Icon(Icons.play_arrow, size: 16.0, color: Colors.white),
-            label: const Text('继续'),
-          ),
-          const SizedBox(width: 8.0),
-          ElevatedButton.icon(
-            onPressed: _stopTranslation,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-            ),
-            icon: const Icon(Icons.stop, size: 16.0, color: Colors.white),
-            label: const Text('停止'),
-          ),
-          const SizedBox(width: 8.0),
-          ElevatedButton.icon(
-            onPressed: _saveCurrentProgress,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-            ),
-            icon: const Icon(Icons.save, size: 16.0, color: Colors.white),
-            label: const Text('保存进度'),
           ),
         ];
 
@@ -870,9 +607,8 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
     }
   }
 
-  /// 开始批量翻译
+  /// 开始批量翻译（调用服务端接口）
   Future<void> _startBatchTranslation() async {
-    // 表单验证
     if (_selectedProvider == null) {
       _showErrorSnackBar('请选择翻译接口');
       return;
@@ -883,339 +619,77 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
       return;
     }
 
-    try {
-      final translationManager = Get.find<TranslationServiceManager>();
-
-      // 检查翻译配置
-      if (!await translationManager.hasValidConfigAsync()) {
-        if (mounted) {
-          await TranslationServiceManager.showConfigCheckDialog(context);
-        }
-        return;
+    final translationManager = Get.find<TranslationServiceManager>();
+    if (!await translationManager.hasValidConfigAsync()) {
+      if (mounted) {
+        await TranslationServiceManager.showConfigCheckDialog(context);
       }
-
-      // 准备翻译条目
-      _prepareBatchTranslation();
-
-      // 开始翻译
-      if (!_isDisposed && mounted) {
-        setState(() {
-          _translationStatus = BatchTranslationStatus.running;
-        });
-      }
-
-      _startTranslationProcess();
-    } catch (error, stackTrace) {
-      LoggerUtils.error('批量翻译异常', error: error, stackTrace: stackTrace);
-      _showErrorSnackBar('翻译处理异常: $error');
-    }
-  }
-
-  /// 准备批量翻译
-  void _prepareBatchTranslation() {
-    final allEntries = widget.controller.translationEntries;
-    final Map<String, List<TranslationEntryModel>> entriesByKey = {};
-
-    // 按 key 分组
-    for (final entry in allEntries) {
-      entriesByKey.putIfAbsent(entry.entryKey, () => []).add(entry);
+      return;
     }
 
-    // 清空之前的数据
-    _pendingKeys.clear();
-    _keyEntries.clear();
-    _keySourceEntries.clear();
+    // 收集目标语言代码（项目所有语言 - 源语言）
+    final sourceCode = _selectedSourceEntry!.code.code;
+    final targetLanguageCodes = widget.project.languages
+        .map((l) => l.code.code)
+        .where((code) => code != sourceCode)
+        .toList();
 
-    // 创建新的取消令牌
-    _cancelToken = CancelToken();
-
-    final sourceLanguage = _selectedSourceEntry!.code; // LanguageEnum
-
-    // 遍历所有翻译键，按key分组准备翻译数据
-    for (final translationKey in entriesByKey.keys) {
-      final keyEntries = entriesByKey[translationKey]!;
-
-      // 找到源语言的条目（通过 sourceLanguage 字段匹配）
-      final sourceEntry = keyEntries.firstWhereOrNull(
-        (entry) => entry.sourceLanguage == sourceLanguage && entry.sourceText.isNotEmpty,
-      );
-
-      // 如果源语言没有对应的翻译，跳过这个key
-      if (sourceEntry == null) continue;
-
-      final sourceText = sourceEntry.sourceText;
-
-      // 获取需要翻译的目标语言条目
-      final targetEntries = <TranslationEntryModel>[];
-      for (final entry in keyEntries) {
-        // 如果不覆盖且已有翻译，则跳过
-        if (!_isOverride && entry.targetLanguages.any((t) => t.text.trim().isNotEmpty)) continue;
-
-        targetEntries.add(
-          entry.copyWith(
-            sourceText: sourceText,
-          ),
-        );
-      }
-
-      // 为 batchTranslateEntries 构造源条目（将 sourceText 放入 targetLanguages）
-      final sourceEntryForTranslation = sourceEntry.copyWith(
-        targetLanguages: [
-          TranslationTargetLanguageModel(language: sourceLanguage, text: sourceText),
-        ],
-      );
-
-      // 如果这个key有需要翻译的目标语言，添加到待处理列表
-      if (targetEntries.isNotEmpty) {
-        _pendingKeys.add(translationKey);
-        _keyEntries[translationKey] = targetEntries;
-        _keySourceEntries[translationKey] = sourceEntryForTranslation;
-      }
+    if (targetLanguageCodes.isEmpty) {
+      _showErrorSnackBar('没有需要翻译的目标语言');
+      return;
     }
 
-    _totalCount = _pendingKeys.length; // 总数改为key的数量
-    _currentIndex = 0;
-    _successCount = 0;
-    _failCount = 0;
-    _processedEntries.clear();
-    _shouldStop = false;
-    _isTranslating = false; // 重置翻译状态
-  }
-
-  /// 开始翻译流程
-  void _startTranslationProcess() {
-    _translationTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
-      if (_shouldStop || _currentIndex >= _pendingKeys.length) {
-        timer.cancel();
-        if (_currentIndex >= _pendingKeys.length) {
-          if (!_isDisposed && mounted) {
-            setState(() {
-              _translationStatus = BatchTranslationStatus.completed;
-            });
-            _showCompletionDialog();
-          }
-        }
-        return;
-      }
-
-      // 防止并发翻译：只有当前没有正在进行翻译时才开始新的翻译
-      if (_translationStatus == BatchTranslationStatus.running && !_isTranslating) {
-        _translateNextKey();
-      }
-    });
-  }
-
-  /// 翻译下一个Key的所有目标语言
-  Future<void> _translateNextKey() async {
-    if (_currentIndex >= _pendingKeys.length || _isTranslating || _isDisposed) return;
-
-    // 设置翻译状态，防止并发
-    _isTranslating = true;
-
-    final translationKey = _pendingKeys[_currentIndex];
-    final targetEntries = _keyEntries[translationKey]!;
-    final sourceEntry = _keySourceEntries[translationKey]!;
-
-    try {
-      final translationManager = Get.find<TranslationServiceManager>();
-
-      LoggerUtils.info('开始翻译Key: "$translationKey" (${targetEntries.length}个目标语言)');
-
-      // 按key分组批量翻译，一次性翻译这个key的所有目标语言
-      final results = await translationManager.batchTranslateEntries(
-        sourceEntries: sourceEntry,
-        entries: targetEntries,
-        provider: _selectedProvider!,
-        cancelToken: _cancelToken,
-      );
-
-      // 检查弹窗是否已关闭，如果已关闭则停止处理
-      if (_isDisposed) {
-        LoggerUtils.info('弹窗已关闭，停止处理翻译结果');
-        return;
-      }
-
-      // 处理翻译结果
-      int keySuccessCount = 0;
-      int keyFailCount = 0;
-
-      for (int i = 0; i < results.length; i++) {
-        // 再次检查弹窗状态
-        if (_isDisposed) {
-          LoggerUtils.info('弹窗已关闭，停止处理翻译结果');
-          return;
-        }
-
-        final result = results[i];
-        final entry = targetEntries[i];
-
-        if (result.success) {
-          keySuccessCount++;
-
-          // 获取源语言代码（从 sourceEntry 的第一个目标语言获取）
-          final sourceLangCode = sourceEntry.targetLanguages.isNotEmpty
-              ? sourceEntry.targetLanguages.first.language.code
-              : sourceEntry.sourceLanguage.code;
-
-          // 找到第一个非源语言的目标语言进行更新
-          final targetLangToUpdate = entry.targetLanguages.firstWhere(
-            (t) => t.language.code != sourceLangCode,
-            orElse: () => entry.targetLanguages.isNotEmpty
-                ? entry.targetLanguages.first
-                : TranslationTargetLanguageModel(language: entry.sourceLanguage, text: ''),
-          );
-
-          // 更新目标语言列表
-          final updatedTargetLanguages = entry.targetLanguages.map((t) {
-            if (t.language == targetLangToUpdate.language) {
-              return t.copyWith(text: result.translatedText);
-            }
-            return t;
-          }).toList();
-
-          // 如果该语言不存在，添加它
-          if (!updatedTargetLanguages.any((t) => t.language == targetLangToUpdate.language)) {
-            updatedTargetLanguages.add(
-              TranslationTargetLanguageModel(
-                language: targetLangToUpdate.language,
-                text: result.translatedText,
-              ),
-            );
-          }
-
-          final updatedEntry = entry.copyWith(
-            targetLanguages: updatedTargetLanguages,
-            updatedAt: DateTime.now(),
-          );
-          _processedEntries.add(updatedEntry);
-
-          // 立即更新到控制器（只有在弹窗未关闭时）
-          if (!_isDisposed) {
-            await widget.controller.updateTranslationEntryModel(updatedEntry, isShowSnackbar: false);
-          }
-        } else {
-          keyFailCount++;
-          final errorMessage = result.error ?? '翻译失败';
-          final firstTarget = entry.targetLanguages.isNotEmpty ? entry.targetLanguages.first : null;
-          LoggerUtils.info(
-              '翻译失败: ${entry.entryKey} (${firstTarget?.language.code ?? entry.sourceLanguage.code}) - $errorMessage');
-        }
-      }
-
-      _successCount += keySuccessCount;
-      _failCount += keyFailCount;
-
-      LoggerUtils.info('Key "$translationKey" 翻译完成: 成功 $keySuccessCount 个，失败 $keyFailCount 个');
-    } catch (error, stackTrace) {
-      // 如果是取消异常，更新状态为取消
-      if (error is CancelException) {
-        LoggerUtils.info('翻译被取消: $error');
-        _shouldStop = true;
-        if (!_isDisposed && mounted) {
-          setState(() {
-            _translationStatus = BatchTranslationStatus.cancelled;
-          });
-        }
-        return; // 取消时直接返回，不继续处理
-      }
-
-      _failCount += targetEntries.length;
-      LoggerUtils.error('翻译Key异常', error: error, stackTrace: stackTrace);
-    } finally {
-      // 确保无论成功还是失败都重置翻译状态
-      _isTranslating = false;
-    }
-
-    // 只有在弹窗未关闭时才更新状态
-    if (!_isDisposed && mounted) {
-      setState(() {
-        _currentIndex++;
-      });
-    }
-  }
-
-  /// 暂停翻译
-  void _pauseTranslation() {
-    // 取消当前正在进行的翻译请求
-    _cancelToken?.cancel();
-
-    if (!_isDisposed && mounted) {
-      setState(() {
-        _translationStatus = BatchTranslationStatus.paused;
-      });
-    }
-    _translationTimer?.cancel();
-    _isTranslating = false; // 重置翻译状态
-  }
-
-  /// 继续翻译
-  void _resumeTranslation() {
-    // 创建新的取消令牌，因为之前的已经被取消了
-    _cancelToken = CancelToken();
-
-    if (!_isDisposed && mounted) {
+    if (mounted) {
       setState(() {
         _translationStatus = BatchTranslationStatus.running;
       });
     }
-    _startTranslationProcess();
-  }
 
-  /// 停止翻译
-  void _stopTranslation() {
-    _shouldStop = true;
-
-    // 取消当前正在进行的翻译请求
-    _cancelToken?.cancel();
-
-    _translationTimer?.cancel();
-    _isTranslating = false; // 重置翻译状态
-
-    if (!_isDisposed && mounted) {
-      setState(() {
-        _translationStatus = BatchTranslationStatus.cancelled;
-      });
-    }
-  }
-
-  /// 保存当前进度
-  Future<void> _saveCurrentProgress() async {
     try {
-      // 刷新翻译条目显示
-      await widget.controller.refreshTranslationEntries();
+      final success = await TranslationApi().batchTranslateProject(
+        projectId: widget.project.id,
+        targetLanguages: targetLanguageCodes,
+        provider: _selectedProvider!,
+        force: _isOverride,
+      );
 
-      _showInfoSnackBar('当前进度已保存');
+      if (!mounted) return;
+
+      if (success) {
+        setState(() {
+          _translationStatus = BatchTranslationStatus.completed;
+        });
+
+        Get.snackbar(
+          '翻译完成',
+          '批量翻译已完成',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+          snackPosition: SnackPosition.TOP,
+        );
+
+        // 刷新翻译列表
+        widget.controller.refreshTranslationEntries();
+      } else {
+        setState(() {
+          _translationStatus = BatchTranslationStatus.cancelled;
+        });
+        _showErrorSnackBar('批量翻译失败，请稍后重试');
+      }
     } catch (error, stackTrace) {
-      LoggerUtils.error('保存进度失败', error: error, stackTrace: stackTrace);
-      _showErrorSnackBar('保存进度失败: $error');
+      LoggerUtils.error('批量翻译异常', error: error, stackTrace: stackTrace);
+      if (mounted) {
+        setState(() {
+          _translationStatus = BatchTranslationStatus.cancelled;
+        });
+        _showErrorSnackBar('翻译处理异常: $error');
+      }
     }
-  }
-
-  /// 显示完成对话框
-  void _showCompletionDialog() {
-    if (_isDisposed) return; // 如果弹窗已关闭，不显示完成对话框
-
-    final message = '批量翻译完成！\n成功: $_successCount 个\n失败: $_failCount 个';
-
-    Get.snackbar(
-      '翻译完成',
-      message,
-      backgroundColor: _failCount > 0 ? Colors.orange : Colors.green,
-      colorText: Colors.white,
-      duration: const Duration(seconds: 4),
-      snackPosition: SnackPosition.TOP,
-    );
-
-    // 刷新翻译条目显示
-    widget.controller.refreshTranslationEntries();
   }
 
   /// 关闭对话框
   void _closeDialog() {
-    if (_translationStatus == BatchTranslationStatus.running) {
-      // 如果正在翻译，先停止
-      _stopTranslation();
-    }
     Get.back();
   }
 
@@ -1227,19 +701,6 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
           content: Text(message, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white)),
           backgroundColor: Theme.of(context).colorScheme.error,
           duration: const Duration(seconds: 3),
-        ),
-      );
-    }
-  }
-
-  /// 显示信息提示
-  void _showInfoSnackBar(String message) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white)),
-          backgroundColor: Colors.blue,
-          duration: const Duration(seconds: 2),
         ),
       );
     }

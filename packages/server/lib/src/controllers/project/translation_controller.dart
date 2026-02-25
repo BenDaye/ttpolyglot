@@ -610,12 +610,14 @@ class TranslationController extends BaseController {
         }
 
         final provider = TranslationProviderConfigModel.fromJson(providerData);
+        final force = data['force'] == true;
         final updatedBy = getCurrentUserId(request);
 
         final updatedEntry = await _translationService.translateEntry(
           entryId: entryId,
           targetLanguages: targetLanguages,
           provider: provider,
+          force: force,
           updatedBy: updatedBy,
         );
 
@@ -651,12 +653,14 @@ class TranslationController extends BaseController {
         }
 
         final provider = TranslationProviderConfigModel.fromJson(providerData);
+        final force = data['force'] == true;
         final updatedBy = getCurrentUserId(request);
 
         final updatedEntries = await _translationService.batchTranslateEntries(
           projectId: projectIdInt,
           targetLanguages: targetLanguages,
           provider: provider,
+          force: force,
           updatedBy: updatedBy,
         );
 
