@@ -1,4 +1,5 @@
 ---
+description: 全局代码风格（日志、catch、double、桶文件、导入、圆角）
 alwaysApply: true
 ---
 

@@ -1,0 +1,48 @@
+---
+description: Dart/Flutter 与后端代码风格规范（导入、日志、UI、GetX、Controller、Service、模型）
+alwaysApply: false
+paths: "**/*.dart"
+---
+
+# Dart/Flutter 代码风格规范
+
+适用于 apps/ 和 packages/ 下的所有 Dart 文件。
+
+## 通用规则
+
+### 导入风格
+- 必须使用 package 风格导入，禁止相对路径。
+- 示例: `import 'package:ttpolyglot/src/features/translation/translation.dart';`
+
+### 日志规范
+- 使用 `dart:developer` 的 `log` 替代 `print`。
+- catch 必须捕获 `error` 和 `stackTrace`，并输出:
+  `log('[函数名]', error: error, stackTrace: stackTrace, name: '[类名]');`
+
+### 行宽与格式
+- 行宽 120 字符；始终使用 trailing commas。
+- 不手动编辑 `*.g.dart` 和 `*.freezed.dart`。
+
+## Flutter / UI 规则
+
+- 尺寸值必须使用 double 字面量（如 `10.0`、`200.0`），禁止整数。
+- 圆角半径只允许 `2.0`、`4.0`、`8.0`（如 `BorderRadius.circular(4.0)`）。
+- 每个 feature 必须有桶文件导出（如 `features/translation/translation.dart`）。
+
+## GetX 与 API
+- Controller 通过 Get.find 获取服务；API 类中查询方法返回 `T?`，操作返回 `bool`。
+- API 内 try-catch 必须捕获 error 和 stackTrace 并 log。
+
+## 后端 Server 规则
+
+- Controller 必须继承 BaseController，使用 `execute()` 包装业务逻辑。
+- Service 必须继承 BaseService（infrastructure 层除外）；使用 `logInfo`/`logError`、`throwNotFound`/`throwBusiness`/`throwValidation`。
+- 服务层级: infrastructure/（不继承 BaseService）→ business/、feature/（继承 BaseService）。
+- 响应统一使用 `ResponseUtils.success`/`ResponseUtils.error`/`ResponseUtils.notFound`。
+
+## 数据模型
+- 模型定义在 `packages/model/`，使用 Freezed + json_serializable。
+- 修改模型后需运行 `build_runner build --delete-conflicting-outputs`。
+
+## 命名规范
+- 类名 PascalCase；文件名 snake_case；变量/常量 camelCase；私有成员 `_name`；枚举值 camelCase。

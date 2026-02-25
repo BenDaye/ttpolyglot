@@ -1,0 +1,36 @@
+---
+description: 项目结构与架构约束、依赖规则、目录定位
+alwaysApply: false
+paths: "apps/**/*.dart", "packages/**/*.dart"
+---
+
+# 项目结构与架构约束
+
+## 快速定位
+- Flutter 应用: `apps/ttpolyglot/`
+- 后端 API: `packages/server/`
+- 共享模型: `packages/model/`
+- 解析器: `packages/parsers/`
+- 翻译集成: `packages/translators/`
+- 共享工具: `packages/utils/`
+
+## 架构依赖规则（禁止）
+- `packages/model` 不可依赖其他 packages。
+- `packages/parsers`、`packages/translators` 不可依赖 `packages/server`。
+- `packages/server` 不可依赖 `apps/`。
+- `apps/` 不可依赖 `packages/server`（仅通过 HTTP API 通信）。
+
+## apps/ttpolyglot 结构
+- `src/core/`: layout、routing、theme、services、storage、platform、widgets、utils。
+- `src/common/`: api、network、config、services。
+- `src/features/`: 每个 feature 含 `controllers/`、`views/`、`widgets/` 及桶文件 `{name}.dart`。
+- Feature 间不直接依赖，通过路由导航；API 类放在 `common/api/`。
+
+## packages/server 结构
+- `controllers/`: 继承 BaseController，使用 execute；只负责请求解析与响应构建。
+- `services/`: infrastructure/（DB、Redis）、business/、feature/；业务逻辑在 Service 层。
+- `routes/modules/`: 路由在此注册并挂载到 api_routes.dart。
+- 响应使用 ResponseUtils；中间件顺序: RequestId → Logging → CORS → RateLimit → … → Auth → Controller。
+
+## packages/model
+- 共享 Freezed 模型与枚举；修改后需运行 build_runner。
