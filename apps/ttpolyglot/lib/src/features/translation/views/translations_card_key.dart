@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ttpolyglot/src/common/api/translation_api.dart';
 import 'package:ttpolyglot/src/core/services/translation_service_manager.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_model/model.dart';
@@ -307,29 +308,23 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
     );
   }
 
-  /// 处理根据默认语言翻译
+  /// 处理根据默认语言翻译（调用服务端接口翻译 + 入库，然后刷新列表）
   Future<void> _handleTranslateByDefaultLanguage(BuildContext context) async {
-    if (_isTranslating) return; // 防止重复点击
+    if (_isTranslating) return;
 
     if (mounted) {
-      setState(() {
-        _isTranslating = true;
-      });
+      setState(() => _isTranslating = true);
     }
 
     try {
       final translationManager = Get.find<TranslationServiceManager>();
 
-      // 检查翻译配置（异步等待配置加载完成）
+      // 检查翻译配置
       if (!await translationManager.hasValidConfigAsync()) {
         if (context.mounted) {
           await TranslationServiceManager.showConfigCheckDialog(context);
         }
-        if (mounted) {
-          setState(() {
-            _isTranslating = false;
-          });
-        }
+        if (mounted) setState(() => _isTranslating = false);
         return;
       }
 
@@ -338,160 +333,57 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
         if (context.mounted) {
           _showErrorSnackBar(context, '您还没有设置默认翻译接口');
         }
-        if (mounted) {
-          setState(() {
-            _isTranslating = false;
-          });
-        }
+        if (mounted) setState(() => _isTranslating = false);
         return;
       }
 
-      // 获取可用的源语言（从翻译条目中提取）
-      final availableSourceLanguages = widget.translationEntries.map((entry) => entry.sourceLanguage).toSet().toList();
+      final provider = translationManager.defaultProvider!;
+      final firstEntry = widget.translationEntries.first;
 
-      if (availableSourceLanguages.isEmpty) {
+      // 收集所有目标语言代码
+      final targetLanguageCodes = widget.translationEntries
+          .expand((e) => e.targetLanguages)
+          .map((t) => t.language.code)
+          .toSet()
+          .toList();
+
+      if (targetLanguageCodes.isEmpty) {
         if (context.mounted) {
-          _showErrorSnackBar(context, '没有可用的源语言');
+          _showErrorSnackBar(context, '没有需要翻译的目标语言');
         }
-        if (mounted) {
-          setState(() {
-            _isTranslating = false;
-          });
-        }
+        if (mounted) setState(() => _isTranslating = false);
         return;
       }
 
-      // 如果有多个源语言，让用户选择
-      LanguageEnum selectedSourceLanguage;
-      if (availableSourceLanguages.length == 1) {
-        selectedSourceLanguage = availableSourceLanguages.first;
-      } else {
-        if (!context.mounted) {
-          if (mounted) {
-            setState(() {
-              _isTranslating = false;
-            });
-          }
-          return;
-        }
+      // 调用服务端翻译接口（翻译 + 入库）
+      final result = await TranslationApi().translateEntry(
+        projectId: firstEntry.projectId,
+        entryId: firstEntry.uuid,
+        targetLanguages: targetLanguageCodes,
+        provider: provider,
+      );
 
-        final selectedLanguage = await LanguageSelectionDialog.show(
-          context: context,
-          availableLanguages: availableSourceLanguages,
-          title: '选择源语言',
-          subtitle: '请选择要翻译的源语言',
+      if (result != null) {
+        // 翻译成功，通知父组件刷新列表
+        widget.onTranslateByDefaultLanguage?.call(
+          key: widget.translationKey,
+          entries: widget.translationEntries,
         );
-
-        if (selectedLanguage == null) {
-          if (mounted) {
-            setState(() {
-              _isTranslating = false;
-            });
-          }
-          return; // 用户取消了选择
-        }
-        selectedSourceLanguage = selectedLanguage;
-      }
-
-      // 源语言文本（sourceText 存储在条目的 sourceText 字段中，而非 targetLanguages）
-      final TranslationEntryModel? sourceEntry = widget.translationEntries.firstWhereOrNull(
-          (entry) => entry.sourceLanguage == selectedSourceLanguage && entry.sourceText.isNotEmpty,);
-
-      if (sourceEntry == null) {
         if (context.mounted) {
-          _showErrorSnackBar(context, '主语言还没有设置翻译');
+          _showSuccessSnackBar(context, '翻译成功');
         }
-        if (mounted) {
-          setState(() {
-            _isTranslating = false;
-          });
+      } else {
+        if (context.mounted) {
+          _showErrorSnackBar(context, '翻译失败，请稍后重试');
         }
-        return;
-      }
-
-      // 为 batchTranslateEntries 构造源条目（将 sourceText 放入 targetLanguages）
-      final sourceEntryForTranslation = sourceEntry.copyWith(
-        targetLanguages: [
-          TranslationTargetLanguageModel(language: selectedSourceLanguage, text: sourceEntry.sourceText),
-        ],
-      );
-
-      // 获取需要翻译的条目（所有目标语言条目）
-      final List<TranslationEntryModel> translateEntries = widget.translationEntries.toList();
-
-      // 批量翻译
-      final results = await translationManager.batchTranslateEntries(
-        // 翻译源
-        sourceEntries: sourceEntryForTranslation,
-        // 翻译条目
-        entries: translateEntries,
-      );
-
-      // 处理翻译结果
-      int successCount = 0;
-      int failCount = 0;
-      final updatedEntries = <TranslationEntryModel>[];
-      final failedEntries = <TranslationEntryModel>[];
-
-      for (int i = 0; i < results.length; i++) {
-        final result = results[i];
-        final entry = translateEntries[i];
-        if (result.success) {
-          successCount++;
-          // 更新对应目标语言的翻译文本
-          final updatedTargetLanguages = entry.targetLanguages.map((t) {
-            if (t.language == result.targetLanguage) {
-              return t.copyWith(text: result.translatedText);
-            }
-            return t;
-          }).toList();
-
-          updatedEntries.add(
-            entry.copyWith(
-              targetLanguages: updatedTargetLanguages,
-              updatedAt: DateTime.now(),
-            ),
-          );
-        } else {
-          failCount++;
-          failedEntries.add(entry);
-          LoggerUtils.error('翻译失败: ${entry.entryKey} - ${result.error}');
-        }
-      }
-
-      // 调用回调更新条目
-      widget.onChangeTranslate?.call(entries: updatedEntries);
-
-      // 显示结果
-      if (context.mounted) {
-        _showTranslationResultSnackBar(context, successCount, failCount);
-
-        // 如果有失败的翻译，显示详细信息
-        if (failCount > 0) {
-          _showFailedTranslationsDialog(
-            context,
-            failedEntries,
-            results.where((r) => !r.success).map((r) => r.error ?? '未知错误').toList(),
-          );
-        }
-      }
-
-      // 重置加载状态
-      if (mounted) {
-        setState(() {
-          _isTranslating = false;
-        });
       }
     } catch (error, stackTrace) {
       LoggerUtils.error('翻译处理异常', error: error, stackTrace: stackTrace);
       if (context.mounted) {
         _showErrorSnackBar(context, '翻译处理异常: $error');
       }
-      if (mounted) {
-        setState(() {
-          _isTranslating = false;
-        });
-      }
+    } finally {
+      if (mounted) setState(() => _isTranslating = false);
     }
   }
 
@@ -506,87 +398,14 @@ class _TranslationsCardByKeyState extends State<TranslationsCardByKey> {
     );
   }
 
-  /// 显示翻译结果提示
-  void _showTranslationResultSnackBar(BuildContext context, int successCount, int failCount) {
-    final message = '翻译完成: 成功 $successCount 个，失败 $failCount 个';
-    final backgroundColor = failCount > 0 ? Theme.of(context).colorScheme.error : Colors.green;
-
+  /// 显示成功提示
+  void _showSuccessSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white)),
-        backgroundColor: backgroundColor,
+        backgroundColor: Colors.green,
         duration: const Duration(seconds: 3),
       ),
-    );
-  }
-
-  /// 显示失败翻译详情对话框
-  void _showFailedTranslationsDialog(
-    BuildContext context,
-    List<TranslationEntryModel> failedEntries,
-    List<String> errors,
-  ) {
-    Get.dialog(
-      AlertDialog(
-        title: Row(
-          children: [
-            Icon(
-              Icons.error_outline,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            const SizedBox(width: 8.0),
-            const Text('翻译失败详情'),
-          ],
-        ),
-        content: SizedBox(
-          width: 640.0,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: failedEntries.length,
-            itemBuilder: (context, index) {
-              final entry = failedEntries[index];
-              final error = errors[index];
-
-              return Card(
-                margin: const EdgeInsets.only(bottom: 8.0),
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        entry.entryKey,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                      const SizedBox(height: 4.0),
-                      Text(
-                        '(${entry.sourceLanguage.code} -> ${entry.targetLanguages.firstOrNull?.language.code ?? entry.sourceLanguage.code}) ${entry.sourceText}',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      const SizedBox(height: 4.0),
-                      Text(
-                        '错误: $error',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.error,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('确定'),
-          ),
-        ],
-      ),
-      barrierDismissible: false,
     );
   }
 }

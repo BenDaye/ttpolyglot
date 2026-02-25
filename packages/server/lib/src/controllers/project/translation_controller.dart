@@ -590,4 +590,82 @@ class TranslationController extends BaseController {
       operationName: 'filterTranslations',
     );
   }
+
+  /// 翻译单个条目（调用翻译API + 入库）
+  Future<Response> translate(Request request, String projectId) async {
+    return execute(
+      () async {
+        final body = await request.readAsString();
+        final data = jsonDecode(body) as Map<String, dynamic>;
+
+        final entryId = ValidatorUtils.validateString(data['entry_id'], 'entry_id');
+        final targetLanguages = (data['target_languages'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
+        final providerData = data['provider'] as Map<String, dynamic>?;
+
+        if (targetLanguages.isEmpty) {
+          throw ValidationException(message: 'target_languages 不能为空');
+        }
+        if (providerData == null) {
+          throw ValidationException(message: 'provider 不能为空');
+        }
+
+        final provider = TranslationProviderConfigModel.fromJson(providerData);
+        final updatedBy = getCurrentUserId(request);
+
+        final updatedEntry = await _translationService.translateEntry(
+          entryId: entryId,
+          targetLanguages: targetLanguages,
+          provider: provider,
+          updatedBy: updatedBy,
+        );
+
+        return ResponseUtils.success(
+          message: '翻译成功',
+          data: updatedEntry.toJson(),
+        );
+      },
+      operationName: 'translate',
+    );
+  }
+
+  /// 批量翻译整个项目（调用翻译API + 入库）
+  Future<Response> batchTranslateEntries(Request request, String projectId) async {
+    return execute(
+      () async {
+        final projectIdInt = int.tryParse(projectId);
+        if (projectIdInt == null) {
+          throw ValidationException(message: '项目ID格式无效');
+        }
+
+        final body = await request.readAsString();
+        final data = jsonDecode(body) as Map<String, dynamic>;
+
+        final targetLanguages = (data['target_languages'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
+        final providerData = data['provider'] as Map<String, dynamic>?;
+
+        if (targetLanguages.isEmpty) {
+          throw ValidationException(message: 'target_languages 不能为空');
+        }
+        if (providerData == null) {
+          throw ValidationException(message: 'provider 不能为空');
+        }
+
+        final provider = TranslationProviderConfigModel.fromJson(providerData);
+        final updatedBy = getCurrentUserId(request);
+
+        final updatedEntries = await _translationService.batchTranslateEntries(
+          projectId: projectIdInt,
+          targetLanguages: targetLanguages,
+          provider: provider,
+          updatedBy: updatedBy,
+        );
+
+        return ResponseUtils.success(
+          message: '批量翻译成功',
+          data: updatedEntries.map((e) => e.toJson()).toList(),
+        );
+      },
+      operationName: 'batchTranslateEntries',
+    );
+  }
 }

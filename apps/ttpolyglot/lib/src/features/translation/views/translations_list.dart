@@ -101,6 +101,12 @@ class TranslationsList extends StatelessWidget {
                         onChangeTranslate: ({required List<TranslationEntryModel> entries}) {
                           controller.updateTranslationEntries(entries, isShowSnackbar: false);
                         },
+                        onTranslateByDefaultLanguage: ({
+                          required String key,
+                          required List<TranslationEntryModel> entries,
+                        }) {
+                          controller.refreshTranslationEntries();
+                        },
                         onTranslateByCustom: ({required String key, required List<TranslationEntryModel> entries}) {
                           CustomTranslationDialog.show(
                             translationKey: key,

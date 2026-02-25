@@ -140,6 +140,53 @@ class TranslationApi {
     }
   }
 
+  /// 翻译单个条目（服务端翻译 + 入库）
+  Future<TranslationEntryModel?> translateEntry({
+    required int projectId,
+    required String entryId,
+    required List<String> targetLanguages,
+    required TranslationProviderConfigModel provider,
+  }) async {
+    try {
+      final response = await HttpClient.post(
+        '/projects/$projectId/translations/translate',
+        data: {
+          'entry_id': entryId,
+          'target_languages': targetLanguages,
+          'provider': provider.toJson(),
+        },
+      );
+      return ModelUtils.toModel<TranslationEntryModel>(
+        response.data,
+        (json) => TranslationEntryModel.fromJson(json),
+      );
+    } catch (error, stackTrace) {
+      log('[translateEntry]', error: error, stackTrace: stackTrace, name: 'TranslationApi');
+      return null;
+    }
+  }
+
+  /// 批量翻译整个项目（服务端翻译 + 入库）
+  Future<bool> batchTranslateProject({
+    required int projectId,
+    required List<String> targetLanguages,
+    required TranslationProviderConfigModel provider,
+  }) async {
+    try {
+      await HttpClient.post(
+        '/projects/$projectId/translations/batch/translate-save',
+        data: {
+          'target_languages': targetLanguages,
+          'provider': provider.toJson(),
+        },
+      );
+      return true;
+    } catch (error, stackTrace) {
+      log('[batchTranslateProject]', error: error, stackTrace: stackTrace, name: 'TranslationApi');
+      return false;
+    }
+  }
+
   /// 搜索翻译条目
   Future<List<TranslationEntryModel>?> searchTranslations({
     required int projectId,

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:ttpolyglot_model/model.dart';
+import 'package:ttpolyglot_translators/translators.dart';
 
 import '../base_service.dart';
 import '../infrastructure/database_service.dart';
@@ -878,5 +879,175 @@ class TranslationService extends BaseService {
       logError('更新项目统计失败', error: error, stackTrace: stackTrace, context: {'project_id': projectId});
       // 不抛出异常，避免影响主要操作
     }
+  }
+
+  /// 翻译单个条目并入库
+  Future<TranslationEntryModel> translateEntry({
+    required String entryId,
+    required List<String> targetLanguages,
+    required TranslationProviderConfigModel provider,
+    String? updatedBy,
+  }) async {
+    return execute<TranslationEntryModel>(
+      () async {
+        logInfo('开始翻译条目', context: {'entry_id': entryId, 'targets': targetLanguages});
+
+        final entry = await getTranslationEntryById(entryId);
+        if (entry == null) {
+          throwNotFound('翻译条目不存在');
+        }
+        if (entry.sourceText.isEmpty) {
+          throwBusiness('源文本为空，无法翻译');
+        }
+
+        final updatedEntry = await _translateAndSave(
+          entryId: entryId,
+          sourceText: entry.sourceText,
+          sourceLanguage: entry.sourceLanguage,
+          targetLanguages: targetLanguages,
+          provider: provider,
+        );
+
+        await _recordTranslationHistory(updatedEntry, updatedBy);
+        await _updateProjectStats(updatedEntry.projectId);
+
+        logInfo('翻译条目完成', context: {'entry_id': entryId});
+        return updatedEntry;
+      },
+      operationName: 'translateEntry',
+    );
+  }
+
+  /// 批量翻译整个项目的所有条目并入库
+  Future<List<TranslationEntryModel>> batchTranslateEntries({
+    required int projectId,
+    required List<String> targetLanguages,
+    required TranslationProviderConfigModel provider,
+    String? updatedBy,
+  }) async {
+    return execute<List<TranslationEntryModel>>(
+      () async {
+        // 获取项目下所有翻译条目
+        final allEntries = await getTranslationEntries(projectId: projectId, limit: 10000);
+        final entries = allEntries.items ?? [];
+
+        logInfo('开始批量翻译', context: {'project_id': projectId, 'count': entries.length, 'targets': targetLanguages});
+
+        final updatedEntries = <TranslationEntryModel>[];
+
+        for (final entry in entries) {
+          if (entry.sourceText.isEmpty) continue;
+
+          try {
+            final updatedEntry = await _translateAndSave(
+              entryId: entry.uuid,
+              sourceText: entry.sourceText,
+              sourceLanguage: entry.sourceLanguage,
+              targetLanguages: targetLanguages,
+              provider: provider,
+            );
+            updatedEntries.add(updatedEntry);
+            await _recordTranslationHistory(updatedEntry, updatedBy);
+          } catch (error, stackTrace) {
+            logError('翻译条目失败', error: error, stackTrace: stackTrace, context: {'entry_id': entry.uuid});
+          }
+        }
+
+        await _updateProjectStats(projectId);
+
+        logInfo('批量翻译完成', context: {'total': entries.length, 'success': updatedEntries.length});
+        return updatedEntries;
+      },
+      operationName: 'batchTranslateEntries',
+    );
+  }
+
+  /// 调用翻译 API 并将结果写入数据库
+  ///
+  /// 只翻译目标语言中还没有值的语言，已有翻译的语言会跳过
+  Future<TranslationEntryModel> _translateAndSave({
+    required String entryId,
+    required String sourceText,
+    required LanguageEnum sourceLanguage,
+    required List<String> targetLanguages,
+    required TranslationProviderConfigModel provider,
+  }) async {
+    // 先读取现有 target_languages
+    final isNumericId = int.tryParse(entryId) != null;
+    final entryResult = await _databaseService.query('''
+      SELECT id, COALESCE(target_languages::text, '[]') as target_languages
+      FROM {translation_entries}
+      WHERE ${isNumericId ? 'id = @entry_id' : 'uuid::text = @entry_id'}
+    ''', {'entry_id': entryId});
+
+    if (entryResult.isEmpty) {
+      throwNotFound('翻译条目不存在');
+    }
+
+    final entryData = entryResult.first.toColumnMap();
+    final existingTargetsJson = entryData['target_languages'] as String? ?? '[]';
+    final existingTargets =
+        (jsonDecode(existingTargetsJson) as List<dynamic>).map((item) => item as Map<String, dynamic>).toList();
+
+    // 过滤掉已有翻译值的语言，只保留没有值的
+    final needTranslateLanguages = targetLanguages.where((langCode) {
+      final existing = existingTargets.firstWhere(
+        (t) => t['language'] == langCode,
+        orElse: () => <String, dynamic>{},
+      );
+      final text = existing['text']?.toString() ?? '';
+      return text.isEmpty;
+    }).toList();
+
+    // 所有目标语言都已有翻译，直接返回现有条目
+    if (needTranslateLanguages.isEmpty) {
+      logInfo('所有目标语言已有翻译，跳过', context: {'entry_id': entryId});
+      final existingEntry = await getTranslationEntryById(entryId);
+      if (existingEntry == null) {
+        throwNotFound('翻译条目不存在');
+      }
+      return existingEntry;
+    }
+
+    // 只翻译缺失的语言
+    final targetEnums = needTranslateLanguages.map((code) => LanguageEnum.fromValue(code)).toList();
+
+    final result = await TranslationApiService.translateBatchTexts(
+      sourceText: sourceText,
+      sourceLanguage: sourceLanguage,
+      targetLanguages: targetEnums,
+      config: provider,
+    );
+
+    // 合并翻译结果到 target_languages
+    for (final item in result.items) {
+      if (!item.success) continue;
+
+      final langCode = item.targetLanguage.code;
+      final existingIndex = existingTargets.indexWhere((t) => t['language'] == langCode);
+
+      if (existingIndex >= 0) {
+        existingTargets[existingIndex]['text'] = item.translatedText;
+      } else {
+        existingTargets.add({'language': langCode, 'text': item.translatedText});
+      }
+    }
+
+    // 更新数据库
+    await _databaseService.query('''
+      UPDATE {translation_entries}
+      SET target_languages = @target_languages::jsonb, updated_at = CURRENT_TIMESTAMP
+      WHERE ${isNumericId ? 'id = @entry_id' : 'uuid::text = @entry_id'}
+    ''', {
+      'entry_id': entryId,
+      'target_languages': jsonEncode(existingTargets),
+    });
+
+    final updatedEntry = await getTranslationEntryById(entryId);
+    if (updatedEntry == null) {
+      throwNotFound('更新后条目不存在');
+    }
+
+    return updatedEntry;
   }
 }

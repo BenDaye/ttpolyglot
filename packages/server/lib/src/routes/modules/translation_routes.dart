@@ -24,19 +24,29 @@ class TranslationRoutes {
       redisService: redisService,
     );
 
-    // 翻译条目 CRUD
+    // 翻译条目列表
     router.get('/projects/<projectId>/translations', translationController.getTranslations);
     router.post('/projects/<projectId>/translations', translationController.createTranslation);
-    router.get('/projects/<projectId>/translations/<entryId>', translationController.getTranslation);
-    router.put('/projects/<projectId>/translations/<entryId>', translationController.updateTranslation);
-    router.patch('/projects/<projectId>/translations/<entryId>', translationController.patchTranslation);
-    router.delete('/projects/<projectId>/translations/<entryId>', translationController.deleteTranslation);
+
+    // 翻译搜索和过滤（固定路径必须在 <entryId> 通配符之前注册）
+    router.get('/projects/<projectId>/translations/search', translationController.searchTranslations);
+    router.get('/projects/<projectId>/translations/filter', translationController.filterTranslations);
+
+    // 翻译（调用翻译API + 入库）
+    router.post('/projects/<projectId>/translations/translate', translationController.translate);
 
     // 批量操作
     router.post('/projects/<projectId>/translations/batch', translationController.batchCreate);
     router.delete('/projects/<projectId>/translations/batch', translationController.batchDelete);
     router.post('/projects/<projectId>/translations/batch/translate', translationController.batchTranslate);
+    router.post('/projects/<projectId>/translations/batch/translate-save', translationController.batchTranslateEntries);
     router.post('/projects/<projectId>/translations/batch/approve', translationController.batchApprove);
+
+    // 翻译条目 CRUD（通配符路径放在固定路径后面）
+    router.get('/projects/<projectId>/translations/<entryId>', translationController.getTranslation);
+    router.put('/projects/<projectId>/translations/<entryId>', translationController.updateTranslation);
+    router.patch('/projects/<projectId>/translations/<entryId>', translationController.patchTranslation);
+    router.delete('/projects/<projectId>/translations/<entryId>', translationController.deleteTranslation);
 
     // 翻译历史和版本
     router.get('/projects/<projectId>/translations/<entryId>/history', translationController.getTranslationHistory);
@@ -49,10 +59,6 @@ class TranslationRoutes {
     router.post('/projects/<projectId>/translations/<entryId>/review', translationController.reviewTranslation);
     router.post('/projects/<projectId>/translations/<entryId>/approve', translationController.approveTranslation);
     router.post('/projects/<projectId>/translations/<entryId>/reject', translationController.rejectTranslation);
-
-    // 翻译搜索和过滤
-    router.get('/projects/<projectId>/translations/search', translationController.searchTranslations);
-    router.get('/projects/<projectId>/translations/filter', translationController.filterTranslations);
 
     return router;
   }
