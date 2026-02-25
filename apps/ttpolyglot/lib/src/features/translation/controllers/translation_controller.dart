@@ -437,24 +437,22 @@ class TranslationController extends GetxController {
       }
     }
 
+    // 仅当服务端未将源语言包含在 targetLanguages 中时，手动补充源语言分组
     if (grouped.isNotEmpty) {
       final sourceLanguage = grouped.entries.first.value.first.sourceLanguage;
-      final List<TranslationEntryModel> copy = grouped.entries.first.value.map(
-        (item) {
+      if (!grouped.containsKey(sourceLanguage)) {
+        final copy = _filteredEntries.map((item) {
           final sourceTargetLang = TranslationTargetLanguageModel(
             language: item.sourceLanguage,
             text: item.sourceText,
           );
           return item.copyWith(
-            uuid: item.uuid.replaceAll(
-              item.targetLanguages.firstOrNull?.language.code ?? '',
-              item.sourceLanguage.code,
-            ),
+            uuid: '${item.uuid}_source',
             targetLanguages: [sourceTargetLang],
           );
-        },
-      ).toList();
-      grouped.putIfAbsent(sourceLanguage, () => []).addAll(copy);
+        }).toList();
+        grouped[sourceLanguage] = copy;
+      }
     }
 
     // 按语言的 sortIndex 排序
