@@ -97,12 +97,22 @@ class TranslationApi {
   Future<TranslationEntryModel?> updateTranslation({
     required int projectId,
     required String entryId,
-    required Map<String, dynamic> data,
+    List<TranslationTargetLanguageModel>? targetLanguages,
+    String? sourceText,
+    String? context,
+    String? comment,
+    int? sortIndex,
   }) async {
     try {
       final response = await HttpClient.put(
         '/projects/$projectId/translations/$entryId',
-        data: data,
+        data: {
+          if (targetLanguages != null) 'target_languages': targetLanguages.map((t) => t.toJson()).toList(),
+          if (sourceText != null) 'source_text': sourceText,
+          if (context != null) 'context': context,
+          if (comment != null) 'comment': comment,
+          if (sortIndex != null) 'sort_index': sortIndex,
+        },
       );
       return ModelUtils.toModel<TranslationEntryModel>(
         response.data,

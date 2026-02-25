@@ -135,7 +135,11 @@ class TranslationSyncService extends GetxService {
           await _api.updateTranslation(
             projectId: op.projectId,
             entryId: op.payload.uuid,
-            data: op.payload.toJson(),
+            targetLanguages: op.payload.targetLanguages,
+            sourceText: op.payload.sourceText,
+            context: op.payload.context,
+            comment: op.payload.comment,
+            sortIndex: op.payload.sortIndex,
           );
           return true;
         case 'delete':

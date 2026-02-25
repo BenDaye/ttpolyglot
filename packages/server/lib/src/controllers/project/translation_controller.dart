@@ -128,26 +128,34 @@ class TranslationController extends BaseController {
   Future<Response> updateTranslation(Request request, String projectId, String entryId) async {
     return execute(
       () async {
+        final projectIdInt = int.tryParse(projectId);
+        if (projectIdInt == null) {
+          throw ValidationException(message: '项目ID格式无效');
+        }
+
         final body = await request.readAsString();
         final data = jsonDecode(body) as Map<String, dynamic>;
 
-        final targetText = data['target_text']?.toString();
-        final targetLanguage = data['target_language']?.toString();
-        final translatorId = data['translator_id']?.toString();
-        final reviewerId = data['reviewer_id']?.toString();
-        final contextInfo = data['context_info']?.toString() ?? data['context']?.toString();
+        // 解析 target_languages 数组
+        List<TranslationTargetLanguageModel>? targetLanguages;
+        if (data['target_languages'] is List) {
+          targetLanguages = (data['target_languages'] as List<dynamic>)
+              .map((item) => TranslationTargetLanguageModel.fromJson(item as Map<String, dynamic>))
+              .toList();
+        }
+
         final sourceText = data['source_text']?.toString();
+        final contextInfo = data['context']?.toString();
+        final comment = data['comment']?.toString();
         final sortIndex = data['sort_index'] != null ? int.tryParse(data['sort_index'].toString()) : null;
         final updatedBy = getCurrentUserId(request);
 
         final entry = await _translationService.updateTranslationEntry(
           entryId: entryId,
-          targetText: targetText,
-          targetLanguage: targetLanguage,
-          translatorId: translatorId,
-          reviewerId: reviewerId,
-          contextInfo: contextInfo,
+          targetLanguages: targetLanguages,
           sourceText: sourceText,
+          contextInfo: contextInfo,
+          comment: comment,
           sortIndex: sortIndex,
           updatedBy: updatedBy,
         );
@@ -158,42 +166,6 @@ class TranslationController extends BaseController {
         );
       },
       operationName: 'updateTranslation',
-    );
-  }
-
-  Future<Response> patchTranslation(Request request, String projectId, String entryId) async {
-    return execute(
-      () async {
-        final body = await request.readAsString();
-        final data = jsonDecode(body) as Map<String, dynamic>;
-
-        final targetText = data['target_text']?.toString();
-        final targetLanguage = data['target_language']?.toString();
-        final translatorId = data['translator_id']?.toString();
-        final reviewerId = data['reviewer_id']?.toString();
-        final contextInfo = data['context_info']?.toString() ?? data['context']?.toString();
-        final sourceText = data['source_text']?.toString();
-        final sortIndex = data['sort_index'] != null ? int.tryParse(data['sort_index'].toString()) : null;
-        final updatedBy = getCurrentUserId(request);
-
-        final entry = await _translationService.updateTranslationEntry(
-          entryId: entryId,
-          targetText: targetText,
-          targetLanguage: targetLanguage,
-          translatorId: translatorId,
-          reviewerId: reviewerId,
-          contextInfo: contextInfo,
-          sourceText: sourceText,
-          sortIndex: sortIndex,
-          updatedBy: updatedBy,
-        );
-
-        return ResponseUtils.success(
-          message: '部分更新翻译成功',
-          data: entry,
-        );
-      },
-      operationName: 'patchTranslation',
     );
   }
 
@@ -409,10 +381,22 @@ class TranslationController extends BaseController {
         final targetText = targetVersion['old_target_text']?.toString() ?? targetVersion['new_target_text']?.toString();
         final targetLanguage =
             targetVersion['old_target_language']?.toString() ?? targetVersion['new_target_language']?.toString();
+
+        // 获取现有条目，合并要恢复的语言
+        final existing = await _translationService.getTranslationEntryById(entryId);
+        if (existing == null) {
+          throw NotFoundException(message: '翻译条目不存在');
+        }
+        final updatedTargets = existing.targetLanguages.map((t) {
+          if (t.language.code == targetLanguage && targetText != null) {
+            return TranslationTargetLanguageModel(language: t.language, text: targetText);
+          }
+          return t;
+        }).toList();
+
         final entry = await _translationService.updateTranslationEntry(
           entryId: entryId,
-          targetText: targetText,
-          targetLanguage: targetLanguage,
+          targetLanguages: updatedTargets,
           updatedBy: updatedBy,
         );
 

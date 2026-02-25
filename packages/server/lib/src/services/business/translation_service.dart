@@ -515,12 +515,12 @@ class TranslationService extends BaseService {
   /// 更新翻译条目
   Future<TranslationEntryModel> updateTranslationEntry({
     required String entryId,
-    String? targetText,
-    String? targetLanguage,
+    List<TranslationTargetLanguageModel>? targetLanguages,
+    String? sourceText,
+    String? contextInfo,
+    String? comment,
     String? translatorId,
     String? reviewerId,
-    String? contextInfo,
-    String? sourceText,
     int? sortIndex,
     String? updatedBy,
   }) async {
@@ -535,6 +535,7 @@ class TranslationService extends BaseService {
 
         // 判断 entryId 是数字 ID 还是 UUID
         final isNumericId = int.tryParse(entryId) != null;
+        final whereClause = isNumericId ? 'id = @entry_id' : 'uuid::text = @entry_id';
 
         // 构建更新字段
         final updates = <String>[];
@@ -543,6 +544,16 @@ class TranslationService extends BaseService {
         if (sourceText != null) {
           updates.add('source_text = @source_text');
           parameters['source_text'] = sourceText;
+        }
+
+        if (contextInfo != null) {
+          updates.add('context = @context_info');
+          parameters['context_info'] = contextInfo;
+        }
+
+        if (comment != null) {
+          updates.add('comment = @comment');
+          parameters['comment'] = comment;
         }
 
         if (translatorId != null) {
@@ -555,69 +566,29 @@ class TranslationService extends BaseService {
           parameters['reviewer_id'] = reviewerId;
         }
 
-        if (contextInfo != null) {
-          updates.add('context = @context_info');
-          parameters['context_info'] = contextInfo;
-        }
-
         if (sortIndex != null) {
           updates.add('sort_index = @sort_index');
           parameters['sort_index'] = sortIndex;
         }
 
-        // 更新目标语言翻译
-        if (targetText != null && targetLanguage != null) {
-          // 先获取现有的 target_languages
-          final entryResult = await _databaseService.query('''
-            SELECT id, COALESCE(target_languages::text, '[]') as target_languages
-            FROM {translation_entries}
-            WHERE ${isNumericId ? 'id = @entry_id' : 'uuid::text = @entry_id'}
-          ''', {'entry_id': entryId});
-
-          if (entryResult.isNotEmpty) {
-            final entryData = entryResult.first.toColumnMap();
-            final existingTargetsJson = entryData['target_languages'] as String? ?? '[]';
-            final existingTargets =
-                (jsonDecode(existingTargetsJson) as List<dynamic>).map((item) => item as Map<String, dynamic>).toList();
-
-            // 查找是否已存在该语言的翻译
-            final existingIndex = existingTargets.indexWhere((item) => item['language'] == targetLanguage);
-
-            if (existingIndex >= 0) {
-              // 更新现有翻译
-              existingTargets[existingIndex]['text'] = targetText;
-            } else {
-              // 添加新翻译
-              existingTargets.add({'language': targetLanguage, 'text': targetText});
-            }
-
-            // 更新 target_languages JSONB 字段
-            final updatedTargetsJson = jsonEncode(existingTargets);
-            updates.add('target_languages = @target_languages::jsonb');
-            parameters['target_languages'] = updatedTargetsJson;
-          }
+        // 更新目标语言翻译（整组替换）
+        if (targetLanguages != null) {
+          final targetLanguagesJson = jsonEncode(
+            targetLanguages.map((t) => {'language': t.language.code, 'text': t.text}).toList(),
+          );
+          updates.add('target_languages = @target_languages::jsonb');
+          parameters['target_languages'] = targetLanguagesJson;
         }
 
-        // 更新翻译条目基本信息
-        if (updates.isNotEmpty) {
-          final sql = '''
+        if (updates.isEmpty) {
+          return existing;
+        }
+
+        await _databaseService.query('''
           UPDATE {translation_entries}
           SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP
-          WHERE ${isNumericId ? 'id = @entry_id' : 'uuid::text = @entry_id'}
-          RETURNING id, COALESCE(uuid::text, id::text) as uuid, project_id, 
-                    COALESCE(entry_key, '') as entry_key, 
-                    COALESCE(source_language, 'en_US') as source_language, 
-                    COALESCE(source_text, '') as source_text,
-                    COALESCE(target_languages::text, '[]') as target_languages,
-                    translated_by, reviewed_by, 
-                    COALESCE(context, '') as context, 
-                    COALESCE(comment, '') as comment,
-                    COALESCE(sort_index, 0) as sort_index,
-                    deleted_at, created_at, updated_at
-        ''';
-
-          await _databaseService.query(sql, parameters);
-        }
+          WHERE $whereClause
+        ''', parameters);
 
         // 获取更新后的完整数据
         final updatedEntry = await getTranslationEntryById(entryId);

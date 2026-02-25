@@ -45,7 +45,6 @@ class TranslationRoutes {
     // 翻译条目 CRUD（通配符路径放在固定路径后面）
     router.get('/projects/<projectId>/translations/<entryId>', translationController.getTranslation);
     router.put('/projects/<projectId>/translations/<entryId>', translationController.updateTranslation);
-    router.patch('/projects/<projectId>/translations/<entryId>', translationController.patchTranslation);
     router.delete('/projects/<projectId>/translations/<entryId>', translationController.deleteTranslation);
 
     // 翻译历史和版本

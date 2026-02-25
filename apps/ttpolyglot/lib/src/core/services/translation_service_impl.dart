@@ -255,16 +255,13 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
       // API 优先
       if (AppConfig.useServerForTranslations) {
         try {
-          // 获取第一个目标语言（如果有的话）
-          final firstTarget = entry.targetLanguages.isNotEmpty ? entry.targetLanguages.first : null;
           final updated = await _translationApi.updateTranslation(
             projectId: entry.projectId,
             entryId: entry.uuid,
-            data: {
-              if (firstTarget != null) 'target_text': firstTarget.text,
-              if (firstTarget != null) 'target_language': firstTarget.language.code,
-              if (entry.context.isNotEmpty) 'context_info': entry.context,
-            },
+            targetLanguages: entry.targetLanguages,
+            sourceText: entry.sourceText,
+            context: entry.context,
+            comment: entry.comment,
           );
           if (updated != null) {
             return updated;
