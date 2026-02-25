@@ -37,33 +37,12 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
     bool includeSourceLanguage = false,
   }) async {
     try {
-      // 优先从服务器获取
+      // 优先从服务器获取（服务端已将源语言包含在 target_languages 中）
       if (AppConfig.useServerForTranslations) {
         try {
           final res = await _translationApi.getTranslations(projectId: projectId, page: 1, limit: 1000);
           if (res != null && res.items != null) {
-            final items = res.items!;
-            if (items.isNotEmpty) {
-              if (!includeSourceLanguage) return items;
-              // 获取第一个条目的第一个目标语言
-              if (items.first.targetLanguages.isEmpty) return items;
-              final copyLanguageCode = items.first.targetLanguages.first.language.code;
-              final copyEntries =
-                  items.where((item) => item.targetLanguages.any((t) => t.language.code == copyLanguageCode)).map(
-                (item) {
-                  // 创建源语言作为目标语言的条目
-                  final sourceTargetLang = TranslationTargetLanguageModel(
-                    language: item.sourceLanguage,
-                    text: item.sourceText,
-                  );
-                  return item.copyWith(
-                    uuid: item.uuid.replaceAll(copyLanguageCode, item.sourceLanguage.code),
-                    targetLanguages: [sourceTargetLang],
-                  );
-                },
-              ).toList();
-              return [...copyEntries, ...items];
-            }
+            return res.items!;
           }
         } catch (error, stackTrace) {
           log(

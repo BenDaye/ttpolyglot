@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ttpolyglot/src/common/api/translation_api.dart';
 import 'package:ttpolyglot/src/core/services/translation_service_manager.dart';
+import 'package:ttpolyglot/src/features/project/controllers/project_controller.dart';
 import 'package:ttpolyglot/src/features/settings/controllers/translation_config_controller.dart';
 import 'package:ttpolyglot/src/features/translation/translation.dart';
 import 'package:ttpolyglot_model/model.dart';
-import 'package:ttpolyglot_translators/translators.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
 class CustomTranslationDialog extends StatefulWidget {
@@ -42,20 +43,21 @@ class CustomTranslationDialog extends StatefulWidget {
 class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
   // 状态管理
   TranslationProviderConfigModel? _selectedProvider;
-  TranslationEntryModel? _selectedSourceEntry;
+  LanguageModel? _selectedSourceLanguage;
   bool _isTranslating = false;
-  bool _isOverride = true; // 是否覆盖
-  CancelToken? _cancelToken; // 取消令牌
-
-  @override
-  void dispose() {
-    _cancelToken?.cancel(); // 取消正在进行的翻译请求
-    super.dispose();
-  }
+  bool _isOverride = false;
 
   @override
   Widget build(BuildContext context) {
-    _selectedSourceEntry ??= widget.entries.firstOrNull;
+    final projectController = ProjectController.getInstance(widget.controller.projectId);
+    final project = projectController.project;
+
+    // 默认使用项目主语言
+    if (_selectedSourceLanguage == null && project != null) {
+      _selectedSourceLanguage = project.languages.firstWhereOrNull(
+        (lang) => lang.id == project.primaryLanguageId,
+      );
+    }
 
     return AlertDialog(
       title: Row(
@@ -110,11 +112,11 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
               const SizedBox(height: 24.0),
               // 选择源语言
               _buildSourceLanguageSelector(
-                list: widget.entries,
+                languages: project?.languages ?? [],
               ),
               const SizedBox(height: 24.0),
               // 是否覆盖翻译条目
-              _buildDefaultSwitch(),
+              _buildOverrideSwitch(),
             ],
           ),
         ),
@@ -137,21 +139,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
           ),
         ),
         const SizedBox(width: 8.0),
-        if (_isTranslating) ...[
-          ElevatedButton.icon(
-            onPressed: _cancelTranslation,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-            ),
-            icon: const Icon(Icons.stop, size: 16.0, color: Colors.white),
-            label: const Text('取消'),
-          ),
-          const SizedBox(width: 8.0),
+        if (_isTranslating)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             decoration: BoxDecoration(
@@ -182,10 +170,10 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
                 ),
               ],
             ),
-          ),
-        ] else
+          )
+        else
           ElevatedButton(
-            onPressed: _saveCustomTranslation,
+            onPressed: _startTranslation,
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
               shape: RoundedRectangleBorder(
@@ -306,12 +294,12 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
     return result;
   }
 
-  /// 构建源语言选择器
+  /// 构建源语言选择器（使用项目语言列表，默认主语言）
   Widget _buildSourceLanguageSelector({
-    required List<TranslationEntryModel> list,
+    required List<LanguageModel> languages,
   }) {
-    return DropdownButtonFormField<TranslationEntryModel>(
-      value: _selectedSourceEntry,
+    return DropdownButtonFormField<LanguageModel>(
+      value: _selectedSourceLanguage,
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 20.0),
         labelText: '请选择源语言',
@@ -341,11 +329,9 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
           ),
         ),
       ),
-      items: list.map((entry) {
-        // 获取第一个目标语言（如果有的话）
-        final firstTarget = entry.targetLanguages.isNotEmpty ? entry.targetLanguages.first : null;
-        return DropdownMenuItem<TranslationEntryModel>(
-          value: entry,
+      items: languages.map((lang) {
+        return DropdownMenuItem<LanguageModel>(
+          value: lang,
           child: SizedBox(
             width: 300.0,
             child: Row(
@@ -358,7 +344,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
                     borderRadius: BorderRadius.circular(6.0),
                   ),
                   child: Text(
-                    firstTarget?.language.code ?? entry.sourceLanguage.code,
+                    lang.code.code,
                     style: GoogleFonts.notoSansMono(
                       color: Theme.of(Get.context!).colorScheme.onSecondaryContainer,
                       fontWeight: FontWeight.w500,
@@ -366,7 +352,10 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
                   ),
                 ),
                 Flexible(
-                  child: Text(firstTarget?.text ?? entry.sourceText),
+                  child: Text(
+                    lang.nativeName ?? '',
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
@@ -376,220 +365,108 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
       onChanged: (value) {
         if (value != null) {
           setState(() {
-            _selectedSourceEntry = value;
+            _selectedSourceLanguage = value;
           });
-          final firstTarget = value.targetLanguages.isNotEmpty ? value.targetLanguages.first : null;
           LoggerUtils.info(
-              '选择源语言: ${firstTarget?.language.code ?? value.sourceLanguage.code} - ${firstTarget?.text ?? value.sourceText}');
+            '选择源语言: ${value.code.name} - ${value.nativeName ?? ''}',
+            name: 'CustomTranslationDialog',
+          );
         }
       },
     );
   }
 
-  /// 取消翻译
-  void _cancelTranslation() {
-    _cancelToken?.cancel();
-    _resetTranslatingState();
-  }
+  /// 开始翻译（调用服务端单条翻译接口）
+  Future<void> _startTranslation() async {
+    if (_isTranslating) return;
 
-  /// 保存自定义翻译设置
-  Future<void> _saveCustomTranslation() async {
-    if (_isTranslating) return; // 防止重复点击
-
-    // 表单验证
     if (_selectedProvider == null) {
       _showErrorSnackBar('请选择翻译接口');
       return;
     }
 
-    if (_selectedSourceEntry == null) {
+    if (_selectedSourceLanguage == null) {
       _showErrorSnackBar('请选择源语言');
       return;
     }
 
-    // 获取源语言的文本（优先使用第一个目标语言，否则使用源文本）
-    final sourceText = _selectedSourceEntry!.targetLanguages.isNotEmpty
-        ? _selectedSourceEntry!.targetLanguages.first.text
-        : _selectedSourceEntry!.sourceText;
-    if (sourceText.isEmpty) {
-      _showErrorSnackBar('源语言文本不能为空');
+    final translationManager = Get.find<TranslationServiceManager>();
+    if (!await translationManager.hasValidConfigAsync()) {
+      if (mounted) {
+        await TranslationServiceManager.showConfigCheckDialog(context);
+      }
       return;
     }
 
-    // 创建新的取消令牌
-    _cancelToken = CancelToken();
+    // 获取第一个条目（所有展开条目共享同一个 UUID）
+    final firstEntry = widget.entries.firstOrNull;
+    if (firstEntry == null) {
+      _showErrorSnackBar('没有翻译条目');
+      return;
+    }
+
+    // 收集目标语言（排除源语言）
+    final sourceCode = _selectedSourceLanguage!.code.code;
+    final targetLanguageCodes = widget.entries
+        .expand((e) => e.targetLanguages)
+        .map((t) => t.language.code)
+        .where((code) => code != sourceCode)
+        .toSet()
+        .toList();
+
+    if (targetLanguageCodes.isEmpty) {
+      _showErrorSnackBar('没有需要翻译的目标语言');
+      return;
+    }
 
     setState(() {
       _isTranslating = true;
     });
 
     try {
-      final translationManager = Get.find<TranslationServiceManager>();
-
-      // 检查翻译配置
-      if (!await translationManager.hasValidConfigAsync()) {
-        if (mounted) {
-          await TranslationServiceManager.showConfigCheckDialog(context);
-        }
-        _resetTranslatingState();
-        return;
-      }
-
-      // 开始自定义翻译
-      await _performCustomTranslation(translationManager);
-    } catch (error, stackTrace) {
-      LoggerUtils.error('自定义翻译异常', error: error, stackTrace: stackTrace);
-      _showErrorSnackBar('翻译处理异常: $error');
-      _resetTranslatingState();
-    }
-  }
-
-  /// 执行自定义翻译
-  Future<void> _performCustomTranslation(TranslationServiceManager translationManager) async {
-    // 获取源语言的文本（优先使用第一个目标语言，否则使用源文本）
-    final sourceTargetLang =
-        _selectedSourceEntry!.targetLanguages.isNotEmpty ? _selectedSourceEntry!.targetLanguages.first : null;
-    final sourceText = sourceTargetLang?.text ?? _selectedSourceEntry!.sourceText;
-    final sourceLanguageCode = sourceTargetLang?.language.code ?? _selectedSourceEntry!.sourceLanguage.code;
-
-    // 获取需要翻译的条目
-    final List<TranslationEntryModel> translateEntries = [];
-    for (final entry in widget.entries) {
-      // 跳过源语言相同的条目
-      if (entry.targetLanguages.any((t) => t.language.code == sourceLanguageCode)) continue;
-      translateEntries.add(
-        entry.copyWith(
-          sourceText: sourceText,
-        ),
-      );
-    }
-
-    // 如果不覆盖，则直接返回
-    if (!_isOverride && !translateEntries.any((e) => e.targetLanguages.any((t) => t.text.trim().isEmpty))) {
-      _showErrorSnackBar('没有可翻译语言');
-      _resetTranslatingState();
-      return;
-    }
-
-    if (translateEntries.isEmpty) {
-      _showErrorSnackBar('没有需要翻译的目标语言');
-      _resetTranslatingState();
-      return;
-    }
-
-    try {
-      // 批量翻译
-      final results = await translationManager.batchTranslateEntries(
-        sourceEntries: _selectedSourceEntry!,
-        entries: translateEntries,
+      final updatedEntry = await TranslationApi().translateEntry(
+        projectId: firstEntry.projectId,
+        entryId: firstEntry.uuid,
+        targetLanguages: targetLanguageCodes,
         provider: _selectedProvider!,
-        cancelToken: _cancelToken,
+        force: _isOverride,
       );
 
-      // 如果翻译成功，关闭对话框
-      Get.back();
+      if (!mounted) return;
 
-      // 处理翻译结果
-      await _handleTranslationResults(results, translateEntries);
-    } catch (error, stackTrace) {
-      // 如果是取消异常，直接返回
-      if (error is CancelException) {
-        LoggerUtils.info('翻译被取消: $error');
-        return;
-      }
+      if (updatedEntry != null) {
+        // 用返回的最新数据更新本地列表
+        widget.controller.updateLocalEntry(updatedEntry);
 
-      LoggerUtils.error('自定义翻译异常', error: error, stackTrace: stackTrace);
-      _showErrorSnackBar('翻译处理异常: $error');
-      _resetTranslatingState();
-    }
-  }
-
-  /// 处理翻译结果
-  Future<void> _handleTranslationResults(
-    List<TranslationResult> results,
-    List<TranslationEntryModel> translateEntries,
-  ) async {
-    int successCount = 0;
-    int failCount = 0;
-    final updatedEntries = <TranslationEntryModel>[];
-
-    // 获取源语言代码
-    final sourceTargetLang =
-        _selectedSourceEntry!.targetLanguages.isNotEmpty ? _selectedSourceEntry!.targetLanguages.first : null;
-    final sourceLanguageCode = sourceTargetLang?.language.code ?? _selectedSourceEntry!.sourceLanguage.code;
-
-    for (int i = 0; i < results.length; i++) {
-      final result = results[i];
-      final entry = translateEntries[i];
-
-      // 找到要更新的目标语言（第一个非源语言的目标语言）
-      final targetLangToUpdate = entry.targetLanguages.firstWhere(
-        (t) => t.language.code != sourceLanguageCode,
-        orElse: () => entry.targetLanguages.isNotEmpty
-            ? entry.targetLanguages.first
-            : TranslationTargetLanguageModel(language: entry.sourceLanguage, text: ''),
-      );
-
-      // 如果不覆盖，则直接跳过
-      if (!_isOverride && targetLangToUpdate.text.trim().isNotEmpty) {
-        continue;
-      }
-
-      if (result.success) {
-        successCount++;
-        // 更新目标语言列表
-        final updatedTargetLanguages = entry.targetLanguages.map((t) {
-          if (t.language == targetLangToUpdate.language) {
-            return t.copyWith(text: result.translatedText);
-          }
-          return t;
-        }).toList();
-
-        // 如果该语言不存在，添加它
-        if (!updatedTargetLanguages.any((t) => t.language == targetLangToUpdate.language)) {
-          updatedTargetLanguages.add(
-            TranslationTargetLanguageModel(
-              language: targetLangToUpdate.language,
-              text: result.translatedText,
-            ),
-          );
-        }
-
-        updatedEntries.add(
-          entry.copyWith(
-            targetLanguages: updatedTargetLanguages,
-            updatedAt: DateTime.now(),
-          ),
-        );
+        Get.back();
+        _showSuccessSnackBar('翻译成功');
       } else {
-        failCount++;
-        LoggerUtils.info('翻译失败: ${entry.entryKey} - ${result.error}');
+        _showErrorSnackBar('翻译失败，请稍后重试');
+      }
+    } catch (error, stackTrace) {
+      LoggerUtils.error('自定义翻译异常', error: error, stackTrace: stackTrace);
+      if (mounted) {
+        _showErrorSnackBar('翻译处理异常: $error');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isTranslating = false;
+        });
       }
     }
-
-    // 更新翻译条目
-    if (updatedEntries.isNotEmpty) {
-      for (final entry in updatedEntries) {
-        await widget.controller.updateTranslationEntryModel(entry, isShowSnackbar: false);
-      }
-      await widget.controller.refreshTranslationEntries();
-    }
-
-    // 显示结果
-    if (mounted) {
-      _showTranslationResultSnackBar(successCount, failCount);
-    }
-
-    _resetTranslatingState();
   }
 
-  /// 重置翻译状态
-  void _resetTranslatingState() {
-    if (mounted) {
-      setState(() {
-        _isTranslating = false;
-      });
-    }
+  /// 显示成功提示
+  void _showSuccessSnackBar(String message) {
+    Get.snackbar(
+      '成功',
+      message,
+      backgroundColor: Colors.green,
+      colorText: Colors.white,
+      duration: const Duration(seconds: 3),
+      snackPosition: SnackPosition.TOP,
+    );
   }
 
   /// 显示错误提示
@@ -605,22 +482,8 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
     }
   }
 
-  /// 显示翻译结果提示
-  void _showTranslationResultSnackBar(int successCount, int failCount) {
-    final message = '翻译完成: 成功 $successCount 个，失败 $failCount 个';
-    final backgroundColor = failCount > 0 ? Theme.of(context).colorScheme.error : Colors.green;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white)),
-        backgroundColor: backgroundColor,
-        duration: const Duration(seconds: 4),
-      ),
-    );
-  }
-
-  /// 构建默认翻译开关
-  Widget _buildDefaultSwitch() {
+  /// 构建覆盖翻译开关
+  Widget _buildOverrideSwitch() {
     return Container(
       padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
@@ -640,7 +503,7 @@ class _CustomTranslationDialogState extends State<CustomTranslationDialog> {
           const SizedBox(width: 12.0),
           const Expanded(
             child: Text(
-              '是否覆盖翻译条目',
+              '是否覆盖已有翻译',
               style: TextStyle(
                 fontWeight: FontWeight.w500,
               ),

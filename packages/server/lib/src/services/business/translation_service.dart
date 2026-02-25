@@ -16,24 +16,55 @@ class TranslationService extends BaseService {
         super('TranslationService');
 
   /// 从数据库行数据组装 TranslationEntryModel（包括目标语言）
-  Future<TranslationEntryModel> _buildTranslationEntryModel(Map<String, dynamic> entryData) async {
+  /// 构建翻译条目模型
+  ///
+  /// [projectLanguageCodes] 项目所有语言代码列表，传入时补全缺失语言（text 为空）
+  Future<TranslationEntryModel> _buildTranslationEntryModel(
+    Map<String, dynamic> entryData, {
+    List<String>? projectLanguageCodes,
+  }) async {
     // 从 target_languages JSONB 字段读取数据
     final targetLanguagesJson = entryData['target_languages'];
     List<TranslationTargetLanguageModel> targetLanguages = [];
 
     if (targetLanguagesJson != null) {
       if (targetLanguagesJson is String) {
-        // 如果是字符串，先解析为 JSON
         final decoded = jsonDecode(targetLanguagesJson) as List<dynamic>?;
         if (decoded != null) {
           targetLanguages =
               decoded.map((item) => TranslationTargetLanguageModel.fromJson(item as Map<String, dynamic>)).toList();
         }
       } else if (targetLanguagesJson is List) {
-        // 如果已经是 List，直接转换
         targetLanguages = targetLanguagesJson
             .map((item) => TranslationTargetLanguageModel.fromJson(item as Map<String, dynamic>))
             .toList();
+      }
+    }
+
+    // 将源语言插入 target_languages 首位
+    final sourceLanguage = entryData['source_language']?.toString() ?? 'en_US';
+    final sourceText = entryData['source_text']?.toString() ?? '';
+    if (!targetLanguages.any((t) => t.language.code == sourceLanguage)) {
+      targetLanguages.insert(
+        0,
+        TranslationTargetLanguageModel(
+          language: LanguageEnumConverter().fromJson(sourceLanguage),
+          text: sourceText,
+        ),
+      );
+    }
+
+    // 补全项目中缺失的语言（text 为空）
+    if (projectLanguageCodes != null) {
+      for (final code in projectLanguageCodes) {
+        if (!targetLanguages.any((t) => t.language.code == code)) {
+          targetLanguages.add(
+            TranslationTargetLanguageModel(
+              language: LanguageEnumConverter().fromJson(code),
+              text: '',
+            ),
+          );
+        }
       }
     }
 
@@ -244,11 +275,19 @@ class TranslationService extends BaseService {
 
         final result = await _databaseService.query(sql, parameters);
 
+        // 查询项目所有语言代码，用于补全缺失语言
+        final langResult = await _databaseService.query('''
+          SELECT l.code FROM {project_languages} pl
+          JOIN {languages} l ON pl.language_id = l.id
+          WHERE pl.project_id = @project_id
+        ''', {'project_id': projectId});
+        final projectLanguageCodes = langResult.map((r) => r[0].toString()).toList();
+
         // 组装完整的翻译条目数据
         final entries = <TranslationEntryModel>[];
         for (final row in result) {
           final data = row.toColumnMap();
-          final entry = await _buildTranslationEntryModel(data);
+          final entry = await _buildTranslationEntryModel(data, projectLanguageCodes: projectLanguageCodes);
           entries.add(entry);
         }
 
@@ -426,7 +465,17 @@ class TranslationService extends BaseService {
         }
 
         final resultData = result.first.toColumnMap();
-        return await _buildTranslationEntryModel(resultData);
+        final projectId = resultData['project_id'];
+
+        // 查询项目所有语言代码，用于补全缺失语言
+        final langResult = await _databaseService.query('''
+          SELECT l.code FROM {project_languages} pl
+          JOIN {languages} l ON pl.language_id = l.id
+          WHERE pl.project_id = @project_id
+        ''', {'project_id': projectId});
+        final projectLanguageCodes = langResult.map((r) => r[0].toString()).toList();
+
+        return await _buildTranslationEntryModel(resultData, projectLanguageCodes: projectLanguageCodes);
       },
       operationName: 'getTranslationEntryById',
     );
@@ -572,11 +621,20 @@ class TranslationService extends BaseService {
         }
 
         // 更新目标语言翻译（合并模式：传入的语言更新/新增，未传入的语言保留）
+        // 注意：排除源语言，源语言不存入数据库的 target_languages
         if (targetLanguages != null) {
-          final existingTargets = existing.targetLanguages.map((t) => {'language': t.language.code, 'text': t.text}).toList();
+          final sourceLanguageCode = existing.sourceLanguage.code;
+
+          // 从数据库原始数据获取（不含源语言）
+          final existingTargets = existing.targetLanguages
+              .where((t) => t.language.code != sourceLanguageCode)
+              .map((t) => {'language': t.language.code, 'text': t.text})
+              .toList();
 
           for (final incoming in targetLanguages) {
             final code = incoming.language.code;
+            // 跳过源语言
+            if (code == sourceLanguageCode) continue;
             final idx = existingTargets.indexWhere((t) => t['language'] == code);
             if (idx >= 0) {
               existingTargets[idx] = {'language': code, 'text': incoming.text};
