@@ -85,7 +85,10 @@ class ExportServiceImplDesktop {
   /// 在 isolate 中执行导出任务
   static Future<ExportTaskResult> _executeExportTask(ExportTaskParams params) async {
     try {
-      final allLanguages = [params.project.primaryLanguage, ...params.project.languages];
+      final allLanguages = [
+        params.project.primaryLanguage,
+        ...params.project.languages.where((l) => l.id != params.project.primaryLanguage.id),
+      ];
       final Archive archive = Archive();
 
       // 处理每个语言的翻译
@@ -128,6 +131,9 @@ class ExportServiceImplDesktop {
 
       // 编码为 ZIP 数据
       final zipData = ZipEncoder().encode(archive);
+      if (zipData == null) {
+        return ExportTaskResult(success: false, error: 'ZIP 编码失败');
+      }
 
       return ExportTaskResult(
         success: true,
@@ -337,7 +343,10 @@ class ExportServiceImplDesktop {
   /// 在 isolate 中执行CSV导出任务
   static Future<ExportTaskResult> _executeExportTaskCsv(ExportTaskParams params) async {
     try {
-      final allLanguages = [params.project.primaryLanguage, ...params.project.languages];
+      final allLanguages = [
+        params.project.primaryLanguage,
+        ...params.project.languages.where((l) => l.id != params.project.primaryLanguage.id),
+      ];
       final Archive archive = Archive();
 
       // 处理每个语言的翻译
@@ -378,6 +387,9 @@ class ExportServiceImplDesktop {
 
       // 编码为 ZIP 数据
       final zipData = ZipEncoder().encode(archive);
+      if (zipData == null) {
+        return ExportTaskResult(success: false, error: 'ZIP 编码失败');
+      }
 
       return ExportTaskResult(
         success: true,
@@ -395,7 +407,10 @@ class ExportServiceImplDesktop {
   /// 在 isolate 中执行Excel导出任务
   static Future<ExportTaskResult> _executeExportTaskExcel(ExportTaskParams params) async {
     try {
-      final allLanguages = [params.project.primaryLanguage, ...params.project.languages];
+      final allLanguages = [
+        params.project.primaryLanguage,
+        ...params.project.languages.where((l) => l.id != params.project.primaryLanguage.id),
+      ];
       final Archive archive = Archive();
 
       // 处理每个语言的翻译
@@ -436,6 +451,9 @@ class ExportServiceImplDesktop {
 
       // 编码为 ZIP 数据
       final zipData = ZipEncoder().encode(archive);
+      if (zipData == null) {
+        return ExportTaskResult(success: false, error: 'ZIP 编码失败');
+      }
 
       return ExportTaskResult(
         success: true,
@@ -453,7 +471,10 @@ class ExportServiceImplDesktop {
   /// 在 isolate 中执行ARB导出任务
   static Future<ExportTaskResult> _executeExportTaskArb(ExportTaskParams params) async {
     try {
-      final allLanguages = [params.project.primaryLanguage, ...params.project.languages];
+      final allLanguages = [
+        params.project.primaryLanguage,
+        ...params.project.languages.where((l) => l.id != params.project.primaryLanguage.id),
+      ];
       final Archive archive = Archive();
 
       // 处理每个语言的翻译
@@ -494,6 +515,9 @@ class ExportServiceImplDesktop {
 
       // 编码为 ZIP 数据
       final zipData = ZipEncoder().encode(archive);
+      if (zipData == null) {
+        return ExportTaskResult(success: false, error: 'ZIP 编码失败');
+      }
 
       return ExportTaskResult(
         success: true,
@@ -511,7 +535,10 @@ class ExportServiceImplDesktop {
   /// 在 isolate 中执行PO导出任务
   static Future<ExportTaskResult> _executeExportTaskPo(ExportTaskParams params) async {
     try {
-      final allLanguages = [params.project.primaryLanguage, ...params.project.languages];
+      final allLanguages = [
+        params.project.primaryLanguage,
+        ...params.project.languages.where((l) => l.id != params.project.primaryLanguage.id),
+      ];
       final Archive archive = Archive();
 
       // 处理每个语言的翻译
@@ -542,7 +569,7 @@ class ExportServiceImplDesktop {
         );
 
         // 创建压缩文件条目
-        final fileName = '${language.code}.po';
+        final fileName = '${language.code.code}.po';
         final contentBytes = utf8.encode(poString);
         final file = ArchiveFile(fileName, contentBytes.length, contentBytes);
         archive.addFile(file);
@@ -552,6 +579,9 @@ class ExportServiceImplDesktop {
 
       // 编码为 ZIP 数据
       final zipData = ZipEncoder().encode(archive);
+      if (zipData == null) {
+        return ExportTaskResult(success: false, error: 'ZIP 编码失败');
+      }
 
       return ExportTaskResult(
         success: true,

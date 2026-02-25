@@ -84,23 +84,17 @@ class TranslationServiceImpl extends GetxService implements TranslationService {
 
       if (result.isEmpty) return [];
 
-      // 获取第一个条目的第一个目标语言
-      if (result.first.targetLanguages.isEmpty) return result;
-      final copyLanguageCode = result.first.targetLanguages.first.language.code;
-      final copyEntries =
-          result.where((item) => item.targetLanguages.any((t) => t.language.code == copyLanguageCode)).map(
-        (item) {
-          // 创建源语言作为目标语言的条目
-          final sourceTargetLang = TranslationTargetLanguageModel(
-            language: item.sourceLanguage,
-            text: item.sourceText,
-          );
-          return item.copyWith(
-            uuid: item.uuid.replaceAll(copyLanguageCode, item.sourceLanguage.code),
-            targetLanguages: [sourceTargetLang],
-          );
-        },
-      );
+      // 为每个条目创建源语言作为虚拟目标语言的副本
+      final copyEntries = result.map((item) {
+        final sourceTargetLang = TranslationTargetLanguageModel(
+          language: item.sourceLanguage,
+          text: item.sourceText,
+        );
+        return item.copyWith(
+          uuid: '${item.uuid}_source',
+          targetLanguages: [sourceTargetLang],
+        );
+      }).toList();
 
       return [...copyEntries, ...result];
     } catch (error, stackTrace) {

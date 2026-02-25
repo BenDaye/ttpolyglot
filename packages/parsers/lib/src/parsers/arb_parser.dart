@@ -131,7 +131,7 @@ class ArbParser implements TranslationParser {
 
     // 添加 ARB 元数据
     if (includeMetadata) {
-      arbObject['@@locale'] = language.code;
+      arbObject['@@locale'] = language.code.replaceAll('-', '_');
       arbObject['@@last_modified'] = DateTime.now().toIso8601String();
     }
 

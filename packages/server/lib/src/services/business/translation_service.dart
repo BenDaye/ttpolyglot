@@ -394,11 +394,19 @@ class TranslationService extends BaseService {
         final hasNextPage = result.length > limit;
         final entries = hasNextPage ? result.take(limit).toList() : result;
 
+        // 查询项目所有语言代码，用于补全缺失语言
+        final langResult = await _databaseService.query('''
+          SELECT l.code FROM {project_languages} pl
+          JOIN {languages} l ON pl.language_id = l.id
+          WHERE pl.project_id = @project_id
+        ''', {'project_id': projectId});
+        final projectLanguageCodes = langResult.map((r) => r[0].toString()).toList();
+
         // 组装完整的翻译条目数据
         final entriesList = <TranslationEntryModel>[];
         for (final row in entries) {
           final data = row.toColumnMap();
-          final entry = await _buildTranslationEntryModel(data);
+          final entry = await _buildTranslationEntryModel(data, projectLanguageCodes: projectLanguageCodes);
           entriesList.add(entry);
         }
 

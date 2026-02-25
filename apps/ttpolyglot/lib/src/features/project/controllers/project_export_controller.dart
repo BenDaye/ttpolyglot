@@ -231,7 +231,7 @@ class ProjectExportController extends GetxController {
   void initializeCustomExport(ProjectModel project) {
     // 默认选择所有语言
     _selectedLanguages.clear();
-    _selectedLanguages.addAll(project.languages.map((lang) => lang.code.name));
+    _selectedLanguages.addAll(project.languages.map((lang) => lang.code.code));
 
     // 重置其他设置
     _exportOnlyTranslated.value = true;
@@ -271,9 +271,14 @@ class ProjectExportController extends GetxController {
         return entry.targetLanguages.any((t) => selectedLanguages.contains(t.language.code));
       }).toList();
 
-      // 过滤未翻译的内容（如果需要）
+      // 过滤未翻译的内容（如果需要）— 仅检查选中语言的翻译状态
       final finalEntries = exportOnlyTranslated
-          ? filteredEntries.where((entry) => entry.targetLanguages.any((t) => t.text.trim().isNotEmpty)).toList()
+          ? filteredEntries
+              .where(
+                (entry) => entry.targetLanguages
+                    .any((t) => selectedLanguages.contains(t.language.code) && t.text.trim().isNotEmpty),
+              )
+              .toList()
           : filteredEntries;
 
       if (finalEntries.isEmpty) {
