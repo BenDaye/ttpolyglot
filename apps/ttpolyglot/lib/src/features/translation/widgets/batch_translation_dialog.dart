@@ -51,7 +51,7 @@ class _BatchTranslationDialogState extends State<BatchTranslationDialog> {
   // 状态管理
   TranslationProviderConfigModel? _selectedProvider;
   LanguageModel? _selectedSourceEntry;
-  bool _isOverride = true; // 是否覆盖
+  bool _isOverride = false; // 是否覆盖
   BatchTranslationStatus _translationStatus = BatchTranslationStatus.idle;
 
   @override
