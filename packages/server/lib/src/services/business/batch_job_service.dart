@@ -54,6 +54,58 @@ class BatchJobService extends BaseService {
     );
   }
 
+  /// 创建已完成的批量任务记录（用于前端上报导入/导出结果）
+  Future<Map<String, dynamic>> createBatchJobRecord({
+    required int projectId,
+    required String jobType,
+    required String status,
+    required int totalItems,
+    required String createdBy,
+    int successItems = 0,
+    int failedItems = 0,
+    Map<String, dynamic>? config,
+    Map<String, dynamic>? result,
+    String? errorMessage,
+    String? filePath,
+  }) async {
+    return execute(
+      () async {
+        logInfo('创建批量任务记录', context: {
+          'project_id': projectId,
+          'job_type': jobType,
+          'status': status,
+          'total_items': totalItems,
+        });
+
+        final queryResult = await _databaseService.query('''
+          INSERT INTO {translation_batch_jobs}
+          (project_id, job_type, status, total_items, processed_items, success_items, failed_items,
+           created_by, config, result, error_message, file_path, started_at, completed_at)
+          VALUES (@project_id, @job_type, @status, @total_items, @total_items, @success_items, @failed_items,
+           @created_by, @config::jsonb, @result::jsonb, @error_message, @file_path, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+          RETURNING *
+        ''', {
+          'project_id': projectId,
+          'job_type': jobType,
+          'status': status,
+          'total_items': totalItems,
+          'success_items': successItems,
+          'failed_items': failedItems,
+          'created_by': createdBy,
+          'config': jsonEncode(config ?? {}),
+          'result': jsonEncode(result ?? {}),
+          'error_message': errorMessage,
+          'file_path': filePath,
+        });
+
+        final job = queryResult.first.toColumnMap();
+        logInfo('批量任务记录已创建', context: {'job_id': job['id']});
+        return job;
+      },
+      operationName: 'createBatchJobRecord',
+    );
+  }
+
   /// 获取批量任务列表
   Future<Map<String, dynamic>> getBatchJobs({
     int? projectId,

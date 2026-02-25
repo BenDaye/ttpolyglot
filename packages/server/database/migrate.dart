@@ -31,6 +31,9 @@ import './seeds/005_insert_system_configs.dart';
 import './seeds/006_insert_default_admin_user.dart';
 import 'migrations/018_project_members_table.dart';
 import 'migrations/019_notification_settings_table.dart';
+import 'migrations/020_project_member_invite_logs_table.dart';
+import 'migrations/021_project_translation_stats_table.dart';
+import 'migrations/022_translation_batch_jobs_table.dart';
 
 /// 主函数
 Future<void> main(List<String> args) async {
@@ -477,6 +480,12 @@ void _registerMigrations() {
       '017_user_translation_configs_table', () => Migration017UserTranslationConfigsTable());
   MigrationService.registerMigration('018_project_members_table', () => Migration018ProjectMembersTable());
   MigrationService.registerMigration('019_notification_settings_table', () => Migration019NotificationSettingsTable());
+  MigrationService.registerMigration(
+      '020_project_member_invite_logs_table', () => Migration020ProjectMemberInviteLogsTable());
+  MigrationService.registerMigration(
+      '021_project_translation_stats_table', () => Migration021ProjectTranslationStatsTable());
+  MigrationService.registerMigration(
+      '022_translation_batch_jobs_table', () => Migration022TranslationBatchJobsTable());
 }
 
 /// 注册所有种子数据

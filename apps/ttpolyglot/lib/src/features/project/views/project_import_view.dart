@@ -1,12 +1,12 @@
 import 'package:excel/excel.dart' as excel;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/common/common.dart';
 import 'package:ttpolyglot/src/core/utils/file_save_util.dart';
 import 'package:ttpolyglot/src/core/widgets/format_card.dart';
 import 'package:ttpolyglot/src/features/project/project.dart';
 import 'package:ttpolyglot/src/features/project/widgets/upload_file.dart';
 import 'package:ttpolyglot/src/features/project/widgets/upload_file_list.dart';
-import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
 /// 项目导入页面
@@ -19,6 +19,57 @@ class ProjectImportView extends StatefulWidget {
 }
 
 class _ProjectImportViewState extends State<ProjectImportView> {
+  final FileApi _fileApi = Get.find<FileApi>();
+  late Future<List<ImportHistoryItemModel>> _importHistoryFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _importHistoryFuture = _fetchImportHistory();
+  }
+
+  Future<List<ImportHistoryItemModel>> _fetchImportHistory() async {
+    final data = await _fileApi.getBatchJobs(
+      projectId: widget.projectId,
+      jobType: 'import',
+      limit: 20,
+    );
+    if (data == null) return [];
+
+    final jobs = data['jobs'] as List<dynamic>? ?? [];
+    return jobs.map((job) {
+      final jobMap = job as Map<String, dynamic>;
+      final config = jobMap['config'] is Map ? jobMap['config'] as Map<String, dynamic> : <String, dynamic>{};
+      final result = jobMap['result'] is Map ? jobMap['result'] as Map<String, dynamic> : <String, dynamic>{};
+      final status = jobMap['status']?.toString() ?? 'failed';
+      final successItems = jobMap['success_items'] as int? ?? 0;
+      final failedItems = jobMap['failed_items'] as int? ?? 0;
+      final totalItems = jobMap['total_items'] as int? ?? 0;
+
+      final fileName = config['file_name']?.toString() ?? '导入任务';
+      final format = config['format']?.toString() ?? '';
+      final message = result['message']?.toString() ?? '';
+      final description = message.isNotEmpty
+          ? message
+          : '导入 $successItems/$totalItems 条${failedItems > 0 ? '，失败 $failedItems 条' : ''}';
+
+      return ImportHistoryItemModel(
+        filename: fileName,
+        description: description,
+        timestamp: DateTime.tryParse(jobMap['created_at']?.toString() ?? '') ?? DateTime.now(),
+        success: status == 'completed',
+        format: format,
+        recordCount: successItems,
+      );
+    }).toList();
+  }
+
+  void _refreshImportHistory() {
+    setState(() {
+      _importHistoryFuture = _fetchImportHistory();
+    });
+  }
+
   String _formatImportTime(DateTime timestamp) {
     final now = DateTime.now();
     final difference = now.difference(timestamp);
@@ -425,11 +476,16 @@ class _ProjectImportViewState extends State<ProjectImportView> {
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
                           const Spacer(),
+                          IconButton(
+                            onPressed: _refreshImportHistory,
+                            icon: const Icon(Icons.refresh, size: 20.0),
+                            tooltip: '刷新',
+                          ),
                         ],
                       ),
                       const SizedBox(height: 16.0),
                       FutureBuilder<List<ImportHistoryItemModel>>(
-                        future: Future.value(<ImportHistoryItemModel>[]), // TODO: 从接口获取导入历史
+                        future: _importHistoryFuture,
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
                             return const Center(

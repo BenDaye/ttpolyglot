@@ -283,6 +283,88 @@ class FileController extends BaseController {
     );
   }
 
+  /// 获取批量任务列表（导入/导出历史）
+  Future<Response> getBatchJobs(Request request, String id) async {
+    return execute(
+      () async {
+        final projectId = int.tryParse(id);
+        if (projectId == null) {
+          throw ValidationException(message: '项目ID格式无效');
+        }
+
+        final params = request.url.queryParameters;
+        final jobType = params['job_type'];
+        final status = params['status'];
+        final page = int.tryParse(params['page'] ?? '1') ?? 1;
+        final limit = int.tryParse(params['limit'] ?? '20') ?? 20;
+
+        final result = await _batchJobService.getBatchJobs(
+          projectId: projectId,
+          jobType: jobType,
+          status: status,
+          page: page,
+          limit: limit,
+        );
+
+        return ResponseUtils.success(
+          message: '获取批量任务列表成功',
+          data: result,
+        );
+      },
+      operationName: 'getBatchJobs',
+    );
+  }
+
+  /// 创建批量任务记录（前端上报导入/导出结果）
+  Future<Response> createBatchJobRecord(Request request, String id) async {
+    return execute(
+      () async {
+        final userId = getCurrentUserId(request);
+        if (userId == null) {
+          return ResponseUtils.error(message: '未授权访问');
+        }
+
+        final projectId = int.tryParse(id);
+        if (projectId == null) {
+          throw ValidationException(message: '项目ID格式无效');
+        }
+
+        final body = await request.readAsString();
+        final data = jsonDecode(body) as Map<String, dynamic>;
+
+        final jobType = data['job_type'] as String? ?? 'import';
+        final status = data['status'] as String? ?? 'completed';
+        final totalItems = data['total_items'] as int? ?? 0;
+        final successItems = data['success_items'] as int? ?? 0;
+        final failedItems = data['failed_items'] as int? ?? 0;
+        final config = data['config'] as Map<String, dynamic>?;
+        final result = data['result'] as Map<String, dynamic>?;
+        final errorMessage = data['error_message'] as String?;
+        final filePath = data['file_path'] as String?;
+
+        final job = await _batchJobService.createBatchJobRecord(
+          projectId: projectId,
+          jobType: jobType,
+          status: status,
+          totalItems: totalItems,
+          createdBy: userId,
+          successItems: successItems,
+          failedItems: failedItems,
+          config: config,
+          result: result,
+          errorMessage: errorMessage,
+          filePath: filePath,
+        );
+
+        return ResponseUtils.success(
+          message: '批量任务记录已创建',
+          data: job,
+        );
+      },
+      operationName: 'createBatchJobRecord',
+    );
+  }
+
   Future<Response> getExportStatus(Request request, String id, String taskId) async {
     return execute(
       () async {

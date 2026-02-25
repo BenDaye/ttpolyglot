@@ -34,6 +34,10 @@ class FileRoutes {
     router.post('/projects/<id>/export', fileController.exportTranslations);
     router.get('/projects/<id>/export/<taskId>', fileController.getExportStatus);
 
+    // 批量任务记录（导入/导出历史）
+    router.get('/projects/<id>/batch-jobs', fileController.getBatchJobs);
+    router.post('/projects/<id>/batch-jobs', fileController.createBatchJobRecord);
+
     return router;
   }
 }

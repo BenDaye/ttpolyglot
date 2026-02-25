@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/common/common.dart';
 import 'package:ttpolyglot/src/core/services/service.dart';
-import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_utils/utils.dart';
 
 class ProjectExportController extends GetxController {
@@ -16,6 +16,27 @@ class ProjectExportController extends GetxController {
   final ProjectServiceImpl _projectService = Get.find<ProjectServiceImpl>();
   final TranslationServiceImpl _translationService = Get.find<TranslationServiceImpl>();
   final ExportServiceImpl _exportService = Get.find<ExportServiceImpl>();
+  final FileApi _fileApi = Get.find<FileApi>();
+
+  /// 上报导出记录到服务端
+  void _recordExport({
+    required String format,
+    required int entryCount,
+    required bool success,
+    String? savePath,
+    String? errorMessage,
+  }) {
+    _fileApi.createBatchJobRecord(
+      projectId: projectId,
+      jobType: 'export',
+      status: success ? 'completed' : 'failed',
+      totalItems: entryCount,
+      successItems: success ? entryCount : 0,
+      config: {'format': format},
+      filePath: savePath,
+      errorMessage: errorMessage,
+    );
+  }
 
   static Future<String?> exportTranslationsShortcutJson(
     int projectId,
@@ -44,10 +65,12 @@ class ProjectExportController extends GetxController {
 
       if (savePath == null) return null;
 
+      controller._recordExport(format: 'json', entryCount: entries.length, success: true, savePath: savePath);
       Get.snackbar('成功', 'JSON翻译文件导出成功');
       return savePath;
     } catch (error, stackTrace) {
       LoggerUtils.error('exportTranslationsShortcutJson', error: error, stackTrace: stackTrace);
+      controller._recordExport(format: 'json', entryCount: 0, success: false, errorMessage: error.toString());
       Get.snackbar('错误', '导出JSON翻译文件失败: $error');
       return null;
     }
@@ -80,10 +103,12 @@ class ProjectExportController extends GetxController {
 
       if (savePath == null) return null;
 
+      controller._recordExport(format: 'csv', entryCount: entries.length, success: true, savePath: savePath);
       Get.snackbar('成功', 'CSV翻译文件导出成功');
       return savePath;
     } catch (error, stackTrace) {
       LoggerUtils.error('exportTranslationsShortcutCsv', error: error, stackTrace: stackTrace);
+      controller._recordExport(format: 'csv', entryCount: 0, success: false, errorMessage: error.toString());
       Get.snackbar('错误', '导出CSV翻译文件失败: $error');
       return null;
     }
@@ -116,10 +141,12 @@ class ProjectExportController extends GetxController {
 
       if (savePath == null) return null;
 
+      controller._recordExport(format: 'excel', entryCount: entries.length, success: true, savePath: savePath);
       Get.snackbar('成功', 'Excel翻译文件导出成功');
       return savePath;
     } catch (error, stackTrace) {
       LoggerUtils.error('exportTranslationsShortcutExcel', error: error, stackTrace: stackTrace);
+      controller._recordExport(format: 'excel', entryCount: 0, success: false, errorMessage: error.toString());
       Get.snackbar('错误', '导出Excel翻译文件失败: $error');
       return null;
     }
@@ -152,10 +179,12 @@ class ProjectExportController extends GetxController {
 
       if (savePath == null) return null;
 
+      controller._recordExport(format: 'arb', entryCount: entries.length, success: true, savePath: savePath);
       Get.snackbar('成功', 'ARB翻译文件导出成功');
       return savePath;
     } catch (error, stackTrace) {
       LoggerUtils.error('exportTranslationsShortcutArb', error: error, stackTrace: stackTrace);
+      controller._recordExport(format: 'arb', entryCount: 0, success: false, errorMessage: error.toString());
       Get.snackbar('错误', '导出ARB翻译文件失败: $error');
       return null;
     }
@@ -188,10 +217,12 @@ class ProjectExportController extends GetxController {
 
       if (savePath == null) return null;
 
+      controller._recordExport(format: 'po', entryCount: entries.length, success: true, savePath: savePath);
       Get.snackbar('成功', 'PO翻译文件导出成功');
       return savePath;
     } catch (error, stackTrace) {
       LoggerUtils.error('exportTranslationsShortcutPo', error: error, stackTrace: stackTrace);
+      controller._recordExport(format: 'po', entryCount: 0, success: false, errorMessage: error.toString());
       Get.snackbar('错误', '导出PO翻译文件失败: $error');
       return null;
     }
@@ -296,6 +327,12 @@ class ProjectExportController extends GetxController {
       );
 
       if (savePath != null) {
+        controller._recordExport(
+          format: format,
+          entryCount: finalEntries.length,
+          success: true,
+          savePath: savePath,
+        );
         Get.snackbar('成功', '自定义导出完成');
         return savePath;
       }
@@ -303,6 +340,12 @@ class ProjectExportController extends GetxController {
       return null;
     } catch (error, stackTrace) {
       LoggerUtils.error('自定义导出失败', error: error, stackTrace: stackTrace);
+      controller._recordExport(
+        format: format,
+        entryCount: 0,
+        success: false,
+        errorMessage: error.toString(),
+      );
       Get.snackbar('错误', '自定义导出失败: $error');
       return null;
     } finally {

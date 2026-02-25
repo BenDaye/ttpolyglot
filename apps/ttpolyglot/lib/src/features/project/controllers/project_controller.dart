@@ -22,6 +22,7 @@ class ProjectController extends GetxController {
   final TranslationServiceImpl _translationService = Get.find<TranslationServiceImpl>();
   final ProjectApi _projectApi = Get.find<ProjectApi>();
   final NotificationSettingsApi _notificationSettingsApi = Get.find<NotificationSettingsApi>();
+  final FileApi _fileApi = Get.find<FileApi>();
 
   // 响应式项目对象
   final _project = Rxn<ProjectModel>();
@@ -84,7 +85,7 @@ class ProjectController extends GetxController {
   final RxList<ImportRecordModel> _importRecords = <ImportRecordModel>[].obs;
   List<ImportRecordModel> get importRecords => _importRecords.toList();
 
-  /// 添加导入记录
+  /// 添加导入记录并上报到服务端
   void addImportRecordModel(ImportRecordModel record) {
     _importRecords.insert(0, record); // 最新记录插在最前面
 
@@ -92,6 +93,28 @@ class ProjectController extends GetxController {
     if (_importRecords.length > 5) {
       _importRecords.removeRange(5, _importRecords.length);
     }
+
+    // 异步上报到服务端
+    _fileApi.createBatchJobRecord(
+      projectId: projectId,
+      jobType: 'import',
+      status: record.status == ImportRecordStatus.failure ? 'failed' : 'completed',
+      totalItems: record.totalCount,
+      successItems: record.importedCount,
+      failedItems: record.skippedCount + record.conflictCount,
+      config: {
+        'file_name': record.fileName,
+        'language': record.language,
+        'format': record.fileName.split('.').last,
+      },
+      result: {
+        'imported': record.importedCount,
+        'conflicts': record.conflictCount,
+        'skipped': record.skippedCount,
+        'message': record.message,
+      },
+      errorMessage: record.status == ImportRecordStatus.failure ? record.message : null,
+    );
   }
 
   // 允许的文件扩展名

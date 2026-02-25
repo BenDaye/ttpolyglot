@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ttpolyglot/src/common/common.dart';
 import 'package:ttpolyglot/src/core/utils/file_save_util.dart';
 import 'package:ttpolyglot/src/core/widgets/clickable_stat_card.dart';
 import 'package:ttpolyglot/src/features/features.dart';
-import 'package:ttpolyglot_model/model.dart';
 
 /// 项目导出页面
 class ProjectExportView extends StatefulWidget {
@@ -15,6 +15,51 @@ class ProjectExportView extends StatefulWidget {
 }
 
 class _ProjectExportViewState extends State<ProjectExportView> {
+  final FileApi _fileApi = Get.find<FileApi>();
+  late Future<List<ExportHistoryItem>> _exportHistoryFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _exportHistoryFuture = _fetchExportHistory();
+  }
+
+  Future<List<ExportHistoryItem>> _fetchExportHistory() async {
+    final data = await _fileApi.getBatchJobs(
+      projectId: widget.projectId,
+      jobType: 'export',
+      limit: 20,
+    );
+    if (data == null) return [];
+
+    final jobs = data['jobs'] as List<dynamic>? ?? [];
+    return jobs.map((job) {
+      final jobMap = job as Map<String, dynamic>;
+      final config = jobMap['config'] is Map ? jobMap['config'] as Map<String, dynamic> : <String, dynamic>{};
+      final status = jobMap['status']?.toString() ?? 'failed';
+      final totalItems = jobMap['total_items'] as int? ?? 0;
+
+      final format = config['format']?.toString() ?? 'json';
+      final description = status == 'completed' ? '导出 $totalItems 条翻译，格式: ${format.toUpperCase()}' : '导出失败';
+
+      return ExportHistoryItem(
+        filename: '${format.toUpperCase()}_export_${jobMap['id']?.toString().substring(0, 8) ?? ''}',
+        description: description,
+        timestamp: DateTime.tryParse(jobMap['created_at']?.toString() ?? '') ?? DateTime.now(),
+        success: status == 'completed',
+        format: format,
+        languageCount: totalItems,
+        filePath: jobMap['file_path']?.toString(),
+      );
+    }).toList();
+  }
+
+  void _refreshExportHistory() {
+    setState(() {
+      _exportHistoryFuture = _fetchExportHistory();
+    });
+  }
+
   String _formatTime(DateTime timestamp) {
     final now = DateTime.now();
     final difference = now.difference(timestamp);
@@ -661,11 +706,16 @@ class _ProjectExportViewState extends State<ProjectExportView> {
                                 style: Theme.of(context).textTheme.titleLarge,
                               ),
                               const Spacer(),
+                              IconButton(
+                                onPressed: _refreshExportHistory,
+                                icon: const Icon(Icons.refresh, size: 20.0),
+                                tooltip: '刷新',
+                              ),
                             ],
                           ),
                           const SizedBox(height: 16.0),
                           FutureBuilder<List<ExportHistoryItem>>(
-                            future: Future.value(<ExportHistoryItem>[]), // TODO: 从接口获取导出历史
+                            future: _exportHistoryFuture,
                             builder: (context, snapshot) {
                               if (snapshot.connectionState == ConnectionState.waiting) {
                                 return const Center(

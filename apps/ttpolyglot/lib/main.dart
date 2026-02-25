@@ -145,6 +145,12 @@ Future<void> _initializeService() async {
     permanent: true,
   );
 
+  // 注册文件/批量任务 API
+  Get.put<FileApi>(
+    FileApi(),
+    permanent: true,
+  );
+
   // 初始化认证服务（检查登录状态）
   await Get.find<AuthService>().init();
 
