@@ -130,14 +130,15 @@ class UserSettingsApi {
   }
 
   /// 删除翻译接口
-  Future<void> deleteTranslationProvider(String providerId) async {
+  Future<bool> deleteTranslationProvider(String providerId) async {
     try {
-      await HttpClient.delete(
+      final response = await HttpClient.delete(
         '/users/me/settings/translation/providers/$providerId',
       );
+      return response.success;
     } catch (error, stackTrace) {
       LoggerUtils.error('删除翻译接口失败', error: error, stackTrace: stackTrace);
-      rethrow;
+      return false;
     }
   }
 

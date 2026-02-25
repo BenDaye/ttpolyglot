@@ -105,11 +105,11 @@ class AuthApi {
   /// 忘记密码
   Future<bool> forgotPassword(ForgotPasswordRequestModel request) async {
     try {
-      await HttpClient.post(
+      final response = await HttpClient.post(
         '/auth/forgot-password',
         data: request.toJson(),
       );
-      return true;
+      return response.success;
     } catch (error, stackTrace) {
       LoggerUtils.error('忘记密码请求失败', error: error, stackTrace: stackTrace);
       return false;
@@ -119,11 +119,11 @@ class AuthApi {
   /// 重置密码
   Future<bool> resetPassword(ResetPasswordRequestModel request) async {
     try {
-      await HttpClient.post(
+      final response = await HttpClient.post(
         '/auth/reset-password',
         data: request.toJson(),
       );
-      return true;
+      return response.success;
     } catch (error, stackTrace) {
       LoggerUtils.error('重置密码请求失败', error: error, stackTrace: stackTrace);
       return false;
@@ -133,11 +133,11 @@ class AuthApi {
   /// 验证邮箱
   Future<bool> verifyEmail(VerifyEmailRequestModel request) async {
     try {
-      await HttpClient.post(
+      final response = await HttpClient.post(
         '/auth/verify-email',
         data: request.toJson(),
       );
-      return true;
+      return response.success;
     } catch (error, stackTrace) {
       LoggerUtils.error('验证邮箱请求失败', error: error, stackTrace: stackTrace);
       return false;
@@ -147,11 +147,11 @@ class AuthApi {
   /// 重发验证邮件
   Future<bool> resendVerification(ResendVerificationRequestModel request) async {
     try {
-      await HttpClient.post(
+      final response = await HttpClient.post(
         '/auth/resend-verification',
         data: request.toJson(),
       );
-      return true;
+      return response.success;
     } catch (error, stackTrace) {
       LoggerUtils.error('重发验证邮件请求失败', error: error, stackTrace: stackTrace);
       return false;

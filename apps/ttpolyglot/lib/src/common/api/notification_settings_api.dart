@@ -151,19 +151,20 @@ class NotificationSettingsApi {
   }
 
   /// 初始化默认通知设置
-  Future<void> initializeDefaultSettings({
+  Future<bool> initializeDefaultSettings({
     int? projectId,
   }) async {
     try {
-      await HttpClient.post(
+      final response = await HttpClient.post(
         '/notification-settings/initialize',
         data: {
           if (projectId != null) 'projectId': projectId,
         },
       );
+      return response.success;
     } catch (error, stackTrace) {
       LoggerUtils.error('[initializeDefaultSettings] 初始化默认设置失败', error: error, stackTrace: stackTrace);
-      rethrow;
+      return false;
     }
   }
 
