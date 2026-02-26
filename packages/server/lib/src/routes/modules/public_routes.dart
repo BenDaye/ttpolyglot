@@ -21,8 +21,8 @@ class PublicRoutes {
     );
 
     // 公开获取项目翻译数据
-    // GET /public/projects/<slug>/translations?page=1&limit=1000
-    router.get('/public/projects/<slug>/translations', publicAccessController.getTranslations);
+    // GET /public/projects/<id>/translations?page=1&limit=1000
+    router.get('/public/projects/<id>/translations', publicAccessController.getTranslations);
 
     return router;
   }

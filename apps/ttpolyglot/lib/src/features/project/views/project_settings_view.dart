@@ -133,11 +133,10 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                     ),
                   ),
 
-                  // 公开访问卡片（仅公开项目显示）
-                  if (project.visibility == 'public') ...[
-                    const SizedBox(height: 16.0),
-                    _buildPublicAccessSettings(context, project),
-                  ],
+                  const SizedBox(height: 16.0),
+
+                  // 公开访问卡片
+                  _buildPublicAccessSettings(context, project),
 
                   const SizedBox(height: 16.0),
 
@@ -259,7 +258,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
   }
 
   Widget _buildPublicAccessSettings(BuildContext context, ProjectModel project) {
-    final publicUrl = '${AppConfig.apiBaseUrl}/public/projects/${project.slug}/translations';
+    final publicUrl = '${AppConfig.apiBaseUrl}/public/projects/${project.id}/translations';
 
     return Card(
       child: Padding(
