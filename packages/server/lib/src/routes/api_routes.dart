@@ -71,8 +71,19 @@ class ApiRoutes {
       );
     });
 
+    // 挂载公开路由（无需认证）
+    _mountPublicRoutes();
+
     // 挂载各功能模块路由
     _mountModuleRoutes();
+  }
+
+  /// 挂载公开路由（无需认证）
+  void _mountPublicRoutes() {
+    final publicRoutes = PublicRoutes(
+      databaseService: databaseService,
+    );
+    _router.mount('/', publicRoutes.configure().call);
   }
 
   /// 挂载各功能模块的路由

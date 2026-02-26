@@ -8,6 +8,7 @@ export 'file_routes.dart';
 export 'language_routes.dart';
 export 'notification_routes.dart';
 export 'project_routes.dart';
+export 'public_routes.dart';
 export 'role_permission_routes.dart';
 export 'translation_routes.dart';
 export 'user_routes.dart';

@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/common/common.dart';
 import 'package:ttpolyglot/src/features/features.dart';
@@ -132,6 +133,12 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                     ),
                   ),
 
+                  // 公开访问卡片（仅公开项目显示）
+                  if (project.visibility == 'public') ...[
+                    const SizedBox(height: 16.0),
+                    _buildPublicAccessSettings(context, project),
+                  ],
+
                   const SizedBox(height: 16.0),
 
                   // 成员上限设置卡片
@@ -247,6 +254,66 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
         subtitle: Text(subtitle),
         trailing: const Icon(Icons.arrow_forward_ios, color: Colors.red, size: 16),
         onTap: onTap,
+      ),
+    );
+  }
+
+  Widget _buildPublicAccessSettings(BuildContext context, ProjectModel project) {
+    final publicUrl = '${AppConfig.apiBaseUrl}/public/projects/${project.slug}/translations';
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '公开访问',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8.0),
+            Text(
+              '通过以下链接可公开访问项目的翻译数据（JSON 格式）',
+              style: TextStyle(color: Colors.grey[600], fontSize: 12.0),
+            ),
+            const SizedBox(height: 12.0),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(4.0),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: SelectableText(
+                      publicUrl,
+                      style: TextStyle(
+                        fontSize: 13.0,
+                        fontFamily: 'monospace',
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8.0),
+                  IconButton(
+                    icon: const Icon(Icons.copy, size: 18.0),
+                    tooltip: '复制链接',
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: publicUrl));
+                      Get.snackbar('已复制', '公开访问链接已复制到剪贴板');
+                    },
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8.0),
+            Text(
+              '可选参数: page (页码, 默认 1)、limit (每页条目数, 默认 1000)',
+              style: TextStyle(color: Colors.grey[600], fontSize: 12.0),
+            ),
+          ],
+        ),
       ),
     );
   }
