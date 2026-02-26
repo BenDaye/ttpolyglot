@@ -29,7 +29,7 @@ mixin _$TranslationEntryModel {
   @JsonKey(name: 'project_id')
   int get projectId => throw _privateConstructorUsedError;
 
-  /// 条目键（优化字段）
+  /// 条目键
   @JsonKey(name: 'entry_key')
   String get entryKey => throw _privateConstructorUsedError;
 
@@ -412,7 +412,7 @@ class _$TranslationEntryModelImpl extends _TranslationEntryModel {
   @JsonKey(name: 'project_id')
   final int projectId;
 
-  /// 条目键（优化字段）
+  /// 条目键
   @override
   @JsonKey(name: 'entry_key')
   final String entryKey;
@@ -614,7 +614,7 @@ abstract class _TranslationEntryModel extends TranslationEntryModel {
   @JsonKey(name: 'project_id')
   int get projectId;
 
-  /// 条目键（优化字段）
+  /// 条目键
   @override
   @JsonKey(name: 'entry_key')
   String get entryKey;

@@ -1,5 +1,4 @@
 import 'package:shelf/shelf.dart';
-import 'package:ttpolyglot_model/model.dart';
 import 'package:ttpolyglot_server/server.dart';
 
 import '../base_controller.dart';
@@ -7,7 +6,8 @@ import '../base_controller.dart';
 /// 公开访问控制器
 ///
 /// 提供无需认证的翻译数据访问接口，
-/// 通过项目 ID 标识项目，返回和导出 JSON 相同格式的翻译数据。
+/// 通过项目 UUID 标识项目，仅返回 `entry_key`、`source_language`、
+/// `source_text`、`target_languages` 四个字段。
 class PublicAccessController extends BaseController {
   final DatabaseService _databaseService;
   late final TranslationService _translationService;
@@ -23,28 +23,25 @@ class PublicAccessController extends BaseController {
 
   /// 公开获取项目翻译数据（分页）
   ///
-  /// `GET /public/projects/{id}/translations?page=1&limit=1000`
+  /// `GET /public/projects/{uuid}/translations?page=1&limit=1000`
   ///
   /// 查询参数:
   /// - `page`: 页码，默认 1
   /// - `limit`: 每页条目数，默认/最大 1000
-  Future<Response> getTranslations(Request request, String id) async {
+  Future<Response> getTranslations(Request request, String uuid) async {
     return execute(
       () async {
-        final projectId = int.tryParse(id);
-        if (projectId == null) {
-          throw ValidationException(message: '项目ID格式无效');
-        }
-
-        // 验证项目存在且处于活跃状态
+        // 通过 UUID 查找项目
         final projectResult = await _databaseService.query(
-          'SELECT id FROM {projects} WHERE id = @id AND is_active = true',
-          {'id': projectId},
+          'SELECT id FROM {projects} WHERE uuid = @uuid::uuid AND is_active = true',
+          {'uuid': uuid},
         );
 
         if (projectResult.isEmpty) {
           throw NotFoundException(message: '项目不存在');
         }
+
+        final projectId = int.tryParse(projectResult.first.toColumnMap()['id'].toString()) ?? 0;
 
         // 读取查询参数
         final params = request.url.queryParameters;
@@ -58,9 +55,25 @@ class PublicAccessController extends BaseController {
           limit: limit,
         );
 
-        return ResponseUtils.success<PagerModel<TranslationEntryModel>>(
+        // 过滤字段：仅返回 entry_key, source_language, source_text, target_languages
+        final filteredItems = result.items?.map((entry) => {
+              'entry_key': entry.entryKey,
+              'source_language': entry.sourceLanguage.code,
+              'target_languages': entry.targetLanguages.map((t) => t.toJson()).toList(),
+              'source_text': entry.sourceText,
+            }).toList();
+
+        final filteredResult = {
+          'page': result.page,
+          'page_size': result.pageSize,
+          'total_size': result.totalSize,
+          'total_page': result.totalPage,
+          'items': filteredItems,
+        };
+
+        return ResponseUtils.success<Map<String, dynamic>>(
           message: '获取翻译数据成功',
-          data: result,
+          data: filteredResult,
         );
       },
       operationName: 'getTranslations',

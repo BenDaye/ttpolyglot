@@ -258,7 +258,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
   }
 
   Widget _buildPublicAccessSettings(BuildContext context, ProjectModel project) {
-    final publicUrl = '${AppConfig.apiBaseUrl}/public/projects/${project.id}/translations';
+    final publicUrl = '${AppConfig.apiBaseUrl}/public/projects/${project.uuid}/translations';
 
     return Card(
       child: Padding(

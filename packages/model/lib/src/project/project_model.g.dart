@@ -9,6 +9,7 @@ part of 'project_model.dart';
 _$ProjectModelImpl _$$ProjectModelImplFromJson(Map<String, dynamic> json) =>
     _$ProjectModelImpl(
       id: const FlexibleIntConverter().fromJson(json['id']),
+      uuid: json['uuid'] as String,
       name: json['name'] as String,
       slug: json['slug'] as String,
       description: json['description'] as String?,
@@ -42,6 +43,7 @@ _$ProjectModelImpl _$$ProjectModelImplFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$$ProjectModelImplToJson(_$ProjectModelImpl instance) =>
     <String, dynamic>{
       'id': const FlexibleIntConverter().toJson(instance.id),
+      'uuid': instance.uuid,
       'name': instance.name,
       'slug': instance.slug,
       'description': instance.description,

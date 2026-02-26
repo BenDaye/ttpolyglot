@@ -76,9 +76,9 @@ class ProjectService extends BaseService {
       parameters['offset'] = offset;
 
       final projectsSql = '''
-        SELECT 
-          p.id, p.name, p.slug, p.description, p.status, p.visibility,
-          p.owner_id, p.primary_language_id, p.total_keys, p.translated_keys, 
+        SELECT
+          p.id, p.uuid, p.name, p.slug, p.description, p.status, p.visibility,
+          p.owner_id, p.primary_language_id, p.total_keys, p.translated_keys,
           p.member_limit, p.is_active,
           p.last_activity_at, p.created_at, p.updated_at
         FROM {projects} p
@@ -218,9 +218,9 @@ class ProjectService extends BaseService {
       }
 
       final sql = '''
-        SELECT 
-          p.id, p.name, p.slug, p.description, p.status, p.visibility,
-          p.owner_id, p.primary_language_id, p.total_keys, p.translated_keys, 
+        SELECT
+          p.id, p.uuid, p.name, p.slug, p.description, p.status, p.visibility,
+          p.owner_id, p.primary_language_id, p.total_keys, p.translated_keys,
           p.member_limit, p.is_active,
           p.last_activity_at, p.created_at, p.updated_at
         FROM {projects} p

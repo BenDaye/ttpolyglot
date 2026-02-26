@@ -25,6 +25,10 @@ mixin _$ProjectModel {
   @FlexibleIntConverter()
   int get id => throw _privateConstructorUsedError;
 
+  /// 项目UUID
+  @JsonKey(name: 'uuid')
+  String get uuid => throw _privateConstructorUsedError;
+
   /// 项目名称
   @JsonKey(name: 'name')
   String get name => throw _privateConstructorUsedError;
@@ -114,6 +118,7 @@ abstract class $ProjectModelCopyWith<$Res> {
   @useResult
   $Res call(
       {@JsonKey(name: 'id') @FlexibleIntConverter() int id,
+      @JsonKey(name: 'uuid') String uuid,
       @JsonKey(name: 'name') String name,
       @JsonKey(name: 'slug') String slug,
       @JsonKey(name: 'description') String? description,
@@ -154,6 +159,7 @@ class _$ProjectModelCopyWithImpl<$Res, $Val extends ProjectModel>
   @override
   $Res call({
     Object? id = null,
+    Object? uuid = null,
     Object? name = null,
     Object? slug = null,
     Object? description = freezed,
@@ -176,6 +182,10 @@ class _$ProjectModelCopyWithImpl<$Res, $Val extends ProjectModel>
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as int,
+      uuid: null == uuid
+          ? _value.uuid
+          : uuid // ignore: cast_nullable_to_non_nullable
+              as String,
       name: null == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
@@ -254,6 +264,7 @@ abstract class _$$ProjectModelImplCopyWith<$Res>
   @useResult
   $Res call(
       {@JsonKey(name: 'id') @FlexibleIntConverter() int id,
+      @JsonKey(name: 'uuid') String uuid,
       @JsonKey(name: 'name') String name,
       @JsonKey(name: 'slug') String slug,
       @JsonKey(name: 'description') String? description,
@@ -292,6 +303,7 @@ class __$$ProjectModelImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
+    Object? uuid = null,
     Object? name = null,
     Object? slug = null,
     Object? description = freezed,
@@ -314,6 +326,10 @@ class __$$ProjectModelImplCopyWithImpl<$Res>
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as int,
+      uuid: null == uuid
+          ? _value.uuid
+          : uuid // ignore: cast_nullable_to_non_nullable
+              as String,
       name: null == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
@@ -387,6 +403,7 @@ class __$$ProjectModelImplCopyWithImpl<$Res>
 class _$ProjectModelImpl extends _ProjectModel {
   const _$ProjectModelImpl(
       {@JsonKey(name: 'id') @FlexibleIntConverter() required this.id,
+      @JsonKey(name: 'uuid') required this.uuid,
       @JsonKey(name: 'name') required this.name,
       @JsonKey(name: 'slug') required this.slug,
       @JsonKey(name: 'description') this.description,
@@ -424,6 +441,11 @@ class _$ProjectModelImpl extends _ProjectModel {
   @JsonKey(name: 'id')
   @FlexibleIntConverter()
   final int id;
+
+  /// 项目UUID
+  @override
+  @JsonKey(name: 'uuid')
+  final String uuid;
 
   /// 项目名称
   @override
@@ -528,7 +550,7 @@ class _$ProjectModelImpl extends _ProjectModel {
 
   @override
   String toString() {
-    return 'ProjectModel(id: $id, name: $name, slug: $slug, description: $description, ownerId: $ownerId, status: $status, visibility: $visibility, primaryLanguageId: $primaryLanguageId, totalKeys: $totalKeys, translatedKeys: $translatedKeys, memberLimit: $memberLimit, isActive: $isActive, lastActivityAt: $lastActivityAt, createdAt: $createdAt, updatedAt: $updatedAt, languages: $languages, members: $members)';
+    return 'ProjectModel(id: $id, uuid: $uuid, name: $name, slug: $slug, description: $description, ownerId: $ownerId, status: $status, visibility: $visibility, primaryLanguageId: $primaryLanguageId, totalKeys: $totalKeys, translatedKeys: $translatedKeys, memberLimit: $memberLimit, isActive: $isActive, lastActivityAt: $lastActivityAt, createdAt: $createdAt, updatedAt: $updatedAt, languages: $languages, members: $members)';
   }
 
   @override
@@ -537,6 +559,7 @@ class _$ProjectModelImpl extends _ProjectModel {
         (other.runtimeType == runtimeType &&
             other is _$ProjectModelImpl &&
             (identical(other.id, id) || other.id == id) &&
+            (identical(other.uuid, uuid) || other.uuid == uuid) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.slug, slug) || other.slug == slug) &&
             (identical(other.description, description) ||
@@ -571,6 +594,7 @@ class _$ProjectModelImpl extends _ProjectModel {
   int get hashCode => Object.hash(
       runtimeType,
       id,
+      uuid,
       name,
       slug,
       description,
@@ -607,6 +631,7 @@ class _$ProjectModelImpl extends _ProjectModel {
 abstract class _ProjectModel extends ProjectModel {
   const factory _ProjectModel(
       {@JsonKey(name: 'id') @FlexibleIntConverter() required final int id,
+      @JsonKey(name: 'uuid') required final String uuid,
       @JsonKey(name: 'name') required final String name,
       @JsonKey(name: 'slug') required final String slug,
       @JsonKey(name: 'description') final String? description,
@@ -646,6 +671,11 @@ abstract class _ProjectModel extends ProjectModel {
   @JsonKey(name: 'id')
   @FlexibleIntConverter()
   int get id;
+
+  /// 项目UUID
+  @override
+  @JsonKey(name: 'uuid')
+  String get uuid;
 
   /// 项目名称
   @override

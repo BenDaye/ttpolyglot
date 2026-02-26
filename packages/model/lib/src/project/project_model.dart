@@ -13,6 +13,9 @@ class ProjectModel with _$ProjectModel {
     /// 项目ID
     @JsonKey(name: 'id') @FlexibleIntConverter() required int id,
 
+    /// 项目UUID
+    @JsonKey(name: 'uuid') required String uuid,
+
     /// 项目名称
     @JsonKey(name: 'name') required String name,
 
