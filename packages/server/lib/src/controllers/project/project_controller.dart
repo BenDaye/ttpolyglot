@@ -277,6 +277,12 @@ class ProjectController extends BaseController {
         return ResponseUtils.error(message: '无效的角色类型');
       }
 
+      // 验证操作者是否为 owner 或 admin
+      final callerRole = await _projectService.getUserRoleInProject(invitedBy, id);
+      if (callerRole != 'owner' && callerRole != 'admin') {
+        return ResponseUtils.error(message: '只有项目所有者或管理员可以添加成员');
+      }
+
       await _projectService.addProjectMember(projectId: id, userId: userId, role: role, invitedBy: invitedBy);
 
       return ResponseUtils.success<ProjectMemberModel>(message: '项目成员添加成功');
@@ -293,6 +299,22 @@ class ProjectController extends BaseController {
         return ResponseUtils.error(message: '项目ID格式无效');
       }
       ValidatorUtils.validateUuid(userId, 'user_id');
+
+      // 验证操作者权限
+      final callerId = getCurrentUserId(request);
+      if (callerId == null) {
+        return ResponseUtils.error(message: '用户信息不存在');
+      }
+      final callerRole = await _projectService.getUserRoleInProject(callerId, id);
+      if (callerRole != 'owner' && callerRole != 'admin') {
+        return ResponseUtils.error(message: '只有项目所有者或管理员可以移除成员');
+      }
+
+      // 不允许移除自己
+      if (callerId == userId) {
+        return ResponseUtils.error(message: '不能移除自己，请使用退出项目功能');
+      }
+
       await _projectService.removeProjectMember(id, userId);
       return ResponseUtils.success<ProjectMemberModel>(message: '项目成员删除成功');
     } catch (error, stackTrace) {
@@ -350,6 +372,16 @@ class ProjectController extends BaseController {
       }
       ValidatorUtils.validateUuid(userId, 'user_id');
 
+      // 验证操作者权限
+      final callerId = getCurrentUserId(request);
+      if (callerId == null) {
+        return ResponseUtils.error(message: '用户信息不存在');
+      }
+      final callerRole = await _projectService.getUserRoleInProject(callerId, id);
+      if (callerRole != 'owner' && callerRole != 'admin') {
+        return ResponseUtils.error(message: '只有项目所有者或管理员可以修改成员角色');
+      }
+
       final body = await request.readAsString();
       final data = jsonDecode(body) as Map<String, dynamic>;
       final role = data['role'] as String?;
@@ -358,10 +390,10 @@ class ProjectController extends BaseController {
         return ResponseUtils.error(message: '角色不能为空');
       }
 
-      // 验证角色值是否有效
-      final validRoles = ['owner', 'admin', 'member', 'viewer'];
+      // 验证角色值是否有效（不允许通过此接口设置为 owner，需使用转移所有权功能）
+      final validRoles = ['admin', 'member', 'viewer'];
       if (!validRoles.contains(role)) {
-        return ResponseUtils.error(message: '无效的角色类型');
+        return ResponseUtils.error(message: '无效的角色类型，请使用转移所有权功能设置所有者');
       }
 
       await _projectService.updateProjectMemberRole(id, userId, role);
@@ -391,6 +423,16 @@ class ProjectController extends BaseController {
       ValidatorUtils.validateUuid(newOwnerId, 'new_owner_id');
 
       final currentUserId = getCurrentUserId(request);
+      if (currentUserId == null) {
+        return ResponseUtils.error(message: '用户信息不存在');
+      }
+
+      // 验证操作者是否为项目所有者
+      final callerRole = await _projectService.getUserRoleInProject(currentUserId, id);
+      if (callerRole != 'owner') {
+        return ResponseUtils.error(message: '只有项目所有者可以转移所有权');
+      }
+
       await _projectService.transferProjectOwnership(id, newOwnerId, currentOwnerId: currentUserId);
       return ResponseUtils.success<ProjectModel>(message: '项目所有权转移成功');
     } catch (error, stackTrace) {

@@ -148,6 +148,26 @@ class _ProjectMembersViewState extends State<ProjectMembersView> {
     );
   }
 
+  /// 格式化日期
+  String _formatDate(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
+  /// 获取成员状态文本
+  String _getStatusText(MemberStatusEnum status) => status.displayName;
+
+  /// 获取成员状态颜色
+  Color _getStatusColor(MemberStatusEnum status) {
+    switch (status) {
+      case MemberStatusEnum.active:
+        return Colors.green;
+      case MemberStatusEnum.pending:
+        return Colors.orange;
+      case MemberStatusEnum.inactive:
+        return Colors.grey;
+    }
+  }
+
   /// 根据角色获取颜色
   Color _getRoleColor(ProjectRoleEnum role) {
     switch (role) {
@@ -263,7 +283,7 @@ class _ProjectMembersViewState extends State<ProjectMembersView> {
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(8.0),
       ),
       child: Row(
         children: [
@@ -300,7 +320,7 @@ class _ProjectMembersViewState extends State<ProjectMembersView> {
                       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
                       decoration: BoxDecoration(
                         color: roleColor.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(12.0),
+                        borderRadius: BorderRadius.circular(8.0),
                       ),
                       child: Text(
                         role,
@@ -319,6 +339,31 @@ class _ProjectMembersViewState extends State<ProjectMembersView> {
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
+                ),
+                const SizedBox(height: 4.0),
+                Row(
+                  children: [
+                    // 成员状态
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 1.0),
+                      decoration: BoxDecoration(
+                        color: _getStatusColor(member.status).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(4.0),
+                      ),
+                      child: Text(
+                        _getStatusText(member.status),
+                        style: TextStyle(fontSize: 10.0, color: _getStatusColor(member.status)),
+                      ),
+                    ),
+                    // 加入时间
+                    if (member.joinedAt != null) ...[
+                      const SizedBox(width: 8.0),
+                      Text(
+                        '加入于 ${_formatDate(member.joinedAt!)}',
+                        style: TextStyle(fontSize: 11.0, color: Colors.grey[500]),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),
@@ -470,7 +515,8 @@ class _ProjectMembersViewState extends State<ProjectMembersView> {
                 Get.back();
                 Get.snackbar('成功', '成员权限已更新');
                 controller.refreshProject();
-              } catch (error) {
+              } catch (error, stackTrace) {
+                log('[_showEditMemberDialog]', error: error, stackTrace: stackTrace, name: 'ProjectMembersView');
                 Get.snackbar('失败', '更新成员权限失败');
               }
             },
@@ -508,7 +554,8 @@ class _ProjectMembersViewState extends State<ProjectMembersView> {
                 Get.back();
                 Get.snackbar('成功', '成员已移除');
                 controller.refreshProject();
-              } catch (error) {
+              } catch (error, stackTrace) {
+                log('[_showRemoveMemberDialog]', error: error, stackTrace: stackTrace, name: 'ProjectMembersView');
                 Get.snackbar('失败', '移除成员失败');
               }
             },

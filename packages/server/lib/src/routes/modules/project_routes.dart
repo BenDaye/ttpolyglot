@@ -16,7 +16,7 @@ class ProjectRoutes {
     required this.withAuth,
   });
 
-  /// 配置项目相关路由
+  /// 配置需认证的项目路由
   Router configure() {
     final router = Router();
     final projectController = ProjectController(
@@ -24,6 +24,7 @@ class ProjectRoutes {
     );
     final projectMemberController = ProjectMemberController(
       projectMemberService: projectMemberService,
+      projectService: projectService,
     );
 
     // 项目基本操作
@@ -59,8 +60,30 @@ class ProjectRoutes {
     // 项目成员上限
     router.patch('/projects/<id>/member-limit', projectController.updateMemberLimit);
 
-    // 挂载项目成员邀请相关路由
-    router.mount('/projects', projectMemberController.router.call);
+    // 所有权转移
+    router.post('/projects/<id>/transfer-ownership', projectController.transferOwnership);
+
+    // 邀请链接管理（需认证）
+    router.post('/projects/<projectId>/invites', projectMemberController.generateInvite);
+    router.get('/projects/<projectId>/invites', projectMemberController.getProjectInvites);
+    router.delete('/projects/<projectId>/invites/<inviteId>', projectMemberController.revokeInvite);
+
+    // 接受邀请（需认证）
+    router.post('/projects/invites/<inviteCode>/accept', projectMemberController.acceptInvite);
+
+    return router;
+  }
+
+  /// 配置公开路由（无需认证）
+  Router publicRouter() {
+    final router = Router();
+    final projectMemberController = ProjectMemberController(
+      projectMemberService: projectMemberService,
+      projectService: projectService,
+    );
+
+    // 获取邀请信息（公开，无需认证）
+    router.get('/projects/invites/<inviteCode>/info', projectMemberController.getInviteInfo);
 
     return router;
   }

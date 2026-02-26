@@ -104,12 +104,14 @@ class ApiRoutes {
     );
     _router.mount('/', userRoutes.configure().call);
 
-    // 项目路由模块（整体应用认证）
+    // 项目路由模块
     final projectRoutes = ProjectRoutes(
       projectService: projectService,
       projectMemberService: projectMemberService,
       withAuth: _withAuth,
     );
+    // 公开路由必须先挂载，否则认证中间件会先拦截
+    _router.mount('/', projectRoutes.publicRouter().call);
     _router.mount('/', _withAuth(projectRoutes.configure().call));
 
     // 翻译路由模块（整体应用认证）

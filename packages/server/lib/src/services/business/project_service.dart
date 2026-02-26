@@ -587,32 +587,61 @@ class ProjectService extends BaseService {
     try {
       logInfo('添加项目成员: $projectId, user: $userId, role: $role');
 
-      // 检查用户是否已经是项目成员
+      // 检查用户是否已经是活跃的项目成员
       final existingRole = await _getUserRoleInProject(userId, projectId);
       if (existingRole != null) {
         throwBusiness('用户已经是项目成员');
       }
 
-      // 添加项目成员
-      await _databaseService.query('''
-        INSERT INTO {project_members} (
-          project_id, user_id, role, invited_by, joined_at, status
-        ) VALUES (
-          @project_id, @user_id, @role, @invited_by, CURRENT_TIMESTAMP, 'active'
-        )
+      // 检查成员上限
+      await _checkMemberLimit(projectId);
+
+      // 检查是否存在已停用的记录（软删除的），如果有则重新激活
+      final inactiveResult = await _databaseService.query('''
+        SELECT id FROM {project_members}
+        WHERE project_id = @project_id AND user_id = @user_id
+          AND (is_active = false OR status != 'active')
+        LIMIT 1
       ''', {
         'project_id': projectId,
         'user_id': userId,
-        'role': role,
-        'invited_by': invitedBy,
       });
+
+      if (inactiveResult.isNotEmpty) {
+        // 重新激活已停用的成员
+        await _databaseService.query('''
+          UPDATE {project_members}
+          SET role = @role, invited_by = @invited_by, is_active = true,
+              status = 'active', joined_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+          WHERE project_id = @project_id AND user_id = @user_id
+        ''', {
+          'project_id': projectId,
+          'user_id': userId,
+          'role': role,
+          'invited_by': invitedBy,
+        });
+      } else {
+        // 新增项目成员
+        await _databaseService.query('''
+          INSERT INTO {project_members} (
+            project_id, user_id, role, invited_by, joined_at, status
+          ) VALUES (
+            @project_id, @user_id, @role, @invited_by, CURRENT_TIMESTAMP, 'active'
+          )
+        ''', {
+          'project_id': projectId,
+          'user_id': userId,
+          'role': role,
+          'invited_by': invitedBy,
+        });
+      }
 
       // 更新项目成员数量
       await _updateProjectMemberCount(projectId);
 
       logInfo('项目成员添加成功: $projectId, user: $userId');
-    } catch (error) {
-      logError('添加项目成员失败: $projectId, user: $userId', error: error);
+    } catch (error, stackTrace) {
+      logError('添加项目成员失败: $projectId, user: $userId', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -621,6 +650,12 @@ class ProjectService extends BaseService {
   Future<void> removeProjectMember(String projectId, String userId) async {
     try {
       logInfo('移除项目成员: $projectId, user: $userId');
+
+      // 不能移除项目所有者
+      final targetRole = await _getUserRoleInProject(userId, projectId);
+      if (targetRole != null && targetRole['name'] == 'owner') {
+        throwBusiness('不能移除项目所有者');
+      }
 
       // 移除项目成员
       await _databaseService.query('''
@@ -722,8 +757,8 @@ class ProjectService extends BaseService {
     final result = await _databaseService.query('''
       SELECT pm.role as name, pm.role as display_name
       FROM {project_members} pm
-      WHERE pm.user_id = @user_id 
-        AND pm.project_id = @project_id 
+      WHERE pm.user_id = @user_id
+        AND pm.project_id = @project_id
         AND pm.is_active = true
         AND pm.status = 'active'
       LIMIT 1
@@ -733,6 +768,39 @@ class ProjectService extends BaseService {
     });
 
     return result.isNotEmpty ? result.first.toColumnMap() : null;
+  }
+
+  /// 获取用户在项目中的角色（公开方法，供 Controller 权限校验使用）
+  Future<String?> getUserRoleInProject(String userId, String projectId) async {
+    final result = await _getUserRoleInProject(userId, projectId);
+    return result?['name'] as String?;
+  }
+
+  /// 检查项目成员上限
+  Future<void> _checkMemberLimit(String projectId) async {
+    final result = await _databaseService.query('''
+      SELECT
+        (SELECT COUNT(*) FROM {project_members} pm
+         WHERE pm.project_id = p.id
+           AND pm.status = 'active'
+           AND pm.is_active = true
+           AND pm.user_id IS NOT NULL) as members_count,
+        p.member_limit
+      FROM {projects} p
+      WHERE p.id = @project_id
+    ''', {'project_id': projectId});
+
+    if (result.isEmpty) {
+      throwNotFound('项目不存在');
+    }
+
+    final row = result.first.toColumnMap();
+    final membersCount = int.tryParse(row['members_count'].toString()) ?? 0;
+    final memberLimit = int.tryParse(row['member_limit'].toString()) ?? 10;
+
+    if (membersCount >= memberLimit) {
+      throwBusiness('项目成员已达上限 ($memberLimit)');
+    }
   }
 
   /// 更新项目成员数量（已废弃，数据库不再维护成员计数）
@@ -796,10 +864,22 @@ class ProjectService extends BaseService {
     try {
       logInfo('更新项目成员角色: project=$projectId, user=$userId, role=$role');
 
+      // 不允许通过此方法设置所有者角色
+      if (role == 'owner') {
+        throwBusiness('请使用转移所有权功能设置所有者');
+      }
+
+      // 不能修改所有者角色
+      final targetRole = await _getUserRoleInProject(userId, projectId);
+      if (targetRole != null && targetRole['name'] == 'owner') {
+        throwBusiness('不能修改所有者角色，请先转移所有权');
+      }
+
       await _databaseService.query('''
         UPDATE {project_members}
         SET role = @role, updated_at = CURRENT_TIMESTAMP
         WHERE project_id = @project_id AND user_id = @user_id
+          AND is_active = true AND status = 'active'
       ''', {
         'project_id': projectId,
         'user_id': userId,
@@ -826,6 +906,15 @@ class ProjectService extends BaseService {
         throwNotFound('项目不存在');
       }
 
+      // 验证调用者是否为当前所有者
+      if (currentOwnerId == null) {
+        throwBusiness('缺少当前所有者信息');
+      }
+      final isOwner = await _isUserProjectOwner(projectId, currentOwnerId);
+      if (!isOwner) {
+        throwBusiness('只有项目所有者可以转移所有权');
+      }
+
       // 检查新所有者是否是项目成员
       final members = await getProjectMembers(projectId);
       if (members == null || members.isEmpty) {
@@ -837,13 +926,19 @@ class ProjectService extends BaseService {
         throwBusiness('新所有者不是项目成员');
       }
 
-      // 在事务中执行转移
+      // 在事务中执行转移（锁定项目行防止并发转移）
       await _databaseService.transaction(() async {
+        // 锁定项目行，防止并发所有权转移
+        await _databaseService.query('''
+          SELECT id FROM {projects} WHERE id = @project_id FOR UPDATE
+        ''', {'project_id': projectId});
+
         // 将原所有者降为管理员
         await _databaseService.query('''
           UPDATE {project_members}
           SET role = @role, updated_at = CURRENT_TIMESTAMP
           WHERE project_id = @project_id AND role = 'owner'
+            AND is_active = true AND status = 'active'
         ''', {
           'project_id': projectId,
           'role': 'admin',
@@ -854,6 +949,7 @@ class ProjectService extends BaseService {
           UPDATE {project_members}
           SET role = @role, updated_at = CURRENT_TIMESTAMP
           WHERE project_id = @project_id AND user_id = @user_id
+            AND is_active = true AND status = 'active'
         ''', {
           'project_id': projectId,
           'user_id': newOwnerId,

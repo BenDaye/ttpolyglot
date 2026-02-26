@@ -417,6 +417,11 @@ class ProjectMemberService extends BaseService {
     try {
       log('[generateInvite] projectId=$projectId, role=$role', name: 'ProjectMemberService');
 
+      // 不允许通过邀请链接设置 owner 角色
+      if (role == 'owner') {
+        throwBusiness('不能通过邀请链接设置所有者角色');
+      }
+
       // 检查项目是否存在
       final projectExists = await _isProjectExists(projectId);
       if (!projectExists) {
@@ -603,28 +608,35 @@ class ProjectMemberService extends BaseService {
       // 在事务中创建成员记录并更新邀请使用次数
       late int memberId;
       await _databaseService.transaction(() async {
-        // 创建成员记录
+        // 再次验证邀请状态（防止并发撤销）并创建成员记录
         final result = await _databaseService.query('''
           INSERT INTO {project_members} (
             project_id, user_id, role, invited_by, status, joined_at
-          ) 
+          )
           SELECT project_id, @user_id, role, invited_by, 'active', CURRENT_TIMESTAMP
           FROM {project_members}
-          WHERE invite_code = @invite_code AND user_id IS NULL
+          WHERE invite_code = @invite_code AND user_id IS NULL AND status = 'active'
           RETURNING id
         ''', {
           'user_id': userId,
           'invite_code': inviteCode,
         });
 
+        if (result.isEmpty) {
+          throwBusiness('邀请链接已失效或已被撤销');
+        }
+
         final rawMemberId = result.first[0];
         memberId = (rawMemberId is int) ? rawMemberId : int.parse(rawMemberId.toString());
+
+        // 检查成员上限（在事务内检查，防止并发超限）
+        await _checkMemberLimit(projectId);
 
         // 增加邀请使用次数
         await _databaseService.query('''
           UPDATE {project_members}
           SET used_count = used_count + 1
-          WHERE invite_code = @invite_code AND user_id IS NULL
+          WHERE invite_code = @invite_code AND user_id IS NULL AND status = 'active'
         ''', {'invite_code': inviteCode});
 
         // 更新项目成员数量
