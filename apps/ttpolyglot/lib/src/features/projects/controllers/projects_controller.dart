@@ -85,6 +85,7 @@ class ProjectsController extends GetxController {
       final apiProjects = await controller._projectApi.getProjects(
         page: controller._currentPage.value,
         limit: controller._pageSize.value,
+        search: controller._searchQuery.value.isNotEmpty ? controller._searchQuery.value : null,
       );
 
       if (apiProjects != null) {
@@ -110,6 +111,7 @@ class ProjectsController extends GetxController {
   /// 搜索项目
   void searchProjects(String query) {
     _searchQuery.value = query;
+    loadProjects(refresh: true);
   }
 
   /// 项目创建现在通过 API 完成，在 ProjectDialogController 中处理
@@ -143,10 +145,12 @@ class ProjectsController extends GetxController {
     final controller = instance;
 
     try {
-      // 转换项目 ID 为 int
-
       // 调用 API 删除项目
-      await controller._projectApi.deleteProject(projectId);
+      final success = await controller._projectApi.deleteProject(projectId);
+      if (success != true) {
+        Get.snackbar('错误', '删除项目失败');
+        return;
+      }
 
       // 从本地列表中删除
       controller._projects.removeWhere((project) => project.id == projectId);
@@ -253,6 +257,7 @@ class ProjectsController extends GetxController {
       final apiProjects = await controller._projectApi.getProjects(
         page: nextPage,
         limit: controller._pageSize.value,
+        search: controller._searchQuery.value.isNotEmpty ? controller._searchQuery.value : null,
       );
 
       if (apiProjects != null && apiProjects.items != null) {

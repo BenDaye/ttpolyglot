@@ -68,12 +68,17 @@ class ProjectController extends BaseController {
         return ResponseUtils.error(message: '分页参数无效');
       }
 
+      final userId = getCurrentUserId(request);
+      if (userId == null) {
+        return ResponseUtils.error(message: '用户未认证');
+      }
+
       final projects = await _projectService.getProjects(
         page: page,
         limit: limit,
         search: params['search'],
         status: params['status'],
-        userId: getCurrentUserId(request),
+        userId: userId,
       );
 
       return ResponseUtils.success<PagerModel<ProjectModel>>(
@@ -341,7 +346,8 @@ class ProjectController extends BaseController {
         return ResponseUtils.error(message: '项目ID格式无效');
       }
       await _projectService.archiveProject(id);
-      return ResponseUtils.success<ProjectModel>(message: '项目已归档');
+      final updatedProject = await _projectService.getProjectById(id);
+      return ResponseUtils.success<ProjectModel>(message: '项目已归档', data: updatedProject);
     } catch (error, stackTrace) {
       ServerLogger.error('归档项目失败: $id', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(message: error is ServerException ? error.message : '归档项目失败');
@@ -356,7 +362,8 @@ class ProjectController extends BaseController {
         return ResponseUtils.error(message: '项目ID格式无效');
       }
       await _projectService.restoreProject(id);
-      return ResponseUtils.success<ProjectModel>(message: '项目已恢复');
+      final updatedProject = await _projectService.getProjectById(id);
+      return ResponseUtils.success<ProjectModel>(message: '项目已恢复', data: updatedProject);
     } catch (error, stackTrace) {
       ServerLogger.error('恢复项目失败: $id', error: error, stackTrace: stackTrace);
       return ResponseUtils.error(message: error is ServerException ? error.message : '恢复项目失败');

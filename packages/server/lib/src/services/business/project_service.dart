@@ -94,13 +94,16 @@ class ProjectService extends BaseService {
           page: page,
           pageSize: limit,
           totalSize: total,
-          totalPage: 0,
+          totalPage: total == 0 ? 0 : (total / limit).ceil(),
           items: [],
         );
       }
 
-      // 收集所有项目ID
-      final projectIds = projectsResult.map((row) => row.toColumnMap()['id'].toString()).toList();
+      // 收集所有项目ID（必须为 int 类型，匹配数据库 integer 列）
+      final projectIds = projectsResult.map((row) {
+        final id = row.toColumnMap()['id'];
+        return (id is int) ? id : int.parse(id.toString());
+      }).toList();
 
       // 批量获取所有项目的语言
       final languagesSql = '''
@@ -705,7 +708,7 @@ class ProjectService extends BaseService {
           COUNT(*) FILTER (WHERE created_at > CURRENT_TIMESTAMP - INTERVAL '30 days') as new_last_month,
           COALESCE(AVG(total_keys), 0) as avg_keys_per_project,
           COALESCE(AVG(CASE WHEN total_keys > 0 THEN translated_keys::float / total_keys * 100 ELSE 0 END), 0) as avg_completion_percentage
-        FROM projects
+        FROM {projects}
       ''';
 
       final result = await _databaseService.query(sql);
@@ -825,7 +828,7 @@ class ProjectService extends BaseService {
       logInfo('归档项目: $projectId');
 
       await _databaseService.query('''
-        UPDATE projects
+        UPDATE {projects}
         SET status = 'archived', archived_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
         WHERE id = @project_id
       ''', {'project_id': projectId});
@@ -845,7 +848,7 @@ class ProjectService extends BaseService {
       logInfo('恢复项目: $projectId');
 
       await _databaseService.query('''
-        UPDATE projects
+        UPDATE {projects}
         SET status = 'active', archived_at = NULL, updated_at = CURRENT_TIMESTAMP
         WHERE id = @project_id
       ''', {'project_id': projectId});
@@ -1150,6 +1153,18 @@ class ProjectService extends BaseService {
     try {
       logInfo('获取项目活动: $projectId, page=$page, limit=$limit');
 
+      // 先查询总数
+      final countResult = await _databaseService.query('''
+        SELECT COUNT(*) FROM (
+          SELECT te.id
+          FROM {translation_entries} te
+          CROSS JOIN LATERAL jsonb_array_elements(COALESCE(te.target_languages, '[]'::jsonb)) AS elem
+          WHERE te.project_id = @project_id AND te.deleted_at IS NULL
+        ) sub
+      ''', {'project_id': projectId});
+      final totalRaw = countResult.first[0];
+      final total = (totalRaw is int) ? totalRaw : int.parse(totalRaw.toString());
+
       final offset = (page - 1) * limit;
 
       final activities = await _databaseService.query('''
@@ -1175,8 +1190,8 @@ class ProjectService extends BaseService {
       return PagerModel<TranslationEntryModel>(
         page: page,
         pageSize: limit,
-        totalSize: activities.length,
-        totalPage: (activities.length / limit).ceil(),
+        totalSize: total,
+        totalPage: total == 0 ? 0 : (total / limit).ceil(),
         items: activities.map((row) => TranslationEntryModel.fromJson(row.toColumnMap())).toList(),
       );
     } catch (error, stackTrace) {
