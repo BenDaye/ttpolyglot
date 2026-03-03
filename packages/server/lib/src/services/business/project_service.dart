@@ -4,6 +4,7 @@ import 'package:ttpolyglot_model/model.dart';
 
 import '../../config/server_config.dart';
 import '../../utils/data/string_utils.dart';
+import '../../utils/security/crypto_utils.dart';
 import '../base_service.dart';
 import '../infrastructure/database_service.dart';
 import '../infrastructure/redis_service.dart';
@@ -12,6 +13,7 @@ import '../infrastructure/redis_service.dart';
 class ProjectService extends BaseService {
   final DatabaseService _databaseService;
   final RedisService _redisService;
+  final CryptoUtils _cryptoUtils = CryptoUtils();
 
   ProjectService({
     required DatabaseService databaseService,
@@ -179,6 +181,9 @@ class ProjectService extends BaseService {
         projectData['languages'] = (languagesByProject[projectId] ?? []).map((lang) => lang.toJson()).toList();
         projectData['members'] = (membersByProject[projectId] ?? []).map((member) => member.toJson()).toList();
 
+        // 生成 appKey
+        projectData['app_key'] = _cryptoUtils.generateAppKey(projectData['uuid'].toString());
+
         projects.add(projectData);
       }
 
@@ -207,7 +212,11 @@ class ProjectService extends BaseService {
         try {
           // 验证缓存数据结构
           if (cachedProject['id'] != null) {
-            return ProjectModel.fromJson(cachedProject);
+            final cachedModel = ProjectModel.fromJson(cachedProject);
+            // 动态计算 appKey（不从缓存读取，避免密钥轮换后过期）
+            return cachedModel.copyWith(
+              appKey: _cryptoUtils.generateAppKey(cachedModel.uuid),
+            );
           } else {
             // 缓存数据结构无效，删除缓存
             logInfo('缓存数据结构无效，删除缓存: $cacheKey');
@@ -248,11 +257,15 @@ class ProjectService extends BaseService {
       projectData['languages'] = languages.map((lang) => lang.toJson()).toList();
       projectData['members'] = (members ?? []).map((member) => member.toJson()).toList();
 
+      // 生成 appKey
+      projectData['app_key'] = _cryptoUtils.generateAppKey(projectData['uuid'].toString());
+
       // 构建项目模型
       final project = ProjectModel.fromJson(projectData);
 
-      // 缓存项目详情
-      await _redisService.setJson(cacheKey, project.toJson(), ServerConfig.cacheApiResponseTtl);
+      // 缓存项目详情（不缓存 appKey，避免密钥轮换后过期）
+      final projectForCache = project.copyWith(appKey: null);
+      await _redisService.setJson(cacheKey, projectForCache.toJson(), ServerConfig.cacheApiResponseTtl);
 
       return project;
     } catch (error, stackTrace) {

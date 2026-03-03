@@ -100,6 +100,10 @@ mixin _$ProjectModel {
   @JsonKey(name: 'members')
   List<ProjectMemberModel> get members => throw _privateConstructorUsedError;
 
+  /// 项目 appKey（加密后的 UUID，用于公开 API 访问）
+  @JsonKey(name: 'app_key')
+  String? get appKey => throw _privateConstructorUsedError;
+
   /// Serializes this ProjectModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
@@ -140,7 +144,8 @@ abstract class $ProjectModelCopyWith<$Res> {
       @JsonKey(name: 'created_at') @TimesConverter() DateTime createdAt,
       @JsonKey(name: 'updated_at') @TimesConverter() DateTime updatedAt,
       @JsonKey(name: 'languages') List<LanguageModel> languages,
-      @JsonKey(name: 'members') List<ProjectMemberModel> members});
+      @JsonKey(name: 'members') List<ProjectMemberModel> members,
+      @JsonKey(name: 'app_key') String? appKey});
 }
 
 /// @nodoc
@@ -176,6 +181,7 @@ class _$ProjectModelCopyWithImpl<$Res, $Val extends ProjectModel>
     Object? updatedAt = null,
     Object? languages = null,
     Object? members = null,
+    Object? appKey = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -250,6 +256,10 @@ class _$ProjectModelCopyWithImpl<$Res, $Val extends ProjectModel>
           ? _value.members
           : members // ignore: cast_nullable_to_non_nullable
               as List<ProjectMemberModel>,
+      appKey: freezed == appKey
+          ? _value.appKey
+          : appKey // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -286,7 +296,8 @@ abstract class _$$ProjectModelImplCopyWith<$Res>
       @JsonKey(name: 'created_at') @TimesConverter() DateTime createdAt,
       @JsonKey(name: 'updated_at') @TimesConverter() DateTime updatedAt,
       @JsonKey(name: 'languages') List<LanguageModel> languages,
-      @JsonKey(name: 'members') List<ProjectMemberModel> members});
+      @JsonKey(name: 'members') List<ProjectMemberModel> members,
+      @JsonKey(name: 'app_key') String? appKey});
 }
 
 /// @nodoc
@@ -320,6 +331,7 @@ class __$$ProjectModelImplCopyWithImpl<$Res>
     Object? updatedAt = null,
     Object? languages = null,
     Object? members = null,
+    Object? appKey = freezed,
   }) {
     return _then(_$ProjectModelImpl(
       id: null == id
@@ -394,6 +406,10 @@ class __$$ProjectModelImplCopyWithImpl<$Res>
           ? _value._members
           : members // ignore: cast_nullable_to_non_nullable
               as List<ProjectMemberModel>,
+      appKey: freezed == appKey
+          ? _value.appKey
+          : appKey // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -427,8 +443,8 @@ class _$ProjectModelImpl extends _ProjectModel {
       @JsonKey(name: 'created_at') @TimesConverter() required this.createdAt,
       @JsonKey(name: 'updated_at') @TimesConverter() required this.updatedAt,
       @JsonKey(name: 'languages') required final List<LanguageModel> languages,
-      @JsonKey(name: 'members')
-      required final List<ProjectMemberModel> members})
+      @JsonKey(name: 'members') required final List<ProjectMemberModel> members,
+      @JsonKey(name: 'app_key') this.appKey})
       : _languages = languages,
         _members = members,
         super._();
@@ -548,9 +564,14 @@ class _$ProjectModelImpl extends _ProjectModel {
     return EqualUnmodifiableListView(_members);
   }
 
+  /// 项目 appKey（加密后的 UUID，用于公开 API 访问）
+  @override
+  @JsonKey(name: 'app_key')
+  final String? appKey;
+
   @override
   String toString() {
-    return 'ProjectModel(id: $id, uuid: $uuid, name: $name, slug: $slug, description: $description, ownerId: $ownerId, status: $status, visibility: $visibility, primaryLanguageId: $primaryLanguageId, totalKeys: $totalKeys, translatedKeys: $translatedKeys, memberLimit: $memberLimit, isActive: $isActive, lastActivityAt: $lastActivityAt, createdAt: $createdAt, updatedAt: $updatedAt, languages: $languages, members: $members)';
+    return 'ProjectModel(id: $id, uuid: $uuid, name: $name, slug: $slug, description: $description, ownerId: $ownerId, status: $status, visibility: $visibility, primaryLanguageId: $primaryLanguageId, totalKeys: $totalKeys, translatedKeys: $translatedKeys, memberLimit: $memberLimit, isActive: $isActive, lastActivityAt: $lastActivityAt, createdAt: $createdAt, updatedAt: $updatedAt, languages: $languages, members: $members, appKey: $appKey)';
   }
 
   @override
@@ -586,31 +607,34 @@ class _$ProjectModelImpl extends _ProjectModel {
                 other.updatedAt == updatedAt) &&
             const DeepCollectionEquality()
                 .equals(other._languages, _languages) &&
-            const DeepCollectionEquality().equals(other._members, _members));
+            const DeepCollectionEquality().equals(other._members, _members) &&
+            (identical(other.appKey, appKey) || other.appKey == appKey));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      id,
-      uuid,
-      name,
-      slug,
-      description,
-      ownerId,
-      status,
-      visibility,
-      primaryLanguageId,
-      totalKeys,
-      translatedKeys,
-      memberLimit,
-      isActive,
-      lastActivityAt,
-      createdAt,
-      updatedAt,
-      const DeepCollectionEquality().hash(_languages),
-      const DeepCollectionEquality().hash(_members));
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        id,
+        uuid,
+        name,
+        slug,
+        description,
+        ownerId,
+        status,
+        visibility,
+        primaryLanguageId,
+        totalKeys,
+        translatedKeys,
+        memberLimit,
+        isActive,
+        lastActivityAt,
+        createdAt,
+        updatedAt,
+        const DeepCollectionEquality().hash(_languages),
+        const DeepCollectionEquality().hash(_members),
+        appKey
+      ]);
 
   /// Create a copy of ProjectModel
   /// with the given fields replaced by the non-null parameter values.
@@ -659,8 +683,8 @@ abstract class _ProjectModel extends ProjectModel {
       @TimesConverter()
       required final DateTime updatedAt,
       @JsonKey(name: 'languages') required final List<LanguageModel> languages,
-      @JsonKey(name: 'members')
-      required final List<ProjectMemberModel> members}) = _$ProjectModelImpl;
+      @JsonKey(name: 'members') required final List<ProjectMemberModel> members,
+      @JsonKey(name: 'app_key') final String? appKey}) = _$ProjectModelImpl;
   const _ProjectModel._() : super._();
 
   factory _ProjectModel.fromJson(Map<String, dynamic> json) =
@@ -763,6 +787,11 @@ abstract class _ProjectModel extends ProjectModel {
   @override
   @JsonKey(name: 'members')
   List<ProjectMemberModel> get members;
+
+  /// 项目 appKey（加密后的 UUID，用于公开 API 访问）
+  @override
+  @JsonKey(name: 'app_key')
+  String? get appKey;
 
   /// Create a copy of ProjectModel
   /// with the given fields replaced by the non-null parameter values.

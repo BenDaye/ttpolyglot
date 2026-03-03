@@ -63,6 +63,9 @@ class ProjectModel with _$ProjectModel {
 
     /// 项目成员
     @JsonKey(name: 'members') required List<ProjectMemberModel> members,
+
+    /// 项目 appKey（加密后的 UUID，用于公开 API 访问）
+    @JsonKey(name: 'app_key') String? appKey,
   }) = _ProjectModel;
 
   factory ProjectModel.fromJson(Map<String, dynamic> json) => _$ProjectModelFromJson(json);

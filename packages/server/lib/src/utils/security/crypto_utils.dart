@@ -196,6 +196,46 @@ class CryptoUtils {
     final digest = sha256.convert(fileBytes);
     return digest.toString();
   }
+
+  /// 生成项目 appKey（XOR 加密 UUID + base64Url 编码）
+  String generateAppKey(String uuid) {
+    try {
+      final key = ServerConfig.encryptionKey;
+      final keyBytes = utf8.encode(key);
+      final uuidBytes = utf8.encode(uuid);
+      final encryptedBytes = <int>[];
+
+      for (int i = 0; i < uuidBytes.length; i++) {
+        encryptedBytes.add(uuidBytes[i] ^ keyBytes[i % keyBytes.length]);
+      }
+
+      // 去除尾部 '=' 填充，避免 URL 传输时被截断或转义
+      return base64Url.encode(encryptedBytes).replaceAll('=', '');
+    } catch (error, stackTrace) {
+      ServerLogger.error('生成 appKey 失败', error: error, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
+
+  /// 解密 appKey 还原 UUID（base64Url 解码 + XOR 解密）
+  String decryptAppKey(String appKey) {
+    try {
+      final key = ServerConfig.encryptionKey;
+      final keyBytes = utf8.encode(key);
+      // normalize 会自动补齐缺失的 '=' 填充
+      final encryptedBytes = base64Url.decode(base64Url.normalize(appKey));
+      final decryptedBytes = <int>[];
+
+      for (int i = 0; i < encryptedBytes.length; i++) {
+        decryptedBytes.add(encryptedBytes[i] ^ keyBytes[i % keyBytes.length]);
+      }
+
+      return utf8.decode(decryptedBytes);
+    } catch (error, stackTrace) {
+      ServerLogger.error('解密 appKey 失败', error: error, stackTrace: stackTrace);
+      rethrow;
+    }
+  }
 }
 
 /// 密码强度级别

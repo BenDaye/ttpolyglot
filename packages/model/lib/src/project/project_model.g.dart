@@ -38,6 +38,7 @@ _$ProjectModelImpl _$$ProjectModelImplFromJson(Map<String, dynamic> json) =>
       members: (json['members'] as List<dynamic>)
           .map((e) => ProjectMemberModel.fromJson(e as Map<String, dynamic>))
           .toList(),
+      appKey: json['app_key'] as String?,
     );
 
 Map<String, dynamic> _$$ProjectModelImplToJson(_$ProjectModelImpl instance) =>
@@ -63,6 +64,7 @@ Map<String, dynamic> _$$ProjectModelImplToJson(_$ProjectModelImpl instance) =>
       'updated_at': const TimesConverter().toJson(instance.updatedAt),
       'languages': instance.languages,
       'members': instance.members,
+      'app_key': instance.appKey,
     };
 
 _$CreateProjectRequestImpl _$$CreateProjectRequestImplFromJson(
