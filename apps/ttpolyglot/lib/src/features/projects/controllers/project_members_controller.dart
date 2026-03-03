@@ -88,13 +88,13 @@ class ProjectMembersController extends GetxController {
 
   /// 更新成员角色
   Future<void> updateMemberRole({
-    required int memberId,
+    required String userId,
     required String role,
   }) async {
     try {
       await _api.updateMemberRole(
         projectId: projectId,
-        memberId: memberId,
+        userId: userId,
         role: role,
       );
 
@@ -106,7 +106,7 @@ class ProjectMembersController extends GetxController {
   }
 
   /// 移除成员
-  Future<void> removeMember(int memberId) async {
+  Future<void> removeMember(String userId) async {
     try {
       // 确认对话框
       final confirmed = await Get.dialog<bool>(
@@ -133,7 +133,7 @@ class ProjectMembersController extends GetxController {
 
       await _api.removeMember(
         projectId: projectId,
-        memberId: memberId,
+        userId: userId,
       );
 
       await loadMembers(showLoading: false); // 刷新列表
@@ -266,7 +266,7 @@ class ProjectMembersController extends GetxController {
           ElevatedButton(
             onPressed: () {
               Get.back();
-              updateMemberRole(memberId: member.id, role: selectedRole);
+              updateMemberRole(userId: member.userId!, role: selectedRole);
             },
             child: const Text('保存'),
           ),

@@ -56,7 +56,7 @@ class ProjectMemberApi {
       final response = await HttpClient.post<Map<String, dynamic>>(
         '/projects/$projectId/members',
         data: {
-          'userId': userId,
+          'user_id': userId,
           'role': role,
         },
       );
@@ -103,12 +103,12 @@ class ProjectMemberApi {
   /// 更新成员角色
   Future<ProjectMemberModel?> updateMemberRole({
     required int projectId,
-    required int memberId,
+    required String userId,
     required String role,
   }) async {
     try {
       final response = await HttpClient.put<Map<String, dynamic>>(
-        '/projects/$projectId/members/$memberId',
+        '/projects/$projectId/members/$userId',
         data: {
           'role': role,
         },
@@ -132,11 +132,11 @@ class ProjectMemberApi {
   /// 移除成员
   Future<bool?> removeMember({
     required int projectId,
-    required int memberId,
+    required String userId,
   }) async {
     try {
       final response = await HttpClient.delete(
-        '/projects/$projectId/members/$memberId',
+        '/projects/$projectId/members/$userId',
       );
 
       final result = ModelUtils.toModel(
@@ -265,7 +265,7 @@ class ProjectMemberApi {
   Future<InviteInfoModel?> getInviteInfo(String inviteCode) async {
     try {
       final response = await HttpClient.get<Map<String, dynamic>>(
-        '/invites/$inviteCode',
+        '/projects/invites/$inviteCode/info',
       );
 
       final result = ModelUtils.toModel(
@@ -287,7 +287,7 @@ class ProjectMemberApi {
   Future<ProjectMemberModel?> acceptInviteByCode(String inviteCode) async {
     try {
       final response = await HttpClient.post<Map<String, dynamic>>(
-        '/invites/$inviteCode/accept',
+        '/projects/invites/$inviteCode/accept',
       );
 
       final result = ModelUtils.toModel(
@@ -338,7 +338,7 @@ class ProjectMemberApi {
   }) async {
     try {
       final response = await HttpClient.post<Map<String, dynamic>>(
-        '/projects/$projectId/members/add',
+        '/projects/$projectId/members',
         data: {
           'user_id': userId,
           'role': role,

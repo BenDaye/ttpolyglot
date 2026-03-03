@@ -271,10 +271,10 @@ class ProjectController extends BaseController {
         return ResponseUtils.error(message: '角色不能为空');
       }
 
-      // 验证角色值是否有效
-      final validRoles = ['owner', 'admin', 'member', 'viewer'];
+      // 验证角色值是否有效（不允许直接添加 owner，需使用转移所有权功能）
+      final validRoles = ['admin', 'member', 'viewer'];
       if (!validRoles.contains(role)) {
-        return ResponseUtils.error(message: '无效的角色类型');
+        return ResponseUtils.error(message: '无效的角色类型，请使用转移所有权功能设置所有者');
       }
 
       // 验证操作者是否为 owner 或 admin

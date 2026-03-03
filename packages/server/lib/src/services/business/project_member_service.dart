@@ -30,8 +30,8 @@ class ProjectMemberService extends BaseService {
     try {
       log('[getProjectMembers]', name: 'ProjectMemberService');
 
-      // 构建查询条件
-      final conditions = <String>['pm.project_id = @project_id'];
+      // 构建查询条件（排除邀请链接记录，只返回真实成员）
+      final conditions = <String>['pm.project_id = @project_id', 'pm.user_id IS NOT NULL'];
       final parameters = <String, dynamic>{'project_id': projectId};
 
       if (role != null && role.isNotEmpty) {
@@ -121,6 +121,9 @@ class ProjectMemberService extends BaseService {
         throwNotFound('项目不存在');
       }
 
+      // 检查成员上限
+      await _checkMemberLimit(projectId);
+
       // 检查用户是否已是成员
       final existingMember = await _getMemberByUserId(projectId, userId);
       if (existingMember != null) {
@@ -129,30 +132,45 @@ class ProjectMemberService extends BaseService {
         } else if (existingMember.status == MemberStatusEnum.pending) {
           throwBusiness('用户已有待处理的邀请');
         }
+        // inactive/revoked/expired 状态：重新激活为 pending
       }
 
-      // 在事务中创建成员记录
       late int memberId;
       await _databaseService.transaction(() async {
-        final result = await _databaseService.query('''
-          INSERT INTO {project_members} (
-            project_id, user_id, role, invited_by, status
-          ) VALUES (
-            @project_id, @user_id, @role, @invited_by, 'pending'
-          ) RETURNING id
-        ''', {
-          'project_id': projectId,
-          'user_id': userId,
-          'role': role,
-          'invited_by': invitedBy,
-        });
+        if (existingMember != null) {
+          // 重新激活已停用/已撤销/已过期的记录
+          await _databaseService.query('''
+            UPDATE {project_members}
+            SET role = @role, invited_by = @invited_by, status = 'pending',
+                is_active = true, joined_at = NULL, updated_at = CURRENT_TIMESTAMP
+            WHERE project_id = @project_id AND user_id = @user_id
+            RETURNING id
+          ''', {
+            'project_id': projectId,
+            'user_id': userId,
+            'role': role,
+            'invited_by': invitedBy,
+          });
+          memberId = existingMember.id;
+        } else {
+          // 创建新成员记录
+          final result = await _databaseService.query('''
+            INSERT INTO {project_members} (
+              project_id, user_id, role, invited_by, status
+            ) VALUES (
+              @project_id, @user_id, @role, @invited_by, 'pending'
+            ) RETURNING id
+          ''', {
+            'project_id': projectId,
+            'user_id': userId,
+            'role': role,
+            'invited_by': invitedBy,
+          });
 
-        // project_members.id 是 SERIAL 类型（INTEGER），需要安全转换
-        final rawMemberId = result.first[0];
-        memberId = (rawMemberId is int) ? rawMemberId : int.parse(rawMemberId.toString());
-
-        // 更新项目成员数量
-        await _updateProjectMemberCount(projectId);
+          // project_members.id 是 SERIAL 类型（INTEGER），需要安全转换
+          final rawMemberId = result.first[0];
+          memberId = (rawMemberId is int) ? rawMemberId : int.parse(rawMemberId.toString());
+        }
       });
 
       // 清除缓存
@@ -160,10 +178,13 @@ class ProjectMemberService extends BaseService {
 
       // 获取创建的成员信息
       final member = await _getMemberById(memberId);
+      if (member == null) {
+        throwBusiness('成员创建成功但获取详情失败');
+      }
 
       log('[inviteMember] 成员邀请成功: $memberId', name: 'ProjectMemberService');
 
-      return member!;
+      return member;
     } catch (error, stackTrace) {
       log('[inviteMember]', error: error, stackTrace: stackTrace, name: 'ProjectMemberService');
       rethrow;
@@ -207,10 +228,13 @@ class ProjectMemberService extends BaseService {
 
       // 获取更新后的成员信息
       final updatedMember = await _getMemberByUserId(projectId, userId);
+      if (updatedMember == null) {
+        throwBusiness('邀请接受成功但获取成员详情失败');
+      }
 
       log('[acceptInvitation] 邀请接受成功', name: 'ProjectMemberService');
 
-      return updatedMember!;
+      return updatedMember;
     } catch (error, stackTrace) {
       log('[acceptInvitation]', error: error, stackTrace: stackTrace, name: 'ProjectMemberService');
       rethrow;
@@ -293,10 +317,13 @@ class ProjectMemberService extends BaseService {
 
       // 获取更新后的成员信息
       final updatedMember = await _getMemberByUserId(projectId, userId);
+      if (updatedMember == null) {
+        throwBusiness('角色更新成功但获取成员详情失败');
+      }
 
       log('[updateMemberRole] 角色更新成功', name: 'ProjectMemberService');
 
-      return updatedMember!;
+      return updatedMember;
     } catch (error, stackTrace) {
       log('[updateMemberRole]', error: error, stackTrace: stackTrace, name: 'ProjectMemberService');
       rethrow;
@@ -466,10 +493,13 @@ class ProjectMemberService extends BaseService {
 
       // 获取创建的邀请信息
       final invite = await _getMemberById(inviteId);
+      if (invite == null) {
+        throwBusiness('邀请链接生成成功但获取详情失败');
+      }
 
       log('[generateInvite] 邀请链接生成成功: $inviteId', name: 'ProjectMemberService');
 
-      return invite!;
+      return invite;
     } catch (error, stackTrace) {
       log('[generateInvite]', error: error, stackTrace: stackTrace, name: 'ProjectMemberService');
       rethrow;
@@ -602,47 +632,95 @@ class ProjectMemberService extends BaseService {
       // 检查用户是否已是成员
       final existingMember = await _getMemberByUserId(projectId, userId);
       if (existingMember != null) {
-        throwBusiness('您已是项目成员');
+        if (existingMember.status == MemberStatusEnum.active) {
+          throwBusiness('您已是项目成员');
+        } else if (existingMember.status == MemberStatusEnum.pending) {
+          throwBusiness('您已有待处理的邀请');
+        }
+        // inactive/revoked/expired 状态：允许通过邀请链接重新加入
       }
 
       // 在事务中创建成员记录并更新邀请使用次数
       late int memberId;
       await _databaseService.transaction(() async {
-        // 再次验证邀请状态（防止并发撤销）并创建成员记录
-        final result = await _databaseService.query('''
-          INSERT INTO {project_members} (
-            project_id, user_id, role, invited_by, status, joined_at
-          )
-          SELECT project_id, @user_id, role, invited_by, 'active', CURRENT_TIMESTAMP
-          FROM {project_members}
-          WHERE invite_code = @invite_code AND user_id IS NULL AND status = 'active'
-          RETURNING id
-        ''', {
-          'user_id': userId,
-          'invite_code': inviteCode,
-        });
-
-        if (result.isEmpty) {
-          throwBusiness('邀请链接已失效或已被撤销');
-        }
-
-        final rawMemberId = result.first[0];
-        memberId = (rawMemberId is int) ? rawMemberId : int.parse(rawMemberId.toString());
-
-        // 检查成员上限（在事务内检查，防止并发超限）
+        // 先检查成员上限（在事务内检查，防止并发超限）
         await _checkMemberLimit(projectId);
 
-        // 增加邀请使用次数
-        await _databaseService.query('''
+        if (existingMember != null) {
+          // 重新激活已停用/已撤销/已过期的记录
+          // 同时验证邀请状态（防止并发撤销）
+          final inviteCheck = await _databaseService.query('''
+            SELECT role, invited_by FROM {project_members}
+            WHERE invite_code = @invite_code AND user_id IS NULL AND status = 'active'
+          ''', {'invite_code': inviteCode});
+
+          if (inviteCheck.isEmpty) {
+            throwBusiness('邀请链接已失效或已被撤销');
+          }
+
+          final inviteRow = inviteCheck.first.toColumnMap();
+          await _databaseService.query('''
+            UPDATE {project_members}
+            SET role = @role, invited_by = @invited_by, status = 'active',
+                is_active = true, joined_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+            WHERE project_id = @project_id AND user_id = @user_id
+            RETURNING id
+          ''', {
+            'project_id': projectId,
+            'user_id': userId,
+            'role': inviteRow['role'] as String,
+            'invited_by': inviteRow['invited_by'] as String,
+          });
+          memberId = existingMember.id;
+        } else {
+          // 再次验证邀请状态（防止并发撤销）并创建成员记录
+          final result = await _databaseService.query('''
+            INSERT INTO {project_members} (
+              project_id, user_id, role, invited_by, status, joined_at
+            )
+            SELECT project_id, @user_id, role, invited_by, 'active', CURRENT_TIMESTAMP
+            FROM {project_members}
+            WHERE invite_code = @invite_code AND user_id IS NULL AND status = 'active'
+            RETURNING id
+          ''', {
+            'user_id': userId,
+            'invite_code': inviteCode,
+          });
+
+          if (result.isEmpty) {
+            throwBusiness('邀请链接已失效或已被撤销');
+          }
+
+          final rawMemberId = result.first[0];
+          memberId = (rawMemberId is int) ? rawMemberId : int.parse(rawMemberId.toString());
+        }
+
+        // 增加邀请使用次数并获取邀请链接记录ID
+        final inviteUpdateResult = await _databaseService.query('''
           UPDATE {project_members}
           SET used_count = used_count + 1
           WHERE invite_code = @invite_code AND user_id IS NULL AND status = 'active'
+          RETURNING id
         ''', {'invite_code': inviteCode});
+
+        // 记录邀请日志
+        if (inviteUpdateResult.isNotEmpty) {
+          final rawInviteLinkId = inviteUpdateResult.first[0];
+          final inviteLinkId = (rawInviteLinkId is int) ? rawInviteLinkId : int.parse(rawInviteLinkId.toString());
+          await _databaseService.query('''
+            INSERT INTO {project_member_invite_logs} (
+              member_id, user_id, accepted, accepted_at
+            ) VALUES (
+              @member_id, @user_id, true, CURRENT_TIMESTAMP
+            )
+          ''', {
+            'member_id': inviteLinkId,
+            'user_id': userId,
+          });
+        }
 
         // 更新项目成员数量
         await _updateProjectMemberCount(projectId);
-
-        // TODO: 记录邀请日志到 project_member_invite_logs 表
       });
 
       // 清除缓存
@@ -650,10 +728,13 @@ class ProjectMemberService extends BaseService {
 
       // 获取创建的成员信息
       final member = await _getMemberById(memberId);
+      if (member == null) {
+        throwBusiness('加入成功但获取详情失败');
+      }
 
       log('[acceptInviteByCode] 邀请接受成功: $memberId', name: 'ProjectMemberService');
 
-      return member!;
+      return member;
     } catch (error, stackTrace) {
       log('[acceptInviteByCode]', error: error, stackTrace: stackTrace, name: 'ProjectMemberService');
       rethrow;
@@ -747,27 +828,48 @@ class ProjectMemberService extends BaseService {
       // 检查用户是否已是成员
       final existingMember = await _getMemberByUserId(projectId, userId);
       if (existingMember != null) {
-        throwBusiness('用户已是项目成员');
+        if (existingMember.status == MemberStatusEnum.active) {
+          throwBusiness('用户已是项目成员');
+        } else if (existingMember.status == MemberStatusEnum.pending) {
+          throwBusiness('用户已有待处理的邀请');
+        }
+        // inactive/revoked/expired 状态：允许重新添加
       }
 
-      // 在事务中创建成员记录
+      // 在事务中创建/更新成员记录
       late int memberId;
       await _databaseService.transaction(() async {
-        final result = await _databaseService.query('''
-          INSERT INTO {project_members} (
-            project_id, user_id, role, invited_by, status, joined_at
-          ) VALUES (
-            @project_id, @user_id, @role, @invited_by, 'active', CURRENT_TIMESTAMP
-          ) RETURNING id
-        ''', {
-          'project_id': projectId,
-          'user_id': userId,
-          'role': role,
-          'invited_by': invitedBy,
-        });
+        if (existingMember != null) {
+          // 重新激活已停用/已撤销/已过期的记录
+          await _databaseService.query('''
+            UPDATE {project_members}
+            SET role = @role, invited_by = @invited_by, status = 'active',
+                is_active = true, joined_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+            WHERE project_id = @project_id AND user_id = @user_id
+          ''', {
+            'project_id': projectId,
+            'user_id': userId,
+            'role': role,
+            'invited_by': invitedBy,
+          });
+          memberId = existingMember.id;
+        } else {
+          final result = await _databaseService.query('''
+            INSERT INTO {project_members} (
+              project_id, user_id, role, invited_by, status, joined_at
+            ) VALUES (
+              @project_id, @user_id, @role, @invited_by, 'active', CURRENT_TIMESTAMP
+            ) RETURNING id
+          ''', {
+            'project_id': projectId,
+            'user_id': userId,
+            'role': role,
+            'invited_by': invitedBy,
+          });
 
-        final rawMemberId = result.first[0];
-        memberId = (rawMemberId is int) ? rawMemberId : int.parse(rawMemberId.toString());
+          final rawMemberId = result.first[0];
+          memberId = (rawMemberId is int) ? rawMemberId : int.parse(rawMemberId.toString());
+        }
 
         // 更新项目成员数量
         await _updateProjectMemberCount(projectId);
@@ -778,10 +880,13 @@ class ProjectMemberService extends BaseService {
 
       // 获取创建的成员信息
       final member = await _getMemberById(memberId);
+      if (member == null) {
+        throwBusiness('成员添加成功但获取详情失败');
+      }
 
       log('[addMember] 成员添加成功: $memberId', name: 'ProjectMemberService');
 
-      return member!;
+      return member;
     } catch (error, stackTrace) {
       log('[addMember]', error: error, stackTrace: stackTrace, name: 'ProjectMemberService');
       rethrow;
@@ -791,10 +896,11 @@ class ProjectMemberService extends BaseService {
   /// 检查项目成员上限
   Future<void> _checkMemberLimit(int projectId) async {
     final result = await _databaseService.query('''
-      SELECT 
-        (SELECT COUNT(*) FROM {project_members} pm 
-         WHERE pm.project_id = p.id 
-           AND pm.status = 'active' 
+      SELECT
+        (SELECT COUNT(*) FROM {project_members} pm
+         WHERE pm.project_id = p.id
+           AND pm.status = 'active'
+           AND pm.is_active = true
            AND pm.user_id IS NOT NULL) as members_count,
         p.member_limit
       FROM {projects} p

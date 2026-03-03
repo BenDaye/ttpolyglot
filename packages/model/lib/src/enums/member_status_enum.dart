@@ -4,7 +4,9 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 enum MemberStatusEnum {
   pending('pending', '待加入'),
   active('active', '活跃'),
-  inactive('inactive', '已停用');
+  inactive('inactive', '已停用'),
+  expired('expired', '已过期'),
+  revoked('revoked', '已撤销');
 
   const MemberStatusEnum(this.value, this.displayName);
 

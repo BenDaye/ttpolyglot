@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:ttpolyglot/src/common/common.dart';
 
@@ -59,7 +60,7 @@ class JoinProjectController extends GetxController {
       Get.snackbar('成功', '你已成功加入项目 ${inviteInfo!.project.name}');
     } catch (error, stackTrace) {
       log('[acceptInvite]', error: error, stackTrace: stackTrace, name: 'JoinProjectController');
-      Get.snackbar('失败', _getErrorMessage(error));
+      Get.snackbar('加入失败', _getErrorMessage(error));
     } finally {
       _isAccepting.value = false;
     }
@@ -71,8 +72,18 @@ class JoinProjectController extends GetxController {
   }
 
   String _getErrorMessage(dynamic error) {
-    // 根据错误类型返回友好的错误信息
-    return '加载邀请信息失败，请稍后重试';
+    if (error is DioException) {
+      // 优先从 BaseModel 中提取后端业务错误信息
+      final errorData = error.error;
+      if (errorData is BaseModel && errorData.message.isNotEmpty) {
+        return errorData.message;
+      }
+      // 回退到 DioException 的 message
+      if (error.message != null && error.message!.isNotEmpty) {
+        return error.message!;
+      }
+    }
+    return '操作失败，请稍后重试';
   }
 
   @override

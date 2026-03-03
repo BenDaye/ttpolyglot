@@ -165,6 +165,10 @@ class _ProjectMembersViewState extends State<ProjectMembersView> {
         return Colors.orange;
       case MemberStatusEnum.inactive:
         return Colors.grey;
+      case MemberStatusEnum.expired:
+        return Colors.red;
+      case MemberStatusEnum.revoked:
+        return Colors.red;
     }
   }
 

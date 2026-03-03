@@ -95,6 +95,8 @@ class ProjectMembersView extends StatelessWidget {
                   DropdownMenuItem(value: 'active', child: Text('活跃')),
                   DropdownMenuItem(value: 'pending', child: Text('待接受')),
                   DropdownMenuItem(value: 'inactive', child: Text('已停用')),
+                  DropdownMenuItem(value: 'expired', child: Text('已过期')),
+                  DropdownMenuItem(value: 'revoked', child: Text('已撤销')),
                 ],
                 onChanged: (value) {
                   if (value != null) {
@@ -202,7 +204,7 @@ class ProjectMembersView extends StatelessWidget {
                       controller.showEditRoleDialog(member);
                       break;
                     case 'remove':
-                      controller.removeMember(member.id);
+                      controller.removeMember(member.userId!);
                       break;
                   }
                 },
@@ -290,6 +292,12 @@ class ProjectMembersView extends StatelessWidget {
         break;
       case MemberStatusEnum.inactive:
         badgeColor = Colors.grey;
+        break;
+      case MemberStatusEnum.expired:
+        badgeColor = Colors.red;
+        break;
+      case MemberStatusEnum.revoked:
+        badgeColor = Colors.red;
         break;
     }
 

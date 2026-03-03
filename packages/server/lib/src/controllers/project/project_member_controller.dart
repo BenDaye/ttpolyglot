@@ -206,9 +206,7 @@ class ProjectMemberController extends BaseController {
 
   /// 构建邀请URL
   String _buildInviteUrl(String inviteCode) {
-    // 这里应该使用配置的前端地址
-    // 暂时硬编码，实际应从环境变量或配置文件读取
-    const frontendUrl = 'https://app.ttpolyglot.com';
-    return '$frontendUrl/join/$inviteCode';
+    final siteUrl = ServerConfig.siteUrl.isNotEmpty ? ServerConfig.siteUrl : 'https://app.ttpolyglot.com';
+    return '$siteUrl/join/$inviteCode';
   }
 }
