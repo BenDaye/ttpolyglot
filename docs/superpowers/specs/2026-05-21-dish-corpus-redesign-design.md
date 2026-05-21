@@ -1,13 +1,13 @@
 ---
 title: TTPolyglot 重新立项 · 菜品垂类语料库
 date: 2026-05-21
-status: 进行中 (WIP) — 已完成第 1-2 节；第 3-6 节待续
+status: 进行中 (WIP) — 已完成第 1-3 节；第 4-6 节待续
 mode: 推倒重做（discard existing i18n direction）
 ---
 
 # TTPolyglot 重新立项设计 · 菜品垂类语料库
 
-> 本文件是 brainstorm 阶段性产物，**前两节已收敛、可作为下游设计依据**；剩余 4 节（技术选型 / 现有代码处置 / 里程碑 / 风险）待续。
+> 本文件是 brainstorm 阶段性产物，**前三节已收敛、可作为下游设计依据**；剩余 3 节（现有代码处置 / 里程碑 / 风险）待续。
 
 ---
 
@@ -494,11 +494,229 @@ A 的 Anonymized Raw Items Export       ──► C 拿真实菜单文本做训�
 
 ---
 
-## 5. 未决事项 / 下一步
+## 5. 第 3 节 · 技术选型决定点
 
-### 5.1 待续节次
+### 5.1 决策概览
 
-- **第 3 节 · 技术选型决定点**：Dart / Serverpod 继续 vs 换栈（Python / Node / Go）、DB（PG 已基本定）、Search（Meilisearch vs Typesense vs OpenSearch）、Queue（PG LISTEN/NOTIFY → Redis Stream → NATS 演进）、LLM gateway（自建 vs LiteLLM）、编辑后台前端（Flutter Web vs Vue / React）
+| 决策 | 最终选择 | 理由速签 |
+|---|---|---|
+| 1. 后端语言 | **Python (FastAPI + Dramatiq)** | 产品 80% 工程在 NLP/LLM 管道，Python 是它的母语 |
+| 2. 数据库 | **PostgreSQL 16 + pgvector + pg_trgm + unaccent** | 一个库覆盖结构化 + 全文 + 向量 + jsonb 全部需求 |
+| 3. 搜索 | **Meilisearch ≥1.6（含 CJK 分词）** | PG 全文 CJK 配置太痛苦；Meilisearch 原生支持 |
+| 4. 任务队列 | **Dramatiq + Redis** | Celery 太重，Temporal 太大，Dramatiq 刚刚好 |
+| 5. LLM 网关 | **LiteLLM + 自写薄壳 LLMProviderPort** | 不重造多 provider 适配；自己加 CJK 路由 |
+| 6. 编辑后台前端 | **React 18 + Vite + Ant Design 5** | 数据密集 admin UI 场景；CJK 一等公民 |
+| 7. 仓库形态 | **新仓库 `tt-cuisine`，本仓归档** | 新栈与旧栈共用代码 < 5%，混在一起得不偿失 |
+| 8. 基建（Auth / Cache / Storage / Proxy / Deploy / CI / Monitor） | Clerk + Redis + MinIO + Caddy + Docker Compose + GH Actions + Prometheus | 见 §5.9 |
+
+### 5.2 决策 1 · 后端语言（Dart → Python，弃栈）
+
+**Dart 服务端的硬伤**：
+
+| 维度 | 实情 |
+|---|---|
+| CJK NLP 工具链 | jieba / pypinyin / opencc / fugashi / mecab 全是 Python；Dart 端 FFI 或 RPC 反复跨语言 |
+| NER + Embedding 生态 | spaCy / sentence-transformers — Python 母语；Dart 无对等物 |
+| LLM SDK | 官方 SDK 首发 Python，Dart 要么没有要么社区端口 |
+| Serverpod 社区 | 小众；docs gap、招人难、debug 无援 |
+| 唯一优势 | 复用 Flutter app — **但 Flutter 这次也弃栈（决策 6），优势消失** |
+
+**Python 栈**：
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                  Python 单语言后端                          │
+│  ┌────────────────────┐       ┌────────────────────┐        │
+│  │  Read Service      │       │  Write/Worker      │        │
+│  │  FastAPI + Uvicorn │       │  Dramatiq actors   │        │
+│  │  5-10k RPS/box     │       │  共用 Domain pkg   │        │
+│  └────────────────────┘       └────────────────────┘        │
+│             ▲                          ▲                    │
+│             └──────────┬───────────────┘                    │
+│              ┌─────────▼─────────┐                          │
+│              │  Domain & Ports   │  pure python, no I/O     │
+│              │   Pydantic v2     │                          │
+│              └───────────────────┘                          │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**关键库**：FastAPI · Uvicorn · SQLAlchemy 2.0 (async) · Alembic · Dramatiq · jieba · pypinyin · opencc · fugashi · pecab · rapidfuzz · sentence-transformers (BAAI/bge-m3) · LiteLLM · pytest · mypy strict · ruff · Pydantic v2
+
+**性能担忧的回应**：FastAPI + Uvicorn 在 4C 机器上 5-10k RPS 是日常水平；读路径峰值 day-1 < 50 RPS，M3 < 500 RPS。**慢 10 倍仍然过剩 20 倍**。
+
+### 5.3 决策 2 · 数据库
+
+PostgreSQL 16 + 扩展：
+
+| 子决策 | 选择 |
+|---|---|
+| 引擎 | PostgreSQL 16 |
+| 向量 | pgvector day-1 启用（Stage 4 消歧立刻就要） |
+| 模糊匹配 | pg_trgm + unaccent |
+| Schema 隔离 | `wiki_core` / `ingest` / `audit` 三 schema（同库不同 schema） |
+| 迁移 | Alembic |
+| 备份 | pg_dump nightly + WAL archive 到 S3 |
+
+**day-1 不要做**：分片、读写分离、跨库 join、多租户 schema-per-tenant。
+
+### 5.4 决策 3 · 搜索
+
+**Meilisearch ≥1.6（含 CJK 分词）**
+
+- 1.4+ 起原生 CJK 分词，自托管 Docker 一键起
+- Rust 内核，极快
+- API 友好
+
+**用途分工**：
+- Meilisearch：对外 `/search`（CJK 模糊、拼音、跨语言别名）
+- PG 全文：内部 admin 查询 + 候选浮现
+
+### 5.5 决策 4 · 任务队列
+
+**Dramatiq + Redis day-1；Temporal 在 M3 重评估**
+
+写路径 8 个 Stage 用 Dramatiq actors 表达：每个 Stage 是一个 actor，Stage 间通过 PG 状态字段流转。**day-1 严禁上 Temporal**——太诱人但太重。
+
+### 5.6 决策 5 · LLM 网关
+
+LiteLLM 做底层 100+ provider 适配；自写**薄壳** `LLMProviderPort`（约 500 行）加 CJK 路由：
+
+```
+┌─ LLMProviderPort（自写薄壳）──────────────────────┐
+│ · 按任务类型路由（命名 / 描述 / 配料 / 消歧）        │
+│ · prompt 模板版本管理 + a/b 测试                  │
+│ · 计费打点 + 审计日志                             │
+│ · 降级链（DeepSeek 失败 → Qwen → GPT-4o-mini）   │
+│ · 数据驻留合规（境内任务不走境外 provider）         │
+└────────────────────────┬─────────────────────────┘
+                         │
+            ┌────────────▼──────────────┐
+            │       LiteLLM (库)         │
+            │ DeepSeek/Qwen/Kimi/智谱    │
+            │ GPT/Claude/Ollama 自部署   │
+            └───────────────────────────┘
+```
+
+**不用 OpenRouter/Portkey 等托管服务**：CJK provider 在这些服务上支持参差、价格不透明、数据驻留合规不可控、质量基准必须我们自己做。
+
+### 5.7 决策 6 · 编辑后台前端（Flutter Web → React，弃栈）
+
+**Flutter Web 在数据密集 admin UI 上的硬伤**：
+
+| 维度 | Flutter Web 实情 |
+|---|---|
+| 文本渲染 | canvas 渲染；CJK 字体回退坑多 |
+| 复制粘贴 | 与浏览器原生 selection 差距大；编辑场景天天用 |
+| SEO / a11y | 几乎裸跑 |
+| 滚动 / 虚拟列表 | 长表格性能问题已知 |
+| 表单 / 弹窗 / Diff 视图 | 生态贫瘠；要手写基础组件 |
+
+**React 栈**：
+
+| 子项 | 选择 | 理由 |
+|---|---|---|
+| UI 组件库 | Ant Design 5 (antd) | 阿里出品；CJK 一等公民；admin UI 完整度业内最高 |
+| 全局状态 | Zustand | 比 Redux Toolkit 轻；hook 风格；TS 友好 |
+| 服务端数据 | TanStack Query v5 | 缓存/失效/重试一等公民 |
+| 路由 | TanStack Router | TS 全类型；data loaders 一等公民 |
+| 表单 | React Hook Form + Zod | 性能好；schema 校验一等公民 |
+| 表格 / 虚拟化 | TanStack Table + TanStack Virtual | 5k 候选 / 10k Concept 滚动顺滑 |
+| Diff 视图 | react-diff-viewer-continued + monaco-editor | alias 跨语言对照、配料 / 工艺审核必备 |
+| 编辑后台 i18n | react-i18next | 后台自身也要中英双语 |
+| 构建 | Vite + TypeScript strict | — |
+| 测试 | Vitest + Testing Library + Playwright | — |
+
+### 5.8 决策 7 · 仓库形态（新仓 `tt-cuisine`，本仓归档）
+
+**新仓布局**（Python + React + Docker Compose）：
+
+```
+tt-cuisine/
+├── apps/
+│   ├── api/                # FastAPI Read Service
+│   ├── worker/             # Dramatiq Workers
+│   └── admin-web/          # React 18 + Vite + Ant Design 5 编辑后台
+├── packages/
+│   ├── domain/             # 纯 Python 领域模型 (DishConcept, ...)
+│   ├── ports/              # 端口接口定义 (Protocol/ABC)
+│   ├── adapters/           # 适配器 (TTPOS / LiteLLM / PG / Meili / S3)
+│   ├── pipeline/           # 写路径 8 stages
+│   └── nlp/                # CJK 处理 (拼音 / 繁简 / 分词)
+├── ops/
+│   ├── compose/            # docker-compose.{dev,prod}.yml
+│   ├── migrations/         # Alembic
+│   └── helm/               # M3+ 自托管 chart 起步
+├── docs/
+│   └── specs/              # 新仓的设计文档
+├── pyproject.toml          # uv / hatch
+└── README.md
+```
+
+**本仓 `ttpolyglot` 的命运**：
+- 不删除：留作 brainstorm 决策溯源 + Dart / Flutter 旧设计参考
+- README 顶部加 deprecation note，指向 `tt-cuisine` 新仓
+- 本设计文档 `docs/superpowers/specs/...` **继续在本仓**——它是 pivot 的历史记录
+- 保留 git tag `v0.1.0-i18n-direction-archive` 标记 pivot 点
+
+### 5.9 决策 8 · 其余基建
+
+| 类别 | 选择 | 备注 |
+|---|---|---|
+| Reverse Proxy | Caddy | 自动 HTTPS，配置 5 行起步 |
+| Cache | Redis（同实例兼任队列 backend） | day-1 单实例足够 |
+| Object Storage | MinIO 自托管（S3 API 兼容） | day-1 简单；M2 切云 S3 透明 |
+| 编辑后台 Auth | Clerk 起步；合规要求改 Authentik 自托管 | 5-20 编辑人员场景 |
+| 公开 API Auth | 自建 API key + rate-limit + HMAC 签名 | 不用 Clerk |
+| Deployment | Docker Compose day-1；Helm + K8s M3+ | 别在 day-1 上 K8s |
+| CI | GitHub Actions | mypy / pytest / ruff / vitest / playwright |
+| Monitoring | day-1 结构化 JSON log；M1 加 Prometheus + Grafana；M2 加 Sentry | APM 推到 M3 |
+| 配置 | Pydantic Settings + `.env` + Vault（M2+） | 不要 yaml 字符串 |
+| 文档 | mkdocs-material + 自动 OpenAPI 嵌入 | API 客户友好 |
+
+### 5.10 综合后的技术栈快照
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                  tt-cuisine · 完整技术栈                          │
+├──────────────────────────────────────────────────────────────────┤
+│ 后端语言        │ Python 3.12 (strict typed, pydantic v2)         │
+│ Web 框架        │ FastAPI + Uvicorn (ASGI)                        │
+│ 任务队列        │ Dramatiq + Redis                                │
+│ ORM / 迁移      │ SQLAlchemy 2.0 (async) + Alembic                │
+│ 数据库          │ PostgreSQL 16 + pgvector + pg_trgm + unaccent   │
+│ 搜索            │ Meilisearch 1.6+ (CJK 分词)                     │
+│ Cache           │ Redis (与队列共用)                              │
+│ 对象存储        │ MinIO (开发/M2) → AWS S3 / 阿里云 OSS (生产)    │
+│ LLM 网关        │ LiteLLM + 自定 LLMProviderPort                  │
+│ CJK NLP         │ jieba + pypinyin + opencc + fugashi + pecab     │
+│ Embedding       │ sentence-transformers (BAAI/bge-m3)             │
+│ 模糊匹配        │ rapidfuzz (Rust 内核 Python 绑定)               │
+│ 测试            │ pytest + httpx + factory-boy + freezegun        │
+│ 类型检查        │ mypy strict + Pydantic 边界                     │
+│ Lint / Format   │ ruff (替代 flake8 + black + isort)              │
+│ 前端框架        │ React 18 + Vite + TS strict                     │
+│ 前端 UI lib     │ Ant Design 5                                    │
+│ 前端状态        │ Zustand + TanStack Query                        │
+│ 前端路由        │ TanStack Router                                 │
+│ 前端表单 / 表格 │ React Hook Form + Zod / TanStack Table          │
+│ 前端测试        │ Vitest + Testing Library + Playwright           │
+│ 编辑后台 Auth   │ Clerk (起步) → Authentik (合规)                 │
+│ 公开 API Auth   │ 自建 API key + HMAC                             │
+│ 反向代理        │ Caddy                                           │
+│ 部署            │ Docker Compose (day-1 → M2) → K8s + Helm (M3+) │
+│ CI / CD         │ GitHub Actions                                  │
+│ 监控            │ JSON log → Prometheus + Grafana → Sentry        │
+│ 文档            │ mkdocs-material                                 │
+│ 仓库            │ 新仓 tt-cuisine；本仓归档为 i18n-direction      │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 6. 未决事项 / 下一步
+
+### 6.1 待续节次
+
 - **第 4 节 · 现有代码处置清单**：精确到文件级的"救 / 丢 / 重做"判定
 - **第 5 节 · 里程碑切片**：M0 → M3 每个里程碑的 success criteria
 - **第 6 节 · 风险与反模式**：消歧失败 / LLM 幻觉 / TTPOS 合规 / 数据资产授权法律 / 编辑团队招募
