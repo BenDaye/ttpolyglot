@@ -1,13 +1,13 @@
 ---
 title: TTPolyglot 重新立项 · 菜品垂类语料库
 date: 2026-05-21
-status: 进行中 (WIP) — 已完成第 1-4 节；第 5-6 节待续
+status: 进行中 (WIP) — 已完成第 1-5 节；第 6 节待续
 mode: 推倒重做（discard existing i18n direction）
 ---
 
 # TTPolyglot 重新立项设计 · 菜品垂类语料库
 
-> 本文件是 brainstorm 阶段性产物，**前四节已收敛、可作为下游设计依据**；剩余 2 节（里程碑 / 风险）待续。
+> 本文件是 brainstorm 阶段性产物，**前五节已收敛、可作为下游设计依据**；剩余 1 节（风险）待续。
 
 ---
 
@@ -891,12 +891,181 @@ tt-cuisine/                            # 新仓
 
 ---
 
-## 7. 未决事项 / 下一步
+## 7. 第 5 节 · 里程碑切片
 
-### 7.1 待续节次
+### 7.1 总览
 
-- **第 5 节 · 里程碑切片**：M0 → M3 每个里程碑的 success criteria + exit criteria + 决策点
-- **第 6 节 · 风险与反模式**：消歧失败 / LLM 幻觉 / TTPOS 合规 / 数据资产授权法律 / 编辑团队招募
+不按"季度"切，按**离散的产品形态**切。每个里程碑是一个**清晰可演示的产品状态**。时间估算是参考值（1 人 baseline；2 人减半；3+ 边际递减）。
+
+```
+M0  ────► M1  ────► M2  ────► M3  ────► (B/C 启动)
+地基      贯通      规模      商业化
+1-2 月    3-4 月    4-6 月    6-12 月
+
+M0: "Hello, DishConcept"      — 能跑通最小闭环
+M1: "100 道菜可 demo"          — 第一次有真实演示价值
+M2: "1000 道菜 + 外部客户"     — 第一个 ARR
+M3: "10000 道菜 + B 启动"      — 数据资产规模化 + 兄弟产品萌芽
+```
+
+| 里程碑 | 主线 deliverable | Success criteria | Exit criteria |
+|---|---|---|---|
+| **M0** 地基 | 单进程跑通 hello-DishConcept | admin 手工创建 1 个 concept；API 能查到 | 基础组件全跑通；CI green |
+| **M1** 贯通 | 8-stage 写路径前 6 stage 跑通 | 100 道经典 CJK 菜入库；编辑可日常工作 | LLM 单 provider 跑通；编辑团队上手 |
+| **M2** 规模 | TTPOS 真实接入 + 1000 concept + 商业化 | 1000 concept；1 个付费/试用客户；MRR ≥ ¥1k | pgvector 消歧；多 provider 降级链；计费稳定 |
+| **M3** 商业化 | 数据资产规模化 + B 启动 + 自部署 | 10000 concept；MRR ≥ ¥50k；自托管首客；B MVP | B 最小闭环跑通；A 授权合同模板就绪 |
+
+### 7.2 M0 · 地基（"Hello, DishConcept"）
+
+**Deliverables**：
+1. 仓库 scaffolding（uv workspace / Docker Compose / GitHub Actions / 本仓 deprecation note + tag）
+2. 数据层（Alembic 迁移 wiki_core 最小表 concepts + dish_names；pgvector/pg_trgm/unaccent extensions）
+3. Domain 层（DishConcept + DishName Pydantic 模型；Language enum）
+4. Read Service（FastAPI skeleton；`GET /api/v1/concepts/{slug}`；OpenAPI）
+5. Admin Web（React + Vite + AntD + TanStack Router；Clerk 登录；单页 list/create/view）
+6. 部署（`docker compose up` 全栈跑通 + README）
+
+**Success Criteria**：
+- `docker compose up` 后 admin web 能登录
+- admin web 创建 "宫保鸡丁" 含 5 语别名
+- `curl /api/v1/concepts/gong-bao-ji-ding` 返回 JSON
+- CI 全绿
+- 设计文档迁移到新仓 `docs/specs/`
+
+**Exit Criteria**：
+- 上述全勾
+- 至少 1 个真实编辑账号能登录
+- domain 单元测试 + 1 个端到端集成测试
+- 结构化 JSON log
+
+**严禁出现**：LLM 调用、TTPOS 接入（含 mock）、写路径管道、Meilisearch 索引接入、Ingredient/CookingMethod 实体、worker 进程。
+
+**决策点**：仓库可见性 / Alembic 迁移粒度 / Clerk vs 自建 Auth / AntD 主题色。
+
+**团队**：1 人 6-8 周 / 2 人 3-4 周。
+
+### 7.3 M1 · 贯通（"100 道菜可 demo"）
+
+**Deliverables**：
+1. 领域模型扩展（DishConcept 完整字段 + Ingredient/CookingMethod/CuisineRegion/AllergenTag 实体 + ConceptRevision）
+2. 写路径管道 Stage 1-6（暂跳 7-8）：
+   - Stage 1: TTPOS mock adapter（CSV/JSON 文件）
+   - Stage 2-3: 规范化 + 候选抽取（规则 + jieba）
+   - Stage 4: 消歧（字符 + 拼音相似；**不上 embedding**）
+   - Stage 5: 编辑审核界面
+   - Stage 6: LLM 单 provider (DeepSeek) 多语补全 + 描述生成
+3. LLMProviderPort 起步（LiteLLM 集成；仅 DeepSeek；prompt 模板 v1；审计日志）
+4. Worker 进程（Dramatiq + Redis；actor 表达 stage；PG 状态字段流转）
+5. Admin Web 扩展（候选审核界面；DishConcept 编辑器；Revision 时间线）
+6. Public API v1 alpha：5 个核心 endpoint
+7. 数据：100 道 CJK 经典菜 + 100 ingredient + 20 cookingMethod
+
+**Success Criteria**：
+- 100 道菜入库，每道含中日韩英 4 语别名 + 配料 + 工艺 + 菜系 + 过敏原
+- 编辑审核界面可日常工作（≥ 1 真实编辑能上手）
+- 从 mock TTPOS → 候选 → 审核 → 发布 → API 查到 端到端跑通
+- 5 个 endpoint + OpenAPI 文档
+- 5 分钟 demo 视频
+
+**Exit Criteria**：
+- 100 道菜质量编辑评 ≥ 4/5
+- LLM 多语补全人工修改率 ≤ 30%
+- 编辑日均产能 ≥ 5 道菜
+- TTPOS 真实接入协议谈妥
+
+**严禁出现**：pgvector / 多 LLM provider / Temporal / 自托管 / 计费 / B/C 任何代码。
+
+**决策点**：第一批菜系覆盖 / 数据质量基准 / TTPOS 接入时间窗 / 编辑团队招募策略。
+
+**团队**：2 人 12-16 周 / 3 人 8-10 周。
+
+### 7.4 M2 · 规模（"1000 道菜 + 外部客户"）
+
+**Deliverables**：
+1. 写路径管道 Stage 7-8 完整（终审 / 索引 / 缓存失效 / 事件广播；每 stage 可单独重跑）
+2. 消歧升级（pgvector + sentence-transformers BAAI/bge-m3；多策略融合）
+3. LLM 多 provider（DeepSeek + Qwen + Kimi + GPT-4o-mini；降级链 + 任务级路由；数据驻留合规；prompt 模板 v2 + a/b 测试）
+4. TTPOS 真实接入（500 餐厅；合规审计日志）
+5. Meilisearch 索引（CJK 分词；增量同步；跨语言别名搜索）
+6. 计费 + API key（HMAC + rate limit + quota；Stripe + 国内方案；月度账单 + 用量看板）
+7. Snapshot 导出（增量/全量/子集授权；对账机制）
+8. 数据扩张：1000 concept / 500 ingredient / 50 cookingMethod / 100 cuisineRegion
+9. 监控升级（Prometheus + Grafana + Sentry + 业务指标看板）
+
+**Success Criteria**：
+- 1000 高质量 DishConcept
+- ≥ 1 外部 API 客户（试用或付费）
+- MRR ≥ ¥1k
+- TTPOS 真实数据流稳定 ≥ 4 周
+- Read API 可用性 ≥ 99.5%
+
+**Exit Criteria**：
+- ≥ 3 inbound 商业咨询
+- 数据资产授权合同模板就绪（法务过）
+- 编辑日产能 ≥ 20 道菜（≥ 3 编辑）
+- 单笔最大合同 ≥ ¥10k
+
+**严禁出现**：B/C 任何代码 / K8s / 微服务拆分 / 自托管代码 / 移动 app。
+
+**决策点**：计费货币 / 数据授权模式 / 合规重点国家 / 编辑团队拆不拆 / TTPOS 合作分成模型。
+
+**团队**：4 人 16-20 周 / 5 人 12-16 周。
+
+### 7.5 M3 · 商业化（"10000 道菜 + B 启动"）
+
+**Deliverables**：
+1. 数据规模：10000 DishConcept / 2000 ingredient / 100 cookingMethod / 5000 TTPOS 餐厅
+2. 自托管能力（Helm chart 完整 + 私部署文档 + ≥ 1 大客户私部署成功）
+3. 商业化深化（MRR ≥ ¥50k；≥ 3 付费客户；合规审计通过）
+4. **B 产品 day-1**（新 service `tt-cuisine-menu-service`：订单系统 → 机翻初稿（调 A API） → 人审 → 交付；首批 5-10 餐厅订单；MVP demo）
+5. **C 产品种子**（200 道菜 ground truth 评测集；当前 LLM 跑 baseline；商业可行性内部评估）
+6. 平台演化评估（Temporal / 读写 DB 分离 / K8s 三选一或都不上）
+7. 团队（编辑 5-10；后端 2 / 前端 1 / 商务 1 / 合规 1）
+
+**Success Criteria**：
+- 10000 DishConcept
+- MRR ≥ ¥50k
+- 自托管首批客户 ≥ 1
+- B MVP 完整闭环可演
+- C 评测集 + baseline 报告
+
+**Exit Criteria**：
+- 12 个月内 ARR 路径清晰（≥ ¥1M ARR 视为可融资/可独立运营）
+- 团队月度流失 < 20%
+- A 平台稳定性 ≥ 99.9%
+
+**M3 之后**：进入持续运营，按季度 OKR / 商业目标管理。
+
+### 7.6 跨里程碑红线（"什么时候要停下来回到设计"）
+
+| 红线 | 信号 | 应对 |
+|---|---|---|
+| 领域模型撞墙 | M1 末发现 DishConcept 字段不够 | 停下扩展领域模型，不要 ad-hoc 加字段 |
+| 消歧失败率 > 50% | M1 末编辑全要手动 | 重评估 Stage 4 算法栈；提前上 embedding |
+| LLM 成本失控 | 单 concept 建库成本 > ¥10 | 重评估 provider 路由 + 缓存策略 |
+| TTPOS 数据合规出问题 | M2 中发现菜单不能跨用 | 重评估冷启动策略 |
+| 编辑团队招不到 | M1 中发现餐饮+多语审核人才稀缺 | 重评估"团队 vs 社区 vs LLM" |
+| 客户不愿付钱 | M2 末 0 付费客户 | 重评估"数据资产 vs 服务"哪个先 monetize |
+| 数据资产被复制 | M3 发现 API 被爬走整库 | 反爬 + 授权机制升级 |
+
+### 7.7 时间线与资金需求（参考）
+
+| 阶段 | 1 人 baseline | 团队 | 资金需求 |
+|---|---|---|---|
+| M0 | 6-8 周 | 1-2 人 | ¥0-50k |
+| M1 | 12-16 周 | 2-3 人 | ¥100-300k |
+| M2 | 16-20 周 | 4-5 人 | ¥500k-1M |
+| M3 | 24-48 周 | 8-12 人 | ¥2-5M |
+
+**单人/小团队 bootstrap 路径**估算。融资加速可压一半，但 M0/M1 是**领域知识积累期**，没人能用钱买掉。
+
+---
+
+## 8. 未决事项 / 下一步
+
+### 8.1 待续节次
+
+- **第 6 节 · 风险与反模式**：消歧失败 / LLM 幻觉 / TTPOS 合规 / 数据资产授权法律 / 编辑团队招募 / 元风险
 
 ### 5.2 待 sizing 的产品参数
 
