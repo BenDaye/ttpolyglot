@@ -1,13 +1,13 @@
 ---
 title: TTPolyglot 重新立项 · 菜品垂类语料库
 date: 2026-05-21
-status: 进行中 (WIP) — 已完成第 1-3 节；第 4-6 节待续
+status: 进行中 (WIP) — 已完成第 1-4 节；第 5-6 节待续
 mode: 推倒重做（discard existing i18n direction）
 ---
 
 # TTPolyglot 重新立项设计 · 菜品垂类语料库
 
-> 本文件是 brainstorm 阶段性产物，**前三节已收敛、可作为下游设计依据**；剩余 3 节（现有代码处置 / 里程碑 / 风险）待续。
+> 本文件是 brainstorm 阶段性产物，**前四节已收敛、可作为下游设计依据**；剩余 2 节（里程碑 / 风险）待续。
 
 ---
 
@@ -713,12 +713,189 @@ tt-cuisine/
 
 ---
 
-## 6. 未决事项 / 下一步
+## 6. 第 4 节 · 现有代码处置清单
 
-### 6.1 待续节次
+### 6.1 四个处置类别
 
-- **第 4 节 · 现有代码处置清单**：精确到文件级的"救 / 丢 / 重做"判定
-- **第 5 节 · 里程碑切片**：M0 → M3 每个里程碑的 success criteria
+| 标签 | 含义 | 动作 |
+|---|---|---|
+| 🟢 **救（Migrate）** | 概念 + 代码都可直接搬到新仓（翻译成 Python） | 列入新仓 day-0 种子清单 |
+| 🟡 **借鉴（Reference）** | 代码丢，但**设计模式 / 决策依据**值得在新仓保留 | 在新仓相应处加注释引用 + 旧仓留 link |
+| 🟠 **重做（Rebuild）** | 概念上需要，但旧实现完全错位，必须从零重写 | 旧文件**不复用**；新仓重新设计 |
+| 🔴 **丢（Drop）** | 概念不需要、或与新方向冲突 | 旧仓归档时随之埋葬 |
+
+**观察**：救的部分 < 5%。这是推倒重做的预期结果，非损失。
+
+### 6.2 `packages/core` 逐文件审计
+
+#### `lib/src/models/`
+
+| 文件 | 处置 | 理由 |
+|---|---|---|
+| `language.dart` | 🟢 救 | `Language(code, name, nativeName, region)` 结构对菜品维基适用；翻译为 Pydantic |
+| `user.dart` | 🟠 重做 | Clerk 接管 auth 后变 thin shadow model |
+| `project.dart` | 🔴 丢 | i18n 项目概念，新产品无对应 |
+| `translation_entry.dart` | 🔴 丢 | 对等物是 `DishName` + `Description`，结构差异巨大 |
+| `workspace_config.dart` | 🔴 丢 | SaaS 单租户，无对应 |
+| `export.dart` | 🔴 丢 | i18n 文件导出，无关 |
+
+#### `lib/src/services/`
+
+| 文件 | 处置 | 理由 |
+|---|---|---|
+| `project_service.dart` `translation_service.dart` `workspace_service.dart` `export_service.dart` `sync_service.dart` | 🔴 丢 | i18n 服务接口，全不适用 |
+| `storage_service.dart` | 🟡 借鉴 | KV storage 端口抽象模式参考；新仓 `ObjectStoragePort` API 不同 |
+
+#### `lib/src/enums/`
+
+| 文件 | 处置 |
+|---|---|
+| `translation_status.dart` | 🟠 重做（→ `ConceptStatus`） |
+| `translation_key.dart` | 🔴 丢 |
+| `sync_status.dart` | 🔴 丢 |
+| `user_role.dart` | 🟠 重做（角色集不同） |
+
+#### `lib/src/utils/`
+
+| 文件 | 处置 |
+|---|---|
+| `translation_utils.dart` `source_language_validator.dart` `data_migration_validator.dart` | 🔴 全丢（i18n 工具） |
+
+#### 顶层
+
+| 文件 | 处置 |
+|---|---|
+| `core.dart` | 🔴 丢（barrel export） |
+| `pubspec.yaml` | 🔴 丢（Dart 生态） |
+
+**`packages/core` 净保留**：1 个模型 (`Language`) + 2 个 enum 设计模式参考。
+
+### 6.3 `packages/parsers` 逐文件审计
+
+| 文件 | 处置 | 理由 |
+|---|---|---|
+| `parser_interface.dart` | 🟡 借鉴 | 双向接口模式 → 新仓 `MenuSourcePort` + `ExportPort` |
+| `parser_factory.dart` | 🟡 借鉴 | factory 模式可在 `MenuSourcePort` 多适配器选择处复用 |
+| `parser_result.dart` | 🟡 借鉴 | 带 errors/warnings 的结果类型设计 |
+| `parsers/json_parser.dart` `yaml_parser.dart` `arb_parser.dart` `po_parser.dart` `properties_parser.dart` | 🔴 全丢 | i18n 格式，无关 |
+| `parsers/csv_parser.dart` | 🟠 重做 | CSV 批量 dish 导入概念保留，针对 `Dish` 结构从零写 |
+| `constants/file_formats.dart` | 🔴 丢 |
+| `exceptions/parser_exception.dart` | 🟠 重做（异常分类思路保留） |
+| `utils/encoding_utils.dart` | 🟢 救 | CJK 编码检测通用工具，Python 用 `chardet` 包装 |
+| `utils/file_utils.dart` | 🟡 借鉴 | `pathlib` 重写更轻 |
+
+**`packages/parsers` 净保留**：1 个工具 + 5 个模式参考；6 个具体 parser 全丢。
+
+### 6.4 `apps/ttpolyglot` 逐目录审计
+
+#### 顶层
+
+| 文件 | 处置 |
+|---|---|
+| `main.dart` `lib/src/app.dart` `pubspec.yaml` | 🔴 全丢 |
+
+#### `lib/src/core/`
+
+| 目录 | 处置 | 借鉴价值 |
+|---|---|---|
+| `core/routing/` | 🟡 借鉴 | 命名路由表模式 → React TanStack Router 重写 |
+| `core/theme/` | 🟡 借鉴 | Light/Dark 双主题 → Ant Design 5 自带 theme |
+| `core/layout/` | 🟡 借鉴 | 响应式 layout → React hooks + Ant Design Layout 重写 |
+| `core/services/*_impl.dart` | 🔴 丢 |
+| `core/storage/` | 🟡 借鉴 | 平台抽象思路（admin IndexedDB 缓存层可参考） |
+| `core/platform/` `core/utils/` `core/widgets/` | 🔴 丢 |
+
+#### `lib/src/features/`
+
+| Feature | 处置 | 借鉴价值 |
+|---|---|---|
+| `root/` | 🟠 重做 | shell 布局思路保留 |
+| `sign_in/` `sign_up/` | 🔴 丢 | 走 Clerk |
+| `dashboard/` | 🟡 借鉴 | 首页概念适用，内容完全不同 |
+| `projects/` `project/` | 🔴 丢 | i18n 项目管理 |
+| `translation/` | 🟡 借鉴 | 编辑器交互形态参考，数据模型不同 |
+| `settings/` | 🟠 重做 |
+
+**`apps/ttpolyglot` 净保留**：0 文件代码；约 5 个 UI 交互模式作为设计参考。
+
+### 6.5 顶层与 Claude Code 配置
+
+| 文件 / 目录 | 处置 | 理由 |
+|---|---|---|
+| `CLAUDE.md` | 🟠 重做 | 新仓全新一份（Python / React / Docker Compose 约定） |
+| `.claude/` | 🟢 救 | Hooks / subagents / skills 框架完整迁移 |
+| `.claude/hooks/dart-format.sh` | 🟠 重做（→ `python-format.sh`，跑 ruff format） |
+| `.claude/hooks/block-generated.sh` | 🟠 重做（阻止列表改 `*.pyc` / `__pycache__` / `alembic/versions/*.py` / `node_modules` / `dist/`） |
+| `.claude/agents/getx-architecture-reviewer.md` `flutter-test-writer.md` | 🔴 丢 |
+| `.claude/commands/fix-melos-scripts.md` | 🔴 丢 |
+| `.claude/commands/new-package.md` | 🟠 重做（Python + JS 双模板） |
+| `.serena/` | 🟢 救 |
+| `.cursor/` | 🟢 救（视需要） |
+| `LICENSE` | 🟢 救 |
+| `.gitignore` | 🟠 重做（去 Dart 行，加 Python / Node / Docker） |
+| `README.md` | 🟠 重做（本仓加 deprecation note；新仓另写） |
+| `melos.yaml` `pubspec.yaml` `pubspec.lock` | 🔴 全丢 |
+
+### 6.6 净保留物：新仓 day-0 种子清单
+
+```
+tt-cuisine/                            # 新仓
+├── LICENSE                            # ← ttpolyglot/LICENSE 直接搬
+├── .claude/                           # ← 选择性迁移
+│   ├── settings.json                  # 框架保留，hooks 改 Python
+│   ├── hooks/
+│   │   ├── python-format.sh           # ← 改写自 dart-format.sh
+│   │   └── block-generated.sh         # ← 改写，更新阻止列表
+│   ├── agents/                        # ← 全部弃，按需新增
+│   ├── commands/
+│   │   └── new-package.md             # ← 重写为 Python/JS 双模板
+│   └── skills/                        # ← 留空
+├── .serena/                           # ← 迁移
+├── packages/
+│   ├── domain/
+│   │   └── tt_cuisine/domain/
+│   │       └── language.py            # ← 参考 ttpolyglot/.../language.dart
+│   └── nlp/
+│       └── tt_cuisine/nlp/
+│           └── encoding.py            # ← 参考 ttpolyglot/.../encoding_utils.dart
+└── docs/specs/                        # ← 本仓 docs/.../2026-05-21-...md 复制一份作为奠基
+```
+
+**实际原样复用**：`LICENSE` 1 个。**翻译/改写迁移**：5-8 个。**作为设计参考但不复制代码**：本设计文档。
+
+### 6.7 本仓归档程序
+
+```
+1. 打 tag 标记 pivot 点
+   git tag -a v0.1.0-i18n-direction-archive \
+     -m "i18n 工具方向最后定格；自此推倒重做"
+
+2. README.md 顶部加 deprecation note，指向 tt-cuisine 新仓
+3. 一次 commit 记录归档
+4. GitHub 上把本仓 visibility 改为 archived（或保留 public read-only）
+5. 不删除分支 / 历史 / issues —— 它们是决策溯源的一部分
+```
+
+### 6.8 数字化总结
+
+| 类别 | 文件数 |
+|---|---|
+| 🟢 救 | 5 |
+| 🟡 借鉴 | 12 |
+| 🟠 重做 | 9 |
+| 🔴 丢 | 100+ |
+
+**复用率约 5%**，与"推倒重做"判定一致。
+
+**最有价值的非代码资产**：本设计文档 / `.claude/` 配置框架 / 端口适配器领域思维 / MCP 服务器选型。
+
+---
+
+## 7. 未决事项 / 下一步
+
+### 7.1 待续节次
+
+- **第 5 节 · 里程碑切片**：M0 → M3 每个里程碑的 success criteria + exit criteria + 决策点
 - **第 6 节 · 风险与反模式**：消歧失败 / LLM 幻觉 / TTPOS 合规 / 数据资产授权法律 / 编辑团队招募
 
 ### 5.2 待 sizing 的产品参数
