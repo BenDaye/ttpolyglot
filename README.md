@@ -1,13 +1,15 @@
 > ⚠️ **本仓已归档**
 >
 > TTPolyglot 在 2026-05-21 完成方向转向：放弃通用 i18n 工具方向，
-> 推倒重做为**菜品垂类多语言语料库**（新仓 `tt-cuisine`）。
+> 推倒重做为**菜品垂类多语言语料库**，新项目命名为 **sapor**。
+>
+> 👉 **新仓：https://github.com/ZonEaseTech/sapor**（私有）
 >
 > - 决策溯源与完整设计：[docs/superpowers/specs/2026-05-21-dish-corpus-redesign-design.md](docs/superpowers/specs/2026-05-21-dish-corpus-redesign-design.md)
-> - M0 实施计划：[docs/superpowers/plans/2026-05-21-tt-cuisine-m0-foundation.md](docs/superpowers/plans/2026-05-21-tt-cuisine-m0-foundation.md)
+> - M0 实施计划：[docs/superpowers/plans/2026-05-21-tt-cuisine-m0-foundation.md](docs/superpowers/plans/2026-05-21-tt-cuisine-m0-foundation.md)（文中 `tt-cuisine` 为 sapor 的历史曾用名）
 > - 归档 tag：`v0.1.0-i18n-direction-archive`
 >
-> 本仓保留作历史档案与决策溯源；新开发请前往 `tt-cuisine`。
+> 本仓保留作历史档案与决策溯源；新开发请前往 sapor 新仓。
 
 ---
 
